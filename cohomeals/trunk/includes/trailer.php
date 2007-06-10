@@ -58,58 +58,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 <input type="submit" value="<?php etranslate("Go")?>" />
 </form>
 
-<form action="week.php" method="get" name="SelectWeek" id="weekform">
-<?php
-  if ( ! empty ( $user ) && $user != $login ) {
-    echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-  }
-  if ( ! empty ( $cat_id ) && $categories_enabled == "Y"
-    && ( ! $user || $user == $login ) ) {
-    echo "<input type=\"hidden\" name=\"cat_id\" value=\"$cat_id\" />\n";
-  }
-?>
-<label for="weekselect"><?php etranslate("Week")?>:&nbsp;</label>
-<select name="date" id="weekselect" onchange="document.SelectWeek.submit()">
-<?php
-  if ( ! empty ( $thisyear ) && ! empty ( $thismonth ) ) {
-    $m = $thismonth;
-    $y = $thisyear;
-  } else {
-    $m = date ( "m" );
-    $y = date ( "Y" );
-  }
-  if ( ! empty ( $thisday ) ) {
-    $d = $thisday;
-  } else {
-    $d = date ( "d" );
-  }
-  $d_time = mktime ( 3, 0, 0, $m, $d, $y );
-  $thisdate = date ( "Ymd", $d_time );
-  $wday = date ( "w", $d_time );
-  // $WEEK_START equals 1 or 0 
-  $wkstart = mktime ( 3, 0, 0, $m, $d - ( $wday - $WEEK_START ), $y );
-
-  for ( $i = -7; $i <= 7; $i++ ) {
-    $twkstart = $wkstart + ( 3600 * 24 * 7 * $i );
-    $twkend = $twkstart + ( 3600 * 24 * 6 );
-    echo "<option value=\"" . date ( "Ymd", $twkstart ) . "\"";
-    if ( date ( "Ymd", $twkstart ) <= $thisdate &&
-      date ( "Ymd", $twkend ) >= $thisdate ) {
-      echo " selected=\"selected\"";
-    }
-    echo ">";
-    if ( ! empty ( $GLOBALS['PULLDOWN_WEEKNUMBER'] ) && $GLOBALS['PULLDOWN_WEEKNUMBER'] = "Y" ) {
-      echo  "(" . week_number ( $twkstart ) . ")&nbsp;&nbsp;";
-    }
-    printf ( "%s - %s",
-      date_to_str ( date ( "Ymd", $twkstart ), $DATE_FORMAT_MD, false, true ),
-      date_to_str ( date ( "Ymd", $twkend ), $DATE_FORMAT_MD, false, true ) );
-    echo "</option>\n";
-  }
-?>
-</select>
-<input type="submit" value="<?php etranslate("Go")?>" />
-</form>
 
 <form action="year.php" method="get" name="SelectYear" id="yearform">
 <?php

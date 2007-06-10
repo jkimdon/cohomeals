@@ -367,7 +367,7 @@ INSERT INTO webcal_config ( cal_setting, cal_value )
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ('TODAYCELLBG','#FFFF33');
 INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'STARTVIEW', 'week.php' );
+  VALUES ( 'STARTVIEW', 'month.php' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'WEEK_START', '0' );
 INSERT INTO webcal_config ( cal_setting, cal_value )

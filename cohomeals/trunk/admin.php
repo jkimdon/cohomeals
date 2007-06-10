@@ -144,10 +144,7 @@ if ( ! $error ) {
   <select name="admin_STARTVIEW" id="admin_startview">
    <option value="day.php"<?php 
       if ( $s["STARTVIEW"] == "day.php" ) echo " selected=\"selected\"";
-     ?>><?php etranslate("Day")?></option>
-   <option value="week.php"<?php 
-      if ( $s["STARTVIEW"] == "week.php" ) echo " selected=\"selected\"";
-     ?>><?php etranslate("Week")?></option>
+    ?>><?php etranslate("Day")?></option>
    <option value="month.php" <?php 
       if ( $s["STARTVIEW"] == "month.php" ) echo " selected=\"selected\"";
      ?>><?php etranslate("Month")?></option>

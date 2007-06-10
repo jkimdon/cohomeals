@@ -1318,10 +1318,12 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  translate("Next") . "\" class=\"next\" href=\"day.php?" . $u_url .
  "date=$month_ahead$caturl\"><img src=\"rightarrowsmall.gif\" alt=\"" .
  translate("Next") . "\" /></a>\n";
+    echo "<a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
     echo month_name ( $thismonth - 1 );
     if ( $showyear != '' ) {
       echo " $thisyear";
     }
+    echo "</a>\n";
     echo "</th></tr>\n<tr>\n";
   } else {  //not day script
     //print the month name

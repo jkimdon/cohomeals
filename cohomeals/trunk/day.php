@@ -86,7 +86,7 @@ $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate,
 <td style="vertical-align:top;" rowspan="2">
 <!-- START MINICAL -->
 <div class="minicalcontainer">
-<?php display_small_month ( $thismonth, $thisyear, true ); ?>
+<?php display_small_month ( $thismonth, $thisyear, true, true, "thismonth", 'month.php?' ); ?>
 </div>
 </td></tr><tr><td>
 <table class="glance" cellspacing="0" cellpadding="0">
@@ -94,8 +94,11 @@ $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate,
 if ( empty ( $TIME_SLOTS ) )
   $TIME_SLOTS = 24;
 
-print_day_at_a_glance ( date ( "Ymd", $now ),
+/*print_day_at_a_glance ( date ( "Ymd", $now ),*/
+print "<tr><td style=\"width:50%;\">";
+print_date_entries ( date ( "Ymd", $now ),
   empty ( $user ) ? $login : $user, $can_add );
+print "</td></tr>";
 ?>
 </table>
 </td>
