@@ -163,20 +163,6 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
 ?>
 
 <br />
-<a title="<?php etranslate("Generate printer-friendly version")?>" 
-class="printer" href="month.php?<?php
-   if ( $thisyear ) {
-    echo "year=$thisyear&amp;month=$thismonth&amp;";
-   }
-   if ( ! empty ( $user ) ) {
-     echo "user=$user&amp;";
-   }
-   if ( ! empty ( $cat_id ) ) {
-     echo "cat_id=$cat_id&amp;";
-   }
-  ?>friendly=1" target="cal_printer_friendly" 
-onmouseover="window.status = '<?php etranslate("Generate printer-friendly version")
-  ?>'">[<?php etranslate("Printer Friendly")?>]</a>
 <?php
  print_trailer ();
 ?>

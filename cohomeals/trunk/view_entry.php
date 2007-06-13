@@ -505,24 +505,6 @@ if ( $categories_enabled == "Y" ) {
   ?>
 </td></tr>
 <?php } ?>
-<?php if ( $row[5] > 0 && $row[5] != ( 24 * 60 ) ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Duration")?>:</td><td>
- <?php echo $row[5]; ?> <?php etranslate("minutes")?>
-</td></tr>
-<?php } ?>
-<?php if ( $disable_priority_field != "Y" ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Priority")?>:</td><td>
- <?php echo $pri[$row[6]]; ?>
-</td></tr>
-<?php } ?>
-<?php if ( $disable_access_field != "Y" ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Access")?>:</td><td>
- <?php echo ( $row[8] == "P" ) ? translate("Public") : translate("Confidential"); ?>
-</td></tr>
-<?php } ?>
 <?php if ( $categories_enabled == "Y" && ! empty ( $category ) ) { ?>
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Category")?>:</td><td>
@@ -545,32 +527,7 @@ if ( !empty ( $DISPLAY_CREATED_BYPROXY ) && $DISPLAY_CREATED_BYPROXY == "Y" ) {
       " ( by " . $proxy_fullname . " )");
   }
 }
-
-if ( $single_user == "N" ) {
-  echo "<tr><td style=\"vertical-align:top; font-weight:bold;\">\n" . 
- translate("Created by") . ":</td><td>\n";
-  if ( $is_private ) {
-    echo "[" . translate("Confidential") . "]\n</td></tr>";
-  } else {
-    if ( strlen ( $email_addr ) ) {
-      echo "<a href=\"mailto:$email_addr?subject=$subject\">" .
-        ( $row[0] == "__public__" ? translate( "Public Access" ): $createby_fullname ) .
-        "</a>$proxy_fullname\n</td></tr>";
-    } else {
-      echo ( $row[0] == "__public__" ? translate( "Public Access" ) : $createby_fullname ) .
-        "$proxy_fullname\n</td></tr>";
-    }
-  }
-}
 ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Updated")?>:</td><td>
- <?php
-    echo date_to_str ( $row[3] );
-    echo " ";
-    echo display_time ( $row[4] );
-   ?>
-</td></tr>
 <?php
 // load any site-specific fields and display them
 $extras = get_site_extra_fields ( $id );
@@ -644,6 +601,12 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
 }
 ?>
 
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Menu")?>:
+</td></tr>
+
+
+
 <?php // participants
 // Only ask for participants if we are multi-user.
 $allmails = array ();
@@ -657,7 +620,7 @@ if ( $public_access == "Y" && $login == "__public__" &&
 }
 if ( $single_user == "N" && $show_participants ) { ?>
   <tr><td style="vertical-align:top; font-weight:bold;">
-  <?php etranslate("Participants")?>:</td><td>
+  <?php etranslate("On-site diners")?>:</td><td>
   <?php
   if ( $is_private ) {
     echo "[" . translate("Confidential") . "]";
@@ -694,7 +657,7 @@ if ( $single_user == "N" && $show_participants ) { ?>
         $tempfullname . "</a><br />\n";
       $allmails[] = $tempemail;
     } else {
-      echo $tempfullname . "<br />\n";
+      echo $tempfirstname . "<br />\n";
     }
   }
   // show external users here...
@@ -737,6 +700,40 @@ if ( $single_user == "N" && $show_participants ) { ?>
  } // end participants
 ?>
 
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Take-home plates")?>:
+</td></tr>
+
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Walk-ins welcome?")?>:
+</td></tr>
+
+
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Food preferences based on current participants")?>:
+</td></tr>
+
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Head cooks")?>:
+</td></tr>
+
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Cooks")?>:
+</td></tr>
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Cleanup crew")?>:
+</td></tr>
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("Notes")?>:
+</td></tr>
+
+
 </table>
 
 <br /><?php
@@ -744,15 +741,6 @@ if ( $single_user == "N" && $show_participants ) { ?>
 $rdate = "";
 if ( $event_repeats ) {
   $rdate = "&amp;date=$event_date";
-}
-
-// Show a printer-friendly link
-if ( empty ( $friendly ) ) {
-  echo "<a title=\"" . 
-    translate("Generate printer-friendly version") . "\" class=\"printer\" " .
-    "href=\"view_entry.php?id=$id&amp;friendly=1$rdate\" " .
-    "target=\"cal_printer_friendly\">" .
-    translate("Printer Friendly") . "</a><br />\n";
 }
 
 if ( empty ( $event_status ) ) {
@@ -846,10 +834,6 @@ if ( $can_edit && $event_status != "D" ) {
        translate("This will delete this entry for all users.") . "');\">" . 
        translate("Delete entry") . "</a><br />\n";
   }
-  echo "<a title=\"" . 
-    translate("Copy entry") . "\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id$u_url&amp;copy=1\">" . 
-    translate("Copy entry") . "</a><br />\n";  
 } elseif ( $readonly != "Y" && $is_my_event && $login != "__public__" &&
   $event_status != "D" )  {
   echo "<a title=\"" . 
@@ -858,10 +842,6 @@ if ( $can_edit && $event_status != "D" ) {
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete the entry from your calendar.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
-  echo "<a title=\"" . 
-    translate("Copy entry") . "\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id&amp;copy=1\">" . 
-    translate("Copy entry") . "</a><br />\n";
 }
 if ( $readonly != "Y" && ! $is_my_event && ! $is_private && 
   $event_status != "D" && $login != "__public__" )  {
@@ -941,24 +921,6 @@ if ( $show_log ) {
   echo "</table>\n";
 }
 
-if (! $is_private) {
-  echo "<br /><form method=\"post\" name=\"exportform\" " .
-    "action=\"export_handler.php\">\n";
-  echo "<label for=\"exformat\">" . 
-    translate("Export this entry to") . ":&nbsp;</label>\n";
-  echo "<select name=\"format\" id=\"exformat\">\n";
-  echo " <option value=\"ical\">iCalendar</option>\n";
-  echo " <option value=\"vcal\">vCalendar</option>\n";
-  echo " <option value=\"pilot-csv\">Pilot-datebook CSV (" . 
-    translate("Palm Pilot") . ")</option>\n";
-  echo " <option value=\"pilot-text\">Install-datebook (" . 
-    translate("Palm Pilot") . ")</option>\n";
-  echo "</select>\n";
-  echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
-  echo "<input type=\"submit\" value=\"" . 
-    translate("Export") . "\" />\n";
-  echo "</form>\n";
-}
 ?>
 
 <?php

@@ -160,13 +160,6 @@ if ( $single_user != "Y" ) {
       translate("Unapproved Events") . "\" href=\"$url\">" . 
       translate("Unapproved Events") . "</a>";
   }
-  if ( $login == "__public__" && $public_access_others != "Y" ) {
-    // don't allow them to see other people's calendar
-  } else if ( $allow_view_other == "Y" || $is_admin ) {
-    $goto_link[] = "<a title=\"" . 
-      translate("Another User's Calendar") . "\" href=\"select_user.php\">" . 
-      translate("Another User's Calendar") . "</a>";
-  }
 } else {
   $goto_link[] = "<a title=\"" . 
     translate("My Calendar") . "\" style=\"font-weight:bold;\" " .
@@ -188,14 +181,6 @@ if ( empty ( $user ) || $user == $login ) {
   $goto_link[] = "<a title=\"" . 
     translate("Search") . "\" href=\"search.php\">" .
     translate("Search") . "</a>";
-  if ( $login != '__public__' ) {
-    $goto_link[] = "<a title=\"" . 
-      translate("Import") . "\" href=\"import.php\">" . 
-      translate("Import") . "</a>";
-    $goto_link[] = "<a title=\"" . 
-      translate("Export") . "\" href=\"export.php\">" . 
-      translate("Export") . "</a>";
-  }
   if ( $can_add ) {
     $url = "<a title=\"" . 
       translate("Add New Entry") . "\" href=\"edit_entry.php";
