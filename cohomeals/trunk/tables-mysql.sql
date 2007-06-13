@@ -84,6 +84,8 @@ CREATE TABLE webcal_entry (
   /* 'P' = Public, */
   /* 'R' = Confidential (others can see time allocated but not what it is) */
   cal_access CHAR(1) DEFAULT 'P',
+  /*  walkins are: 'D' = discouraged, 'W' = welcome, 'E' = encouraged */
+  cal_walkins CHAR(1) DEFAULT 'D',
   /* brief description of event */
   cal_name VARCHAR(80) NOT NULL,
   /* full description of event */

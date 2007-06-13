@@ -488,7 +488,17 @@ if ( $allday != "Y" && $hour == -1 ) {
 <?php etranslate("Menu")?>:</td></tr>
 
 <tr><td class="tooltip">
-<?php etranslate("Walk-ins welcome?")?>:</td></tr>
+<?php etranslate("Walk-ins welcome?")?>:</td>
+<td>
+  <select name="walkins">
+    <option value="D" selected="selected">Discouraged</option>
+    <option value="W">Welcome</option>
+    <option value="E">Encouraged</option>
+  </select>
+</td>
+</tr>
+
+
 
 <tr><td class="tooltip">
 <?php etranslate("Number of head cooks")?>:</td></tr>

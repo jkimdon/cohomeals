@@ -249,7 +249,7 @@ if ( ( empty ( $event_status ) && ! $is_admin ) || ! $can_view ) {
 // Load event info now.
 $sql = "SELECT cal_create_by, cal_date, cal_time, cal_mod_date, " .
   "cal_mod_time, cal_duration, cal_priority, cal_type, cal_access, " .
-  "cal_name, cal_description FROM webcal_entry WHERE cal_id = $id";
+  "cal_name, cal_description, cal_walkins FROM webcal_entry WHERE cal_id = $id";
 $res = dbi_query ( $sql );
 if ( ! $res ) {
   echo translate("Invalid entry id") . ": $id";
@@ -263,6 +263,7 @@ if ( $row ) {
   $event_time = $row[2];
   $name = $row[9];
   $description = $row[10];
+  $walkins = $row[11];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -707,7 +708,19 @@ if ( $single_user == "N" && $show_participants ) { ?>
 
 <tr><td style="vertical-align:top; font-weight:bold;">
 <?php etranslate("Walk-ins welcome?")?>:
-</td></tr>
+</td>
+<td>
+<?php 
+if ( $walkins == "W" ) {
+  echo "Welcome";
+} else if ( $walkins == "E" ) {
+  echo "Encouraged";
+} else {
+  echo "Discouraged";
+}
+?>
+</td>
+</tr>
 
 
 

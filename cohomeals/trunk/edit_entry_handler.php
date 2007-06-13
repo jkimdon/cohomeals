@@ -348,7 +348,7 @@ if ( empty ( $error ) ) {
     ( $old_id > 0 ? " cal_group_id, " : "" ) .
     "cal_create_by, cal_date, " .
     "cal_time, cal_mod_date, cal_mod_time, cal_duration, cal_priority, " .
-    "cal_access, cal_type, cal_name, cal_description ) " .
+    "cal_access, cal_walkins, cal_type, cal_name, cal_description ) " .
     "VALUES ( $id, " .
     ( $old_id > 0 ? " $old_id, " : "" ) .
     "'" . ( ! empty ( $old_create_by ) && 
@@ -366,6 +366,7 @@ if ( empty ( $error ) ) {
   $sql .= sprintf ( "%d, ", $duration );
   $sql .= ! empty ( $priority ) ? sprintf ( "%d,", $priority ) : "2,";
   $sql .= empty ( $access ) ? "'P', " : "'$access', ";
+  $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
   if (  ! empty ( $rpt_type ) && $rpt_type != 'none' ) {
     $sql .= "'M', ";
   } else {
