@@ -17,9 +17,9 @@ if ( $action == "Delete" || $action == translate ("Delete") ) {
 
   // Get event ids for all events this user is a participant
   $events = array ();
-  $res = dbi_query ( "SELECT webcal_entry.cal_id " .
-    "FROM webcal_entry, webcal_entry_user " .
-    "WHERE webcal_entry.cal_id = webcal_entry_user.cal_id " .
+  $res = dbi_query ( "SELECT webcal_meal.cal_id " .
+    "FROM webcal_meal, webcal_entry_user " .
+    "WHERE webcal_meal.cal_id = webcal_entry_user.cal_id " .
     "AND webcal_entry_user.cal_login = '$user'" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
@@ -43,7 +43,7 @@ if ( $action == "Delete" || $action == translate ("Delete") ) {
   }
   // Now delete events that were just for this user
   for ( $i = 0; $i < count ( $delete_em ); $i++ ) {
-    dbi_query ( "DELETE FROM webcal_entry WHERE cal_id = " . $delete_em[$i] );
+    dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = " . $delete_em[$i] );
   }
 
   // Delete user participation from events

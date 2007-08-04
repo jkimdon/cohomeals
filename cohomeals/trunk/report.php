@@ -444,34 +444,32 @@ if ( empty ( $error ) && empty ( $list ) ) {
         if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
           if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
             $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-            $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+            $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
               translate("cont.") . ")";
           } else {
             $viewid = $rep[$cur_rep]['cal_id'];
-            $viewname = $rep[$cur_rep]['cal_name'];
+            $viewname = $rep[$cur_rep]['cal_suit'];
           }
           $event_str .= event_to_text ( $viewid,
             $dateYmd, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
             $viewname, $rep[$cur_rep]['cal_description'],
-            $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-            $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'] );
+            $rep[$cur_rep]['cal_login'] );
         }
         $cur_rep++;
       }
       if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
         if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
           $viewid = $ev[$i]['cal_ext_for_id'];
-          $viewname = $ev[$i]['cal_name'] . " (" .
+          $viewname = $ev[$i]['cal_suit'] . " (" .
             translate("cont.") . ")";
         } else {
           $viewid = $ev[$i]['cal_id'];
-          $viewname = $ev[$i]['cal_name'];
+          $viewname = $ev[$i]['cal_suit'];
         }
         $event_str .= event_to_text ( $viewid,
           $dateYmd, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
           $viewname, $ev[$i]['cal_description'],
-          $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-          $ev[$i]['cal_access'], $ev[$i]['cal_login'] );
+          $ev[$i]['cal_login'] );
       }
     }
     // print out any remaining repeating events
@@ -479,17 +477,16 @@ if ( empty ( $error ) && empty ( $list ) ) {
       if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
         if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
           $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
             translate("cont.") . ")";
         } else {
           $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_name'];
+          $viewname = $rep[$cur_rep]['cal_suit'];
         }
         $event_str .= event_to_text ( $viewid,
           $dateYmd, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
           $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'] );
+          $rep[$cur_rep]['cal_login'] );
       }
       $cur_rep++;
     }

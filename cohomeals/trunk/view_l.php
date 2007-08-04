@@ -265,8 +265,6 @@ if ( ! empty ( $eventinfo ) ) {
   echo $eventinfo;
 }
 
-display_unapproved_events ( ( $is_assistant || 
-  $is_nonuser_admin ? $user : $login ) );
 ?>
 
 <br />

@@ -5,17 +5,6 @@ load_user_categories ();
 
 $error = "";
 
-$do_override = false;
-$old_id = -1;
-if ( ! empty ( $override ) && ! empty ( $override_date ) ) {
-  // override date specified.  user is going to create an exception
-  // to a repeating event.
-  $do_override = true;
-  $old_id = $id;
-}
-// Remember previous cal_goup_id if present
-$old_id = ( ! empty ( $parent ) ? $parent : $old_id );
-
 if ( empty ( $TZ_OFFSET ) ) {
   $TZ_OFFSET = 0;
 }
@@ -79,27 +68,11 @@ if ( ! empty ( $hour ) && ( $timetype == 'T' ) ) {
 // Can edit if:
 //   - new event
 //   - user is admin
-//   - user created event
 //   - user is participant
 $can_edit = false;
-// value may be needed later for recreating event
-$old_create_by = ( ! empty ( $user )? $user : '');
 if ( empty ( $id ) ) {
   // New event...
   $can_edit = true;
-} else {
-  // event owner or assistant event ?
-  $sql = "SELECT cal_create_by FROM webcal_entry WHERE cal_id = '$id'";
-  $res = dbi_query($sql);
-  if ($res) {
-    $row = dbi_fetch_row ( $res );
-    // value may be needed later for recreating event
-    $old_create_by = $row[0];
-    if (( $row[0] == $login ) || (( $user == $row[0] ) && ( $is_assistant || $is_nonuser_admin )))
-      $can_edit = true;
-    dbi_free_result ( $res );
-  } else
-    $error = translate("Database error") . ": " . dbi_error ();
 }
 if ( $is_admin ) {
   $can_edit = true;
@@ -243,12 +216,7 @@ if ( $single_user == "N" &&
   }
 }
 
-// first check for any schedule conflicts
-if ( empty ( $allow_conflict_override ) || $allow_conflict_override != "Y" ) {
-  $confirm_conflicts = ""; // security precaution
-}
-if ( $allow_conflicts != "Y" && empty ( $confirm_conflicts ) &&
-  strlen ( $hour ) > 0 && $timetype != 'U' ) {
+if ( strlen ( $hour ) > 0 && $timetype != 'U' ) {
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $str_cal_date = date ( "Ymd", $date );
   if ( strlen ( $hour ) > 0 ) {
@@ -291,20 +259,14 @@ if ( $allow_conflicts != "Y" && empty ( $confirm_conflicts ) &&
   $dates = get_all_dates ( $date, $rpt_type, $endt, $dayst,
     $ex_days, $rpt_freq );
     
-  $conflicts = check_for_conflicts ( $dates, $duration, $hour, $minute,
-    $participants, $login, empty ( $id ) ? 0 : $id );
-}
-if ( empty ( $error ) && ! empty ( $conflicts ) ) {
-  $error = translate("The following conflicts with the suggested time") .
-    ": <ul>$conflicts</ul>";
 }
 //Avoid Undefined variable message
 $msg = '';
 if ( empty ( $error ) ) {
   $newevent = true;
   // now add the entries
-  if ( empty ( $id ) || $do_override ) {
-    $res = dbi_query ( "SELECT MAX(cal_id) FROM webcal_entry" );
+  if ( empty ( $id ) ) {
+    $res = dbi_query ( "SELECT MAX(cal_id) FROM webcal_meal" );
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
       $id = $row[0] + 1;
@@ -328,7 +290,7 @@ if ( empty ( $error ) ) {
       $error = translate("Database error") . ": " . dbi_error ();
     }
     if ( empty ( $error ) ) {
-      dbi_query ( "DELETE FROM webcal_entry WHERE cal_id = $id" );
+      dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_ext_user WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_repeats WHERE cal_id = $id" );
@@ -337,23 +299,11 @@ if ( empty ( $error ) ) {
     $newevent = false;
   }
 
-  if ( $do_override ) {
-    $sql = "INSERT INTO webcal_entry_repeats_not ( cal_id, cal_date ) " .
-      "VALUES ( $old_id, $override_date )";
-    if ( ! dbi_query ( $sql ) ) {
-      $error = translate("Database error") . ": " . dbi_error ();
-    }
-  }
-  $sql = "INSERT INTO webcal_entry ( cal_id, " .
-    ( $old_id > 0 ? " cal_group_id, " : "" ) .
-    "cal_create_by, cal_date, " .
-    "cal_time, cal_mod_date, cal_mod_time, cal_duration, cal_priority, " .
-    "cal_access, cal_walkins, cal_type, cal_name, cal_description ) " .
-    "VALUES ( $id, " .
-    ( $old_id > 0 ? " $old_id, " : "" ) .
-    "'" . ( ! empty ( $old_create_by ) && 
-      ( ( $is_admin && ! $newevent ) || $is_assistant || 
-      $is_nonuser_admin ) ? $old_create_by : $login ) . "', ";
+  $sql = "INSERT INTO webcal_meal ( cal_id, " .
+    "cal_date, " .
+    "cal_time, cal_duration, " .
+    "cal_walkins, cal_suit, cal_description ) " .
+    "VALUES ( $id, ";
     
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $sql .= date ( "Ymd", $date ) . ", ";
@@ -362,16 +312,8 @@ if ( empty ( $error ) ) {
   } else {
     $sql .= "-1, ";
   }
-  $sql .= date ( "Ymd" ) . ", " . date ( "Gis" ) . ", ";
   $sql .= sprintf ( "%d, ", $duration );
-  $sql .= ! empty ( $priority ) ? sprintf ( "%d,", $priority ) : "2,";
-  $sql .= empty ( $access ) ? "'P', " : "'$access', ";
   $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
-  if (  ! empty ( $rpt_type ) && $rpt_type != 'none' ) {
-    $sql .= "'M', ";
-  } else {
-    $sql .= "'E', ";
-  }
 
   if ( strlen ( $name ) == 0 ) {
     $name = translate("Unnamed Event");
@@ -806,70 +748,8 @@ if ( empty ( $error ) ) {
 }
 
 print_header();
-if ( strlen ( $conflicts ) ) { 
+
+print_trailer();
 ?>
-<h2><?php etranslate("Scheduling Conflict")?></h2>
-
-<?php etranslate("Your suggested time of")?> <span style="font-weight:bold;">
-<?php
-  if ( ! empty ( $allday ) && $allday == "Y" ) {
-    etranslate("All day event");
-  } else {
-    $time = sprintf ( "%d%02d00", $hour, $minute );
-    echo display_time ( $time );
-    if ( $duration > 0 )
-      echo "-" . display_time ( add_duration ( $time, $duration ) );
-  }
-?></span> <?php etranslate("conflicts with the following existing calendar entries")?>:
-<ul>
-<?php echo $conflicts; ?>
-</ul>
-
-<?php
-// user can confirm conflicts
-  echo "<form name=\"confirm\" method=\"post\">\n";
-  if ( ! is_array ( $_POST ) && is_array ( $HTTP_POST_VARS ) )
-    $_POST = $HTTP_POST_VARS;
-  foreach ($_POST as $xkey=>$xval ) {
-    if (is_array($xval)) {
-      $xkey.="[]";
-      foreach ( $xval as $ykey=>$yval ) {
-        if (get_magic_quotes_gpc())
-          $yval = stripslashes($yval);
-        $yval = htmlentities  ( $yval );
-        echo "<input type=\"hidden\" name=\"$xkey\" value=\"$yval\" />\n";
-      }
-    } else {
-      if (get_magic_quotes_gpc())
-        $xval = stripslashes($xval);
-      $xval = htmlentities ( $xval );
-      echo "<input type=\"hidden\" name=\"$xkey\" value=\"$xval\" />\n";
-    }
-  }
-?>
-<table>
- <tr>
-<?php
-  // Allow them to override a conflict if server settings allow it
-  if ( ! empty ( $allow_conflict_override ) &&
-    $allow_conflict_override == "Y" ) {
-    echo "<td><input type=\"submit\" name=\"confirm_conflicts\" " .
-      "value=\"" . translate("Save") . "\" /></td>\n";
-  }
-?>
-   <td><input type="button" value="<?php etranslate("Cancel")?>" 
-onclick="history.back()" /><td>
- </tr>
-</table>
-</form>
-
-<?php } else { ?>
-<h2><?php etranslate("Error")?></h2>
-<blockquote>
-<?php echo $error; ?>
-</blockquote>
-<?php } ?>
-
-<?php print_trailer(); ?>
 </body>
 </html>

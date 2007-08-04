@@ -106,8 +106,6 @@ print "</td></tr>";
 <br />
 <?php
  if ( ! empty ( $eventinfo ) ) echo $eventinfo;
-
-  display_unapproved_events ( ( $is_assistant || $is_nonuser_admin ? $user : $login ) );
 ?>
 <br />
 <a title="<?php etranslate("Generate printer-friendly version")?>" class="printer" href="day.php?<?php

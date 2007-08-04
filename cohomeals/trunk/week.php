@@ -180,11 +180,11 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
       if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
         if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
           $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
             translate("cont.") . ")";
         } else {
           $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_name'];
+          $viewname = $rep[$cur_rep]['cal_suit'];
         }
         if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) ) {
           $all_day[$d] = 1;
@@ -192,8 +192,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
         html_for_event_week_at_a_glance ( $viewid,
           $date, $rep[$cur_rep]['cal_time'],
           $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_duration'],
+          $rep[$cur_rep]['cal_duration'],
           $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
       }
       $cur_rep++;
@@ -201,11 +200,11 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_name'] . " (" .
+        $viewname = $ev[$i]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_name'];
+        $viewname = $ev[$i]['cal_suit'];
       }
       if ( $ev[$i]['cal_duration'] == ( 24 * 60 ) ) {
         $all_day[$d] = 1;
@@ -213,8 +212,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
       html_for_event_week_at_a_glance ( $viewid,
         $date, $ev[$i]['cal_time'],
         $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-        $ev[$i]['cal_access'], $ev[$i]['cal_duration'],
+        $ev[$i]['cal_duration'],
         $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
     }
   }
@@ -223,11 +221,11 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
     if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
       if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
         $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_name'];
+        $viewname = $rep[$cur_rep]['cal_suit'];
       }
       if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) ) {
         $all_day[$d] = 1;
@@ -235,8 +233,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
       html_for_event_week_at_a_glance ( $viewid,
         $date, $rep[$cur_rep]['cal_time'],
         $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-        $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_duration'],
+        $rep[$cur_rep]['cal_duration'],
         $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
     }
     $cur_rep++;
@@ -405,8 +402,6 @@ for ( $i = $first_slot; $i <= $last_slot; $i++ ) {
 if ( ! empty ( $eventinfo ) ) {
   echo $eventinfo;
 }
-display_unapproved_events ( ( $is_assistant || 
-  $is_nonuser_admin ? $user : $login ) );
 ?>
 
 <br />

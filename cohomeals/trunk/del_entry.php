@@ -13,11 +13,10 @@ if ( $id > 0 ) {
     $can_edit = false;
   } else {
     $can_edit = false;
-    $sql = "SELECT webcal_entry.cal_id FROM webcal_entry, " .
-      "webcal_entry_user WHERE webcal_entry.cal_id = " .
-      "webcal_entry_user.cal_id AND webcal_entry.cal_id = $id " .
-      "AND (webcal_entry.cal_create_by = '$login' " .
-      "OR webcal_entry_user.cal_login = '$login')";
+    $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
+      "webcal_entry_user WHERE webcal_meal.cal_id = " .
+      "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
+      "AND webcal_entry_user.cal_login = '$login'";
     $res = dbi_query ( $sql );
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
@@ -28,18 +27,6 @@ if ( $id > 0 ) {
   }
 }
 
-// See who owns the event.  Owner should be able to delete.
-$res = dbi_query (
-  "SELECT cal_create_by FROM webcal_entry WHERE cal_id = $id" );
-if ( $res ) {
-  $row = dbi_fetch_row ( $res );
-  $owner = $row[0];
-  dbi_free_result ( $res );
-  if ( $owner == $login || $is_assistant && ( $user == $owner ) || $is_nonuser_admin && ( $user == $owner ) ) {
-    $my_event = true;
-    $can_edit = true;
-  }
-}
 
 if ( $readonly == 'Y' )
   $can_edit = false;
@@ -67,7 +54,7 @@ if ( $id > 0 && empty ( $error ) ) {
   if ( ! empty ( $date ) ) {
     $thisdate = $date;
   } else {
-    $res = dbi_query ( "SELECT cal_date FROM webcal_entry WHERE cal_id = $id" );
+    $res = dbi_query ( "SELECT cal_date FROM webcal_meal WHERE cal_id = $id" );
     if ( $res ) {
       // date format is 19991231
       $row = dbi_fetch_row ( $res );
@@ -75,7 +62,7 @@ if ( $id > 0 && empty ( $error ) ) {
     }
   }
 
-  // Only allow delete of webcal_entry & webcal_entry_repeats
+  // Only allow delete of webcal_meal & webcal_entry_repeats
   // if owner or admin, not participant.
   if ( $is_admin || $my_event ) {
 
@@ -95,8 +82,8 @@ if ( $id > 0 && empty ( $error ) ) {
     }
 
     // Get event name
-    $sql = "SELECT cal_name, cal_date, cal_time " .
-      "FROM webcal_entry WHERE cal_id = $id";
+    $sql = "SELECT cal_suit, cal_date, cal_time " .
+      "FROM webcal_meal WHERE cal_id = $id";
     $res = dbi_query($sql);
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
@@ -159,7 +146,7 @@ if ( $id > 0 && empty ( $error ) ) {
       // If it's a repeating event, delete any event exceptions
       // that were entered.
       if ( $event_repeats ) {
- $res = dbi_query ( "SELECT cal_id FROM webcal_entry " .
+ $res = dbi_query ( "SELECT cal_id FROM webcal_meal " .
    "WHERE cal_group_id = $id" );
         if ( $res ) {
    $ex_events = array ();
@@ -206,13 +193,7 @@ if ( $id > 0 && empty ( $error ) ) {
 }
 
 $ret = getValue ( "ret" );
-if ( ! empty ( $ret ) && $ret == "list" ) {
-  $url = "list_unapproved.php";
-  if ( ! empty ( $user ) )
-    $url .= "?user=$user";
-} else {
-  $url = get_preferred_view ( "", empty ( $user ) ? "" : "user=$user" );
-}
+$url = get_preferred_view ( "", empty ( $user ) ? "" : "user=$user" );
 
 if ( empty ( $error ) ) {
   do_redirect ( $url );

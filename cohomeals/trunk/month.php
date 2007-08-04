@@ -158,8 +158,6 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
 <br />
 <?php
  if ( ! empty ( $eventinfo ) ) echo $eventinfo;
-
- display_unapproved_events ( ( $is_assistant || $is_nonuser_admin ? $user : $login ) );
 ?>
 
 <br />

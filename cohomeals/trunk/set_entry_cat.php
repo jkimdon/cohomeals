@@ -30,7 +30,7 @@ if ( $res ) {
 
 // Get event name and make sure event exists
 $event_name = "";
-$res = dbi_query ( "SELECT cal_name FROM webcal_entry " .
+$res = dbi_query ( "SELECT cal_suit FROM webcal_meal " .
   "WHERE cal_id = $id" );
 if ( $res ) {
   if ( $row = dbi_fetch_row ( $res ) ) {

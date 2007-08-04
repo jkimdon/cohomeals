@@ -40,54 +40,41 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, ca
  * cal_ext_for_id set to the cal_id of the original entry.
  * The following tables contain additional information about each
  * event:<ul>
- * <li><a href="#webcal_entry_user">webcal_entry_user</a> -
- *  lists participants in the event and specifies the status (accepted,
- *  rejected) and category of each participant.</li>
- * <li><a href="#webcal_entry_repeats">webcal_entry_repeats</a> -
- *  contains information if the event repeats.</li>
- * <li><a href="#webcal_entry_repeats_not">webcal_entry_repeats_not</a> -
- *  specifies which dates the repeating event does not repeat (because
- *  they were deleted or modified for just that date by the user)</li>
- * <li><a href="#webcal_entry_log">webcal_entry_log</a> -
- *  provides a history of changes to this event.</li>
- * <li><a href="#webcal_site_extras">webcal_site_extras</a> -
- *  stores event data as defined in site_extras.php (such as reminders and
- *  other custom event fields).</li>
+ * <li><a href="#webcal_entry_user">webcal_meal_participant</a> -
+ *  lists diners/crew
  * </ul>
  */
-CREATE TABLE webcal_entry (
+CREATE TABLE webcal_meal (
   /* cal_id is unique integer id for event */
   cal_id INT NOT NULL,
-  /* cal_group_id: the parent event id if this event is overriding an */
-  /* occurrence of a repeating event */
-  cal_group_id INT NULL,
   /* used when an event goes past midnight into the */
   /* next day, in which case an additional entry in this table */
   /* will use this field to indicate the original event cal_id */
   cal_ext_for_id INT NULL,
-  /* user login of user that created the event */
-  cal_create_by VARCHAR(25) NOT NULL,
   /* date of event (in YYYYMMDD format) */
   cal_date INT NOT NULL,
   /* event time (in HHMMSS format) */
   cal_time INT NULL,
-  /* date the event was last modified (in YYYYMMDD format) */
-  cal_mod_date INT,
-  /* time the event was last modified (in HHMMSS format) */
-  cal_mod_time INT,
   /* duration of event in minutes */
   cal_duration INT NOT NULL,
-  /* event priority: 1=Low, 2=Med, 3=High */
-  cal_priority INT DEFAULT 2,
-  /* 'E' = Event, 'M' = Repeating event */
-  cal_type CHAR(1) DEFAULT 'E',
-  /* 'P' = Public, */
-  /* 'R' = Confidential (others can see time allocated but not what it is) */
-  cal_access CHAR(1) DEFAULT 'P',
+  /* meal suit: heart, spade, diamond, club, wild */
+  cal_suit VARCHAR(7) NOT NULL,
   /*  walkins are: 'D' = discouraged, 'W' = welcome, 'E' = encouraged */
   cal_walkins CHAR(1) DEFAULT 'D',
-  /* brief description of event */
-  cal_name VARCHAR(80) NOT NULL,
+  /* base price (child, walkin, guest prices based on this) */
+  cal_baseprice DECIMAL(5,2),
+  /* head cook has special editing permissions. use cal_id of chef */
+  cal_headchef INT,
+  /* desired number of cooks (not counting head chef) */
+  cal_desired_cooks INT,
+  /* desired number of cleanup crew members */
+  cal_desired_cleanup INT,
+  /* desired number of setup */
+  cal_desired_setup INT,
+  /* desired number of other crew members */
+  cal_desired_othercrew INT,
+  /* description of duties of optional other crew members */
+  cal_othercrew_description VARCHAR(80) NULL,
   /* full description of event */
   cal_description TEXT,
   PRIMARY KEY ( cal_id )

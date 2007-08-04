@@ -1429,11 +1429,8 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *                            YYYYMMDD format
  * @param int    $time        Time (in HHMMSS format)
  * @param int    $duration    Event duration in minutes
- * @param string $name        Event name
+ * @param string $suit        Event name
  * @param string $description Long description of event
- * @param string $status      Event status
- * @param int    $pri         Event priority
- * @param string $access      Event access
  * @param string $event_owner Username of user associated with this event
  * @param int    $event_cat   Category of event for <var>$event_owner</var>
  *
@@ -1442,8 +1439,8 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  * @uses build_event_popup
  */
 function print_entry ( $id, $date, $time, $duration,
-  $name, $description, $status,
-  $pri, $access, $event_owner, $event_cat=-1 ) {
+  $suit, $description,
+  $event_owner, $event_cat=-1 ) {
   global $eventinfo, $login, $user, $PHP_SELF, $TZ_OFFSET;
   static $key = 0;
   
@@ -1453,7 +1450,6 @@ function print_entry ( $id, $date, $time, $duration,
     $class = "layerentry";
   } else {
     $class = "entry";
-    if ( $status == "W" ) $class = "unapprovedentry";
   }
   // if we are looking at a view, then always use "entry"
   if ( strstr ( $PHP_SELF, "view_m.php" ) ||
@@ -1462,7 +1458,6 @@ function print_entry ( $id, $date, $time, $duration,
     strstr ( $PHP_SELF, "view_t.php" ) )
     $class = "entry";
 
-  if ( $pri == 3 ) echo "<strong>";
   $popupid = "eventinfo-$id-$key";
   $key++;
   echo "<a title=\"" . 
@@ -1519,14 +1514,7 @@ function print_entry ( $id, $date, $time, $duration,
         $timestr .= " - " . display_time ( $end_time );
     }
   }
-  if ( $login != $user && $access == 'R' && strlen ( $user ) ) {
-    echo "(" . translate("Private") . ")";
-  } else if ( $login != $event_owner && $access == 'R' &&
-    strlen ( $event_owner ) ) {
-    echo "(" . translate("Private") . ")";
-  } else {
-    echo htmlspecialchars ( $name );
-  }
+  echo htmlspecialchars ( $suit );
 
   if ( $login != $event_owner && strlen ( $event_owner ) ) {
     if ($layers) foreach ($layers as $layer) {
@@ -1536,18 +1524,9 @@ function print_entry ( $id, $date, $time, $duration,
     }
   }
   echo "</a>\n";
-  if ( $pri == 3 ) echo "</strong>\n"; //end font-weight span
   echo "<br />";
-  if ( $login != $user && $access == 'R' && strlen ( $user ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else
-  if ( $login != $event_owner && $access == 'R' && strlen ( $event_owner ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      $description, $timestr, site_extras_for_popup ( $id ) );
+  $eventinfo .= build_event_popup ( $popupid, $event_owner,
+				    $description, $timestr, site_extras_for_popup ( $id ) );
 }
 
 /** 
@@ -1613,56 +1592,56 @@ function read_events ( $user, $startdate, $enddate, $cat_id = ''  ) {
   $ed = substr ( $enddate, 6, 2 );
   if ( $startdate == $enddate ) {
     if ( $TZ_OFFSET == 0 ) {
-      $date_filter = " AND webcal_entry.cal_date = $startdate";
+      $date_filter = " AND webcal_meal.cal_date = $startdate";
     } else if ( $TZ_OFFSET > 0 ) {
       $prev_day = mktime ( 3, 0, 0, $sm, $sd - 1, $sy );
       $cutoff = 24 - $TZ_OFFSET .  "0000";
-      $date_filter = " AND ( ( webcal_entry.cal_date = $startdate AND " .
-        "( webcal_entry.cal_time <= $cutoff OR " .
-        "webcal_entry.cal_time = -1 ) ) OR " .
-        "( webcal_entry.cal_date = " . date("Ymd", $prev_day ) .
-        " AND webcal_entry.cal_time >= $cutoff ) )";
+      $date_filter = " AND ( ( webcal_meal.cal_date = $startdate AND " .
+        "( webcal_meal.cal_time <= $cutoff OR " .
+        "webcal_meal.cal_time = -1 ) ) OR " .
+        "( webcal_meal.cal_date = " . date("Ymd", $prev_day ) .
+        " AND webcal_meal.cal_time >= $cutoff ) )";
     } else {
       $next_day = mktime ( 3, 0, 0, $sm, $sd + 1, $sy );
       $cutoff = ( 0 - $TZ_OFFSET ) * 10000;
-      $date_filter = " AND ( ( webcal_entry.cal_date = $startdate AND " .
-        "( webcal_entry.cal_time > $cutoff OR " .
-        "webcal_entry.cal_time = -1 ) ) OR " .
-        "( webcal_entry.cal_date = " . date("Ymd", $next_day ) .
-        " AND webcal_entry.cal_time <= $cutoff ) )";
+      $date_filter = " AND ( ( webcal_meal.cal_date = $startdate AND " .
+        "( webcal_meal.cal_time > $cutoff OR " .
+        "webcal_meal.cal_time = -1 ) ) OR " .
+        "( webcal_meal.cal_date = " . date("Ymd", $next_day ) .
+        " AND webcal_meal.cal_time <= $cutoff ) )";
     }
   } else {
     if ( $TZ_OFFSET == 0 ) {
-      $date_filter = " AND webcal_entry.cal_date >= $startdate " .
-        "AND webcal_entry.cal_date <= $enddate";
+      $date_filter = " AND webcal_meal.cal_date >= $startdate " .
+        "AND webcal_meal.cal_date <= $enddate";
     } else if ( $TZ_OFFSET > 0 ) {
       $prev_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd - 1, $sy ) );
       $enddate_minus1 = date ( ( "Ymd" ), mktime ( 3, 0, 0, $em, $ed - 1, $ey ) );
       $cutoff = 24 - $TZ_OFFSET . "0000";
-      $date_filter = " AND ( ( webcal_entry.cal_date >= $startdate " .
-        "AND webcal_entry.cal_date <= $enddate AND " .
-        "webcal_entry.cal_time = -1 ) OR " .
-        "( webcal_entry.cal_date = $prev_day AND " .
-        "webcal_entry.cal_time >= $cutoff ) OR " .
-        "( webcal_entry.cal_date = $enddate AND " .
-        "webcal_entry.cal_time < $cutoff ) OR " .
-        "( webcal_entry.cal_date >= $startdate AND " .
-        "webcal_entry.cal_date <= $enddate_minus1 ) )";
+      $date_filter = " AND ( ( webcal_meal.cal_date >= $startdate " .
+        "AND webcal_meal.cal_date <= $enddate AND " .
+        "webcal_meal.cal_time = -1 ) OR " .
+        "( webcal_meal.cal_date = $prev_day AND " .
+        "webcal_meal.cal_time >= $cutoff ) OR " .
+        "( webcal_meal.cal_date = $enddate AND " .
+        "webcal_meal.cal_time < $cutoff ) OR " .
+        "( webcal_meal.cal_date >= $startdate AND " .
+        "webcal_meal.cal_date <= $enddate_minus1 ) )";
     } else {
       // TZ_OFFSET < 0
       $next_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd + 1, $sy ) );
       $enddate_plus1 =
         date ( ( "Ymd" ), mktime ( 3, 0, 0, $em, $ed + 1, $ey ) );
       $cutoff = ( 0 - $TZ_OFFSET ) * 10000;
-      $date_filter = " AND ( ( webcal_entry.cal_date >= $startdate " .
-        "AND webcal_entry.cal_date <= $enddate AND " .
-        "webcal_entry.cal_time = -1 ) OR " .
-        "( webcal_entry.cal_date = $startdate AND " .
-        "webcal_entry.cal_time > $cutoff ) OR " .
-        "( webcal_entry.cal_date = $enddate_plus1 AND " .
-        "webcal_entry.cal_time <= $cutoff ) OR " .
-        "( webcal_entry.cal_date > $startdate AND " .
-        "webcal_entry.cal_date < $enddate_plus1 ) )";
+      $date_filter = " AND ( ( webcal_meal.cal_date >= $startdate " .
+        "AND webcal_meal.cal_date <= $enddate AND " .
+        "webcal_meal.cal_time = -1 ) OR " .
+        "( webcal_meal.cal_date = $startdate AND " .
+        "webcal_meal.cal_time > $cutoff ) OR " .
+        "( webcal_meal.cal_date = $enddate_plus1 AND " .
+        "webcal_meal.cal_time <= $cutoff ) OR " .
+        "( webcal_meal.cal_date > $startdate AND " .
+        "webcal_meal.cal_date < $enddate_plus1 ) )";
     }
   }
   return query_events ( $user, false, $date_filter, $cat_id  );
@@ -1771,11 +1750,10 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
   $result = array ();
   $layers_byuser = array ();
 
-  $sql = "SELECT webcal_entry.cal_name, webcal_entry.cal_description, "
-    . "webcal_entry.cal_date, webcal_entry.cal_time, "
-    . "webcal_entry.cal_id, webcal_entry.cal_ext_for_id, "
-    . "webcal_entry.cal_priority, "
-    . "webcal_entry.cal_access, webcal_entry.cal_duration, "
+  $sql = "SELECT webcal_meal.cal_suit, webcal_meal.cal_description, "
+    . "webcal_meal.cal_date, webcal_meal.cal_time, "
+    . "webcal_meal.cal_id, webcal_meal.cal_ext_for_id, "
+    . "webcal_meal.cal_duration, "
     . "webcal_entry_user.cal_status, "
     . "webcal_entry_user.cal_category, "
     . "webcal_entry_user.cal_login ";
@@ -1783,12 +1761,12 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
     $sql .= ", "
       . "webcal_entry_repeats.cal_type, webcal_entry_repeats.cal_end, "
       . "webcal_entry_repeats.cal_frequency, webcal_entry_repeats.cal_days "
-      . "FROM webcal_entry, webcal_entry_repeats, webcal_entry_user "
-      . "WHERE webcal_entry.cal_id = webcal_entry_repeats.cal_id AND ";
+      . "FROM webcal_meal, webcal_entry_repeats, webcal_entry_user "
+      . "WHERE webcal_meal.cal_id = webcal_entry_repeats.cal_id AND ";
   } else {
-    $sql .= "FROM webcal_entry, webcal_entry_user WHERE ";
+    $sql .= "FROM webcal_meal, webcal_entry_user WHERE ";
   }
-  $sql .= "webcal_entry.cal_id = webcal_entry_user.cal_id " .
+  $sql .= "webcal_meal.cal_id = webcal_entry_user.cal_id " .
     "AND webcal_entry_user.cal_status IN ('A','W') ";
 
   if ( $cat_id != '' ) $sql .= "AND webcal_entry_user.cal_category LIKE '$cat_id' ";
@@ -1816,7 +1794,7 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
   $sql .= $date_filter;
 
   // now order the results by time and by entry id.
-  $sql .= " ORDER BY webcal_entry.cal_time, webcal_entry.cal_id";
+  $sql .= " ORDER BY webcal_meal.cal_time, webcal_meal.cal_id";
 
   //echo "<strong>SQL:</strong> $sql<br />\n";
   
@@ -1828,29 +1806,24 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
 
     while ( $row = dbi_fetch_row ( $res ) ) {
 
-      if ($row[9] == 'R' || $row[9] == 'D') {
-        continue;  // don't show rejected/deleted ones
-      }
       $item = array (
-        "cal_name" => $row[0],
+        "cal_suit" => $row[0],
         "cal_description" => $row[1],
         "cal_date" => $row[2],
         "cal_time" => $row[3],
         "cal_id"   => $row[4],
         "cal_ext_for_id"   => $row[5],
-        "cal_priority" => $row[6],
-        "cal_access" => $row[7],
-        "cal_duration" => $row[8],
-        "cal_status" => $row[9],
-        "cal_category" => $row[10],
-        "cal_login" => $row[11],
+        "cal_duration" => $row[6],
+        "cal_status" => $row[7],
+        "cal_category" => $row[8],
+        "cal_login" => $row[9],
   "cal_exceptions" => array()
         );
-      if ( $want_repeated && ! empty ( $row[12] ) ) {
-        $item['cal_type'] = empty ( $row[12] ) ? "" : $row[12];
-        $item['cal_end'] = empty ( $row[13] ) ? "" : $row[13];
-        $item['cal_frequency'] = empty ( $row[14] ) ? "" : $row[14];
-        $item['cal_days'] = empty ( $row[15] ) ? "" : $row[15];
+      if ( $want_repeated && ! empty ( $row[10] ) ) {
+        $item['cal_type'] = empty ( $row[10] ) ? "" : $row[10];
+        $item['cal_end'] = empty ( $row[11] ) ? "" : $row[11];
+        $item['cal_frequency'] = empty ( $row[12] ) ? "" : $row[12];
+        $item['cal_days'] = empty ( $row[13] ) ? "" : $row[13];
       }
 
       if ( $item['cal_id'] != $checkdup_id ) {
@@ -2478,17 +2451,16 @@ function print_date_entries ( $date, $user, $ssi ) {
       if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
         if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
           $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
             translate("cont.") . ")";
         } else {
           $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_name'];
+          $viewname = $rep[$cur_rep]['cal_suit'];
         }
         print_entry ( $viewid,
           $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
           $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'],
+	  $rep[$cur_rep]['cal_login'],
           $rep[$cur_rep]['cal_category'] );
         $cnt++;
       }
@@ -2497,17 +2469,16 @@ function print_date_entries ( $date, $user, $ssi ) {
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_name'] . " (" .
+        $viewname = $ev[$i]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_name'];
+        $viewname = $ev[$i]['cal_suit'];
       }
       print_entry ( $viewid,
         $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
         $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-        $ev[$i]['cal_access'], $ev[$i]['cal_login'],
+        $ev[$i]['cal_login'],
         $ev[$i]['cal_category'] );
       $cnt++;
     }
@@ -2517,17 +2488,16 @@ function print_date_entries ( $date, $user, $ssi ) {
     if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
       if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
         $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_name'];
+        $viewname = $rep[$cur_rep]['cal_suit'];
       }
       print_entry ( $viewid,
         $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
         $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-        $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'],
+        $rep[$cur_rep]['cal_login'],
         $rep[$cur_rep]['cal_category'] );
       $cnt++;
     }
@@ -2569,184 +2539,6 @@ function times_overlap ( $time1, $duration1, $time2, $duration2 ) {
   return true;
 }
 
-/**
- * Checks for conflicts.
- *
- * Find overlaps between an array of dates and the other dates in the database.
- *
- * Limits on number of appointments: if enabled in System Settings
- * (<var>$limit_appts</var> global variable), too many appointments can also
- * generate a scheduling conflict.
- * 
- * @todo Update this to handle exceptions to repeating events
- *
- * @param array  $dates        Array of dates in YYYYMMDD format that is
- *                             checked for overlaps.
- * @param int    $duration     Event duration in minutes
- * @param int    $hour         Hour of event (0-23)
- * @param int    $minute       Minute of the event (0-59)
- * @param array  $participants Array of users whose calendars are to be checked
- * @param string $login        The current user name
- * @param int    $id           Current event id (this keeps overlaps from
- *                             wrongly checking an event against itself)
- *
- * @return Empty string for no conflicts or return the HTML of the
- *         conflicts when one or more are found.
- */
-function check_for_conflicts ( $dates, $duration, $hour, $minute,
-  $participants, $login, $id ) {
-  global $single_user_login, $single_user;
-  global $repeated_events, $limit_appts, $limit_appts_number;
-  if (!count($dates)) return false;
-
-  $evtcnt = array ();
-
-  $sql = "SELECT distinct webcal_entry_user.cal_login, webcal_entry.cal_time," .
-    "webcal_entry.cal_duration, webcal_entry.cal_name, " .
-    "webcal_entry.cal_id, webcal_entry.cal_ext_for_id, " .
-    "webcal_entry.cal_access, " .
-    "webcal_entry_user.cal_status, webcal_entry.cal_date " .
-    "FROM webcal_entry, webcal_entry_user " .
-    "WHERE webcal_entry.cal_id = webcal_entry_user.cal_id " .
-    "AND (";
-  for ($x = 0; $x < count($dates); $x++) {
-    if ($x != 0) $sql .= " OR ";
-    $sql.="webcal_entry.cal_date = " . date ( "Ymd", $dates[$x] );
-  }
-  $sql .=  ") AND webcal_entry.cal_time >= 0 " .
-    "AND webcal_entry_user.cal_status IN ('A','W') AND ( ";
-  if ( $single_user == "Y" ) {
-     $participants[0] = $single_user_login;
-  } else if ( strlen ( $participants[0] ) == 0 ) {
-     // likely called from a form with 1 user
-     $participants[0] = $login;
-  }
-  for ( $i = 0; $i < count ( $participants ); $i++ ) {
-    if ( $i > 0 )
-      $sql .= " OR ";
-    $sql .= " webcal_entry_user.cal_login = '" . $participants[$i] . "'";
-  }
-  $sql .= " )";
-  // make sure we don't get something past the end date of the
-  // event we are saving.
-  //echo "SQL: $sql<br />\n";
-  $conflicts = "";
-  $res = dbi_query ( $sql );
-  $found = array();
-  $count = 0;
-  if ( $res ) {
-    $time1 = sprintf ( "%d%02d00", $hour, $minute );
-    $duration1 = sprintf ( "%d", $duration );
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      //Add to an array to see if it has been found already for the next part.
-      $found[$count++] = $row[4];
-      // see if either event overlaps one another
-      if ( $row[4] != $id && ( empty ( $row[5] ) || $row[5] != $id ) ) {
-        $time2 = $row[1];
-        $duration2 = $row[2];
-        $cntkey = $row[0] . "-" . $row[8];
-        if ( empty ( $evtcnt[$cntkey] ) )
-          $evtcnt[$cntkey] = 0;
-        else
-          $evtcnt[$cntkey]++;
-        $over_limit = 0;
-        if ( $limit_appts == "Y" && $limit_appts_number > 0
-          && $evtcnt[$cntkey] >= $limit_appts_number ) {
-          $over_limit = 1;
-        }
-        if ( $over_limit ||
-          times_overlap ( $time1, $duration1, $time2, $duration2 ) ) {
-          $conflicts .= "<li>";
-          if ( $single_user != "Y" )
-            $conflicts .= "$row[0]: ";
-          if ( $row[6] == 'R' && $row[0] != $login )
-            $conflicts .=  "(" . translate("Private") . ")";
-          else {
-            $conflicts .=  "<a href=\"view_entry.php?id=$row[4]";
-            if ( $row[0] != $login )
-              $conflicts .= "&amp;user=$row[0]";
-            $conflicts .= "\">$row[3]</a>";
-          }
-          if ( $duration2 == ( 24 * 60 ) ) {
-            $conflicts .= " (" . translate("All day event") . ")";
-          } else {
-            $conflicts .= " (" . display_time ( $time2 );
-            if ( $duration2 > 0 )
-              $conflicts .= "-" .
-                display_time ( add_duration ( $time2, $duration2 ) );
-            $conflicts .= ")";
-          }
-          $conflicts .= " on " . date_to_str( $row[8] );
-          if ( $over_limit ) {
-            $tmp = translate ( "exceeds limit of XXX events per day" );
-            $tmp = str_replace ( "XXX", $limit_appts_number, $tmp );
-            $conflicts .= " (" . $tmp . ")";
-          }
-          $conflicts .= "</li>\n";
-        }
-      }
-    }
-    dbi_free_result ( $res );
-  } else {
-    echo translate("Database error") . ": " . dbi_error (); exit;
-  }
-  
-  //echo "<br />\nhello";
-  for ($q=0;$q<count($participants);$q++) {
-    $time1 = sprintf ( "%d%02d00", $hour, $minute );
-    $duration1 = sprintf ( "%d", $duration );
-    //This date filter is not necessary for functional reasons, but it eliminates some of the
-    //events that couldn't possibly match.  This could be made much more complex to put more
-    //of the searching work onto the database server, or it could be dropped all together to put
-    //the searching work onto the client.
-    $date_filter  = "AND (webcal_entry.cal_date <= " . date("Ymd",$dates[count($dates)-1]);
-    $date_filter .= " AND (webcal_entry_repeats.cal_end IS NULL OR webcal_entry_repeats.cal_end >= " . date("Ymd",$dates[0]) . "))";
-    //Read repeated events for the participants only once for a participant for
-    //for performance reasons.
-    $repeated_events=query_events($participants[$q],true,$date_filter);
-    //for ($dd=0; $dd<count($repeated_events); $dd++) {
-    //  echo $repeated_events[$dd]['cal_id'] . "<br />";
-    //}
-    for ($i=0; $i < count($dates); $i++) {
-      $dateYmd = date ( "Ymd", $dates[$i] );
-      $list = get_repeating_entries($participants[$q],$dateYmd);
-      $thisyear = substr($dateYmd, 0, 4);
-      $thismonth = substr($dateYmd, 4, 2);
-      for ($j=0; $j < count($list);$j++) {
-        //okay we've narrowed it down to a day, now I just gotta check the time...
-        //I hope this is right...
-        $row = $list[$j];
-        if ( $row['cal_id'] != $id && ( empty ( $row['cal_ext_for_id'] ) || 
-          $row['cal_ext_for_id'] != $id ) ) {
-          $time2 = $row['cal_time'];
-          $duration2 = $row['cal_duration'];
-          if ( times_overlap ( $time1, $duration1, $time2, $duration2 ) ) {
-            $conflicts .= "<li>";
-            if ( $single_user != "Y" )
-              $conflicts .= $row['cal_login'] . ": ";
-            if ( $row['cal_access'] == 'R' && $row['cal_login'] != $login )
-              $conflicts .=  "(" . translate("Private") . ")";
-            else {
-              $conflicts .=  "<a href=\"view_entry.php?id=" . $row['cal_id'];
-              if ( ! empty ( $user ) && $user != $login )
-                $conflicts .= "&amp;user=$user";
-              $conflicts .= "\">" . $row['cal_name'] . "</a>";
-            }
-            $conflicts .= " (" . display_time ( $time2 );
-            if ( $duration2 > 0 )
-              $conflicts .= "-" .
-                display_time ( add_duration ( $time2, $duration2 ) );
-            $conflicts .= ")";
-            $conflicts .= " on " . date("l, F j, Y", $dates[$i]);
-            $conflicts .= "</li>\n";
-          }
-        }
-      }
-    }
-  }
-   
-  return $conflicts;
-}
 
 /**
  * Converts a time format HHMMSS (like 130000 for 1PM) into number of minutes past midnight.
@@ -2843,17 +2635,14 @@ function html_for_add_icon ( $date=0,$hour="", $minute="", $user="" ) {
  * @param int    $id             Event id
  * @param string $date           Date of event in YYYYMMDD format
  * @param string $time           Time of event in HHMM format
- * @param string $name           Brief description of event
+ * @param string $suit           Brief description of event
  * @param string $description    Full description of event
- * @param string $status         Status of event ('A', 'W')
- * @param int    $pri            Priority of event
- * @param string $access         Access to event by others ('P', 'R')
  * @param int    $duration       Duration of event in minutes
  * @param string $event_owner    User who created event
  * @param int    $event_category Category id for event
  */
 function html_for_event_week_at_a_glance ( $id, $date, $time,
-  $name, $description, $status, $pri, $access, $duration, $event_owner,
+  $suit, $description, $duration, $event_owner,
   $event_category=-1 ) {
   global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
     $eventinfo, $login, $user;
@@ -2878,7 +2667,6 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
     $class = "layerentry";
   } else {
     $class = "entry";
-    if ( $status == "W" ) $class = "unapprovedentry";
   }
   // if we are looking at a view, then always use "entry"
   if ( strstr ( $PHP_SELF, "view_m.php" ) ||
@@ -2902,8 +2690,6 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
     $hour_arr[$ind] .= "&amp;user=" . $GLOBALS["user"];
   $hour_arr[$ind] .= "\" onmouseover=\"window.status='" .
     translate("View this entry") . "'; show(event, '$popupid'); return true;\" onmouseout=\"hide('$popupid'); return true;\">";
-  if ( $pri == 3 )
-    $hour_arr[$ind] .= "<strong>";
 
   if ( $login != $event_owner && strlen ( $event_owner ) ) {
     if ($layers) foreach ($layers as $layer) {
@@ -2952,36 +2738,21 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
   if ( empty ( $hour_arr[$ind] ) )
     $hour_arr[$ind] = "";
 
-  if ( $login != $user && $access == 'R' && strlen ( $user ) ) {
-    $hour_arr[$ind] .= "(" . translate("Private") . ")";
-  } else if ( $login != $event_owner && $access == 'R' &&
-    strlen ( $event_owner ) ) {
-    $hour_arr[$ind] .= "(" . translate("Private") . ")";
-  } else if ( $login != $event_owner && strlen ( $event_owner ) ) {
-    $hour_arr[$ind] .= htmlspecialchars ( $name );
+  if ( $login != $event_owner && strlen ( $event_owner ) ) {
+    $hour_arr[$ind] .= htmlspecialchars ( $suit );
     if ( ! empty ( $in_span ) )
       $hour_arr[$ind] .= "</span>"; //end color span
   } else {
-    $hour_arr[$ind] .= htmlspecialchars ( $name );
+    $hour_arr[$ind] .= htmlspecialchars ( $suit );
   }
 
-  if ( $pri == 3 ) $hour_arr[$ind] .= "</strong>"; //end font-weight span
     $hour_arr[$ind] .= "</a>";
   //if ( $DISPLAY_ICONS == "Y" ) {
   //  $hour_arr[$ind] .= icon_text ( $id, true, true );
   //}
   $hour_arr[$ind] .= "<br />\n";
-  if ( $login != $user && $access == 'R' && strlen ( $user ) ) {
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  } else if ( $login != $event_owner && $access == 'R' &&
-    strlen ( $event_owner ) ) {
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  } else {
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      $description, $timestr, site_extras_for_popup ( $id ) );
-  }
+  $eventinfo .= build_event_popup ( $popupid, $event_owner,
+				    $description, $timestr, site_extras_for_popup ( $id ) );
 }
 
 /**
@@ -2993,17 +2764,14 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
  * @param int    $id             Event id
  * @param string $date           Date of event in YYYYMMDD format
  * @param string $time           Time of event in HHMM format
- * @param string $name           Brief description of event
+ * @param string $suit           Brief description of event
  * @param string $description    Full description of event
- * @param string $status         Status of event ('A', 'W')
- * @param int    $pri            Priority of event
- * @param string $access         Access to event by others ('P', 'R')
  * @param int    $duration       Duration of event in minutes
  * @param string $event_owner    User who created event
  * @param int    $event_category Category id for event
  */
 function html_for_event_day_at_a_glance ( $id, $date, $time,
-  $name, $description, $status, $pri, $access, $duration, $event_owner,
+  $suit, $description, $duration, $event_owner,
   $event_category=-1 ) {
   global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
     $eventinfo, $login, $user;
@@ -3013,15 +2781,7 @@ function html_for_event_day_at_a_glance ( $id, $date, $time,
   $popupid = "eventinfo-day-$id-$key";
   $key++;
 
-  if ( $login != $user && $access == 'R' && strlen ( $user ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else if ( $login != $event_owner && $access == 'R' &&
-    strlen ( $event_owner ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else
-    $eventinfo .= build_event_popup ( $popupid, $event_owner, $description,
+  $eventinfo .= build_event_popup ( $popupid, $event_owner, $description,
       "", site_extras_for_popup ( $id ) );
 
   // calculate slot length in minutes
@@ -3050,8 +2810,6 @@ function html_for_event_day_at_a_glance ( $id, $date, $time,
     $class = "layerentry";
   } else {
     $class = "entry";
-    if ( $status == "W" )
-      $class = "unapprovedentry";
   }
   // if we are looking at a view, then always use "entry"
   if ( strstr ( $PHP_SELF, "view_m.php" ) ||
@@ -3071,7 +2829,6 @@ function html_for_event_day_at_a_glance ( $id, $date, $time,
     $hour_arr[$ind] .= "&amp;user=" . $GLOBALS["user"];
   $hour_arr[$ind] .= "\" onmouseover=\"window.status='" .
     translate("View this entry") . "'; show(event, '$popupid'); return true;\" onmouseout=\"hide('$popupid'); return true;\">";
-  if ( $pri == 3 ) $hour_arr[$ind] .= "<strong>";
 
   if ( $login != $event_owner && strlen ( $event_owner ) ) {
     if ($layers) foreach ($layers as $layer) {
@@ -3112,22 +2869,15 @@ function html_for_event_day_at_a_glance ( $id, $date, $time,
     }
     $hour_arr[$ind] .= "] ";
   }
-  if ( $login != $user && $access == 'R' && strlen ( $user ) )
-    $hour_arr[$ind] .= "(" . translate("Private") . ")";
-  else
-  if ( $login != $event_owner && $access == 'R' && strlen ( $event_owner ) )
-    $hour_arr[$ind] .= "(" . translate("Private") . ")";
-  else
   if ( $login != $event_owner && strlen ( $event_owner ) )
   {
-    $hour_arr[$ind] .= htmlspecialchars ( $name );
+    $hour_arr[$ind] .= htmlspecialchars ( $suit );
     if ( ! empty ( $in_span ) )
       $hour_arr[$ind] .= "</span>"; //end color span
   }
 
   else
-    $hour_arr[$ind] .= htmlspecialchars ( $name );
-  if ( $pri == 3 ) $hour_arr[$ind] .= "</strong>"; //end font-weight span
+    $hour_arr[$ind] .= htmlspecialchars ( $suit );
 
   $hour_arr[$ind] .= "</a>";
   if ( $GLOBALS["DISPLAY_DESC_PRINT_DAY"] == "Y" ) {
@@ -3206,19 +2956,18 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
       if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
         if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
           $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
             translate("cont.") . ")";
         } else {
           $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_name'];
+          $viewname = $rep[$cur_rep]['cal_suit'];
         }
         if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) )
           $all_day = 1;
         html_for_event_day_at_a_glance ( $viewid,
           $date, $rep[$cur_rep]['cal_time'],
           $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_duration'],
+          $rep[$cur_rep]['cal_duration'],
           $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
       }
       $cur_rep++;
@@ -3226,19 +2975,18 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_name'] . " (" .
+        $viewname = $ev[$i]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_name'];
+        $viewname = $ev[$i]['cal_suit'];
       }
       if ( $ev[$i]['cal_duration'] == ( 24 * 60 ) )
         $all_day = 1;
       html_for_event_day_at_a_glance ( $viewid,
         $date, $ev[$i]['cal_time'],
         $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-        $ev[$i]['cal_access'], $ev[$i]['cal_duration'],
+        $ev[$i]['cal_duration'],
         $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
     }
   }
@@ -3247,19 +2995,18 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
     if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
       if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
         $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_name'] . " (" .
+        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
           translate("cont.") . ")";
       } else {
         $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_name'];
+        $viewname = $rep[$cur_rep]['cal_suit'];
       }
       if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) )
         $all_day = 1;
       html_for_event_day_at_a_glance ( $viewid,
         $date, $rep[$cur_rep]['cal_time'],
         $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-        $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_duration'],
+        $rep[$cur_rep]['cal_duration'],
         $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
     }
     $cur_rep++;
@@ -3352,59 +3099,6 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
   }
 }
 
-/**
- * Checks for any unnaproved events.
- *
- * If any are found, display a link to the unapproved events (where they can be
- * approved).
- *
- * If the user is an admin user, also count up any public events.
- * If the user is a nonuser admin, count up events on the nonuser calendar.
- *
- * @param string $user Current user login
- */
-function display_unapproved_events ( $user ) {
-  global $public_access, $is_admin, $nonuser_enabled, $login;
-
-  // Don't do this for public access login, admin user must approve public
-  // events
-  if ( $user == "__public__" )
-    return;
-
-  $sql = "SELECT COUNT(webcal_entry_user.cal_id) " .
-    "FROM webcal_entry_user, webcal_entry " .
-    "WHERE webcal_entry_user.cal_id = webcal_entry.cal_id " .
-    "AND webcal_entry_user.cal_status = 'W' " .
-    "AND ( webcal_entry.cal_ext_for_id IS NULL " .
-    "OR webcal_entry.cal_ext_for_id = 0 ) " .
-    "AND ( webcal_entry_user.cal_login = '$user'";
-  if ( $public_access == "Y" && $is_admin ) {
-    $sql .= " OR webcal_entry_user.cal_login = '__public__'";
-  }
-  if ( $nonuser_enabled == 'Y' ) {
-    $admincals = get_nonuser_cals ( $login );
-    for ( $i = 0; $i < count ( $admincals ); $i++ ) {
-      $sql .= " OR webcal_entry_user.cal_login = '" .
-        $admincals[$i]['cal_login'] . "'";
-    }
-  }
-  $sql .= " )";
-  //print "SQL: $sql<br />\n";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      if ( $row[0] > 0 ) {
- $str = translate ("You have XXX unapproved events");
- $str = str_replace ( "XXX", $row[0], $str );
-        echo "<a class=\"nav\" href=\"list_unapproved.php";
-        if ( $user != $login )
-          echo "?user=$user\"";
-        echo "\">" . $str .  "</a><br />\n";
-      }
-    }
-    dbi_free_result ( $res );
-  }
-}
 
 /**
  * Looks for URLs in the given text, and makes them into links.
@@ -4031,9 +3725,8 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
       if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
         print_entry_timebar ( $rep[$cur_rep]['cal_id'],
           $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_name'], $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'],
+          $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
+          $rep[$cur_rep]['cal_login'],
           $rep[$cur_rep]['cal_category'] );
         $cnt++;
       }
@@ -4042,9 +3735,8 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       print_entry_timebar ( $ev[$i]['cal_id'],
         $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-        $ev[$i]['cal_name'], $ev[$i]['cal_description'],
-        $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-        $ev[$i]['cal_access'], $ev[$i]['cal_login'],
+        $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
+        $ev[$i]['cal_login'],
         $ev[$i]['cal_category'] );
       $cnt++;
     }
@@ -4054,9 +3746,8 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
     if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
       print_entry_timebar ( $rep[$cur_rep]['cal_id'],
         $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_name'], $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-        $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'],
+        $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
+        $rep[$cur_rep]['cal_login'],
         $rep[$cur_rep]['cal_category'] );
       $cnt++;
     }
@@ -4073,19 +3764,16 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
  * @param string $date           Date of event in YYYYMMDD format
  * @param string $time           Time of event in HHMM format
  * @param int    $duration       Duration of event in minutes
- * @param string $name           Brief description of event
+ * @param string $suit           Brief description of event
  * @param string $description    Full description of event
- * @param string $status         Status of event ('A', 'W')
- * @param int    $pri            Priority of event
- * @param string $access         Access to event by others ('P', 'R')
  * @param string $event_owner    User who created event
  * @param int    $event_category Category id for event
  *
  * @staticvar int Used to ensure all event popups have a unique id
  */
 function print_entry_timebar ( $id, $date, $time, $duration,
-  $name, $description, $status,
-  $pri, $access, $event_owner, $event_category=-1 ) {
+  $suit, $description, 
+  $event_owner, $event_category=-1 ) {
   global $eventinfo, $login, $user, $PHP_SELF, $prefarray;
   static $key = 0;
   $insidespan = false;
@@ -4139,7 +3827,6 @@ function print_entry_timebar ( $id, $date, $time, $duration,
     $class = "layerentry";
   } else {
     $class = "entry";
-    if ( $status == "W" ) $class = "unapprovedentry";
   }
   // if we are looking at a view, then always use "entry"
   if ( strstr ( $PHP_SELF, "view_m.php" ) ||
@@ -4148,7 +3835,6 @@ function print_entry_timebar ( $id, $date, $time, $duration,
     strstr ( $PHP_SELF, "view_t.php" ) )
     $class = "entry";
 
-  if ( $pri == 3 ) echo "<strong>";
   $popupid = "eventinfo-$id-$key";
   $key++;
   echo "<a class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
@@ -4186,21 +3872,14 @@ function print_entry_timebar ( $id, $date, $time, $duration,
       $timestr .= " - " . display_time ( $end_time );
     }
   }
-  if ( $login != $user && $access == 'R' && strlen ( $user ) )
-    echo "(" . translate("Private") . ")";
-  else
-  if ( $login != $event_owner && $access == 'R' && strlen ( $event_owner ) )
-    echo "(" . translate("Private") . ")";
-  else
   if ( $login != $event_owner && strlen ( $event_owner ) )
   {
-    echo htmlspecialchars ( $name );
+    echo htmlspecialchars ( $suit );
     if ( $insidespan ) { echo ("</span>"); } //end color span
   }
   else
-    echo htmlspecialchars ( $name );
+    echo htmlspecialchars ( $suit );
   echo "</a>";
-  if ( $pri == 3 ) echo "</strong>"; //end font-weight span
   echo "</td>\n";
   if ( $pos < 2 ) {
     if ( $pos < 1 ) {
@@ -4210,15 +3889,7 @@ function print_entry_timebar ( $id, $date, $time, $duration,
     echo ($ev_padding > 0 ? "<td style=\"text-align:left; width:$ev_padding%;\">&nbsp;</td>\n" : "" );
   }
   echo "</tr>\n</table>\n";
-  if ( $login != $user && $access == 'R' && strlen ( $user ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else
-  if ( $login != $event_owner && $access == 'R' && strlen ( $event_owner ) )
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
-      translate("This event is confidential"), "" );
-  else
-    $eventinfo .= build_event_popup ( $popupid, $event_owner,
+  $eventinfo .= build_event_popup ( $popupid, $event_owner,
       $description, $timestr, site_extras_for_popup ( $id ) );
 }
 

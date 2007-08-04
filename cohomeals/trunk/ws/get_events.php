@@ -138,9 +138,9 @@ function print_event_xml ( $id, $event_date ) {
 
   // get event details
   $res = dbi_query (
-    "SELECT cal_create_by, cal_date, cal_time, cal_mod_date, " .
-    "cal_mod_time, cal_duration, cal_priority, cal_type, cal_access, " .
-    "cal_name, cal_description FROM webcal_entry WHERE cal_id = $id" );
+    "SELECT cal_date, cal_time, " .
+    "cal_duration, " .
+    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = $id" );
   if ( ! $res ) {
     echo "Db error: could not find event id $id.\n";
     return;
@@ -152,13 +152,12 @@ function print_event_xml ( $id, $event_date ) {
     return;
   }
 
-  $create_by = $row[0];
-  $name = $row[9];
-  $description = $row[10];
+  $suit = $row[3];
+  $description = $row[4];
 
   echo "<event>\n";
   echo "  <id>$id</id>\n";
-  echo "  <name>" . escapeXml ( $name ) . "</name>\n";
+  echo "  <name>" . escapeXml ( $suit ) . "</name>\n";
   if ( ! empty ( $server_url ) ) {
     if ( substr ( $server_url, -1, 1 ) == "/" ) {
       echo "  <url>" .  $server_url . "view_entry.php?id=" . $id . "</url>\n";
@@ -169,22 +168,12 @@ function print_event_xml ( $id, $event_date ) {
   echo "  <description>" . escapeXml ( $description ) . "</description>\n";
   echo "  <dateFormatted>" . date_to_str ( $event_date ) . "</dateFormatted>\n";
   echo "  <date>" . $event_date . "</date>\n";
-  if ( $row[2] >= 0 ) {
-    echo "  <time>" . sprintf ( "%04d", $row[2] / 100 ) . "</time>\n";
-    echo "  <timeFormatted>" . display_time ( $row[2] ) . "</timeFormatted>\n";
+  if ( $row[1] >= 0 ) {
+    echo "  <time>" . sprintf ( "%04d", $row[1] / 100 ) . "</time>\n";
+    echo "  <timeFormatted>" . display_time ( $row[1] ) . "</timeFormatted>\n";
   }
-  if ( $row[5] > 0 )
-    echo "  <duration>" . $row[5] . "</duration>\n";
-  if ( ! $disable_priority_field )
-    echo "  <priority>" . $pri[$row[6]] . "</priority>\n";
-  if ( ! $disable_access_field )
-    echo "  <access>" . 
-      ( $row[8] == "P" ? translate("Public") : translate("Confidential") ) .
-      "</access>\n";
-  if ( ! strlen ( $single_user_login ) )
-    echo "  <createdBy>" . $row[0] . "</createdBy>\n";
-  echo "  <updateDate>" . date_to_str ( $row[3] ) . "</updateDate>\n";
-  echo "  <updateTime>" . display_time ( $row[4] ) . "</updateTime>\n";
+  if ( $row[2] > 0 )
+    echo "  <duration>" . $row[2] . "</duration>\n";
 
   // site extra fields
   $extras = get_site_extra_fields ( $id );
@@ -277,7 +266,7 @@ for ( $d = $starttime; $d <= $endtime; $d += $ONE_DAY ) {
     if ( ! empty ( $completed_ids[$id] ) )
       continue;
     $completed_ids[$id] = 1;
-    process_event ( $id, $ev[$i]['cal_name'], $date, $ev[$i]['cal_time'] );
+    process_event ( $id, $ev[$i]['cal_suit'], $date, $ev[$i]['cal_time'] );
   }
   $rep = get_repeating_entries ( $user, $date );
   for ( $i = 0; $i < count ( $rep ); $i++ ) {
@@ -285,7 +274,7 @@ for ( $d = $starttime; $d <= $endtime; $d += $ONE_DAY ) {
     if ( ! empty ( $completed_ids[$id] ) )
       continue;
     $completed_ids[$id] = 1;
-    process_event ( $id, $rep[$i]['cal_name'], $date, $rep[$i]['cal_time'] );
+    process_event ( $id, $rep[$i]['cal_suit'], $date, $rep[$i]['cal_time'] );
   }
 }
 

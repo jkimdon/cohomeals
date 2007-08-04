@@ -31,11 +31,10 @@ if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
 
 if ( empty ( $error ) ) {
   // is this user a participant or the creator of the event?
-  $sql = "SELECT webcal_entry.cal_id FROM webcal_entry, " .
-    "webcal_entry_user WHERE webcal_entry.cal_id = " .
-    "webcal_entry_user.cal_id AND webcal_entry.cal_id = $id " .
-    "AND (webcal_entry.cal_create_by = '$login' " .
-    "OR webcal_entry_user.cal_login = '$login')";
+  $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
+    "webcal_entry_user WHERE webcal_meal.cal_id = " .
+    "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
+    "AND webcal_entry_user.cal_login = '$login'";
   $res = dbi_query ( $sql );
   if ( $res ) {
     $row = dbi_fetch_row ( $res );
@@ -75,9 +74,9 @@ if ( empty ( $error ) ) {
     // this user's groups.
     $my_users = get_my_users ();
     if ( is_array ( $my_users ) ) {
-      $sql = "SELECT webcal_entry.cal_id FROM webcal_entry, " .
-        "webcal_entry_user WHERE webcal_entry.cal_id = " .
-        "webcal_entry_user.cal_id AND webcal_entry.cal_id = $id " .
+      $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
+        "webcal_entry_user WHERE webcal_meal.cal_id = " .
+        "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
         "AND webcal_entry_user.cal_login IN ( ";
       for ( $i = 0; $i < count ( $my_users ); $i++ ) {
         if ( $i > 0 ) {
@@ -154,7 +153,7 @@ $unapproved = FALSE;
 // If it is, redirect the user to the original event.
 $ext_id = -1;
 if ( empty ( $error ) ) {
-  $res = dbi_query ( "SELECT cal_ext_for_id FROM webcal_entry " .
+  $res = dbi_query ( "SELECT cal_ext_for_id FROM webcal_meal " .
     "WHERE cal_id = $id" );
   if ( $res ) {
     if ( $row = dbi_fetch_row ( $res ) ) {
@@ -247,9 +246,9 @@ if ( ( empty ( $event_status ) && ! $is_admin ) || ! $can_view ) {
 
 
 // Load event info now.
-$sql = "SELECT cal_create_by, cal_date, cal_time, cal_mod_date, " .
-  "cal_mod_time, cal_duration, cal_priority, cal_type, cal_access, " .
-  "cal_name, cal_description, cal_walkins FROM webcal_entry WHERE cal_id = $id";
+$sql = "SELECT cal_date, cal_time, " .
+  "cal_duration, " .
+  "cal_suit, cal_description, cal_walkins FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
 if ( ! $res ) {
   echo translate("Invalid entry id") . ": $id";
@@ -258,12 +257,11 @@ if ( ! $res ) {
 
 $row = dbi_fetch_row ( $res );
 if ( $row ) { 
-  $create_by = $row[0];
-  $orig_date = $row[1];
-  $event_time = $row[2];
-  $name = $row[9];
-  $description = $row[10];
-  $walkins = $row[11];
+  $orig_date = $row[0];
+  $event_time = $row[1];
+  $suit = $row[3];
+  $description = $row[4];
+  $walkins = $row[5];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -277,9 +275,9 @@ if ( $row ) {
 if ( $event_time >= 0 && ! empty ( $TZ_OFFSET )  && $TZ_OFFSET != 0 ) { 
   // -1 = no time specified
   $adjusted_time = $event_time + $TZ_OFFSET * 10000;
-  $year = substr($row[1],0,4);
-  $month = substr($row[1],4,2);
-  $day = substr($row[1],-2);
+  $year = substr($row[0],0,4);
+  $month = substr($row[0],4,2);
+  $day = substr($row[0],-2);
   if ( $adjusted_time > 240000 ) {
     $gmt = mktime ( 3, 0, 0, $month, $day, $year );
     $gmt += $ONE_DAY;
@@ -289,7 +287,7 @@ if ( $event_time >= 0 && ! empty ( $TZ_OFFSET )  && $TZ_OFFSET != 0 ) {
   }
 }
 // Set alterted date
-$tz_date = ( ! empty ( $gmt ) ) ? date ( "Ymd", $gmt ) : $row[1];
+$tz_date = ( ! empty ( $gmt ) ) ? date ( "Ymd", $gmt ) : $row[0];
 
 // save date so the trailer links are for the same time period
 $thisyear = (int) ( $tz_date / 10000 );
@@ -399,30 +397,18 @@ if ( $res ) {
   dbi_free_result ( $res );
 }
 /* calculate end time */
-if ( $event_time >= 0 && $row[5] > 0 )
-  $end_str = "-" . display_time ( add_duration ( $row[2], $row[5] ) );
+if ( $event_time >= 0 && $row[2] > 0 )
+  $end_str = "-" . display_time ( add_duration ( $row[1], $row[2] ) );
 else
   $end_str = "";
 
-// get the email adress of the creator of the entry
-user_load_variables ( $create_by, "createby_" );
-$email_addr = empty ( $createby_email ) ? '' : $createby_email;
 
-// If confidential and not this user's event, then
-// They cannot seem name or description.
-//if ( $row[8] == "R" && ! $is_my_event && ! $is_admin ) {
-if ( $row[8] == "R" && ! $is_my_event ) {
-  $is_private = true;
-  $name = "[" . translate("Confidential") . "]";
-  $description = "[" . translate("Confidential") . "]";
-} else {
-  $is_private = false;
-}
+$is_private = false;
 
 if ( $event_repeats && ! empty ( $date ) )
   $event_date = $date;
 else
-  $event_date = $row[1];
+  $event_date = $row[0];
 
 // TODO: don't let someone view another user's private entry
 // by hand editing the URL.
@@ -444,6 +430,12 @@ if ( $categories_enabled == "Y" ) {
 ?>
 <h2><?php echo htmlspecialchars ( $name ); ?></h2>
 <table style="border-width:0px;">
+
+<tr><td style="vertical-align:top; font-weight:bold;">
+ <?php etranslate("Suit")?>:</td><td>
+ <?php echo $suit; ?>
+</td></tr>
+
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Description")?>:</td><td>
  <?php
@@ -484,24 +476,24 @@ if ( $categories_enabled == "Y" ) {
   if ( $event_repeats ) {
     echo date_to_str ( $event_date );
   } else {
-    echo date_to_str ( $row[1], "", true, false, ( $row[5] == ( 24 * 60 ) ? "" : $event_time ) );
+    echo date_to_str ( $row[0], "", true, false, ( $row[2] == ( 24 * 60 ) ? "" : $event_time ) );
   }
   ?>
 </td></tr>
 <?php if ( $event_repeats ) { ?>
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Repeat Type")?>:</td><td>
- <?php echo date_to_str ( $row[1], "", true, false, $event_time ) . $rep_str; ?>
+ <?php echo date_to_str ( $row[0], "", true, false, $event_time ) . $rep_str; ?>
 </td></tr>
 <?php } ?>
 <?php if ( $event_time >= 0 ) { ?>
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Time")?>:</td><td>
  <?php
-    if ( $row[5] == ( 24 * 60 ) ) {
+    if ( $row[2] == ( 24 * 60 ) ) {
       etranslate("All day event");
     } else {
-      echo display_time ( $row[2] ) . $end_str;
+      echo display_time ( $row[1] ) . $end_str;
     }
   ?>
 </td></tr>
@@ -763,19 +755,6 @@ if ( empty ( $event_status ) ) {
   $event_status = "D";
 }
 
-if ( $unapproved && $readonly == 'N' ) {
-  echo "<a title=\"" . 
-    translate("Approve/Confirm entry") . 
-    "\" href=\"approve_entry.php?id=$id\" " .
-    "onclick=\"return confirm('" . 
-    translate("Approve this entry?") . "');\">" . 
-    translate("Approve/Confirm entry") . "</a><br />\n";
-  echo "<a title=\"" . 
-    translate("Reject entry") . "\" href=\"reject_entry.php?id=$id\" " .
-    "onclick=\"return confirm('" .
-    translate("Reject this entry?") . "');\">" . 
-    translate("Reject entry") . "</a><br />\n";
-}
 
 if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "&amp;user=$user";

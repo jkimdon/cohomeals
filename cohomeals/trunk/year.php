@@ -89,8 +89,6 @@ if ( $user == "__public__" )
 </div>
 
 <br />
-<?php display_unapproved_events ( $login ); ?>
-<br />
 <a title="<?php 
 	etranslate("Generate printer-friendly version")
 ?>" class="printer" href="year.php?<?php

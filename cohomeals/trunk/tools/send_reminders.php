@@ -213,9 +213,9 @@ function send_reminder ( $id, $event_date ) {
 
   // get event details
   $res = dbi_query (
-    "SELECT cal_create_by, cal_date, cal_time, cal_mod_date, " .
-    "cal_mod_time, cal_duration, cal_priority, cal_type, cal_access, " .
-    "cal_name, cal_description FROM webcal_entry WHERE cal_id = $id" );
+    "SELECT cal_date, cal_time, " .
+    "cal_duration, " .
+    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = $id" );
   if ( ! $res ) {
     echo "Db error: could not find event id $id.\n";
     return;
@@ -272,9 +272,8 @@ function send_reminder ( $id, $event_date ) {
     $body = translate("This is a reminder for the event detailed below.") .
       "\n\n";
 
-    $create_by = $row[0];
-    $name = $row[9];
-    $description = $row[10];
+    $suit = $row[3];
+    $description = $row[4];
 
     // add trailing '/' if not found in server_url
     if ( ! empty ( $server_url ) ) {
@@ -285,25 +284,15 @@ function send_reminder ( $id, $event_date ) {
       }
     }
 
-    $body .= strtoupper ( $name ) . "\n\n";
+    $body .= strtoupper ( $suit ) . "\n\n";
     $body .= translate("Description") . ":\n";
     $body .= indent ( $description ) . "\n";
     $body .= translate("Date") . ": " . date_to_str ( $event_date ) . "\n";
-    if ( $row[2] >= 0 )
-      $body .= translate ("Time") . ": " . display_time ( $row[2] ) . "\n";
-    if ( $row[5] > 0 )
-      $body .= translate ("Duration") . ": " . $row[5] .
+    if ( $row[1] >= 0 )
+      $body .= translate ("Time") . ": " . display_time ( $row[1] ) . "\n";
+    if ( $row[2] > 0 )
+      $body .= translate ("Duration") . ": " . $row[2] .
         " " . translate("minutes") . "\n";
-    if ( ! empty ( $disable_priority_field ) && ! $disable_priority_field )
-      $body .= translate("Priority") . ": " . $pri[$row[6]] . "\n";
-    if ( ! empty ( $disable_access_field ) && ! $disable_access_field )
-      $body .= translate("Access") . ": " .
-        ( $row[8] == "P" ? translate("Public") : translate("Confidential") ) .
-        "\n";
-    if ( ! empty ( $single_user_login ) && $single_user_login == false )
-      $body .= translate("Created by") . ": " . $row[0] . "\n";
-    $body .= translate("Updated") . ": " . date_to_str ( $row[3] ) . " " .
-      display_time ( $row[4] ) . "\n";
 
     // site extra fields
     $extras = get_site_extra_fields ( $id );

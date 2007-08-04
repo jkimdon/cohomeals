@@ -287,18 +287,16 @@ function print_det_date_entries ( $date, $user, $ssi ) {
         $rep[$cur_rep]['cal_status'] == 'A' )
         print_detailed_entry ( $rep[$cur_rep]['cal_id'],
           $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_name'], $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-          $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'] );
+          $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
+          $rep[$cur_rep]['cal_login'] );
       $cur_rep++;
     }
     if ( $GLOBALS["DISPLAY_UNAPPROVED"] != "N" ||
       $ev[$i]['cal_status'] == 'A' )
       print_detailed_entry ( $ev[$i]['cal_id'],
         $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-        $ev[$i]['cal_name'], $ev[$i]['cal_description'],
-        $ev[$i]['cal_status'], $ev[$i]['cal_priority'],
-        $ev[$i]['cal_access'], $ev[$i]['cal_login'] );
+        $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
+        $ev[$i]['cal_login'] );
   }
   // print out any remaining repeating events
   while ( $cur_rep < count ( $rep ) ) {
@@ -306,9 +304,8 @@ function print_det_date_entries ( $date, $user, $ssi ) {
       $rep[$cur_rep]['cal_status'] == 'A' )
       print_detailed_entry ( $rep[$cur_rep]['cal_id'],
         $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_name'], $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_status'], $rep[$cur_rep]['cal_priority'],
-        $rep[$cur_rep]['cal_access'], $rep[$cur_rep]['cal_login'] );
+        $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
+        $rep[$cur_rep]['cal_login'] );
     $cur_rep++;
   }
 }

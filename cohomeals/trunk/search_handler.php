@@ -33,10 +33,10 @@ if ( ! empty ( $error ) ) {
   $words = split ( " ", $keywords );
   for ( $i = 0; $i < count ( $words ); $i++ ) {
     // Note: we only search approved events
-    $sql = "SELECT webcal_entry.cal_id, webcal_entry.cal_name, " .
-      "webcal_entry.cal_date " .
-      "FROM webcal_entry, webcal_entry_user " .
-      "WHERE webcal_entry.cal_id = webcal_entry_user.cal_id " .
+    $sql = "SELECT webcal_meal.cal_id, webcal_meal.cal_suit, " .
+      "webcal_meal.cal_date " .
+      "FROM webcal_meal, webcal_entry_user " .
+      "WHERE webcal_meal.cal_id = webcal_entry_user.cal_id " .
       "AND webcal_entry_user.cal_status in ('A','W') " .
       "AND webcal_entry_user.cal_login IN ( ";
     if ( $search_others ) {
@@ -53,12 +53,11 @@ if ( ! empty ( $error ) ) {
     if ( $search_others ) {
       // Don't search confidential entries of other users.
       $sql .= "AND ( webcal_entry_user.cal_login = '$login' OR " .
-        "( webcal_entry_user.cal_login != '$login' AND " .
-	"webcal_entry.cal_access = 'P' ) ) ";
+        " webcal_entry_user.cal_login != '$login' ) ";
     }
-    $sql .= "AND ( UPPER(webcal_entry.cal_name) " .
+    $sql .= "AND ( UPPER(webcal_meal.cal_suit) " .
       "LIKE UPPER('%" .  $words[$i] . "%') " .
-      "OR UPPER(webcal_entry.cal_description) " .
+      "OR UPPER(webcal_meal.cal_description) " .
       "LIKE UPPER('%" .  $words[$i] . "%') ) " .
       "ORDER BY cal_date";
     //echo "SQL: $sql<br />";

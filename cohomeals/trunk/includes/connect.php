@@ -173,11 +173,8 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_user.php" ) ||
     strstr ( $PHP_SELF, "edit_user_handler.php" ) ||
-    strstr ( $PHP_SELF, "approve_entry.php" ) ||
-    strstr ( $PHP_SELF, "reject_entry.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
     strstr ( $PHP_SELF, "set_entry_cat.php" ) ||
-    strstr ( $PHP_SELF, "list_unapproved.php" ) ||
     strstr ( $PHP_SELF, "layers.php" ) ||
     strstr ( $PHP_SELF, "layer_toggle.php" ) ||
     strstr ( $PHP_SELF, "import.php" ) ||
@@ -210,7 +207,6 @@ if ( $readonly == "Y" ) {
   if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
     strstr ( $PHP_SELF, "adminhome.php" ) ||
     strstr ( $PHP_SELF, "admin.php" ) ||
-    strstr ( $PHP_SELF, "approve_entry.php" ) ||
     strstr ( $PHP_SELF, "category_handler.php" ) ||
     strstr ( $PHP_SELF, "category.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
@@ -226,12 +222,10 @@ if ( $readonly == "Y" ) {
     strstr ( $PHP_SELF, "import.php" ) ||
     strstr ( $PHP_SELF, "layers.php" ) ||
     strstr ( $PHP_SELF, "layer_toggle.php" ) ||
-    strstr ( $PHP_SELF, "list_unapproved.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "pref.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "purge.php" ) ||
-    strstr ( $PHP_SELF, "reject_entry.php" ) ||
     strstr ( $PHP_SELF, "set_entry_cat.php" ) ||
     strstr ( $PHP_SELF, "users.php" ) ||
     strstr ( $PHP_SELF, "views_edit_handler.php" ) ||

@@ -230,22 +230,18 @@ print "</body>\n</html>";
 function print_upcoming_event ( $e ) {
   global $display_link, $link_target, $server_url, $charset;
 
-  if ( $e['cal_access'] == 'P' ) {
-    if ( $display_link && ! empty ( $server_url ) ) {
-      print "<a title=\"" . 
-        $e['cal_name'] . "\" href=\"" . 
-        $server_url . "view_entry.php?id=" . 
-        $e['cal_id'] . "&amp;date=" . 
-        $e['cal_date'] . "\"";
-      if ( ! empty ( $link_target ) ) {
-        print " target=\"$link_target\"";
-      }
-      print ">";
+  if ( $display_link && ! empty ( $server_url ) ) {
+    print "<a title=\"" . 
+      $e['cal_suit'] . "\" href=\"" . 
+      $server_url . "view_entry.php?id=" . 
+      $e['cal_id'] . "&amp;date=" . 
+      $e['cal_date'] . "\"";
+    if ( ! empty ( $link_target ) ) {
+      print " target=\"$link_target\"";
     }
-    print $e['cal_name'];
-  } else {
-    print "[" . translate("Confidential") . "]";
+    print ">";
   }
+  print $e['cal_suit'];
 
   if ( $display_link && ! empty ( $server_url ) ) {
     print "</a>";

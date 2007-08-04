@@ -45,11 +45,10 @@ if ( $readonly == 'Y' ) {
   } else {
     $can_edit = false;
     if ( $readonly == "N" || $is_admin ) {
-      $sql = "SELECT webcal_entry.cal_id FROM webcal_entry, " .
-        "webcal_entry_user WHERE webcal_entry.cal_id = " .
-        "webcal_entry_user.cal_id AND webcal_entry.cal_id = $id " .
-        "AND (webcal_entry.cal_create_by = '$login' " .
-        "OR webcal_entry_user.cal_login = '$login')";
+      $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
+        "webcal_entry_user WHERE webcal_meal.cal_id = " .
+        "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
+        "AND webcal_entry_user.cal_login = '$login'";
       $res = dbi_query ( $sql );
       if ( $res ) {
         $row = dbi_fetch_row ( $res );
@@ -59,9 +58,9 @@ if ( $readonly == 'Y' ) {
       }
     }
   }
-  $sql = "SELECT cal_create_by, cal_date, cal_time, cal_mod_date, " .
-    "cal_mod_time, cal_duration, cal_priority, cal_type, cal_access, " .
-    "cal_name, cal_description, cal_group_id FROM webcal_entry WHERE cal_id = " . $id;
+  $sql = "SELECT cal_date, cal_time, " .
+    "cal_duration, " .
+    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = " . $id;
   $res = dbi_query ( $sql );
   if ( $res ) {
     $row = dbi_fetch_row ( $res );
@@ -69,17 +68,15 @@ if ( $readonly == 'Y' ) {
       // Leave $cal_date to what was set in URL with date=YYYYMMDD
       $cal_date = $date;
     } else {
-      $cal_date = $row[1];
+      $cal_date = $row[0];
     }
-    $create_by = $row[0];
-    if (( $user == $create_by ) && ( $is_assistant || $is_nonuser_admin )) $can_edit = true;
     
     $year = (int) ( $cal_date / 10000 );
     $month = ( $cal_date / 100 ) % 100;
     $day = $cal_date % 100;
-    $time = $row[2];
+    $time = $row[1];
     // test for AllDay event, if so, don't adjust time
-    if ( $time > 0  || ( $time == 0 &&  $row[5] != 1440 ) ) { /* -1 = no time specified */
+    if ( $time > 0  || ( $time == 0 &&  $row[2] != 1440 ) ) { /* -1 = no time specified */
       $time += ( ! empty ( $TZ_OFFSET )?$TZ_OFFSET : 0)  * 10000;
       if ( $time > 240000 ) {
         $time -= 240000;
@@ -102,17 +99,13 @@ if ( $readonly == 'Y' ) {
     if ( $time >= 0 ) {
       $hour = floor($time / 10000);
       $minute = ( $time / 100 ) % 100;
-      $duration = $row[5];
+      $duration = $row[2];
     } else {
       $duration = "";
       $hour = -1;
     }
-    $priority = $row[6];
-    $type = $row[7];
-    $access = $row[8];
-    $name = $row[9];
-    $description = $row[10];
-    $parent = $row[11];
+    $suit = $row[3];
+    $description = $row[4];
     // check for repeating event info...
     // but not if we are overriding a single entry of an already repeating
     // event... confusing, eh?
@@ -212,10 +205,6 @@ if ( empty ( $name ) )
   $name = "";
 if ( empty ( $description ) )
   $description = "";
-if ( empty ( $priority ) )
-  $priority = 0;
-if ( empty ( $access ) )
-  $access = "";
 if ( empty ( $rpt_freq ) )
   $rpt_freq = 0;
 if ( empty ( $rpt_end_date ) )
@@ -322,29 +311,6 @@ if ( ! empty ( $parent ) )
      echo htmlspecialchars ( $description );
     ?></textarea></td><td style="vertical-align:top;">
 
-<?php if (( ! empty ( $categories ) ) || ( $disable_access_field != "Y" ) || 
-         ( $disable_priority_field != "Y" ) ){ // new table for extra fields ?>
-    <table>
-<?php } ?>
-<?php if ( $disable_access_field != "Y" ) { ?>
-      <tr><td class="tooltip" title="<?php etooltip("access-help")?>">
-       <label for="entry_access"><?php etranslate("Access")?>:</label></td><td>
-       <select name="access" id="entry_access">
-        <option value="P"<?php if ( $access == "P" || ! strlen ( $access ) ) echo " selected=\"selected\"";?>><?php etranslate("Public")?></option>
-        <option value="R"<?php if ( $access == "R" ) echo " selected=\"selected\"";?>><?php etranslate("Confidential")?></option>
-       </select>
-       </td></tr>
-<?php } ?>
-<?php if ( $disable_priority_field != "Y" ) { ?>
-     <tr><td class="tooltip" title="<?php etooltip("priority-help")?>">
-      <label for="entry_prio"><?php etranslate("Priority")?>:&nbsp;</label></td><td>
-      <select name="priority" id="entry_prio">
-       <option value="1"<?php if ( $priority == 1 ) echo " selected=\"selected\"";?>><?php etranslate("Low")?></option>
-       <option value="2"<?php if ( $priority == 2 || $priority == 0 ) echo " selected=\"selected\"";?>><?php etranslate("Medium")?></option>
-       <option value="3"<?php if ( $priority == 3 ) echo " selected=\"selected\"";?>><?php etranslate("High")?></option>
-      </select>
-     </td></tr>
-<?php } ?>
 <?php if ( ! empty ( $categories ) ) { ?>
      <tr><td class="tooltip" title="<?php etooltip("category-help")?>">
       <label for="entry_categories"><?php etranslate("Category")?>:&nbsp;</label></td><td>
@@ -360,11 +326,6 @@ if ( ! empty ( $parent ) )
       </select>
      </td></tr>
 <?php } //end if (! empty ($categories)) ?>
-<?php if (( ! empty ( $categories ) ) || ( $disable_access_field != "Y" ) || 
-         ( $disable_priority_field != "Y" ) ){ // end the table ?>
-   </table>
-    
-<?php } ?>
   </td></tr>
   <tr><td class="tooltip" title="<?php etooltip("date-help")?>">
    <?php etranslate("Date")?>:</td><td colspan="2">
