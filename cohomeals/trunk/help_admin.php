@@ -92,20 +92,8 @@ print_header('', '', '', true);
  <?php etranslate("work-hours-help")?>
 </td></tr>
 <tr><td class="help">
- <?php etranslate("Disable Priority field")?>:</td><td>
- <?php etranslate("disable-priority-field-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Disable Access field")?>:</td><td>
- <?php etranslate("disable-access-field-help")?>
-</td></tr>
-<tr><td class="help">
  <?php etranslate("Disable Participants field")?>:</td><td>
  <?php etranslate("disable-participants-field-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Disable Repeating field")?>:</td><td>
- <?php etranslate("disable-repeating-field-help")?>
 </td></tr>
 <tr><td class="help">
  <?php etranslate("Display Site Extras in popup")?>:</td><td>

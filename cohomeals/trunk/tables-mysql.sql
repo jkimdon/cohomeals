@@ -80,46 +80,7 @@ CREATE TABLE webcal_meal (
   PRIMARY KEY ( cal_id )
 );
 
-/*
- * Defines repeating info about an event.
- * The event is defined in <a href="#webcal_entry">webcal_entry</a>.
- */
-CREATE TABLE webcal_entry_repeats (
-  /* event id */
-  cal_id INT DEFAULT 0 NOT NULL,
-  /* type of repeating:<ul> */
-  /* <li>daily - repeats daily</li> */
-  /* <li>monthlyByDate - repeats on same day of the month</li> */
-  /* <li>monthlyByDayR - repeats on same weekday of the month */
-  /*   (counting weeks from the end of the month is in last Monday)</li> */
-  /* <li>monthlyByDay - repeats on specified weekday (2nd Monday, for example)</li> */
-  /* <li>weekly - repeats every week</li> */
-  /* <li>yearly - repeats on same date every year</li> */
-  cal_type VARCHAR(20),
-  /* end date for repeating event (in YYYYMMDD format) */
-  cal_end INT,
-  /* frequency of repeat: 1 = every, 2 = every other, 3 = every 3rd, etc. */
-  cal_frequency INT DEFAULT 1,
-  /* which days of the week does it repeat on (only applies when cal_type = 'weekly' */
-  cal_days CHAR(7),
-  PRIMARY KEY (cal_id)
-);
 
-/*
- * This table specifies which dates in a repeating
- * event have either been deleted or replaced with
- * a replacement event for that day.  When replaced, the cal_group_id
- * (I know... not the best name, but it was not being used) column will
- * be set to the original event.  That way the user can delete the original
- * event and (at the same time) delete any exception events.
- */
-CREATE TABLE webcal_entry_repeats_not (
-  /* event id of repeating event */
-  cal_id INT NOT NULL,
-  /* cal_date: date event should not repeat (in YYYYMMDD format) */
-  cal_date INT NOT NULL,
-  PRIMARY KEY ( cal_id, cal_date )
-);
 
 /*
  * This table associates one or more users with an event by the event id.
@@ -323,8 +284,6 @@ INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'disable_access_field', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'disable_participants_field', 'N' );
-INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'disable_repeating_field', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'allow_view_other', 'Y' );
 INSERT INTO webcal_config ( cal_setting, cal_value )

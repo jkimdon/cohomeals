@@ -64,7 +64,7 @@ if ( $readonly == 'Y' ) {
   $res = dbi_query ( $sql );
   if ( $res ) {
     $row = dbi_fetch_row ( $res );
-    if ( ! empty ( $override ) && ! empty ( $date ) ) {
+    if ( ! empty ( $date ) ) {
       // Leave $cal_date to what was set in URL with date=YYYYMMDD
       $cal_date = $date;
     } else {
@@ -106,42 +106,6 @@ if ( $readonly == 'Y' ) {
     }
     $suit = $row[3];
     $description = $row[4];
-    // check for repeating event info...
-    // but not if we are overriding a single entry of an already repeating
-    // event... confusing, eh?
-    if ( ! empty ( $override ) ) {
-      $rpt_type = "none";
-      $rpt_end = 0;
-      $rpt_end_date = $cal_date;
-      $rpt_freq = 1;
-      $rpt_days = "nnnnnnn";
-      $rpt_sun = $rpt_mon = $rpt_tue = $rpt_wed =
-        $rpt_thu = $rpt_fri = $rpt_sat = false;
-    } else {
-      $res = dbi_query ( "SELECT cal_id, cal_type, cal_end, " .
-        "cal_frequency, cal_days FROM webcal_entry_repeats " .
-        "WHERE cal_id = $id" );
-      if ( $res ) {
-        if ( $row = dbi_fetch_row ( $res ) ) {
-          $rpt_type = $row[1];
-          if ( $row[2] > 0 )
-            $rpt_end = date_to_epoch ( $row[2] );
-          else
-            $rpt_end = 0;
-          $rpt_end_date = $row[2];
-          $rpt_freq = $row[3];
-          $rpt_days = $row[4];
-          $rpt_sun  = ( substr ( $rpt_days, 0, 1 ) == 'y' );
-          $rpt_mon  = ( substr ( $rpt_days, 1, 1 ) == 'y' );
-          $rpt_tue  = ( substr ( $rpt_days, 2, 1 ) == 'y' );
-          $rpt_wed  = ( substr ( $rpt_days, 3, 1 ) == 'y' );
-          $rpt_thu  = ( substr ( $rpt_days, 4, 1 ) == 'y' );
-          $rpt_fri  = ( substr ( $rpt_days, 5, 1 ) == 'y' );
-          $rpt_sat  = ( substr ( $rpt_days, 6, 1 ) == 'y' );
-        }
-      }
-    }
-    
   }
   $sql = "SELECT cal_login, cal_category FROM webcal_entry_user WHERE cal_id = $id";
   $res = dbi_query ( $sql );
@@ -188,8 +152,6 @@ if ( ! empty ( $month ) && $month )
   $thismonth = $month;
 if ( ! empty ( $day ) && $day )
   $thisday = $day;
-if ( empty ( $rpt_type ) || ! $rpt_type )
-  $rpt_type = "none";
 
 // avoid error for using undefined vars
 if ( ! isset ( $hour ) )
@@ -205,10 +167,6 @@ if ( empty ( $name ) )
   $name = "";
 if ( empty ( $description ) )
   $description = "";
-if ( empty ( $rpt_freq ) )
-  $rpt_freq = 0;
-if ( empty ( $rpt_end_date ) )
-  $rpt_end_date = 0;
 
 if ( ( empty ( $year ) || ! $year ) &&
   ( empty ( $month ) || ! $month ) &&
@@ -237,17 +195,17 @@ if ( $allow_html_description == "Y" ){
   // If they have installed the htmlarea widget, make use of it
   $textareasize = 'rows="15" cols="50"';
   if ( file_exists ( "includes/htmlarea/htmlarea.php" ) ) {
-    $BodyX = 'onload="initEditor();timetype_handler();rpttype_handler()"';
+    $BodyX = 'onload="initEditor();timetype_handler()"';
     $INC = array ( 'htmlarea/htmlarea.php', 'js/edit_entry.php',
       'js/visible.php', 'htmlarea/core.php' );
   } else {
     // No htmlarea files found...
-    $BodyX = 'onload="timetype_handler();rpttype_handler()"';
+    $BodyX = 'onload="timetype_handler()"';
     $INC = array ( 'js/edit_entry.php', 'js/visible.php' );
   }
 } else {
   $textareasize = 'rows="5" cols="40"';
-  $BodyX = 'onload="timetype_handler();rpttype_handler()"';
+  $BodyX = 'onload="timetype_handler()"';
   $INC = array('js/edit_entry.php','js/visible.php');
 }
 
@@ -267,11 +225,6 @@ if ( ! empty ( $id ) && ( empty ( $copy ) || $copy != '1' ) ) echo "<input type=
 // we need an additional hidden input field
 echo "<input type=\"hidden\" name=\"entry_changed\" value=\"\" />\n";
 
-// are we overriding an entry from a repeating event...
-if ( ! empty ( $override ) ) {
-  echo "<input type=\"hidden\" name=\"override\" value=\"1\" />\n";
-  echo "<input type=\"hidden\" name=\"override_date\" value=\"$cal_date\" />\n";
-}
 // if assistant, need to remember boss = user
 if ( $is_assistant || $is_nonuser_admin || ! empty ( $user ) )
    echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";

@@ -70,10 +70,7 @@ $wkend = $wkstart + ( 3600 * 24 * 6 );
 $startdate = date ( "Ymd", $wkstart );
 $enddate = date ( "Ymd", $wkend );
 
-/* Pre-Load the repeated events for quckier access */
-$repeated_events = read_repeated_events ( $login, "", $startdate );
-
-/* Pre-load the non-repeating events for quicker access */
+/* Pre-load the events for quicker access */
 $events = read_events ( $login, $startdate, $enddate );
 
 for ( $i = 0; $i < 7; $i++ ) {

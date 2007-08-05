@@ -49,11 +49,7 @@ if ( ! empty ( $auto_refresh ) && $auto_refresh == "Y" &&
 $INC = array('js/popups.php');
 print_header($INC,$HeadX);
 
-/* Pre-Load the repeated events for quckier access */
-$repeated_events = read_repeated_events ( strlen ( $user ) ? $user : $login,
-  $cat_id, $startdate );
-
-/* Pre-load the non-repeating events for quicker access */
+/* Pre-load the events for quicker access */
 $events = read_events ( strlen ( $user ) ? $user : $login,
   $startdate, $enddate, $cat_id );
 
@@ -164,39 +160,11 @@ if ( $login == "__public__" ) {
 
 $all_day = array ();
 for ( $d = $start_ind; $d < $end_ind; $d++ ) {
-  // get all the repeating events for this date and store in array $rep
-  $date = date ( "Ymd", $days[$d] );
-  $rep = get_repeating_entries ( $user, $date );
-  $cur_rep = 0;
-
-  // Get static non-repeating events
+  // Get static events
   $ev = get_entries ( $user, $date, $get_unapproved );
   $hour_arr = array ();
   $rowspan_arr = array ();
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    // print out any repeating events that are before this one...
-    while ( $cur_rep < count ( $rep ) &&
-      $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-      if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-        if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-          $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-            translate("cont.") . ")";
-        } else {
-          $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'];
-        }
-        if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) ) {
-          $all_day[$d] = 1;
-        }
-        html_for_event_week_at_a_glance ( $viewid,
-          $date, $rep[$cur_rep]['cal_time'],
-          $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
-      }
-      $cur_rep++;
-    }
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
@@ -215,28 +183,6 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
         $ev[$i]['cal_duration'],
         $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
     }
-  }
-  // print out any remaining repeating events
-  while ( $cur_rep < count ( $rep ) ) {
-    if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-      if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-        $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'];
-      }
-      if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) ) {
-        $all_day[$d] = 1;
-      }
-      html_for_event_week_at_a_glance ( $viewid,
-        $date, $rep[$cur_rep]['cal_time'],
-        $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
-    }
-    $cur_rep++;
   }
 
   // squish events that use the same cell into the same cell.

@@ -55,24 +55,6 @@
 				<?php etranslate("participants-help")?>
 			</td></tr>
 		<?php } ?>
-	<?php if ( $disable_repeating_field != "Y" ) { ?>
-		<tr><td class="help">
-			<?php etranslate("Repeat Type")?>:</td><td>
-			<?php etranslate("repeat-type-help")?>
-		</td></tr>
-		<tr><td class="help">
-			<?php etranslate("Repeat End Date")?>:</td><td>
-			<?php etranslate("repeat-end-date-help")?>
-		</td></tr>
-		<tr><td class="help">
-			<?php etranslate("Repeat Day")?>:</td><td>
-			<?php etranslate("repeat-day-help")?>
-		</td></tr>
-		<tr><td class="help">
-			<?php etranslate("Frequency")?>:</td><td>
-			<?php etranslate("repeat-frequency-help")?>
-		</td></tr>
-	<?php } ?>
 </table>
 
 <?php include_once "includes/help_trailer.php"; ?>

@@ -402,8 +402,6 @@ if ( ! isset ( $report_time_range ) ) {
 if ( empty ( $error ) && empty ( $list ) ) {
   $cat_id = empty ( $report_cat_id ) ? "" : $report_cat_id;
 
-  $repeated_events = read_repeated_events ( $report_user, $cat_id, $start_date );
-
   $events = read_events ( $report_user, $start_date, $end_date, $cat_id );
 
   $get_unapproved = $DISPLAY_UNAPPROVED == 'Y';
@@ -427,36 +425,15 @@ if ( empty ( $error ) && empty ( $list ) ) {
   $day_str = '';
 
   // Loop through each day
-  // Get events for each day (both normal and repeating).
+  // Get events for each day 
   // (Most of this code was copied from week.php)
   for ( $cur_time = $start_time; $cur_time <= $end_time; $cur_time += $ONE_DAY ) {
     $event_str = '';
     $dateYmd = date ( "Ymd", $cur_time );
-    $rep = get_repeating_entries ( empty ( $user ) ? $login : $user, $dateYmd );
     $ev = get_entries ( empty ( $user ) ? $login : $user, $dateYmd );
-    $cur_rep = 0;
     //echo "DATE: $dateYmd <br />\n";
   
     for ( $i = 0; $i < count ( $ev ); $i++ ) {
-      // print out any repeating events that are before this one...
-      while ( $cur_rep < count ( $rep ) &&
-        $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-        if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-          if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-            $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-            $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-              translate("cont.") . ")";
-          } else {
-            $viewid = $rep[$cur_rep]['cal_id'];
-            $viewname = $rep[$cur_rep]['cal_suit'];
-          }
-          $event_str .= event_to_text ( $viewid,
-            $dateYmd, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-            $viewname, $rep[$cur_rep]['cal_description'],
-            $rep[$cur_rep]['cal_login'] );
-        }
-        $cur_rep++;
-      }
       if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
         if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
           $viewid = $ev[$i]['cal_ext_for_id'];
@@ -471,24 +448,6 @@ if ( empty ( $error ) && empty ( $list ) ) {
           $viewname, $ev[$i]['cal_description'],
           $ev[$i]['cal_login'] );
       }
-    }
-    // print out any remaining repeating events
-    while ( $cur_rep < count ( $rep ) ) {
-      if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-        if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-          $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-            translate("cont.") . ")";
-        } else {
-          $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'];
-        }
-        $event_str .= event_to_text ( $viewid,
-          $dateYmd, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_login'] );
-      }
-      $cur_rep++;
     }
   
     if ( ! empty ( $event_str ) || $report_include_empty == 'Y' ||

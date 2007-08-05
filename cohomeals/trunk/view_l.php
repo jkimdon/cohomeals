@@ -141,17 +141,12 @@ if ( ! empty ( $error ) ) {
 }
 
 $e_save = array ();
-$re_save = array ();
 for ( $i = 0; $i < count ( $viewusers ); $i++ ) {
-  /* Pre-Load the repeated events for quckier access */
-  $repeated_events = read_repeated_events ( $viewusers[$i], "", $startdate ); 
-  $re_save = array_merge($re_save, $repeated_events);
-  /* Pre-load the non-repeating events for quicker access */
+  /* Pre-load the events for quicker access */
   $events = read_events ( $viewusers[$i], $startdate, $enddate );
   $e_save = array_merge($e_save, $events);
 } 
 $events = array ();
-$repeated_events = array ();
 
 for ( $i = 0; $i < count ( $e_save ); $i++ ) {
   $should_add = 1;
@@ -165,17 +160,6 @@ for ( $i = 0; $i < count ( $e_save ); $i++ ) {
   }
 }
 
-for ( $i = 0; $i < count ( $re_save ); $i++ ) {
-  $should_add = 1;
-  for ( $j = 0; $j < count ( $repeated_events ) && $should_add; $j++ ) {
-    if ( $re_save[$i]['cal_id'] == $repeated_events[$j]['cal_id'] ) {
-      $should_add = 0;
-    }
-  }
-  if ( $should_add ) {
-    array_push ( $repeated_events, $re_save[$i] );
-  }
-}
 
 display_small_month ( $prevmonth, $prevyear, true, true, "prevmonth", 
   "view_l.php?id=$id&amp;" );

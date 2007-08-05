@@ -317,25 +317,10 @@ if ( ! $error ) {
    ?>
   </select>
  </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("disable-priority-field-help")?>">
-  <?php etranslate("Disable Priority field")?>:</td><td>
-  <label><input type="radio" name="admin_disable_priority_field" value="Y"<?php if ( $s["disable_priority_field"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-  <label><input type="radio" name="admin_disable_priority_field" value="N"<?php if ( $s["disable_priority_field"] == "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("disable-access-field-help")?>">
-  <?php etranslate("Disable Access field")?>:</td><td>
-  <label><input type="radio" name="admin_disable_access_field" value="Y"<?php if ( $s["disable_access_field"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-  <label><input type="radio" name="admin_disable_access_field" value="N"<?php if ( $s["disable_access_field"] == "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
  <tr><td class="tooltip" title="<?php etooltip("disable-participants-field-help")?>">
   <?php etranslate("Disable Participants field")?>:</td><td>
   <label><input type="radio" name="admin_disable_participants_field" value="Y" <?php if ( $s["disable_participants_field"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
   <label><input type="radio" name="admin_disable_participants_field" value="N" <?php if ( $s["disable_participants_field"] == "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("disable-repeating-field-help")?>">
-  <?php etranslate("Disable Repeating field")?>:</td><td>
-  <label><input type="radio" name="admin_disable_repeating_field" value="Y" <?php if ( $s["disable_repeating_field"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-  <label><input type="radio" name="admin_disable_repeating_field" value="N" <?php if ( $s["disable_repeating_field"] == "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
  </td></tr>
  <tr><td class="tooltip" title="<?php etooltip("popup-includes-siteextras-help")?>">
   <?php etranslate("Display Site Extras in popup")?>:</td><td>

@@ -35,21 +35,6 @@ if ( ! $can_edit ) {
   $error = translate ( "You are not authorized" );
 }
 
-// Is this a repeating event?
-$event_repeats = false;
-$res = dbi_query ( "SELECT COUNT(cal_id) FROM webcal_entry_repeats " .
-  "WHERE cal_id = $id" );
-if ( $res ) {
-  $row = dbi_fetch_row ( $res );
-  if ( $row[0] > 0 )
-    $event_repeats = true;
-  dbi_free_result ( $res );
-}
-$override_repeat = false;
-if ( ! empty ( $date ) && $event_repeats && ! empty ( $override ) ) {
-  $override_repeat = true;
-}
-
 if ( $id > 0 && empty ( $error ) ) {
   if ( ! empty ( $date ) ) {
     $thisdate = $date;
@@ -62,7 +47,7 @@ if ( $id > 0 && empty ( $error ) ) {
     }
   }
 
-  // Only allow delete of webcal_meal & webcal_entry_repeats
+  // Only allow delete of webcal_meal
   // if owner or admin, not participant.
   if ( $is_admin || $my_event ) {
 
@@ -138,48 +123,10 @@ if ( $id > 0 && empty ( $error ) ) {
     // Instead of deleting from the database... mark it as deleted
     // by setting the status for each participant to "D" (instead
     // of "A"/Accepted, "W"/Waiting-on-approval or "R"/Rejected)
-    if ( $override_repeat ) {
-      dbi_query ( "INSERT INTO webcal_entry_repeats_not ( cal_id, cal_date ) " .
-        "VALUES ( $id, $date )" );
-      // Should we log this to the activity log???
-    } else {
-      // If it's a repeating event, delete any event exceptions
-      // that were entered.
-      if ( $event_repeats ) {
- $res = dbi_query ( "SELECT cal_id FROM webcal_meal " .
-   "WHERE cal_group_id = $id" );
-        if ( $res ) {
-   $ex_events = array ();
-          while ( $row = dbi_fetch_row ( $res ) ) {
-     $ex_events[] = $row[0];
-   }
-          dbi_free_result ( $res );
-          for ( $i = 0; $i < count ( $ex_events ); $i++ ) {
-     $res = dbi_query ( "SELECT cal_login FROM " .
-              "webcal_entry_user WHERE cal_id = $ex_events[$i]" );
-            if ( $res ) {
-              $delusers = array ();
-              while ( $row = dbi_fetch_row ( $res ) ) {
-                $delusers[] = $row[0];
-              }
-              dbi_free_result ( $res );
-              for ( $j = 0; $j < count ( $delusers ); $j++ ) {
-                // Log the deletion
-         activity_log ( $ex_events[$i], $login, $delusers[$j],
-                  $LOG_DELETE, "" );
-                dbi_query ( "UPDATE webcal_entry_user SET cal_status = 'D' " .
-           "WHERE cal_id = $ex_events[$i] " .
-                  "AND cal_login = '$delusers[$j]'" );
-              }
-            }
-          }
- }
-      }
-
-      // Now, mark event as deleted for all users.
-      dbi_query ( "UPDATE webcal_entry_user SET cal_status = 'D' " .
-        "WHERE cal_id = $id" );
-    }
+    
+    // Now, mark event as deleted for all users.
+    dbi_query ( "UPDATE webcal_entry_user SET cal_status = 'D' " .
+		"WHERE cal_id = $id" );
   } else {
     // Not the owner of the event and are not the admin.
     // Just delete the event from this user's calendar.

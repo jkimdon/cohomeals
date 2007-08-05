@@ -151,12 +151,8 @@ if ( ! empty ( $error ) ) {
 }
 
 $e_save = array ();
-$re_save = array ();
 for ( $i = 0; $i < count ( $viewusers ); $i++ ) {
-  /* Pre-Load the repeated events for quckier access */
-  $repeated_events = read_repeated_events ( $viewusers[$i], "", $startdate );
-  $re_save[$i] = $repeated_events;
-  /* Pre-load the non-repeating events for quicker access */
+  /* Pre-load the events for quicker access */
   $events = read_events ( $viewusers[$i], $startdate, $enddate );
   $e_save[$i] = $events;
 }
@@ -217,7 +213,6 @@ for ( $j = 0; $j < count ($viewusers); $j += $USERS_PER_TABLE ) {
       $i < count ($viewusers) && $k < $USERS_PER_TABLE; $i++, $k++ ) {
  $user = $viewusers[$i];
  $events = $e_save[$i];
- $repeated_events = $re_save[$i];
  if ( date ("Ymd", $date) == date ("Ymd", $today) ) {
   echo "<td class=\"today\"";
  } else {

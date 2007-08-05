@@ -222,43 +222,8 @@ if ( strlen ( $hour ) > 0 && $timetype != 'U' ) {
   if ( strlen ( $hour ) > 0 ) {
     $str_cal_time = sprintf ( "%02d%02d00", $hour, $minute );
   }
-  if ( ! empty ( $rpt_end_use ) ) {
-    $endt = mktime ( 3, 0, 0, $rpt_month, $rpt_day,$rpt_year );
-  } else {
-    $endt = 'NULL';
-  }
-
-  if ($rpt_type == 'weekly') {
-    $dayst = ( empty( $rpt_sun )  ? 'n' : 'y' )
-      . (  empty( $rpt_mon )  ? 'n' : 'y' )
-      . (  empty( $rpt_tue )  ? 'n' : 'y' )
-      . (  empty( $rpt_wed )  ? 'n' : 'y' )
-      . (  empty( $rpt_thu )  ? 'n' : 'y' )
-      . (  empty( $rpt_fri )  ? 'n' : 'y' )
-      . (  empty( $rpt_sat )  ? 'n' : 'y' );
-  } else {
-    $dayst = "nnnnnnn";
-  }
-
-  // Load exception days... but not for a new event (which can't have
-  // exception dates yet)
-  $ex_days = array ();
-  if ( ! empty ( $id ) ) {
-    $res = dbi_query ( "SELECT cal_date FROM webcal_entry_repeats_not " .
-      "WHERE cal_id = $id" );
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $ex_days[] = $row[0];
-      }
-      dbi_free_result ( $res );
-    } else {
-      $error = translate("Database error") . ": " . dbi_error ();
-    }
-  }
-
-  $dates = get_all_dates ( $date, $rpt_type, $endt, $dayst,
-    $ex_days, $rpt_freq );
-    
+  $endt = 'NULL';
+  $dayst = "nnnnnnn";
 }
 //Avoid Undefined variable message
 $msg = '';
@@ -293,7 +258,6 @@ if ( empty ( $error ) ) {
       dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_ext_user WHERE cal_id = $id" );
-      dbi_query ( "DELETE FROM webcal_entry_repeats WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_site_extras WHERE cal_id = $id" );
     }
     $newevent = false;
@@ -704,38 +668,6 @@ if ( empty ( $error ) ) {
     }
   }
 
-  // clearly, we want to delete the old repeats, before inserting new...
-  if ( empty ( $error ) ) {
-    if ( ! dbi_query ( "DELETE FROM webcal_entry_repeats WHERE cal_id = $id") ) {
-      $error = translate("Database error") . ": " . dbi_error ();
-    }
-    // add repeating info
-    if ( ! empty ( $rpt_type ) && strlen ( $rpt_type ) && $rpt_type != 'none' ) {
-      $freq = ( $rpt_freq ? $rpt_freq : 1 );
-      if ( ! empty ( $rpt_end_use  ) ) {
-        $end = sprintf ( "%04d%02d%02d", $rpt_year, $rpt_month, $rpt_day );
-      } else {
-        $end = 'NULL';
-      }
-      if ($rpt_type == 'weekly') {
-        $days = ( empty( $rpt_sun )  ? 'n' : 'y' )
-          . (  empty( $rpt_mon )  ? 'n' : 'y' )
-          . (  empty( $rpt_tue )  ? 'n' : 'y' )
-          . (  empty( $rpt_wed )  ? 'n' : 'y' )
-          . (  empty( $rpt_thu )  ? 'n' : 'y' )
-          . (  empty( $rpt_fri )  ? 'n' : 'y' )
-          . (  empty( $rpt_sat )  ? 'n' : 'y' );
-      } else {
-        $days = "nnnnnnn";
-      }
-  
-      $sql = "INSERT INTO webcal_entry_repeats ( cal_id, " .
-        "cal_type, cal_end, cal_days, cal_frequency ) VALUES " .
-        "( $id, '$rpt_type', $end, '$days', $freq )";
-      dbi_query ( $sql );
-      $msg .= "<span style=\"font-weight:bold;\">SQL:</span> $sql<br />\n<br />";
-    }
-  }
 }
 
 // If we were editing this event, then go back to the last view (week, day,

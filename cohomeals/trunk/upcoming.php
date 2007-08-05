@@ -147,10 +147,7 @@ $endTime = mktime ( 3, 0, 0, $thismonth, $thisday + $numDays,
 $endDate = date ( "Ymd", $endTime );
 
 
-/* Pre-Load the repeated events for quckier access */
-$repeated_events = read_repeated_events ( $username, $cat_id, $date );
-
-/* Pre-load the non-repeating events for quicker access */
+/* Pre-load the events for quicker access */
 $events = read_events ( $username, $date, $endDate, $cat_id );
 
 // Print header without custom header and no style sheet
@@ -195,26 +192,20 @@ print "<dl>\n";
 
 print "<!-- \nstartTime: $startTime\nendTime: $endTime\nstartDate: " .
   "$date\nnumDays: $numDays\nuser: $username\nevents: " . 
-  count ( $events ) . "\nrepeated_events: " . 
-  count ( $repeated_events ) . " -->\n";
+  count ( $events ) . " -->\n";
 
 $numEvents = 0;
 for ( $i = $startTime; date ( "Ymd", $i ) <= date ( "Ymd", $endTime ) &&
   $numEvents < $maxEvents; $i += ( 24 * 3600 ) ) {
   $d = date ( "Ymd", $i );
   $entries = get_entries ( $username, $d, $get_unapproved );
-  $rentries = get_repeating_entries ( $username, $d, $get_unapproved );
-  print "<!-- $d " . count ( $entries ) . "/" . count ( $rentries ) . " -->\n";
+  print "<!-- $d " . count ( $entries ) . " -->\n";
 
-  if ( count ( $entries ) > 0 || count ( $rentries ) > 0 ) {
+  if ( count ( $entries ) > 0 ) {
     print "<!-- XXX -->\n";
     print "<dt>" . date_to_str ( $d ) . "</dt>\n<dd>";
     for ( $j = 0; $j < count ( $entries ) && $numEvents < $maxEvents; $j++ ) {
       print_upcoming_event ( $entries[$j] );
-      $numEvents++;
-    }
-    for ( $j = 0; $j < count ( $rentries ) && $numEvents < $maxEvents; $j++ ) {
-      print_upcoming_event ( $rentries[$j] );
       $numEvents++;
     }
     print "</dd>\n";

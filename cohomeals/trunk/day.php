@@ -45,11 +45,7 @@ print_header($INC,$HeadX);
 ?>
 
 <?php
-/* Pre-Load the repeated events for quckier access */
-$repeated_events = read_repeated_events ( empty ( $user ) ? $login : $user,
-  $cat_id, $startdate  );
-
-/* Pre-load the non-repeating events for quicker access */
+/* Pre-load the events for quicker access */
 $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate,
   $cat_id  );
 ?>

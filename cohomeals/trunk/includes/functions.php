@@ -1373,11 +1373,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
         $ev = get_entries ( $user, $dateYmd, $get_unapproved );
         if ( count ( $ev ) > 0 ) {
           $hasEvents = true;
-        } else {
-          $rep = get_repeating_entries ( $user, $dateYmd, $get_unapproved );
-          if ( count ( $rep ) > 0 )
-            $hasEvents = true;
-        }
+        } 
       }
       if ( $dateYmd >= date ("Ymd",$monthstart) &&
         $dateYmd <= date ("Ymd",$monthend) ) {
@@ -1425,8 +1421,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  * Prints the HTML for one day's events in the month view.
  *
  * @param int    $id          Event ID
- * @param int    $date        Date of event (relevant in repeating events) in
- *                            YYYYMMDD format
+ * @param int    $date        Date of event in YYYYMMDD format
  * @param int    $time        Time (in HHMMSS format)
  * @param int    $duration    Event duration in minutes
  * @param string $suit        Event name
@@ -1644,7 +1639,7 @@ function read_events ( $user, $startdate, $enddate, $cat_id = ''  ) {
         "webcal_meal.cal_date < $enddate_plus1 ) )";
     }
   }
-  return query_events ( $user, false, $date_filter, $cat_id  );
+  return query_events ( $user, $date_filter, $cat_id  );
 }
 
 /**
@@ -1737,14 +1732,13 @@ function get_entries ( $user, $date, $get_unapproved=true ) {
  * Includes layers and possibly public access if enabled
  *
  * @param string $user          Username
- * @param bool   $want_repeated Get repeating events?
  * @param string $date_filter   SQL phrase starting with AND, to be appended to
  *                              the WHERE clause.  May be empty string.
  * @param int    $cat_id        Category ID to filter on.  May be empty.
  *
  * @return array Array of events sorted by time of day
  */
-function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
+function query_events ( $user, $date_filter, $cat_id = '' ) {
   global $login;
   global $layers, $public_access_default_visible;
   $result = array ();
@@ -1757,15 +1751,7 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
     . "webcal_entry_user.cal_status, "
     . "webcal_entry_user.cal_category, "
     . "webcal_entry_user.cal_login ";
-  if ( $want_repeated ) {
-    $sql .= ", "
-      . "webcal_entry_repeats.cal_type, webcal_entry_repeats.cal_end, "
-      . "webcal_entry_repeats.cal_frequency, webcal_entry_repeats.cal_days "
-      . "FROM webcal_meal, webcal_entry_repeats, webcal_entry_user "
-      . "WHERE webcal_meal.cal_id = webcal_entry_repeats.cal_id AND ";
-  } else {
-    $sql .= "FROM webcal_meal, webcal_entry_user WHERE ";
-  }
+  $sql .= "FROM webcal_meal, webcal_entry_user WHERE ";
   $sql .= "webcal_meal.cal_id = webcal_entry_user.cal_id " .
     "AND webcal_entry_user.cal_status IN ('A','W') ";
 
@@ -1819,12 +1805,6 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
         "cal_login" => $row[9],
   "cal_exceptions" => array()
         );
-      if ( $want_repeated && ! empty ( $row[10] ) ) {
-        $item['cal_type'] = empty ( $row[10] ) ? "" : $row[10];
-        $item['cal_end'] = empty ( $row[11] ) ? "" : $row[11];
-        $item['cal_frequency'] = empty ( $row[12] ) ? "" : $row[12];
-        $item['cal_days'] = empty ( $row[13] ) ? "" : $row[13];
-      }
 
       if ( $item['cal_id'] != $checkdup_id ) {
         $checkdup_id = $item['cal_id'];
@@ -1859,388 +1839,11 @@ function query_events ( $user, $want_repeated, $date_filter, $cat_id = '' ) {
     dbi_free_result ( $res );
   }
 
-  // Now load event exceptions and store as array in 'cal_exceptions' field
-  if ( $want_repeated ) {
-    for ( $i = 0; $i < count ( $result ); $i++ ) {
-      if ( ! empty ( $result[$i]['cal_id'] ) ) {
-        $res = dbi_query ( "SELECT cal_date FROM webcal_entry_repeats_not " .
-            "WHERE cal_id = " . $result[$i]['cal_id'] );
-        while ( $row = dbi_fetch_row ( $res ) ) {
-          $result[$i]['cal_exceptions'][] = $row[0];
-        }
-      }
-    }
-  }
-
   return $result;
 }
 
-/**
- * Reads all the repeated events for a user.
- *
- * This is only called once per page request to improve performance. All the
- * events get loaded into the array <var>$repeated_events</var> sorted by time of day (not
- * date).
- *
- * This will load all the repeated events into memory.
- *
- * <b>Notes:</b>
- * - To get which events repeat on a specific date, use
- *   {@link get_repeating_entries()}.
- * - To get all the dates that one specific event repeats on, call
- *   {@link get_all_dates()}.
- *
- * @param string $user   Username
- * @param int    $cat_id Category ID to filter on  (May be empty)
- * @param string $date   Cutoff date for repeating event endtimes in YYYYMMDD
- *                       format (may be empty)
- *
- * @return Array of repeating events sorted by time of day
- *
- * @uses query_events
- */
-function read_repeated_events ( $user, $cat_id = '', $date = ''  ) {
-  global $login;
-  global $layers;
 
-  $filter = ($date != '') ? "AND (webcal_entry_repeats.cal_end >= $date OR webcal_entry_repeats.cal_end IS NULL) " : '';
-  return query_events ( $user, true, $filter, $cat_id );
-}
 
-/**
- * Returns all the dates a specific event will fall on accounting for the repeating.
- *
- * Any event with no end will be assigned one.
- *
- * @param string $date     Initial date in raw format
- * @param string $rpt_type Repeating type as stored in the database
- * @param string $end      End date
- * @param string $days     Days events occurs on (for weekly)
- * @param array  $ex_dates Array of exception dates for this event in YYYYMMDD format
- * @param int    $freq     Frequency of repetition
- *
- * @return array Array of dates (in UNIX time format)
- */
-function get_all_dates ( $date, $rpt_type, $end, $days, $ex_days, $freq=1 ) {
-  global $conflict_repeat_months, $days_per_month, $ldays_per_month;
-  global $ONE_DAY;
-  //echo "get_all_dates ( $date, '$rpt_type', $end, '$days', [array], $freq ) <br>\n";
-  $currentdate = floor($date/$ONE_DAY)*$ONE_DAY;
-  $realend = floor($end/$ONE_DAY)*$ONE_DAY;
-  $dateYmd = date ( "Ymd", $date );
-  if ($end=='NULL') {
-    // Check for $conflict_repeat_months months into future for conflicts
-    $thismonth = substr($dateYmd, 4, 2);
-    $thisyear = substr($dateYmd, 0, 4);
-    $thisday = substr($dateYmd, 6, 2);
-    $thismonth += $conflict_repeat_months;
-    if ($thismonth > 12) {
-      $thisyear++;
-      $thismonth -= 12;
-    }
-    $realend = mktime(3,0,0,$thismonth,$thisday,$thisyear);
-  }
-  $ret = array();
-  $ret[0] = $date;
-  //do iterative checking here.
-  //I floored the $realend so I check it against the floored date
-  if ($rpt_type && $currentdate < $realend) {
-    $cdate = $date;
-    if (!$freq) $freq = 1;
-    $n = 1;
-    if ($rpt_type == 'daily') {
-      //we do inclusive counting on end dates.
-      $cdate += $ONE_DAY * $freq;
-      while ($cdate <= $realend+$ONE_DAY) {
-        if ( ! is_exception ( $cdate, $ex_days ) )
-          $ret[$n++]=$cdate;
-        $cdate += $ONE_DAY * $freq;
-      }
-    } else if ($rpt_type == 'weekly') {
-      $daysarray = array();
-      $r=0;
-      $dow = date("w",$date);
-      $cdate = $date - ($dow * $ONE_DAY);
-      for ($i = 0; $i < 7; $i++) {
-        $isDay = substr($days, $i, 1);
-        if (strcmp($isDay,"y")==0) {
-          $daysarray[$r++]=$i * $ONE_DAY;
-        }
-      }
-      //we do inclusive counting on end dates.
-      while ($cdate <= $realend+$ONE_DAY) {
-        //add all of the days of the week.
-        for ($j=0; $j<$r;$j++) {
-          $td = $cdate + $daysarray[$j];
-          if ($td >= $date) {
-            if ( ! is_exception ( $td, $ex_days ) )
-              $ret[$n++] = $td;
-          }
-        }
-        //skip to the next week in question.
-        $cdate += ( $ONE_DAY * 7 ) * $freq;
-      }
-    } else if ($rpt_type == 'monthlyByDay') {
-      $dow  = date('w', $date);
-      $thismonth = substr($dateYmd, 4, 2);
-      $thisyear  = substr($dateYmd, 0, 4);
-      $week  = floor(date("d", $date)/7);
-      $thismonth+=$freq;
-      //dow1 is the weekday that the 1st of the month falls on
-      $dow1 = date('w',mktime (3,0,0,$thismonth,1,$thisyear));
-      $t = $dow - $dow1;
-      if ($t < 0) $t += 7;
-      $day = 7*$week + $t + 1;
-      $cdate = mktime (3,0,0,$thismonth,$day,$thisyear);
-      while ($cdate <= $realend+$ONE_DAY) {
-        if ( ! is_exception ( $cdate, $ex_days ) )
-          $ret[$n++] = $cdate;
-        $thismonth+=$freq;
-        //dow1 is the weekday that the 1st of the month falls on
-        $dow1time = mktime ( 3, 0, 0, $thismonth, 1, $thisyear );
-        $dow1 = date ( 'w', $dow1time );
-        $t = $dow - $dow1;
-        if ($t < 0) $t += 7;
-        $day = 7*$week + $t + 1;
-        $cdate = mktime (3,0,0,$thismonth,$day,$thisyear);
-      }
-    } else if ($rpt_type == 'monthlyByDayR') {
-      // by weekday of month reversed (i.e., last Monday of month)
-      $dow  = date('w', $date);
-      $thisday = substr($dateYmd, 6, 2);
-      $thismonth = substr($dateYmd, 4, 2);
-      $thisyear  = substr($dateYmd, 0, 4);
-      // get number of days in this month
-      $daysthismonth = $thisyear % 4 == 0 ? $ldays_per_month[$thismonth] :
-        $days_per_month[$thismonth];
-      // how many weekdays like this one remain in the month?
-      // 0=last one, 1=one more after this one, etc.
-      $whichWeek = floor ( ( $daysthismonth - $thisday ) / 7 );
-      // find first repeat date
-      $thismonth += $freq;
-      if ( $thismonth > 12 ) {
-        $thisyear++;
-        $thismonth -= 12;
-      }
-      // get weekday for last day of month
-      $dowLast += date('w',mktime (3,0,0,$thismonth + 1, -1,$thisyear));
-      if ( $dowLast >= $dow ) {
-        // last weekday is in last week of this month
-        $day = $daysthismonth - ( $dowLast - $dow ) -
-          ( 7 * $whichWeek );
-      } else {
-        // last weekday is NOT in last week of this month
-        $day = $daysthismonth - ( $dowLast - $dow ) -
-          ( 7 * ( $whichWeek + 1 ) );
-      }
-      $cdate = mktime (3,0,0,$thismonth,$day,$thisyear);
-      while ($cdate <= $realend+$ONE_DAY) {
-        if ( ! is_exception ( $cdate, $ex_days ) )
-          $ret[$n++] = $cdate;
-        $thismonth += $freq;
-        if ( $thismonth > 12 ) {
-          $thisyear++;
-          $thismonth -= 12;
-        }
-        // get weekday for last day of month
-        $dowLast += date('w',mktime (3,0,0,$thismonth + 1, -1,$thisyear));
-        if ( $dowLast >= $dow ) {
-          // last weekday is in last week of this month
-          $day = $daysthismonth - ( $dowLast - $dow ) -
-            ( 7 * $whichWeek );
-        } else {
-          // last weekday is NOT in last week of this month
-          $day = $daysthismonth - ( $dowLast - $dow ) -
-            ( 7 * ( $whichWeek + 1 ) );
-        }
-        $cdate = mktime (3,0,0,$thismonth,$day,$thisyear);
-      }
-    } else if ($rpt_type == 'monthlyByDate') {
-      $thismonth = substr($dateYmd, 4, 2);
-      $thisyear  = substr($dateYmd, 0, 4);
-      $thisday   = substr($dateYmd, 6, 2);
-      $hour      = date('H',$date);
-      $minute    = date('i',$date);
-
-      $thismonth += $freq;
-      $cdate = mktime (3,0,0,$thismonth,$thisday,$thisyear);
-      while ($cdate <= $realend+$ONE_DAY) {
-        if ( ! is_exception ( $cdate, $ex_days ) )
-          $ret[$n++] = $cdate;
-        $thismonth += $freq;
-        $cdate = mktime (3,0,0,$thismonth,$thisday,$thisyear);
-      }
-    } else if ($rpt_type == 'yearly') {
-      $thismonth = substr($dateYmd, 4, 2);
-      $thisyear  = substr($dateYmd, 0, 4);
-      $thisday   = substr($dateYmd, 6, 2);
-      $hour      = date('H',$date);
-      $minute    = date('i',$date);
-
-      $thisyear += $freq;
-      $cdate = mktime (3,0,0,$thismonth,$thisday,$thisyear);
-      while ($cdate <= $realend+$ONE_DAY) {
-        if ( ! is_exception ( $cdate, $ex_days ) )
-          $ret[$n++] = $cdate;
-        $thisyear += $freq;
-        $cdate = mktime (3,0,0,$thismonth,$thisday,$thisyear);
-      }
-    }
-  }
-  return $ret;
-}
-
-/**
- * Gets all the repeating events for the specified date.
- *
- * <b>Note:</b>
- * The global variable <var>$repeated_events</var> needs to be
- * set by calling {@link read_repeated_events()} first.
- *
- * @param string $user           Username
- * @param string $date           Date to get events for in YYYYMMDD format
- * @param bool   $get_unapproved Include unapproved events in results?
- *
- * @return mixed The query result resource on queries (which can then be
- *               passed to {@link dbi_fetch_row()} to obtain the results), or
- *               true/false on insert or delete queries.
- *
- * @global array Array of repeating events retreived using {@link read_repeated_events()}
- */
-function get_repeating_entries ( $user, $dateYmd, $get_unapproved=true ) {
-  global $repeated_events;
-  $n = 0;
-  $ret = array ();
-  //echo count($repeated_events)."<br />\n";
-  for ( $i = 0; $i < count ( $repeated_events ); $i++ ) {
-    if ( $repeated_events[$i]['cal_status'] == 'A' || $get_unapproved ) {
-      if ( repeated_event_matches_date ( $repeated_events[$i], $dateYmd ) ) {
-        // make sure this is not an exception date...
-        $unixtime = date_to_epoch ( $dateYmd );
-        if ( ! is_exception ( $unixtime, $repeated_events[$i]['cal_exceptions'] ) )
-          $ret[$n++] = $repeated_events[$i];
-      }
-    }
-  }
-  return $ret;
-}
-
-/**
- * Determines whether the event passed in will fall on the date passed.
- *
- * @param array  $event   The event as an array
- * @param string $dateYmd Date to check in YYYYMMDD format
- *
- * @return bool Does <var>$event</var> occur on <var>$dateYmd</var>?
- */
-function repeated_event_matches_date($event,$dateYmd) {
-  global $days_per_month, $ldays_per_month, $ONE_DAY;
-  // only repeat after the beginning, and if there is an end
-  // before the end
-  $date = date_to_epoch ( $dateYmd );
-  $thisyear = substr($dateYmd, 0, 4);
-  $start = date_to_epoch ( $event['cal_date'] );
-  $end   = date_to_epoch ( $event['cal_end'] );
-  $freq = $event['cal_frequency'];
-  $thismonth = substr($dateYmd, 4, 2);
-  if ($event['cal_end'] && $dateYmd > date("Ymd",$end) )
-    return false;
-  if ( $dateYmd <= date("Ymd",$start) )
-    return false;
-  $id = $event['cal_id'];
-
-  if ($event['cal_type'] == 'daily') {
-    if ( (floor(($date - $start)/$ONE_DAY)%$freq) )
-      return false;
-    return true;
-  } else if ($event['cal_type'] == 'weekly') {
-    $dow  = date("w", $date);
-    $dow1 = date("w", $start);
-    $isDay = substr($event['cal_days'], $dow, 1);
-    $wstart = $start - ($dow1 * $ONE_DAY);
-    if (floor(($date - $wstart)/604800)%$freq)
-      return false;
-    return (strcmp($isDay,"y") == 0);
-  } else if ($event['cal_type'] == 'monthlyByDay') {
-    $dowS = date("w", $start);
-    $dow  = date("w", $date);
-    // do this comparison first in hopes of best performance
-    if ( $dowS != $dow )
-      return false;
-    $mthS = date("m", $start);
-    $yrS  = date("Y", $start);
-    $dayS  = floor(date("d", $start));
-    $dowS1 = ( date ( "w", $start - ( $ONE_DAY * ( $dayS - 1 ) ) ) + 35 ) % 7;
-    $days_in_first_weekS = ( 7 - $dowS1 ) % 7;
-    $whichWeekS = floor ( ( $dayS - $days_in_first_weekS ) / 7 );
-    if ( $dowS >= $dowS1 && $days_in_first_weekS )
-      $whichWeekS++;
-    //echo "dayS=$dayS;dowS=$dowS;dowS1=$dowS1;wWS=$whichWeekS<br />\n";
-    $mth  = date("m", $date);
-    $yr   = date("Y", $date);
-    $day  = date("d", $date);
-    $dow1 = ( date ( "w", $date - ( $ONE_DAY * ( $day - 1 ) ) ) + 35 ) % 7;
-    $days_in_first_week = ( 7 - $dow1 ) % 7;
-    $whichWeek = floor ( ( $day - $days_in_first_week ) / 7 );
-    if ( $dow >= $dow1 && $days_in_first_week )
-      $whichWeek++;
-    //echo "day=$day;dow=$dow;dow1=$dow1;wW=$whichWeek<br />\n";
-
-    if ((($yr - $yrS)*12 + $mth - $mthS) % $freq)
-      return false;
-
-    return ( $whichWeek == $whichWeekS );
-  } else if ($event['cal_type'] == 'monthlyByDayR') {
-    $dowS = date("w", $start);
-    $dow  = date("w", $date);
-    // do this comparison first in hopes of best performance
-    if ( $dowS != $dow )
-      return false;
-
-    $dayS = ceil(date("d", $start));
-    $mthS = ceil(date("m", $start));
-    $yrS  = date("Y", $start);
-    $daysthismonthS = $mthS % 4 == 0 ? $ldays_per_month[$mthS] :
-      $days_per_month[$mthS];
-    $whichWeekS = floor ( ( $daysthismonthS - $dayS ) / 7 );
-
-    $day = ceil(date("d", $date));
-    $mth = ceil(date("m", $date));
-    $yr  = date("Y", $date);
-    $daysthismonth = $mth % 4 == 0 ? $ldays_per_month[$mth] :
-      $days_per_month[$mth];
-    $whichWeek = floor ( ( $daysthismonth - $day ) / 7 );
-
-    if ((($yr - $yrS)*12 + $mth - $mthS) % $freq)
-      return false;
-
-    return ( $whichWeekS == $whichWeek );
-  } else if ($event['cal_type'] == 'monthlyByDate') {
-    $mthS = date("m", $start);
-    $yrS  = date("Y", $start);
-
-    $mth  = date("m", $date);
-    $yr   = date("Y", $date);
-
-    if ((($yr - $yrS)*12 + $mth - $mthS) % $freq)
-      return false;
-
-    return (date("d", $date) == date("d", $start));
-  }
-  else if ($event['cal_type'] == 'yearly') {
-    $yrS = date("Y", $start);
-    $yr  = date("Y", $date);
-
-    if (($yr - $yrS)%$freq)
-      return false;
-
-    return (date("dm", $date) == date("dm", $start));
-  } else {
-    // unknown repeat type
-    return false;
-  }
-  return false;
-}
 
 /**
  * Converts a date to a timestamp.
@@ -2437,35 +2040,10 @@ function print_date_entries ( $date, $user, $ssi ) {
     $cnt++;
   }
   
-  // get all the repeating events for this date and store in array $rep
-  $rep = get_repeating_entries ( $user, $date, $get_unapproved );
-  $cur_rep = 0;
-
-  // get all the non-repeating events for this date and store in $ev
+  // get all events for this date and store in $ev
   $ev = get_entries ( $user, $date, $get_unapproved );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    // print out any repeating events that are before this one...
-    while ( $cur_rep < count ( $rep ) &&
-      $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-      if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-        if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-          $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-            translate("cont.") . ")";
-        } else {
-          $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'];
-        }
-        print_entry ( $viewid,
-          $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $viewname, $rep[$cur_rep]['cal_description'],
-	  $rep[$cur_rep]['cal_login'],
-          $rep[$cur_rep]['cal_category'] );
-        $cnt++;
-      }
-      $cur_rep++;
-    }
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
@@ -2482,26 +2060,6 @@ function print_date_entries ( $date, $user, $ssi ) {
         $ev[$i]['cal_category'] );
       $cnt++;
     }
-  }
-  // print out any remaining repeating events
-  while ( $cur_rep < count ( $rep ) ) {
-    if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-      if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-        $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'];
-      }
-      print_entry ( $viewid,
-        $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-        $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_login'],
-        $rep[$cur_rep]['cal_category'] );
-      $cnt++;
-    }
-    $cur_rep++;
   }
   if ( $cnt == 0 )
     echo "&nbsp;"; // so the table cell has at least something
@@ -2919,7 +2477,6 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
   global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan;
   global $TABLEBG, $CELLBG, $TODAYCELLBG, $THFG, $THBG, $TIME_SLOTS, $TZ_OFFSET;
   global $WORK_DAY_START_HOUR, $WORK_DAY_END_HOUR;
-  global $repeated_events;
   $get_unapproved = ( $GLOBALS["DISPLAY_UNAPPROVED"] == "Y" );
   if ( $user == "__public__" )
     $get_unapproved = false;
@@ -2936,11 +2493,7 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
     $rowspan_arr[$i] = 0;
   }
 
-  // get all the repeating events for this date and store in array $rep
-  $rep = get_repeating_entries ( $user, $date );
-  $cur_rep = 0;
-
-  // Get static non-repeating events
+  // Get static events
   $ev = get_entries ( $user, $date, $get_unapproved );
   $hour_arr = array ();
   $interval = ( 24 * 60 ) / $TIME_SLOTS;
@@ -2950,28 +2503,6 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
   $rowspan_arr = array ();
   $all_day = 0;
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    // print out any repeating events that are before this one...
-    while ( $cur_rep < count ( $rep ) &&
-      $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-      if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-        if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-          $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-            translate("cont.") . ")";
-        } else {
-          $viewid = $rep[$cur_rep]['cal_id'];
-          $viewname = $rep[$cur_rep]['cal_suit'];
-        }
-        if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) )
-          $all_day = 1;
-        html_for_event_day_at_a_glance ( $viewid,
-          $date, $rep[$cur_rep]['cal_time'],
-          $viewname, $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
-      }
-      $cur_rep++;
-    }
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
         $viewid = $ev[$i]['cal_ext_for_id'];
@@ -2989,27 +2520,6 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
         $ev[$i]['cal_duration'],
         $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
     }
-  }
-  // print out any remaining repeating events
-  while ( $cur_rep < count ( $rep ) ) {
-    if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-      if ( ! empty ( $rep[$cur_rep]['cal_ext_for_id'] ) ) {
-        $viewid = $rep[$cur_rep]['cal_ext_for_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $rep[$cur_rep]['cal_id'];
-        $viewname = $rep[$cur_rep]['cal_suit'];
-      }
-      if ( $rep[$cur_rep]['cal_duration'] == ( 24 * 60 ) )
-        $all_day = 1;
-      html_for_event_day_at_a_glance ( $viewid,
-        $date, $rep[$cur_rep]['cal_time'],
-        $viewname, $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_login'], $rep[$cur_rep]['cal_category'] );
-    }
-    $cur_rep++;
   }
 
   // squish events that use the same cell into the same cell.
@@ -3711,27 +3221,10 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
     $GLOBALS["login"] == "__public__" )
     $can_add = false;
 
-  // get all the repeating events for this date and store in array $rep
-  $rep = get_repeating_entries ( $user, $date ) ;
-  $cur_rep = 0;
-
-  // get all the non-repeating events for this date and store in $ev
+  // get all events for this date and store in $ev
   $ev = get_entries ( $user, $date, $get_unapproved );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    // print out any repeating events that are before this one...
-    while ( $cur_rep < count ( $rep ) &&
-      $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-      if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-        print_entry_timebar ( $rep[$cur_rep]['cal_id'],
-          $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_login'],
-          $rep[$cur_rep]['cal_category'] );
-        $cnt++;
-      }
-      $cur_rep++;
-    }
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
       print_entry_timebar ( $ev[$i]['cal_id'],
         $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
@@ -3740,18 +3233,6 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
         $ev[$i]['cal_category'] );
       $cnt++;
     }
-  }
-  // print out any remaining repeating events
-  while ( $cur_rep < count ( $rep ) ) {
-    if ( $get_unapproved || $rep[$cur_rep]['cal_status'] == 'A' ) {
-      print_entry_timebar ( $rep[$cur_rep]['cal_id'],
-        $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_login'],
-        $rep[$cur_rep]['cal_category'] );
-      $cnt++;
-    }
-    $cur_rep++;
   }
   if ( $cnt == 0 )
     echo "&nbsp;"; // so the table cell has at least something
@@ -4313,7 +3794,7 @@ function background_css ( $color, $height = '', $percent = '' ) {
  */
 function daily_matrix ( $date, $participants, $popup = '' ) {
   global $CELLBG, $TODAYCELLBG, $THFG, $THBG, $TABLEBG;
-  global $user_fullname, $repeated_events, $events;
+  global $user_fullname, $events;
   global $WORK_DAY_START_HOUR, $WORK_DAY_END_HOUR, $TZ_OFFSET,$ignore_offset;
 
   $increment = 15;
@@ -4331,14 +3812,10 @@ function daily_matrix ( $date, $participants, $popup = '' ) {
   // Build a master array containing all events for $participants
   for ( $i = 0; $i < count ( $participants ); $i++ ) {
 
-    /* Pre-Load the repeated events for quckier access */
-    $repeated_events = read_repeated_events ( $participants[$i], "", $date );
-    /* Pre-load the non-repeating events for quicker access */
+    /* Pre-load events for quicker access */
     $events = read_events ( $participants[$i], $date, $date );
 
-    // get all the repeating events for this date and store in array $rep
-    $rep = get_repeating_entries ( $participants[$i], $date );
-    // get all the non-repeating events for this date and store in $ev
+    // get all events for this date and store in $ev
     $ev = get_entries ( $participants[$i], $date );
 
     // combine into a single array for easy processing

@@ -142,10 +142,8 @@ if ( $res ) {
 $startdate = date ( "Ymd" );
 $enddate = date ( "Ymd", time() + ( $DAYS_IN_ADVANCE * 24 * 3600 ) );
 
-// Now read events all the repeating events (for all users)
-$repeated_events = query_events ( "", true, "AND (webcal_entry_repeats.cal_end > $startdate OR webcal_entry_repeats.cal_end IS NULL) " );
 
-// Read non-repeating events (for all users)
+// Read events (for all users)
 if ( $debug )
   echo "Checking for events from date $startdate to date $enddate <br />\n";
 $events = read_events ( "", $startdate, $enddate );
@@ -447,7 +445,7 @@ $startdate = time(); // today
 for ( $d = 0; $d < $DAYS_IN_ADVANCE; $d++ ) {
   $date = date ( "Ymd", time() + ( $d * 24 * 3600 ) );
   //echo "Date: $date\n";
-  // Get non-repeating events for this date.
+  // Get events for this date.
   // An event will be included one time for each participant.
   $ev = get_entries ( "", $date );
   // Keep track of duplicates
@@ -458,14 +456,6 @@ for ( $d = 0; $d < $DAYS_IN_ADVANCE; $d++ ) {
       continue;
     $completed_ids[$id] = 1;
     process_event ( $id, $ev[$i]['cal_name'], $date, $ev[$i]['cal_time'] );
-  }
-  $rep = get_repeating_entries ( "", $date );
-  for ( $i = 0; $i < count ( $rep ); $i++ ) {
-    $id = $rep[$i]['cal_id'];
-    if ( ! empty ( $completed_ids[$id] ) )
-      continue;
-    $completed_ids[$id] = 1;
-    process_event ( $id, $rep[$i]['cal_name'], $date, $rep[$i]['cal_time'] );
   }
 }
 

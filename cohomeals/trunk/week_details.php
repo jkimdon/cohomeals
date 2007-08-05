@@ -46,10 +46,7 @@ if ( $auto_refresh == "Y" && ! empty ( $auto_refresh_time ) ) {
 $INC = array('js/popups.php');
 print_header($INC,$HeadX);
 
-/* Pre-Load the repeated events for quckier access */
-$repeated_events = read_repeated_events ( strlen ( $user ) ? $user : $login, $cat_id, $startdate  );
-
-/* Pre-load the non-repeating events for quicker access */
+/* Pre-load the events for quicker access */
 $events = read_events ( strlen ( $user ) ? $user : $login, $startdate, $enddate, $cat_id  );
 
 for ( $i = 0; $i < 7; $i++ ) {
@@ -272,41 +269,16 @@ function print_det_date_entries ( $date, $user, $ssi ) {
 
   $dateu = mktime ( 2, 0, 0, $month, $day, $year );
 
-  // get all the repeating events for this date and store in array $rep
-  $rep = get_repeating_entries ( $user, $date );
-  $cur_rep = 0;
-
-  // get all the non-repeating events for this date and store in $ev
+  // get all the events for this date and store in $ev
   $ev = get_entries ( $user, $date );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    // print out any repeating events that are before this one...
-    while ( $cur_rep < count ( $rep ) &&
-      $rep[$cur_rep]['cal_time'] < $ev[$i]['cal_time'] ) {
-      if ( $GLOBALS["DISPLAY_UNAPPROVED"] != "N" ||
-        $rep[$cur_rep]['cal_status'] == 'A' )
-        print_detailed_entry ( $rep[$cur_rep]['cal_id'],
-          $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-          $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
-          $rep[$cur_rep]['cal_login'] );
-      $cur_rep++;
-    }
     if ( $GLOBALS["DISPLAY_UNAPPROVED"] != "N" ||
       $ev[$i]['cal_status'] == 'A' )
       print_detailed_entry ( $ev[$i]['cal_id'],
         $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
         $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
         $ev[$i]['cal_login'] );
-  }
-  // print out any remaining repeating events
-  while ( $cur_rep < count ( $rep ) ) {
-    if ( $GLOBALS["DISPLAY_UNAPPROVED"] != "N" ||
-      $rep[$cur_rep]['cal_status'] == 'A' )
-      print_detailed_entry ( $rep[$cur_rep]['cal_id'],
-        $date, $rep[$cur_rep]['cal_time'], $rep[$cur_rep]['cal_duration'],
-        $rep[$cur_rep]['cal_suit'], $rep[$cur_rep]['cal_description'],
-        $rep[$cur_rep]['cal_login'] );
-    $cur_rep++;
   }
 }
 ?>

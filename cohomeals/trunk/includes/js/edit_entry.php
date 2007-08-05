@@ -175,27 +175,6 @@ function selectDate (  day, month, year, current, evt ) {
   }
 }
 
-function rpttype_handler () {
-  var i = document.editentryform.rpttype.selectedIndex;
-  var val = document.editentryform.rpttype.options[i].text;
-  //alert ( "val " + i + " = " + val );
-  //i == 0 when event does not repeat
-  if ( i != 0 ) {
-    // none (not repeating)
-    makeVisible ( "rptenddate" );
-    makeVisible ( "rptfreq" );
-    if ( i == 2 ) {
-      makeVisible ( "rptday" );
-    } else {
-      makeInvisible ( "rptday" );
-    }
-  } else {
-    // Timed Event
-    makeInvisible ( "rptenddate" );
-    makeInvisible ( "rptfreq" );
-    makeInvisible ( "rptday" );
-  }
-}
 
 <?php //see the showTab function in includes/js/visible.php for common code shared by all pages
 	//using the tabbed GUI.

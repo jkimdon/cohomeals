@@ -302,100 +302,6 @@ $subject = translate($application_name) . ": " . $name;
 $subject = str_replace ( "\"", "", $subject );
 $subject = htmlspecialchars ( $subject );
 
-$event_repeats = false;
-// build info string for repeating events and end date
-$sql = "SELECT cal_type, cal_end, cal_frequency, cal_days " .
-  "FROM webcal_entry_repeats WHERE cal_id = $id";
-
-$res = dbi_query ($sql);
-$rep_str = '';
-if ( $res ) {
-  if ( $tmprow = dbi_fetch_row ( $res ) ) {
-    $event_repeats = true;
-    $cal_type = $tmprow[0];
-    $cal_end = $tmprow[1];
-    $cal_frequency = $tmprow[2];
-    $cal_days = $tmprow[3];
-
-    if ( $cal_end ) {
-      $rep_str .= "&nbsp; - &nbsp;";
-      $rep_str .= date_to_str ( $cal_end );
-    }
-    $rep_str .= "&nbsp;(" . translate("every") . " ";
-
-    if ( $cal_frequency > 1 ) {
-      switch ( $cal_frequency ) {
-        case 2: $rep_str .= translate("2nd"); break;
-        case 3: $rep_str .= translate("3rd"); break;
-        case 4: $rep_str .= translate("4th"); break;
-        case 5: $rep_str .= translate("5th"); break;
-        case 12: if ( $cal_type == 'monthlyByDay' ||
-                   $cal_type == 'monthlyByDayR' ) {
-                   break;
-                 }
-        default: $rep_str .= $cal_frequency; break;
-      }
-    }
-    $rep_str .= ' ';
-    switch ($cal_type) {
-      case "daily":
-        $rep_str .= translate("Day");
-        break;
-      case "weekly": $rep_str .= translate("Week");
-        for ($i=0; $i<=7; $i++) {
-          if (substr($cal_days, $i, 1) == "y") {
-            $rep_str .= ", " . weekday_short_name($i);
-          }
-        }
-        break;
-      case "monthlyByDay":
-      case "monthlyByDayR":
-        if ( $cal_frequency == 12 ) {
-          $rep_str .= month_name ( $thismonth - 1 ) . " / ";
-        } else {
-          $rep_str .= translate("Month") . " / ";
-        }
-        $days_this_month = $thisyear % 4 == 0 ? $ldays_per_month[$thismonth] :
-          $days_per_month[$thismonth];
-        if ( $cal_type == 'monthlyByDay' ) {
-          $dow1 = date ( "w", mktime ( 3, 0, 0, $thismonth, 1, $thisyear ) );
-          $days_in_first_week = ( 7 - $dow1 );
-          $whichWeek = ceil ( $thisday / 7 );
-        } else {
-          $whichWeek = floor ( ( $days_this_month - $thisday ) / 7 );
-          $whichWeek++;
-        }
-        $rep_str .= ' ';
-        switch ( $whichWeek ) {
-          case 1:
-            if ( $cal_type == 'monthlyByDay' )
-              $rep_str .= translate ( "1st" );
-            break;
-          case 2:
-            $rep_str .= translate ( "2nd" ); break;
-          case 3:
-            $rep_str .= translate ( "3rd" ); break;
-          case 4:
-            $rep_str .= translate ( "4th" ); break;
-          case 5:
-            $rep_str .= translate ( "5th" ); break;
-        }
-        if ( $cal_type == 'monthlyByDayR' )
-          $rep_str .= " " . translate ( "last" );
-        $rep_str .= ' ' . weekday_name ( $thisdow );
-        break;
-      case "monthlyByDate":
-        $rep_str .= translate("Month") . "/" . translate("by date");
-        break;
-      case "yearly":
-        $rep_str .= translate("Year");
-        break;
-    }
-    $rep_str .= ")";
-  } else
-    $rep_str = "";
-  dbi_free_result ( $res );
-}
 /* calculate end time */
 if ( $event_time >= 0 && $row[2] > 0 )
   $end_str = "-" . display_time ( add_duration ( $row[1], $row[2] ) );
@@ -405,10 +311,7 @@ else
 
 $is_private = false;
 
-if ( $event_repeats && ! empty ( $date ) )
-  $event_date = $date;
-else
-  $event_date = $row[0];
+$event_date = $row[0];
 
 // TODO: don't let someone view another user's private entry
 // by hand editing the URL.
@@ -473,19 +376,9 @@ if ( $categories_enabled == "Y" ) {
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Date")?>:</td><td>
  <?php
-  if ( $event_repeats ) {
-    echo date_to_str ( $event_date );
-  } else {
-    echo date_to_str ( $row[0], "", true, false, ( $row[2] == ( 24 * 60 ) ? "" : $event_time ) );
-  }
+  echo date_to_str ( $row[0], "", true, false, ( $row[2] == ( 24 * 60 ) ? "" : $event_time ) );
   ?>
 </td></tr>
-<?php if ( $event_repeats ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Repeat Type")?>:</td><td>
- <?php echo date_to_str ( $row[0], "", true, false, $event_time ) . $rep_str; ?>
-</td></tr>
-<?php } ?>
 <?php if ( $event_time >= 0 ) { ?>
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Time")?>:</td><td>
@@ -743,10 +636,6 @@ if ( $walkins == "W" ) {
 
 <br /><?php
 
-$rdate = "";
-if ( $event_repeats ) {
-  $rdate = "&amp;date=$event_date";
-}
 
 if ( empty ( $event_status ) ) {
   // this only happens when an admin views a deleted event that he is
@@ -780,57 +669,26 @@ if ( empty ( $user ) && $categories_enabled == "Y" &&
   $event_status != "D" && ! $can_edit )  {
   echo "<a title=\"" . 
     translate("Set category") . "\" class=\"nav\" " .
-    "href=\"set_entry_cat.php?id=$id$rdate\">" .
+    "href=\"set_entry_cat.php?id=$id\">" .
     translate("Set category") . "</a><br />\n";
 }
 
 if ( $can_edit && $event_status != "D" ) {
-  if ( $event_repeats ) {
-    echo "<a title=\"" .
-      translate("Edit repeating entry for all dates") . 
-      "\" class=\"nav\" href=\"edit_entry.php?id=$id$u_url\">" . 
-      translate("Edit repeating entry for all dates") . "</a><br />\n";
-    // Don't allow override of first event
-    if ( ! empty ( $date ) && $date != $orig_date ) {
-      echo "<a title=\"" .
-        translate("Edit entry for this date") . "\" class=\"nav\" " . 
-        "href=\"edit_entry.php?id=$id$u_url$rdate&amp;override=1\">" .
-        translate("Edit entry for this date") . "</a><br />\n";
-    }
-    echo "<a title=\"" . 
-      translate("Delete repeating event for all dates") . 
-      "\" class=\"nav\" href=\"del_entry.php?id=$id$u_url&amp;override=1\" " .
-      "onclick=\"return confirm('" . 
-      translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
-      translate("This will delete this entry for all users.") . "');\">" . 
-      translate("Delete repeating event for all dates") . "</a><br />\n";
-    // Don't allow deletion of first event
-    if ( ! empty ( $date ) && $date != $orig_date ) {
-      echo "<a title=\"" . 
-        translate("Delete entry only for this date") . 
-        "\" class=\"nav\" href=\"del_entry.php?id=$id$u_url$rdate&amp;override=1\" " .
-        "onclick=\"return confirm('" .
-        translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
-        translate("This will delete this entry for all users.") . "');\">" . 
-        translate("Delete entry only for this date") . "</a><br />\n";
-    }
-  } else {
-    echo "<a title=\"" .
-      translate("Edit entry") . "\" class=\"nav\" " .
-      "href=\"edit_entry.php?id=$id$u_url\">" .
-      translate("Edit entry") . "</a><br />\n";
-    echo "<a title=\"" . 
-      translate("Delete entry") . "\" class=\"nav\" " .
-      "href=\"del_entry.php?id=$id$u_url$rdate\" onclick=\"return confirm('" . 
-       translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
-       translate("This will delete this entry for all users.") . "');\">" . 
-       translate("Delete entry") . "</a><br />\n";
-  }
+  echo "<a title=\"" .
+    translate("Edit entry") . "\" class=\"nav\" " .
+    "href=\"edit_entry.php?id=$id$u_url\">" .
+    translate("Edit entry") . "</a><br />\n";
+  echo "<a title=\"" . 
+    translate("Delete entry") . "\" class=\"nav\" " .
+    "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
+    translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
+    translate("This will delete this entry for all users.") . "');\">" . 
+    translate("Delete entry") . "</a><br />\n";
 } elseif ( $readonly != "Y" && $is_my_event && $login != "__public__" &&
   $event_status != "D" )  {
   echo "<a title=\"" . 
     translate("Delete entry") . "\" class=\"nav\" " .
-    "href=\"del_entry.php?id=$id$u_url$rdate\" onclick=\"return confirm('" . 
+    "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete the entry from your calendar.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
