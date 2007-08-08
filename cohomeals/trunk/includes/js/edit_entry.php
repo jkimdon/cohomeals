@@ -43,22 +43,6 @@ function validate_and_submit () {
       document.editentryform.hour.focus ();
       return false;
     }
-    // Ask for confirmation for time of day if it is before the user's
-<?php
-      if ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ||
-        $GLOBALS['EVENT_EDIT_TABS'] == 'Y' ) { ?>
-        showTab ( "details" );
-<?php } ?>
-    // preference for work hours.
-    <?php if ($GLOBALS["TIME_FORMAT"] == "24") {
-      echo "if ( h < $WORK_DAY_START_HOUR  ) {";
-    }  else {
-      echo "if ( h < $WORK_DAY_START_HOUR && document.editentryform.ampm[0].checked ) {";
-    }
-    ?>
-    if ( ! confirm ( "<?php etranslate ("The time you have entered begins before your preferred work hours.  Is this correct?")?> "))
-      return false;
-  }
   }
   // is there really a change?
   changed = false;
