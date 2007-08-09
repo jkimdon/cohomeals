@@ -239,12 +239,9 @@ function user_load_variables ( $login, $prefix ) {
 //   $password - user password
 //   $firstname - first name
 //   $lastname - last name
-//   $birthdate - YYYYMMDD (integer)
 //   $email - email address
-//   $household - for billing 
 //   $admin - is admin? ("Y" or "N")
-//   $beancounter - is beancounter? ("Y" or "N")
-function user_add_user ( $user, $password, $firstname, $lastname, $birthdate, $email, $household, $admin, $beancounter ) {
+function user_add_user ( $user, $password, $firstname, $lastname, $email, $admin ) {
   global $error;
 
   $error = 'Not yet supported.';
@@ -256,12 +253,9 @@ function user_add_user ( $user, $password, $firstname, $lastname, $birthdate, $e
 //   $user - user login
 //   $firstname - first name
 //   $lastname - last name
-//   $birthdate - YYYYMMDD (integer)
 //   $email - email address
-//   $household - for billing
 //   $admin - is admin?
-//   $beancounter - is beancounter? ("Y" or "N")
-function user_update_user ( $user, $firstname, $lastname, $birthdate, $email, $household, $admin, $beancounter ) {
+function user_update_user ( $user, $firstname, $lastname, $email, $admin ) {
   global $error;
 
   $error = 'Not yet supported.';

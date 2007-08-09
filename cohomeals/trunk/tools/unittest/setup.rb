@@ -8,8 +8,7 @@ require 'firewatir/testUnitAddons'
 
 topdir = File.join(File.dirname(__FILE__), '..')
 Dir.chdir topdir do
-#  $all_tests = Dir["unittest/*_test.rb"]
-  $all_tests = Dir["unittest/adduser_test.rb"]
+  $all_tests = Dir["unittest/*_test.rb"]
 end
 
 def start_ff_with_logger
