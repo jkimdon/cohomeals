@@ -25,8 +25,15 @@ CREATE TABLE webcal_user (
   cal_firstname VARCHAR(25),
   /* is the user a WebCalendar administrator ('Y' = yes, 'N' = no) */
   cal_is_admin CHAR(1) DEFAULT 'N',
+  /* bean counter is the only one who can add payment events */
+  cal_is_beancounter CHAR(1) DEFAULT 'N',
   /* user's email address */
   cal_email VARCHAR(75) NULL,
+  /* billing is by household */
+  cal_household VARCHAR(25) NOT NULL,
+  /* user birthdate (for determining work/eat ratios and meal prices)
+     If not entered, assume they are an adult. */
+  cal_birthdate INT,
   PRIMARY KEY ( cal_login )
 );
 

@@ -131,14 +131,17 @@ function user_load_variables ( $login, $prefix ) {
     $GLOBALS[$prefix . "login"] = $login;
     $GLOBALS[$prefix . "firstname"] = "";
     $GLOBALS[$prefix . "lastname"] = "";
+    $GLOBALS[$prefix . "birthdate"] = "";
     $GLOBALS[$prefix . "is_admin"] = "N";
+    $GLOBALS[$prefix . "is_beancounter"] = "N";
     $GLOBALS[$prefix . "email"] = "";
     $GLOBALS[$prefix . "fullname"] = $PUBLIC_ACCESS_FULLNAME;
     $GLOBALS[$prefix . "password"] = "";
+    $GLOBALS[$prefix . "household"] = "";
     return true;
   }
   $sql =
-    "SELECT cal_firstname, cal_lastname, cal_is_admin, cal_email, cal_passwd " .
+    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_admin, cal_is_beancounter, cal_email, cal_passwd, cal_household " .
     "FROM webcal_user WHERE cal_login = '" . $login . "'";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -146,13 +149,16 @@ function user_load_variables ( $login, $prefix ) {
       $GLOBALS[$prefix . "login"] = $login;
       $GLOBALS[$prefix . "firstname"] = $row[0];
       $GLOBALS[$prefix . "lastname"] = $row[1];
-      $GLOBALS[$prefix . "is_admin"] = $row[2];
-      $GLOBALS[$prefix . "email"] = empty ( $row[3] ) ? "" : $row[3];
+      $GLOBALS[$prefix . "birthdate"] = $row[2];
+      $GLOBALS[$prefix . "is_admin"] = $row[3];
+      $GLOBALS[$prefix . "is_beancounter"] = $row[4];
+      $GLOBALS[$prefix . "email"] = empty ( $row[5] ) ? "" : $row[5];
       if ( strlen ( $row[0] ) && strlen ( $row[1] ) )
         $GLOBALS[$prefix . "fullname"] = "$row[0] $row[1]";
       else
         $GLOBALS[$prefix . "fullname"] = $login;
-      $GLOBALS[$prefix . "password"] = $row[4];
+      $GLOBALS[$prefix . "password"] = $row[6];
+      $GLOBALS[$prefix . "household"] = $row[7];
     }
     dbi_free_result ( $res );
   } else {
@@ -168,10 +174,13 @@ function user_load_variables ( $login, $prefix ) {
 //   $password - user password
 //   $firstname - first name
 //   $lastname - last name
+//   $birthdate - birth date (for calculating meal prices) YYYYMMDD (int)
 //   $email - email address
+//   $household - household for billing
 //   $admin - is admin? ("Y" or "N")
-function user_add_user ( $user, $password, $firstname, $lastname, $email,
-  $admin ) {
+//   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
+function user_add_user ( $user, $password, $firstname, $lastname, 
+  $birthdate, $email, $household, $admin, $beancounter ) {
   global $error;
 
   if ( $user == "__public__" ) {
@@ -195,13 +204,25 @@ function user_add_user ( $user, $password, $firstname, $lastname, $email,
     $upassword = "'" . md5($password) . "'";
   else
     $upassword = "NULL";
+  if ( strlen ( $household ) )
+    $uhousehold = "'" . $household . "'";
+  else
+    $uhousehold = "'" . $user . "'";
+  if ( strlen ( $birthdate ) )
+    $ubirthdate = "'" . $birthdate . "'";
+  else
+    $ubirthdate = "NULL";
   if ( $admin != "Y" )
     $admin = "N";
+  if ( $beancounter != "Y" )
+    $beancounter = "N";
   $sql = "INSERT INTO webcal_user " .
     "( cal_login, cal_lastname, cal_firstname, " .
-    "cal_is_admin, cal_passwd, cal_email ) " .
+    "cal_is_admin, cal_is_beancounter, cal_passwd, cal_email, " .
+    "cal_household, cal_birthdate ) " .
     "VALUES ( '$user', $ulastname, $ufirstname, " .
-    "'$admin', $upassword, $uemail )";
+    "'$admin', '$beancounter', $upassword, $uemail, " . 
+    "$uhousehold, $ubirthdate )";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
     return false;
@@ -214,9 +235,11 @@ function user_add_user ( $user, $password, $firstname, $lastname, $email,
 //   $user - user login
 //   $firstname - first name
 //   $lastname - last name
+//   $birthdate - YYYYMMDD integer
 //   $email - email address
 //   $admin - is admin?
-function user_update_user ( $user, $firstname, $lastname, $email, $admin ) {
+function user_update_user ( $user, $firstname, $lastname, $birthdate,
+			    $email, $household, $admin, $beancounter ) {
   global $error;
 
   if ( $user == "__public__" ) {
@@ -235,12 +258,24 @@ function user_update_user ( $user, $firstname, $lastname, $email, $admin ) {
     $ulastname = "'" . $lastname . "'";
   else
     $ulastname = "NULL";
+  if ( strlen ( $birthdate ) )
+    $ubirthdate = "'" . $birthdate . "'";
+  else
+    $ubirthdate = "NULL";
+  if ( strlen ( $household ) )
+    $uhousehold = "'" . $household . "'";
+  else
+    $uhousehold = "'" . $user . "'";
   if ( $admin != "Y" )
     $admin = "N";
+  if ( $beancounter != "Y" )
+    $beancounter = "N";
 
   $sql = "UPDATE webcal_user SET cal_lastname = $ulastname, " .
     "cal_firstname = $ufirstname, cal_email = $uemail," .
-    "cal_is_admin = '$admin' WHERE cal_login = '$user'";
+    "cal_birthdate = $ubirthdate, cal_household = $uhousehold," .
+    "cal_is_admin = '$admin', cal_is_beancounter = '$beancounter' " .
+    "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
     return false;

@@ -68,6 +68,9 @@ print_header ( '', '', '', $disableCustom );
 		<label for="ulastname"><?php etranslate("Last Name")?>:</label></td><td>
 		<input type="text" name="ulastname" id="ulastname" size="20" value="<?php echo empty ( $ulastname ) ? '' : htmlspecialchars ( $ulastname );?>" />
 	</td></tr>
+	<tr><td> 
+		<label for="ubirthdate"><?php etranslate("Birthdate")?>:</label></td><td>
+		<?php print_birthdate_selection( $ubirthdate ); ?></td></tr>
 	<tr><td>
 		<label for="uemail"><?php etranslate("E-mail address")?>:</label></td><td>
 		<input type="text" name="uemail" id="uemail" size="20" value="<?php echo empty ( $uemail ) ? '' : htmlspecialchars ( $uemail );?>" />
@@ -83,10 +86,21 @@ print_header ( '', '', '', $disableCustom );
 	</td></tr>
 <?php }
 if ( $is_admin ) { ?>
+	<tr><td>
+		<label for="uhousehold"><?php etranslate("Household")?>:</label></td><td>
+		<input type="text" name="uhousehold" id="uhousehold" size="20" value="<?php echo empty ( $uhousehold ) ? '' : htmlspecialchars ( $uhousehold );?>" />
+	</td></tr>
+
 	<tr><td style="font-weight:bold;">
 		<?php etranslate("Admin")?>:</td><td>
 		<label><input type="radio" name="uis_admin" value="Y"<?php if ( ! empty ( $uis_admin ) && $uis_admin == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
 		<label><input type="radio" name="uis_admin" value="N"<?php if ( empty ( $uis_admin ) || $uis_admin != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
+	</td></tr>
+
+	<tr><td style="font-weight:bold;">
+		<?php etranslate("Bean counter")?>:</td><td>
+		<label><input type="radio" name="uis_beancounter" value="Y"<?php if ( ! empty ( $uis_beancounter ) && $uis_beancounter == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
+		<label><input type="radio" name="uis_beancounter" value="N"<?php if ( empty ( $uis_beancounter ) || $uis_beancounter != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
 	</td></tr>
 <?php } //end if ($is_admin ) ?>
 	<tr><td colspan="2">
