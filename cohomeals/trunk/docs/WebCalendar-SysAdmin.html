@@ -181,7 +181,6 @@ h2 {
   <ul>
    <li>LDAP</li>
    <li>HTTP authentication</li>
-   <li>NIS</li>
    <li>web-based</li>
   </ul>
  </li>
@@ -462,12 +461,6 @@ input path/table-ibase.sql;</strong></pre>
    authentication.<br />
           <span class="note">Note:</span> In order to use HTTP-based authentication,
     PHP must be setup as a module for your server rather than a CGI.
-  </li>
-  <li>NIS-based authentication (login/passwords verified by NIS):<br />
-   <tt>use_http_auth = false</tt><br />
-   <tt>user_inc = user-nis.php</tt><br />
-   Additional configuration settings will need to be set
-   in <tt>includes/user-nis.php</tt>.
   </li>
   <li>LDAP-based authentication (login/passwords verified by LDAP server):<br />
    <tt>use_http_auth = false</tt><br />
@@ -1185,9 +1178,6 @@ cal_firstname, cal_is_admin ) VALUES
     there can be multiple user accounts, each with his
     own calendar.  Unless Public Access is enalbed, all users 
     will be required to login before they can access the system.</dd>
-  <dt><a name="g_nis">NIS</a></dt>
-   <dd>NIS (Network Information Service) is a UNIX-based user authentication 
-    system for managing user directories in a network</dd>
   <dt><a name="g_nonuser">NonUser Calendar</a></dt>
    <dd>A participant to a calendar event that is not a calendar user.  This is typically used either as a resource (conference room,
   laptop computer) that needs to be shared or as a shared calendar

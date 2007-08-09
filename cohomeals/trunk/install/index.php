@@ -674,10 +674,6 @@ You should select "Web Server" from the list of
     ( $settings['user_inc'] == 'user-ldap.php' ? " selected=\"selected\"" : "" ) .
     "> LDAP </option>\n";
 
-  echo "<option value=\"user-nis.php\" " .
-    ( $settings['user_inc'] == 'user-nis.php' ? " selected=\"selected\"" : "" ) .
-    "> NIS </option>\n";
-
   echo "<option value=\"none\" " .
     ( $settings['user_inc'] == 'user.php' && $settings['single_user'] == 'true' ? " selected=\"selected\"" : "" ) .
     "> None (Single-User) </option>\n</select>";
