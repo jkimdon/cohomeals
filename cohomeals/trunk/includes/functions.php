@@ -1219,8 +1219,21 @@ function build_event_popup ( $popupid, $user, $description, $time, $site_extras=
  * @uses date_selection_html
  */
 function print_date_selection ( $prefix, $date ) {
-  print date_selection_html ( $prefix, $date );
+  print date_selection_html ( $prefix, $date, 20 );
 }
+
+/**
+ * Prints out a date selection box for use in a form.
+ *
+ * @param string $prefix Prefix to use in front of form element names
+ * @param int    $date   Currently selected date (in YYYYMMDD format)
+ *
+ * @uses date_selection_html
+ */
+function print_birthdate_selection ( $date ) {
+  print date_selection_html ( 'birth', $date, 200 );
+}
+
 
 /**
  * Generate HTML for a date selection for use in a form.
@@ -1230,9 +1243,8 @@ function print_date_selection ( $prefix, $date ) {
  *
  * @return string HTML for the selection box
  */
-function date_selection_html ( $prefix, $date ) {
+function date_selection_html ( $prefix, $date, $num_years ) {
   $ret = "";
-  $num_years = 20;
   if ( strlen ( $date ) != 8 )
     $date = date ( "Ymd" );
   $thisyear = $year = substr ( $date, 0, 4 );
@@ -1251,18 +1263,22 @@ function date_selection_html ( $prefix, $date ) {
       ( $i == $thismonth ? " selected=\"selected\"" : "" ) . ">$m</option>\n";
   }
   $ret .= "</select>\n<select name=\"" . $prefix . "year\">\n";
-  for ( $i = -10; $i < $num_years; $i++ ) {
+  for ( $i = -$num_years/2; $i < $num_years/2; $i++ ) {
     $y = $thisyear + $i;
     $ret .= "<option value=\"$y\"" .
       ( $y == $thisyear ? " selected=\"selected\"" : "" ) . ">$y</option>\n";
   }
   $ret .= "</select>\n";
-  $ret .= "<input type=\"button\" onclick=\"selectDate( '" .
-    $prefix . "day','" . $prefix . "month','" . $prefix . "year',$date, event)\" value=\"" .
-    translate("Select") . "...\" />\n";
+  if ( strcmp( $prefix, 'birth' ) ) {
+    $ret .= "<input type=\"button\" onclick=\"selectDate( '" .
+      $prefix . "day','" . $prefix . "month','" . $prefix . "year',$date, event)\" value=\"" .
+      translate("Select") . "...\" />\n";
+  }
 
   return $ret;
 }
+
+
 
 /**
  * Prints out a minicalendar for a month.

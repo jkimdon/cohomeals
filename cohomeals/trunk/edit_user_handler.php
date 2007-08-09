@@ -43,6 +43,7 @@ else if ( $formtype == "setpassword" && strlen ( $user ) ) {
 
 // Handle update of user info
 else if ( $formtype == "edituser" ) {
+  $ubirthdate = sprintf ( "%04d%02d%02d", $birthyear, $birthmonth, $birthday );
   if ( strlen ( $add ) && $is_admin ) {
     if ( $upassword1 != $upassword2 ) { 
       $error = translate( "The passwords were not identical" ) . "."; 
@@ -56,19 +57,22 @@ else if ( $formtype == "edituser" ) {
         // calls user_add_user that is located in $user_inc
         $error = translate( "Username can not be blank" ) . ".";
       } else {
-        user_add_user ( $user, $upassword1, $ufirstname, $ulastname,
-          $uemail, $uis_admin );
+        user_add_user ( $user, $upassword1, $ufirstname, $ulastname, 
+          $ubirthdate, $uemail, $uhousehold, $uis_admin, $uis_beancounter );
       }
     }
   } else if ( strlen ( $add ) && ! $is_admin ) {
     $error = translate("You are not authorized") . ".";
   } else {
-    // Don't allow a user to change themself to an admin by setting
-    // uis_admin in the URL by hand.  They must be admin beforehand.
-    if ( ! $is_admin )
+    // Don't allow a user to change themself to an admin or beancounter 
+    // by setting uis_admin/beancounter in the URL by hand.  
+    // They must be admin beforehand.
+    if ( ! $is_admin ) {
       $uis_admin = "N";
-    user_update_user ( $user, $ufirstname, $ulastname,
-      $uemail, $uis_admin );
+      $uis_beancounter = "N";
+    }
+    user_update_user ( $user, $ufirstname, $ulastname, $ubirthdate,
+      $uemail, $uhousehold, $uis_admin, $uis_beancounter );
   }
 }
 

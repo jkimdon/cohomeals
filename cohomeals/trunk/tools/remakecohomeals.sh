@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -x
+
+########## 
+
+sudo mysqladmin -f drop cohomeals
+sudo mysqladmin create cohomeals
+sudo mysql cohomeals < tools/testmeals-privileges.sql
+sudo mysql cohomeals < tables-mysql.sql
+
