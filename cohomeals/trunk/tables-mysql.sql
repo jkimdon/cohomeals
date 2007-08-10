@@ -475,40 +475,6 @@ CREATE TABLE webcal_nonuser_cals (
   PRIMARY KEY ( cal_login )
 );
 
-/*
- * Used to track import data (one row per import)
- */
-CREATE TABLE webcal_import (
-  /* unique id for import */
-  cal_import_id INT NOT NULL,
-  /* name of import (optional) */
-  cal_name VARCHAR(50) NULL,
-  /* date of import (YYYYMMDD format) */
-  cal_date INT NOT NULL,
-  /* type of import (ical, vcal, palm) */
-  cal_type VARCHAR(10) NOT NULL,
-  /* user who performed the import */
-  cal_login VARCHAR(25) NULL,
-  PRIMARY KEY ( cal_import_id )
-);
-
-/*
- * Used to track import data (one row per event)
- */
-CREATE TABLE webcal_import_data (
-  /* import id (from webcal_import table) */
-  cal_import_id INT NOT NULL,
-  /* event id in WebCalendar */
-  cal_id INT NOT NULL,
-  /* user login */
-  cal_login VARCHAR(25) NOT NULL,
-  /* type of import: 'palm', 'vcal', 'ical' or 'publish' */
-  cal_import_type VARCHAR(15) NOT NULL,
-  /* external id used in external calendar system (for example, UID in iCal) */
-  cal_external_id VARCHAR(200) NULL,
-  PRIMARY KEY  ( cal_id, cal_login )
-);
-
 
 /*
  * Defines a custom report created by a user.
