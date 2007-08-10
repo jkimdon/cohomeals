@@ -308,9 +308,9 @@ function user_delete_user ( $user ) {
   // Get event ids for all events this user is a participant
   $events = array ();
   $res = dbi_query ( "SELECT webcal_meal.cal_id " .
-    "FROM webcal_meal, webcal_entry_user " .
-    "WHERE webcal_meal.cal_id = webcal_entry_user.cal_id " .
-    "AND webcal_entry_user.cal_login = '$user'" );
+    "FROM webcal_meal, webcal_meal_participant " .
+    "WHERE webcal_meal.cal_id = webcal_meal_participant.cal_id " .
+    "AND webcal_meal_participant.cal_login = '$user'" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $events[] = $row[0];
@@ -321,7 +321,7 @@ function user_delete_user ( $user ) {
   // If just 1, then save id to be deleted
   $delete_em = array ();
   for ( $i = 0; $i < count ( $events ); $i++ ) {
-    $res = dbi_query ( "SELECT COUNT(*) FROM webcal_entry_user " .
+    $res = dbi_query ( "SELECT COUNT(*) FROM webcal_meal_participant " .
       "WHERE cal_id = " . $events[$i] );
     if ( $res ) {
       if ( $row = dbi_fetch_row ( $res ) ) {
@@ -337,7 +337,7 @@ function user_delete_user ( $user ) {
   }
 
   // Delete user participation from events
-  dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_login = '$user'" );
+  dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_login = '$user'" );
 
   // Delete preferences
   dbi_query ( "DELETE FROM webcal_user_pref WHERE cal_login = '$user'" );

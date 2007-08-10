@@ -7,7 +7,6 @@ if (($user != $login) && $is_nonuser_admin) {
    load_user_layers ();
 }
 
-load_user_categories ();
 
 $next = mktime ( 3, 0, 0, $thismonth, $thisday + 7, $thisyear );
 $prev = mktime ( 3, 0, 0, $thismonth, $thisday - 7, $thisyear );
@@ -43,7 +42,7 @@ if ( ! empty ( $auto_refresh ) && $auto_refresh == "Y" &&
   ! empty ( $auto_refresh_time ) ) {
   $refresh = $auto_refresh_time * 60; // convert to seconds
   $HeadX = "<meta http-equiv=\"refresh\" content=\"$refresh; url=week.php?$u_url" .
-    "date=$startdate$caturl" . 
+    "date=$startdate" . 
     ( ! empty ( $friendly ) ? "&amp;friendly=1" : "") . "\" />\n";
 }
 $INC = array('js/popups.php');
@@ -51,7 +50,7 @@ print_header($INC,$HeadX);
 
 /* Pre-load the events for quicker access */
 $events = read_events ( strlen ( $user ) ? $user : $login,
-  $startdate, $enddate, $cat_id );
+  $startdate, $enddate );
 
 for ( $i = 0; $i < 7; $i++ ) {
   $days[$i] = $wkstart + ( 24 * 3600 ) * $i;
@@ -75,12 +74,12 @@ if ( $GLOBALS["DISPLAY_WEEKNUMBER"] == "Y" ) {
 ?>
 <a title="<?php etranslate("Previous")?>" 
 class="prev" href="week.php?<?php echo $u_url; ?>date=<?php echo 
-  date("Ymd", $prev ) . $caturl;?>"><img src="leftarrow.gif" 
+  date("Ymd", $prev );?>"><img src="leftarrow.gif" 
   alt="<?php etranslate("Previous")?>" /></a>
 
 <a title="<?php etranslate("Next")?>" class="next" 
 href="week.php?<?php echo $u_url;?>date=<?php echo 
-  date ("Ymd", $next ) . $caturl;?>"><img src="rightarrow.gif" 
+  date ("Ymd", $next );?>"><img src="rightarrow.gif" 
   alt="<?php etranslate("Next")?>" /></a>
 <span class="user"><?php
   if ( $single_user == "N" ) {
@@ -93,14 +92,7 @@ href="week.php?<?php echo $u_url;?>date=<?php echo
     echo "<br />-- " . translate("Assistant mode") . " --";
   }
 ?></span>
-<?php
-  if ( $categories_enabled == "Y" && (!$user || ($user == $login || 
-    $is_assistant ))) {
-    echo "<br /><br />\n";
-    print_category_menu('week', sprintf ( "%04d%02d%02d",$thisyear, 
-      $thismonth, $thisday ), $cat_id );
-  }
-?></div>
+</div>
 <br />
 
 <table class="main" cellspacing="0" cellpadding="0">
@@ -136,7 +128,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
     echo html_for_add_icon (  date ( "Ymd", $days[$d] ), "", "", $user );
   }
   echo "<a href=\"day.php?" . $u_url .
-    "date=" . date ('Ymd', $days[$d] ) . $caturl . "\">" .
+    "date=" . date ('Ymd', $days[$d] ) . "\">" .
     $header[$d] . "</a></th>\n";
 }
 ?>
@@ -181,7 +173,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
         $date, $ev[$i]['cal_time'],
         $viewname, $ev[$i]['cal_description'],
         $ev[$i]['cal_duration'],
-        $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
+        $ev[$i]['cal_login'] );
     }
   }
 
@@ -357,7 +349,7 @@ class="printer" href="week.php?<?php
   if ( $thisyear ) {
     echo "year=$thisyear&amp;month=$thismonth&amp;day=$thisday";
   }
-  echo $caturl . "&amp;";
+  echo "&amp;";
 ?>friendly=1" target="cal_printer_friendly"
 onmouseover="window.status = '<?php etranslate("Generate printer-friendly version")?>'">[<?php etranslate("Printer Friendly")?>]</a>
 

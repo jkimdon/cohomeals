@@ -20,7 +20,6 @@
  *   can edit/delete report.
  */
 include_once 'includes/init.php';
-load_user_categories ();
 
 $updating_public = false;
 $error = "";
@@ -109,7 +108,7 @@ $event_template = "<dt>\${name}</dt>\n<dd>" .
 if ( empty ( $error ) && $report_id >= 0 ) {
   $sql = "SELECT cal_login, cal_report_id, cal_is_global, " .
     "cal_report_type, cal_include_header, cal_report_name, " .
-    "cal_time_range, cal_user, cal_allow_nav, cal_cat_id, " .
+    "cal_time_range, cal_user, cal_allow_nav, " .
     "cal_include_empty, cal_show_in_trailer, cal_update_date " .
     "FROM webcal_report " .
     "WHERE cal_report_id = $report_id";
@@ -127,7 +126,6 @@ if ( empty ( $error ) && $report_id >= 0 ) {
       $report_time_range = $row[$i++];
       $report_user = $row[$i++];
       $report_allow_nav = $row[$i++];
-      $report_cat_id = $row[$i++];
       $report_include_empty = $row[$i++];
       $report_show_in_trailer = $row[$i++];
       $report_update_date = $row[$i++];
@@ -187,7 +185,6 @@ if ( empty ( $error ) && $report_id >= 0 ) {
   $report_time_range = 11; // current week
   //$report_user already set
   $report_allow_nav = 'Y';
-  $report_cat_id = '';
   $report_include_empty = 'N';
   $report_show_in_trailer = 'N';
   $report_update_date = '';
@@ -302,20 +299,6 @@ if ( $is_admin ) {
     while ( list ( $num, $descr ) = each ( $ranges ) ) {
       echo "<option value=\"$num\"";
       if ( $report_time_range == $num ) {
-        echo " selected=\"selected\"";
-      }
-      echo ">$descr</option>\n";
-    }
-  ?></select>
-</td></tr>
-<tr><td>
- <label for="rpt_cat_id"><?php etranslate("Category")?>:</label></td><td>
- <select name="cat_id" id="rpt_cat_id">
-  <option value=""><?php etranslate("None") ?></option>
-  <?php
-    while ( list ( $cat_id, $descr ) = each ( $categories ) ) {
-      echo "<option value=\"$cat_id\"";
-      if ( $report_cat_id == $cat_id ) {
         echo " selected=\"selected\"";
       }
       echo ">$descr</option>\n";

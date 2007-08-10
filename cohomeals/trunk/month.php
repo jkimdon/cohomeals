@@ -7,7 +7,6 @@ if (($user != $login) && $is_nonuser_admin) {
   load_user_layers ();
 }
 
-load_user_categories ();
 
 $next = mktime ( 3, 0, 0, $thismonth + 1, 1, $thisyear );
 $nextyear = date ( "Y", $next );
@@ -33,7 +32,7 @@ $HeadX = '';
 if ( $auto_refresh == "Y" && ! empty ( $auto_refresh_time ) ) {
   $refresh = $auto_refresh_time * 60; // convert to seconds
   $HeadX = "<meta http-equiv=\"refresh\" content=\"$refresh; url=month.php?$u_url" .
-    "year=$thisyear&amp;month=$thismonth$caturl" . 
+    "year=$thisyear&amp;month=$thismonth" . 
     ( ! empty ( $friendly ) ? "&amp;friendly=1" : "") . "\" />\n";
 }
 $INC = array('js/popups.php');
@@ -41,12 +40,9 @@ print_header($INC,$HeadX);
 
 /* Pre-load the events for quicker access */
 $events = read_events ( ( ! empty ( $user ) && strlen ( $user ) )
-  ? $user : $login, $startdate, $enddate, $cat_id );
+  ? $user : $login, $startdate, $enddate );
 
-if ( ! empty ( $cat_id ) )
-  $monthURL = "month.php?cat_id=$cat_id&amp;";
-else
-  $monthURL = 'month.php?';
+$monthURL = 'month.php?';
 display_small_month ( $prevmonth, $prevyear, true, true, "prevmonth",
   $monthURL );
 display_small_month ( $nextmonth, $nextyear, true, true, "nextmonth",
@@ -69,12 +65,6 @@ display_small_month ( $nextmonth, $nextyear, true, true, "nextmonth",
     echo "<br />-- " . translate("Assistant mode") . " --";
   }
 ?></span>
-<?php
-  if ( $categories_enabled == "Y" && (!$user || ($user == $login || $is_assistant ))) {
-    echo "<br /><br />\n";
-    print_category_menu('month',sprintf ( "%04d%02d01",$thisyear, $thismonth ),$cat_id );
-  }
-?>
 </div>
 
 <table class="main" style="clear:both;" cellspacing="0" cellpadding="0">

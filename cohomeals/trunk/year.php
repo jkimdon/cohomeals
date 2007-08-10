@@ -29,7 +29,7 @@ $boldDays = false;
 if ( ! empty ( $bold_days_in_year ) && $bold_days_in_year == 'Y' ) {
   /* Pre-load the events for quicker access */
   $events = read_events ( ( ! empty ( $user ) && strlen ( $user ) )
-    ? $user : $login, $year . "0101", $year . "1231", $cat_id );
+    ? $user : $login, $year . "0101", $year . "1231" );
   $boldDays = true;
 }
 

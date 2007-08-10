@@ -1,6 +1,5 @@
 <?php
 include_once 'includes/init.php';
-load_user_categories();
 
 $error = "";
 
@@ -9,7 +8,7 @@ if ( $id > 0 ) {
 
   // double check to make sure user doesn't already have the event
   $is_my_event = false;
-  $sql = "SELECT cal_id FROM webcal_entry_user " .
+  $sql = "SELECT cal_id FROM webcal_meal_participant " .
     "WHERE cal_login = '$login' AND cal_id = $id";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -24,7 +23,7 @@ if ( $id > 0 ) {
 
   // add the event
   if ( $readonly == "N" && ! $is_my_event )  {
-    if ( ! dbi_query ( "INSERT INTO webcal_entry_user ( cal_id, cal_login, cal_status ) VALUES ( $id, '$login', 'A' )") ) {
+    if ( ! dbi_query ( "INSERT INTO webcal_meal_participant ( cal_id, cal_login ) VALUES ( $id, '$login' )") ) {
       $error = translate("Error adding event") . ": " . dbi_error ();
     }
   }

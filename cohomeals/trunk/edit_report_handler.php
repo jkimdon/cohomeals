@@ -16,7 +16,6 @@
  *	is_global (Y or N)
  *	include_header (Y or N)
  *	time_range
- *	cat_id
  *	allow_nav
  *	include_empty
  *	show_in_trailer
@@ -35,7 +34,6 @@
  *	  or you are an admin user.
  */
 include_once 'includes/init.php';
-load_user_categories ();
 
 $error = "";
 $report_id = getIntValue ( "report_id", true );
@@ -158,9 +156,6 @@ if ( empty ( $error ) ) {
 
   $names[] = "cal_time_range";
   $values[] = ( ! isset ( $time_range ) ? 11 : $time_range );
-
-  $names[] = "cal_cat_id";
-  $values[] = ( empty ( $cat_id ) ? "NULL" : $cat_id );
 
   $names[] = "cal_allow_nav";
   $values[] = ( empty ( $allow_nav ) || $allow_nav != 'Y' ) ? "'N'" : "'Y'";

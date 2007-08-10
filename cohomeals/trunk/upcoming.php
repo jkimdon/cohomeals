@@ -23,7 +23,6 @@
  * Input parameters:
  * You can override settings by changing the URL parameters:
  *   - days: number of days ahead to look for events
- *   - cat_id: specify a category id to filter on
  *   - user: login name of calendar to display (instead of public
  *     user), if allowed by System Settings.  You must have the
  *     following System Settings configured for this:
@@ -79,11 +78,6 @@ $allow_user_override = false;
 // Load layers
 $load_layers = true;
 
-// Load just a specified category (by its id)
-// Leave blank to not filter on category (unless specified in URL)
-// Can override in URL with "upcoming.php?cat_id=4"
-$cat_id = '';
-
 // End configurable settings...
 
 // Set for use elsewhere as a global
@@ -108,19 +102,10 @@ if ( $allow_user_override ) {
   }
 }
 
-$cat_id = '';
-if ( $categories_enabled == 'Y' ) {
-  $x = getIntValue ( "cat_id", true );
-  if ( ! empty ( $x ) ) {
-    $cat_id = $x;
-  }
-}
-
 if ( $load_layers ) {
   load_user_layers ( $username );
 }
 
-//load_user_categories ();
 
 // Calculate date range
 $date = getIntValue ( "date", true );
@@ -148,7 +133,7 @@ $endDate = date ( "Ymd", $endTime );
 
 
 /* Pre-load the events for quicker access */
-$events = read_events ( $username, $date, $endDate, $cat_id );
+$events = read_events ( $username, $date, $endDate );
 
 // Print header without custom header and no style sheet
 if ( ! empty ( $LANGUAGE ) ) {

@@ -1297,7 +1297,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   global $WEEK_START, $user, $login, $boldDays, $get_unapproved;
   global $DISPLAY_WEEKNUMBER;
   global $SCRIPT, $thisday; // Needed for day.php
-  global $caturl, $today;
+  global $today;
 
   if ( $user != $login && ! empty ( $user ) ) {
     $u_url = "user=$user" . "&amp;";
@@ -1326,11 +1326,11 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
     echo "<tr class=\"monthnav\"><th colspan=\"7\">\n";
     echo "<a title=\"" . 
  translate("Previous") . "\" class=\"prev\" href=\"day.php?" . $u_url  .
- "date=$month_ago$caturl\"><img src=\"leftarrowsmall.gif\" alt=\"" .
+ "date=$month_ago\"><img src=\"leftarrowsmall.gif\" alt=\"" .
  translate("Previous") . "\" /></a>\n";
     echo "<a title=\"" . 
  translate("Next") . "\" class=\"next\" href=\"day.php?" . $u_url .
- "date=$month_ahead$caturl\"><img src=\"rightarrowsmall.gif\" alt=\"" .
+ "date=$month_ahead\"><img src=\"rightarrowsmall.gif\" alt=\"" .
  translate("Next") . "\" /></a>\n";
     echo "<a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
     echo month_name ( $thismonth - 1 );
@@ -1441,7 +1441,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  * @param string $suit        Event name
  * @param string $description Long description of event
  * @param string $event_owner Username of user associated with this event
- * @param int    $event_cat   Category of event for <var>$event_owner</var>
  *
  * @staticvar int Used to ensure all event popups have a unique id
  *
@@ -1449,7 +1448,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  */
 function print_entry ( $id, $date, $time, $duration,
   $suit, $description,
-  $event_owner, $event_cat=-1 ) {
+  $event_owner ) {
   global $eventinfo, $login, $user, $PHP_SELF, $TZ_OFFSET;
   static $key = 0;
   
@@ -1477,21 +1476,9 @@ function print_entry ( $id, $date, $time, $duration,
     translate("View this entry") .
     "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
   $icon = "circle.gif";
-  $catIcon = '';
-  if ( $event_cat > 0 ) {
-    $catIcon = "icons/cat-" . $event_cat . ".gif";
-    if ( ! file_exists ( $catIcon ) )
-      $catIcon = '';
-  }
 
-  if ( empty ( $catIcon ) ) {
-    echo "<img src=\"$icon\" class=\"bullet\" alt=\"" . 
-      translate("View this entry") . "\" />";
-  } else {
-    // Use category icon
-    echo "<img src=\"$catIcon\" alt=\"" . 
-      translate("View this entry") . "\" /><br />";
-  }
+  echo "<img src=\"$icon\" class=\"bullet\" alt=\"" . 
+    translate("View this entry") . "\" />";
 
   if ( $login != $event_owner && strlen ( $event_owner ) ) {
     if ($layers) foreach ($layers as $layer) {
@@ -1582,13 +1569,12 @@ function get_site_extra_fields ( $eventid ) {
  * @param string $user      Username
  * @param string $startdate Start date range, inclusive (in YYYYMMDD format)
  * @param string $enddate   End date range, inclusive (in YYYYMMDD format)
- * @param int    $cat_id    Category ID to filter on
  *
  * @return array Array of events
  *
  * @uses query_events
  */
-function read_events ( $user, $startdate, $enddate, $cat_id = ''  ) {
+function read_events ( $user, $startdate, $enddate ) {
   global $login;
   global $layers;
   global $TZ_OFFSET;
@@ -1653,7 +1639,7 @@ function read_events ( $user, $startdate, $enddate, $cat_id = ''  ) {
         "webcal_meal.cal_date < $enddate_plus1 ) )";
     }
   }
-  return query_events ( $user, $date_filter, $cat_id  );
+  return query_events ( $user, $date_filter );
 }
 
 /**
@@ -1683,10 +1669,7 @@ function get_entries ( $user, $date, $get_unapproved=true ) {
     // In case of data corruption (or some other bug...)
     if ( empty ( $events[$i] ) || empty ( $events[$i]['cal_id'] ) )
       continue;
-    if ( ( ! $get_unapproved ) && $events[$i]['cal_status'] == 'W' ) {
-      // ignore this event
-    //don't adjust anything  if  no TZ offset or ALL Day Event or Untimed
-    } else if ( empty ( $TZ_OFFSET) ||  ( $events[$i]['cal_time'] <= 0 ) ) {
+    if ( empty ( $TZ_OFFSET) ||  ( $events[$i]['cal_time'] <= 0 ) ) {
       if ( $events[$i]['cal_date'] == $date )
         $ret[$n++] = $events[$i];
     } else if ( $TZ_OFFSET > 0 ) {
@@ -1748,11 +1731,10 @@ function get_entries ( $user, $date, $get_unapproved=true ) {
  * @param string $user          Username
  * @param string $date_filter   SQL phrase starting with AND, to be appended to
  *                              the WHERE clause.  May be empty string.
- * @param int    $cat_id        Category ID to filter on.  May be empty.
  *
  * @return array Array of events sorted by time of day
  */
-function query_events ( $user, $date_filter, $cat_id = '' ) {
+function query_events ( $user, $date_filter ) {
   global $login;
   global $layers, $public_access_default_visible;
   $result = array ();
@@ -1762,23 +1744,18 @@ function query_events ( $user, $date_filter, $cat_id = '' ) {
     . "webcal_meal.cal_date, webcal_meal.cal_time, "
     . "webcal_meal.cal_id, webcal_meal.cal_ext_for_id, "
     . "webcal_meal.cal_duration, "
-    . "webcal_entry_user.cal_status, "
-    . "webcal_entry_user.cal_category, "
-    . "webcal_entry_user.cal_login ";
-  $sql .= "FROM webcal_meal, webcal_entry_user WHERE ";
-  $sql .= "webcal_meal.cal_id = webcal_entry_user.cal_id " .
-    "AND webcal_entry_user.cal_status IN ('A','W') ";
-
-  if ( $cat_id != '' ) $sql .= "AND webcal_entry_user.cal_category LIKE '$cat_id' ";
+    . "webcal_meal_participant.cal_login ";
+  $sql .= "FROM webcal_meal, webcal_meal_participant WHERE ";
+  $sql .= "webcal_meal.cal_id = webcal_meal_participant.cal_id ";
 
   if ( strlen ( $user ) > 0 )
-    $sql .= "AND (webcal_entry_user.cal_login = '" . $user . "' ";
+    $sql .= "AND (webcal_meal_participant.cal_login = '" . $user . "' ";
 
   if ( $user == $login && strlen ( $user ) > 0 ) {
     if ($layers) foreach ($layers as $layer) {
       $layeruser = $layer['cal_layeruser'];
 
-      $sql .= "OR webcal_entry_user.cal_login = '" . $layeruser . "' ";
+      $sql .= "OR webcal_meal_participant.cal_login = '" . $layeruser . "' ";
 
       // while we are parsing the whole layers array, build ourselves
       // a new array that will help when we have to check for dups
@@ -1787,7 +1764,7 @@ function query_events ( $user, $date_filter, $cat_id = '' ) {
   }
   if ( $user == $login && strlen ( $user ) &&
     $public_access_default_visible == 'Y' ) {
-    $sql .= "OR webcal_entry_user.cal_login = '__public__' ";
+    $sql .= "OR webcal_meal_participant.cal_login = '__public__' ";
   }
   if ( strlen ( $user ) > 0 )
     $sql .= ") ";
@@ -1814,9 +1791,7 @@ function query_events ( $user, $date_filter, $cat_id = '' ) {
         "cal_id"   => $row[4],
         "cal_ext_for_id"   => $row[5],
         "cal_duration" => $row[6],
-        "cal_status" => $row[7],
-        "cal_category" => $row[8],
-        "cal_login" => $row[9],
+        "cal_login" => $row[7],
   "cal_exceptions" => array()
         );
 
@@ -2003,7 +1978,7 @@ function icon_text ( $id, $can_edit, $can_delete ) {
  */
 function print_date_entries ( $date, $user, $ssi ) {
   global $events, $readonly, $is_admin, $login,
-    $public_access, $public_access_can_add, $cat_id;
+    $public_access, $public_access_can_add;
   $cnt = 0;
   $get_unapproved = ( $GLOBALS["DISPLAY_UNAPPROVED"] == "Y" );
   // public access events always must be approved before being displayed
@@ -2025,8 +2000,6 @@ function print_date_entries ( $date, $user, $ssi ) {
       translate("New Entry") . "\" href=\"edit_entry.php?";
     if ( strcmp ( $user, $GLOBALS["login"] ) )
       print "user=$user&amp;";
-    if ( ! empty ( $cat_id ) )
-      print "cat_id=$cat_id&amp;";
     print "date=$date\"><img src=\"new.gif\" alt=\"" .
       translate("New Entry") . "\" class=\"new\" /></a>";
     $cnt++;
@@ -2035,8 +2008,6 @@ function print_date_entries ( $date, $user, $ssi ) {
     echo "<a class=\"dayofmonth\" href=\"day.php?";
     if ( strcmp ( $user, $GLOBALS["login"] ) )
       echo "user=$user&amp;";
-    if ( ! empty ( $cat_id ) )
-      echo "cat_id=$cat_id&amp;";
     echo "date=$date\">$day</a>";
     if ( $GLOBALS["DISPLAY_WEEKNUMBER"] == "Y" &&
       date ( "w", $dateu ) == $GLOBALS["WEEK_START"] ) {
@@ -2044,8 +2015,6 @@ function print_date_entries ( $date, $user, $ssi ) {
         translate("Week") . "&nbsp;" . week_number ( $dateu ) . "\" href=\"week.php?date=$date";
       if ( strcmp ( $user, $GLOBALS["login"] ) )
         echo "&amp;user=$user";
-      if ( ! empty ( $cat_id ) )
-      echo "&amp;cat_id=$cat_id";
        echo "\" class=\"weeknumber\">";
       echo "(" .
         translate("Week") . "&nbsp;" . week_number ( $dateu ) . ")</a>";
@@ -2058,22 +2027,19 @@ function print_date_entries ( $date, $user, $ssi ) {
   $ev = get_entries ( $user, $date, $get_unapproved );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
-      if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-        $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_suit'];
-      }
-      print_entry ( $viewid,
-        $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-        $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_login'],
-        $ev[$i]['cal_category'] );
-      $cnt++;
+    if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
+      $viewid = $ev[$i]['cal_ext_for_id'];
+      $viewname = $ev[$i]['cal_suit'] . " (" .
+	translate("cont.") . ")";
+    } else {
+      $viewid = $ev[$i]['cal_id'];
+      $viewname = $ev[$i]['cal_suit'];
     }
+    print_entry ( $viewid,
+      $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
+      $viewname, $ev[$i]['cal_description'],
+      $ev[$i]['cal_login'] );
+    $cnt++;
   }
   if ( $cnt == 0 )
     echo "&nbsp;"; // so the table cell has at least something
@@ -2174,7 +2140,7 @@ function calc_time_slot ( $time, $round_down = false ) {
  */
 function html_for_add_icon ( $date=0,$hour="", $minute="", $user="" ) {
   global $TZ_OFFSET;
-  global $login, $readonly, $cat_id;
+  global $login, $readonly;
   $u_url = '';
 
   if ( $readonly == 'Y' )
@@ -2193,7 +2159,6 @@ function html_for_add_icon ( $date=0,$hour="", $minute="", $user="" ) {
     "date=$date" . ( isset ( $hour ) && $hour != NULL && $hour >= 0 ? "&amp;hour=$hour" : ""  ) .
     ( $minute > 0 ? "&amp;minute=$minute" : "" ) .
     ( empty ( $user ) ? "" :  "&amp;defusers=$user" ) .
-    ( empty ( $cat_id ) ? "" :  "&amp;cat_id=$cat_id" ) .
     "\"><img src=\"new.gif\" class=\"new\" alt=\"" . 
  translate("New Entry") . "\" /></a>\n";
 }
@@ -2211,11 +2176,9 @@ function html_for_add_icon ( $date=0,$hour="", $minute="", $user="" ) {
  * @param string $description    Full description of event
  * @param int    $duration       Duration of event in minutes
  * @param string $event_owner    User who created event
- * @param int    $event_category Category id for event
  */
 function html_for_event_week_at_a_glance ( $id, $date, $time,
-  $suit, $description, $duration, $event_owner,
-  $event_category=-1 ) {
+  $suit, $description, $duration, $event_owner ) {
   global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
     $eventinfo, $login, $user;
   static $key = 0;
@@ -2250,11 +2213,6 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
   // avoid php warning for undefined array index
   if ( empty ( $hour_arr[$ind] ) )
     $hour_arr[$ind] = "";
-
-  $catIcon = "icons/cat-" . $event_category . ".gif";
-  if ( $event_category > 0 && file_exists ( $catIcon ) ) {
-    $hour_arr[$ind] .= "<img src=\"$catIcon\" alt=\"$catIcon\" />";
-  }
 
   $hour_arr[$ind] .= "<a title=\"" . 
   translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
@@ -2340,11 +2298,9 @@ function html_for_event_week_at_a_glance ( $id, $date, $time,
  * @param string $description    Full description of event
  * @param int    $duration       Duration of event in minutes
  * @param string $event_owner    User who created event
- * @param int    $event_category Category id for event
  */
 function html_for_event_day_at_a_glance ( $id, $date, $time,
-  $suit, $description, $duration, $event_owner,
-  $event_category=-1 ) {
+  $suit, $description, $duration, $event_owner ) {
   global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
     $eventinfo, $login, $user;
   static $key = 0;
@@ -2389,11 +2345,6 @@ function html_for_event_day_at_a_glance ( $id, $date, $time,
     strstr ( $PHP_SELF, "view_v.php" ) ||
     strstr ( $PHP_SELF, "view_t.php" ) )
     $class = "entry";
-
-  $catIcon = "icons/cat-" . $event_category . ".gif";
-  if ( $event_category > 0 && file_exists ( $catIcon ) ) {
-    $hour_arr[$ind] .= "<img src=\"$catIcon\" alt=\"$catIcon\" />";
-  }
 
   $hour_arr[$ind] .= "<a title=\"" .
     translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
@@ -2517,23 +2468,21 @@ function print_day_at_a_glance ( $date, $user, $can_add=0 ) {
   $rowspan_arr = array ();
   $all_day = 0;
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
-      if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-        $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_suit'];
-      }
-      if ( $ev[$i]['cal_duration'] == ( 24 * 60 ) )
-        $all_day = 1;
-      html_for_event_day_at_a_glance ( $viewid,
-        $date, $ev[$i]['cal_time'],
-        $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_duration'],
-        $ev[$i]['cal_login'], $ev[$i]['cal_category'] );
+    if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
+      $viewid = $ev[$i]['cal_ext_for_id'];
+      $viewname = $ev[$i]['cal_suit'] . " (" .
+	translate("cont.") . ")";
+    } else {
+      $viewid = $ev[$i]['cal_id'];
+      $viewname = $ev[$i]['cal_suit'];
     }
+    if ( $ev[$i]['cal_duration'] == ( 24 * 60 ) )
+      $all_day = 1;
+    html_for_event_day_at_a_glance ( $viewid,
+      $date, $ev[$i]['cal_time'],
+      $viewname, $ev[$i]['cal_description'],
+      $ev[$i]['cal_duration'],
+      $ev[$i]['cal_login'] );
   }
 
   // squish events that use the same cell into the same cell.
@@ -2994,72 +2943,7 @@ function my_array_splice(&$input,$offset,$length,$replacement) {
   }
 }
 
-/**
- * Loads current user's category info and stuff it into category global
- * variable.
- *
- * @param string $ex_global Don't include global categories ('' or '1')
- */
-function load_user_categories ($ex_global = '') {
-  global $login, $user, $is_assistant;
-  global $categories, $category_owners;
-  global $categories_enabled, $is_admin;
 
-  $cat_owner =  ( ( ! empty ( $user ) && strlen ( $user ) ) &&  ( $is_assistant  ||
-    $is_admin ) ) ? $user : $login;  
-  $categories = array ();
-  $category_owners = array ();
-  if ( $categories_enabled == "Y" ) {
-    $sql = "SELECT cat_id, cat_name, cat_owner FROM webcal_categories WHERE ";
-    $sql .=  ($ex_global == '') ? " (cat_owner = '$cat_owner') OR  (cat_owner IS NULL) ORDER BY cat_owner, cat_name" : " cat_owner = '$cat_owner' ORDER BY cat_name";
-
-    $res = dbi_query ( $sql );
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $cat_id = $row[0];
-        $categories[$cat_id] = $row[1];
-        $category_owners[$cat_id] = $row[2];
-      }
-      dbi_free_result ( $res );
-    }
-  } else {
-    //echo "Categories disabled.";
-  }
-}
-
-/**
- * Prints dropdown HTML for categories.
- *
- * @param string $form   The page to submit data to (without .php)
- * @param string $date   Date in YYYYMMDD format
- * @param int    $cat_id Category id that should be pre-selected
- */
-function print_category_menu ( $form, $date = '', $cat_id = '' ) {
-  global $categories, $category_owners, $user, $login;
-  echo "<form action=\"{$form}.php\" method=\"get\" name=\"SelectCategory\" class=\"categories\">\n";
-  if ( ! empty($date) ) echo "<input type=\"hidden\" name=\"date\" value=\"$date\" />\n";
-  if ( ! empty ( $user ) && $user != $login )
-    echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-  echo translate ("Category") . ": <select name=\"cat_id\" onchange=\"document.SelectCategory.submit()\">\n";
-  echo "<option value=\"\"";
-  if ( $cat_id == '' ) echo " selected=\"selected\"";
-  echo ">" . translate("All") . "</option>\n";
-  $cat_owner =  ( ! empty ( $user ) && strlen ( $user ) ) ? $user : $login;
-  if (  is_array ( $categories ) ) {
-    foreach ( $categories as $K => $V ){
-      if ( $cat_owner ||
-        empty ( $category_owners[$K] ) ) {
-        echo "<option value=\"$K\"";
-        if ( $cat_id == $K ) echo " selected=\"selected\"";
-        echo ">$V</option>\n";
-      }
-    }
-  }
-  echo "</select>\n";
-  echo "</form>\n";
-  echo "<span id=\"cat\">" . translate ("Category") . ": ";
-  echo ( strlen ( $cat_id ) ? $categories[$cat_id] : translate ('All') ) . "</span>\n";
-}
 
 /**
  * Converts HTML entities in 8bit.
@@ -3239,14 +3123,11 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
   $ev = get_entries ( $user, $date, $get_unapproved );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
-      print_entry_timebar ( $ev[$i]['cal_id'],
-        $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-        $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
-        $ev[$i]['cal_login'],
-        $ev[$i]['cal_category'] );
-      $cnt++;
-    }
+    print_entry_timebar ( $ev[$i]['cal_id'],
+      $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
+      $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
+      $ev[$i]['cal_login'] );
+    $cnt++;
   }
   if ( $cnt == 0 )
     echo "&nbsp;"; // so the table cell has at least something
@@ -3262,13 +3143,12 @@ function print_date_entries_timebar ( $date, $user, $ssi ) {
  * @param string $suit           Brief description of event
  * @param string $description    Full description of event
  * @param string $event_owner    User who created event
- * @param int    $event_category Category id for event
  *
  * @staticvar int Used to ensure all event popups have a unique id
  */
 function print_entry_timebar ( $id, $date, $time, $duration,
   $suit, $description, 
-  $event_owner, $event_category=-1 ) {
+  $event_owner ) {
   global $eventinfo, $login, $user, $PHP_SELF, $prefarray;
   static $key = 0;
   $insidespan = false;
@@ -3868,18 +3748,11 @@ function daily_matrix ( $date, $participants, $popup = '' ) {
       // convert cal_duration to bars
       $bars = $E['cal_duration'] / $increment;
 
-      // never replace 'A' with 'W'
       for ($q = 0; $bars > $q; $q++) {
         $slot = sprintf ("%02.2f",$slot);
         if (strlen($slot) == 4) $slot = '0'.$slot; // add leading zeros
         $slot = $slot.''; // convert to a string
-        if ( empty ( $master['_all_'][$slot] ) ||
-          $master['_all_'][$slot]['stat'] != 'A') {
-          $master['_all_'][$slot]['stat'] = $E['cal_status'];
-        }
-        if ( empty ( $master[$participants[$i]][$slot] ) ||
-          $master[$participants[$i]][$slot]['stat'] != 'A' ) {
-          $master[$participants[$i]][$slot]['stat'] = $E['cal_status'];
+        if ( empty ( $master[$participants[$i]][$slot] ) ) {
           $master[$participants[$i]][$slot]['ID'] = $E['cal_id'];
         }
         $slot = $slot + '0.25';
@@ -3968,11 +3841,9 @@ function daily_matrix ( $date, $participants, $popup = '' ) {
          } else if ( empty ( $master[$participants[$i]][$r]['ID'] ) ) {
            // This is the first line for 'all' users.  No event here.
            $space = "<span class=\"matrix\"><img src=\"pix.gif\" alt=\"\" style=\"height: 8px\" /></span>";
-         } else if ($master[$participants[$i]][$r]['stat'] == "A") {
+         } else {
            $space = "<a class=\"matrix\" href=\"view_entry.php?id={$master[$participants[$i]][$r]['ID']}\"><img src=\"pix.gif\" title=\"$viewMsg\" alt=\"$viewMsg\" /></a>";
-         } else if ($master[$participants[$i]][$r]['stat'] == "W") {
-           $space = "<a class=\"matrix\" href=\"view_entry.php?id={$master[$participants[$i]][$r]['ID']}\"><img src=\"pixb.gif\" title=\"$viewMsg\" alt=\"$viewMsg\" /></a>";
-         }
+         } 
 
          echo "<td class=\"matrixappts\" style=\"width:{$cell_pct}%;$border\" ";
          if ($space == "&nbsp;") echo "$MouseDown $MouseOver $MouseOut";

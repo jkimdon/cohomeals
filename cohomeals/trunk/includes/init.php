@@ -93,7 +93,6 @@ $year = getValue ( "year", "[0-9]+" );
 $month = getValue ( "month", "[0-9]+" );
 $hour = getValue ( "hour", "[0-9]+" );
 $minute = getValue ( "minute", "[0-9]+" );
-$cat_id = getValue ( "cat_id", "[0-9]+" );
 $friendly = getValue ( "friendly", "[01]" );
 if ( empty ( $public_access ) )
   $public_access = 'N';
@@ -145,21 +144,6 @@ if ($DMW) {
 
   set_today($date);
 
-  if ( $categories_enabled == "Y" ) {
-    if ( ! empty ( $cat_id ) ) {
-      $cat_id = $cat_id;
-    } elseif ( ! empty ( $CATEGORY_VIEW ) ) {
-      $cat_id = $CATEGORY_VIEW;
-    } else {
-      $cat_id = '';
-    }
-  } else {
-    $cat_id = '';
-  }
-  if ( empty ( $cat_id ) )
-    $caturl = "";
-  else
-    $caturl = "&amp;cat_id=$cat_id";
 }
 
 /** Maps page filenames to the id that page's <body> tag will have
@@ -172,7 +156,6 @@ $bodyid = array(
  "admin.php" => "admin",
  "adminhome.php" => "adminhome",
  "assistant_edit.php" => "assistantedit",
- "category.php" => "category",
  "day.php" => "day",
  "del_entry.php" => "delentry",
  "del_layer.php" => "dellayer",
@@ -205,7 +188,6 @@ $bodyid = array(
  "report.php" => "report",
  "search.php" => "search",
  "select_user.php" => "selectuser",
- "set_entry_cat.php" => "setentrycat",
  "users.php" => "users",
  "usersel.php" => "usersel",
  "view_d.php" => "viewd",
@@ -357,7 +339,7 @@ function print_trailer ( $include_nav_links=true, $closeDb=true,
   $disableCustom=false )
 {
   global $CUSTOM_TRAILER, $c, $STARTVIEW;
-  global $login, $user, $cat_id, $categories_enabled, $thisyear,
+  global $login, $user, $thisyear,
     $thismonth, $thisday, $DATE_FORMAT_MY, $WEEK_START, $DATE_FORMAT_MD,
     $readonly, $is_admin, $public_access, $public_access_can_add,
     $single_user, $use_http_auth, $login_return_path, $require_approvals,

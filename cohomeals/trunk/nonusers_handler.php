@@ -18,9 +18,9 @@ if ( $action == "Delete" || $action == translate ("Delete") ) {
   // Get event ids for all events this user is a participant
   $events = array ();
   $res = dbi_query ( "SELECT webcal_meal.cal_id " .
-    "FROM webcal_meal, webcal_entry_user " .
-    "WHERE webcal_meal.cal_id = webcal_entry_user.cal_id " .
-    "AND webcal_entry_user.cal_login = '$user'" );
+    "FROM webcal_meal, webcal_meal_participant " .
+    "WHERE webcal_meal.cal_id = webcal_meal_participant.cal_id " .
+    "AND webcal_meal_participant.cal_login = '$user'" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $events[] = $row[0];
@@ -31,7 +31,7 @@ if ( $action == "Delete" || $action == translate ("Delete") ) {
   // If just 1, then save id to be deleted
   $delete_em = array ();
   for ( $i = 0; $i < count ( $events ); $i++ ) {
-    $res = dbi_query ( "SELECT COUNT(*) FROM webcal_entry_user " .
+    $res = dbi_query ( "SELECT COUNT(*) FROM webcal_meal_participant " .
       "WHERE cal_id = " . $events[$i] );
     if ( $res ) {
       if ( $row = dbi_fetch_row ( $res ) ) {
@@ -47,7 +47,7 @@ if ( $action == "Delete" || $action == translate ("Delete") ) {
   }
 
   // Delete user participation from events
-  dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_login = '$user'" );
+  dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_login = '$user'" );
 
   // Delete any layers other users may have that point to this user.
   dbi_query ( "DELETE FROM webcal_user_layers WHERE cal_layeruser = '$user'" );

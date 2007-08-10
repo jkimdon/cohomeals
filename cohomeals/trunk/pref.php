@@ -4,9 +4,6 @@ include_once 'includes/init.php';
 if ($user != $login)
   $user = (($is_admin || $is_nonuser_admin) && $user) ? $user : $login;
 
-// Load categories only if editing our own calendar
-if (!$user || $user == $login) load_user_categories ();
-
 // Reload preferences into $prefarray[].
 // Get system settings first.
 $updating_public = false;
@@ -326,27 +323,6 @@ for ( $i = 0; $i < count ( $views ); $i++ ) {
 	<label><input type="radio" name="pref_TIMED_EVT_LEN" value="E" <?php if ( $prefarray["TIMED_EVT_LEN"] == "E" ) echo " checked=\"checked\"";?> /> <?php etranslate("End Time")?></label>
 </td></tr>
 
-<?php if ( ! empty ( $categories ) ) { ?>
-<tr><td>
-	<label for="pref_cat"><?php etranslate("Default Category")?>:</label></td><td>
-	<select name="pref_CATEGORY_VIEW" id="pref_cat">
-<?php
-	echo "<option value=\"\"";
-	if ( empty ( $prefarray["CATEGORY_VIEW"] ) ) echo " selected=\"selected\"";
-	echo ">".translate("All")."</option>\n";
-	
-	if ( ! empty ( $categories ) ) {
-		foreach( $categories as $K => $V ){
-			echo "<option value=\"$K\"";
-			if ( ! empty ( $prefarray["CATEGORY_VIEW"] ) &&
-				$prefarray["CATEGORY_VIEW"] == $K ) echo " selected=\"selected\"";
-			echo ">$V</option>\n";
-		}
-	}
-?>
-	</select>
-</td></tr>
-<?php } //end if (! empty ($categories ) ) ?>
 </table>
 
 <?php if ( ! $updating_public ) { ?>

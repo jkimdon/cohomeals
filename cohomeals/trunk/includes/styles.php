@@ -441,11 +441,6 @@ textarea {
   color: <?php echo $GLOBALS['H2COLOR']; ?>;
   text-align: center;
 }
-.categories {
-  font-size: 18px;
-  color: <?php echo $GLOBALS['H2COLOR']; ?>;
-  text-align: center;
-}
 <?php //left column in help sections 
 ?>.help {
   vertical-align: top;

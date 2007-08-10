@@ -47,7 +47,7 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, ca
  * cal_ext_for_id set to the cal_id of the original entry.
  * The following tables contain additional information about each
  * event:<ul>
- * <li><a href="#webcal_entry_user">webcal_meal_participant</a> -
+ * <li><a href="#webcal_meal_participant">webcal_meal_participant</a> -
  *  lists diners/crew
  * </ul>
  */
@@ -90,22 +90,28 @@ CREATE TABLE webcal_meal (
 
 
 /*
- * This table associates one or more users with an event by the event id.
- * The event can be found in
- * <a href="#webcal_entry">webcal_entry</a>.
+ * This table associates one or more participants with a meal using the meal id.
+ * One entry refers to one person and one meal, telling the role of the person.
+ * Each person at a meal has their own entry, and each meal has its own set of
+ * entries per person.
+ * The meal can be found in webcal_meal.
  */
-CREATE TABLE webcal_entry_user (
-  /* event id */
+CREATE TABLE webcal_meal_participant (
+  /* meal id */
   cal_id INT DEFAULT 0 NOT NULL,
   /* participant in the event */
   cal_login VARCHAR(25) NOT NULL,
-  /* status of event for this user: <ul> */
-  /* <li>A=Accepted</li> */
-  /* <li>R=Rejected</li> */
-  /* <li>W=Waiting</li>    </ul>*/
-  cal_status CHAR(1) DEFAULT 'A',
-  /* category of the event for this user */
-  cal_category INT DEFAULT NULL,
+  /* type of participation: 
+     'M' = in-house muncher
+     'T' = take-home plate
+     'H' = head chef
+     'C' = cook
+     'S' = setup
+     'L' = cleanup 
+     'O' = other */
+  cal_type CHAR(1),
+  /* description of participant type if "other" */
+  cal_description VARCHAR(80) NULL,
   PRIMARY KEY ( cal_id, cal_login )
 );
 
@@ -280,8 +286,6 @@ INSERT INTO webcal_config ( cal_setting, cal_value )
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'user_sees_only_his_groups', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'categories_enabled', 'N' );
-INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'allow_conflicts', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'conflict_repeat_months', '6' );
@@ -444,22 +448,6 @@ CREATE TABLE webcal_entry_log (
   PRIMARY KEY ( cal_log_id )
 );
 
-/*
- * Defines user categories.
- * Categories can be specific to a user or global.  When a category is global,
- * the cat_owner field will be NULL.  (Only an admin user can create
- * a global category.)
- */
-CREATE TABLE webcal_categories (
-  /* unique category id */
-  cat_id INT NOT NULL,
-  /* user login of category owner. */
-  /* If this is NULL, then it is a global category */
-  cat_owner VARCHAR(25) NULL,
-  /* category name */
-  cat_name VARCHAR(80) NOT NULL,
-  PRIMARY KEY ( cat_id )
-);
 
 /*
  * Define assitant/boss relationship.

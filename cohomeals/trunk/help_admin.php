@@ -207,10 +207,6 @@ print_header('', '', '', true);
  <?php etranslate("subscriptions-enabled-help")?>
 </td></tr>
 <tr><td class="help">
- <?php etranslate("Categories enabled")?>:</td><td>
- <?php etranslate("categories-enabled-help")?>
-</td></tr>
-<tr><td class="help">
  <?php etranslate("Allow external users")?>:</td><td>
  <?php etranslate("allow-external-users-help")?>
 </td></tr>

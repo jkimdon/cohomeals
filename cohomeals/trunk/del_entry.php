@@ -14,9 +14,9 @@ if ( $id > 0 ) {
   } else {
     $can_edit = false;
     $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-      "webcal_entry_user WHERE webcal_meal.cal_id = " .
-      "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
-      "AND webcal_entry_user.cal_login = '$login'";
+      "webcal_meal_participant WHERE webcal_meal.cal_id = " .
+      "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
+      "AND webcal_meal_participant.cal_login = '$login'";
     $res = dbi_query ( $sql );
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
@@ -52,10 +52,8 @@ if ( $id > 0 && empty ( $error ) ) {
   if ( $is_admin || $my_event ) {
 
     // Email participants that the event was deleted
-    // First, get list of participants (with status Approved or
-    // Waiting on approval).
-    $sql = "SELECT cal_login FROM webcal_entry_user WHERE cal_id = $id " .
-      "AND cal_status IN ('A','W')";
+    // First, get list of participants 
+    $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = $id ";
     $res = dbi_query ( $sql );
     $partlogin = array ();
     if ( $res ) {
@@ -120,20 +118,17 @@ if ( $id > 0 && empty ( $error ) ) {
       }
     }
 
-    // Instead of deleting from the database... mark it as deleted
-    // by setting the status for each participant to "D" (instead
-    // of "A"/Accepted, "W"/Waiting-on-approval or "R"/Rejected)
-    
     // Now, mark event as deleted for all users.
-    dbi_query ( "UPDATE webcal_entry_user SET cal_status = 'D' " .
-		"WHERE cal_id = $id" );
+    dbi_query ( "DELETE FROM webcal_meal_participant " .
+      "WHERE cal_id = $id" );
+
   } else {
     // Not the owner of the event and are not the admin.
     // Just delete the event from this user's calendar.
     // We could just set the status to 'D' instead of deleting.
     // (but we would need to make some changes to edit_entry_handler.php
     // to accomodate this).
-    dbi_query ( "DELETE FROM webcal_entry_user " .
+    dbi_query ( "DELETE FROM webcal_meal_participant " .
       "WHERE cal_id = $id AND cal_login = '$login'" );
     activity_log ( $id, $login, $login, $LOG_REJECT, "" );
   }

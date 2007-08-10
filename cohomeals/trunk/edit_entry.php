@@ -18,8 +18,6 @@
 include_once 'includes/init.php';
 include_once 'includes/site_extras.php';
 
-load_user_categories ();
-
 // Default for using tabs is enabled
 if ( empty ( $EVENT_EDIT_TABS ) )
   $EVENT_EDIT_TABS = 'Y'; // default
@@ -46,9 +44,9 @@ if ( $readonly == 'Y' ) {
     $can_edit = false;
     if ( $readonly == "N" || $is_admin ) {
       $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-        "webcal_entry_user WHERE webcal_meal.cal_id = " .
-        "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
-        "AND webcal_entry_user.cal_login = '$login'";
+        "webcal_meal_participant WHERE webcal_meal.cal_id = " .
+        "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
+        "AND webcal_meal_participant.cal_login = '$login'";
       $res = dbi_query ( $sql );
       if ( $res ) {
         $row = dbi_fetch_row ( $res );
@@ -106,15 +104,6 @@ if ( $readonly == 'Y' ) {
     }
     $suit = $row[3];
     $description = $row[4];
-  }
-  $sql = "SELECT cal_login, cal_category FROM webcal_entry_user WHERE cal_id = $id";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $participants[$row[0]] = 1;
-      if ($login == $row[0]) $cat_id = $row[1];
-      if ( ( $is_assistant  || $is_admin ) && $user == $row[0]) $cat_id = $row[1];
-    }
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -264,21 +253,6 @@ if ( ! empty ( $parent ) )
      echo htmlspecialchars ( $description );
     ?></textarea></td><td style="vertical-align:top;">
 
-<?php if ( ! empty ( $categories ) ) { ?>
-     <tr><td class="tooltip" title="<?php etooltip("category-help")?>">
-      <label for="entry_categories"><?php etranslate("Category")?>:&nbsp;</label></td><td>
-      <select name="cat_id" id="entry_categories">
-       <option value=""><?php etranslate("None")?></option>
-     <?php
-      foreach( $categories as $K => $V ){
-       echo "       <option value=\"$K\"";
-       if ( $cat_id == $K ) echo " selected=\"selected\"";
-       echo ">$V</option>\n";
-      }
-     ?>
-      </select>
-     </td></tr>
-<?php } //end if (! empty ($categories)) ?>
   </td></tr>
   <tr><td class="tooltip" title="<?php etooltip("date-help")?>">
    <?php etranslate("Date")?>:</td><td colspan="2">

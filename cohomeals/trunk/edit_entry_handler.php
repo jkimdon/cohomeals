@@ -1,7 +1,6 @@
 <?php
 include_once 'includes/init.php';
 include_once 'includes/site_extras.php';
-load_user_categories ();
 
 $error = "";
 
@@ -79,8 +78,8 @@ if ( $is_admin ) {
 }
 if ( empty ( $error ) && ! $can_edit ) {
   // is user a participant of that event ?
-  $sql = "SELECT cal_id FROM webcal_entry_user WHERE cal_id = '$id' " .
-    "AND cal_login = '$login' AND cal_status IN ('W','A')";
+  $sql = "SELECT cal_id FROM webcal_meal_participant WHERE cal_id = '$id' " .
+    "AND cal_login = '$login'";
   $res = dbi_query ( $sql );
   if ($res) {
     $row = dbi_fetch_row ( $res );
@@ -241,14 +240,13 @@ if ( empty ( $error ) ) {
     }
   } else {
     $newevent = false;
-    // save old status values of participants
-    $sql = "SELECT cal_login, cal_status, cal_category FROM webcal_entry_user " .
+    // save old participants
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
       "WHERE cal_id = $id ";
     $res = dbi_query ( $sql );
     if ( $res ) {
       for ( $i = 0; $tmprow = dbi_fetch_row ( $res ); $i++ ) {
-        $old_status[$tmprow[0]] = $tmprow[1]; 
-        $old_category[$tmprow[0]] = $tmprow[2];
+        $old_meal_participant[$tmprow[0]] = $tmprow[0];
       }
       dbi_free_result ( $res );
     } else {
@@ -256,11 +254,10 @@ if ( empty ( $error ) ) {
     }
     if ( empty ( $error ) ) {
       dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
-      dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_id = $id" );
+      dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_entry_ext_user WHERE cal_id = $id" );
       dbi_query ( "DELETE FROM webcal_site_extras WHERE cal_id = $id" );
     }
-    $newevent = false;
   }
 
   $sql = "INSERT INTO webcal_meal ( cal_id, " .
@@ -303,8 +300,8 @@ if ( empty ( $error ) ) {
   }
 
   // check if participants have been removed and send out emails
-  if ( ! $newevent && count ( $old_status ) > 0 ) {  // nur bei Update!!!
-    while ( list ( $old_participant, $dummy ) = each ( $old_status ) ) {
+  if ( ! $newevent && count ( $old_meal_participant ) > 0 ) {  
+    while ( list ( $old_participant, $dummy ) = each ( $old_meal_participant ) ) {
       $found_flag = false;
       for ( $i = 0; $i < count ( $participants ); $i++ ) {
         if ( $participants[$i] == $old_participant ) {
@@ -386,86 +383,16 @@ if ( empty ( $error ) ) {
 
   // now add participants and send out notifications
   for ( $i = 0; $i < count ( $participants ); $i++ ) {
-    $my_cat_id = "";
     // Is the person adding the nonuser calendar admin
     $is_nonuser_admin = user_is_nonuser_admin ( $login, $participants[$i] );
 
-    // if public access, require approval unless
-    // $public_access_add_needs_approval is set to "N"
-    if ( $login == "__public__" ) {
-      if ( ! empty ( $public_access_add_needs_approval ) &&
-        $public_access_add_needs_approval == "N" ) {
-        $status = "A"; // no approval needed
-      } else {
-        // Approval required
-        $status = "W"; // approval required
-      }
-      $my_cat_id = $cat_id;
-    } else if ( ! $newevent ) {
-      // keep the old status if no email will be sent
-        $send_user_mail = ( empty ( $old_status[$participants[$i]] ) ||
-          $entry_changed ) ?  true : false;
-        $tmp_status = ( ! empty ( $old_status[$participants[$i]] ) && ! $send_user_mail ) ?
-          $old_status[$participants[$i]] : "W";
-      $status = ( $participants[$i] != $login && boss_must_approve_event ( $login, $participants[$i] ) && $require_approvals == "Y" && ! $is_nonuser_admin ) ?
-        $tmp_status : "A";
-      $tmp_cat = ( ! empty ( $old_category[$participants[$i]]) ) ?
-        $old_category[$participants[$i]] : 'NULL';
-      $tmp_cat = ( $participants[$i] == $user ) ? $cat_id : $tmp_cat;
-      // Allow cat to be changed for public access (if admin user)
-      if ( $participants[$i] == "__public__" && $is_admin ) {
-        $tmp_cat = $cat_id;
-      }
-
-      // If user is admin and this event was previously approved for public,
-      // keep it as approved even though date/time may have changed
-      // This goes against stricter security, but it confuses users to have
-      // to re-approve events they already approved.
-      if ( $participants[$i] == "__public__" && $is_admin &&
-        $old_status['__public__'] == 'A' ) {
-        $status = 'A';
-      }
-      $my_cat_id = ( $participants[$i] != $login ) ? $tmp_cat : $cat_id;
-      // If user is admin and
-      // if it's a global cat, then set it for other users as well.
-      if ( $is_admin && ! empty ( $categories[$cat_id] ) &&
-        empty ( $category_owners[$cat_id] ) ) {
-        // found categ. and owner set to NULL; it is global
-        $my_cat_id = $cat_id;
-      }
-    } else {  // New Event
-      $send_user_mail = true;
-      $status = ( $participants[$i] != $login && 
-        boss_must_approve_event ( $login, $participants[$i] ) && 
-        $require_approvals == "Y" && ! $is_nonuser_admin ) ?
-        "W" : "A";
-      // If admin, no need to approve Public Access Events
-      if ( $participants[$i] == "__public__" && $is_admin ) {
-        $status = "A";
-      }
-      if ( $participants[$i] == $login ) {
-        $my_cat_id = $cat_id;
-      } else {
-        // if it's a global cat, then set it for other users as well.
-        if ( ! empty ( $categories[$cat_id] ) &&
-          empty ( $category_owners[$cat_id] ) ) {
-          // found cat. and owner set to NULL; it is global
-          $my_cat_id = $cat_id;
-        } else {
-          // not global category
-          $my_cat_id = 'NULL';
-        }
-      }
-    }
     // Some users report that they get an error on duplicate keys
     // on the following add... As a safety measure, delete any
     // existing entry with the id.  Ignore the result.
-    dbi_query ( "DELETE FROM webcal_entry_user WHERE cal_id = $id " .
+    dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id " .
       "AND cal_login = '$participants[$i]'" );
-    if ( empty ( $my_cat_id ) ) $my_cat_id = 'NULL';
-    $sql = "INSERT INTO webcal_entry_user " .
-      "( cal_id, cal_login, cal_status, cal_category ) VALUES ( $id, '" .
-      $participants[$i] . "', '$status', $my_cat_id )";
+    $sql = "INSERT INTO webcal_meal_participant " .
+      "( cal_id, cal_login ) VALUES ( $id, '$participants[$i]' )";
     if ( ! dbi_query ( $sql ) ) {
       $error = translate("Database error") . ": " . dbi_error ();
       break;
@@ -485,7 +412,7 @@ if ( empty ( $error ) ) {
         if ( $participants[$i] != $login && 
           boss_must_be_notified ( $login, $participants[$i] ) && 
           strlen ( $tempemail ) &&
-          $do_send == "Y" && $send_user_mail && $send_email != "N" ) {
+          $do_send == "Y" && $send_email != "N" ) {
 
           // Want date/time in user's timezone
           $user_hour = $hour + $user_TZ;
@@ -517,7 +444,7 @@ if ( empty ( $error ) ) {
           //do_debug($user_language);
           $fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
           $msg = translate("Hello") . ", " . $tempfullname . ".\n\n";
-          if ( $newevent || ( empty ( $old_status[$participants[$i]] ) ) ) {
+          if ( $newevent || ( empty ( $old_meal_participant[$participants[$i]] ) ) ) {
             $msg .= translate("A new appointment has been made for you by");
           } else {
             $msg .= translate("An appointment has been updated by");
@@ -530,9 +457,7 @@ if ( empty ( $error ) ) {
             translate("Time") . ": " .
             display_time ( ( $user_hour * 10000 ) + ( $minute * 100 ), true ) . "\n" ) .
             translate("Please look on") . " " . translate($application_name) . " " .
-            ( $require_approvals == "Y" ?
-            translate("to accept or reject this appointment") :
-            translate("to view this appointment") ) . ".";
+            translate("to view this appointment") . ".";
           // add URL to event, if we can figure it out
           if ( ! empty ( $server_url ) ) {
             $url = $server_url .  "view_entry.php?id=" .  $id;

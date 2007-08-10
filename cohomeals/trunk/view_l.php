@@ -259,7 +259,6 @@ if ( ! empty ( $eventinfo ) ) {
   echo "year=$thisyear&amp;month=$thismonth&amp;";
  }
  if ( ! empty ( $user ) ) echo "user=$user&amp;";
- if ( ! empty ( $cat_id ) ) echo "cat_id=$cat_id&amp;";
 ?>friendly=1" target="cal_printer_friendly" onmouseover="window.status = '<?php 
  etranslate("Generate printer-friendly version")?>'">[<?php 
  etranslate("Printer Friendly")?>]</a>

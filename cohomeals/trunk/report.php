@@ -239,7 +239,7 @@ if ( empty ( $error ) && empty ( $list ) ) {
   $res = dbi_query ( "SELECT cal_login, cal_report_id, cal_is_global, " .
     "cal_report_type, cal_include_header, cal_report_name, " .
     "cal_time_range, cal_user, " .
-    "cal_allow_nav, cal_cat_id, cal_include_empty, cal_update_date " .
+    "cal_allow_nav, cal_include_empty, cal_update_date " .
     "FROM webcal_report WHERE cal_report_id = $report_id" );
   if ( $res ) {
     if ( $row = dbi_fetch_row ( $res ) ) { 
@@ -261,7 +261,6 @@ if ( empty ( $error ) && empty ( $list ) ) {
           $report_user = $test_report_user;
         }
         $report_allow_nav = $row[$i++];
-        $report_cat_id = $row[$i++];
         $report_include_empty = $row[$i++];
         $report_update_date = $row[$i++];
       }
@@ -400,9 +399,8 @@ if ( ! isset ( $report_time_range ) ) {
 }
 
 if ( empty ( $error ) && empty ( $list ) ) {
-  $cat_id = empty ( $report_cat_id ) ? "" : $report_cat_id;
 
-  $events = read_events ( $report_user, $start_date, $end_date, $cat_id );
+  $events = read_events ( $report_user, $start_date, $end_date );
 
   $get_unapproved = $DISPLAY_UNAPPROVED == 'Y';
   if ( $report_user == "__public__" ) {

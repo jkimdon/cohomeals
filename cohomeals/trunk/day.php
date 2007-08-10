@@ -6,7 +6,6 @@ if (($user != $login) && $is_nonuser_admin)
 else
   load_user_layers ();
 
-load_user_categories ();
 
 $wday = strftime ( "%w", mktime ( 3, 0, 0, $thismonth, $thisday, $thisyear ) );
 
@@ -38,7 +37,7 @@ $HeadX = '';
 if ( $auto_refresh == "Y" && ! empty ( $auto_refresh_time ) ) {
   $refresh = $auto_refresh_time * 60; // convert to seconds
   $HeadX = "<meta http-equiv=\"refresh\" content=\"$refresh; url=day.php?$u_url" .
-    "date=$nowYmd$caturl" . ( ! empty ( $friendly ) ? "&amp;friendly=1" : "") . "\" />\n";
+    "date=$nowYmd" . ( ! empty ( $friendly ) ? "&amp;friendly=1" : "") . "\" />\n";
 }
 $INC = array('js/popups.php');
 print_header($INC,$HeadX);
@@ -46,15 +45,14 @@ print_header($INC,$HeadX);
 
 <?php
 /* Pre-load the events for quicker access */
-$events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate,
-  $cat_id  );
+$events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate );
 ?>
 
 <table>
 <tr><td style="vertical-align:top; width:82%;">
 <div style="border-width:0px;">
-<a title="<?php etranslate("Next"); ?>" class="next" href="day.php?<?php echo $u_url;?>date=<?php echo $nextYmd . $caturl;?>"><img src="rightarrow.gif" alt="<?php etranslate("Next"); ?>" /></a>
-<a title="<?php etranslate("Previous"); ?>" class="prev" href="day.php?<?php echo $u_url;?>date=<?php echo $prevYmd . $caturl;?>"><img src="leftarrow.gif" alt="<?php etranslate("Previous"); ?>" /></a>
+<a title="<?php etranslate("Next"); ?>" class="next" href="day.php?<?php echo $u_url;?>date=<?php echo $nextYmd;?>"><img src="rightarrow.gif" alt="<?php etranslate("Next"); ?>" /></a>
+<a title="<?php etranslate("Previous"); ?>" class="prev" href="day.php?<?php echo $u_url;?>date=<?php echo $prevYmd;?>"><img src="leftarrow.gif" alt="<?php etranslate("Previous"); ?>" /></a>
 <div class="title">
 <span class="date"><?php
   echo date_to_str ( $nowYmd );
@@ -70,12 +68,6 @@ $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate,
   if ( $is_assistant )
     echo "<br />-- " . translate("Assistant mode") . " --";
 ?></span>
-<?php
-  if ( $categories_enabled == "Y" && (!$user || ($user == $login || $is_assistant ))) {
-    echo "<br />\n<br />\n";
-    print_category_menu( 'day', sprintf ( "%04d%02d%02d",$thisyear, $thismonth, $thisday ), $cat_id );
-  }
-?>
 </div>
 </div>
 </td>
@@ -109,7 +101,6 @@ print "</td></tr>";
   if ( $thisyear ) {
     echo "year=$thisyear&amp;month=$thismonth&amp;day=$thisday&amp;";
   }
-  if ( ! empty ( $cat_id ) ) echo "cat_id=$cat_id&amp;";
 ?>friendly=1" target="cal_printer_friendly" onmouseover="window.status = '<?php etranslate("Generate printer-friendly version")?>'">[<?php etranslate("Printer Friendly")?>]</a>
 
 <?php print_trailer (); ?>

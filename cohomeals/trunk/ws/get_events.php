@@ -95,8 +95,8 @@ function print_event_xml ( $id, $event_date ) {
 
   // get participants first...
  
-  $sql = "SELECT cal_login FROM webcal_entry_user " .
-    "WHERE cal_id = $id AND cal_status IN ('A','W') " .
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id " .
     "ORDER BY cal_login";
   $res = dbi_query ( $sql );
   $participants = array ();

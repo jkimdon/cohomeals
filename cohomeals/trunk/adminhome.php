@@ -78,10 +78,6 @@ if ( $single_user != 'Y' ) {
 	$links[] = "assistant_edit.php";
 }
 
-if ( $categories_enabled == 'Y' ) {
-	$names[] = translate("Categories");
-	$links[] = "category.php";
-}
 
 $names[] = translate("Views");
 $links[] = "views.php";

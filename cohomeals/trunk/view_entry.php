@@ -32,9 +32,9 @@ if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
 if ( empty ( $error ) ) {
   // is this user a participant or the creator of the event?
   $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-    "webcal_entry_user WHERE webcal_meal.cal_id = " .
-    "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
-    "AND webcal_entry_user.cal_login = '$login'";
+    "webcal_meal_participant WHERE webcal_meal.cal_id = " .
+    "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
+    "AND webcal_meal_participant.cal_login = '$login'";
   $res = dbi_query ( $sql );
   if ( $res ) {
     $row = dbi_fetch_row ( $res );
@@ -75,9 +75,9 @@ if ( empty ( $error ) ) {
     $my_users = get_my_users ();
     if ( is_array ( $my_users ) ) {
       $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-        "webcal_entry_user WHERE webcal_meal.cal_id = " .
-        "webcal_entry_user.cal_id AND webcal_meal.cal_id = $id " .
-        "AND webcal_entry_user.cal_login IN ( ";
+        "webcal_meal_participant WHERE webcal_meal.cal_id = " .
+        "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
+        "AND webcal_meal_participant.cal_login IN ( ";
       for ( $i = 0; $i < count ( $my_users ); $i++ ) {
         if ( $i > 0 ) {
           $sql .= ", ";
@@ -111,8 +111,8 @@ if ( empty ( $error ) && ! $can_view && ! empty ( $nonuser_enabled ) &&
   for ( $i = 0; $i < count ( $nonusers ); $i++ ) {
     $nonuser_lookup[$nonusers[$i]['cal_login']] = 1;
   }
-  $sql = "SELECT cal_login FROM webcal_entry_user " .
-    "WHERE cal_id = $id AND cal_status in ('A','W')";
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id";
   $res = dbi_query ( $sql );
   $found_nonuser_cal = false;
   $found_reg_user = false;
@@ -172,9 +172,6 @@ if ( $ext_id > 0 ) {
   if ( $user != "" ) {
     $url .= "&amp;user=$user";
   }
-  if ( $cat_id != "" ) {
-    $url .= "&amp;cat_id=$cat_id";
-  }
   do_redirect ( $url );
 }
 
@@ -187,63 +184,6 @@ if ( ! empty ( $error ) ) {
   echo "</body>\n</html>";
   exit;
 }
-// Try to determine the event status.
-$event_status = "";
-
-if ( ! empty ( $user ) && $login != $user ) {
-  // If viewing another user's calendar, check the status of the
-  // event on their calendar (to see if it's deleted).
-  $sql = "SELECT cal_status FROM webcal_entry_user " .
-    "WHERE cal_login = '$user' AND cal_id = $id";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      $event_status = $row[0];
-    }
-    dbi_free_result ( $res );
-  }
-} else {
-  // We are viewing event on user's own calendar, so check the
-  // status on their own calendar.
-  $sql = "SELECT cal_id, cal_status FROM webcal_entry_user " .
-    "WHERE cal_login = '$login' AND cal_id = $id";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    $row = dbi_fetch_row ( $res );
-    $event_status = $row[1];
-    dbi_free_result ( $res );
-  }
-}
-
-// At this point, if we don't have the event status, then either
-// this user is not viewing an event from his own calendar and not
-// viewing an event from someone else's calendar.
-// They probably got here from the search results page (or possibly
-// by hand typing in the URL.)
-// Check to make sure that it hasn't been deleted from everyone's
-// calendar.
-if ( empty ( $event_status ) ) {
-  $sql = "SELECT cal_status FROM webcal_entry_user " .
-    "WHERE cal_status <> 'D' ORDER BY cal_status";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      $event_status = $row[0];
-    }
-    dbi_free_result ( $res );
-  }
-}
-
-// If we have no event status yet, it must have been deleted.
-if ( ( empty ( $event_status ) && ! $is_admin ) || ! $can_view ) {
-  echo "<h2>" . 
-    translate("Error") . "</h2>" . 
-    translate("You are not authorized") . ".\n";
-  print_trailer ();
-  echo "</body>\n</html>";
-  exit;
-}
-
 
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
@@ -316,20 +256,6 @@ $event_date = $row[0];
 // TODO: don't let someone view another user's private entry
 // by hand editing the URL.
 
-// Get category Info
-if ( $categories_enabled == "Y" ) {
-  $cat_owner =  ( ( ! empty ( $user ) && strlen ( $user ) ) &&  ( $is_assistant  ||
-    $is_admin ) ) ? $user : $login;  
-  $sql = "SELECT cat_name FROM webcal_categories, webcal_entry_user " .
-    "WHERE webcal_entry_user.cal_login = '$cat_owner' AND webcal_entry_user.cal_id = $id " .
-    "AND webcal_entry_user.cal_category = webcal_categories.cat_id";
-  $res2 = dbi_query ( $sql );
-  if ( $res2 ) {
-    $row2 = dbi_fetch_row ( $res2 );
-    $category = $row2[0];
-    dbi_free_result ( $res2 );
-  }
-}
 ?>
 <h2><?php echo htmlspecialchars ( $name ); ?></h2>
 <table style="border-width:0px;">
@@ -389,12 +315,6 @@ if ( $categories_enabled == "Y" ) {
       echo display_time ( $row[1] ) . $end_str;
     }
   ?>
-</td></tr>
-<?php } ?>
-<?php if ( $categories_enabled == "Y" && ! empty ( $category ) ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Category")?>:</td><td>
- <?php echo $category; ?>
 </td></tr>
 <?php } ?>
 <?php
@@ -511,7 +431,7 @@ if ( $single_user == "N" && $show_participants ) { ?>
   if ( $is_private ) {
     echo "[" . translate("Confidential") . "]";
   } else {
-    $sql = "SELECT cal_login, cal_status FROM webcal_entry_user " .
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
       "WHERE cal_id = $id";
     //echo "$sql\n";
     $res = dbi_query ( $sql );
@@ -520,16 +440,7 @@ if ( $single_user == "N" && $show_participants ) { ?>
     if ( $res ) {
       while ( $row = dbi_fetch_row ( $res ) ) {
         $pname = $row[0];
-        if ( $login == $row[0] && $row[1] == 'W' ) {
-          $unapproved = TRUE;
-        }
-        if ( $row[1] == 'A' ) {
-          $approved[$num_app++] = $pname;
-        } else if ( $row[1] == 'W' ) {
-          $waiting[$num_wait++] = $pname;
-        } else if ( $row[1] == 'R' )  {
-          $rejected[$num_rej++] = $pname;
-        }
+	$approved[$num_app++] = $pname;
       }
       dbi_free_result ( $res );
     } else {
@@ -557,27 +468,6 @@ if ( $single_user == "N" && $show_participants ) { ?>
             ")<br />\n";
         }
       }
-    }
-  }
-  for ( $i = 0; $i < $num_wait; $i++ ) {
-    user_load_variables ( $waiting[$i], "temp" );
-    if ( strlen ( $tempemail ) ) {
-      echo "<br /><a href=\"mailto:" . $tempemail . "?subject=$subject\">" . 
-        $tempfullname . "</a> (?)\n";
-      $allmails[] = $tempemail;
-    } else {
-      echo "<br />" . $tempfullname . " (?)\n";
-    }
-  }
-  for ( $i = 0; $i < $num_rej; $i++ ) {
-    user_load_variables ( $rejected[$i], "temp" );
-    if ( strlen ( $tempemail ) ) {
-      echo "<br /><strike><a href=\"mailto:" . $tempemail .
-        "?subject=$subject\">" . $tempfullname .
-        "</a></strike> (" . translate("Rejected") . ")\n";
-    } else {
-      echo "<br /><strike>$tempfullname</strike> (" . 
-        translate("Rejected") . ")\n";
     }
   }
 ?>
@@ -637,14 +527,6 @@ if ( $walkins == "W" ) {
 <br /><?php
 
 
-if ( empty ( $event_status ) ) {
-  // this only happens when an admin views a deleted event that he is
-  // not a participant for.  Set to $event_status to "D" just to get
-  // rid of all the edit/delete links below.
-  $event_status = "D";
-}
-
-
 if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "&amp;user=$user";
 } else {
@@ -661,19 +543,7 @@ if ( $readonly == 'Y' ) {
   $can_edit = false;
 }
 
-// If approved, but event category not set (and user does not have permission
-// to edit where they could also set the category), then allow them to
-// set it through set_cat.php.
-if ( empty ( $user ) && $categories_enabled == "Y" &&
-  $readonly != "Y" && $is_my_event && $login != "__public__" &&
-  $event_status != "D" && ! $can_edit )  {
-  echo "<a title=\"" . 
-    translate("Set category") . "\" class=\"nav\" " .
-    "href=\"set_entry_cat.php?id=$id\">" .
-    translate("Set category") . "</a><br />\n";
-}
-
-if ( $can_edit && $event_status != "D" ) {
+if ( $can_edit ) {
   echo "<a title=\"" .
     translate("Edit entry") . "\" class=\"nav\" " .
     "href=\"edit_entry.php?id=$id$u_url\">" .
@@ -684,8 +554,7 @@ if ( $can_edit && $event_status != "D" ) {
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete this entry for all users.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
-} elseif ( $readonly != "Y" && $is_my_event && $login != "__public__" &&
-  $event_status != "D" )  {
+} elseif ( $readonly != "Y" && $is_my_event && $login != "__public__" )  {
   echo "<a title=\"" . 
     translate("Delete entry") . "\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
@@ -694,7 +563,7 @@ if ( $can_edit && $event_status != "D" ) {
     translate("Delete entry") . "</a><br />\n";
 }
 if ( $readonly != "Y" && ! $is_my_event && ! $is_private && 
-  $event_status != "D" && $login != "__public__" )  {
+  $login != "__public__" )  {
   echo "<a title=\"" . 
     translate("Add to My Calendar") . "\" class=\"nav\" " .
     "href=\"add_entry.php?id=$id\" onclick=\"return confirm('" . 

@@ -158,8 +158,6 @@ function indent ( $str ) {
 
 // Send a reminder for a single event for a single day to all
 // participants in the event.
-// Send to participants who have accepted as well as those who have not yet
-// approved.  But, don't send to users how rejected (cal_status='R').
 function send_reminder ( $id, $event_date ) {
   global $names, $emails, $site_extras, $debug, $only_testing,
     $server_url, $languages, $tzoffset, $application_name;
@@ -173,8 +171,8 @@ function send_reminder ( $id, $event_date ) {
 
   // get participants first...
  
-  $sql = "SELECT cal_login FROM webcal_entry_user " .
-    "WHERE cal_id = $id AND cal_status IN ('A','W') " .
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id " . 
     "ORDER BY cal_login";
   $res = dbi_query ( $sql );
   $participants = array ();

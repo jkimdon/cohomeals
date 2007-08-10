@@ -20,10 +20,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
   if ( ! empty ( $user ) && $user != $login ) {
     echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
   }
-  if ( ! empty ( $cat_id ) && $categories_enabled == "Y"
-    && ( ! $user || $user == $login ) ) {
-    echo "<input type=\"hidden\" name=\"cat_id\" value=\"$cat_id\" />\n";
-  }
 ?>
 <label for="monthselect"><?php etranslate("Month")?>:&nbsp;</label>
 <select name="date" id="monthselect" onchange="document.SelectMonth.submit()">
@@ -63,10 +59,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 <?php
   if ( ! empty ( $user ) && $user != $login ) {
     echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-  }
-  if ( ! empty ( $cat_id ) && $categories_enabled == "Y"
-    && ( ! $user || $user == $login ) ) {
-    echo "<input type=\"hidden\" name=\"cat_id\" value=\"$cat_id\" />\n";
   }
 ?>
 <label for="yearselect"><?php etranslate("Year")?>:&nbsp;</label>

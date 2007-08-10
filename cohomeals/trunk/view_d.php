@@ -170,7 +170,6 @@ daily_matrix($date,$participants);
 echo "<br /><a title=\"" . translate ( "Generate printer-friendly version" ) . 
   "\" class=\"printer\" href=\"view_d.php?id=$id&amp;";
 echo ( empty ( $u_url ) ? '' : $u_url ) . "date=$nowYmd";
-echo ( empty ( $caturl ) ? '' : $caturl );
 echo "&amp;friendly=1\" target=\"cal_printer_friendly\" " .
   "onmouseover=\"window.status='" .
   translate ( "Generate printer-friendly version" ) .
