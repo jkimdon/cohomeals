@@ -60,10 +60,7 @@ if ( empty ( $PHP_SELF ) ) {
 $cookie_path = str_replace ( "login.php", "", $PHP_SELF );
 //echo "Cookie path: $cookie_path\n$cookie_path1";
 
-if ( $single_user == "Y" ) {
-  // No login for single-user mode
-  do_redirect ( "index.php" );
-} else if ( $use_http_auth ) {
+if ( $use_http_auth ) {
   // There is no login page when using HTTP authorization
   do_redirect ( "index.php" );
 } else {

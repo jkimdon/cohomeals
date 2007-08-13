@@ -6,10 +6,8 @@ db_database: cohomeals
 db_login: cohoadmin
 db_password: flaGpolE
 db_persistent: true
-single_user_login: 
 readonly: false
 use_http_auth: false
-single_user: false
 user_inc: user.php
 # end settings.php
 ?>

@@ -7,7 +7,6 @@
 // web page to them. 
 
 include_once 'includes/init.php';
-load_user_layers ();
 
 $error = "";
 if ( ! $is_admin )

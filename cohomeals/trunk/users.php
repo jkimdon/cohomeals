@@ -6,7 +6,7 @@
 		- contains the tabs
 		- lists users
 		- has an iframe for adding/editing users
-		- include statements for groups.php and nonusers.php
+		- include statements for groups.php
 	2. edit_user.php
 		- the contents of the iframe (i.e. a form for adding/editing users)
 	3. edit_user_handler.php
@@ -14,7 +14,7 @@
 		- provides user with confirmation of successful operation
 		- refreshes the parent frame (users.php)
 
-	This structure is mirrored for groups & nonusers
+	This structure is mirrored for groups
 */
 
 /* $Id $ */
@@ -50,9 +50,6 @@ print_header($INC);
 	?></a></span>
 	<?php if ($groups_enabled == "Y" && $is_admin) { ?>
 		<span class="tabbak" id="tab_groups"><a href="#tabgroups" onclick="return showTab('groups')"><?php etranslate("Groups")?></a></span>
-	<?php } 
-	if ($nonuser_enabled == 'Y' && $is_admin) { ?>
-		<span class="tabbak" id="tab_nonusers"><a href="#tabnonusers" onclick="return showTab('nonusers')"><?php etranslate("NonUser Calendars")?></a></span>
 	<?php } ?>
 </div>
 
@@ -100,9 +97,6 @@ print_header($INC);
 	if ($groups_enabled == "Y" && $is_admin) { 
 		include_once 'groups.php';
 	} 
-	if ($nonuser_enabled == 'Y' && $is_admin) {
-		include_once 'nonusers.php';
-	}
 ?>
 </div>
 

@@ -1,7 +1,6 @@
 <?php
 include_once 'includes/init.php';
 
-$my_event = false;
 $can_edit = false;
 
 // First, check to see if this user should be able to delete this event.
@@ -48,8 +47,8 @@ if ( $id > 0 && empty ( $error ) ) {
   }
 
   // Only allow delete of webcal_meal
-  // if owner or admin, not participant.
-  if ( $is_admin || $my_event ) {
+  // if admin, not participant.
+  if ( $is_admin ) {
 
     // Email participants that the event was deleted
     // First, get list of participants 
@@ -93,7 +92,7 @@ if ( $id > 0 && empty ( $error ) ) {
           $eventtime -= 240000;
         }
       }            
-      if ( $partlogin[$i] != $login && $do_send == "Y" && boss_must_be_notified ( $login, $partlogin[$i] ) && 
+      if ( $partlogin[$i] != $login && $do_send == "Y" && 
         strlen ( $tempemail ) && $send_email != "N" ) {
          if (($GLOBALS['LANGUAGE'] != $user_language) && ! empty ( $user_language ) && ( $user_language != 'none' )){
           reset_language ( $user_language );
@@ -123,11 +122,8 @@ if ( $id > 0 && empty ( $error ) ) {
       "WHERE cal_id = $id" );
 
   } else {
-    // Not the owner of the event and are not the admin.
+    // Not the admin.
     // Just delete the event from this user's calendar.
-    // We could just set the status to 'D' instead of deleting.
-    // (but we would need to make some changes to edit_entry_handler.php
-    // to accomodate this).
     dbi_query ( "DELETE FROM webcal_meal_participant " .
       "WHERE cal_id = $id AND cal_login = '$login'" );
     activity_log ( $id, $login, $login, $LOG_REJECT, "" );
@@ -135,7 +131,7 @@ if ( $id > 0 && empty ( $error ) ) {
 }
 
 $ret = getValue ( "ret" );
-$url = get_preferred_view ( "", empty ( $user ) ? "" : "user=$user" );
+$url = get_preferred_view ( "", "" );
 
 if ( empty ( $error ) ) {
   do_redirect ( $url );

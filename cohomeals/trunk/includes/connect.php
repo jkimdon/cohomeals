@@ -26,34 +26,6 @@ if ( empty ( $c ) ) {
   }
 }
 
-// If we are in single user mode, make sure that the login selected is
-// a valid login.
-if ( $single_user == 'Y' ) {
-  if ( empty ( $single_user_login ) ) {
-    die_miserable_death ( "You have not defined <tt>single_user_login</tt> in " .
-      "<tt>includes/settings.php</tt>" );
-  }
-  $res = dbi_query ( "SELECT COUNT(*) FROM webcal_user " .
-    "WHERE cal_login = '$single_user_login'" );
-  if ( ! $res ) {
-    echo "Database error: " . dbi_error (); exit;
-  }
-  $row = dbi_fetch_row ( $res );
-  if ( $row[0] == 0 ) {
-    // User specified as single_user_login does not exist
-    if ( ! dbi_query ( "INSERT INTO webcal_user ( cal_login, " .
-      "cal_passwd, cal_is_admin ) VALUES ( '$single_user_login', " .
-       "'" . md5($single_user_login) . "', 'Y' )" ) ) {
-      die_miserable_death ( "User <tt>$single_user_login</tt> does not " .
-        "exist in <tt>webcal_user</tt> table and was not able to add " .
-        "it for you:<br /><blockquote>" .
-        dbi_error () . "</blockquote>" );
-    }
-    // User was added... should we tell them?
-  }
-  dbi_free_result ( $res );
-}
-
 
 // global settings have not been loaded yet, so check for public_access now
 $res = dbi_query ( "SELECT cal_value FROM webcal_config " .
@@ -150,18 +122,12 @@ if ( empty ( $login ) && $use_http_auth ) {
     }
   }
 }
-//else if ( ! $single_user ) {
-//  echo "Error(3)! no login info found: " . dbi_error () . "<br /><span style=\"font-weight:bold;\">SQL:</span> $sql";
-//  exit;
-//}
 
 // If they are accessing using the public login, restrict them from using
 // certain pages.
 $not_auth = false;
 if ( ! empty ( $login ) && $login == "__public__" ) {
-  if ( strstr ( $PHP_SELF, "views.php" ) ||
-    strstr ( $PHP_SELF, "views_edit_handler.php" ) ||
-    strstr ( $PHP_SELF, "activity_log.php" ) ||
+  if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
     strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "adminhome.php" ) ||
     strstr ( $PHP_SELF, "admin_handler.php" ) ||
@@ -172,10 +138,6 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
     strstr ( $PHP_SELF, "edit_user.php" ) ||
     strstr ( $PHP_SELF, "edit_user_handler.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
-    strstr ( $PHP_SELF, "layers.php" ) ||
-    strstr ( $PHP_SELF, "layer_toggle.php" ) ||
-    strstr ( $PHP_SELF, "import.php" ) ||
-    strstr ( $PHP_SELF, "import_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_template.php" ) ) {
     $not_auth = true;
   }
@@ -212,18 +174,11 @@ if ( $readonly == "Y" ) {
     strstr ( $PHP_SELF, "edit_user.php" ) ||
     strstr ( $PHP_SELF, "group_edit_handler.php" ) ||
     strstr ( $PHP_SELF, "groups.php" ) ||
-    strstr ( $PHP_SELF, "import_handler.php" ) ||
-    strstr ( $PHP_SELF, "import_handler.php" ) ||
-    strstr ( $PHP_SELF, "import.php" ) ||
-    strstr ( $PHP_SELF, "layers.php" ) ||
-    strstr ( $PHP_SELF, "layer_toggle.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "pref.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "purge.php" ) ||
-    strstr ( $PHP_SELF, "users.php" ) ||
-    strstr ( $PHP_SELF, "views_edit_handler.php" ) ||
-    strstr ( $PHP_SELF, "views.php" ) ) {
+    strstr ( $PHP_SELF, "users.php" ) ) {
     $not_auth = true;
   }
 }

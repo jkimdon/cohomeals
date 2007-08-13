@@ -16,11 +16,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 
 <div id="trailer">
 <form action="month.php" method="get" name="SelectMonth" id="monthform">
-<?php
-  if ( ! empty ( $user ) && $user != $login ) {
-    echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-  }
-?>
 <label for="monthselect"><?php etranslate("Month")?>:&nbsp;</label>
 <select name="date" id="monthselect" onchange="document.SelectMonth.submit()">
 <?php
@@ -84,7 +79,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 
 <?php
 $goto_link = array ( );
-$views_link = array ( );
 $reports_link = array ( );
 $manage_calendar_link = array ( );
 
@@ -117,20 +111,11 @@ if ( ! strstr ( $reqURI, "month.php" ) &&
   $todayURL = $reqURI;
 }
 
-if ( ! empty ( $user ) && $user != $login ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("My Calendar") . "\" style=\"font-weight:bold;\" " .
-    "href=\"$mycal\">" . 
-    translate("Back to My Calendar") . "</a>";
-} else {
-  $goto_link[] = "<a title=\"" . 
-    translate("Calendar") . "\" style=\"font-weight:bold;\" " .
-    "href=\"$mycal\">" . 
-    translate("Calendar") . "</a>";
-}
-if ( ! empty ( $user ) && $user != $login ) {
-  $todayURL .= '?user=' . $user;
-}
+$goto_link[] = "<a title=\"" . 
+translate("Calendar") . "\" style=\"font-weight:bold;\" " .
+  "href=\"$mycal\">" . 
+translate("Calendar") . "</a>";
+
 if ( $login != '__public__' && $readonly == 'N' ) {
   $goto_link[] = "<a title=\"" . 
     translate("User info") . "\" style=\"font-weight:bold;\" " .

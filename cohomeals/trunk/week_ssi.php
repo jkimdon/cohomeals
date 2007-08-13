@@ -4,16 +4,13 @@
 // for another page.
 // (Such as an intranet home page or something.)
 // As such, no login is required.  Instead, the login id is either
-// passed in the URL "week_ssi.php?login=cknudsen".  Unless, of course,
-// we are in single-user mode, where no login info is needed.
+// passed in the URL "week_ssi.php?login=cknudsen".  
 // If no login info is passed, we check for the last login used.
 
 $user = "__none__"; // don't let user specify in URL
 
 if ( strlen ( $login ) == 0 ) {
-  if ( $single_user == "Y" ) {
-    $login = $user = $single_user_login;
-  } else if ( strlen ( $webcalendar_login ) > 0 ) {
+  if ( strlen ( $webcalendar_login ) > 0 ) {
     $login = $user = $webcalendar_login;
   } else {
 	echo "<span style=\"color:#FF0000; font-weight:bold;\">Error:</span><span style=\"color:#FF0000;\"> No calendar user specified.</span>";
@@ -29,7 +26,6 @@ include "includes/connect.php";
 
 load_global_settings ();
 load_user_preferences ();
-load_user_layers ();
 
 $view = "week";
 
@@ -71,7 +67,7 @@ $startdate = date ( "Ymd", $wkstart );
 $enddate = date ( "Ymd", $wkend );
 
 /* Pre-load the events for quicker access */
-$events = read_events ( $login, $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 
 for ( $i = 0; $i < 7; $i++ ) {
   $days[$i] = $wkstart + ( 24 * 3600 ) * $i;

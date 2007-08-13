@@ -1,11 +1,6 @@
 <?php
 include_once 'includes/init.php';
 
-if (($user != $login) && $is_nonuser_admin)
-  load_user_layers ($user);
-else
-  load_user_layers ();
-
 
 $wday = strftime ( "%w", mktime ( 3, 0, 0, $thismonth, $thisday, $thisyear ) );
 
@@ -45,7 +40,7 @@ print_header($INC,$HeadX);
 
 <?php
 /* Pre-load the events for quicker access */
-$events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 ?>
 
 <table>
@@ -58,15 +53,8 @@ $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate )
   echo date_to_str ( $nowYmd );
 ?></span>
 <span class="user"><?php
-  // display current calendar's user (if not in single user)
-  if ( $single_user == "N" ) {
-    echo "<br />";
-    echo $user_fullname;
-  }
-  if ( $is_nonuser_admin )
-    echo "<br />-- " . translate("Admin mode") . " --";
-  if ( $is_assistant )
-    echo "<br />-- " . translate("Assistant mode") . " --";
+  echo "<br />";
+  echo $user_fullname;
 ?></span>
 </div>
 </div>
@@ -82,10 +70,9 @@ $events = read_events ( empty ( $user ) ? $login : $user, $startdate, $enddate )
 if ( empty ( $TIME_SLOTS ) )
   $TIME_SLOTS = 24;
 
-/*print_day_at_a_glance ( date ( "Ymd", $now ),*/
 print "<tr><td style=\"width:50%;\">";
 print_date_entries ( date ( "Ymd", $now ),
-  empty ( $user ) ? $login : $user, $can_add );
+  $can_add );
 print "</td></tr>";
 ?>
 </table>

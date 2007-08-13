@@ -76,15 +76,6 @@ if ( $login == "__public__" && $login != $user ) {
 if ( empty ( $user ) )
   $user = $login;
 
-// If viewing different user then yourself...
-if ( $login != $user ) {
-  if ( $allow_view_other != 'Y' ) {
-    echo "<error>" . translate("Not authorized") . "</error>\n";
-    echo "</reminders>\n";
-    exit;
-  }
-  echo "<!-- Allowing user to view other user's calendar -->\n";
-}
 
 // Make sure this user has enabled email reminders.
 //if ( $EMAIL_REMINDER == 'N' ) {
@@ -98,8 +89,8 @@ $enddate = date ( "Ymd", time() + ( $DAYS_IN_ADVANCE * 24 * 3600 ) );
 
 // Read events
 if ( $debug )
-  echo "Checking for events for $user from date $startdate to date $enddate\n";
-$events = read_events ( $user, $startdate, $enddate );
+  echo "Checking for events from date $startdate to date $enddate\n";
+$events = read_events ( $startdate, $enddate );
 if ( $debug )
   echo "Found " . count ( $events ) . " events in time range.\n";
 
@@ -120,10 +111,6 @@ function list_reminder ( $id, $event_date, $remind_time ) {
     $server_url, $application_name;
   global $EXTRA_TEXT, $EXTRA_MULTILINETEXT, $EXTRA_URL, $EXTRA_DATE,
     $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LANGUAGE, $LOG_REMINDER;
-
-  $pri[1] = translate("Low");
-  $pri[2] = translate("Medium");
-  $pri[3] = translate("High");
 
   // get participants first...
  
@@ -239,7 +226,7 @@ function list_reminder ( $id, $event_date, $remind_time ) {
     }
   }
   echo "  </siteExtras>\n";
-  if ( $single_user != "Y" && ! $disable_participants_field ) {
+  if ( ! $disable_participants_field ) {
     echo "  <participants>\n";
     for ( $i = 0; $i < count ( $participants ); $i++ ) {
       echo "    <participant>" .  $participants[$i] .
@@ -326,7 +313,7 @@ for ( $d = 0; $d < $DAYS_IN_ADVANCE; $d++ ) {
   $date = date ( "Ymd", time() + ( $d * 24 * 3600 ) );
   //echo "Date: $date\n";
   // An event will be included one time for each participant.
-  $ev = get_entries ( $user, $date );
+  $ev = get_entries ( $date );
   // Keep track of duplicates
   $completed_ids = array ( );
   for ( $i = 0; $i < count ( $ev ); $i++ ) {

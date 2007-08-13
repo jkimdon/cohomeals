@@ -73,17 +73,6 @@ if ( $is_admin ) {
 	$links[] = "users.php";
 }
 
-if ( $single_user != 'Y' ) {
-	$names[] = translate("Assistants");
-	$links[] = "assistant_edit.php";
-}
-
-
-$names[] = translate("Views");
-$links[] = "views.php";
-
-$names[] = translate("Layers");
-$links[] = "layers.php";
 
 if ( $reports_enabled == 'Y' ) {
 	$names[] = translate("Reports");

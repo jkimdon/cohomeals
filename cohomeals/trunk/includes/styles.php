@@ -103,11 +103,7 @@ a:hover {
 #edituser,
 #edituserhandler,
 #groupedit,
-#editnonusers,
 #groupedithandler,
-#editnonusershandler {
-  background-color: #F8F8FF;
-}
 #tabscontent {
   margin: 0px;
   padding: 0.5em;
@@ -140,19 +136,15 @@ a:hover {
 }
 #tabscontent_public,
 #tabscontent_groups,
-#tabscontent_nonuser,
 #tabscontent_other,
 #tabscontent_email,
 #tabscontent_colors,
 #tabscontent_participants,
 #tabscontent_sched,
 #tabscontent_pete,
-#tabscontent_export,
-#tabscontent_nonusers,
 #useriframe,
-#grpiframe,
-#nonusersiframe {
-  display: none;
+#grpiframe {
+ display: none;
 }
 label {
   font-weight: bold;
@@ -236,23 +228,6 @@ label {
   border-width: 0px;
   float: right;
 }
-<?php //links to unapproved entries/events
-?>.unapprovedentry {
-  font-size: 13px;
-  color: #800000;
-  text-decoration: none;
-  padding-right: 3px;
-}
-.nounapproved {
-  margin-left: 20px;
-}
-<?php //links to entries/events on layers
-?>.layerentry {
-  font-size: 13px;
-  color: #006060;
-  text-decoration: none;
-  padding-right: 3px;
-}
 <?php //links to entries/events
 ?>.entry {
   font-size: 13px;
@@ -260,10 +235,8 @@ label {
   text-decoration: none;
   padding-right: 3px;
 }
-<?php //event (or bullet) icon; NOTE: must appear AFTER the .entry, .layerentry, and .unapprovedentry classes
-?>.entry img,
-.layerentry img,
-.unapprovedentry img {
+<?php //event (or bullet) icon; NOTE: must appear AFTER the .entry class
+?>.entry img {
   border-width: 0px;
   margin-left: 2px;
   margin-right: 2px;

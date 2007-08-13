@@ -150,22 +150,6 @@ CREATE TABLE webcal_user_pref (
   PRIMARY KEY ( cal_login, cal_setting )
 );
 
-/*
- * Define layers for a user.
- */
-CREATE TABLE webcal_user_layers (
-  /* unique layer id */
-  cal_layerid INT DEFAULT 0 NOT NULL,
-  /* login of owner of this layer */
-  cal_login VARCHAR(25) NOT NULL,
-  /* login name of user that this layer represents */
-  cal_layeruser VARCHAR(25) NOT NULL,
-  /* color to display this layer in */
-  cal_color VARCHAR(25) NULL,
-  /* show duplicates ('N' or 'Y') */
-  cal_dups CHAR(1) DEFAULT 'N',
-  PRIMARY KEY ( cal_login, cal_layeruser )
-);
 
 /*
  * This table holds data for site extra fields
@@ -230,36 +214,6 @@ CREATE TABLE webcal_group_user (
   PRIMARY KEY ( cal_group_id, cal_login )
 );
 
-/*
- * A "view" allows a user to put the calendars of multiple users all on
- * one page.  A "view" is valid only for the owner (cal_owner) of the
- * view.  Users for the view are in
- * <a href="#webcal_view_user">webcal_view_user</a>.
- */
-CREATE TABLE webcal_view (
-  /* unique view id */
-  cal_view_id INT NOT NULL,
-  /* login name of owner of this view */
-  cal_owner VARCHAR(25) NOT NULL,
-  /* name of view */
-  cal_name VARCHAR(50) NOT NULL,
-  /* "W" for week view, "D" for day view, "M" for month view */
-  cal_view_type CHAR(1),
-  /* is this a global view (can it be accessed by other users) ('Y' or 'N') */
-  cal_is_global CHAR(1) DEFAULT 'N' NOT NULL,
-  PRIMARY KEY ( cal_view_id )
-);
-
-/*
- * Specify users in a view. See <a href="#webcal_view">webcal_view</a>.
- */
-CREATE TABLE webcal_view_user (
-  /* view id */
-  cal_view_id INT NOT NULL,
-  /* a user in the view */
-  cal_login VARCHAR(25) NOT NULL,
-  PRIMARY KEY ( cal_view_id, cal_login )
-);
 
 /*
  * System settings (set by the admin interface in admin.php)
@@ -446,33 +400,6 @@ CREATE TABLE webcal_entry_log (
   /* optional text */
   cal_text TEXT,
   PRIMARY KEY ( cal_log_id )
-);
-
-
-/*
- * Define assitant/boss relationship.
- */
-CREATE TABLE webcal_asst (
-  /* user login of boss */
-  cal_boss VARCHAR(25) NOT NULL,
-  /* user login of assistant */
-  cal_assistant VARCHAR(25) NOT NULL,
-  PRIMARY KEY ( cal_boss, cal_assistant )
-);
-
-/*
- * Defines non-user calendars.
- */
-CREATE TABLE webcal_nonuser_cals (
-  /* the unique id for the calendar */
-  cal_login VARCHAR(25) NOT NULL,
-  /* calendar's last name */
-  cal_lastname VARCHAR(25) NULL,
-  /* calendar's first name */
-  cal_firstname VARCHAR(25) NULL,
-  /* who is the calendar administrator */
-  cal_admin VARCHAR(25) NOT NULL,
-  PRIMARY KEY ( cal_login )
 );
 
 

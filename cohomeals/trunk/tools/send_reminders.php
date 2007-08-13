@@ -146,7 +146,7 @@ $enddate = date ( "Ymd", time() + ( $DAYS_IN_ADVANCE * 24 * 3600 ) );
 // Read events (for all users)
 if ( $debug )
   echo "Checking for events from date $startdate to date $enddate <br />\n";
-$events = read_events ( "", $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 if ( $debug )
   echo "Found " . count ( $events ) . " events in time range. <br />\n";
 
@@ -164,10 +164,6 @@ function send_reminder ( $id, $event_date ) {
   global $EXTRA_TEXT, $EXTRA_MULTILINETEXT, $EXTRA_URL, $EXTRA_DATE,
     $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LANGUAGE, $LOG_REMINDER;
   global $allow_external_users, $external_reminders;
-
-  $pri[1] = translate("Low");
-  $pri[2] = translate("Medium");
-  $pri[3] = translate("High");
 
   // get participants first...
  
@@ -227,24 +223,20 @@ function send_reminder ( $id, $event_date ) {
   // languages between users if needed.
   $mailusers = array ();
   $recipients = array ();
-  if ( isset ( $single_user ) && $single_user == "Y" ) {
-    $mailusers[] = $emails[$single_user_login];
-    $recipients[] = $single_user_login;
-  } else {
-    for ( $i = 0; $i < count ( $participants ); $i++ ) {
-      if ( strlen ( $emails[$participants[$i]] ) ) {
-        $mailusers[] = $emails[$participants[$i]];
-        $recipients[] = $participants[$i];
-      } else {
-        if ( $debug )
-   echo "No email for user $participants[$i] <br />\n";
-      }
-    }
-    for ( $i = 0; $i < count ( $ext_participants ); $i++ ) {
-      $mailusers[] = $ext_participants_email[$i];
-      $recipients[] = $ext_participants[$i];
+  for ( $i = 0; $i < count ( $participants ); $i++ ) {
+    if ( strlen ( $emails[$participants[$i]] ) ) {
+      $mailusers[] = $emails[$participants[$i]];
+      $recipients[] = $participants[$i];
+    } else {
+      if ( $debug )
+	echo "No email for user $participants[$i] <br />\n";
     }
   }
+  for ( $i = 0; $i < count ( $ext_participants ); $i++ ) {
+    $mailusers[] = $ext_participants_email[$i];
+    $recipients[] = $ext_participants[$i];
+  }
+
   if ( $debug )
     echo "Found " . count ( $mailusers ) . " with email addresses <br />\n";
   for ( $j = 0; $j < count ( $mailusers ); $j++ ) {
@@ -311,8 +303,7 @@ function send_reminder ( $id, $event_date ) {
         }
       }
     }
-    if ( ! empty ( $single_user )  && $single_user != "Y" &&
-      ! empty ( $disable_participants_field ) &&  ! $disable_participants_field ) {
+    if ( ! empty ( $disable_participants_field ) &&  ! $disable_participants_field ) {
       $body .= translate("Participants") . ":\n";
       for ( $i = 0; $i < count ( $participants ); $i++ ) {
         $body .= "  " . $names[$participants[$i]] . "\n";
@@ -445,7 +436,7 @@ for ( $d = 0; $d < $DAYS_IN_ADVANCE; $d++ ) {
   //echo "Date: $date\n";
   // Get events for this date.
   // An event will be included one time for each participant.
-  $ev = get_entries ( "", $date );
+  $ev = get_entries ( $date );
   // Keep track of duplicates
   $completed_ids = array ( );
   for ( $i = 0; $i < count ( $ev ); $i++ ) {

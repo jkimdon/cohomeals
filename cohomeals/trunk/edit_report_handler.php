@@ -47,10 +47,6 @@ if ( $is_admin && ! empty ( $public ) && $public_access == "Y" ) {
   $updating_public = true;
 }
 
-if ( $single_user == 'Y' || $disable_participants_field == 'Y' ) {
-  $report_user = '';
-}
-
 if ( ! $is_admin )
   $is_global = 'N';
 
@@ -58,7 +54,7 @@ $adding_report = ( empty ( $report_id ) || $report_id <= 0 );
 
 // Check permissions
 // Can only edit/delete if you created the event or your are an admin.
-if ( empty ( $error ) && $single_user != 'N' && ! empty ( $report_id ) &&
+if ( empty ( $error ) && ! empty ( $report_id ) &&
   $report_id > 0 && ! $is_admin ) {
   $res = dbi_query ( "SELECT cal_login FROM webcal_report " .
      "WHERE report_id = $report_id" );

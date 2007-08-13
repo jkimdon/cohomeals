@@ -34,11 +34,9 @@ unset ( $db_database );
 unset ( $db_login );
 unset ( $db_password );
 unset ( $db_persistent );
-unset ( $single_user_login );
 unset ( $readonly );
 unset ( $mode );
 unset ( $use_http_auth );
-unset ( $single_user );
 unset ( $user_inc );
 unset ( $includedir );
 unset ( $basedir );
@@ -152,29 +150,12 @@ foreach ( array ( "db_type", "db_host", "db_login", "db_password" ) as $s ) {
 $readonly = preg_match ( "/(1|yes|true|on)/i",
   $settings['readonly'] ) ? 'Y' : 'N';
 
-$single_user = "N";
-$single_user = preg_match ( "/(1|yes|true|on)/i",
-  $settings['single_user'] ) ? 'Y' : 'N';
-if ( $single_user == 'Y' )
-  $single_user_login = $settings['single_user_login'];
-
-if ( $single_user == 'Y' && empty ( $single_user_login ) ) {
-  die_miserable_death ( "You must define <tt>single_user_login</tt> in " .
-    "the settings.php file.\n" );
-}
-
 
 $use_http_auth = preg_match ( "/(1|yes|true|on)/i",
   $settings['use_http_auth'] ) ? true : false;
 
 // Type of user authentication
 $user_inc = $settings['user_inc'];
-
-// We can add extra 'nonuser' calendars such as a corporate calendar,
-// holiday calendar, departmental calendar, etc.  We need a unique prefix
-// for these calendars as not to get mixed up with real logins.  This prefix
-// should be a Maximum of 5 characters and should NOT change once set!
-$NONUSER_PREFIX = '_NUC_';
 
 // Language options  The first is the name presented to users while
 // the second is the filename (without the ".txt") that must exist
@@ -304,9 +285,6 @@ $browser_languages = array (
 // translate("Swedish")
 // translate("Turkish")
 // translate("Welsh")
-
-if ( $single_user != "Y" )
-  $single_user_login = "";
 
 // Make sure magic quotes is enabled, since this app requires it.
 if ( get_magic_quotes_gpc () == 0 ) {

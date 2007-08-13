@@ -214,10 +214,6 @@ if ( ! empty ( $id ) && ( empty ( $copy ) || $copy != '1' ) ) echo "<input type=
 // we need an additional hidden input field
 echo "<input type=\"hidden\" name=\"entry_changed\" value=\"\" />\n";
 
-// if assistant, need to remember boss = user
-if ( $is_assistant || $is_nonuser_admin || ! empty ( $user ) )
-   echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-
 // if has cal_group_id was set, need to send parent = $parent
 if ( ! empty ( $parent ) )
    echo "<input type=\"hidden\" name=\"parent\" value=\"$parent\" />\n";
@@ -425,7 +421,7 @@ if ( $allday != "Y" && $hour == -1 ) {
 <input type="hidden" name="participant_list" value="" />
 </form>
 
-<?php if ( $id > 0 && ( $login == $create_by || $single_user == "Y" || $is_admin ) ) { ?>
+<?php if ( $id > 0 && $is_admin ) { ?>
  <a href="del_entry.php?id=<?php echo $id;?>" onclick="return confirm('<?php etranslate("Are you sure you want to delete this entry?")?>');"><?php etranslate("Delete entry")?></a><br />
 <?php 
  } //end if clause for delete link

@@ -2,12 +2,6 @@
 include_once 'includes/init.php';
 send_no_cache_header ();
 
-if (($user != $login) && $is_nonuser_admin)
-  load_user_layers ($user);
-else
-  load_user_layers ();
-
-
 
 $next = mktime ( 2, 0, 0, $thismonth, $thisday + 7, $thisyear );
 $prev = mktime ( 2, 0, 0, $thismonth, $thisday - 7, $thisyear );
@@ -46,7 +40,7 @@ $INC = array('js/popups.php');
 print_header($INC,$HeadX);
 
 /* Pre-load the events for quicker access */
-$events = read_events ( strlen ( $user ) ? $user : $login, $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 
 for ( $i = 0; $i < 7; $i++ ) {
   $days[$i] = $wkstart + ( 24 * 3600 ) * $i;
@@ -71,13 +65,7 @@ if ( $GLOBALS["DISPLAY_WEEKNUMBER"] == "Y" ) {
 }
 ?>
 <span class="user"><?php
-  if ( $single_user == "N" ) {
-    echo "<br />$user_fullname\n";
-  }
-  if ( $is_nonuser_admin )
-    echo "<br />-- " . translate("Admin mode") . " --";
-  if ( $is_assistant )
-    echo "<br />-- " . translate("Assistant mode") . " --";
+  echo "<br />$user_fullname\n";
 ?></span>
 <?php
 </div>
@@ -122,7 +110,7 @@ for ( $d = 0; $d < 7; $d++ ) {
     echo ">";
   }
 
-  print_det_date_entries ( $date, $user, true );
+  print_det_date_entries ( $date, true );
   echo "&nbsp;";
   echo "</td></tr>\n";
 }
@@ -154,43 +142,20 @@ onmouseover="window.status = '<?php etranslate("Generate printer-friendly versio
 //   $time - time (in HHMMSS format)
 //   $name - event name
 //   $description - long description of event
-//   $status - event status
-//   $pri - event priority
-//   $access - event access
-//   $event_owner - user associated with this event
 function print_detailed_entry ( $id, $date, $time, $duration,
-  $name, $description, $status,
-  $pri, $access, $event_owner ) {
-  global $eventinfo, $login, $user, $TZ_OFFSET;
+  $name, $description ) {
+  global $eventinfo, $login, $TZ_OFFSET;
   static $key = 0;
 
-  global $layers;
+  $class = "entry";
 
-  if ( $login != $event_owner && strlen ( $event_owner ) ) {
-    $class = "layerentry";
-  } else {
-    $class = "entry";
-    if ( $status == "W" ) $class = "unapprovedentry";
-  }
-
-  if ( $pri == 3 ) echo "<strong>";
 	$divname = "eventinfo-$id-$key";
 	$key++;
 	echo "<a title=\"" . 
 		translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
-	if ( strlen ( $user ) > 0 )
-		echo "&amp;user=" . $user;
 	echo "\" onmouseover=\"window.status='" . 
 		translate("View this entry") .	"'; return true;\" onmouseout=\"window.status=''; return true;\">";
 	echo "<img src=\"circle.gif\" class=\"bullet\" alt=\"view icon\" />";
-
-  if ( $login != $event_owner && strlen ( $event_owner ) ) {
-    if ($layers) foreach ($layers as $layer) {
-      if($layer['cal_layeruser'] == $event_owner) {
-        echo("<span style=\"color:#" . $layer['cal_color'] . ";\">");
-      }
-    }
-  }
 
   $timestr = "";
   $my_time = $time + ( $TZ_OFFSET * 10000 );
@@ -227,20 +192,11 @@ function print_detailed_entry ( $id, $date, $time, $duration,
 	echo "&raquo;&nbsp;";
     }
   }
-  if ( $login != $user && $access == 'R' && strlen ( $user ) ) {
-    $PN = "(" . translate("Private") . ")"; $PD = "(" . translate("Private") . ")";
-  } elseif ( $login != $event_owner && $access == 'R' && strlen ( $event_owner ) ) {
-    $PN = "(" . translate("Private") . ")";$PD ="(" . translate("Private") . ")";
-  } elseif ( $login != $event_owner && strlen ( $event_owner ) ) {
-    $PN = htmlspecialchars ( $name ) ."</span>";
-    $PD = activate_urls ( htmlspecialchars ( $description ) );
-  } else {
-    $PN = htmlspecialchars ( $name );
-    $PD = activate_urls ( htmlspecialchars ( $description ) );
-  }
+  $PN = htmlspecialchars ( $name );
+  $PD = activate_urls ( htmlspecialchars ( $description ) );
+
   echo $PN;
   echo "</a>";
-  if ( $pri == 3 ) echo "</strong>";
   # Only display description if it is different than the event name.
   if ( $PN != $PD )
     echo " - " . $PD;
@@ -249,13 +205,11 @@ function print_detailed_entry ( $id, $date, $time, $duration,
 
 //
 // Print all the calendar entries for the specified user for the
-// specified date.  If we are displaying data from someone other than
-// the logged in user, then check the access permission of the entry.
+// specified date.
 // params:
 //   $date - date in YYYYMMDD format
-//   $user - username
 //   $is_ssi - is this being called from week_ssi.php?
-function print_det_date_entries ( $date, $user, $ssi ) {
+function print_det_date_entries ( $date, $ssi ) {
   global $events, $readonly, $is_admin;
 
   $year = substr ( $date, 0, 4 );
@@ -265,15 +219,12 @@ function print_det_date_entries ( $date, $user, $ssi ) {
   $dateu = mktime ( 2, 0, 0, $month, $day, $year );
 
   // get all the events for this date and store in $ev
-  $ev = get_entries ( $user, $date );
+  $ev = get_entries ( $date );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    if ( $GLOBALS["DISPLAY_UNAPPROVED"] != "N" ||
-      $ev[$i]['cal_status'] == 'A' )
-      print_detailed_entry ( $ev[$i]['cal_id'],
-        $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-        $ev[$i]['cal_suit'], $ev[$i]['cal_description'],
-        $ev[$i]['cal_login'] );
+    print_detailed_entry ( $ev[$i]['cal_id'],
+      $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
+      $ev[$i]['cal_suit'], $ev[$i]['cal_description'] );
   }
 }
 ?>

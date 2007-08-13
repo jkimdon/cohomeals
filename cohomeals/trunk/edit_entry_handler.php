@@ -95,7 +95,7 @@ if ( ! $can_edit && empty ( $error ) ) {
 }
 
 // If display of participants is disabled, set the participant list
-// to the event creator.  This also works for single-user mode.
+// to the event creator. 
 // Basically, if no participants were selected (because there
 // was no selection list available in the form or because the user
 // refused to select any participant from the list), then we will
@@ -165,8 +165,7 @@ $ext_names = array ();
 $ext_emails = array ();
 $matches = array ();
 $ext_count = 0;
-if ( $single_user == "N" &&
-  ! empty ( $allow_external_users ) && 
+if ( ! empty ( $allow_external_users ) && 
   $allow_external_users == "Y" &&
   ! empty ( $externalparticipants ) ) {
   $lines = explode ( "\n", $externalparticipants );
@@ -292,13 +291,9 @@ if ( empty ( $error ) ) {
   }
 
   // log add/update
-  activity_log ( $id, $login, ($is_assistant || $is_nonuser_admin ? $user : $login),
+  activity_log ( $id, $login, $login,
     $newevent ? $LOG_CREATE : $LOG_UPDATE, "" );
   
-  if ( $single_user == "Y" ) {
-    $participants[0] = $single_user_login;
-  }
-
   // check if participants have been removed and send out emails
   if ( ! $newevent && count ( $old_meal_participant ) > 0 ) {  
     while ( list ( $old_participant, $dummy ) = each ( $old_meal_participant ) ) {
@@ -309,10 +304,7 @@ if ( empty ( $error ) ) {
           break;
         }
       }
-     $is_nonuser_admin = user_is_nonuser_admin ( $login, $old_participant );
-      // Don't send mail if we are editing a non-user calendar
-      // and we are the admin
-      if ( !$found_flag && !$is_nonuser_admin) {
+      if ( !$found_flag ) {
         // only send mail if their email address is filled in
         $do_send = get_pref_setting ( $old_participant, "EMAIL_EVENT_DELETED" );
         $user_TZ = get_pref_setting ( $old_participant, "TZ_OFFSET" );
@@ -383,8 +375,6 @@ if ( empty ( $error ) ) {
 
   // now add participants and send out notifications
   for ( $i = 0; $i < count ( $participants ); $i++ ) {
-    // Is the person adding the nonuser calendar admin
-    $is_nonuser_admin = user_is_nonuser_admin ( $login, $participants[$i] );
 
     // Some users report that they get an error on duplicate keys
     // on the following add... As a safety measure, delete any
@@ -397,86 +387,81 @@ if ( empty ( $error ) ) {
       $error = translate("Database error") . ": " . dbi_error ();
       break;
     } else {
-      // Don't send mail if we are editing a non-user calendar
-      // and we are the admin
-      if (!$is_nonuser_admin) {
-        $from = $user_email;
-        if ( empty ( $from ) && ! empty ( $email_fallback_from ) )
-          $from = $email_fallback_from;
-        // only send mail if their email address is filled in
-        $do_send = get_pref_setting ( $participants[$i],
-           $newevent ? "EMAIL_EVENT_ADDED" : "EMAIL_EVENT_UPDATED" );
-        $user_TZ = get_pref_setting ( $participants[$i], "TZ_OFFSET" );
-        $user_language = get_pref_setting ( $participants[$i], "LANGUAGE" );
-        user_load_variables ( $participants[$i], "temp" );
-        if ( $participants[$i] != $login && 
-          boss_must_be_notified ( $login, $participants[$i] ) && 
-          strlen ( $tempemail ) &&
-          $do_send == "Y" && $send_email != "N" ) {
+      $from = $user_email;
+      if ( empty ( $from ) && ! empty ( $email_fallback_from ) )
+	$from = $email_fallback_from;
+      // only send mail if their email address is filled in
+      $do_send = get_pref_setting ( $participants[$i],
+	         $newevent ? "EMAIL_EVENT_ADDED" : "EMAIL_EVENT_UPDATED" );
+      $user_TZ = get_pref_setting ( $participants[$i], "TZ_OFFSET" );
+      $user_language = get_pref_setting ( $participants[$i], "LANGUAGE" );
+      user_load_variables ( $participants[$i], "temp" );
+      if ( $participants[$i] != $login && 
+	   strlen ( $tempemail ) &&
+	   $do_send == "Y" && $send_email != "N" ) {
 
-          // Want date/time in user's timezone
-          $user_hour = $hour + $user_TZ;
-          if ( $user_hour < 0 ) {
-            $user_hour += 24;
-            // adjust date
-            $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-            $user_date -= $ONE_DAY;
-            $user_month = date ( "m", $date );
-            $user_day = date ( "d", $date );
-            $user_year = date ( "Y", $date );
-          } elseif ( $user_hour >= 24 ) {
-            $user_hour -= 24;
-            // adjust date
-            $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-            $user_date += $ONE_DAY;
-            $user_month = date ( "m", $date );
-            $user_day = date ( "d", $date );
-            $user_year = date ( "Y", $date );
-          } else {
-            $user_month = $month;
-            $user_day = $day;
-            $user_year = $year;
-          }
-          if (($GLOBALS['LANGUAGE'] != $user_language) && 
+	// Want date/time in user's timezone
+	$user_hour = $hour + $user_TZ;
+	if ( $user_hour < 0 ) {
+	  $user_hour += 24;
+	  // adjust date
+	  $user_date = mktime ( 3, 0, 0, $month, $day, $year );
+	  $user_date -= $ONE_DAY;
+	  $user_month = date ( "m", $date );
+	  $user_day = date ( "d", $date );
+	  $user_year = date ( "Y", $date );
+	} elseif ( $user_hour >= 24 ) {
+	  $user_hour -= 24;
+	  // adjust date
+	  $user_date = mktime ( 3, 0, 0, $month, $day, $year );
+	  $user_date += $ONE_DAY;
+	  $user_month = date ( "m", $date );
+	  $user_day = date ( "d", $date );
+	  $user_year = date ( "Y", $date );
+	} else {
+	  $user_month = $month;
+	  $user_day = $day;
+	  $user_year = $year;
+	}
+	if (($GLOBALS['LANGUAGE'] != $user_language) && 
             ! empty ( $user_language ) && ( $user_language != 'none' )) {
-             reset_language ( $user_language );
-          }
-          //do_debug($user_language);
-          $fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
-          $msg = translate("Hello") . ", " . $tempfullname . ".\n\n";
-          if ( $newevent || ( empty ( $old_meal_participant[$participants[$i]] ) ) ) {
-            $msg .= translate("A new appointment has been made for you by");
-          } else {
-            $msg .= translate("An appointment has been updated by");
-          }
-          $msg .= " " . $login_fullname .  ". " .
-            translate("The subject is") . " \"" . $name . "\"\n\n" .
-            translate("The description is") . " \"" . $description . "\"\n" .
-            translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
-            ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
+	  reset_language ( $user_language );
+	}
+	//do_debug($user_language);
+	$fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
+	$msg = translate("Hello") . ", " . $tempfullname . ".\n\n";
+	if ( $newevent || ( empty ( $old_meal_participant[$participants[$i]] ) ) ) {
+	  $msg .= translate("A new appointment has been made for you by");
+	} else {
+	  $msg .= translate("An appointment has been updated by");
+	}
+	$msg .= " " . $login_fullname .  ". " .
+	  translate("The subject is") . " \"" . $name . "\"\n\n" .
+	  translate("The description is") . " \"" . $description . "\"\n" .
+	  translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
+	  ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
             translate("Time") . ": " .
             display_time ( ( $user_hour * 10000 ) + ( $minute * 100 ), true ) . "\n" ) .
-            translate("Please look on") . " " . translate($application_name) . " " .
-            translate("to view this appointment") . ".";
-          // add URL to event, if we can figure it out
-          if ( ! empty ( $server_url ) ) {
-            $url = $server_url .  "view_entry.php?id=" .  $id;
-            $msg .= "\n\n" . $url;
-          }
-          if ( strlen ( $from ) ) {
-            $extra_hdrs = "From: $from\r\nX-Mailer: " . translate($application_name);
-          } else {
-            $extra_hdrs = "X-Mailer: " . translate($application_name);
-          }
-          mail ( $tempemail,
-            translate($application_name) . " " . translate("Notification") . ": " . $name,
-            html_to_8bits ($msg), $extra_hdrs );
-          activity_log ( $id, $login, $participants[$i], $LOG_NOTIFICATION, "" );
-        }
+	  translate("Please look on") . " " . translate($application_name) . " " .
+	  translate("to view this appointment") . ".";
+	// add URL to event, if we can figure it out
+	if ( ! empty ( $server_url ) ) {
+	  $url = $server_url .  "view_entry.php?id=" .  $id;
+	  $msg .= "\n\n" . $url;
+	}
+	if ( strlen ( $from ) ) {
+	  $extra_hdrs = "From: $from\r\nX-Mailer: " . translate($application_name);
+	} else {
+	  $extra_hdrs = "X-Mailer: " . translate($application_name);
+	}
+	mail ( $tempemail,
+	       translate($application_name) . " " . translate("Notification") . ": " . $name,
+	       html_to_8bits ($msg), $extra_hdrs );
+	activity_log ( $id, $login, $participants[$i], $LOG_NOTIFICATION, "" );
       }
     }
   }
-
+  
   // add external participants
   // send notification if enabled.
   if ( is_array ( $ext_names ) && is_array ( $ext_emails ) ) {

@@ -9,132 +9,15 @@
  * Input Parameters:
  * id (*) - cal_id of requested event
  * date  - yyyymmdd format of requested event
- * user  - user to display
  * (*) required field
  */
 include_once 'includes/init.php';
 include_once 'includes/site_extras.php';
 
-// make sure this user is allowed to look at this calendar.
-$can_view = false;
-$is_my_event = false;
-
-if ( $is_admin || $is_nonuser_admin || $is_assistant ) {
-  $can_view = true;
-} 
-
 $error = '';
 
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
   $error = translate ( "Invalid entry id" ) . "."; 
-}
-
-if ( empty ( $error ) ) {
-  // is this user a participant or the creator of the event?
-  $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-    "webcal_meal_participant WHERE webcal_meal.cal_id = " .
-    "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
-    "AND webcal_meal_participant.cal_login = '$login'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    $row = dbi_fetch_row ( $res );
-    if ( $row && $row[0] > 0 ) {
-      $can_view = true;
-      $is_my_event = true;
-    }
-    dbi_free_result ( $res );
-  }
-
-  if ( ($login != "__public__") && ($public_access_others == "Y") ) {
-    $can_view = true;
-  }
-
-  if ( ! $can_view ) {
-    $check_group = false;
-    // if not a participant in the event, must be allowed to look at
-    // other user's calendar.
-    if ( $login == "__public__" ) {
-      if ( $public_access_others == "Y" ) {
-        $check_group = true;
-      }
-    } else {
-      if ( $allow_view_other == "Y" ) {
-        $check_group = true;
-      }
-    }
-    // If $check_group is true now, it means this user can look at the
-    // event only if they are in the same group as some of the people in
-    // the event.
-    // This gets kind of tricky.  If there is a participant from a different
-    // group, do we still show it?  For now, the answer is no.
-    // This could be configurable somehow, but how many lines of text would
-    // it need in the admin page to describe this scenario?  Would confuse
-    // 99.9% of users.
-    // In summary, make sure at least one event participant is in one of
-    // this user's groups.
-    $my_users = get_my_users ();
-    if ( is_array ( $my_users ) ) {
-      $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-        "webcal_meal_participant WHERE webcal_meal.cal_id = " .
-        "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
-        "AND webcal_meal_participant.cal_login IN ( ";
-      for ( $i = 0; $i < count ( $my_users ); $i++ ) {
-        if ( $i > 0 ) {
-          $sql .= ", ";
-        }
-        $sql .= "'" . $my_users[$i]['cal_login'] . "'";
-        }
-      $sql .= " )";
-      $res = dbi_query ( $sql );
-      if ( $res ) {
-        $row = dbi_fetch_row ( $res );
-        if ( $row && $row[0] > 0 ) {
-          $can_view = true;
-        }
-        dbi_free_result ( $res );
-      }
-    }
-    // If we didn't indicate we need to check groups, then this user
-    // can't view this event.
-    if ( ! $check_group ) {
-      $can_view = false;
-    }
-  }
-}
-
-// If they still cannot view, make sure they are not looking at a nonuser
-// calendar event where the nonuser is the _only_ participant.
-if ( empty ( $error ) && ! $can_view && ! empty ( $nonuser_enabled ) &&
-  $nonuser_enabled == 'Y' ) {
-  $nonusers = get_nonuser_cals ();
-  $nonuser_lookup = array ();
-  for ( $i = 0; $i < count ( $nonusers ); $i++ ) {
-    $nonuser_lookup[$nonusers[$i]['cal_login']] = 1;
-  }
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = $id";
-  $res = dbi_query ( $sql );
-  $found_nonuser_cal = false;
-  $found_reg_user = false;
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      if ( ! empty ( $nonuser_lookup[$row[0]] ) ) {
-        $found_nonuser_cal = true;
-      } else {
-        $found_reg_user = true;
-      }
-    }
-    dbi_free_result ( $res );
-  }
-  // Does this event contain only nonuser calendars as participants?
-  // If so, then grant access.
-  if ( $found_nonuser_cal && ! $found_reg_user ) {
-    $can_view = true;
-  }
-}
-  
-if ( empty ( $error ) && ! $can_view ) {
-  $error = translate ( "You are not authorized" );
 }
 
 if ( ! empty ( $year ) ) {
@@ -143,11 +26,6 @@ if ( ! empty ( $year ) ) {
 if ( ! empty ( $month ) ) {
   $thismonth = $month;
 }
-$pri[1] = translate("Low");
-$pri[2] = translate("Medium");
-$pri[3] = translate("High");
-
-$unapproved = FALSE;
 
 // Make sure this is not a continuation event.
 // If it is, redirect the user to the original event.
@@ -253,9 +131,6 @@ $is_private = false;
 
 $event_date = $row[0];
 
-// TODO: don't let someone view another user's private entry
-// by hand editing the URL.
-
 ?>
 <h2><?php echo htmlspecialchars ( $name ); ?></h2>
 <table style="border-width:0px;">
@@ -285,20 +160,6 @@ $event_date = $row[0];
   }
 ?></td></tr>
 
-<?php if ( $event_status != 'A' && ! empty ( $event_status ) ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Status")?>:</td><td>
- <?php
-     if ( $event_status == 'W' )
-       etranslate("Waiting for approval");
-     if ( $event_status == 'D' )
-       etranslate("Deleted");
-     else if ( $event_status == 'R' )
-       etranslate("Rejected");
-      ?>
-</td></tr>
-<?php } ?>
-
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Date")?>:</td><td>
  <?php
@@ -319,7 +180,7 @@ $event_date = $row[0];
 <?php } ?>
 <?php
 // Display who originally created event
-// useful if assistant or Admin
+// useful if Admin
 $proxy_fullname = '';  
 if ( !empty ( $DISPLAY_CREATED_BYPROXY ) && $DISPLAY_CREATED_BYPROXY == "Y" ) {
   $res = dbi_query ( "SELECT wu.cal_firstname, wu.cal_lastname " .
@@ -414,67 +275,52 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
 
 
 <?php // participants
-// Only ask for participants if we are multi-user.
 $allmails = array ();
-$show_participants = ( $disable_participants_field != "Y" );
-if ( $is_admin ) {
-  $show_participants = true;
+?>
+<tr><td style="vertical-align:top; font-weight:bold;">
+<?php etranslate("On-site diners")?>:</td><td>
+<?php
+$sql = "SELECT cal_login FROM webcal_meal_participant " .
+       "WHERE cal_id = $id";
+//echo "$sql\n";
+$res = dbi_query ( $sql );
+$first = 1;
+$num_app = $num_wait = $num_rej = 0;
+if ( $res ) {
+  while ( $row = dbi_fetch_row ( $res ) ) {
+    $pname = $row[0];
+    $approved[$num_app++] = $pname;
+  }
+  dbi_free_result ( $res );
+} else {
+  echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
 }
-if ( $public_access == "Y" && $login == "__public__" &&
-  ( $public_access_others != "Y" || $public_access_view_part == "N" ) ) {
-  $show_participants = false;
-}
-if ( $single_user == "N" && $show_participants ) { ?>
-  <tr><td style="vertical-align:top; font-weight:bold;">
-  <?php etranslate("On-site diners")?>:</td><td>
-  <?php
-  if ( $is_private ) {
-    echo "[" . translate("Confidential") . "]";
+
+for ( $i = 0; $i < $num_app; $i++ ) {
+  user_load_variables ( $approved[$i], "temp" );
+  if ( strlen ( $tempemail ) ) {
+    echo "<a href=\"mailto:" . $tempemail . "?subject=$subject\">" . 
+      $tempfullname . "</a><br />\n";
+    $allmails[] = $tempemail;
   } else {
-    $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id";
-    //echo "$sql\n";
-    $res = dbi_query ( $sql );
-    $first = 1;
-    $num_app = $num_wait = $num_rej = 0;
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $pname = $row[0];
-	$approved[$num_app++] = $pname;
-      }
-      dbi_free_result ( $res );
-    } else {
-      echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
-    }
+    echo $tempfirstname . "<br />\n";
   }
-  for ( $i = 0; $i < $num_app; $i++ ) {
-    user_load_variables ( $approved[$i], "temp" );
-    if ( strlen ( $tempemail ) ) {
-      echo "<a href=\"mailto:" . $tempemail . "?subject=$subject\">" . 
-        $tempfullname . "</a><br />\n";
-      $allmails[] = $tempemail;
-    } else {
-      echo $tempfirstname . "<br />\n";
-    }
-  }
-  // show external users here...
-  if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
-    $external_users = event_get_external_users ( $id, 1 );
-    $ext_users = explode ( "\n", $external_users );
-    if ( is_array ( $ext_users ) ) {
-      for ( $i = 0; $i < count( $ext_users ); $i++ ) {
-        if ( ! empty ( $ext_users[$i] ) ) {
-          echo $ext_users[$i] . " (" . translate("External User") . 
-            ")<br />\n";
-        }
+}
+// show external users here...
+if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
+  $external_users = event_get_external_users ( $id, 1 );
+  $ext_users = explode ( "\n", $external_users );
+  if ( is_array ( $ext_users ) ) {
+    for ( $i = 0; $i < count( $ext_users ); $i++ ) {
+      if ( ! empty ( $ext_users[$i] ) ) {
+	echo $ext_users[$i] . " (" . translate("External User") . 
+	  ")<br />\n";
       }
     }
   }
+}
 ?>
 </td></tr>
-<?php
- } // end participants
-?>
 
 <tr><td style="vertical-align:top; font-weight:bold;">
 <?php etranslate("Take-home plates")?>:
@@ -533,9 +379,7 @@ if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "";
 }
 
-$can_edit = ( $is_admin || $is_nonuser_admin && ($user == $create_by) || 
-  ( $is_assistant && ! $is_private && ($user == $create_by) ) ||
-  ( $readonly != "Y" && ( $login == $create_by || $single_user == "Y" ) ) );
+$can_edit = ( $is_admin || ( $readonly != "Y" ) );
 if ( $public_access == "Y" && $login == "__public__" ) {
   $can_edit = false;
 }
@@ -554,7 +398,7 @@ if ( $can_edit ) {
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete this entry for all users.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
-} elseif ( $readonly != "Y" && $is_my_event && $login != "__public__" )  {
+} elseif ( $readonly != "Y" && $login != "__public__" )  {
   echo "<a title=\"" . 
     translate("Delete entry") . "\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
@@ -562,7 +406,7 @@ if ( $can_edit ) {
     translate("This will delete the entry from your calendar.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
 }
-if ( $readonly != "Y" && ! $is_my_event && ! $is_private && 
+if ( $readonly != "Y" && ! $is_private && 
   $login != "__public__" )  {
   echo "<a title=\"" . 
     translate("Add to My Calendar") . "\" class=\"nav\" " .

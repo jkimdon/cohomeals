@@ -72,14 +72,6 @@ print_header('', '', '', true);
  <?php etranslate("auto-refresh-time-help")?>
 </td></tr>
 <tr><td class="help">
- <?php etranslate("Require event approvals")?>:</td><td>
- <?php etranslate("require-approvals-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Display unapproved")?>:</td><td>
- <?php etranslate("display-unapproved-help")?>
-</td></tr>
-<tr><td class="help">
  <?php etranslate("Display week number")?>:</td><td>
  <?php etranslate("display-week-number-help")?>
 </td></tr>
@@ -92,24 +84,12 @@ print_header('', '', '', true);
  <?php etranslate("work-hours-help")?>
 </td></tr>
 <tr><td class="help">
- <?php etranslate("Disable Participants field")?>:</td><td>
- <?php etranslate("disable-participants-field-help")?>
-</td></tr>
-<tr><td class="help">
  <?php etranslate("Display Site Extras in popup")?>:</td><td>
  <?php etranslate("popup-includes-siteextras-help")?>
 </td></tr>
 <tr><td class="help">
  <?php etranslate("Allow HTML in Description")?>:</td><td>
  <?php etranslate("allow-html-description-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Allow viewing other user's calendars")?>:</td><td>
- <?php etranslate("allow-view-other-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Include add event link in views")?>:</td><td>
- <?php etranslate("allow-view-add-help")?>
 </td></tr>
 <tr><td class="help">
  <?php etranslate("Remember last login")?>:</td><td>
@@ -183,18 +163,6 @@ print_header('', '', '', true);
 </td></tr>
 </table>
 
-
-<h3><?php etranslate("Nonuser")?></h3>
-<table style="border-width:0px;">
-<tr><td class="help">
- <?php etranslate("Nonuser enabled")?>:</td><td>
- <?php etranslate("nonuser-enabled-help")?>
-</td></tr>
-<tr><td class="help">
- <?php etranslate("Nonuser list")?>:</td><td>
- <?php etranslate("nonuser-list-help")?>
-</td></tr>
-</table>
 
 <h3><?php etranslate("Other")?></h3>
 <table style="border-width:0px;">

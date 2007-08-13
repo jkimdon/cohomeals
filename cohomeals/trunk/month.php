@@ -1,12 +1,6 @@
 <?php
 include_once 'includes/init.php';
 
-if (($user != $login) && $is_nonuser_admin) {
-  load_user_layers ($user);
-} else {
-  load_user_layers ();
-}
-
 
 $next = mktime ( 3, 0, 0, $thismonth + 1, 1, $thisyear );
 $nextyear = date ( "Y", $next );
@@ -39,8 +33,7 @@ $INC = array('js/popups.php');
 print_header($INC,$HeadX);
 
 /* Pre-load the events for quicker access */
-$events = read_events ( ( ! empty ( $user ) && strlen ( $user ) )
-  ? $user : $login, $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 
 $monthURL = 'month.php?';
 display_small_month ( $prevmonth, $prevyear, true, true, "prevmonth",
@@ -54,16 +47,8 @@ display_small_month ( $nextmonth, $nextyear, true, true, "nextmonth",
     $DATE_FORMAT_MY, false, false );
 ?></span>
 <span class="user"><?php
-  if ( $single_user == "N" ) {
-    echo "<br />\n";
-    echo $user_fullname;
-  }
-  if ( $is_nonuser_admin ) {
-    echo "<br />-- " . translate("Admin mode") . " --";
-  }
-  if ( $is_assistant ) {
-    echo "<br />-- " . translate("Assistant mode") . " --";
-  }
+  echo "<br />\n";
+  echo $user_fullname;
 ?></span>
 </div>
 
@@ -132,7 +117,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
       echo ">";
       //echo date ( "D, m-d-Y H:i:s", $date ) . "<br />";
       print_date_entries ( date ( "Ymd", $date ),
-        ( ! empty ( $user ) ) ? $user : $login, false );
+        false );
       print "</td>\n";
     } else {
       print "<td>&nbsp;</td>\n";

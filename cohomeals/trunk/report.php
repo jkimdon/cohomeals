@@ -46,8 +46,7 @@ include_once 'includes/init.php';
 //   $access - event access
 //   $event_owner - user associated with this event
 function event_to_text ( $id, $date, $time, $duration,
-  $name, $description, $status,
-  $pri, $access, $event_owner ) {
+  $name, $description ) {
   global $login, $user, $event_template, $report_id, $allow_html_description;
 
   $time_str = $start_time_str = $end_time_str = '';
@@ -79,30 +78,21 @@ function event_to_text ( $id, $date, $time, $duration,
       }
     }
   }
-  if ( $login != $user && $access == 'R' && strlen ( $user ) ) {
-    $name_str = "(" . translate("Private") . ")";
-    $description_str = translate("This event is confidential");
-  } else if ( $login != $event_owner && $access == 'R' &&
-    strlen ( $event_owner ) ) {
-    $name_str = "(" . translate("Private") . ")";
-    $description_str = translate("This event is confidential");
-  } else {
-    $name_str = htmlspecialchars ( $name );
-    if ( ! empty ( $allow_html_description ) &&
-      $allow_html_description == 'Y' ) {
-      $str = str_replace ( '&', '&amp;', $description );
-      $description_str = str_replace ( '&amp;amp;', '&amp;', $str );
-      if ( strstr ( $description_str, "<" ) &&
-        strstr ( $description_str, ">" ) ) {
-        // found some HTML
-      } else {
-        // No HTML found.  Add line breaks.
-        $description_str = nl2br ( $description_str );
-      }
+  $name_str = htmlspecialchars ( $name );
+  if ( ! empty ( $allow_html_description ) &&
+       $allow_html_description == 'Y' ) {
+    $str = str_replace ( '&', '&amp;', $description );
+    $description_str = str_replace ( '&amp;amp;', '&amp;', $str );
+    if ( strstr ( $description_str, "<" ) &&
+	 strstr ( $description_str, ">" ) ) {
+      // found some HTML
     } else {
-      $description_str = nl2br (
-        activate_urls ( htmlspecialchars ( $description ) ) );
+      // No HTML found.  Add line breaks.
+      $description_str = nl2br ( $description_str );
     }
+  } else {
+    $description_str = nl2br (
+      activate_urls ( htmlspecialchars ( $description ) ) );
   }
 
   $date_str = date_to_str ( $date, "", false );
@@ -112,26 +102,6 @@ function event_to_text ( $id, $date, $time, $duration,
     $duration_str = $duration . ' ' . translate ( "minutes" );
   } else {
     $duration_str = '';
-  }
-
-  if ( $pri == 1 ) {
-    $pri_str = translate ( "Low" );
-  } else if ( $pri == 2 ) {
-    $pri_str = translate ( "Medium" );
-  } else if ( $pri == 3 ) {
-    $pri_str = translate ( "High" );
-  }
-
-  if ( $status == 'W' ) {
-    $status_str = translate ( "Waiting for approval" );
-  } else if ( $status == 'D' ) {
-    $status_str = translate ( "Deleted" );
-  } else if ( $status == 'R' ) {
-    $status_str = translate ( "Rejected" );
-  } else if ( $status == 'A' ) {
-    $status_str = translate ( "Approved" );
-  } else {
-    $status_str = translate ( "Unknown" );
   }
 
   $href_str = "view_entry.php?id=$id";
@@ -147,10 +117,8 @@ function event_to_text ( $id, $date, $time, $duration,
   $text = str_replace ( '${starttime}', $start_time_str, $text );
   $text = str_replace ( '${endtime}', $end_time_str, $text );
   $text = str_replace ( '${duration}', $duration_str, $text );
-  $text = str_replace ( '${priority}', $pri_str, $text );
   $text = str_replace ( '${href}', $href_str, $text );
   $text = str_replace ( '${id}', $id, $text );
-  $text = str_replace ( '${user}', $event_owner, $text );
   $text = str_replace ( '${report_id}', $report_id, $text );
 
   return $text;
@@ -400,7 +368,7 @@ if ( ! isset ( $report_time_range ) ) {
 
 if ( empty ( $error ) && empty ( $list ) ) {
 
-  $events = read_events ( $report_user, $start_date, $end_date );
+  $events = read_events ( $start_date, $end_date );
 
   $get_unapproved = $DISPLAY_UNAPPROVED == 'Y';
   if ( $report_user == "__public__" ) {
@@ -428,24 +396,21 @@ if ( empty ( $error ) && empty ( $list ) ) {
   for ( $cur_time = $start_time; $cur_time <= $end_time; $cur_time += $ONE_DAY ) {
     $event_str = '';
     $dateYmd = date ( "Ymd", $cur_time );
-    $ev = get_entries ( empty ( $user ) ? $login : $user, $dateYmd );
+    $ev = get_entries ( $dateYmd );
     //echo "DATE: $dateYmd <br />\n";
   
     for ( $i = 0; $i < count ( $ev ); $i++ ) {
-      if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
-        if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-          $viewid = $ev[$i]['cal_ext_for_id'];
-          $viewname = $ev[$i]['cal_suit'] . " (" .
-            translate("cont.") . ")";
-        } else {
-          $viewid = $ev[$i]['cal_id'];
-          $viewname = $ev[$i]['cal_suit'];
-        }
-        $event_str .= event_to_text ( $viewid,
-          $dateYmd, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-          $viewname, $ev[$i]['cal_description'],
-          $ev[$i]['cal_login'] );
+      if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
+	$viewid = $ev[$i]['cal_ext_for_id'];
+	$viewname = $ev[$i]['cal_suit'] . " (" .
+	  translate("cont.") . ")";
+      } else {
+	$viewid = $ev[$i]['cal_id'];
+	$viewname = $ev[$i]['cal_suit'];
       }
+      $event_str .= event_to_text ( $viewid,
+		    $dateYmd, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
+		    $viewname, $ev[$i]['cal_description'] );
     }
   
     if ( ! empty ( $event_str ) || $report_include_empty == 'Y' ||

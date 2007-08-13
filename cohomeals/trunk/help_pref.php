@@ -98,17 +98,6 @@ print_header('','','',true);
  </td></tr>
 </table>
 
-<h3><?php etranslate("When I am the boss")?></h3>
-<table style="border-width:0px;">
- <tr><td class="help">
-  <?php etranslate("Email me event notification")?>:</td><td>
-  <?php etranslate("email-boss-notifications-help")?>
- </td></tr>
- <tr><td class="help">
-  <?php etranslate("I want to approve events")?>:</td><td>
-  <?php etranslate("boss-approve-event-help")?>
- </td></tr>
-</table>
 <?php if ( $PUBLISH_ENABLED == 'Y' ) { ?>
  <h3><?php etranslate("Subscribe/Publish")?></h3>
  <table style="border-width:0px;">

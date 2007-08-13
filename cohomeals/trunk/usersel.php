@@ -59,10 +59,6 @@ print_header($INC,'','',true);
 <?php
 
 $users = get_my_users ();
-if ($nonuser_enabled == "Y" ) {
-  $nonusers = get_nonuser_cals ();
-  $users = ($nonuser_at_top == "Y") ? array_merge($nonusers, $users) : array_merge($users, $nonusers);
-}
 
 for ( $i = 0; $i < count ( $users ); $i++ ) {
   $u = $users[$i]['cal_login'];

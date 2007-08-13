@@ -14,8 +14,6 @@
  * Security:
  * If system setting $reports_enabled is set to anything other than
  *   'Y', then don't allow access to this page.
- * If $allow_view_other is 'N', then do not allow selection of
- *   participants.
  * If not an admin user, only report creator (cal_login in webcal_report)
  *   can edit/delete report.
  */
@@ -47,9 +45,6 @@ if ( empty ( $report_id ) ) {
 }
 
 $show_participants = true;
-if ( $single_user == 'Y' || $disable_participants_field == 'Y' ) {
-  $show_participants = false;
-}
 
 if ( $login == "__public__" ) {
   $error = translate ( "You are not authorized" );
@@ -88,13 +83,8 @@ $ranges = array (
 );
 
 // Get list of users that the current user can see
-if ( empty ( $error ) && $show_participants ) {
+if ( empty ( $error ) ) {
   $userlist = get_my_users ();
-  if ($nonuser_enabled == "Y" ) {
-    $nonusers = get_nonuser_cals ();
-    $userlist = ($nonuser_at_top == "Y") ? array_merge($nonusers, $userlist) : 
-      array_merge($userlist, $nonusers);
-  }
 }
 
 // Default values

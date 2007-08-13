@@ -250,9 +250,7 @@ if ( empty ( $x ) ) {
     $settings['readonly'] = 'false';
     $settings['user_inc'] = 'user.php';
     $settings['install_password'] = '';
-    $settings['single_user_login'] = '';
     $settings['use_http_auth'] = 'false';
-    $settings['single_user'] = 'false';
     $settings['user_inc'] = 'user.php';
   }
 } else {
@@ -262,19 +260,15 @@ if ( empty ( $x ) ) {
   $settings['db_login'] = getPostValue ( 'form_db_login' );
   $settings['db_password'] = getPostValue ( 'form_db_password' );
   $settings['db_persistent'] = getPostValue ( 'form_db_persistent' );
-  $settings['single_user_login'] = getPostValue ( 'form_single_user_login' );
   $settings['readonly'] = getPostValue ( 'form_readonly' );
   if ( getPostValue ( "form_user_inc" ) == "http" ) {
     $settings['use_http_auth'] = 'true';
-    $settings['single_user'] = 'false';
     $settings['user_inc'] = 'user.php';
   } else if ( getPostValue ( "form_user_inc" ) == "none" ) {
     $settings['use_http_auth'] = 'false';
-    $settings['single_user'] = 'true';
     $settings['user_inc'] = 'user.php';
   } else {
     $settings['use_http_auth'] = 'false';
-    $settings['single_user'] = 'false';
     $settings['user_inc'] = getPostValue ( 'form_user_inc' );
   }
   // Save settings to file now.
@@ -362,26 +356,10 @@ function testPHPInfo () {
 function validate(form)
 {
   var form = document.dbform;
-  // only check is to make sure single-user login is specified if
-  // in single-user mode
-  if ( form.form_user_inc.options[4].selected ) {
-    if ( form.form_single_user_login.value.length == 0 ) {
-      // No single user login specified
-      alert ( "Error: you must specify a\nSingle-User Login" );
-      form.form_single_user_login.focus ();
-      return false;
-    }
-  }
   // Submit form...
   form.submit ();
 }
 function auth_handler () {
-  var form = document.dbform;
-  if ( form.form_user_inc.options[4].selected ) {
-    makeVisible ( "singleuser" );
-  } else {
-    makeInvisible ( "singleuser" );
-  }
 }
 
 function show_db_status ( success ) {
@@ -674,16 +652,8 @@ You should select "Web Server" from the list of
     ( $settings['user_inc'] == 'user-ldap.php' ? " selected=\"selected\"" : "" ) .
     "> LDAP </option>\n";
 
-  echo "<option value=\"none\" " .
-    ( $settings['user_inc'] == 'user.php' && $settings['single_user'] == 'true' ? " selected=\"selected\"" : "" ) .
-    "> None (Single-User) </option>\n</select>";
 ?>
         </td>
-      </tr>
-      <tr id="singleuser">
-        <td class="prompt">&nbsp;&nbsp;&nbsp;Single-User Login:</td>
-        <td>
-          <input name="form_single_user_login" size="20" value="<?php echo $settings['single_user_login'];?>" /></td>
       </tr>
       <tr>
         <td class="prompt">Read-Only:</td>

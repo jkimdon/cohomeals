@@ -118,10 +118,6 @@ if ($DMW) {
     ! $is_admin ) {
     $valid_user = false;
     $userlist = get_my_users();
-    if ($nonuser_enabled == "Y" ) {
-      $nonusers = get_nonuser_cals ();
-      $userlist =  array_merge($nonusers, $userlist);
-    }
     for ( $i = 0; $i < count ( $userlist ); $i++ ) {
       if ( $user == $userlist[$i]['cal_login'] ) $valid_user = true;
     } 
@@ -155,19 +151,13 @@ $bodyid = array(
  "add_entry.php" => "addentry",
  "admin.php" => "admin",
  "adminhome.php" => "adminhome",
- "assistant_edit.php" => "assistantedit",
  "day.php" => "day",
  "del_entry.php" => "delentry",
- "del_layer.php" => "dellayer",
  "edit_entry.php" => "editentry",
- "edit_layer.php" => "editlayer",
- "edit_nonusers.php" => "editnonusers",
- "edit_nonusers_handler.php" => "editnonusershandler",
  "edit_report.php" => "editreport",
  "edit_template.php" => "edittemplate",
  "edit_user.php" => "edituser",
  "edit_user_handler.php" => "edituserhandler",
- "export.php" => "export",
  "group_edit.php" => "groupedit",
  "group_edit_handler.php" => "groupedithandler",
  "groups.php" => "groups",
@@ -175,30 +165,17 @@ $bodyid = array(
  "help_bug.php" => "helpbug",
  "help_edit_entry.php" => "helpeditentry",
  "help_index.php" => "helpindex",
- "help_layers.php" => "helplayers",
  "help_pref.php" => "helppref",
  "index.php" => "index",
- "layers.php" => "layers",
- "layers_toggle.php" => "layerstoggle",
  "login.php" => "login",
  "month.php" => "month",
- "nonusers.php" => "nonusers",
  "pref.php" => "pref",
  "purge.php" => "purge",
  "report.php" => "report",
  "search.php" => "search",
- "select_user.php" => "selectuser",
  "users.php" => "users",
  "usersel.php" => "usersel",
- "view_d.php" => "viewd",
  "view_entry.php" => "viewentry",
- "view_l.php" => "viewl",
- "view_m.php" => "viewm",
- "view_t.php" => "viewt",
- "view_v.php" => "viewv",
- "view_w.php" => "vieww",
- "views.php" => "views",
- "views_edit.php" => "viewsedit",
  "week.php" => "week",
  "week_details.php" => "weekdetails",
  "week_ssi.php" => "weekssi",
@@ -339,13 +316,13 @@ function print_trailer ( $include_nav_links=true, $closeDb=true,
   $disableCustom=false )
 {
   global $CUSTOM_TRAILER, $c, $STARTVIEW;
-  global $login, $user, $thisyear,
+  global $login, $thisyear,
     $thismonth, $thisday, $DATE_FORMAT_MY, $WEEK_START, $DATE_FORMAT_MD,
     $readonly, $is_admin, $public_access, $public_access_can_add,
-    $single_user, $use_http_auth, $login_return_path, $require_approvals,
-    $is_nonuser_admin, $public_access_others, $allow_view_other,
-    $views, $reports_enabled, $LAYER_STATUS, $nonuser_enabled,
-    $groups_enabled, $fullname, $has_boss;
+    $use_http_auth, $login_return_path,
+    $public_access_others, $allow_view_other,
+    $reports_enabled,
+    $groups_enabled, $fullname;
   
   if ( $include_nav_links ) {
     include_once "includes/trailer.php";

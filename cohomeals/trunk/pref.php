@@ -2,14 +2,12 @@
 include_once 'includes/init.php';
 
 if ($user != $login)
-  $user = (($is_admin || $is_nonuser_admin) && $user) ? $user : $login;
+  $user = ($is_admin && $user) ? $user : $login;
 
 // Reload preferences into $prefarray[].
 // Get system settings first.
 $updating_public = false;
 $prefarray = array ();
-$prefarray['EMAIL_ASSISTANT_EVENTS'] =
-  $prefarray['APPROVE_ASSISTANT_EVENT'] = ''; // no undefined vars message
 $res = dbi_query ( "SELECT cal_setting, cal_value FROM webcal_config " );
 if ( $res ) {
   while ( $row = dbi_fetch_row ( $res ) ) {
@@ -40,11 +38,6 @@ print_header($INC);
 	if ( $updating_public )
 		echo translate($PUBLIC_ACCESS_FULLNAME) . "&nbsp;";
 	etranslate("Preferences");
-	if ( $is_nonuser_admin ) {
-		nonuser_load_variables ( $user, "nonuser" );
-		echo "<br /><strong>-- " . 
-			translate("Admin mode") . ": ".$nonuserfullname." --</strong>\n";
-	}
 ?>&nbsp;<img src="help.gif" alt="<?php etranslate("Help")?>" class="help" onclick="window.open ( 'help_pref.php', 'cal_help', 'dependent,menubar,scrollbars,height=400,width=400,innerHeight=420,outerWidth=420');" /></h2>
 
 <a title="<?php etranslate("Admin") ?>" class="nav" href="adminhome.php">&laquo;&nbsp;<?php etranslate("Admin") ?></a><br /><br />
@@ -137,16 +130,6 @@ if ( $prefarray['STARTVIEW'] == 'month' || $prefarray['STARTVIEW'] == 'day' ||
 <option value="month.php" <?php if ( $prefarray["STARTVIEW"] == "month.php" ) echo " selected=\"selected\"";?>><?php etranslate("Month")?></option>
 <option value="year.php" <?php if ( $prefarray["STARTVIEW"] == "year.php" ) echo " selected=\"selected\"";?>><?php etranslate("Year")?></option>
 <?php
-// Allow user to select a view also
-for ( $i = 0; $i < count ( $views ); $i++ ) {
-  $xurl = $views[$i]['url'];
-  echo "<option value=\"";
-  echo $xurl . "\" ";
-  $xurl_strip = str_replace ( "&amp;", "&", $xurl );
-  if ( $STARTVIEW == $xurl_strip )
-    echo "selected=\"selected\" ";
-  echo ">" . $views[$i]['cal_name'] . "</option>\n";
-}
 ?>
 </select>
 </td></tr>
@@ -274,11 +257,6 @@ for ( $i = 0; $i < count ( $views ); $i++ ) {
 	<input type="text" name="pref_auto_refresh_time" size="4" value="<?php if ( empty ( $prefarray["auto_refresh_time"] ) ) echo "0"; else echo $prefarray["auto_refresh_time"]; ?>" /> <?php etranslate("minutes")?>
 </td></tr>
 
-<tr><td class="tooltip" title="<?php etooltip("display-unapproved-help");?>">
-	<?php etranslate("Display unapproved")?>:</td><td>
-	<label><input type="radio" name="pref_DISPLAY_UNAPPROVED" value="Y" <?php if ( $prefarray["DISPLAY_UNAPPROVED"] != "N" ) echo " checked=\"checked\"";?> /> <?php etranslate("Yes")?></label>&nbsp;
-	<label><input type="radio" name="pref_DISPLAY_UNAPPROVED" value="N" <?php if ( $prefarray["DISPLAY_UNAPPROVED"] == "N" ) echo " checked=\"checked\"";?> /> <?php etranslate("No")?></label>
-</td></tr>
 <tr><td class="tooltip" title="<?php etooltip("display-week-number-help")?>">
 	<?php etranslate("Display week number")?>:</td><td>
 	<label><input type="radio" name="pref_DISPLAY_WEEKNUMBER" value="Y" <?php if ( $DISPLAY_WEEKNUMBER != "N" ) echo " checked=\"checked\"";?> /> <?php etranslate("Yes")?></label>&nbsp;
@@ -355,15 +333,6 @@ for ( $i = 0; $i < count ( $views ); $i++ ) {
 </td></tr>
 </table>
 
-<br /><br />
-<table class="standard" cellspacing="1" cellpadding="2">
-<tr><th colspan="2"><?php etranslate("When I am the boss")?></th></tr>
-<tr><td style="vertical-align:top; font-weight:bold;"><?php etranslate("Email me event notification")?>:</td>
-  <td><label><input type="radio" name="pref_EMAIL_ASSISTANT_EVENTS" value="Y" <?php if ( $prefarray["EMAIL_ASSISTANT_EVENTS"] == "Y" ) echo " checked=\"checked\"";?> /> <?php etranslate("Yes")?></label> <label><input type="radio" name="pref_EMAIL_ASSISTANT_EVENTS" value="N" <?php if ( $prefarray["EMAIL_ASSISTANT_EVENTS"] == "N" ) echo " checked=\"checked\"";?> /> <?php etranslate("No")?></label></td></tr>
-
-<tr><td style="vertical-align:top; font-weight:bold;"><?php etranslate("I want to approve events")?>:</td>
-  <td><label><input type="radio" name="pref_APPROVE_ASSISTANT_EVENT" value="Y" <?php if ( $prefarray["APPROVE_ASSISTANT_EVENT"] == "Y" ) echo " checked=\"checked\"";?> /> <?php etranslate("Yes")?></label> <label><input type="radio" name="pref_APPROVE_ASSISTANT_EVENT" value="N" <?php if ( $prefarray["APPROVE_ASSISTANT_EVENT"] == "N" ) echo " checked=\"checked\"";?> /> <?php etranslate("No")?></label></td></tr>
-</table>
 
 <?php } /* if ( ! $updating_public ) */ ?>
 

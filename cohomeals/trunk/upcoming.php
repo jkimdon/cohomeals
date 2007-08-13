@@ -75,16 +75,12 @@ $username = '__public__';
 // "upcoming.php?user=craig"
 $allow_user_override = false;
 
-// Load layers
-$load_layers = true;
-
 // End configurable settings...
 
 // Set for use elsewhere as a global
 $login = $username;
 // Load user preferences for DISPLAY_UNAPPROVED
 load_user_preferences ();
-$get_unapproved = ! empty ( $DISPLAY_UNAPPROVED ) && $DISPLAY_UNAPPROVED == 'Y';
 
 include "includes/translate.php";
 
@@ -100,10 +96,6 @@ if ( $allow_user_override ) {
     $login = $u;
     // We also set $login since some functions assume that it is set.
   }
-}
-
-if ( $load_layers ) {
-  load_user_layers ( $username );
 }
 
 
@@ -133,7 +125,7 @@ $endDate = date ( "Ymd", $endTime );
 
 
 /* Pre-load the events for quicker access */
-$events = read_events ( $username, $date, $endDate );
+$events = read_events ( $date, $endDate );
 
 // Print header without custom header and no style sheet
 if ( ! empty ( $LANGUAGE ) ) {
@@ -183,7 +175,7 @@ $numEvents = 0;
 for ( $i = $startTime; date ( "Ymd", $i ) <= date ( "Ymd", $endTime ) &&
   $numEvents < $maxEvents; $i += ( 24 * 3600 ) ) {
   $d = date ( "Ymd", $i );
-  $entries = get_entries ( $username, $d, $get_unapproved );
+  $entries = get_entries ( $d );
   print "<!-- $d " . count ( $entries ) . " -->\n";
 
   if ( count ( $entries ) > 0 ) {

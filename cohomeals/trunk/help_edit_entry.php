@@ -46,15 +46,10 @@
 		</td></tr>
 	<?php } ?>
 	<?php
-		$show_participants = ( $disable_participants_field != "Y" );
-		if ( $is_admin )
-			$show_participants = true;
-		if ( $single_user == "N" && $show_participants ) { ?>
-			<tr><td class="help">
-				<?php etranslate("Participants")?>:</td><td>
-				<?php etranslate("participants-help")?>
-			</td></tr>
-		<?php } ?>
+	<tr><td class="help">
+	<?php etranslate("Participants")?>:</td><td>
+	<?php etranslate("participants-help")?>
+	</td></tr>
 </table>
 
 <?php include_once "includes/help_trailer.php"; ?>

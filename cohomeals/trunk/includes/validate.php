@@ -79,77 +79,73 @@ if ( $use_http_auth ) {
   }
 }
 
-if ( $single_user == "Y" ) {
-  $login = $single_user_login;
-} else {
-  if ( $use_http_auth ) {
-    // HTTP server did validation for us....
-    if ( empty ( $PHP_AUTH_USER ) )
-      $session_not_found = true;
-    else
-      $login = $PHP_AUTH_USER;
-
-  } elseif ( substr($user_inc,0,9) == 'user-app-' ) {
-    // Use another application's authentication
-    if (! $login = user_logged_in()) app_login_screen(clean_whitespace($login_return_path));
+if ( $use_http_auth ) {
+  // HTTP server did validation for us....
+  if ( empty ( $PHP_AUTH_USER ) )
+    $session_not_found = true;
+  else
+    $login = $PHP_AUTH_USER;
   
-  } else {
-    if ( ! empty ( $settings['session'] ) && $settings['session'] == 'php' ) {
-      session_start ();
-      if ( ! empty ( $_SESSION['webcalendar_session'] ) ) {
-        $webcalendar_session = $_SESSION['webcalendar_session'];
-      }
+} elseif ( substr($user_inc,0,9) == 'user-app-' ) {
+  // Use another application's authentication
+  if (! $login = user_logged_in()) app_login_screen(clean_whitespace($login_return_path));
+  
+} else {
+  if ( ! empty ( $settings['session'] ) && $settings['session'] == 'php' ) {
+    session_start ();
+    if ( ! empty ( $_SESSION['webcalendar_session'] ) ) {
+      $webcalendar_session = $_SESSION['webcalendar_session'];
     }
-    // We can't actually check the database yet since we haven't connected
-    // to the database.  That happens in connect.php.
-
-    // Check for session.  If not found, then note it for later
-    // handling in connect.php.
-    else if ( empty ( $webcalendar_session ) && empty ( $login ) ) {
-      $session_not_found = true;
-    }
-
-    else {
-      // Check for cookie...
-      if ( ! empty ( $webcalendar_session ) ) {
-        $encoded_login = $webcalendar_session;
-        if ( empty ( $encoded_login ) ) {
-          // invalid session cookie
-          $session_not_found = true;
-        } else {
-          $login_pw = split('\|', decode_string ($encoded_login));
-          $login = $login_pw[0];
-          $cryptpw = $login_pw[1];
-          // Security fix.  Don't allow certain types of characters in
-          // the login.  WebCalendar does not escape the login name in
-          // SQL requests.  So, if the user were able to set the login
-          // name to be "x';drop table u;",
-          // they may be able to affect the database.
-          if ( ! empty ( $login ) ) {
-            if ( $login != addslashes ( $login ) ) {
-              die_miserable_death ( "Illegal characters in login " .
-                "<tt>" . htmlentities ( $login ) . "</tt>" );
-            }
-          }
-          // make sure we are connected to the database for password check
-          $c = @dbi_connect ( $db_host, $db_login, $db_password, $db_database );
-          if ( ! $c ) {
-            die_miserable_death (
-              "Error connecting to database:<blockquote>" .
-              dbi_error () . "</blockquote>\n" );
-          }
-          doDbSanityCheck ();
-
-          if (!user_valid_crypt($login, $cryptpw)) {
-            do_debug ( "User not logged in; redirecting to login page" );
-            if ( empty ( $login_return_path ) )
-              do_redirect ( "login.php" );
-            else
-              do_redirect ( "login.php?return_path=$login_return_path" );
-          }
-
-          do_debug ( "Decoded login from cookie: $login" );
-        }
+  }
+  // We can't actually check the database yet since we haven't connected
+  // to the database.  That happens in connect.php.
+  
+  // Check for session.  If not found, then note it for later
+  // handling in connect.php.
+  else if ( empty ( $webcalendar_session ) && empty ( $login ) ) {
+    $session_not_found = true;
+  }
+  
+  else {
+    // Check for cookie...
+    if ( ! empty ( $webcalendar_session ) ) {
+      $encoded_login = $webcalendar_session;
+      if ( empty ( $encoded_login ) ) {
+	// invalid session cookie
+	$session_not_found = true;
+      } else {
+	$login_pw = split('\|', decode_string ($encoded_login));
+	$login = $login_pw[0];
+	$cryptpw = $login_pw[1];
+	// Security fix.  Don't allow certain types of characters in
+	// the login.  WebCalendar does not escape the login name in
+	// SQL requests.  So, if the user were able to set the login
+	// name to be "x';drop table u;",
+	// they may be able to affect the database.
+	if ( ! empty ( $login ) ) {
+	  if ( $login != addslashes ( $login ) ) {
+	    die_miserable_death ( "Illegal characters in login " .
+				  "<tt>" . htmlentities ( $login ) . "</tt>" );
+	  }
+	}
+	// make sure we are connected to the database for password check
+	$c = @dbi_connect ( $db_host, $db_login, $db_password, $db_database );
+	if ( ! $c ) {
+	  die_miserable_death (
+			       "Error connecting to database:<blockquote>" .
+			       dbi_error () . "</blockquote>\n" );
+	}
+	doDbSanityCheck ();
+	
+	if (!user_valid_crypt($login, $cryptpw)) {
+	  do_debug ( "User not logged in; redirecting to login page" );
+	  if ( empty ( $login_return_path ) )
+	    do_redirect ( "login.php" );
+	  else
+	    do_redirect ( "login.php?return_path=$login_return_path" );
+	}
+	
+	do_debug ( "Decoded login from cookie: $login" );
       }
     }
   }

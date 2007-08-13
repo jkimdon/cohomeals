@@ -2,11 +2,6 @@
 include_once 'includes/init.php';
 send_no_cache_header ();
 
-if (($user != $login) && $is_nonuser_admin)
-  load_user_layers ($user);
-else
-  load_user_layers ();
-
 if ( empty ( $year ) )
   $year = date("Y");
 
@@ -28,15 +23,9 @@ if ( $allow_view_other != "Y" && ! $is_admin )
 $boldDays = false;
 if ( ! empty ( $bold_days_in_year ) && $bold_days_in_year == 'Y' ) {
   /* Pre-load the events for quicker access */
-  $events = read_events ( ( ! empty ( $user ) && strlen ( $user ) )
-    ? $user : $login, $year . "0101", $year . "1231" );
+  $events = read_events ( $year . "0101", $year . "1231" );
   $boldDays = true;
 }
-
-// Include unapproved events?
-$get_unapproved = ( $DISPLAY_UNAPPROVED == 'Y' );
-if ( $user == "__public__" )
-  $get_unapproved = false;
 
  print_header();
  ?>
@@ -46,16 +35,12 @@ if ( $user == "__public__" )
 	<a title="<?php etranslate("Next")?>" class="next" href="year.php?year=<?php echo $nextYear; if ( ! empty ( $user ) ) echo "&amp;user=$user";?>"><img src="rightarrow.gif" alt="<?php etranslate("Next")?>" /></a>
 	<span class="date"><?php echo $thisyear ?></span>
 	<span class="user"><?php
-		if ( $single_user == "N" ) {
-			echo "<br />\n";
-			if ( ! empty ( $user ) ) {
-				user_load_variables ( $user, "user_" );
-				echo $user_fullname;
-			} else {
-				echo $fullname;
-			}
-			if ( $is_assistant )
-				echo "<br /><strong>-- " . translate("Assistant mode") . " --</strong>";
+		echo "<br />\n";
+		if ( ! empty ( $user ) ) {
+			user_load_variables ( $user, "user_" );
+			echo $user_fullname;
+		} else {
+			echo $fullname;
 		}
 	?></span>
 </div>

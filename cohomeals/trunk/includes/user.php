@@ -120,13 +120,8 @@ function user_valid_crypt ( $login, $crypt_password ) {
 //   $user - user login
 //   $prefix - variable prefix to use
 function user_load_variables ( $login, $prefix ) {
-  global $PUBLIC_ACCESS_FULLNAME, $NONUSER_PREFIX;
+  global $PUBLIC_ACCESS_FULLNAME;
 
-  if ($NONUSER_PREFIX && substr($login, 0, strlen($NONUSER_PREFIX) ) == $NONUSER_PREFIX) {
-    nonuser_load_variables ( $login, $prefix );
-    return true;
-  }
-  
   if ( $login == "__public__" ) {
     $GLOBALS[$prefix . "login"] = $login;
     $GLOBALS[$prefix . "firstname"] = "";
@@ -237,7 +232,9 @@ function user_add_user ( $user, $password, $firstname, $lastname,
 //   $lastname - last name
 //   $birthdate - YYYYMMDD integer
 //   $email - email address
+//   $household - household for billing
 //   $admin - is admin?
+//   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_update_user ( $user, $firstname, $lastname, $birthdate,
 			    $email, $household, $admin, $beancounter ) {
   global $error;
@@ -344,32 +341,6 @@ function user_delete_user ( $user ) {
 
   // Delete from groups
   dbi_query ( "DELETE FROM webcal_group_user WHERE cal_login = '$user'" );
-
-  // Delete bosses & assistants
-  dbi_query ( "DELETE FROM webcal_asst WHERE cal_boss = '$user'" );
-  dbi_query ( "DELETE FROM webcal_asst WHERE cal_assistant = '$user'" );
-
-  // Delete user's views
-  $delete_em = array ();
-  $res = dbi_query ( "SELECT cal_view_id FROM webcal_view " .
-    "WHERE cal_owner = '$user'" );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $delete_em[] = $row[0];
-    }
-    dbi_free_result ( $res );
-  }
-  for ( $i = 0; $i < count ( $delete_em ); $i++ ) {
-    dbi_query ( "DELETE FROM webcal_view_user WHERE cal_view_id = " .
-      $delete_em[$i] );
-  }
-  dbi_query ( "DELETE FROM webcal_view WHERE cal_owner = '$user'" );
-
-  // Delete layers
-  dbi_query ( "DELETE FROM webcal_user_layers WHERE cal_login = '$user'" );
-
-  // Delete any layers other users may have that point to this user.
-  dbi_query ( "DELETE FROM webcal_user_layers WHERE cal_layeruser = '$user'" );
 
   // Delete user
   dbi_query ( "DELETE FROM webcal_user WHERE cal_login = '$user'" );

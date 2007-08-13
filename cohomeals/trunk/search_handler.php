@@ -17,7 +17,7 @@ if ( empty ( $users ) || empty ( $users[0] ) )
   $search_others = false;
 if ( $login == "__public__" && $public_access_others != "Y" )
   $search_others = false;
-if ( $readonly == "Y" || $single_user == "Y" )
+if ( $readonly == "Y" )
   $search_others = false;
 
 print_header();

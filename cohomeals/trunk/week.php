@@ -1,12 +1,6 @@
 <?php
 include_once 'includes/init.php';
 
-if (($user != $login) && $is_nonuser_admin) {
-   load_user_layers ($user);
-} else {
-   load_user_layers ();
-}
-
 
 $next = mktime ( 3, 0, 0, $thismonth, $thisday + 7, $thisyear );
 $prev = mktime ( 3, 0, 0, $thismonth, $thisday - 7, $thisyear );
@@ -49,8 +43,7 @@ $INC = array('js/popups.php');
 print_header($INC,$HeadX);
 
 /* Pre-load the events for quicker access */
-$events = read_events ( strlen ( $user ) ? $user : $login,
-  $startdate, $enddate );
+$events = read_events ( $startdate, $enddate );
 
 for ( $i = 0; $i < 7; $i++ ) {
   $days[$i] = $wkstart + ( 24 * 3600 ) * $i;
@@ -82,15 +75,7 @@ href="week.php?<?php echo $u_url;?>date=<?php echo
   date ("Ymd", $next );?>"><img src="rightarrow.gif" 
   alt="<?php etranslate("Next")?>" /></a>
 <span class="user"><?php
-  if ( $single_user == "N" ) {
-    echo "<br />$user_fullname";
-  }
-  if ( $is_nonuser_admin ) {
-    echo "<br />-- " . translate("Admin mode") . " --";
-  }
-  if ( $is_assistant ) {
-    echo "<br />-- " . translate("Assistant mode") . " --";
-  }
+  echo "<br />$user_fullname";
 ?></span>
 </div>
 <br />
@@ -125,7 +110,7 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
   echo ">";
 
   if ( $can_add ) {
-    echo html_for_add_icon (  date ( "Ymd", $days[$d] ), "", "", $user );
+    echo html_for_add_icon (  date ( "Ymd", $days[$d] ), "", "" );
   }
   echo "<a href=\"day.php?" . $u_url .
     "date=" . date ('Ymd', $days[$d] ) . "\">" .
@@ -153,7 +138,7 @@ if ( $login == "__public__" ) {
 $all_day = array ();
 for ( $d = $start_ind; $d < $end_ind; $d++ ) {
   // Get static events
-  $ev = get_entries ( $user, $date, $get_unapproved );
+  $ev = get_entries ( $date );
   $hour_arr = array ();
   $rowspan_arr = array ();
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
@@ -301,8 +286,7 @@ for ( $i = $first_slot; $i <= $last_slot; $i++ ) {
      }
      echo ">";
      if ( $can_add ) { //if user can add events...
-       echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m, 
-         $user ); //..then echo the add event icon
+       echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m );
      }
      echo "&nbsp;</td>\n";
    } else {
@@ -314,7 +298,7 @@ for ( $i = $first_slot; $i <= $last_slot; $i++ ) {
        }
        echo " rowspan=\"$rowspan_day[$d]\">";
        if ( $can_add ) {
-         echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m, $user );
+         echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m );
        }
        echo $save_hour_arr[$d][$i] . "</td>\n";
      } else {
@@ -324,7 +308,7 @@ for ( $i = $first_slot; $i <= $last_slot; $i++ ) {
        }
        echo ">";
        if ( $can_add ) {
-         echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m, $user );
+         echo html_for_add_icon (  date ( "Ymd", $days[$d] ), $time_h, $time_m );
        }
        echo $save_hour_arr[$d][$i] . "</td>\n";
      }

@@ -190,12 +190,7 @@ function user_valid_crypt ( $login, $crypt_password ) {
 //   $prefix - variable prefix to use
 function user_load_variables ( $login, $prefix ) {
   global $error, $ds, $ldap_base_dn, $ldap_login_attr, $ldap_user_attr;
-  global $PUBLIC_ACCESS_FULLNAME, $NONUSER_PREFIX;
-
-  if ($NONUSER_PREFIX && substr($login, 0, strlen($NONUSER_PREFIX) ) == $NONUSER_PREFIX ) {
-    nonuser_load_variables ( $login, $prefix );
-    return true;
-  }
+  global $PUBLIC_ACCESS_FULLNAME;
 
   if ( $login == '__public__' ) {
     $GLOBALS[$prefix . 'login'] = $login;

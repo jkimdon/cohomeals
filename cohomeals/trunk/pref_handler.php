@@ -7,7 +7,7 @@ $updating_public = false;;
 if ( $is_admin && ! empty ( $public ) && $public_access == "Y" ) {
   $updating_public = true;
   $prefuser = "__public__";
-} elseif (($user != $login) && ($is_admin || $is_nonuser_admin)) {
+} elseif (($user != $login) && $is_admin) {
   $prefuser = "$user";
 } else {
   $prefuser = "$login";
@@ -46,7 +46,7 @@ while ( list ( $key, $value ) = each ( $HTTP_POST_VARS ) ) {
 if ( empty ( $error ) ) {
   if ( $updating_public ) {
     do_redirect ( "pref.php?public=1" );
-  } elseif (($is_admin || $is_nonuser_admin) && $login != $user ) {
+  } elseif ( $is_admin && $login != $user ) {
     do_redirect ( "pref.php?user=$user" );
   } else {
     do_redirect ( "pref.php" );

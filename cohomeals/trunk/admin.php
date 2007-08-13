@@ -77,7 +77,6 @@ if ( ! $error ) {
  <span class="tabfor" id="tab_settings"><a href="#tabsettings" onclick="return showTab('settings')"><?php etranslate("Settings")?></a></span>
  <span class="tabbak" id="tab_public"><a href="#tabpublic" onclick="return showTab('public')"><?php etranslate("Public Access")?></a></span>
  <span class="tabbak" id="tab_groups"><a href="#tabgroups" onclick="return showTab('groups')"><?php etranslate("Groups")?></a></span>
- <span class="tabbak" id="tab_nonuser"><a href="#tabnonuser" onclick="return showTab('nonuser')"><?php etranslate("NonUser Calendars")?></a></span>
  <span class="tabbak" id="tab_other"><a href="#tabother" onclick="return showTab('other')"><?php etranslate("Other")?></a></span>
  <span class="tabbak" id="tab_email"><a href="#tabemail" onclick="return showTab('email')"><?php etranslate("Email")?></a></span>
  <span class="tabbak" id="tab_colors" title="<?php etooltip("colors-help")?>"><a href="#tabcolors" onclick="return showTab('colors')"><?php etranslate("Colors")?></a></span>
@@ -332,11 +331,6 @@ if ( ! $error ) {
   <label><input type="radio" name="admin_allow_html_description" value="Y" <?php if ( $s["allow_html_description"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
   <label><input type="radio" name="admin_allow_html_description" value="N" <?php if ( $s["allow_html_description"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
  </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("allow-view-other-help")?>">
-  <?php etranslate("Allow viewing other user's calendars")?>:</td><td>
-  <label><input type="radio" name="admin_allow_view_other" value="Y" <?php if ( $s["allow_view_other"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
-  <label><input type="radio" name="admin_allow_view_other" value="N" <?php if ( $s["allow_view_other"] == "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
  <tr><td class="tooltip" title="<?php etooltip("allow-view-add-help")?>">
   <?php etranslate("Include add event link in views")?>:</td><td>
   <label><input type="radio" name="admin_add_link_in_views" value="Y" <?php if ( $s["add_link_in_views"] != "N" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
@@ -466,22 +460,6 @@ if ( ! $error ) {
   <label><input type="radio" name="admin_user_sees_only_his_groups" value="Y" <?php if ( $s["user_sees_only_his_groups"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
   <label><input type="radio" name="admin_user_sees_only_his_groups" value="N" <?php if ( $s["user_sees_only_his_groups"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
  </td></tr>
-</table>
-</div>
-
-<!-- BEGIN NONUSER -->
-<div id="tabscontent_nonuser">
-<table cellspacing="0" cellpadding="3">
- <tr><td class="tooltip" title="<?php etooltip("nonuser-enabled-help")?>">
-  <?php etranslate("Nonuser enabled")?>:</td><td>
-  <label><input type="radio" name="admin_nonuser_enabled" value="Y" <?php if ( $s["nonuser_enabled"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
-  <label><input type="radio" name="admin_nonuser_enabled" value="N" <?php if ( $s["nonuser_enabled"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("nonuser-list-help")?>">
-  <?php etranslate("Nonuser list")?>:</td><td>
-  <label><input type="radio" name="admin_nonuser_at_top" value="Y" <?php if ( $s["nonuser_at_top"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Top")?></label>&nbsp;
-  <label><input type="radio" name="admin_nonuser_at_top" value="N" <?php if ( $s["nonuser_at_top"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Bottom")?></label>
-</td></tr>
 </table>
 </div>
 

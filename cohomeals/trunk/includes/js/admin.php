@@ -177,7 +177,6 @@ function email_handler () {
 tabs[1] = "settings";
 tabs[2] = "public";
 tabs[3] = "groups";
-tabs[5] = "nonuser";
 tabs[6] = "other";
 tabs[8] = "email";
 tabs[9] = "colors";
