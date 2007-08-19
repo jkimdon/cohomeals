@@ -1,0 +1,3 @@
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'jkimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'Joey', 'Kimdon', 'N', 'N', 'Kimdons', '19770904' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'dkimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19751223' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'akimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons', '20050914' )

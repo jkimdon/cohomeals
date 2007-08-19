@@ -4,36 +4,15 @@ include_once 'includes/site_extras.php';
 
 $error = "";
 
-if ( empty ( $TZ_OFFSET ) ) {
-  $TZ_OFFSET = 0;
-}
-
-if ( empty ( $endhour ) ) {
-  $endhour = 0;
-}
-// Modify the time to be server time rather than user time.
-if ( ! empty ( $hour ) && ( $timetype == 'T' ) ) {
-  // Convert to 24 hour before subtracting TZ_OFFSET so am/pm isn't confused.
-  // Note this obsoltes any code in the file below that deals with am/pm
-  // so the code can be deleted
+if ( ! empty ( $hour ) ) {
+  // Convert to 24 hour 
   if ( $TIME_FORMAT == '12' && $hour < 12 ) {
     if ( $ampm == 'pm' )
      $hour += 12;
   } elseif ($TIME_FORMAT == '12' && $hour == '12' && $ampm == 'am' ) {
     $hour = 0;
   }
-  if ( $GLOBALS['TIMED_EVT_LEN'] == 'E') {
-    if ( isset ( $endhour ) && $TIME_FORMAT == '12' ) {
-      // Convert end time to a twenty-four hour time scale.
-      if ( $endampm == 'pm' && $endhour < 12 ) {
-        $endhour += 12;
-      } elseif ( $endampm == 'am' && $endhour == 12 ) {
-        $endhour = 0;
-      }
-    }
-  }
   $TIME_FORMAT=24;
-  $hour -= $TZ_OFFSET;
   if ( $hour < 0 ) {
     $hour += 24;
     // adjust date
@@ -53,44 +32,19 @@ if ( ! empty ( $hour ) && ( $timetype == 'T' ) ) {
     $year = date ( "Y", $date );
   }
 
-  // Must adjust $endhour too
-  if ($TZ_OFFSET) {
-    $endhour -= $TZ_OFFSET;
-    if ( $endhour < 0 )   $endhour += 24;
-    if ( $endhour >= 24 ) $endhour -= 24;
-  }
 }
 
 // Make sure this user is really allowed to edit this event.
 // Otherwise, someone could hand type in the URL to edit someone else's
 // event.
 // Can edit if:
-//   - new event
 //   - user is admin
-//   - user is participant
+//   - user is meal coordinator
 $can_edit = false;
-if ( empty ( $id ) ) {
-  // New event...
+if ( $is_meal_coordinator || $is_admin ) {
   $can_edit = true;
 }
-if ( $is_admin ) {
-  $can_edit = true;
-}
-if ( empty ( $error ) && ! $can_edit ) {
-  // is user a participant of that event ?
-  $sql = "SELECT cal_id FROM webcal_meal_participant WHERE cal_id = '$id' " .
-    "AND cal_login = '$login'";
-  $res = dbi_query ( $sql );
-  if ($res) {
-    $row = dbi_fetch_row ( $res );
-    if ( ! empty( $row[0] ) )
-      $can_edit = true; // is participant
-    dbi_free_result ( $res );
-  } else
-    $error = translate("Database error") . ": " . dbi_error ();
-}
-
-if ( ! $can_edit && empty ( $error ) ) {
+if ( ! $can_edit ) {
   $error = translate ( "You are not authorized" );
 }
 
@@ -102,35 +56,9 @@ if ( ! $can_edit && empty ( $error ) ) {
 // assume the only participant is the current user.
 if ( empty ( $participants[0] ) ) {
   $participants[0] = $login;
-  // There might be a better way to do this, but if Admin sets this value,
-  // WebCalendar should respect it
-  if ( ! empty ( $public_access_default_selected ) &&
-    $public_access_default_selected == "Y" ) {
-    $participants[1] = "__public__";     
-  }
-}
-// If "all day event" was selected, then we set the event time
-// to be 12AM with a duration of 24 hours.
-// We don't actually store the "all day event" flag per se.  This method
-// makes conflict checking much simpler.  We just need to make sure
-// that we don't screw up the day view (which normally starts the
-// view with the first timed event).
-// Note that if someone actually wants to create an event that starts
-// at midnight and lasts exactly 24 hours, it will be treated in the
-// same manner.
-
-$duration_h = getValue ( "duration_h" );
-$duration_m = getValue ( "duration_m" );
-
-if ( $timetype == "A" ) {
-  $duration_h = 24;
-  $duration_m = 0;
-  $hour = 0;
-  $minute = 0;
 }
 
-$duration = ( $duration_h * 60 ) + $duration_m;
-if ( $hour > 0 && $timetype != 'U' ) {
+if ( $hour > 0 ) {
   if ( $TIME_FORMAT == '12' ) {
     $ampmt = $ampm;
     //This way, a user can pick am and still
@@ -145,20 +73,6 @@ if ( $hour > 0 && $timetype != 'U' ) {
   }
 }
 //echo "SERVER HOUR: $hour $ampm";
-
-if ( $GLOBALS['TIMED_EVT_LEN'] == 'E' && $timetype == "T" ) {
-    if ( ! isset ( $endhour ) ) {
-        $duration = 0;
-    } else {
-      // Calculate duration.
-      $endmins = ( 60 * (int) ( $endhour ) ) + $endminute;
-      $startmins = ( 60 * $hour ) + $minute;
-      $duration = $endmins - $startmins;
-    }
-    if ( $duration < 0 ) {
-        $duration = 0;
-    }
-}
 
 // handle external participants
 $ext_names = array ();
@@ -214,13 +128,12 @@ if ( ! empty ( $allow_external_users ) &&
   }
 }
 
-if ( strlen ( $hour ) > 0 && $timetype != 'U' ) {
+if ( strlen ( $hour ) > 0 ) {
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $str_cal_date = date ( "Ymd", $date );
   if ( strlen ( $hour ) > 0 ) {
     $str_cal_time = sprintf ( "%02d%02d00", $hour, $minute );
   }
-  $endt = 'NULL';
   $dayst = "nnnnnnn";
 }
 //Avoid Undefined variable message
@@ -260,30 +173,24 @@ if ( empty ( $error ) ) {
   }
 
   $sql = "INSERT INTO webcal_meal ( cal_id, " .
-    "cal_date, " .
-    "cal_time, cal_duration, " .
-    "cal_walkins, cal_suit, cal_description ) " .
+    "cal_date, cal_time, cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
+    "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " .
+    "cal_walkins, cal_notes ) " .
     "VALUES ( $id, ";
     
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $sql .= date ( "Ymd", $date ) . ", ";
-  if ( strlen ( $hour ) > 0 && $timetype != 'U' ) {
-    $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
-  } else {
-    $sql .= "-1, ";
-  }
-  $sql .= sprintf ( "%d, ", $duration );
+  $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
+  $sql .= "'" . $suit . "', ";
+  $sql .= "'" . $menu . "', ";
+  $sql .= "'" . $head_chef . "', ";
+  $sql .= $num_cooks . ", ";
+  $sql .= $num_cleanup . ", ";
+  $sql .= $num_setup . ", ";
+  $sql .= $num_other_crew . ", ";
   $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
+  $sql .= "'" . $notes . "' )";
 
-  if ( strlen ( $name ) == 0 ) {
-    $name = translate("Unnamed Event");
-  }
-  $sql .= "'" . $name .  "', ";
-  if ( strlen ( $description ) == 0 ) {
-    $description = $name;
-  }
-  $sql .= "'" . $description . "' )";
-  
   if ( empty ( $error ) ) {
     if ( ! dbi_query ( $sql ) ) {
       $error = translate("Database error") . ": " . dbi_error ();
@@ -307,14 +214,12 @@ if ( empty ( $error ) ) {
       if ( !$found_flag ) {
         // only send mail if their email address is filled in
         $do_send = get_pref_setting ( $old_participant, "EMAIL_EVENT_DELETED" );
-        $user_TZ = get_pref_setting ( $old_participant, "TZ_OFFSET" );
         $user_language = get_pref_setting ( $old_participant, "LANGUAGE" );
         user_load_variables ( $old_participant, "temp" );
         if ( $old_participant != $login && strlen ( $tempemail ) &&
           $do_send == "Y" && $send_email != "N" ) {
 
-          // Want date/time in user's timezone
-          $user_hour = $hour + $user_TZ;
+          $user_hour = $hour;
           if ( $user_hour < 0 ) {
             $user_hour += 24;
             // adjust date
@@ -346,7 +251,7 @@ if ( empty ( $error ) ) {
             translate("An appointment has been canceled for you by") .
             " " . $login_fullname .  ". " .
             translate("The subject was") . " \"" . $name . "\"\n\n" .
-            translate("The description is") . " \"" . $description . "\"\n" .
+            translate("The notes were") . " \"" . $notes . "\"\n" .
             translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
             ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
             translate("Time") . ": " .
@@ -393,15 +298,13 @@ if ( empty ( $error ) ) {
       // only send mail if their email address is filled in
       $do_send = get_pref_setting ( $participants[$i],
 	         $newevent ? "EMAIL_EVENT_ADDED" : "EMAIL_EVENT_UPDATED" );
-      $user_TZ = get_pref_setting ( $participants[$i], "TZ_OFFSET" );
       $user_language = get_pref_setting ( $participants[$i], "LANGUAGE" );
       user_load_variables ( $participants[$i], "temp" );
       if ( $participants[$i] != $login && 
 	   strlen ( $tempemail ) &&
 	   $do_send == "Y" && $send_email != "N" ) {
 
-	// Want date/time in user's timezone
-	$user_hour = $hour + $user_TZ;
+	$user_hour = $hour;
 	if ( $user_hour < 0 ) {
 	  $user_hour += 24;
 	  // adjust date
@@ -437,7 +340,7 @@ if ( empty ( $error ) ) {
 	}
 	$msg .= " " . $login_fullname .  ". " .
 	  translate("The subject is") . " \"" . $name . "\"\n\n" .
-	  translate("The description is") . " \"" . $description . "\"\n" .
+	  translate("The notes are") . " \"" . $notes . "\"\n" .
 	  translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
 	  ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
             translate("Time") . ": " .
@@ -493,7 +396,7 @@ if ( empty ( $error ) ) {
           }
           $msg .= " " . $login_fullname .  ". " .
             translate("The subject is") . " \"" . $name . "\"\n\n" .
-            translate("The description is") . " \"" . $description . "\"\n" .
+            translate("The notes are") . " \"" . $notes . "\"\n" .
             translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
             ( ( empty ( $hour ) && empty ( $minute ) ) ? "" :
             translate("Time") . ": " .
@@ -579,6 +482,7 @@ if ( empty ( $error ) ) {
   }
 
 }
+
 
 // If we were editing this event, then go back to the last view (week, day,
 // month).  If this is a new event, then go to the preferred view for

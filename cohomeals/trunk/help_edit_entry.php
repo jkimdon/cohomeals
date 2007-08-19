@@ -22,29 +22,6 @@
 		<?php etranslate("Time")?>:</td><td>
 		<?php etranslate("time-help")?>
 	</td></tr>
-   <?php if ( $GLOBALS['TIMED_EVT_LEN'] != 'E' ) { ?>
-	<tr><td class="help">
-		<?php etranslate("Duration")?>:</td><td>
-		<?php etranslate("duration-help")?>
-	</td></tr>
-   <?php } else { ?>
-	<tr><td class="help">
- 		<?php etranslate("End Time")?>:</td><td>
- 		<?php etranslate("end-time-help")?>
- 	</td></tr>
-   <?php } ?>
-	<?php if ( $disable_priority_field != "Y" ) { ?>
-		<tr><td class="help">
-			<?php etranslate("Priority")?>:</td><td>
-			<?php etranslate("priority-help")?>
-		</td></tr>
-	<?php } ?>
-	<?php if ( $disable_access_field != "Y" ) { ?>
-		<tr><td class="help">
-			<?php etranslate("Access")?>:</td><td>
-			<?php etranslate("access-help")?>
-		</td></tr>
-	<?php } ?>
 	<?php
 	<tr><td class="help">
 	<?php etranslate("Participants")?>:</td><td>

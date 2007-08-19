@@ -140,10 +140,9 @@ onmouseover="window.status = '<?php etranslate("Generate printer-friendly versio
 //   $id - event id
 //   $date - date (not used)
 //   $time - time (in HHMMSS format)
-//   $name - event name
-//   $description - long description of event
-function print_detailed_entry ( $id, $date, $time, $duration,
-  $name, $description ) {
+//   $suit - meal suit
+//   $notes - notes on meal or crew
+function print_detailed_entry ( $id, $date, $time, $suit, $notes ) {
   global $eventinfo, $login, $TZ_OFFSET;
   static $key = 0;
 
@@ -174,30 +173,14 @@ function print_detailed_entry ( $id, $date, $time, $duration,
       echo ( (int) ( $my_time / 10000 ) ) < 12 ? translate("am") : translate("pm");
     }
     $timestr = display_time ( $time );
-    if ( $duration > 0 ) {
-      // calc end time
-      $h = (int) ( $time / 10000 );
-      $m = ( $time / 100 ) % 100;
-      $m += $duration;
-      $d = $duration;
-      while ( $m >= 60 ) {
-        $h++;
-        $m -= 60;
-      }
-      $end_time = sprintf ( "%02d%02d00", $h, $m );
-      $timestr .= " - " . display_time ( $end_time );
-      echo " - " .display_time ( $end_time ). "";
-      echo "&raquo;&nbsp;";
-    } else {
-	echo "&raquo;&nbsp;";
-    }
+    echo "&raquo;&nbsp;";
   }
-  $PN = htmlspecialchars ( $name );
-  $PD = activate_urls ( htmlspecialchars ( $description ) );
+  $PN = htmlspecialchars ( $suit );
+  $PD = activate_urls ( htmlspecialchars ( $notes ) );
 
   echo $PN;
   echo "</a>";
-  # Only display description if it is different than the event name.
+  # Only display notes if it is different than the event name.
   if ( $PN != $PD )
     echo " - " . $PD;
   echo "<br />\n";
@@ -223,8 +206,8 @@ function print_det_date_entries ( $date, $ssi ) {
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     print_detailed_entry ( $ev[$i]['cal_id'],
-      $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-      $ev[$i]['cal_suit'], $ev[$i]['cal_description'] );
+			   $date, $ev[$i]['cal_time'],
+			   $ev[$i]['cal_suit'], $ev[$i]['cal_notes'] );
   }
 }
 ?>

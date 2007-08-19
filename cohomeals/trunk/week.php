@@ -135,7 +135,6 @@ if ( $login == "__public__" ) {
   $get_unapproved = false;
 }
 
-$all_day = array ();
 for ( $d = $start_ind; $d < $end_ind; $d++ ) {
   // Get static events
   $ev = get_entries ( $date );
@@ -143,22 +142,9 @@ for ( $d = $start_ind; $d < $end_ind; $d++ ) {
   $rowspan_arr = array ();
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     if ( $get_unapproved || $ev[$i]['cal_status'] == 'A' ) {
-      if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-        $viewid = $ev[$i]['cal_ext_for_id'];
-        $viewname = $ev[$i]['cal_suit'] . " (" .
-          translate("cont.") . ")";
-      } else {
-        $viewid = $ev[$i]['cal_id'];
-        $viewname = $ev[$i]['cal_suit'];
-      }
-      if ( $ev[$i]['cal_duration'] == ( 24 * 60 ) ) {
-        $all_day[$d] = 1;
-      }
-      html_for_event_week_at_a_glance ( $viewid,
-        $date, $ev[$i]['cal_time'],
-        $viewname, $ev[$i]['cal_description'],
-        $ev[$i]['cal_duration'],
-        $ev[$i]['cal_login'] );
+      $viewid = $ev[$i]['cal_id'];
+      $viewname = $ev[$i]['cal_suit'];
+      print_date_entries ( date ( "Ymd", $date ), $can_add );
     }
   }
 

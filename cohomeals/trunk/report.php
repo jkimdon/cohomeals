@@ -38,85 +38,52 @@ include_once 'includes/init.php';
 //   $id - event id
 //   $date - date
 //   $time - time (in HHMMSS format)
-//   $duration - event duration (in minutes)
-//   $name - event name
-//   $description - long description of event
+//   $suit - meal suit
+//   $notes - notes on meal or crew
 //   $status - event status
 //   $pri - event priority
 //   $access - event access
 //   $event_owner - user associated with this event
-function event_to_text ( $id, $date, $time, $duration,
-  $name, $description ) {
+function event_to_text ( $id, $date, $time, $suit, $notes ) {
   global $login, $user, $event_template, $report_id, $allow_html_description;
 
   $time_str = $start_time_str = $end_time_str = '';
 
-  if ( $duration == ( 24 * 60 ) ) {
-    $time_str = translate("All day event");
-  } else if ( $time == -1 ) {
-    $time_str = translate("Untimed event");
-  } else {
-    $time_str = display_time ( $time );
-    $start_time_str = $time_str;
-    $time_short = preg_replace ("/(:00)/", '', $time_str);
-    if ( $duration > 0 ) {
-      if ( $duration == ( 24 * 60 ) ) {
-        $time_str = translate("All day event");
-      } else {
-        // calc end time
-        $h = (int) ( $time / 10000 );
-        $m = ( $time / 100 ) % 100;
-        $m += $duration;
-        $d = $duration;
-        while ( $m >= 60 ) {
-          $h++;
-          $m -= 60;
-        }
-        $end_time = sprintf ( "%02d%02d00", $h, $m );
-        $time_str .= " - " . display_time ( $end_time );
-        $end_time_str = display_time ( $end_time );
-      }
-    }
-  }
-  $name_str = htmlspecialchars ( $name );
+  $time_str = display_time ( $time );
+  $start_time_str = $time_str;
+  $time_short = preg_replace ("/(:00)/", '', $time_str);
+  $suit_str = htmlspecialchars ( $suit );
   if ( ! empty ( $allow_html_description ) &&
        $allow_html_description == 'Y' ) {
-    $str = str_replace ( '&', '&amp;', $description );
-    $description_str = str_replace ( '&amp;amp;', '&amp;', $str );
-    if ( strstr ( $description_str, "<" ) &&
-	 strstr ( $description_str, ">" ) ) {
+    $str = str_replace ( '&', '&amp;', $notes );
+    $notes_str = str_replace ( '&amp;amp;', '&amp;', $str );
+    if ( strstr ( $notes_str, "<" ) &&
+	 strstr ( $notes_str, ">" ) ) {
       // found some HTML
     } else {
       // No HTML found.  Add line breaks.
-      $description_str = nl2br ( $description_str );
+      $notes_str = nl2br ( $notes_str );
     }
   } else {
-    $description_str = nl2br (
-      activate_urls ( htmlspecialchars ( $description ) ) );
+    $notes_str = nl2br (
+      activate_urls ( htmlspecialchars ( $notes ) ) );
   }
 
   $date_str = date_to_str ( $date, "", false );
   $date_full_str = date_to_str ( $date, "", true, false );
-
-  if ( $duration > 0 ) {
-    $duration_str = $duration . ' ' . translate ( "minutes" );
-  } else {
-    $duration_str = '';
-  }
 
   $href_str = "view_entry.php?id=$id";
 
   // Replace all variables in the event template.
   $text = $event_template;
   $text = str_replace ( '${name}', $name_str, $text );
-  $text = str_replace ( '${description}', $description_str, $text );
+  $text = str_replace ( '${notes}', $notes_str, $text );
   $text = str_replace ( '${date}', $date_str, $text );
   $text = str_replace ( '${dateYmd}', $date, $text );
   $text = str_replace ( '${fulldate}', $date_full_str, $text );
   $text = str_replace ( '${time}', $time_str, $text );
   $text = str_replace ( '${starttime}', $start_time_str, $text );
   $text = str_replace ( '${endtime}', $end_time_str, $text );
-  $text = str_replace ( '${duration}', $duration_str, $text );
   $text = str_replace ( '${href}', $href_str, $text );
   $text = str_replace ( '${id}', $id, $text );
   $text = str_replace ( '${report_id}', $report_id, $text );
@@ -253,7 +220,7 @@ $day_template = '<dt><b>${date}</b></dt><dd><dl>${events}</dl></dd>';
 $event_template = '<dt>${name}</dt><dd>' .
   '<b>' . translate ( "Date" ) . ':</b> ${date}<br />' .
   '<b>' . translate ( "Time" ) . ':</b> ${time}<br />' .
-  '${description}</dd>';
+  '${notes}</dd>';
 
 // Load templates for this report.
 if ( empty ( $error ) && empty ( $list ) ) {
@@ -400,17 +367,11 @@ if ( empty ( $error ) && empty ( $list ) ) {
     //echo "DATE: $dateYmd <br />\n";
   
     for ( $i = 0; $i < count ( $ev ); $i++ ) {
-      if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-	$viewid = $ev[$i]['cal_ext_for_id'];
-	$viewname = $ev[$i]['cal_suit'] . " (" .
-	  translate("cont.") . ")";
-      } else {
-	$viewid = $ev[$i]['cal_id'];
-	$viewname = $ev[$i]['cal_suit'];
-      }
+      $viewid = $ev[$i]['cal_id'];
+      $viewname = $ev[$i]['cal_suit'];
       $event_str .= event_to_text ( $viewid,
-		    $dateYmd, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-		    $viewname, $ev[$i]['cal_description'] );
+		    $dateYmd, $ev[$i]['cal_time'],
+		    $viewname, $ev[$i]['cal_notes'] );
     }
   
     if ( ! empty ( $event_str ) || $report_include_empty == 'Y' ||

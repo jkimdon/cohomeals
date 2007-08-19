@@ -27,32 +27,6 @@ if ( ! empty ( $month ) ) {
   $thismonth = $month;
 }
 
-// Make sure this is not a continuation event.
-// If it is, redirect the user to the original event.
-$ext_id = -1;
-if ( empty ( $error ) ) {
-  $res = dbi_query ( "SELECT cal_ext_for_id FROM webcal_meal " .
-    "WHERE cal_id = $id" );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      $ext_id = $row[0];
-    }
-    dbi_free_result ( $res );
-  } else {
-    // db error... ignore it, I guess.
-  }
-}
-if ( $ext_id > 0 ) {
-  $url = "view_entry.php?id=$ext_id";
-  if ( $date != "" ) {
-    $url .= "&amp;date=$date";
-  }
-  if ( $user != "" ) {
-    $url .= "&amp;user=$user";
-  }
-  do_redirect ( $url );
-}
-
 print_header();
 
 if ( ! empty ( $error ) ) {
@@ -65,8 +39,10 @@ if ( ! empty ( $error ) ) {
 
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
-  "cal_duration, " .
-  "cal_suit, cal_description, cal_walkins FROM webcal_meal WHERE cal_id = $id";
+    "cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
+    "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
+    "cal_walkins, cal_notes " .
+    "FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
 if ( ! $res ) {
   echo translate("Invalid entry id") . ": $id";
@@ -77,9 +53,15 @@ $row = dbi_fetch_row ( $res );
 if ( $row ) { 
   $orig_date = $row[0];
   $event_time = $row[1];
-  $suit = $row[3];
-  $description = $row[4];
-  $walkins = $row[5];
+  $suit = $row[2];
+  $menu = $row[3];
+  $head_chef = $row[4];
+  $num_cooks = $row[5];
+  $num_cleanup = $row[6];
+  $num_setup = $row[7];
+  $num_other_crew = $row[8];
+  $walkins = $row[9];
+  $notes = $row[10];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -120,13 +102,6 @@ $subject = translate($application_name) . ": " . $name;
 $subject = str_replace ( "\"", "", $subject );
 $subject = htmlspecialchars ( $subject );
 
-/* calculate end time */
-if ( $event_time >= 0 && $row[2] > 0 )
-  $end_str = "-" . display_time ( add_duration ( $row[1], $row[2] ) );
-else
-  $end_str = "";
-
-
 $is_private = false;
 
 $event_date = $row[0];
@@ -140,41 +115,18 @@ $event_date = $row[0];
  <?php echo $suit; ?>
 </td></tr>
 
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Description")?>:</td><td>
- <?php
-  if ( ! empty ( $allow_html_description ) &&
-    $allow_html_description == 'Y' ) {
-    $str = str_replace ( '&', '&amp;', $description );
-    $str = str_replace ( '&amp;amp;', '&amp;', $str );
-    // If there is no html found, then go ahead and replace
-    // the line breaks ("\n") with the html break.
-    if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
-      // found some html...
-      echo $str;
-    } else {
-      echo nl2br ( activate_urls ( $str ) );
-    }
-  } else {
-    echo nl2br ( activate_urls ( htmlspecialchars ( $description ) ) );
-  }
-?></td></tr>
 
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Date")?>:</td><td>
  <?php
-  echo date_to_str ( $row[0], "", true, false, ( $row[2] == ( 24 * 60 ) ? "" : $event_time ) );
+  echo date_to_str ( $row[0], "", true, false, $event_time );
   ?>
 </td></tr>
 <?php if ( $event_time >= 0 ) { ?>
 <tr><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Time")?>:</td><td>
  <?php
-    if ( $row[2] == ( 24 * 60 ) ) {
-      etranslate("All day event");
-    } else {
-      echo display_time ( $row[1] ) . $end_str;
-    }
+   echo display_time ( $row[1] );
   ?>
 </td></tr>
 <?php } ?>
@@ -268,9 +220,80 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
 }
 ?>
 
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Menu")?>:
+<tr><td style="vertical-align:top; font-weight:bold;">Menu:</td>
+ <td>
+ <?php
+  if ( ! empty ( $allow_html_description ) &&
+    $allow_html_description == 'Y' ) {
+    $menu_str = str_replace ( '&', '&amp;', $menu );
+    $menu_str = str_replace ( '&amp;amp;', '&amp;', $str );
+    // If there is no html found, then go ahead and replace
+    // the line breaks ("\n") with the html break.
+    if ( strstr ( $menu_str, "<" ) && strstr ( $menu_str, ">" ) ) {
+      // found some html...
+      echo $menu_str;
+    } else {
+      echo nl2br ( activate_urls ( $menu_str ) );
+    }
+  } else {
+    echo nl2br ( activate_urls ( htmlspecialchars ( $menu ) ) );
+  }
+?></td></tr>
+
+<tr><td style="vertical-align:top; font-weight:bold;">Head chef:</td>
+<td>
+<?php 
+  $sql = "SELECT cal_firstname, cal_lastname " .
+         "FROM webcal_user " .
+	 "WHERE cal_login = '" . $head_chef . "'";
+  $res = dbi_query ( $sql );
+  if ( $res ) {
+    $row = dbi_fetch_row ( $res );
+    echo $row[0] . " " . $row[1];
+  }
+  else {
+    echo "Database error: " . dbi_error() . "<br />\n";
+  }
+?>
 </td></tr>
+
+
+<?php if ( $num_cooks != 0 ) { ?>
+ <tr><td style="vertical-align:top; font-weight:bold;">Cooks:</td>
+    <td> <?php for ( $i = 1; $i <= $num_cooks; $i++ ) {
+      echo $i . ". ???<br>";
+    } ?>
+    <td>
+</td></tr>
+<?php } ?>
+
+<?php if ( $num_setup != 0 ) { ?>
+ <tr><td style="vertical-align:top; font-weight:bold;">Setup:</td>
+    <td> <?php for ( $i = 1; $i <= $num_setup; $i++ ) {
+      echo $i . ". ???<br>";
+    } ?>
+    <td>
+</td></tr>
+<?php } ?>
+
+<?php if ( $num_cleanup != 0 ) { ?>
+ <tr><td style="vertical-align:top; font-weight:bold;">Cleanup:</td>
+    <td> <?php for ( $i = 1; $i <= $num_cleanup; $i++ ) {
+      echo $i . ". ???<br>";
+    } ?>
+    <td>
+</td></tr>
+<?php } ?>
+
+<?php if ( $num_other_crew != 0 ) { ?>
+ <tr><td style="vertical-align:top; font-weight:bold;">Other crew (see notes):</td>
+    <td> <?php for ( $i = 1; $i <= $num_other_crew; $i++ ) {
+      echo $i . ". ???<br>";
+    } ?>
+    <td>
+</td></tr>
+<?php } ?>
+
 
 
 
@@ -350,22 +373,28 @@ if ( $walkins == "W" ) {
 </td></tr>
 
 
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Head cooks")?>:
-</td></tr>
+
 
 
 <tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Cooks")?>:
-</td></tr>
-
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Cleanup crew")?>:
-</td></tr>
-
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Notes")?>:
-</td></tr>
+ <?php etranslate("Notes")?>:</td><td>
+ <?php
+  if ( ! empty ( $allow_html_description ) &&
+    $allow_html_description == 'Y' ) {
+    $str = str_replace ( '&', '&amp;', $notes );
+    $str = str_replace ( '&amp;amp;', '&amp;', $str );
+    // If there is no html found, then go ahead and replace
+    // the line breaks ("\n") with the html break.
+    if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
+      // found some html...
+      echo $str;
+    } else {
+      echo nl2br ( activate_urls ( $str ) );
+    }
+  } else {
+    echo nl2br ( activate_urls ( htmlspecialchars ( $notes ) ) );
+  }
+?></td></tr>
 
 
 </table>
@@ -379,11 +408,8 @@ if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "";
 }
 
-$can_edit = ( $is_admin || ( $readonly != "Y" ) );
-if ( $public_access == "Y" && $login == "__public__" ) {
-  $can_edit = false;
-}
-if ( $readonly == 'Y' ) {
+$can_edit = ( $is_admin || $is_meal_coordinator );
+if ( $login == "__public__" ) {
   $can_edit = false;
 }
 
@@ -398,22 +424,6 @@ if ( $can_edit ) {
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete this entry for all users.") . "');\">" . 
     translate("Delete entry") . "</a><br />\n";
-} elseif ( $readonly != "Y" && $login != "__public__" )  {
-  echo "<a title=\"" . 
-    translate("Delete entry") . "\" class=\"nav\" " .
-    "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
-    translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
-    translate("This will delete the entry from your calendar.") . "');\">" . 
-    translate("Delete entry") . "</a><br />\n";
-}
-if ( $readonly != "Y" && ! $is_private && 
-  $login != "__public__" )  {
-  echo "<a title=\"" . 
-    translate("Add to My Calendar") . "\" class=\"nav\" " .
-    "href=\"add_entry.php?id=$id\" onclick=\"return confirm('" . 
-    translate("Do you want to add this entry to your calendar?") . "\\n\\n" . 
-    translate("This will add the entry to your calendar.") . "');\">" . 
-    translate("Add to My Calendar") . "</a><br />\n";
 }
 
 if ( count ( $allmails ) > 0 ) {

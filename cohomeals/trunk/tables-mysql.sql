@@ -42,9 +42,7 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, ca
 
 /*
  * Defines a calendar event.  Each event in the system has one entry
- * in this table unless the event starts before midnight and ends
- * after midnight. In that case a secondary event will be created with
- * cal_ext_for_id set to the cal_id of the original entry.
+ * in this table.
  * The following tables contain additional information about each
  * event:<ul>
  * <li><a href="#webcal_meal_participant">webcal_meal_participant</a> -
@@ -54,36 +52,31 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, ca
 CREATE TABLE webcal_meal (
   /* cal_id is unique integer id for event */
   cal_id INT NOT NULL,
-  /* used when an event goes past midnight into the */
-  /* next day, in which case an additional entry in this table */
-  /* will use this field to indicate the original event cal_id */
-  cal_ext_for_id INT NULL,
   /* date of event (in YYYYMMDD format) */
   cal_date INT NOT NULL,
   /* event time (in HHMMSS format) */
   cal_time INT NULL,
-  /* duration of event in minutes */
-  cal_duration INT NOT NULL,
   /* meal suit: heart, spade, diamond, club, wild */
   cal_suit VARCHAR(7) NOT NULL,
   /*  walkins are: 'D' = discouraged, 'W' = welcome, 'E' = encouraged */
   cal_walkins CHAR(1) DEFAULT 'D',
   /* base price (child, walkin, guest prices based on this) */
-  cal_baseprice DECIMAL(5,2),
-  /* head cook has special editing permissions. use cal_id of chef */
-  cal_headchef INT,
+  cal_base_price DECIMAL(5,2),
+  /* head cook has special editing permissions. use cal_login of chef */
+  cal_head_chef VARCHAR(25),
   /* desired number of cooks (not counting head chef) */
-  cal_desired_cooks INT,
+  cal_num_cooks INT,
   /* desired number of cleanup crew members */
-  cal_desired_cleanup INT,
+  cal_num_cleanup INT,
   /* desired number of setup */
-  cal_desired_setup INT,
+  cal_num_setup INT,
   /* desired number of other crew members */
-  cal_desired_othercrew INT,
-  /* description of duties of optional other crew members */
-  cal_othercrew_description VARCHAR(80) NULL,
-  /* full description of event */
-  cal_description TEXT,
+  cal_num_other_crew INT,
+  /* menu. For now, is just a text box. Later we'll allow interaction with a
+     recipe database. */
+  cal_menu TEXT,
+  /* notes, such as a description of duties of optional other crew members */
+  cal_notes TEXT,
   PRIMARY KEY ( cal_id )
 );
 

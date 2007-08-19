@@ -23,87 +23,41 @@ if ( empty ( $EVENT_EDIT_TABS ) )
   $EVENT_EDIT_TABS = 'Y'; // default
 $useTabs = ( $EVENT_EDIT_TABS == 'Y' );
 
-// make sure this is not a read-only calendar
 $can_edit = false;
-
-// Public access can only add events, not edit.
-if ( $login == "__public__" && $id > 0 ) {
-  $id = 0;
+if ( $is_meal_coordinator || $is_admin ) {
+  $can_edit = true;
 }
 
 $external_users = "";
 $participants = array ();
 
-if ( $readonly == 'Y' ) {
-  $can_edit = false;
-} else if ( ! empty ( $id ) && $id > 0 ) {
-  // first see who has access to edit this entry
-  if ( $is_admin ) {
-    $can_edit = true;
-  } else {
-    $can_edit = false;
-    if ( $readonly == "N" || $is_admin ) {
-      $sql = "SELECT webcal_meal.cal_id FROM webcal_meal, " .
-        "webcal_meal_participant WHERE webcal_meal.cal_id = " .
-        "webcal_meal_participant.cal_id AND webcal_meal.cal_id = $id " .
-        "AND webcal_meal_participant.cal_login = '$login'";
-      $res = dbi_query ( $sql );
-      if ( $res ) {
-        $row = dbi_fetch_row ( $res );
-        if ( $row && $row[0] > 0 )
-          $can_edit = true;
-        dbi_free_result ( $res );
-      }
-    }
-  }
+if ( ! empty ( $id ) && $id > 0 ) { 
+  // edit existing event
   $sql = "SELECT cal_date, cal_time, " .
-    "cal_duration, " .
-    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = " . $id;
+    "cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
+    "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
+    "cal_walkins, cal_notes " .
+    "FROM webcal_meal WHERE cal_id = " . $id;
   $res = dbi_query ( $sql );
   if ( $res ) {
     $row = dbi_fetch_row ( $res );
-    if ( ! empty ( $date ) ) {
-      // Leave $cal_date to what was set in URL with date=YYYYMMDD
-      $cal_date = $date;
-    } else {
-      $cal_date = $row[0];
-    }
+    $cal_date = $row[0];
     
     $year = (int) ( $cal_date / 10000 );
     $month = ( $cal_date / 100 ) % 100;
     $day = $cal_date % 100;
     $time = $row[1];
-    // test for AllDay event, if so, don't adjust time
-    if ( $time > 0  || ( $time == 0 &&  $row[2] != 1440 ) ) { /* -1 = no time specified */
-      $time += ( ! empty ( $TZ_OFFSET )?$TZ_OFFSET : 0)  * 10000;
-      if ( $time > 240000 ) {
-        $time -= 240000;
-        $gmt = mktime ( 3, 0, 0, $month, $day, $year );
-        $gmt += $ONE_DAY;
-        $month = date ( "m", $gmt );
-        $day = date ( "d", $gmt );
-        $year = date ( "Y", $gmt );
-      } else if ( $time < 0 ) {
-        $time += 240000;
-        $gmt = mktime ( 3, 0, 0, $month, $day, $year );
-        $gmt -= $ONE_DAY;
-        $month = date ( "m", $gmt );
-        $day = date ( "d", $gmt );
-        $year = date ( "Y", $gmt );
-      }
-      // Set alterted date
-      $cal_date = sprintf("%04d%02d%02d",$year,$month,$day);
-    }
-    if ( $time >= 0 ) {
-      $hour = floor($time / 10000);
-      $minute = ( $time / 100 ) % 100;
-      $duration = $row[2];
-    } else {
-      $duration = "";
-      $hour = -1;
-    }
-    $suit = $row[3];
-    $description = $row[4];
+    $hour = floor($time / 10000);
+    $minute = ( $time / 100 ) % 100;
+    $suit = $row[2];
+    $menu = $row[3];
+    $head_chef = $row[4];
+    $num_cooks = $row[5];
+    $num_cleanup = $row[6];
+    $num_setup = $row[7];
+    $num_other_crew = $row[8];
+    $walkins = $row[9];
+    $notes = $row[10];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -124,17 +78,19 @@ if ( $readonly == 'Y' ) {
       $participants[$tmp_ar[$i]] = 1;
     }
   }
-  if ( $readonly == "N" ) {
-    // If public, then make sure we can add events
-    if ( $login == '__public__' ) {
-      if ( $public_access_can_add )
-        $can_edit = true;
-    } else {
-      // not public user
-        $can_edit = true;
-    }
-  }
+
+  // defaults
+  $suit="wild";
+  $head_chef="not selected";
+  $menu="";
+  $num_cooks=2;
+  $num_cleanup=2;
+  $num_setup=2;
+  $num_other_crew=0;
+  $walkins="D";
+  $notes="";
 }
+
 if ( ! empty ( $year ) && $year )
   $thisyear = $year;
 if ( ! empty ( $month ) && $month )
@@ -145,17 +101,8 @@ if ( ! empty ( $day ) && $day )
 // avoid error for using undefined vars
 if ( ! isset ( $hour ) )
   $hour = -1;
-if ( empty ( $duration ) )
-  $duration = 0;
-if ( $duration == ( 24 * 60 ) ) {
-  $hour = $minute = $duration = "";
-  $allday = "Y";
-} else
-  $allday = "N";
-if ( empty ( $name ) )
-  $name = "";
-if ( empty ( $description ) )
-  $description = "";
+if ( empty ( $suit ) )
+  $suit = "";
 
 if ( ( empty ( $year ) || ! $year ) &&
   ( empty ( $month ) || ! $month ) &&
@@ -184,25 +131,35 @@ if ( $allow_html_description == "Y" ){
   // If they have installed the htmlarea widget, make use of it
   $textareasize = 'rows="15" cols="50"';
   if ( file_exists ( "includes/htmlarea/htmlarea.php" ) ) {
-    $BodyX = 'onload="initEditor();timetype_handler()"';
+    $BodyX = 'onload="initEditor();"';
     $INC = array ( 'htmlarea/htmlarea.php', 'js/edit_entry.php',
       'js/visible.php', 'htmlarea/core.php' );
   } else {
     // No htmlarea files found...
-    $BodyX = 'onload="timetype_handler()"';
+    $BodyX = 'onload=""';
     $INC = array ( 'js/edit_entry.php', 'js/visible.php' );
   }
 } else {
   $textareasize = 'rows="5" cols="40"';
-  $BodyX = 'onload="timetype_handler()"';
+  $BodyX = 'onload=""';
   $INC = array('js/edit_entry.php','js/visible.php');
 }
+
 
 print_header ( $INC, '', $BodyX );
 ?>
 
 
-<h2><?php if ( $id ) echo translate("Edit Entry"); else echo translate("Add Entry"); ?>&nbsp;<img src="help.gif" alt="<?php etranslate("Help")?>" class="help" onclick="window.open ( 'help_edit_entry.php<?php if ( empty ( $id ) ) echo "?add=1"; ?>', 'cal_help', 'dependent,menubar,scrollbars,height=400,width=400,innerHeight=420,outerWidth=420');" /></h2>
+<h2>
+<?php 
+  if ( $id ) echo translate("Edit Meal"); 
+  else echo translate("Add Meal"); 
+?>
+&nbsp;
+<img src="help.gif" alt="Help" class="help" onclick="window.open ( 'help_edit_entry.php
+<?php if ( empty ( $id ) ) echo "?add=1"; ?>
+', 'cal_help', 'dependent,menubar,scrollbars,height=400,width=400,innerHeight=420,outerWidth=420');" />
+</h2>
 
 <?php
  if ( $can_edit ) {
@@ -220,13 +177,6 @@ if ( ! empty ( $parent ) )
 
 ?>
 
-<!-- TABS -->
-<?php if ( $useTabs ) { ?>
-<div id="tabs">
- <span class="tabfor" id="tab_details"><a href="#tabdetails" onclick="return showTab('details')"><?php etranslate("Details") ?></a></span>
-</div>
-<?php } ?>
-
 <!-- TABS BODY -->
 <?php if ( $useTabs ) { ?>
 <div id="tabscontent">
@@ -235,19 +185,19 @@ if ( ! empty ( $parent ) )
  <div id="tabscontent_details">
 <?php } ?>
   <table style="border-width:0px;">
-   <tr><td style="width:23%;" class="tooltip" title="<?php etooltip("brief-description-help")?>">
-    <label for="entry_brief"><?php etranslate("Meal suit")?>:</label></td><td>
-    <input type="text" name="name" id="entry_brief" size="25" value="<?php 
-     echo htmlspecialchars ( $name );
-    ?>" /></td><td style="width:35%;">
-   </td></tr>
-   <tr><td style="vertical-align:top;" class="tooltip" title="<?php etooltip("full-description-help")?>">
-    <label for="entry_full"><?php etranslate("Description")?>:</label></td><td>
-    <textarea name="description" id="entry_full" <?php
-     echo $textareasize;
-    ?>><?php
-     echo htmlspecialchars ( $description );
-    ?></textarea></td><td style="vertical-align:top;">
+
+  <tr><td class="tooltip">Suit:</td>
+  <td>
+    <select name="suit">
+      <?php
+        select_option( "wild", $suit );
+	select_option( "spade", $suit );
+	select_option( "heart", $suit );
+	select_option( "club", $suit );
+	select_option( "diamond", $suit );
+      ?>
+    </select>
+  </td></tr>
 
   </td></tr>
   <tr><td class="tooltip" title="<?php etooltip("date-help")?>">
@@ -256,13 +206,7 @@ if ( ! empty ( $parent ) )
     print_date_selection ( "", $cal_date );
    ?>
   </td></tr>
-  <tr><td>&nbsp;</td><td colspan="2">
-   <select name="timetype" onchange="timetype_handler()">
-    <option value="U" <?php if ( $allday != "Y" && $hour == -1 ) echo " selected=\"selected\""?>><?php etranslate("Untimed event"); ?></option>
-    <option value="T" <?php if ( $allday != "Y" && $hour >= 0 ) echo " selected=\"selected\""?>><?php etranslate("Timed event"); ?></option>
-    <option value="A" <?php if ( $allday == "Y" ) echo " selected=\"selected\""?>><?php etranslate("All day event"); ?></option>
-   </select>
-  </td></tr>
+
   <tr id="timeentrystart"><td class="tooltip" title="<?php etooltip("time-help")?>">
    <?php echo translate("Time") . ":"; ?></td><td colspan="2">
 <?php
@@ -292,27 +236,7 @@ if ( $TIME_FORMAT == "12" ) {
   echo "<label><input type=\"radio\" name=\"ampm\" value=\"pm\" $pmsel />&nbsp;" .
     translate("pm") . "</label>\n";
 }
-?>
 
-<?php
-  $dur_h = (int)( $duration / 60 );
-  $dur_m = $duration % 60;
-
-if ($GLOBALS['TIMED_EVT_LEN'] != 'E') { ?>
-   </td></tr>
-  <tr id="timeentryduration"><td>
-  <span class="tooltip" title="<?php 
-   etooltip("duration-help")
-  ?>"><?php 
-   etranslate("Duration")
-  ?>:&nbsp;</span></td><td colspan="2">
-  <input type="text" name="duration_h" id="duration_h" size="2" maxlength="2" value="2"/>:<input type="text" name="duration_m" id="duration_m" size="2" maxlength="2" value="00"/>&nbsp;(<label for="duration_h"><?php 
-   echo translate("hours")
-  ?></label>: <label for="duration_m"><?php 
-   echo translate("minutes")
-  ?></label>)
- </td></tr>
-<?php } else {
 if ( $id ) {
   $t_h12 = $h12;
   if ( $TIME_FORMAT == "12" ) {
@@ -322,79 +246,96 @@ if ( $id ) {
     if ( !empty ( $pmsel ) && $t_h12 < 12 )
       $t_h12 += 12;
   } //end 12-hour time format
-
-  // Add duration
-  $endhour = $t_h12 + $dur_h;
-  $endminute = $minute + $dur_m;
-  $endhour = $endhour + (int)( $endminute / 60 );
-  $endminute %= 60;
-
-  if ( $TIME_FORMAT == "12" ) {
-    // Convert back to a standard time format
-    if ( $endhour < 12 ) {
-      $endamsel = " checked=\"checked\""; $endpmsel = "";
-    } else {
-      $endamsel = ""; $endpmsel = " checked=\"checked\"";
-    } //end if ( $endhour < 12 )
-    $endhour %= 12;
-    if ( $endhour == 0 ) $endhour = 12;
-  } //end if ( $TIME_FORMAT == "12" )
-} else {
-  $endhour = $h12;
-  $endminute = $minute;
-  $endamsel = $amsel;
-  $endpmsel = $pmsel;
-} //end if ( $id )
-if ( $allday != "Y" && $hour == -1 ) {
-  $endhour = "";
-  $endminute = "";
-} //end if ( $allday != "Y" && $hour == -1 )
+}
 ?>
- <span id="timeentryend" class="tooltip" title="<?php etooltip("end-time-help")?>">&nbsp;-&nbsp;
-  <input type="text" name="endhour" size="2" value="<?php 
-   if ( $allday != "Y" ) echo $endhour;
-  ?>" maxlength="2" />:<input type="text" name="endminute" size="2" value="<?php 
-   if ( $time >= 0 && $allday != "Y" ) printf ( "%02d", $endminute );
-  ?>" maxlength="2" />
-  <?php
-   if ( $TIME_FORMAT == "12" ) {
-    echo "<label><input type=\"radio\" name=\"endampm\" value=\"am\" $endamsel />&nbsp;" .
-     translate("am") . "</label>\n";
-    echo "<label><input type=\"radio\" name=\"endampm\" value=\"pm\" $endpmsel />&nbsp;" .
-     translate("pm") . "</label>\n";
-   }
-  ?>
- </span>
 </td></tr>
-<?php } ?>
 
-<tr><td class="tooltip">
-<?php etranslate("Menu")?>:</td></tr>
+<tr><td style="vertical-align:top;" class="tooltip">Menu:</td><td>
+  <textarea name="menu" 
+  <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $menu );?></textarea>
+</td></tr>
 
-<tr><td class="tooltip">
-<?php etranslate("Walk-ins welcome?")?>:</td>
+<tr><td class="tooltip">Head chef:</td>
+  <td>
+  <select name="head_chef">
+    <option value="not selected"
+      <?php if ( $head_chef == "not selected" ) echo "selected=\"selected\""; ?>
+      >not selected</option>
+  <?php
+    $adult_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-15, date( "m" ), date( "d" ) );
+    $sql = "SELECT cal_login, cal_firstname, cal_lastname " .
+           "FROM webcal_user " .
+	   "WHERE cal_birthdate <= $adult_cutoff " . 
+           "ORDER BY cal_firstname";
+    $res = dbi_query ( $sql );
+    if ( $res ) {
+      while ( $row = dbi_fetch_row ( $res ) ) {
+        echo "<option value=" . $row[0];
+	if ( $row[0] == $head_chef ) echo " selected=\"selected\"";
+	echo ">" . $row[1] . " " . $row[2] . "</option>";
+      } 
+    }
+  ?>
+  </select>
+</td></tr>
+
+<tr><td class="tooltip">Number of other cooks:</td>
+  <td>
+  <select name="num_cooks">
+  <?php
+    for ( $i=0; $i<11; $i++ )
+      select_option( $i, $num_cooks );
+  ?>
+  </select>
+</td></tr>
+
+<tr><td class="tooltip">Number of people for setup:</td>
+  <td>
+  <select name="num_setup">
+  <?php
+    for ( $i=0; $i<11; $i++ )
+      select_option( $i, $num_setup );
+  ?>
+  </select>
+</td></tr>
+
+<tr><td class="tooltip">Number of people for cleanup:</td>
+  <td>
+  <select name="num_cleanup">
+  <?php
+    for ( $i=0; $i<11; $i++ )
+      select_option( $i, $num_cleanup );
+  ?>
+  </select>
+</td></tr>
+
+<tr><td class="tooltip">Number of other crew members:</td>
+  <td>
+  <select name="num_other_crew">
+  <?php
+    for ( $i=0; $i<11; $i++ )
+      select_option( $i, $num_other_crew );
+  ?>
+  </select>
+</td></tr>
+
+<tr><td class="tooltip">Walk-ins welcome?:</td>
 <td>
   <select name="walkins">
-    <option value="D" selected="selected">Discouraged</option>
-    <option value="W">Welcome</option>
-    <option value="E">Encouraged</option>
+    <?php
+    select_option( "D", $walkins, "Discouraged" );
+    select_option( "W", $walkins, "Welcome" );
+    select_option( "E", $walkins, "Encouraged" );
+    ?>
   </select>
 </td>
 </tr>
 
 
-
-<tr><td class="tooltip">
-<?php etranslate("Number of head cooks")?>:</td></tr>
-
-<tr><td class="tooltip">
-<?php etranslate("Number of other cooks")?>:</td></tr>
-
-<tr><td class="tooltip">
-<?php etranslate("Number of cleaners")?>:</td></tr>
-
-<tr><td class="tooltip">
-<?php etranslate("Notes")?>:</td></tr>
+<tr><td style="vertical-align:top;" class="tooltip">Notes:</td><td>
+  <textarea name="notes" 
+  <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $notes );?></textarea>
+</td></tr>
 
 </table>
 
@@ -433,3 +374,14 @@ if ( $allday != "Y" && $hour == -1 ) {
 <?php print_trailer(); ?>
 </body>
 </html>
+
+
+<?php 
+function select_option( $option, $selected, $text="" ) {
+  if ( $text == "" ) $text = $option;
+  if ( $option == $selected )
+    echo "<option value=\"$option\" selected=\"selected\">$text</option>\n";
+  else
+    echo "<option value=\"$option\">$text</option>\n";
+}
+?> 

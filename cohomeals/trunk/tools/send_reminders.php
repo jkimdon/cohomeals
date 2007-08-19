@@ -206,8 +206,7 @@ function send_reminder ( $id, $event_date ) {
   // get event details
   $res = dbi_query (
     "SELECT cal_date, cal_time, " .
-    "cal_duration, " .
-    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = $id" );
+    "cal_suit, cal_notes FROM webcal_meal WHERE cal_id = $id" );
   if ( ! $res ) {
     echo "Db error: could not find event id $id.\n";
     return;
@@ -260,8 +259,8 @@ function send_reminder ( $id, $event_date ) {
     $body = translate("This is a reminder for the event detailed below.") .
       "\n\n";
 
-    $suit = $row[3];
-    $description = $row[4];
+    $suit = $row[2];
+    $notes = $row[3];
 
     // add trailing '/' if not found in server_url
     if ( ! empty ( $server_url ) ) {
@@ -273,14 +272,11 @@ function send_reminder ( $id, $event_date ) {
     }
 
     $body .= strtoupper ( $suit ) . "\n\n";
-    $body .= translate("Description") . ":\n";
-    $body .= indent ( $description ) . "\n";
+    $body .= translate("Notes") . ":\n";
+    $body .= indent ( $notes ) . "\n";
     $body .= translate("Date") . ": " . date_to_str ( $event_date ) . "\n";
     if ( $row[1] >= 0 )
       $body .= translate ("Time") . ": " . display_time ( $row[1] ) . "\n";
-    if ( $row[2] > 0 )
-      $body .= translate ("Duration") . ": " . $row[2] .
-        " " . translate("minutes") . "\n";
 
     // site extra fields
     $extras = get_site_extra_fields ( $id );
@@ -444,7 +440,7 @@ for ( $d = 0; $d < $DAYS_IN_ADVANCE; $d++ ) {
     if ( ! empty ( $completed_ids[$id] ) )
       continue;
     $completed_ids[$id] = 1;
-    process_event ( $id, $ev[$i]['cal_name'], $date, $ev[$i]['cal_time'] );
+    process_event ( $id, $ev[$i]['cal_suit'], $date, $ev[$i]['cal_time'] );
   }
 }
 

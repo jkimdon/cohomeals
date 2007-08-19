@@ -214,11 +214,7 @@ function print_upcoming_event ( $e ) {
   if ( $display_link && ! empty ( $server_url ) ) {
     print "</a>";
   }
-  if ( $e['cal_duration'] == 24 * 60 ) {
-    print " (" . translate("All day event") . ")\n";
-  } else if ( $e['cal_time'] != -1 ) {
-    print " (" . display_time ( $e['cal_time'] ) . ")\n";
-  }
+  print " (" . display_time ( $e['cal_time'] ) . ")\n";
   print "<br />\n";
 }
 ?>

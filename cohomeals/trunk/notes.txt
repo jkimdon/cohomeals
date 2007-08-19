@@ -1,0 +1,67 @@
+
+----
+fixme:
+- put baseprice in edit_entry.php
+
+-------
+
+current:
+
+if meal coordinator (or admin): create new meals: 
+				suit, description, date, time, head chef,
+				menu, walkins-welcome, num cooks, num cleanup,
+				num setup, notes
+if user (not MC or admin): 
+	 can add self to spade, wild, and diamond meals from meal page
+	 can subscribe to heart or club from a link on the main page
+	 can change to/from take-home plate for heart or club from meal page
+	 can add self to head chef (if unset) from meal page
+	 can add/remove self to cooks, cleanup, setup from meal page
+	 if head chef is set, only current head chef or MC or admin can change
+if head chef (or MC or admin): can change head chef, description, 
+				   menu, walkins-welcome, num cooks, 
+				   num cleanup, num setup, notes
+
+- get rid of "add to my calendar" on meal page
+- put in "current status" of current user on meal page
+
+-------
+
+before committing, grep for:
+
+-------
+future remove:
+readonly
+site extras (?)
+demo mode
+timezone offset
+disable_participants field
+show_participants
+work hours
+can_view (except for possible public access)
+
+----
+questions:
+
+
+----
+todo:
+add_entry should be renamed to something like participate_in_meal
+deal with ssi
+deal with public access
+deal with colors, gradient
+unsupport languages?
+do something with the hour matrix in week view
+pare down user preferences
+pare down admin preferences (e.g. disable participants)
+only timed events
+get rid of other supported databases
+change about-type stuff
+edit connect.php to have beancounter, household, etc
+check for extra date converters if get rid of date style preferences
+add unit tests for different levels of security access (admin, user, public, etc)
+get_my_users is probably not needed since we view all users
+security check: get rid of unused functions
+deletion
+check out the log info -- see if it's what we want
+head chef pulldown sorted by who has done it the least

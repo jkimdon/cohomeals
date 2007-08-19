@@ -83,11 +83,11 @@ $reports_link = array ( );
 $manage_calendar_link = array ( );
 
 // Go To links
-$can_add = ( $readonly == "N" );
-if ( $public_access == "Y" && $public_access_can_add != "Y" &&
-  $login == "__public__" ) {
-  $can_add = false;
+$can_add = false;
+if ( $is_meal_coordinator || $is_admin ) {
+  $can_add = true;
 }
+
 
 if ( ! empty ( $GLOBALS['STARTVIEW'] ) ) {
   $mycal = $GLOBALS['STARTVIEW'];

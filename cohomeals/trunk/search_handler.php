@@ -56,7 +56,7 @@ if ( ! empty ( $error ) ) {
     }
     $sql .= "AND ( UPPER(webcal_meal.cal_suit) " .
       "LIKE UPPER('%" .  $words[$i] . "%') " .
-      "OR UPPER(webcal_meal.cal_description) " .
+      "OR UPPER(webcal_meal.cal_notes) " .
       "LIKE UPPER('%" .  $words[$i] . "%') ) " .
       "ORDER BY cal_date";
     //echo "SQL: $sql<br />";

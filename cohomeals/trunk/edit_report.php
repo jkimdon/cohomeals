@@ -342,15 +342,12 @@ if ( $is_admin ) {
   <textarea rows="12" cols="60" name="event_template">
     <?php echo htmlentities ( $event_template, ENT_COMPAT, $charset )?>
   </textarea></td><td style="vertical-align:top;">
-  <tt>${name}</tt><br />
-  <tt>${description}</tt><br />
+  <tt>${suit}</tt><br />
+  <tt>${notes}</tt><br />
   <tt>${date}</tt><br />
   <tt>${fulldate}</tt><br />
   <tt>${time}</tt><br />
   <tt>${starttime}</tt><br />
-  <tt>${endtime}</tt><br />
-  <tt>${duration}</tt><br />
-  <tt>${priority}</tt><br />
   <tt>${href}</tt><br />
   <tt>${user}</tt><br />
   <tt>${report_id}</tt> 

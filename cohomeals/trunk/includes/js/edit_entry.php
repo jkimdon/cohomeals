@@ -4,24 +4,13 @@
 <!-- <![CDATA[
 // do a little form verifying
 function validate_and_submit () {
-  if ( document.editentryform.name.value == "" ) {
-    document.editentryform.name.select ();
-<?php
-    if ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ||
-      $GLOBALS['EVENT_EDIT_TABS'] == 'Y' ) { ?>
-    showTab ( "details" );
-<?php } ?>
-    document.editentryform.name.focus ();
-    alert ( "<?php etranslate("You have not entered a Brief Description")?>." );
-    return false;
-  }
+
   // Leading zeros seem to confuse parseInt()
   if ( document.editentryform.hour.value.charAt ( 0 ) == '0' )
     document.editentryform.hour.value = document.editentryform.hour.value.substring ( 1, 2 );
-  if ( document.editentryform.timetype.selectedIndex == 1 ) {
-    h = parseInt ( document.editentryform.hour.value );
-    m = parseInt ( document.editentryform.minute.value );
-<?php if ($GLOBALS["TIME_FORMAT"] == "12") { ?>
+  h = parseInt ( document.editentryform.hour.value );
+  m = parseInt ( document.editentryform.minute.value );
+  <?php if ($GLOBALS["TIME_FORMAT"] == "12") { ?>
     if ( document.editentryform.ampm[1].checked ) {
       // pm
       if ( h < 12 )
@@ -31,18 +20,17 @@ function validate_and_submit () {
       if ( h == 12 )
         h = 0;
     }
-<?php } ?>
-    if ( h >= 24 || m > 59 ) {
-<?php
-      if ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ||
-        $GLOBALS['EVENT_EDIT_TABS'] == 'Y' ) { ?>
-        showTab ( "details" );
-<?php } ?>
-      alert ( "<?php etranslate ("You have not entered a valid time of day")?>." );
-      document.editentryform.hour.select ();
-      document.editentryform.hour.focus ();
-      return false;
-    }
+  <?php } ?>
+  if ( h >= 24 || m > 59 ) {
+    <?php
+    if ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ||
+	 $GLOBALS['EVENT_EDIT_TABS'] == 'Y' ) { ?>
+      showTab ( "details" );
+    <?php } ?>
+    alert ( "<?php etranslate ("You have not entered a valid time of day")?>." );
+    document.editentryform.hour.select ();
+    document.editentryform.hour.focus ();
+    return false;
   }
   // is there really a change?
   changed = false;
@@ -129,35 +117,6 @@ function selectDate (  day, month, year, current, evt ) {
     "width=500,height=500,resizable=yes,scrollbars=yes" );
 }
 <?php } ?>
-
-<?php	// This function is called when the event type combo box 
-	// is changed. If the user selectes "untimed event" or "all day event",
-	// the times & duration fields are hidden.
-	// If they change their mind & switch it back, the original 
-	// values are restored for them
-?>function timetype_handler () {
-  var i = document.editentryform.timetype.selectedIndex;
-  var val = document.editentryform.timetype.options[i].text;
-  //alert ( "val " + i + " = " + val );
-  // i == 1 when set to timed event
-  if ( i != 1 ) {
-    // Untimed/All Day
-    makeInvisible ( "timeentrystart" );
-    if ( document.editentryform.duration_h ) {
-      makeInvisible ( "timeentryduration" );
-    } else {
-      makeInvisible ( "timeentryend" );
-    }
-  } else {
-    // Timed Event
-    makeVisible ( "timeentrystart" );
-    if ( document.editentryform.duration_h ) {
-      makeVisible ( "timeentryduration" );
-    } else {
-      makeVisible ( "timeentryend" );
-    }
-  }
-}
 
 
 <?php //see the showTab function in includes/js/visible.php for common code shared by all pages

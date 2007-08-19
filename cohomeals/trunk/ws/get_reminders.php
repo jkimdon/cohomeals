@@ -153,8 +153,7 @@ function list_reminder ( $id, $event_date, $remind_time ) {
   // get event details
   $res = dbi_query (
     "SELECT cal_date, cal_time, " .
-    "cal_duration, " .
-    "cal_suit, cal_description FROM webcal_meal WHERE cal_id = $id" );
+    "cal_suit, cal_notes FROM webcal_meal WHERE cal_id = $id" );
   if ( ! $res ) {
     echo "Db error: could not find event id $id.\n";
     return;
@@ -166,8 +165,8 @@ function list_reminder ( $id, $event_date, $remind_time ) {
     return;
   }
 
-  $suit = $row[3];
-  $description = $row[4];
+  $suit = $row[2];
+  $notes = $row[3];
 
   echo "<reminder>\n";
   echo "  <remindDate>" . date ( "Ymd", $remind_time ) . "</remindDate>\n";
@@ -183,15 +182,13 @@ function list_reminder ( $id, $event_date, $remind_time ) {
       echo "  <url>" .  $server_url . "/view_entry.php?id=" . $id . "</url>\n";
     }
   }
-  echo "  <description>" . escapeXml ( $description ) . "</description>\n";
+  echo "  <notes>" . escapeXml ( $notes ) . "</notes>\n";
   echo "  <dateFormatted>" . date_to_str ( $event_date ) . "</dateFormatted>\n";
   echo "  <date>" . $event_date . "</date>\n";
   if ( $row[1] >= 0 ) {
     echo "  <time>" . sprintf ( "%04d", $row[1] / 100 ) . "</time>\n";
     echo "  <timeFormatted>" . display_time ( $row[1] ) . "</timeFormatted>\n";
   }
-  if ( $row[2] > 0 )
-    echo "  <duration>" . $row[2] . "</duration>\n";
 
   // site extra fields
   $extras = get_site_extra_fields ( $id );

@@ -1078,26 +1078,21 @@ function site_extras_for_popup ( $id ) {
  * Builds the HTML for the event popup.
  *
  * @param string $popupid     CSS id to use for event popup
- * @param string $user        Username of user the event pertains to
- * @param string $description Event description
- * @param string $time        Time of the event (already formatted in a display format)
- * @param string $site_extras HTML for any site_extras for this event
+ * @param string $menu        Meal menu
  *
  * @return string The HTML for the event popup
  */
-function build_event_popup ( $popupid, $description, $time, $site_extras='' ) {
+function build_event_popup ( $popupid, $menu ) {
   global $login, $popup_fullnames, $popuptemp_fullname;
   $ret = "<dl id=\"$popupid\" class=\"popup\">\n";
 
   if ( empty ( $popup_fullnames ) )
     $popup_fullnames = array ();
-  
-  if ( strlen ( $time ) )
-    $ret .= "<dt>" . translate ("Time") . ":</dt>\n<dd>$time</dd>\n";
-  $ret .= "<dt>" . translate ("Description") . ":</dt>\n<dd>";
+
+  $ret .= "<dt>" . translate ("Menu") . ":</dt>\n<dd>";
   if ( ! empty ( $GLOBALS['allow_html_description'] ) &&
     $GLOBALS['allow_html_description'] == 'Y' ) {
-    $str = str_replace ( "&", "&amp;", $description );
+    $str = str_replace ( "&", "&amp;", $menu );
     $str = str_replace ( "&amp;amp;", "&amp;", $str );
     // If there is no html found, then go ahead and replace
     // the line breaks ("\n") with the html break.
@@ -1109,12 +1104,10 @@ function build_event_popup ( $popupid, $description, $time, $site_extras='' ) {
       $ret .= nl2br ( $str );
     }
   } else {
-    // html not allowed in description, escape everything
-    $ret .= nl2br ( htmlspecialchars ( $description ) );
+    // html not allowed in notes, escape everything
+    $ret .= nl2br ( htmlspecialchars ( $menu ) );
   }
   $ret .= "</dd>\n";
-  if ( ! empty ( $site_extras ) )
-    $ret .= $site_extras;
   $ret .= "</dl>\n";
   return $ret;
 }
@@ -1346,19 +1339,16 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  * @param int    $id          Event ID
  * @param int    $date        Date of event in YYYYMMDD format
  * @param int    $time        Time (in HHMMSS format)
- * @param int    $duration    Event duration in minutes
  * @param string $suit        Event name
- * @param string $description Long description of event
+ * @param string $notes       Notes
  *
  * @staticvar int Used to ensure all event popups have a unique id
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $duration,
-  $suit, $description ) {
+function print_entry ( $id, $date, $time, $suit, $menu ) {
   global $eventinfo, $PHP_SELF, $TZ_OFFSET;
   static $key = 0;
-  
 
   $class = "entry";
 
@@ -1376,32 +1366,14 @@ function print_entry ( $id, $date, $time, $duration,
 
 
   $timestr = "";
-  if ( $duration == ( 24 * 60 ) ) {
-    $timestr = translate("All day event");
-  } else if ( $time != -1 ) {
-    $timestr = display_time ( $time );
-    $time_short = preg_replace ("/(:00)/", '', $timestr);
-    echo $time_short . "&raquo;&nbsp;";
-    if ( $duration > 0 ) {
-        // calc end time
-        $h = (int) ( $time / 10000 );
-        $m = ( $time / 100 ) % 100;
-        $m += $duration;
-        $d = $duration;
-        while ( $m >= 60 ) {
-          $h++;
-          $m -= 60;
-        }
-        $end_time = sprintf ( "%02d%02d00", $h, $m );
-        $timestr .= " - " . display_time ( $end_time );
-    }
-  }
+  $timestr = display_time ( $time );
+  $time_short = preg_replace ("/(:00)/", '', $timestr);
+  echo $time_short . "&raquo;&nbsp;";
   echo htmlspecialchars ( $suit );
 
   echo "</a>\n";
   echo "<br />";
-  $eventinfo .= build_event_popup ( $popupid,
-				    $description, $timestr, site_extras_for_popup ( $id ) );
+  $eventinfo .= build_event_popup ( $popupid, $menu );
 }
 
 /** 
@@ -1454,7 +1426,6 @@ function get_site_extra_fields ( $eventid ) {
  */
 function read_events ( $startdate, $enddate ) {
   global $login;
-  global $TZ_OFFSET;
 
   $sy = substr ( $startdate, 0, 4 );
   $sm = substr ( $startdate, 4, 2 );
@@ -1463,58 +1434,10 @@ function read_events ( $startdate, $enddate ) {
   $em = substr ( $enddate, 4, 2 );
   $ed = substr ( $enddate, 6, 2 );
   if ( $startdate == $enddate ) {
-    if ( $TZ_OFFSET == 0 ) {
-      $date_filter = "webcal_meal.cal_date = $startdate";
-    } else if ( $TZ_OFFSET > 0 ) {
-      $prev_day = mktime ( 3, 0, 0, $sm, $sd - 1, $sy );
-      $cutoff = 24 - $TZ_OFFSET .  "0000";
-      $date_filter = "( ( webcal_meal.cal_date = $startdate AND " .
-        "( webcal_meal.cal_time <= $cutoff OR " .
-        "webcal_meal.cal_time = -1 ) ) OR " .
-        "( webcal_meal.cal_date = " . date("Ymd", $prev_day ) .
-        " AND webcal_meal.cal_time >= $cutoff ) )";
-    } else {
-      $next_day = mktime ( 3, 0, 0, $sm, $sd + 1, $sy );
-      $cutoff = ( 0 - $TZ_OFFSET ) * 10000;
-      $date_filter = "( ( webcal_meal.cal_date = $startdate AND " .
-        "( webcal_meal.cal_time > $cutoff OR " .
-        "webcal_meal.cal_time = -1 ) ) OR " .
-        "( webcal_meal.cal_date = " . date("Ymd", $next_day ) .
-        " AND webcal_meal.cal_time <= $cutoff ) )";
-    }
+    $date_filter = "webcal_meal.cal_date = $startdate";
   } else {
-    if ( $TZ_OFFSET == 0 ) {
-      $date_filter = " webcal_meal.cal_date >= $startdate " .
-        "AND webcal_meal.cal_date <= $enddate";
-    } else if ( $TZ_OFFSET > 0 ) {
-      $prev_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd - 1, $sy ) );
-      $enddate_minus1 = date ( ( "Ymd" ), mktime ( 3, 0, 0, $em, $ed - 1, $ey ) );
-      $cutoff = 24 - $TZ_OFFSET . "0000";
-      $date_filter = " ( ( webcal_meal.cal_date >= $startdate " .
-        "AND webcal_meal.cal_date <= $enddate AND " .
-        "webcal_meal.cal_time = -1 ) OR " .
-        "( webcal_meal.cal_date = $prev_day AND " .
-        "webcal_meal.cal_time >= $cutoff ) OR " .
-        "( webcal_meal.cal_date = $enddate AND " .
-        "webcal_meal.cal_time < $cutoff ) OR " .
-        "( webcal_meal.cal_date >= $startdate AND " .
-        "webcal_meal.cal_date <= $enddate_minus1 ) )";
-    } else {
-      // TZ_OFFSET < 0
-      $next_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd + 1, $sy ) );
-      $enddate_plus1 =
-        date ( ( "Ymd" ), mktime ( 3, 0, 0, $em, $ed + 1, $ey ) );
-      $cutoff = ( 0 - $TZ_OFFSET ) * 10000;
-      $date_filter = " ( ( webcal_meal.cal_date >= $startdate " .
-        "AND webcal_meal.cal_date <= $enddate AND " .
-        "webcal_meal.cal_time = -1 ) OR " .
-        "( webcal_meal.cal_date = $startdate AND " .
-        "webcal_meal.cal_time > $cutoff ) OR " .
-        "( webcal_meal.cal_date = $enddate_plus1 AND " .
-        "webcal_meal.cal_time <= $cutoff ) OR " .
-        "( webcal_meal.cal_date > $startdate AND " .
-        "webcal_meal.cal_date < $enddate_plus1 ) )";
-    }
+    $date_filter = " webcal_meal.cal_date >= $startdate " .
+      "AND webcal_meal.cal_date <= $enddate";
   }
   return query_events ( $date_filter );
 }
@@ -1611,10 +1534,9 @@ function query_events ( $date_filter ) {
   global $public_access_default_visible;
   $result = array ();
 
-  $sql = "SELECT webcal_meal.cal_suit, webcal_meal.cal_description, "
+  $sql = "SELECT webcal_meal.cal_suit, webcal_meal.cal_notes, "
     . "webcal_meal.cal_date, webcal_meal.cal_time, "
-    . "webcal_meal.cal_id, webcal_meal.cal_ext_for_id, "
-    . "webcal_meal.cal_duration ";
+    . "webcal_meal.cal_id, webcal_meal.cal_menu ";
   $sql .= "FROM webcal_meal WHERE ";
 
   $sql .= $date_filter;
@@ -1634,13 +1556,11 @@ function query_events ( $date_filter ) {
 
       $item = array (
         "cal_suit" => $row[0],
-        "cal_description" => $row[1],
+        "cal_notes" => $row[1],
         "cal_date" => $row[2],
         "cal_time" => $row[3],
         "cal_id"   => $row[4],
-        "cal_ext_for_id"   => $row[5],
-        "cal_duration" => $row[6],
-        "cal_login" => $row[7],
+        "cal_menu" => $row[5],
   "cal_exceptions" => array()
         );
 
@@ -1811,17 +1731,11 @@ function print_date_entries ( $date, $ssi ) {
   $ev = get_entries ( $date );
 
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
-    if ( ! empty ( $ev[$i]['cal_ext_for_id'] ) ) {
-      $viewid = $ev[$i]['cal_ext_for_id'];
-      $viewname = $ev[$i]['cal_suit'] . " (" .
-	translate("cont.") . ")";
-    } else {
-      $viewid = $ev[$i]['cal_id'];
-      $viewname = $ev[$i]['cal_suit'];
-    }
+    $viewid = $ev[$i]['cal_id'];
+    $viewname = $ev[$i]['cal_suit'];
     print_entry ( $viewid,
-      $date, $ev[$i]['cal_time'], $ev[$i]['cal_duration'],
-      $viewname, $ev[$i]['cal_description'] );
+      $date, $ev[$i]['cal_time'],
+      $viewname, $ev[$i]['cal_menu'] );
     $cnt++;
   }
   if ( $cnt == 0 )
@@ -1910,212 +1824,6 @@ function html_for_add_icon ( $date=0,$hour="", $minute="" ) {
  translate("New Entry") . "\" /></a>\n";
 }
 
-/**
- * Generates the HTML for an event to be viewed in the week-at-glance (week.php).
- *
- * The HTML will be stored in an array (global variable $hour_arr)
- * indexed on the event's starting hour.
- *
- * @param int    $id             Event id
- * @param string $date           Date of event in YYYYMMDD format
- * @param string $time           Time of event in HHMM format
- * @param string $suit           Brief description of event
- * @param string $description    Full description of event
- * @param int    $duration       Duration of event in minutes
- */
-function html_for_event_week_at_a_glance ( $id, $date, $time,
-  $suit, $description, $duration ) {
-  global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
-    $eventinfo;
-  static $key = 0;
-  global $DISPLAY_ICONS, $PHP_SELF, $TIME_SLOTS;
-
-  $popupid = "eventinfo-day-$id-$key";
-  $key++;
-  
-  // Figure out which time slot it goes in.
-  if ( $time >= 0 && $duration != ( 24 * 60 ) ) {
-    $ind = calc_time_slot ( $time );
-    if ( $ind < $first_slot )
-      $first_slot = $ind;
-    if ( $ind > $last_slot )
-      $last_slot = $ind;
-  } else
-    $ind = 9999;
-
-  $class = "entry";
-
-  // avoid php warning for undefined array index
-  if ( empty ( $hour_arr[$ind] ) )
-    $hour_arr[$ind] = "";
-
-  $hour_arr[$ind] .= "<a title=\"" . 
-  translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
-  $hour_arr[$ind] .= "\" onmouseover=\"window.status='" .
-    translate("View this entry") . "'; show(event, '$popupid'); return true;\" onmouseout=\"hide('$popupid'); return true;\">";
-
-  if ( $duration == ( 24 * 60 ) ) {
-    $timestr = translate("All day event");
-  } else if ( $time >= 0 ) {
-    $hour_arr[$ind] .= display_time ( $time ) . "&raquo;&nbsp;";
-    $timestr = display_time ( $time );
-    if ( $duration > 0 ) {
-      // calc end time
-      $h = (int) ( $time / 10000 );
-      $m = ( $time / 100 ) % 100;
-      $m += $duration;
-      $d = $duration;
-      while ( $m >= 60 ) {
-        $h++;
-        $m -= 60;
-      }
-      $end_time = sprintf ( "%02d%02d00", $h, $m );
-      $timestr .= "-" . display_time ( $end_time );
-    } else {
-      $end_time = 0;
-    }
-    if ( empty ( $rowspan_arr[$ind] ) )
-      $rowspan_arr[$ind] = 0; // avoid warning below
-    // which slot is end time in? take one off so we don't
-    // show 11:00-12:00 as taking up both 11 and 12 slots.
-    $endind = calc_time_slot ( $end_time, true );
-    if ( $endind == $ind )
-      $rowspan = 0;
-    else
-      $rowspan = $endind - $ind + 1;
-    if ( $rowspan > $rowspan_arr[$ind] && $rowspan > 1 )
-      $rowspan_arr[$ind] = $rowspan;
-  } else {
-    $timestr = "";
-  }
-
-  // avoid php warning of undefined index when using .= below
-  if ( empty ( $hour_arr[$ind] ) )
-    $hour_arr[$ind] = "";
-
-  $hour_arr[$ind] .= htmlspecialchars ( $suit );
-
-    $hour_arr[$ind] .= "</a>";
-  $hour_arr[$ind] .= "<br />\n";
-  $eventinfo .= build_event_popup ( $popupid,
-				    $description, $timestr, site_extras_for_popup ( $id ) );
-}
-
-/**
- * Generates the HTML for an event to be viewed in the day-at-glance (day.php).
- *
- * The HTML will be stored in an array (global variable $hour_arr)
- * indexed on the event's starting hour.
- *
- * @param int    $id             Event id
- * @param string $date           Date of event in YYYYMMDD format
- * @param string $time           Time of event in HHMM format
- * @param string $suit           Brief description of event
- * @param string $description    Full description of event
- * @param int    $duration       Duration of event in minutes
- * @param string $event_owner    User who created event
- */
-function html_for_event_day_at_a_glance ( $id, $date, $time,
-  $suit, $description, $duration ) {
-  global $first_slot, $last_slot, $hour_arr, $rowspan_arr, $rowspan,
-    $eventinfo, $login;
-  static $key = 0;
-  global $layers, $PHP_SELF, $TIME_SLOTS, $TZ_OFFSET;
-
-  $popupid = "eventinfo-day-$id-$key";
-  $key++;
-
-  $eventinfo .= build_event_popup ( $popupid, $description,
-      "", site_extras_for_popup ( $id ) );
-
-  // calculate slot length in minutes
-  $interval = ( 60 * 24 ) / $TIME_SLOTS;
-
-  // If TZ_OFFSET make this event before the start of the day or
-  // after the end of the day, adjust the time slot accordingly.
-  if ( $time >= 0 && $duration != ( 24 * 60 ) ) {
-    if ( $time + ( $TZ_OFFSET * 10000 ) > 240000 )
-      $time -= 240000;
-    else if ( $time + ( $TZ_OFFSET * 10000 ) < 0 )
-      $time += 240000;
-    $ind = calc_time_slot ( $time );
-    if ( $ind < $first_slot )
-      $first_slot = $ind;
-    if ( $ind > $last_slot )
-      $last_slot = $ind;
-  } else
-    $ind = 9999;
-  //echo "time = $time <br />\nind = $ind <br />\nfirst_slot = $first_slot<br />\n";
-
-  if ( empty ( $hour_arr[$ind] ) )
-    $hour_arr[$ind] = "";
-
-  $class = "entry";
-
-  $hour_arr[$ind] .= "<a title=\"" .
-    translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
-  $hour_arr[$ind] .= "\" onmouseover=\"window.status='" .
-    translate("View this entry") . "'; show(event, '$popupid'); return true;\" onmouseout=\"hide('$popupid'); return true;\">";
-
-
-  if ( $duration == ( 24 * 60 ) ) {
-    $hour_arr[$ind] .= "[" . translate("All day event") . "] ";
-  } else if ( $time >= 0 ) {
-    $hour_arr[$ind] .= "[" . display_time ( $time );
-    if ( $duration > 0 ) {
-      // calc end time
-      $h = (int) ( $time / 10000 );
-      $m = ( $time / 100 ) % 100;
-      $m += $duration;
-      $d = $duration;
-      while ( $m >= 60 ) {
-        $h++;
-        $m -= 60;
-      }
-      $end_time = sprintf ( "%02d%02d00", $h, $m );
-      $hour_arr[$ind] .= "-" . display_time ( $end_time );
-      // which slot is end time in? take one off so we don't
-      // show 11:00-12:00 as taking up both 11 and 12 slots.
-      $endind = calc_time_slot ( $end_time, true );
-      if ( $endind == $ind )
-        $rowspan = 0;
-      else
-        $rowspan = $endind - $ind + 1;
-      if ( ! isset ( $rowspan_arr[$ind] ) )
-        $rowspan_arr[$ind] = 0;
-      if ( $rowspan > $rowspan_arr[$ind] && $rowspan > 1 )
-        $rowspan_arr[$ind] = $rowspan;
-    }
-    $hour_arr[$ind] .= "] ";
-  }
-  $hour_arr[$ind] .= htmlspecialchars ( $suit );
-
-  $hour_arr[$ind] .= "</a>";
-  if ( $GLOBALS["DISPLAY_DESC_PRINT_DAY"] == "Y" ) {
-    $hour_arr[$ind] .= "\n<dl class=\"desc\">\n";
-    $hour_arr[$ind] .= "<dt>" . translate("Description") . ":</dt>\n<dd>";
-    if ( ! empty ( $GLOBALS['allow_html_description'] ) &&
-      $GLOBALS['allow_html_description'] == 'Y' ) {
-      $str = str_replace ( "&", "&amp;", $description );
-      $str = str_replace ( "&amp;amp;", "&amp;", $str );
-      // If there is no html found, then go ahead and replace
-      // the line breaks ("\n") with the html break.
-      if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
-        // found some html...
-        $hour_arr[$ind] .= $str;
-      } else {
-        // no html, replace line breaks
-        $hour_arr[$ind] .= nl2br ( $str );
-      }
-    } else {
-      // html not allowed in description, escape everything
-      $hour_arr[$ind] .= nl2br ( htmlspecialchars ( $description ) );
-    }
-    $hour_arr[$ind] .= "</dd>\n</dl>\n";
-  }
-
-  $hour_arr[$ind] .= "<br />\n";
-}
 
 
 /**
@@ -2767,28 +2475,4 @@ function background_css ( $color, $height = '', $percent = '' ) {
   return $ret;
 }
 
-
-/**
- * Return the time in HHMMSS format of input time + duration
- *
- *
- * <b>Note:</b> The gd library module needs to be available to use gradient
- * images.  If it is not available, a single background color will be used
- * instead.
- *
- * @param string $time   format "235900"
- * @param int $duration  number of minutes
- *
- * @return string The time in HHMMSS format
- */
-function add_duration ( $time, $duration ) {
-  $hour = (int) ( $time / 10000 );
-  $min = ( $time / 100 ) % 100;
-  $minutes = $hour * 60 + $min + $duration;
-  $h = $minutes / 60;
-  $m = $minutes % 60;
-  $ret = sprintf ( "%d%02d00", $h, $m );
-  //echo "add_duration ( $time, $duration ) = $ret <br />\n";
-  return $ret;
-}
 ?>
