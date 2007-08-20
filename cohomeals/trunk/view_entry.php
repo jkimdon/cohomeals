@@ -258,54 +258,97 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
 </td></tr>
 
 
-<?php if ( $num_cooks != 0 ) { ?>
- <tr><td style="vertical-align:top; font-weight:bold;">Cooks:</td>
-    <td> <?php for ( $i = 1; $i <= $num_cooks; $i++ ) {
-      echo $i . ". ???<br>";
-    } ?>
-    <td>
-</td></tr>
-<?php } ?>
 
-<?php if ( $num_setup != 0 ) { ?>
- <tr><td style="vertical-align:top; font-weight:bold;">Setup:</td>
-    <td> <?php for ( $i = 1; $i <= $num_setup; $i++ ) {
-      echo $i . ". ???<br>";
-    } ?>
-    <td>
-</td></tr>
-<?php } ?>
+<?php 
+  if ( $num_cooks != 0 ) 
+    display_crew( "Cooks", 'C', $num_cooks );
+  if ( $num_setup != 0 ) 
+    display_crew( "Setup", 'S', $num_setup );
+  if ( $num_cleanup != 0 ) 
+    display_crew( "Cleanup", 'L', $num_cleanup );
+  if ( $num_other_crew != 0 ) 
+    display_crew( "Other Crew (see notes)", 'O', $num_other_crew );
 
-<?php if ( $num_cleanup != 0 ) { ?>
- <tr><td style="vertical-align:top; font-weight:bold;">Cleanup:</td>
-    <td> <?php for ( $i = 1; $i <= $num_cleanup; $i++ ) {
-      echo $i . ". ???<br>";
-    } ?>
-    <td>
-</td></tr>
-<?php } ?>
-
-<?php if ( $num_other_crew != 0 ) { ?>
- <tr><td style="vertical-align:top; font-weight:bold;">Other crew (see notes):</td>
-    <td> <?php for ( $i = 1; $i <= $num_other_crew; $i++ ) {
-      echo $i . ". ???<br>";
-    } ?>
-    <td>
-</td></tr>
-<?php } ?>
+?>
 
 
 
 
 <?php // participants
 $allmails = array ();
-?>
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("On-site diners")?>:</td><td>
-<?php
 $sql = "SELECT cal_login FROM webcal_meal_participant " .
-       "WHERE cal_id = $id";
-//echo "$sql\n";
+       "WHERE cal_login = '$login' AND cal_id = $id " .
+       "AND (cal_type = 'M' OR cal_type = 'T')";
+$res = dbi_query ( $sql );
+if ( $res ) {
+  if ( dbi_fetch_row ( $res ) )
+    $already_eating = true;
+  else
+    $already_eating = false;
+}
+?>
+<tr><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:  
+<?php if ( $already_eating == false ) {?>
+  <a name="participation" class="addbutton" <?php echo "href=\"edit_participation_handler.php?id=$id&type=M&action=A\"";?>>Add me</a></td>
+<?php } else { echo "</td>"; } ?>
+  <td>
+  <?php
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_type = 'M'";
+    $res = dbi_query ( $sql );
+    $first = 1;
+    $num_app = $num_wait = $num_rej = 0;
+    if ( $res ) {
+      while ( $row = dbi_fetch_row ( $res ) ) {
+        $pname = $row[0];
+	$approved[$num_app++] = $pname;
+      }
+      dbi_free_result ( $res );
+    } else {
+      echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
+    }
+
+    for ( $i = 0; $i < $num_app; $i++ ) {
+      user_load_variables ( $approved[$i], "temp" );
+      if ( strlen ( $tempemail ) ) 
+	$allmails[] = $tempemail;
+      echo $tempfirstname;
+      if ( $login == $approved[$i] ) {
+	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+	  "href=\"edit_participation_handler.php?id=$id&type=M&action=D\">" . 
+	  "Remove me</a>";
+	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+	  "href=\"edit_participation_handler.php?id=$id&type=T&action=A\">" . 
+	  "Change to take-home plate</a>";
+      }
+      echo "<br />\n";
+    }
+
+    // show external users here...
+    if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
+      $external_users = event_get_external_users ( $id, 1 );
+      $ext_users = explode ( "\n", $external_users );
+      if ( is_array ( $ext_users ) ) {
+	for ( $i = 0; $i < count( $ext_users ); $i++ ) {
+	  if ( ! empty ( $ext_users[$i] ) ) {
+	    echo $ext_users[$i] . " (" . translate("External User") . 
+	      ")<br />\n";
+	  }
+	}
+      }
+    }
+  ?>
+</td></tr>
+
+
+
+<tr><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:
+<?php if ( $already_eating == false ) {
+  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?id=$id&type=T&action=A\">Add me</a></td>";
+} else { echo "</td>"; }
+echo "<td>";
+$sql = "SELECT cal_login FROM webcal_meal_participant " .
+"WHERE cal_id = $id AND cal_type = 'T'";
 $res = dbi_query ( $sql );
 $first = 1;
 $num_app = $num_wait = $num_rej = 0;
@@ -321,33 +364,20 @@ if ( $res ) {
 
 for ( $i = 0; $i < $num_app; $i++ ) {
   user_load_variables ( $approved[$i], "temp" );
-  if ( strlen ( $tempemail ) ) {
-    echo "<a href=\"mailto:" . $tempemail . "?subject=$subject\">" . 
-      $tempfullname . "</a><br />\n";
-    $allmails[] = $tempemail;
-  } else {
-    echo $tempfirstname . "<br />\n";
+  echo $tempfirstname;
+  if ( $login == $approved[$i] ) {
+    echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+      "href=\"edit_participation_handler.php?id=$id&type=T&action=D\">" . 
+      "Remove</a>";
+    echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+      "href=\"edit_participation_handler.php?id=$id&type=M&action=A\">" . 
+      "Change to on-site dining</a>";
   }
-}
-// show external users here...
-if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
-  $external_users = event_get_external_users ( $id, 1 );
-  $ext_users = explode ( "\n", $external_users );
-  if ( is_array ( $ext_users ) ) {
-    for ( $i = 0; $i < count( $ext_users ); $i++ ) {
-      if ( ! empty ( $ext_users[$i] ) ) {
-	echo $ext_users[$i] . " (" . translate("External User") . 
-	  ")<br />\n";
-      }
-    }
-  }
+  echo "<br />\n";
 }
 ?>
 </td></tr>
 
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Take-home plates")?>:
-</td></tr>
 
 
 <tr><td style="vertical-align:top; font-weight:bold;">
@@ -501,3 +531,52 @@ if ( $show_log ) {
 ?>
 </body>
 </html>
+
+
+<?php
+function display_crew( $title, $type, $number ) {
+  global $id, $login;
+
+  echo "<tr><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
+  echo "<td>";
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_type = '$type'";
+  $res = dbi_query ( $sql );
+  $im_working = false;
+  $i = 1;
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      if ( $i > $number ) 
+	echo "Error: Too many crew members.<br />\n";
+      else { 
+	$person = $row[0];
+	user_load_variables ( $person, "temp" );
+	echo $i . ". " . $GLOBALS[tempfirstname];
+	if ( $person == $login ) {
+	  $im_working = true;
+	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+	    "href=\"edit_participation_handler.php?id=$id&type=$type&action=D\">" . 
+	    "Remove me</a>";
+	}
+	echo "<br />\n";
+	$i += 1;
+      }
+    }
+  }
+  else 
+    echo "Database error: " . dbi_error() . "<br />\n";
+  if ( ($i <= $number) && ($im_working == false) ) {
+    echo $i . ". ";
+    echo "<a name=\"participation\" class=\"addbutton\"" . 
+      "href=\"edit_participation_handler.php?id=$id&type=$type&action=A\">" . 
+      "Add me</a><br>";
+    $i += 1;
+  }
+  if ( $i <= $number ) {
+    for ( $i = $i; $i <= $number; $i++ ) {
+      echo $i . ". ???<br>";
+    } 
+  }
+  echo "</td></tr>";
+}
+?>

@@ -901,5 +901,15 @@ th {
 abbr {
   cursor: help;
 }
+.addbutton {
+  padding: 1px;
+  width: 200px;
+  text-align: center;
+  background-color: #CCCCCC;
+  border-top: 1px solid #EEEEEE;
+  border-left: 1px solid #EEEEEE;
+  border-bottom: 1px solid #777777;
+  border-right: 1px solid #777777;
+}
 -->
 </style>

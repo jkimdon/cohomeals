@@ -97,15 +97,14 @@ CREATE TABLE webcal_meal_participant (
   /* type of participation: 
      'M' = in-house muncher
      'T' = take-home plate
-     'H' = head chef
      'C' = cook
      'S' = setup
      'L' = cleanup 
      'O' = other */
-  cal_type CHAR(1),
+  cal_type CHAR(1) NOT NULL,
   /* description of participant type if "other" */
   cal_description VARCHAR(80) NULL,
-  PRIMARY KEY ( cal_id, cal_login )
+  PRIMARY KEY ( cal_id, cal_login, cal_type )
 );
 
 /*

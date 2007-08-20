@@ -48,15 +48,6 @@ if ( ! $can_edit ) {
   $error = translate ( "You are not authorized" );
 }
 
-// If display of participants is disabled, set the participant list
-// to the event creator. 
-// Basically, if no participants were selected (because there
-// was no selection list available in the form or because the user
-// refused to select any participant from the list), then we will
-// assume the only participant is the current user.
-if ( empty ( $participants[0] ) ) {
-  $participants[0] = $login;
-}
 
 if ( $hour > 0 ) {
   if ( $TIME_FORMAT == '12' ) {
@@ -166,9 +157,6 @@ if ( empty ( $error ) ) {
     }
     if ( empty ( $error ) ) {
       dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
-      dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id" );
-      dbi_query ( "DELETE FROM webcal_entry_ext_user WHERE cal_id = $id" );
-      dbi_query ( "DELETE FROM webcal_site_extras WHERE cal_id = $id" );
     }
   }
 
