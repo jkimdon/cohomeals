@@ -211,9 +211,9 @@ if ( ! empty ( $parent ) )
    <?php echo translate("Time") . ":"; ?></td><td colspan="2">
 <?php
 $h12 = $hour;
-$amsel = " checked=\"checked\""; $pmsel = "";
+$pmsel = " checked=\"checked\""; $amsel = "";
 if ( $TIME_FORMAT == "12" ) {
-  if ( $h12 < 12 ) {
+  if ( ($h12 < 12) && ($h12 > 0) ) {
     $amsel = " checked=\"checked\""; $pmsel = "";
   } else {
     $amsel = ""; $pmsel = " checked=\"checked\"";
