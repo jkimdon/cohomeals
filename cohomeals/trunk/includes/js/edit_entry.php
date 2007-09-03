@@ -21,48 +21,34 @@ function validate_and_submit () {
         h = 0;
     }
   <?php } ?>
-  if ( h >= 24 || m > 59 ) {
-    <?php
-    if ( empty ( $GLOBALS['EVENT_EDIT_TABS'] ) ||
-	 $GLOBALS['EVENT_EDIT_TABS'] == 'Y' ) { ?>
-      showTab ( "details" );
-    <?php } ?>
-    alert ( "<?php etranslate ("You have not entered a valid time of day")?>." );
+  if ( h >= 24 || m > 59 || !h ) {
+    alert ( "You have not entered a valid time of day" );
     document.editentryform.hour.select ();
     document.editentryform.hour.focus ();
     return false;
   }
-  // is there really a change?
-  changed = false;
-  form=document.editentryform;
-  for ( i = 0; i < form.elements.length; i++ ) {
-    field = form.elements[i];
-    switch ( field.type ) {
-      case "radio":
-      case "checkbox":
-        if ( field.checked != field.defaultChecked )
-          changed = true;
-        break;
-      case "text":
-//      case "textarea":
-        if ( field.value != field.defaultValue )
-          changed = true;
-        break;
-      case "select-one":
-//      case "select-multiple":
-        for( j = 0; j < field.length; j++ ) {
-          if ( field.options[j].selected != field.options[j].defaultSelected )
-            changed = true;
-        }
-        break;
+
+
+  // make sure at least one weekday has been checked 
+  if ( document.editentryform.repeats.value == "true" ) {
+    dayok = false;
+    if ( document.editentryform.onSun.checked == true ) dayok = true;
+    if ( document.editentryform.onMon.checked == true ) dayok = true;
+    if ( document.editentryform.onTue.checked == true ) dayok = true;
+    if ( document.editentryform.onWed.checked == true ) dayok = true;
+    if ( document.editentryform.onThurs.checked == true ) dayok = true;
+    if ( document.editentryform.onFri.checked == true ) dayok = true;
+    if ( document.editentryform.onSat.checked == true ) dayok = true;
+    if ( dayok == false ) {
+      alert ( "You have not entered a day of the week." );
+      return false;
     }
   }
-  if ( changed ) {
-    form.entry_changed.value = "yes";
-  }
-//Add code to make HTMLArea code stick in TEXTAREA
- if (typeof editor != "undefined") editor._textArea.value = editor.getHTML();
+
+  //Add code to make HTMLArea code stick in TEXTAREA
+  if (typeof editor != "undefined") editor._textArea.value = editor.getHTML();
   // would be nice to also check date to not allow Feb 31, etc...
+
   document.editentryform.submit ();
   return true;
 }
@@ -117,6 +103,51 @@ function selectDate (  day, month, year, current, evt ) {
     "width=500,height=500,resizable=yes,scrollbars=yes" );
 }
 <?php } ?>
+
+
+function suittype_handler() {
+  var i = document.editentryform.suit.selectedIndex;
+  var val = document.editentryform.suit.options[i].text;
+
+  if ( (val == "heart") || (val == "club") || (val == "diamond") ) {
+    makeVisible ( "suitenddate" );
+    document.editentryform.repeats.value = "true";
+  } else {
+    makeInvisible( "suitenddate" );
+    document.editentryform.repeats.value = "false";
+  }
+
+  if ( (val == "heart") || (val == "club") ) {
+    makeVisible ( "suitdayofweek" );
+    makeInvisible( "menubox" );
+    makeInvisible( "headchef" );
+  } else {
+    makeInvisible( "suitdayofweek" );
+    makeVisible( "menubox" );
+    makeVisible( "headchef" );
+  }
+
+  if ( (val == "diamond" ) ) {
+    document.editentryform.onSun.checked = true;
+
+    document.editentryform.onMon.checked = false;
+    document.editentryform.onTue.checked = false;
+    document.editentryform.onWed.checked = false;
+    document.editentryform.onThurs.checked = false;
+    document.editentryform.onFri.checked = false;
+    document.editentryform.onSat.checked = false;
+  }
+  else {
+    document.editentryform.onSun.checked = false;
+    document.editentryform.onMon.checked = false;
+    document.editentryform.onTue.checked = false;
+    document.editentryform.onWed.checked = false;
+    document.editentryform.onThurs.checked = false;
+    document.editentryform.onFri.checked = false;
+    document.editentryform.onSat.checked = false;
+  }
+}
+
 
 
 <?php //see the showTab function in includes/js/visible.php for common code shared by all pages

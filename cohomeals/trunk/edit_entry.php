@@ -33,6 +33,8 @@ $participants = array ();
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
+  $newevent = false;
+  $repeats = false;
   $sql = "SELECT cal_date, cal_time, " .
     "cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
     "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
@@ -64,6 +66,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   }
 } else {
   // New event.
+  $newevent = true;
   $id = 0; // to avoid warnings below about use of undefined var
   // Anything other then testing for strlen breaks either hour=0 or no hour in URL
   if ( strlen ( $hour ) ) {
@@ -168,8 +171,9 @@ print_header ( $INC, '', $BodyX );
 
 <?php
 if ( ! empty ( $id ) && ( empty ( $copy ) || $copy != '1' ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
-// we need an additional hidden input field
-echo "<input type=\"hidden\" name=\"entry_changed\" value=\"\" />\n";
+// additional hidden input fields
+echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
+echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
 
 // if has cal_group_id was set, need to send parent = $parent
 if ( ! empty ( $parent ) )
@@ -177,6 +181,8 @@ if ( ! empty ( $parent ) )
 
 ?>
 
+<input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
+<p />
 <!-- TABS BODY -->
 <?php if ( $useTabs ) { ?>
 <div id="tabscontent">
@@ -184,30 +190,58 @@ if ( ! empty ( $parent ) )
  <a name="tabdetails"></a>
  <div id="tabscontent_details">
 <?php } ?>
-  <table style="border-width:0px;">
+
+<table style="border-width:0px;">
 
   <tr><td class="tooltip">Suit:</td>
   <td>
-    <select name="suit">
+    <select name="suit" onchange="suittype_handler()">
       <?php
-        select_option( "wild", $suit );
-	select_option( "spade", $suit );
-	select_option( "heart", $suit );
-	select_option( "club", $suit );
-	select_option( "diamond", $suit );
+        if ( $newevent == true ) {
+	  select_option( "wild", $suit );
+	  select_option( "spade", $suit );
+	  select_option( "heart", $suit );
+	  select_option( "club", $suit );
+	  select_option( "diamond", $suit );
+	}
+        else {
+	  echo "<option value=\"$suit\">$suit</option>\n";
+	}
       ?>
     </select>
   </td></tr>
 
+
+
   </td></tr>
-  <tr><td class="tooltip" title="<?php etooltip("date-help")?>">
-   <?php etranslate("Date")?>:</td><td colspan="2">
+  <tr><td class="tooltip" title="<?php etooltip("date-help")?>">Date:</td><td colspan="2">
    <?php
     print_date_selection ( "", $cal_date );
    ?>
   </td></tr>
 
-  <tr id="timeentrystart"><td class="tooltip" title="<?php etooltip("time-help")?>">
+  <?php if ( $newevent == true ) { ?>
+  <tr id="suitenddate">
+    <td class="tooltip">Create meals until:</td>
+    <td><?php print_date_selection ( "end", $end_date ); ?>
+  </td></tr>
+  <?php } ?>
+
+  
+  <?php if ( $newevent == true ) { ?>
+  <tr id="suitdayofweek">
+    <td class="tooltip">Day(s) of the week:</td>
+    <td><input type="checkbox" name="onSun" checked>Sun</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onMon" checked>Mon</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onTue" checked>Tue</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onWed" checked>Wed</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onThurs" checked>Thu</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onFri" checked>Fri</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="onSat" checked>Sat</input></td>
+  </td></tr>
+  <?php } ?>
+
+  <tr><td class="tooltip" title="<?php etooltip("time-help")?>">
    <?php echo translate("Time") . ":"; ?></td><td colspan="2">
 <?php
 $h12 = $hour;
@@ -250,12 +284,12 @@ if ( $id ) {
 ?>
 </td></tr>
 
-<tr><td style="vertical-align:top;" class="tooltip">Menu:</td><td>
+<tr id="menubox"><td style="vertical-align:top;" class="tooltip">Menu:</td><td>
   <textarea name="menu" 
   <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $menu );?></textarea>
 </td></tr>
 
-<tr><td class="tooltip">Head chef:</td>
+<tr id="headchef"><td class="tooltip">Head chef:</td>
   <td>
   <select name="head_chef">
     <option value="not selected"
@@ -370,6 +404,13 @@ if ( $id ) {
   echo translate("You are not authorized to edit this entry") . ".";
 } //end if ( $can_edit )
 ?>
+
+
+<script language="JavaScript" type="text/javascript">
+suittype_handler();	
+</script>
+
+
 
 <?php print_trailer(); ?>
 </body>

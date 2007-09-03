@@ -1,3 +1,5 @@
+before commit:
+
 
 ----
 fixme:
@@ -39,6 +41,8 @@ disable_participants field
 show_participants
 work hours
 can_view (except for possible public access)
+doublecheck group elimination
+get rid of popup "view this entry"
 
 ----
 questions:
@@ -65,3 +69,10 @@ security check: get rid of unused functions
 deletion
 check out the log info -- see if it's what we want
 head chef pulldown sorted by who has done it the least
+color gray/white to distinguish different lines in the edit/view meal table
+prev/next month navigation in easy-to-find spot
+for add meal, check to make sure end date is after start date
+    and check to make sure there is some day of the week clicked for repeating meals
+    add another save button at the top
+default time and number of crew should be according to spec
+more useful activity log (more descriptive actions)

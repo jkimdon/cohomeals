@@ -4,6 +4,95 @@ include_once 'includes/site_extras.php';
 
 $error = "";
 
+for ( $i=0; $i<7; $i++ ) 
+  $repday[$i] = 0;
+if ( $onSun == true ) {
+  $repday[0] = 1;
+}
+if ( $onMon == true ) {
+  $repday[1] = 1;
+}
+if ( $onTue == true ) {
+  $repday[2] = 1;
+}
+if ( $onWed == true ) {
+  $repday[3] = 1;
+}
+if ( $onThurs == true ) {
+  $repday[4] = 1;
+}
+if ( $onFri == true ) {
+  $repday[5] = 1;
+}
+if ( $onSat == true ) {
+  $repday[6] = 1;
+}
+
+$current_date = sprintf ( "%04d%02d%02d", $year, $month, $day );
+$first_date = $current_date;
+$weekday = date ( "w", mktime ( 3, 0, 0, $month, $day, $year ) );
+
+// get situated on the correct starting date
+if ( $repeats == true && $repday[$weekday] != 1 ) {
+  for ( $i=0; $i<7; $i++ ) {
+    $weekday += 1;
+    $day += 1;
+    if ( $weekday == 7 ) 
+      $weekday = 0;
+    if ( $repday[$weekday] == 1 ) {
+      $timestamp = mktime ( 3, 0, 0, $month, $day, $year );
+      $current_date = date ( "Ymd", $timestamp );
+      $day = date ( "d", $timestamp );
+      $month = date ( "m", $timestamp );
+      $year = date ( "Y", $timestamp );
+      break;
+    }
+  }
+}
+if ( $endday == 0 ) 
+  $end_date = $current_date;
+else 
+  $end_date = sprintf ( "%04d%02d%02d", $endyear, $endmonth, $endday );
+
+
+while ( $current_date <= $end_date ) {
+
+  add_or_edit_entry( $newevent, $id, $suit, $day, $month, $year, 
+		     $hour, $minute, $ampm,
+		     $menu, $head_chef, $num_cooks, $num_setup, 
+		     $num_cleanup, $num_other_crew, $walkins, $notes );
+
+
+  if ( $repeats == false ) 
+    break;
+  
+  for ( $i=0; $i<7; $i++ ) {
+    $weekday += 1;
+    $day += 1;
+    if ( $weekday == 7 ) 
+      $weekday = 0;
+    if ( $repday[$weekday] == 1 ) {
+      $timestamp = mktime ( 3, 0, 0, $month, $day, $year );
+      $current_date = date ( "Ymd", $timestamp );
+      $day = date ( "d", $timestamp );
+      $month = date ( "m", $timestamp );
+      $year = date ( "Y", $timestamp );
+      break;
+    }
+  }
+}
+
+
+
+
+
+function add_or_edit_entry( $newevent, $id, $suit, $day, $month, $year, $hour, $minute, $ampm,
+			    $menu, $head_chef, $num_cooks, $num_setup, 
+			    $num_cleanup, $num_other_crew, $walkins, $notes ) {
+  global $is_meal_coordinator, $is_admin;
+  global $LOG_CREATE, $LOG_UPDATE;
+  
+
 if ( ! empty ( $hour ) ) {
   // Convert to 24 hour 
   if ( $TIME_FORMAT == '12' && $hour < 12 ) {
@@ -34,6 +123,7 @@ if ( ! empty ( $hour ) ) {
 
 }
 
+
 // Make sure this user is really allowed to edit this event.
 // Otherwise, someone could hand type in the URL to edit someone else's
 // event.
@@ -47,8 +137,7 @@ if ( $is_meal_coordinator || $is_admin ) {
 if ( ! $can_edit ) {
   $error = translate ( "You are not authorized" );
 }
-
-
+else {
 if ( $hour > 0 ) {
   if ( $TIME_FORMAT == '12' ) {
     $ampmt = $ampm;
@@ -129,10 +218,10 @@ if ( strlen ( $hour ) > 0 ) {
 }
 //Avoid Undefined variable message
 $msg = '';
+
 if ( empty ( $error ) ) {
-  $newevent = true;
   // now add the entries
-  if ( empty ( $id ) ) {
+  if ( $newevent == true ) {
     $res = dbi_query ( "SELECT MAX(cal_id) FROM webcal_meal" );
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
@@ -142,7 +231,6 @@ if ( empty ( $error ) ) {
       $id = 1;
     }
   } else {
-    $newevent = false;
     // save old participants
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
       "WHERE cal_id = $id ";
@@ -165,6 +253,7 @@ if ( empty ( $error ) ) {
     "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " .
     "cal_walkins, cal_notes ) " .
     "VALUES ( $id, ";
+
     
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $sql .= date ( "Ymd", $date ) . ", ";
@@ -178,6 +267,7 @@ if ( empty ( $error ) ) {
   $sql .= $num_other_crew . ", ";
   $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
   $sql .= "'" . $notes . "' )";
+
 
   if ( empty ( $error ) ) {
     if ( ! dbi_query ( $sql ) ) {
@@ -470,15 +560,15 @@ if ( empty ( $error ) ) {
   }
 
 }
-
+}
+}
 
 // If we were editing this event, then go back to the last view (week, day,
 // month).  If this is a new event, then go to the preferred view for
 // the date range that this event was added to.
 if ( empty ( $error ) ) {
-  $xdate = sprintf ( "%04d%02d%02d", $year, $month, $day );
   $user_args = ( empty ( $user ) ? '' : "user=$user" );
-  send_to_preferred_view ( $xdate, $user_args );
+  send_to_preferred_view ( $first_date, $user_args );
 }
 
 print_header();
