@@ -1354,10 +1354,8 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
 
   $popupid = "eventinfo-$id-$key";
   $key++;
-  echo "<a title=\"" . 
-    translate("View this entry") . "\" class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
+  echo "<a class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
   echo "\" onmouseover=\"window.status='" . 
-    translate("View this entry") .
     "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
   $icon = "circle.gif";
 
