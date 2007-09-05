@@ -52,6 +52,9 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, ca
 CREATE TABLE webcal_meal (
   /* cal_id is unique integer id for event */
   cal_id INT NOT NULL,
+  /* club_id is the same for all meals in one set of club meals. unused for other
+     meal suits. */
+  cal_club_id INT NULL,
   /* date of event (in YYYYMMDD format) */
   cal_date INT NOT NULL,
   /* event time (in HHMMSS format) */

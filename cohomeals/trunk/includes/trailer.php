@@ -51,11 +51,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 
 
 <form action="year.php" method="get" name="SelectYear" id="yearform">
-<?php
-  if ( ! empty ( $user ) && $user != $login ) {
-    echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />\n";
-  }
-?>
 <label for="yearselect"><?php etranslate("Year")?>:&nbsp;</label>
 <select name="year" id="yearselect" onchange="document.SelectYear.submit()">
 <?php
@@ -111,57 +106,43 @@ if ( ! strstr ( $reqURI, "month.php" ) &&
   $todayURL = $reqURI;
 }
 
-$goto_link[] = "<a title=\"" . 
-translate("Calendar") . "\" style=\"font-weight:bold;\" " .
+$goto_link[] = "<a title=\"Calendar\" " .
   "href=\"$mycal\">" . 
 translate("Calendar") . "</a>";
 
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("User info") . "\" style=\"font-weight:bold;\" " .
-    "href=\"adminhome.php\">" . 
-    translate("User info") . "</a>";
+  $goto_link[] = "<a title=\"User info\" href=\"adminhome.php\">User info</a>";
 }
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("Financial history") . "\" style=\"font-weight:bold;\" " .
-    "href=\"financeHistory.php\">" . 
-    translate("Financial history") . "</a>";
+  $goto_link[] = "<a title=\"Financial history\" href=\"financeHistory.php\">Financial history</a>";
 }
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("Work/eat history") . "\" style=\"font-weight:bold;\" " .
-    "href=\"workeatHistory.php\">" . 
-    translate("Work/eat history") . "</a>";
+  $goto_link[] = "<a title=\"Work/eat history\" href=\"workeatHistory.php\">Work/eat history</a>";
 }
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("Recipes") . "\" style=\"font-weight:bold;\" " .
-    "href=\"recipes.php\">" . 
-    translate("Recipes") . "</a>";
+  $goto_link[] = "<a title=\"Recipes\" href=\"recipes.php\">Recipes</a>";
 }
 
-// only display some links if we're viewing our own calendar.
-if ( empty ( $user ) || $user == $login ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("Search") . "\" href=\"search.php\">" .
-    translate("Search") . "</a>";
-  if ( $can_add ) {
-    $url = "<a title=\"" . 
-      translate("Add New Meal") . "\" href=\"edit_entry.php";
-    if ( ! empty ( $thisyear ) ) {
-      $url .= "?year=$thisyear";
-      if ( ! empty ( $thismonth ) ) {
-        $url .= "&amp;month=$thismonth";
-      }
-      if ( ! empty ( $thisday ) ) {
-        $url .= "&amp;day=$thisday";
-      }
+
+/// adding/subscribing links
+$subscribe_link[] = "<a href=\"subscribe_heart.php\">Heart</a>";
+$subscribe_link[] = "<a href=\"subscribe_club.php\">Club</a>";
+if ( $can_add ) {
+  $url = "<a title=\"" . 
+    translate("Add New Meal") . "\" href=\"edit_entry.php";
+  if ( ! empty ( $thisyear ) ) {
+    $url .= "?year=$thisyear";
+    if ( ! empty ( $thismonth ) ) {
+      $url .= "&amp;month=$thismonth";
     }
-    $url .= "\">" . translate("Add New Meal") . "</a>";
-    $goto_link[] = $url;
+    if ( ! empty ( $thisday ) ) {
+      $url .= "&amp;day=$thisday";
+    }
   }
+  $url .= "\">Add New Meal</a>";
+  $special_link[] = $url;
 }
+
 if ( $login != '__public__' ) {
   $goto_link[] = "<a title=\"" . 
     translate("Help") . "\" href=\"#\" onclick=\"window.open " .
@@ -180,6 +161,27 @@ if ( count ( $goto_link ) > 0 ) {
     echo $goto_link[$i];
   }
 }
+
+
+if ( count ( $subscribe_link ) > 0 ) {
+  ?><br /><span class="prefix">Manage subscriptions:</span> <?php
+  for ( $i = 0; $i < count ( $subscribe_link ); $i++ ) {
+    if ( $i > 0 )
+      echo " | ";
+    echo $subscribe_link[$i];
+  }
+}
+
+
+if ( count ( $special_link ) > 0 ) {
+  ?><br /><span class="prefix">Special privileges:</span> <?php
+  for ( $i = 0; $i < count ( $special_link ); $i++ ) {
+    if ( $i > 0 )
+      echo " | ";
+    echo $special_link[$i];
+  }
+}
+
 ?>
 
 

@@ -55,9 +55,25 @@ else
   $end_date = sprintf ( "%04d%02d%02d", $endyear, $endmonth, $endday );
 
 
+/// prepare a new club id
+if ( $suit == "club" ) {
+  $res = dbi_query ( "SELECT MAX(cal_club_id) FROM webcal_meal" );
+  if ( $res ) {
+    $row = dbi_fetch_row ( $res );
+    $club_id = $row[0] + 1;
+    dbi_free_result ( $res );
+  } else {
+    $club_id = 1;
+  }
+}
+else {
+  $club_id = 0;
+}
+
+
 while ( $current_date <= $end_date ) {
 
-  add_or_edit_entry( $newevent, $id, $suit, $day, $month, $year, 
+  add_or_edit_entry( $newevent, $id, $club_id, $suit, $day, $month, $year, 
 		     $hour, $minute, $ampm,
 		     $menu, $head_chef, $num_cooks, $num_setup, 
 		     $num_cleanup, $num_other_crew, $walkins, $notes );
@@ -86,7 +102,8 @@ while ( $current_date <= $end_date ) {
 
 
 
-function add_or_edit_entry( $newevent, $id, $suit, $day, $month, $year, $hour, $minute, $ampm,
+function add_or_edit_entry( $newevent, $id, $club_id, $suit, 
+			    $day, $month, $year, $hour, $minute, $ampm,
 			    $menu, $head_chef, $num_cooks, $num_setup, 
 			    $num_cleanup, $num_other_crew, $walkins, $notes ) {
   global $is_meal_coordinator, $is_admin;
@@ -248,13 +265,13 @@ if ( empty ( $error ) ) {
     }
   }
 
-  $sql = "INSERT INTO webcal_meal ( cal_id, " .
+  $sql = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
     "cal_date, cal_time, cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
     "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " .
     "cal_walkins, cal_notes ) " .
     "VALUES ( $id, ";
 
-    
+  $sql .= $club_id . ", ";
   $date = mktime ( 3, 0, 0, $month, $day, $year );
   $sql .= date ( "Ymd", $date ) . ", ";
   $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
