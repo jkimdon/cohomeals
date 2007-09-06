@@ -30,6 +30,7 @@ if ( $is_meal_coordinator || $is_admin ) {
 
 $external_users = "";
 $participants = array ();
+$repeats = false;
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
@@ -68,19 +69,9 @@ if ( ! empty ( $id ) && $id > 0 ) {
   // New event.
   $newevent = true;
   $id = 0; // to avoid warnings below about use of undefined var
-  // Anything other then testing for strlen breaks either hour=0 or no hour in URL
-  if ( strlen ( $hour ) ) {
-    $time = $hour * 100;
-  } else {
-    $time = -1;
-    $hour = 0;
-  }
-  if ( ! empty ( $defusers ) ) {
-    $tmp_ar = explode ( ",", $defusers );
-    for ( $i = 0; $i < count ( $tmp_ar ); $i++ ) {
-      $participants[$tmp_ar[$i]] = 1;
-    }
-  }
+  $hour = 18;
+  $minute = 0;
+  $time = $hour * 100 + $minute;
 
   // defaults
   $suit="wild";

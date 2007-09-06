@@ -33,7 +33,7 @@ $first_date = $current_date;
 $weekday = date ( "w", mktime ( 3, 0, 0, $month, $day, $year ) );
 
 // get situated on the correct starting date
-if ( $repeats == true && $repday[$weekday] != 1 ) {
+if ( ($repeats == "true") && $repday[$weekday] != 1 ) {
   for ( $i=0; $i<7; $i++ ) {
     $weekday += 1;
     $day += 1;
@@ -49,6 +49,7 @@ if ( $repeats == true && $repday[$weekday] != 1 ) {
     }
   }
 }
+
 if ( $endday == 0 ) 
   $end_date = $current_date;
 else 
@@ -79,8 +80,9 @@ while ( $current_date <= $end_date ) {
 		     $num_cleanup, $num_other_crew, $walkins, $notes );
 
 
-  if ( $repeats == false ) 
+  if ( $repeats == "false" ) {
     break;
+  } 
   
   for ( $i=0; $i<7; $i++ ) {
     $weekday += 1;
@@ -112,10 +114,10 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 
 if ( ! empty ( $hour ) ) {
   // Convert to 24 hour 
-  if ( $TIME_FORMAT == '12' && $hour < 12 ) {
+  if ( $hour < 12 ) {
     if ( $ampm == 'pm' )
      $hour += 12;
-  } elseif ($TIME_FORMAT == '12' && $hour == '12' && $ampm == 'am' ) {
+  } elseif ( $hour == '12' && $ampm == 'am' ) {
     $hour = 0;
   }
   $TIME_FORMAT=24;
@@ -155,8 +157,7 @@ if ( ! $can_edit ) {
   $error = translate ( "You are not authorized" );
 }
 else {
-if ( $hour > 0 ) {
-  if ( $TIME_FORMAT == '12' ) {
+  if ( $hour > 0 ) {
     $ampmt = $ampm;
     //This way, a user can pick am and still
     //enter a 24 hour clock time.
@@ -168,8 +169,7 @@ if ( $hour > 0 ) {
       $hour += 12;
     }
   }
-}
-//echo "SERVER HOUR: $hour $ampm";
+
 
 // handle external participants
 $ext_names = array ();
@@ -225,14 +225,7 @@ if ( ! empty ( $allow_external_users ) &&
   }
 }
 
-if ( strlen ( $hour ) > 0 ) {
-  $date = mktime ( 3, 0, 0, $month, $day, $year );
-  $str_cal_date = date ( "Ymd", $date );
-  if ( strlen ( $hour ) > 0 ) {
-    $str_cal_time = sprintf ( "%02d%02d00", $hour, $minute );
-  }
-  $dayst = "nnnnnnn";
-}
+
 //Avoid Undefined variable message
 $msg = '';
 
