@@ -1348,9 +1348,18 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  */
 function print_entry ( $id, $date, $time, $suit, $menu ) {
   global $eventinfo, $PHP_SELF, $TZ_OFFSET;
+  global $login;
   static $key = 0;
 
-  $class = "entry";
+  $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = '$id' AND cal_login = '$login'";
+  if ( $res = dbi_query ( $sql ) ) {
+    if ( dbi_fetch_row ( $res ) ) 
+      $class = "participating_entry";
+    else 
+      $class = "entry";
+  }
+  else 
+    $class = "entry";
 
   $popupid = "eventinfo-$id-$key";
   $key++;

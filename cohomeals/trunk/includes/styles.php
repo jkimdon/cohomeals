@@ -235,6 +235,14 @@ label {
   text-decoration: none;
   padding-right: 3px;
 }
+<?php //links to entries/events for which one is signed up for
+?>.participating_entry {
+  font-size: 13px;
+  font-weight: bold;
+  color: #600000;
+  text-decoration: none;
+  padding-right: 3px;
+}
 <?php //event (or bullet) icon; NOTE: must appear AFTER the .entry class
 ?>.entry img {
   border-width: 0px;
