@@ -96,20 +96,10 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
     if ( date ( "Ymd", $date ) >= date ( "Ymd", $monthstart ) &&
       date ( "Ymd", $date ) <= date ( "Ymd", $monthend ) ) {
       $thiswday = date ( "w", $date );
-      $is_weekend = ( $thiswday == 0 || $thiswday == 6 );
-      if ( empty ( $WEEKENDBG ) ) {
-        $is_weekend = false;
-      }
       print "<td";
       $class = "";
       if ( date ( "Ymd", $date  ) == date ( "Ymd", $today ) ) {
         $class = "today";
-      }
-      if ( $is_weekend ) {
-        if ( strlen ( $class ) ) {
-          $class .= " ";
-        }
-        $class .= "weekend";
       }
       if ( strlen ( $class ) )  {
       echo " class=\"$class\"";

@@ -1296,10 +1296,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
         echo "<td";
         $wday = date ( 'w', $date );
         $class = '';
-  //add class="weekend" if it's saturday or sunday
-        if ( $wday == 0 || $wday == 6 ) {
-          $class = "weekend";
-        }
   //if the day being viewed is today's date AND script = day.php
         if ( $dateYmd == $thisyear . $thismonth . $thisday &&
           $SCRIPT == 'day.php'  ) {
