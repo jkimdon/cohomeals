@@ -14,6 +14,8 @@ print_header ( $INC, '', $BodyX );
 <h2>Select club:</h2>
 
 <?php
+$row_num = 1;
+
 
 $sql = "SELECT cal_id, cal_club_id, cal_date, cal_time, cal_notes " .
        "FROM webcal_meal " .
@@ -31,7 +33,8 @@ if ( $res ) {
     if ( $club_id != $prev_club ) {
       $i=0;
       if ( $first == false ) {
-	print_one_club ( $prev_club, $time, $notes, $weekdays, $dates );
+	print_one_club ( $prev_club, $time, $notes, $weekdays, $dates, $row_num );
+	$row_num = ( $row_num == 1 ) ? 0:1;
       }
       $time = $row[3];
       $notes = $row[4];
@@ -52,7 +55,7 @@ if ( $res ) {
   }
   dbi_free_result ( $res );
 
-  print_one_club ( $club_id, $time, $notes, $weekdays, $dates );
+  print_one_club ( $club_id, $time, $notes, $weekdays, $dates, $row_num );
   
 }
 else {
@@ -67,7 +70,7 @@ else {
 
 
 <?php
-function print_one_club ( $club_id, $time, $notes, $weekdays, $dates ) {
+function print_one_club ( $club_id, $time, $notes, $weekdays, $dates, $row_num ) {
   global $login;
 
 
@@ -85,21 +88,21 @@ function print_one_club ( $club_id, $time, $notes, $weekdays, $dates ) {
   ?>
 
   <table>
-  <tr><td>
+  <tr class="d<?php echo $row_num;?>"><td>
   <?php if ( $already_eating == false ) {?>
     <a name="participation" class="addbutton" <?php echo "href=\"subscribe_club_handler.php?club_id=$club_id&action=A\"";?>>Subscribe me</a></td>
   <?php } else { ?>
     <a name="participation" class="addbutton" <?php echo "href=\"subscribe_club_handler.php?club_id=$club_id&action=D\"";?>>Unsubscribe me</a></td>
   <?php } ?>
 
-  </td><td style="font-weight:bold">Club info:</td></tr>
+  </td><td style="font-weight:bold">Club info:</td><td></td></tr>
 
   <?php
 
-  echo "<tr><td></td><td>time:</td><td>" . display_time ( $time ) . "</td></tr>";
-  echo "<tr><td></td><td>meal notes:</td><td>" . $notes . "</td></tr>";
-  echo "<tr><td></td><td>dates:</td><td>" . $dates[0] . " to " . $dates[1] . "</td></tr>";
-  echo "<tr><td></td><td>day(s) of the week:</td><td>";
+  echo "<tr class=\"d$row_num\"><td></td><td>time:</td><td>" . display_time ( $time ) . "</td></tr>";
+  echo "<tr class=\"d$row_num\"><td></td><td>meal notes:</td><td>" . $notes . "</td></tr>";
+  echo "<tr class=\"d$row_num\"><td></td><td>dates:</td><td>" . $dates[0] . " to " . $dates[1] . "</td></tr>";
+  echo "<tr class=\"d$row_num\"><td></td><td>day(s) of the week:</td><td>";
   for ( $i = 0; $i < 7; $i++ ) {
     $counted[$i] = false;
   }

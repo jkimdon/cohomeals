@@ -110,117 +110,37 @@ $event_date = $row[0];
 <h2><?php echo htmlspecialchars ( $name ); ?></h2>
 <table style="border-width:0px;">
 
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Suit")?>:</td><td>
- <?php echo $suit; ?>
-</td></tr>
+<?php $row_num = 1; ?>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Suit:</td>
+<td><?php echo $suit; ?>
+</td>
+</tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Date")?>:</td><td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Date:</td>
+<td>
  <?php
   echo date_to_str ( $row[0], "", true, false, $event_time );
   ?>
 </td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
+
+
 <?php if ( $event_time >= 0 ) { ?>
-<tr><td style="vertical-align:top; font-weight:bold;">
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">
  <?php etranslate("Time")?>:</td><td>
  <?php
    echo display_time ( $row[1] );
   ?>
 </td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 <?php } ?>
-<?php
-// Display who originally created event
-// useful if Admin
-$proxy_fullname = '';  
-if ( !empty ( $DISPLAY_CREATED_BYPROXY ) && $DISPLAY_CREATED_BYPROXY == "Y" ) {
-  $res = dbi_query ( "SELECT wu.cal_firstname, wu.cal_lastname " .
-    "FROM webcal_user wu INNER JOIN webcal_entry_log wel ON wu.cal_login = wel.cal_login " .
-    "WHERE wel.cal_entry_id = $id " .
-    "AND wel.cal_type = 'C'" );
-  if ( $res ) {
-    $row3 = dbi_fetch_row ( $res ) ;
-   $proxy_fullname = $row3[0] . " " . $row3[1];
-   $proxy_fullname = ($createby_fullname == $proxy_fullname ? ""  :
-      " ( by " . $proxy_fullname . " )");
-  }
-}
-?>
-<?php
-// load any site-specific fields and display them
-$extras = get_site_extra_fields ( $id );
-for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
-  $extra_name = $site_extras[$i][0];
-  $extra_type = $site_extras[$i][2];
-  $extra_arg1 = $site_extras[$i][3];
-  $extra_arg2 = $site_extras[$i][4];
-  if ( ! empty ( $extras[$extra_name]['cal_name'] ) ) {
-    echo "<tr><td style=\"vertical-align:top; font-weight:bold;\">\n" .
-      translate ( $site_extras[$i][1] ) .
-      ":</td><td>\n";
-    if ( $extra_type == $EXTRA_URL ) {
-      if ( strlen ( $extras[$extra_name]['cal_data'] ) ) {
-        echo "<a href=\"" . $extras[$extra_name]['cal_data'] . "\">" .
-          $extras[$extra_name]['cal_data'] . "</a>\n";
-      }
-    } else if ( $extra_type == $EXTRA_EMAIL ) {
-      if ( strlen ( $extras[$extra_name]['cal_data'] ) ) {
-        echo "<a href=\"mailto:" . $extras[$extra_name]['cal_data'] .
-          "?subject=$subject\">" .
-          $extras[$extra_name]['cal_data'] . "</a>\n";
-      }
-    } else if ( $extra_type == $EXTRA_DATE ) {
-      if ( $extras[$extra_name]['cal_date'] > 0 ) {
-        echo date_to_str ( $extras[$extra_name]['cal_date'] );
-      }
-    } else if ( $extra_type == $EXTRA_TEXT ||
-      $extra_type == $EXTRA_MULTILINETEXT ) {
-      echo nl2br ( $extras[$extra_name]['cal_data'] );
-    } else if ( $extra_type == $EXTRA_USER ) {
-      echo $extras[$extra_name]['cal_data'];
-    } else if ( $extra_type == $EXTRA_REMINDER ) {
-      if ( $extras[$extra_name]['cal_remind'] <= 0 ) {
-        etranslate ( "No" );
-      } else {
-        etranslate ( "Yes" );
-        if ( ( $extra_arg2 & $EXTRA_REMINDER_WITH_DATE ) > 0 ) {
-          echo "&nbsp;&nbsp;-&nbsp;&nbsp;";
-          echo date_to_str ( $extras[$extra_name]['cal_date'] );
-        } else if ( ( $extra_arg2 & $EXTRA_REMINDER_WITH_OFFSET ) > 0 ) {
-          echo "&nbsp;&nbsp;-&nbsp;&nbsp;";
-          $minutes = $extras[$extra_name]['cal_data'];
-          $d = (int) ( $minutes / ( 24 * 60 ) );
-          $minutes -= ( $d * 24 * 60 );
-          $h = (int) ( $minutes / 60 );
-          $minutes -= ( $h * 60 );
-          if ( $d > 1 ) {
-            echo $d . " " . translate("days") . " ";
-          } else if ( $d == 1 ) {
-            echo $d . " " . translate("day") . " ";
-          }
-          if ( $h > 1 ) {
-            echo $h . " " . translate("hours") . " ";
-          } else if ( $h == 1 ) {
-            echo $h . " " . translate("hour") . " ";
-          }
-          if ( $minutes > 1 ) {
-            echo $minutes . " " . translate("minutes");
-          } else if ( $minutes == 1 ) {
-            echo $minutes . " " . translate("minute");
-          }
-          echo " " . translate("before event" );
-        }
-      }
-    } else if ( $extra_type == $EXTRA_SELECTLIST ) {
-      echo $extras[$extra_name]['cal_data'];
-    }
-    echo "\n</td></tr>\n";
-  }
-}
-?>
 
-<tr><td style="vertical-align:top; font-weight:bold;">Menu:</td>
+
+
+
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Menu:</td>
  <td>
  <?php
   if ( ! empty ( $allow_html_description ) &&
@@ -239,8 +159,11 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
     echo nl2br ( activate_urls ( htmlspecialchars ( $menu ) ) );
   }
 ?></td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
-<tr><td style="vertical-align:top; font-weight:bold;">Head chef:</td>
+
+
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Head chef:</td>
 <td>
 <?php 
   $sql = "SELECT cal_firstname, cal_lastname " .
@@ -256,19 +179,27 @@ for ( $i = 0; $i < count ( $site_extras ); $i++ ) {
   }
 ?>
 </td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
 <?php 
-  if ( $num_cooks != 0 ) 
-    display_crew( "Cooks", 'C', $num_cooks );
-  if ( $num_setup != 0 ) 
-    display_crew( "Setup", 'S', $num_setup );
-  if ( $num_cleanup != 0 ) 
-    display_crew( "Cleanup", 'L', $num_cleanup );
-  if ( $num_other_crew != 0 ) 
-    display_crew( "Other Crew (see notes)", 'O', $num_other_crew );
-
+if ( $num_cooks != 0 ) {
+  display_crew( "Cooks", 'C', $num_cooks, $row_num );
+  $row_num = ( $row_num == 1 ) ? 0:1;
+}
+if ( $num_setup != 0 ) {
+  display_crew( "Setup", 'S', $num_setup, $row_num );
+  $row_num = ( $row_num == 1 ) ? 0:1;
+}
+if ( $num_cleanup != 0 ) {
+  display_crew( "Cleanup", 'L', $num_cleanup, $row_num );
+  $row_num = ( $row_num == 1 ) ? 0:1;
+}
+if ( $num_other_crew != 0 ) {
+  display_crew( "Other Crew (see notes)", 'O', $num_other_crew, $row_num );
+  $row_num = ( $row_num == 1 ) ? 0:1;
+}
 ?>
 
 
@@ -287,7 +218,7 @@ if ( $res ) {
     $already_eating = false;
 }
 ?>
-<tr><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:</td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:</td>
   <td>
   <?php
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -342,10 +273,11 @@ if ( $res ) {
     }
   ?>
 </td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
-<tr><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:</td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:</td>
 <td>
 <?php
 $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -383,12 +315,11 @@ for ( $i = 0; $i < $num_app; $i++ ) {
 }
 ?>
 </td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Walk-ins welcome?")?>:
-</td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Walk-ins welcome?:</td>
 <td>
 <?php 
 if ( $walkins == "W" ) {
@@ -401,19 +332,19 @@ if ( $walkins == "W" ) {
 ?>
 </td>
 </tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
-<tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Food preferences")?>:
-</td></tr>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food preferences:</td>
+<td></td>
+</tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
-
-
-<tr><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Notes")?>:</td><td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
+<td>
  <?php
   if ( ! empty ( $allow_html_description ) &&
     $allow_html_description == 'Y' ) {
@@ -431,6 +362,8 @@ if ( $walkins == "W" ) {
     echo nl2br ( activate_urls ( htmlspecialchars ( $notes ) ) );
   }
 ?></td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
+
 
 
 </table>
@@ -540,10 +473,10 @@ if ( $show_log ) {
 
 
 <?php
-function display_crew( $title, $type, $number ) {
+function display_crew( $title, $type, $number, $rowcolor ) {
   global $id, $login;
 
-  echo "<tr><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
+  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
   echo "<td>";
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_type = '$type'";

@@ -925,5 +925,11 @@ abbr {
   border-bottom: 1px solid #777777;
   border-right: 1px solid #777777;
 }
+tr.d0 td {
+  background-color: #FFFFFF;
+}
+tr.d1 td {
+  background-color: #EEEEEE;
+}
 -->
 </style>
