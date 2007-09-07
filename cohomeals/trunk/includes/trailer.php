@@ -15,61 +15,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 ?>
 
 <div id="trailer">
-<form action="month.php" method="get" name="SelectMonth" id="monthform">
-<label for="monthselect"><?php etranslate("Month")?>:&nbsp;</label>
-<select name="date" id="monthselect" onchange="document.SelectMonth.submit()">
-<?php
-  if ( ! empty ( $thisyear ) && ! empty ( $thismonth ) ) {
-    $m = $thismonth;
-    $y = $thisyear;
-  } else {
-    $m = date ( "m" );
-    $y = date ( "Y" );
-  }
-  $d_time = mktime ( 3, 0, 0, $m, 1, $y );
-  $thisdate = date ( "Ymd", $d_time );
-  $y--;
-  for ( $i = 0; $i < 25; $i++ ) {
-    $m++;
-    if ( $m > 12 ) {
-      $m = 1;
-      $y++;
-    }
-    $d = mktime ( 3, 0, 0, $m, 1, $y );
-    echo "<option value=\"" . date ( "Ymd", $d ) . "\"";
-    if ( date ( "Ymd", $d ) == $thisdate ) {
-      echo " selected=\"selected\"";
-    }
-    echo ">";
-    echo date_to_str ( date ( "Ymd", $d ), $DATE_FORMAT_MY, false, true );
-    echo "</option>\n";
-  }
-?>
-</select>
-<input type="submit" value="<?php etranslate("Go")?>" />
-</form>
-
-
-<form action="year.php" method="get" name="SelectYear" id="yearform">
-<label for="yearselect"><?php etranslate("Year")?>:&nbsp;</label>
-<select name="year" id="yearselect" onchange="document.SelectYear.submit()">
-<?php
-  if ( ! empty ( $thisyear ) ) {
-    $y = $thisyear;
-  } else {
-    $y = date ( "Y" );
-  }
-  for ( $i = $y - 4; $i < $y + 4; $i++ ) {
-    echo "<option value=\"$i\"";
-    if ( $i == $y ) {
-      echo " selected=\"selected\"";
-    }
-    echo ">$i</option>\n";
-  }
-?>
-</select>
-<input type="submit" value="<?php etranslate("Go")?>" />
-</form>
 <div id="menu">
 
 <?php
@@ -153,6 +98,7 @@ if ( $login != '__public__' ) {
     translate("Help") . "</a>";
 }
 
+echo "<hr>";
 if ( count ( $goto_link ) > 0 ) {
   ?><span class="prefix"><?php etranslate("Go to")?>:</span> <?php
   for ( $i = 0; $i < count ( $goto_link ); $i++ ) {

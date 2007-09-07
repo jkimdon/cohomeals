@@ -172,20 +172,26 @@ label {
 }
 #trailer {
   margin: 0px;
-  padding: 0px;
+  margin-top: 10px;
+  padding-top: 5px;
 }
-#trailer form {
-  float: left;
-  width: 33%;
+#monthnav form {
   border-top: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
+  text-align: center;
+  float: left;
+  width: 50%;
   padding-top: 5px;
   margin-top: 5px;
   margin-bottom: 25px;
 }
-#trailer label {
+#monthnav label {
   margin: 0px;
   padding: 0px;
   font-weight: bold;
+}
+#monthnav #arrow {
+  float: left;
+  width: 50%;
 }
 #monthform {
   clear: left;
