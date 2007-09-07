@@ -287,10 +287,7 @@ if ( $res ) {
     $already_eating = false;
 }
 ?>
-<tr><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:  
-<?php if ( $already_eating == false ) {?>
-  <a name="participation" class="addbutton" <?php echo "href=\"edit_participation_handler.php?id=$id&type=M&action=A\"";?>>Add me</a></td>
-<?php } else { echo "</td>"; } ?>
+<tr><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:</td>
   <td>
   <?php
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -308,6 +305,12 @@ if ( $res ) {
       echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
     }
 
+    if ( $already_eating == false ) {
+      echo "<a name=\"participation\" class=\"addbutton\"" .
+	"href=\"edit_participation_handler.php?id=$id&type=M&action=A\">" .
+	"Add me</a>";
+      echo "<br />\n";
+    }
     for ( $i = 0; $i < $num_app; $i++ ) {
       user_load_variables ( $approved[$i], "temp" );
       if ( strlen ( $tempemail ) ) 
@@ -342,11 +345,9 @@ if ( $res ) {
 
 
 
-<tr><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:
-<?php if ( $already_eating == false ) {
-  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?id=$id&type=T&action=A\">Add me</a></td>";
-} else { echo "</td>"; }
-echo "<td>";
+<tr><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:</td>
+<td>
+<?php
 $sql = "SELECT cal_login FROM webcal_meal_participant " .
 "WHERE cal_id = $id AND cal_type = 'T'";
 $res = dbi_query ( $sql );
@@ -360,6 +361,11 @@ if ( $res ) {
   dbi_free_result ( $res );
 } else {
   echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
+}
+
+if ( $already_eating == false ) {
+  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?id=$id&type=T&action=A\">Add me</a>";
+  echo "<br />\n";
 }
 
 for ( $i = 0; $i < $num_app; $i++ ) {
@@ -399,7 +405,7 @@ if ( $walkins == "W" ) {
 
 
 <tr><td style="vertical-align:top; font-weight:bold;">
-<?php etranslate("Food preferences based on current participants")?>:
+<?php etranslate("Food preferences")?>:
 </td></tr>
 
 
