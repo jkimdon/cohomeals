@@ -110,6 +110,25 @@ CREATE TABLE webcal_meal_participant (
   PRIMARY KEY ( cal_id, cal_login, cal_type )
 );
 
+
+/* 
+ * This table keeps track of subscriptions. If new heart meals are added, the 
+ * subscribers are added to the meal. Also then removals or additions of 
+ * subscribers to heart or club can be handled separately from subscriptions
+ */
+CREATE TABLE webcal_subscriptions (
+  /* participant */
+  cal_login VARCHAR(25) NOT NULL,
+  /* meal suit (heart or club) */
+  cal_suit VARCHAR(7) NOT NULL,
+  /* identify which of the many club meals. Unused for heart meals. */
+  cal_club_id INT NULL,
+  /* optional day of the week skipped for heart meals. 0 = Sun to 6 = Sat */
+  cal_off_day INT NULL,
+  PRIMARY KEY ( cal_login, cal_suit )
+);
+
+
 /*
  * This table associates one or more external users (people who do not
  * have a WebCalendar login) with an event by the event id.
