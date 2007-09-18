@@ -1,6 +1,6 @@
 before commit:
 
-- is am/pm working?
+
 
 ----
 fixme:
@@ -77,3 +77,62 @@ for add meal, check to make sure end date is after start date
     add another save button at the top
 default time and number of crew should be according to spec
 more useful activity log (more descriptive actions)
+fix hackyness in top of edit_entry_handler.php
+
+
+
+*******************************************************
+
+subscribe diamonds for a period of time
+
+change name of "manage subscriptions"
+
+hearts:
+ - have to sign up for 3 months then can back out (check on amount of credit) 
+ - consider changing days of the week
+ - ask about dropping lower than 2/3
+
+change household to billing group
+
+- mc and admin update roster. all see. 
+- have in meal view: food safety, kitchen equipment, orientation. plus have a page where you can see (and edit) all of this. 
+
+- food prefs not editable by user (initially)
+
+- email when meals dropped
+
+- for admin and mc only: see when meal was created and who set it up (log)
+
+- everybody can add a wild card meal
+
+- signup deadlines in add meal view
+  - noon always
+
+prices: +1 for adult walkin, kids (4-12) always half of adult (0-3 free)
+
+- in people's user info, put building and unit number
+
+- deal with guests
+
+- kids crew number and add me button (for 18 and younger)
+
+- walkin:
+ * check with lead cook asap
+ * always welcome
+ * needed
+ * no 
+
+- walkins and leftovers by bean counter. or head chef can add walkins at any time
+
+- max number of diners (for special situations)
+
+- meal different color when deadline for signups has passed
+
+highlight self in view
+
+- flow sign up diners first 
+
+- let head chef sign self up like regular crew member
+
+
+- when mc chooses crew, shows ratio of work/eat, show who's working. also showexperience on thpose already signed up?

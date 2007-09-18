@@ -2482,13 +2482,20 @@ function background_css ( $color, $height = '', $percent = '' ) {
 /********************************
  * signs people up or removes them from dining or crew duties
  *********************************/
-function edit_participation ( $id, $action, $type='M' ) {
+function edit_participation ( $id, $action, $type='M', $user="" ) {
   global $login;
 
+  if ( $user == "" )
+    $user = $login;
+
   // admin is not a real person so cannot be a participant
-  if ( $login == $admin ) 
+  if ( ($user == $login) && ($login == $admin) ) 
     return;
-  
+
+  // only admin and meal coordinator can add others
+  if ( ($user != $login) && ( !$is_meal_coordinator && !$is_admin ) )
+    return;
+
   // make sure input is reasonable
   if ( ($action != 'D') && ($action != 'A') )
     return;
@@ -2508,7 +2515,7 @@ function edit_participation ( $id, $action, $type='M' ) {
   
   // find out the current status of the user for this meal
   $sql = "SELECT cal_type FROM webcal_meal_participant " .
-    "WHERE (cal_id = $id) AND (cal_login = '$login') AND (cal_type = '$type')";
+    "WHERE (cal_id = $id) AND (cal_login = '$user') AND (cal_type = '$type')";
   $res = dbi_query ( $sql );
   if ( !$res ) {
     if ( $action == 'D' )
@@ -2530,7 +2537,7 @@ function edit_participation ( $id, $action, $type='M' ) {
   if ( $can_change == true ) {
     if ( $action == 'A' ) {
       $sql = "INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type ) " . 
-	"VALUES ( $id, '$login', '$type' )";
+	"VALUES ( $id, '$user', '$type' )";
       if ( ! dbi_query ( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
       
@@ -2541,7 +2548,7 @@ function edit_participation ( $id, $action, $type='M' ) {
 	else
 	  $delete_type = 'M';
 	$sql = "DELETE FROM webcal_meal_participant " .
-	  "WHERE cal_id = $id AND cal_login = '$login' AND cal_type = '$delete_type'";
+	  "WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$delete_type'";
 	if ( !dbi_query( $sql ) ) 
 	  $error = translate("Database error") . ": " . dbi_error ();
       }
@@ -2549,7 +2556,7 @@ function edit_participation ( $id, $action, $type='M' ) {
     }
     else { // delete
       $sql = "DELETE FROM webcal_meal_participant " .
-	"WHERE cal_id = $id AND cal_login = '$login' AND cal_type = '$type'";
+	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
       if ( !dbi_query( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
     }

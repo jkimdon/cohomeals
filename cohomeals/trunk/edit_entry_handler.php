@@ -74,10 +74,14 @@ else {
 
 while ( $current_date <= $end_date ) {
 
-  add_or_edit_entry( $newevent, $id, $club_id, $suit, $day, $month, $year, 
-		     $hour, $minute, $ampm,
-		     $menu, $head_chef, $num_cooks, $num_setup, 
-		     $num_cleanup, $num_other_crew, $walkins, $notes );
+  $newid = add_or_edit_entry( $newevent, $id, $club_id, $suit, $day, $month, $year, 
+			      $hour, $minute, $ampm,
+			      $menu, $head_chef, $num_cooks, $num_setup, 
+			      $num_cleanup, $num_other_crew, $walkins, $notes );
+
+  if ( $suit == "heart" ) {
+    add_subscribed_diners( $newid, $day, $month, $year );
+  }
 
 
   if ( $repeats == "false" ) {
@@ -101,9 +105,31 @@ while ( $current_date <= $end_date ) {
 }
 
 
+////////////////////////////////////////////
+function add_subscribed_diners( $id, $day, $month, $year ) {
+
+  $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
+    "WHERE cal_suit = 'heart'";
+  $res = dbi_query ( $sql );
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $w = $row[1];
+      $skipday = date ( "w", mktime( 3,0,0, $month, $day, $year ) );
+      if ( $w != $skipday ) {
+	edit_participation ( $id, 'A', 'M', $row[0] );
+      }
+    }
+    dbi_free_result ( $res );
+  } else {
+    $error = translate("Database error") . ": " . dbi_error ();
+  }
+  
+
+}
 
 
 
+///////////////////////////////////////////////////////
 function add_or_edit_entry( $newevent, $id, $club_id, $suit, 
 			    $day, $month, $year, $hour, $minute, $ampm,
 			    $menu, $head_chef, $num_cooks, $num_setup, 
@@ -571,6 +597,7 @@ if ( empty ( $error ) ) {
 
 }
 }
+ return $id; 
 }
 
 // If we were editing this event, then go back to the last view (week, day,

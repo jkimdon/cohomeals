@@ -492,6 +492,24 @@ textarea {
   background-color: #DDDDFF;
   font-weight: bold;
 }
+<?php //Styles for the heart subscription minicalendar
+      //keep font-size:12px for IE6
+?>.heartsubcal {
+  font-size: 12px;
+  border-collapse: collapse;
+  margin: 15px 15px 15px 15px;
+}
+<?php //formats the day name (i.e. Sun, Mon, etc) in heartsubcals
+?>.heartsubcal th, 
+.heartsubcal td.empty {
+  color: #000000;
+  text-align: center;
+  background-color: #FFFFFF;
+}
+.heartsubcal td {
+  padding: 0px 2px;
+  border: 1px solid #444444;
+}
 #activitylog table,
 .embactlog {
   width: 100%;
