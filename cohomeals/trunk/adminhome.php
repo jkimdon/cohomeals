@@ -80,9 +80,6 @@ if ( $reports_enabled == 'Y' ) {
 }
 
 if ( $is_admin ) {
-	$names[] = translate("Delete Events");
-	$links[] = "purge.php";
-
 	$names[] = translate("Activity Log");
 	$links[] = "activity_log.php";
 }

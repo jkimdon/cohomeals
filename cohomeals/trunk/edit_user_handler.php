@@ -75,7 +75,7 @@ else if ( $formtype == "edituser" ) {
   }
 }
 
-$nextURL = empty ( $is_admin ) ? "adminhome.php" : "users.php";
+$nextURL = "users.php";
 
 if ( ! empty ( $error ) ) {
   print_header( '', '', '', true );

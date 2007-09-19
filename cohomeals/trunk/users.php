@@ -37,7 +37,6 @@ print_header($INC);
 //  exit;
 //}
 ?>
-<a title="<?php etranslate("Admin") ?>" class="nav" href="adminhome.php">&laquo;&nbsp;<?php etranslate("Admin") ?></a><br /><br />
 
 <!-- TABS -->
 <div id="tabs">
@@ -48,9 +47,6 @@ print_header($INC);
 			echo translate("Account");
 		}
 	?></a></span>
-	<?php if ($groups_enabled == "Y" && $is_admin) { ?>
-		<span class="tabbak" id="tab_groups"><a href="#tabgroups" onclick="return showTab('groups')"><?php etranslate("Groups")?></a></span>
-	<?php } ?>
 </div>
 
 <!-- TABS BODY -->
@@ -86,18 +82,14 @@ print_header($INC);
 
 		<?php 
 			echo "<iframe " .
-				" name=\"useriframe\" id=\"useriframe\" style=\"width:90%;border-width:0px; height:280px;\"></iframe>";
+				" name=\"useriframe\" id=\"useriframe\" style=\"width:90%;border-width:0px; height:350px;\"></iframe>";
 		?>
 <?php } else { ?>
-<iframe src="edit_user.php" name="accountiframe" id="accountiframe" style="width:90%;border-width:0px; height:210px;\"></iframe>
+<iframe src="edit_user.php" name="accountiframe" id="accountiframe" style="width:90%;border-width:0px; height:350px;\"></iframe>
 <?php } ?>
 </div>
 
-<?php 
-	if ($groups_enabled == "Y" && $is_admin) { 
-		include_once 'groups.php';
-	} 
-?>
+
 </div>
 
 <?php print_trailer(); ?>

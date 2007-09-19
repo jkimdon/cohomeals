@@ -76,7 +76,6 @@ if ( ! $error ) {
 <div id="tabs">
  <span class="tabfor" id="tab_settings"><a href="#tabsettings" onclick="return showTab('settings')"><?php etranslate("Settings")?></a></span>
  <span class="tabbak" id="tab_public"><a href="#tabpublic" onclick="return showTab('public')"><?php etranslate("Public Access")?></a></span>
- <span class="tabbak" id="tab_groups"><a href="#tabgroups" onclick="return showTab('groups')"><?php etranslate("Groups")?></a></span>
  <span class="tabbak" id="tab_other"><a href="#tabother" onclick="return showTab('other')"><?php etranslate("Other")?></a></span>
  <span class="tabbak" id="tab_email"><a href="#tabemail" onclick="return showTab('email')"><?php etranslate("Email")?></a></span>
  <span class="tabbak" id="tab_colors" title="<?php etooltip("colors-help")?>"><a href="#tabcolors" onclick="return showTab('colors')"><?php etranslate("Colors")?></a></span>
@@ -447,21 +446,6 @@ if ( ! $error ) {
 </table>
 </div>
 
-<!-- BEGIN GROUPS -->
-<div id="tabscontent_groups">
-<table cellspacing="0" cellpadding="3">
- <tr><td class="tooltip" title="<?php etooltip("groups-enabled-help")?>">
-  <?php etranslate("Groups enabled")?>:</td><td>
-  <label><input type="radio" name="admin_groups_enabled" value="Y" <?php if ( $s["groups_enabled"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
-  <label><input type="radio" name="admin_groups_enabled" value="N" <?php if ( $s["groups_enabled"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
- <tr><td class="tooltip" title="<?php etooltip("user-sees-his-group-help")?>">
-  <?php etranslate("User sees only his groups")?>:</td><td>
-  <label><input type="radio" name="admin_user_sees_only_his_groups" value="Y" <?php if ( $s["user_sees_only_his_groups"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
-  <label><input type="radio" name="admin_user_sees_only_his_groups" value="N" <?php if ( $s["user_sees_only_his_groups"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
- </td></tr>
-</table>
-</div>
 
 <!-- BEGIN REPORTS -->
 <div id="tabscontent_other">

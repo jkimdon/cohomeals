@@ -150,7 +150,6 @@ $bodyid = array(
  "activity_log.php" => "activitylog",
  "add_entry.php" => "addentry",
  "admin.php" => "admin",
- "adminhome.php" => "adminhome",
  "day.php" => "day",
  "del_entry.php" => "delentry",
  "edit_entry.php" => "editentry",

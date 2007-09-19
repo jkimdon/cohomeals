@@ -56,7 +56,7 @@ $goto_link[] = "<a title=\"Calendar\" " .
 translate("Calendar") . "</a>";
 
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"User info\" href=\"adminhome.php\">User info</a>";
+  $goto_link[] = "<a title=\"User info\" href=\"users.php\">User info</a>";
 }
 if ( $login != '__public__' && $readonly == 'N' ) {
   $goto_link[] = "<a title=\"Financial history\" href=\"financeHistory.php\">Financial history</a>";

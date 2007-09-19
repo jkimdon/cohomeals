@@ -33,9 +33,9 @@ print_header ( '', '', '', $disableCustom );
 <h2><?php
 	if ( ! empty ( $user ) ) {
 		user_load_variables ( $user, "u" );
-		echo translate("Edit User");
+		echo "User info";
 	} else {
-		echo translate("Add User");
+		echo "Add User";
 	}
 ?></h2>
 <form action="edit_user_handler.php" method="post">
@@ -45,9 +45,11 @@ print_header ( '', '', '', $disableCustom );
 		echo "<input type=\"hidden\" name=\"add\" value=\"1\" />\n";
 	}
 ?>
+
 <table style="border-width:0px;">
-	<tr><td>
-		<label for="username"><?php etranslate("Username")?>:</label></td><td>
+<tr>
+  <td><label for="username">Username:</label></td>
+  <td>
   <?php
     if ( ! empty ( $user ) ) {
       if ( $is_admin )
@@ -59,22 +61,52 @@ print_header ( '', '', '', $disableCustom );
       echo "<input type=\"text\" name=\"user\" id=\"username\" size=\"25\" maxlength=\"25\" />\n";
     }
 ?>
-	</td></tr>
-	<tr><td>
-		<label for="ufirstname"><?php etranslate("First Name")?>:</label></td><td>
-		<input type="text" name="ufirstname" id="ufirstname" size="20" value="<?php echo empty ( $ufirstname ) ? '' : htmlspecialchars ( $ufirstname );?>" />
-	</td></tr>
-	<tr><td>
-		<label for="ulastname"><?php etranslate("Last Name")?>:</label></td><td>
-		<input type="text" name="ulastname" id="ulastname" size="20" value="<?php echo empty ( $ulastname ) ? '' : htmlspecialchars ( $ulastname );?>" />
-	</td></tr>
-	<tr><td> 
-		<label for="ubirthdate"><?php etranslate("Birthdate")?>:</label></td><td>
-		<?php print_birthdate_selection( $ubirthdate ); ?></td></tr>
-	<tr><td>
-		<label for="uemail"><?php etranslate("E-mail address")?>:</label></td><td>
-		<input type="text" name="uemail" id="uemail" size="20" value="<?php echo empty ( $uemail ) ? '' : htmlspecialchars ( $uemail );?>" />
-	</td></tr>
+  </td>
+</tr>
+<tr>
+  <td><label for="ufirstname">First Name:</label></td>
+  <?php if ( $is_admin ) {?>
+    <td><input type="text" name="ufirstname" id="ufirstname" size="20" value="<?php echo empty ( $ufirstname ) ? '' : htmlspecialchars ( $ufirstname );?>" /></td>
+  <?php } else {
+    echo "<td>$ufirstname</td>";
+  } ?>
+</tr>
+<tr>
+  <td><label for="ulastname">Last Name:</label></td>
+  <?php if ( $is_admin ) {?>
+    <td><input type="text" name="ulastname" id="ulastname" size="20" value="<?php echo empty ( $ulastname ) ? '' : htmlspecialchars ( $ulastname );?>" /></td>
+  <?php } else {
+    echo "<td>$ulastname</td>";
+  } ?> 
+</tr>
+<tr>
+  <td><label for="ubirthdate">Birthdate:</label></td>
+  <?php if ( $is_admin ) {?>
+    <td><?php print_birthdate_selection( $ubirthdate ); ?></td>
+  <?php } else {
+    echo "<td>" . substr( $ubirthdate, 6, 2 ) .
+      " " . month_short_name ( substr ( $ubirthdate, 4, 2 ) - 1 ) . 
+      " " . substr ( $ubirthdate, 0, 4 ) . "</td>";
+  } ?>
+</tr>
+<tr>
+  <td><label for="uemail">E-mail address:</label></td>
+  <?php if ( $is_admin ) {?>
+    <td><input type="text" name="uemail" id="uemail" size="20" value="<?php echo empty ( $uemail ) ? '' : htmlspecialchars ( $uemail );?>" /></td>
+  <?php } else {
+    echo "<td>$uemail</td>";
+  } ?>
+</tr>
+<tr>
+  <td><label for="uhousehold">Billing group:</label></td>
+  <?php if ( $is_admin ) {?>
+    <td><input type="text" name="uhousehold" id="uhousehold" size="20" value="<?php echo empty ( $uhousehold ) ? '' : htmlspecialchars ( $uhousehold );?>" /></td>
+  <?php } else {
+    echo "<td>$uhousehold</td>";
+  } ?>
+</tr>
+
+
 <?php if ( empty ( $user ) && ! $use_http_auth && $user_can_update_password ) { ?>
 	<tr><td>
 		<label for="pass1"><?php etranslate("Password")?>:</label></td><td>
@@ -86,11 +118,6 @@ print_header ( '', '', '', $disableCustom );
 	</td></tr>
 <?php }
 if ( $is_admin ) { ?>
-	<tr><td>
-		<label for="uhousehold"><?php etranslate("Household")?>:</label></td><td>
-		<input type="text" name="uhousehold" id="uhousehold" size="20" value="<?php echo empty ( $uhousehold ) ? '' : htmlspecialchars ( $uhousehold );?>" />
-	</td></tr>
-
 	<tr><td style="font-weight:bold;">
 		<?php etranslate("Admin")?>:</td><td>
 		<label><input type="radio" name="uis_admin" value="Y"<?php if ( ! empty ( $uis_admin ) && $uis_admin == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
@@ -104,18 +131,12 @@ if ( $is_admin ) { ?>
 	</td></tr>
 <?php } //end if ($is_admin ) ?>
 	<tr><td colspan="2">
-		<?php if ( $demo_mode == "Y" ) { ?>
-			<input type="button" value="<?php etranslate("Save")?>" onclick="alert('<?php etranslate("Disabled for demo")?>')" />
-			<?php if ( $is_admin && ! empty ( $user ) ) { ?>
-				<input type="submit" name="action" value="<?php etranslate("Delete")?>" onclick="alert('<?php etranslate("Disabled for demo")?>')" />
-			<?php } //end if ( $demo_mode == "Y" ) ?>
-		<?php } else { ?>
-			<input type="submit" value="<?php etranslate("Save")?>" />
-			<?php if ( $is_admin && ! empty ( $user ) ) {
-				if ( $admin_can_delete_user ) ?>
-				<input type="submit" name="action" value="<?php etranslate("Delete")?>" onclick="return confirm('<?php etranslate("Are you sure you want to delete this user?"); ?>')" />
-			<?php } ?>
-		<?php } ?>
+	<?php if ( $is_admin ) { ?>
+          <input type="submit" value="Save" />
+        <?php } ?>
+	<?php if ( $is_admin && ! empty ( $user ) ) { ?>
+	  <input type="submit" name="action" value="Delete" onclick="return confirm('Are you sure you want to delete this user?')" />
+	<?php } ?>
 	</td></tr>
 </table>
 </form>
