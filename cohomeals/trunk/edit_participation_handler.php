@@ -1,7 +1,14 @@
 <?php
 include_once 'includes/init.php';
 
-edit_participation ( $id, $action, $type );
+$id = getGetValue( 'id' );
+$action = getGetValue( 'action' );
+$type = getGetValue( 'type' );
+$user = getGetValue( 'user' );
+if ( !isset( $user ) ) $user = $login;
+
+
+edit_participation ( $id, $action, $type, $user );
 
 
 ///////

@@ -16,6 +16,6 @@ function hide(foo,f,section) {
 	//using the tabbed GUI.
 ?>var tabs = new Array();
 tabs[1] = "users";
-tabs[2] = "groups";
+tabs[2] = "buddies";
 //]]> -->
 </script>

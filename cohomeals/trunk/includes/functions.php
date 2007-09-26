@@ -2479,22 +2479,66 @@ function background_css ( $color, $height = '', $percent = '' ) {
 }
 
 
+function is_participating ( $id, $user, $type ) {
+  $ret = false;
+
+  if ( $type == "B" ) {
+    $sql = "SELECT cal_login FROM webcal_subscriptions " .
+      "WHERE cal_login = '$user' AND cal_suit = 'club' " .
+      "AND cal_club_id = $id";
+  } else {
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
+      "WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
+  }
+  if ( $res = dbi_query( $sql ) ) {
+    if ( dbi_fetch_row( $res ) ) {
+      $ret = true;
+    }
+  }
+  dbi_free_result( $res );
+
+  if ( $type == "M" ) $type = "T";
+  else if ( $type == "T" ) $type = "M";
+  if ( ($type == "M") || ($type == "T") ) {
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
+      "WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( dbi_fetch_row( $res ) ) {
+	$ret = true;
+      }
+    }
+    dbi_free_result( $res );
+  }
+
+  return $ret;
+}
+
+
 /********************************
  * signs people up or removes them from dining or crew duties
  *********************************/
 function edit_participation ( $id, $action, $type='M', $user="" ) {
   global $login;
 
-  if ( $user == "" )
+
+  if ( ($user == "") )
     $user = $login;
 
-  // admin is not a real person so cannot be a participant
-  if ( ($user == $login) && ($login == $admin) ) 
-    return;
+  $can_edit = false;
 
-  // only admin and meal coordinator can add others
-  if ( ($user != $login) && ( !$is_meal_coordinator && !$is_admin ) )
+  // admin, meal coordinator, and buddies can add others
+  if ( $user == $login )
+    $can_edit = true;
+  else if ( $is_meal_coordinator || $is_admin ) 
+    $can_edit = true;
+  else if ( is_signer( $user ) == true ) 
+    $can_edit = true;
+
+  if ( $can_edit == false ) {
+    echo "Not authorized";
     return;
+  }
+    
 
   // make sure input is reasonable
   if ( ($action != 'D') && ($action != 'A') )
@@ -2562,6 +2606,149 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
     }
   }
   
+}
+
+
+
+function edit_club_subscription( $club_id, $user, $action ) {
+
+  //// un/subscribe
+  if ( $action == 'A' ) {
+    $sql = "INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_club_id ) " .
+      "VALUES ( '$user', 'club', '$club_id' )"; 
+    if ( ! dbi_query ( $sql ) ) {
+      $error = "Database error: " . dbi_error ();
+    }
+  } else {
+    $sql = "DELETE FROM webcal_subscriptions " .
+      "WHERE cal_login = '$user' AND cal_suit = 'club' " . 
+      "AND cal_club_id = '$club_id'";
+    if ( ! dbi_query ( $sql ) ) {
+      $error = "Database error: " . dbi_error ();
+    }
+  }
+  
+
+
+  /// add or remove diner from meals
+  $sql = "SELECT cal_id FROM webcal_meal WHERE cal_club_id = '$club_id'";
+  $res = dbi_query ( $sql );
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $cal_id = $row[0];
+      if ( $action == 'A' ) {
+	edit_participation ( $cal_id, 'A', 'M', $user );
+      }
+      else {
+	edit_participation ( $cal_id, 'D', 'M', $user );
+	edit_participation ( $cal_id, 'D', 'F', $user );
+      }
+    }
+  }
+
+}
+
+
+/********************************************
+ * buddy functions
+ ***********************************************/
+
+function get_signers() {
+  global $login;
+
+  $ret = array ();
+  $count = 0;
+
+  $sql = "SELECT cal_signer FROM webcal_buddy " .
+    "WHERE cal_signee = '$login'";
+  if ( $res = dbi_query ( $sql ) ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $sql2 = "SELECT cal_lastname, cal_firstname " . 
+	"FROM webcal_user WHERE cal_login = '$row[0]'";
+      if ( $res2 = dbi_query ( $sql2 ) ) {
+	$row2 = dbi_fetch_row ( $res2 );
+	if ( $row2 ) {
+	  $ret[$count++] = array ( "cal_login" => $row[0],
+				   "cal_fullname" => "$row2[1] $row2[0]" );
+	}
+      }
+      dbi_free_result ( $res2 );
+    }
+  }
+  dbi_free_result ( $res );
+
+  return $ret;
+}
+
+
+
+function get_nonsigners() {
+  global $login;
+
+  $ret = array ();
+  $count = 0;
+
+  $all = user_get_users();
+
+  for ( $i = 0; $i < count( $all ); $i++ ) {
+    $cur_login = $all[$i]['cal_login'];
+    $sql = "SELECT cal_signer " .
+      "FROM webcal_buddy " .
+      "WHERE cal_signer = '$cur_login' AND cal_signee = '$login'";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( !dbi_fetch_row( $res ) && ($cur_login != $login) ) {
+	$ret[$count++] = array ( "cal_login" => $cur_login,
+				 "cal_fullname" => $all[$i]['cal_fullname'] );
+      }
+    }
+    dbi_free_result ( $res );
+  }
+
+  return $ret;
+}
+
+
+function get_signees ( $login, $include_self="false" ) {
+
+  $ret = array ();
+  $count = 0;
+
+  if ( $is_admin || $is_meal_coordinator ) {
+    $sql = "SELECT cal_login FROM webcal_user";
+  } else {
+    $sql = "SELECT cal_signee FROM webcal_buddy " .
+      "WHERE cal_signer = '$login'";
+  }
+  if ( $res = dbi_query ( $sql ) ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      user_load_variables( $row[0], "temp" );
+      $ret[$count++] = array ( "cal_login" => $row[0],
+       "cal_fullname" => $GLOBALS['tempfullname'] );
+    }
+  }
+  dbi_free_result ( $res );
+
+  if ( $include_self == true ) {
+    user_load_variables( $login, "temp" );
+    $ret[$count] = array ( "cal_login" => $login,
+			   "cal_fullname" => $GLOBALS["tempfullname"] );
+  }
+  
+  return $ret;
+}
+
+
+function is_signer( $signee ) {
+  $ret = false;
+
+  $sql = "SELECT cal_signer FROM webcal_buddy " .
+    "WHERE cal_signee = '$signee'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( dbi_fetch_row( $res ) ) 
+      $ret = true;
+  }
+
+  return $ret;
 }
 
 

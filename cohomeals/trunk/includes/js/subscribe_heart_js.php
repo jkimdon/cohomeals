@@ -73,11 +73,6 @@ function check_number_meals( minid, maxid, count ) {
 }
 
 
-function limited_heart_done() {
-  window.opener.reload();
-  window.close();
-}
-
 
 function selectDate (  day, month, year, current, evt ) {
   // get currently selected day/month/year

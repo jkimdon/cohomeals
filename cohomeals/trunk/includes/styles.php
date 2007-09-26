@@ -102,8 +102,6 @@ a:hover {
 }
 #edituser,
 #edituserhandler,
-#groupedit,
-#groupedithandler,
 #tabscontent {
   margin: 0px;
   padding: 0.5em;
@@ -135,16 +133,19 @@ a:hover {
   color: #000000;
 }
 #tabscontent_public,
-#tabscontent_groups,
+#tabscontent_buddies,
+#tabscontent_users,
 #tabscontent_other,
 #tabscontent_email,
 #tabscontent_colors,
 #tabscontent_participants,
 #tabscontent_sched,
 #tabscontent_pete,
-#useriframe,
-#grpiframe {
+#useriframe {
  display: none;
+}
+#tabscontent_buddies .buttonlist li {
+ padding: 3px;
 }
 label {
   font-weight: bold;

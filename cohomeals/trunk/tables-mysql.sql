@@ -37,8 +37,6 @@ CREATE TABLE webcal_user (
   PRIMARY KEY ( cal_login )
 );
 
-# create a default admin user
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_lastname, cal_firstname, cal_is_admin ) VALUES ( 'admin', '21232f297a57a5a743894a0e4a801fc3', 'Administrator', 'Default', 'Y' );
 
 /*
  * Defines a calendar event.  Each event in the system has one entry
@@ -201,31 +199,14 @@ CREATE TABLE webcal_reminder_log (
 );
 
 /*
- * Define a group.  Group members can be found in
- * <a href="#webcal_group_user">webcal_group_user</a>.
+ * Define buddies who can sign up others for meals and shifts 
  */
-CREATE TABLE webcal_group (
-  /* unique group id */
-  cal_group_id INT NOT NULL,
-  /* user login of user that created this group */
-  cal_owner VARCHAR(25) NULL,
-  /* name of the group */
-  cal_name VARCHAR(50) NOT NULL,
-  /* date last updated (in YYYYMMDD format) */
-  cal_last_update INT NOT NULL,
-  PRIMARY KEY ( cal_group_id )
-);
-
-/*
- * Specify users in a group.  The group is defined in
- * <a href="#webcal_group">webcal_group</a>.
- */
-CREATE TABLE webcal_group_user (
-  /* group id */
-  cal_group_id INT NOT NULL,
-  /* user login */
-  cal_login VARCHAR(25) NOT NULL,
-  PRIMARY KEY ( cal_group_id, cal_login )
+CREATE TABLE webcal_buddy (
+  /* the login of the person who can do the signing */
+  cal_signer VARCHAR(25) NOT NULL,
+  /* the login of the person who can be signed up */
+  cal_signee VARCHAR(25) NOT NULL,
+  PRIMARY KEY ( cal_signer, cal_signee )
 );
 
 
@@ -249,10 +230,6 @@ INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'demo_mode', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'require_approvals', 'Y' );
-INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'groups_enabled', 'N' );
-INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'user_sees_only_his_groups', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'allow_conflicts', 'N' );
 INSERT INTO webcal_config ( cal_setting, cal_value )

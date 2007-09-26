@@ -6,6 +6,8 @@ before commit:
 fixme:
 - put baseprice in edit_entry.php
 
+- for heart limited time, put entry in subscription so that if drops below 2/3, we know
+
 -------
 
 current:
@@ -136,3 +138,22 @@ highlight self in view
 
 
 - when mc chooses crew, shows ratio of work/eat, show who's working. also showexperience on thpose already signed up?
+
+
+********************************************
+
+security:
+
+- turn register_globals off
+- check inputs and escape or remove funny characters, like ', ", # (see mysql_real_escape_string and get_magic_quotes_gpc)
+- make sure you have correctly set "open_basedir" in your php.ini file
+- have set "allow_url_fopen" to "off"
+- pre-initialize every variable in the file it's used
+- change default passwords and usernames, esp admin
+- careful of leaving install files on the live site
+- doublecheck all visible files and directories
+- set error reporting to off on the live site
+- delay between password tries
+- track ip addresses for login attempts
+- views (?) or some way to never delete
+- check out: safe_mode, disable_functions, not using eval(), (look at php.ini for some of this)

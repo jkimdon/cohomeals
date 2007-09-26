@@ -9,15 +9,40 @@ include_once 'includes/init.php';
 $INC = array('js/popups.php', 'js/subscribe_heart_js.php', 'js/visible.php' );
 $BodyX = '';
 print_header ( $INC, '', $BodyX );
+
+
+$cur_user = getGetValue( 'user' );
+if ( !isset( $user ) || !is_signer( $user ) ) 
+  $cur_user = $login;
+$signees = get_signees( $login, true );
+
+
 ?>
-
-<form action="subscribe_heart_handler.php" method="post" name="subheartform">
-
 <h2>Heart subscriptions</h2>
+
+<form action="subscribe_heart.php" method="get">
+<table>
+<tr>
+  <td>Managing heart subscriptions for the following person:</td>
+  <td><select name="user">
+  <?php 
+  for ( $i=0; $i<count( $signees ); $i++ ) {
+    $person = $signees[$i]['cal_login'];
+    echo "<option value=\"" . $person . "\"";
+    if ( $cur_user == $person ) 
+      echo " selected";
+    echo ">" . $signees[$i]['cal_fullname'] . "</option>";
+  }?></select></td>
+  <td><input type="submit" value="Change user"/></td>
+</tr>
+</table>
+</form>
+   
+<hr>
 
 <?php 
 $sql = "SELECT cal_off_day FROM webcal_subscriptions " .
-       "WHERE cal_login = '$login' AND cal_suit = 'heart'";
+       "WHERE cal_login = '$cur_user' AND cal_suit = 'heart'";
 if ( $res = dbi_query ( $sql ) ) {
   if ( $row = dbi_fetch_row ( $res ) ) {
     $subscribed = true;
@@ -29,12 +54,17 @@ if ( $res = dbi_query ( $sql ) ) {
   echo "Database error: " . dbi_error() . "<br />\n";
 }
 
+?>
+<form action="subscribe_heart_handler.php" method="post" name="subheartform">
+<?php
+
 $meals = array ();
 $eating = array ();
 $some_meals = false;
 $datedone = false;
 $today_date = date( "Ymd" );//sprintf( "%04d%02d%02d", $thisyear, $thismonth, $thisday );
 $action = 'N';
+
 
 echo "<b>Current status:</b> ";
 if ( $subscribed == true ) {
@@ -70,7 +100,7 @@ if ( $subscribed == true ) {
       }
 
       $sql2 = "SELECT cal_login FROM webcal_meal_participant " .
-	"WHERE cal_login = '$login' AND cal_id = $id " .
+	"WHERE cal_login = '$cur_user' AND cal_id = $id " .
 	"AND (cal_type = 'M' OR cal_type = 'T')";
       if ( $res2 = dbi_query ( $sql2 ) ) {
 	if ( dbi_fetch_row ( $res2 ) ) {
@@ -149,8 +179,9 @@ You may sign up for all meals or you may choose one day of the week for which yo
 
 <?php $action = 'S'; ?>
 
+
 <tr><td></td>
-<td><input type="submit" value="Subscribe me" />
+<td><input type="submit" value="Subscribe" />
 </td></tr>
 </table>
 
@@ -163,15 +194,16 @@ You may sign up for all meals or you may choose one day of the week for which yo
   ?>
   <p>
   <table><tr>
-  <td>Unsubscribe me, starting: </td>
+  <td>Unsubscribe, starting: </td>
   <td><?php print_date_selection( "start", $today_date ); 
   $start_date = sprintf( "%04d%02d%02d", $startyear, $startmonth, $startday );?>
   </td>
-  </tr><tr><td></td><td><input type="submit" value="Unsubscribe me" /></td></tr>
+  </tr><tr><td></td><td><input type="submit" value="Unsubscribe" /></td></tr>
   </table>
 <?php } 
 
 echo "<input type=\"hidden\" name=\"action\" value=\"$action\" />";
+echo "<input type=\"hidden\" name=\"user\" value=\"$cur_user\" />";
 ?>
 
 

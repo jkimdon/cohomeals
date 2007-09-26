@@ -238,22 +238,27 @@ if ( $res ) {
 
     if ( $already_eating == false ) {
       echo "<a name=\"participation\" class=\"addbutton\"" .
-	"href=\"edit_participation_handler.php?id=$id&type=M&action=A\">" .
+	"href=\"edit_participation_handler.php?user=$login&id=$id&type=M&action=A\">" .
 	"Add me</a>";
-      echo "<br />\n";
+      echo "&nbsp;&nbsp;&nbsp;";
     }
+    $nexturl = "signup_buddy.php?id=$id&type=M&action=A";
+    ?>
+    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+    <br><?php
     for ( $i = 0; $i < $num_app; $i++ ) {
       user_load_variables ( $approved[$i], "temp" );
       if ( strlen ( $tempemail ) ) 
 	$allmails[] = $tempemail;
-      echo $tempfirstname;
-      if ( $login == $approved[$i] ) {
+      echo $tempfirstname . " " . $templastname;
+      $person = $approved[$i];
+      if ( is_signer( $person ) || ($person == $login) ) {
 	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	  "href=\"edit_participation_handler.php?id=$id&type=M&action=D\">" . 
-	  "Remove me</a>";
+	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=D\">" . 
+	  "Remove</a>";
 	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	  "href=\"edit_participation_handler.php?id=$id&type=T&action=A\">" . 
-	  "Change to take-home plate</a>";
+	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=A\">" . 
+	  "Change to take-home plate</a><br>";
       }
       echo "<br />\n";
     }
@@ -272,7 +277,7 @@ if ( $res ) {
       }
     }
   ?>
-</td></tr>
+<br></td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
@@ -296,25 +301,30 @@ if ( $res ) {
 }
 
 if ( $already_eating == false ) {
-  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?id=$id&type=T&action=A\">Add me</a>";
-  echo "<br />\n";
+  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?user=$login&id=$id&type=T&action=A\">Add me</a>";
+  echo "&nbsp;&nbsp;&nbsp;";
 }
+$nexturl = "signup_buddy.php?id=$id&type=T&action=A";
+?>
+<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+<br><?php
 
 for ( $i = 0; $i < $num_app; $i++ ) {
   user_load_variables ( $approved[$i], "temp" );
-  echo $tempfirstname;
-  if ( $login == $approved[$i] ) {
+  echo $tempfirstname . " " . $templastname;
+  $person = $approved[$i];
+  if ( is_signer( $person ) || ($person == $login) ) {
     echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?id=$id&type=T&action=D\">" . 
+      "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=D\">" . 
       "Remove</a>";
     echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?id=$id&type=M&action=A\">" . 
-      "Change to on-site dining</a>";
+      "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=A\">" . 
+      "Change to on-site dining</a><br>";
   }
   echo "<br />\n";
 }
 ?>
-</td></tr>
+<br></td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
@@ -490,12 +500,15 @@ function display_crew( $title, $type, $number, $rowcolor ) {
       else { 
 	$person = $row[0];
 	user_load_variables ( $person, "temp" );
-	echo $i . ". " . $GLOBALS[tempfirstname];
+	echo $i . ". " . $GLOBALS[tempfirstname] . 
+	  " " . $GLOBALS[templastname];
 	if ( $person == $login ) {
 	  $im_working = true;
+	}
+	if ( is_signer( $person ) || ($person == $login) ) {
 	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	    "href=\"edit_participation_handler.php?id=$id&type=$type&action=D\">" . 
-	    "Remove me</a>";
+	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
+	    "Remove</a><br>";
 	}
 	echo "<br />\n";
 	$i += 1;
@@ -507,8 +520,18 @@ function display_crew( $title, $type, $number, $rowcolor ) {
   if ( ($i <= $number) && ($im_working == false) ) {
     echo $i . ". ";
     echo "<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?id=$id&type=$type&action=A\">" . 
-      "Add me</a><br>";
+      "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" . 
+      "Add me</a>";
+    $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
+    ?>&nbsp;&nbsp;&nbsp;
+    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=150,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+    <?php
+    $i += 1;
+  }
+  if ( ($im_working == true) && ($i <= $number) ) {
+    echo "<br>" . $i . ". ";
+    $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
+    ?><a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br><?php
     $i += 1;
   }
   if ( $i <= $number ) {
@@ -516,6 +539,6 @@ function display_crew( $title, $type, $number, $rowcolor ) {
       echo $i . ". ???<br>";
     } 
   }
-  echo "</td></tr>";
+  echo "<br></td></tr>";
 }
 ?>

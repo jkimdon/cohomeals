@@ -153,4 +153,3 @@ function print_checked_day ( $date, $id ) {
 
 
 ?>
-
