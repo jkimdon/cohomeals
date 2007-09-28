@@ -193,7 +193,7 @@ function print_detailed_entry ( $id, $date, $time, $suit, $notes ) {
 //   $date - date in YYYYMMDD format
 //   $is_ssi - is this being called from week_ssi.php?
 function print_det_date_entries ( $date, $ssi ) {
-  global $events, $readonly, $is_admin;
+  global $events, $readonly, $is_meal_coordinator;
 
   $year = substr ( $date, 0, 4 );
   $month = substr ( $date, 4, 2 );

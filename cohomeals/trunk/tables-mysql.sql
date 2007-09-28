@@ -23,8 +23,8 @@ CREATE TABLE webcal_user (
   cal_lastname VARCHAR(25),
   /* user's first name */
   cal_firstname VARCHAR(25),
-  /* is the user a WebCalendar administrator ('Y' = yes, 'N' = no) */
-  cal_is_admin CHAR(1) DEFAULT 'N',
+  /* is the user an administrator ('Y' = yes, 'N' = no) */
+  cal_is_meal_coordinator CHAR(1) DEFAULT 'N',
   /* bean counter is the only one who can add payment events */
   cal_is_beancounter CHAR(1) DEFAULT 'N',
   /* user's email address */

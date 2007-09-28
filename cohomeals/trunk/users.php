@@ -35,7 +35,7 @@ print_header( $INC );
 <div id="tabs">
 
   <span class="tabfor" id="tab_users"><a href="#tabusers" onclick="return showTab('users')">
-  <?php if ($is_admin) {
+  <?php if ($is_meal_coordinator) {
     echo "Users";
   } else {
     echo "Account";
@@ -59,7 +59,7 @@ print_header( $INC );
   <a name="tabusers"></a>
   <div id="tabscontent_users">
 
-  <?php if ( $is_admin ) { ?>
+  <?php if ( $is_meal_coordinator ) { ?>
     <a title="Add New User" href="edit_user.php" target="useriframe" onclick="javascript:show('useriframe');">Add New User</a><br />
     <ul>
     <?php 
@@ -71,7 +71,7 @@ print_header( $INC );
 	  $userlist[$i]["cal_login"] . "\" target=\"useriframe\" onclick=\"javascript:show('useriframe');\">";
 	echo $userlist[$i]['cal_fullname'];
 	echo "</a>";
-	if (  $userlist[$i]["cal_is_admin"] == 'Y' )
+	if (  $userlist[$i]["cal_is_meal_coordinator"] == 'Y' )
 	  echo "&nbsp;<abbr title=\"" . translate("denotes administrative user") . "\">*</abbr>";
 	echo "</li>\n";
       }
@@ -136,8 +136,8 @@ print_header( $INC );
     </tr><tr>
     <td><ul>
     <?php 
-    if ( $is_admin || $is_meal_coordinator ) {
-      echo "<li>Everybody (as meal coordinator or admin)</li>";
+    if ( $is_meal_coordinator ) {
+      echo "<li>Everybody (as meal coordinator)</li>";
     } else {
       $signee_list = get_signees ( $login );
       if ( count ( $signee_list ) == 0 ) {

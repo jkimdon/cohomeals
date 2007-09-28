@@ -17,7 +17,7 @@ else
 
 $nextYear= $year + 1;
 
-if ( $allow_view_other != "Y" && ! $is_admin )
+if ( $allow_view_other != "Y" && ! $is_meal_coordinator )
   $user = "";
 
 $boldDays = false;

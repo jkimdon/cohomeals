@@ -1,7 +1,7 @@
 <?php
 	include_once 'includes/init.php';
 
-if ( $is_admin == "Y" ) {
+if ( $is_meal_coordinator == "Y" ) {
   $INC = array('js/search.php');
 } else {
   $INC = '';
@@ -18,7 +18,7 @@ if ( $is_admin == "Y" ) {
 <input type="text" name="keywords" id="keywordsadv" size="30" />&nbsp;
 <input type="submit" value="<?php etranslate("Search")?>" /><br />
 <?php 
-	if ( ($login == "__public__" && $public_access_others != "Y") || (! $is_admin) ) {
+	if ( ($login == "__public__" && $public_access_others != "Y") || (! $is_meal_coordinator) ) {
 		echo "</form>";
 	} else {
 		echo "<div id=\"advlink\"><a title=\"" . 

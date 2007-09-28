@@ -4,7 +4,7 @@ include_once 'includes/init.php';
 
 $user = getGetValue( 'user' );
 
-if ( ! $is_admin )
+if ( ! $is_meal_coordinator )
   $user = $login;
 
 // cannot edit public user.
@@ -14,8 +14,8 @@ if ( $user == '__public__' )
 // don't allow them to create new users if it's not allowed
 if ( empty ( $user ) ) {
   // asking to create a new user
-  if ( ! $is_admin ) {
-    // must be admin...
+  if ( ! $is_meal_coordinator ) {
+    // must be meal_coordinator...
     do_redirect ( "month.php" );
     exit;
   }
@@ -47,7 +47,7 @@ print_header ( '', '', '', true );
   <td>
   <?php
     if ( ! empty ( $user ) ) {
-      if ( $is_admin )
+      if ( $is_meal_coordinator )
         echo $user . "<input name=\"user\" type=\"hidden\" value=\"" .
           htmlspecialchars ( $user ) . "\" />\n";
       else
@@ -60,7 +60,7 @@ print_header ( '', '', '', true );
 </tr>
 <tr>
   <td><label for="ufirstname">First Name:</label></td>
-  <?php if ( $is_admin ) {?>
+  <?php if ( $is_meal_coordinator ) {?>
     <td><input type="text" name="ufirstname" id="ufirstname" size="20" value="<?php echo empty ( $ufirstname ) ? '' : htmlspecialchars ( $ufirstname );?>" /></td>
   <?php } else {
     echo "<td>$ufirstname</td>";
@@ -68,7 +68,7 @@ print_header ( '', '', '', true );
 </tr>
 <tr>
   <td><label for="ulastname">Last Name:</label></td>
-  <?php if ( $is_admin ) {?>
+  <?php if ( $is_meal_coordinator ) {?>
     <td><input type="text" name="ulastname" id="ulastname" size="20" value="<?php echo empty ( $ulastname ) ? '' : htmlspecialchars ( $ulastname );?>" /></td>
   <?php } else {
     echo "<td>$ulastname</td>";
@@ -76,7 +76,7 @@ print_header ( '', '', '', true );
 </tr>
 <tr>
   <td><label for="ubirthdate">Birthdate:</label></td>
-  <?php if ( $is_admin ) {?>
+  <?php if ( $is_meal_coordinator ) {?>
     <td><?php print_birthdate_selection( $ubirthdate ); ?></td>
   <?php } else {
     echo "<td>" . substr( $ubirthdate, 6, 2 ) .
@@ -86,7 +86,7 @@ print_header ( '', '', '', true );
 </tr>
 <tr>
   <td><label for="uemail">E-mail address:</label></td>
-  <?php if ( $is_admin ) {?>
+  <?php if ( $is_meal_coordinator ) {?>
     <td><input type="text" name="uemail" id="uemail" size="20" value="<?php echo empty ( $uemail ) ? '' : htmlspecialchars ( $uemail );?>" /></td>
   <?php } else {
     echo "<td>$uemail</td>";
@@ -94,7 +94,7 @@ print_header ( '', '', '', true );
 </tr>
 <tr>
   <td><label for="ubilling_group">Billing group:</label></td>
-  <?php if ( $is_admin ) {?>
+  <?php if ( $is_meal_coordinator ) {?>
     <td><input type="text" name="ubilling_group" id="ubilling_group" size="20" value="<?php echo empty ( $ubilling_group ) ? '' : htmlspecialchars ( $ubilling_group );?>" /></td>
   <?php } else {
     echo "<td>$ubilling_group</td>";
@@ -112,11 +112,10 @@ print_header ( '', '', '', true );
 		<input name="upassword2" id="pass2" size="15" value="" type="password" />
 	</td></tr>
 <?php }
-if ( $is_admin ) { ?>
-	<tr><td style="font-weight:bold;">
-		<?php etranslate("Admin")?>:</td><td>
-		<label><input type="radio" name="uis_admin" value="Y"<?php if ( ! empty ( $uis_admin ) && $uis_admin == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-		<label><input type="radio" name="uis_admin" value="N"<?php if ( empty ( $uis_admin ) || $uis_admin != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
+if ( $is_meal_coordinator ) { ?>
+ <tr><td style="font-weight:bold;">Meal coordinator?:</td>
+    <td><label><input type="radio" name="uis_meal_coordinator" value="Y"<?php if ( ! empty ( $uis_meal_coordinator ) && $uis_meal_coordinator == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
+		<label><input type="radio" name="uis_meal_coordinator" value="N"<?php if ( empty ( $uis_meal_coordinator ) || $uis_meal_coordinator != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
 	</td></tr>
 
 	<tr><td style="font-weight:bold;">
@@ -124,12 +123,12 @@ if ( $is_admin ) { ?>
 		<label><input type="radio" name="uis_beancounter" value="Y"<?php if ( ! empty ( $uis_beancounter ) && $uis_beancounter == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
 		<label><input type="radio" name="uis_beancounter" value="N"<?php if ( empty ( $uis_beancounter ) || $uis_beancounter != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
 	</td></tr>
-<?php } //end if ($is_admin ) ?>
+<?php } //end if ($is_meal_coordinator ) ?>
 	<tr><td colspan="2">
-	<?php if ( $is_admin ) { ?>
+	<?php if ( $is_meal_coordinator ) { ?>
           <input type="submit" value="Save" />
         <?php } ?>
-	<?php if ( $is_admin && ! empty ( $user ) ) { ?>
+	<?php if ( $is_meal_coordinator && ! empty ( $user ) ) { ?>
 	  <input type="submit" name="action" value="Delete" onclick="return confirm('Are you sure you want to delete this user?')" />
 	<?php } ?>
 	</td></tr>
@@ -144,7 +143,7 @@ if ( $is_admin ) { ?>
 <h2><?php etranslate("Change Password")?></h2>
 <form action="edit_user_handler.php" method="post">
 <input type="hidden" name="formtype" value="setpassword" />
-<?php if ( $is_admin ) { ?>
+<?php if ( $is_meal_coordinator ) { ?>
 	<input type="hidden" name="user" value="<?php echo $user;?>" />
 <?php } ?>
 <table style="border-width:0px;">

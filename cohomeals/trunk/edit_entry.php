@@ -24,7 +24,7 @@ if ( empty ( $EVENT_EDIT_TABS ) )
 $useTabs = ( $EVENT_EDIT_TABS == 'Y' );
 
 $can_edit = false;
-if ( $is_meal_coordinator || $is_admin ) {
+if ( $is_meal_coordinator ) {
   $can_edit = true;
 }
 
@@ -385,7 +385,7 @@ if ( $id ) {
 <input type="hidden" name="participant_list" value="" />
 </form>
 
-<?php if ( $id > 0 && $is_admin ) { ?>
+<?php if ( $id > 0 && $is_meal_coordinator ) { ?>
  <a href="del_entry.php?id=<?php echo $id;?>" onclick="return confirm('<?php etranslate("Are you sure you want to delete this entry?")?>');"><?php etranslate("Delete entry")?></a><br />
 <?php 
  } //end if clause for delete link

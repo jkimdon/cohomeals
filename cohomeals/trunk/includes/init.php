@@ -104,10 +104,10 @@ if ($DMW) {
   // Tell the browser not to cache
   send_no_cache_header ();
 
-  if ( $allow_view_other != 'Y' && ! $is_admin )
+  if ( $allow_view_other != 'Y' && ! $is_meal_coordinator )
     $user = "";
 
-  $can_add = ( $readonly == "N" || $is_admin == "Y" );
+  $can_add = ( $readonly == "N" || $is_meal_coordinator == "Y" );
   if ( $public_access == "Y" && $login == "__public__" ) {
     if ( $public_access_can_add != "Y" )
       $can_add = false;
@@ -274,7 +274,7 @@ function print_trailer ( $include_nav_links=true, $closeDb=true,
   global $CUSTOM_TRAILER, $c, $STARTVIEW;
   global $login, $thisyear,
     $thismonth, $thisday, $DATE_FORMAT_MY, $WEEK_START, $DATE_FORMAT_MD,
-    $readonly, $is_admin, $public_access, $public_access_can_add,
+    $readonly, $is_meal_coordinator, $public_access, $public_access_can_add,
     $use_http_auth, $login_return_path,
     $public_access_others, $allow_view_other,
     $fullname;

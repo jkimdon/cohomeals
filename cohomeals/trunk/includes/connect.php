@@ -75,7 +75,7 @@ if ( empty ( $session_not_found ) )
 
 if ( $pub_acc_enabled && ! empty ( $session_not_found ) ) {
   $login = "__public__";
-  $is_admin =  false;
+  $is_meal_coordinator =  false;
   $lastname = "";
   $firstname = "";
   $fullname = "Public Access"; // Will be translated after translation is loaded
@@ -96,7 +96,7 @@ if ( empty ( $login ) && $use_http_auth ) {
   if ( strstr ( $PHP_SELF, "login.php" ) ) {
     // ignore since login.php will redirect to index.php
   } else if ( $login == "__public__" ) {
-    $is_admin =  false;
+    $is_meal_coordinator =  false;
     $lastname = "";
     $firstname = "";
     $fullname = "Public Access";
@@ -104,7 +104,7 @@ if ( empty ( $login ) && $use_http_auth ) {
   } else {
     user_load_variables ( $login, "login_" );
     if ( ! empty ( $login_login ) ) {
-      $is_admin =  ( $login_is_admin == "Y" ? true : false );
+      $is_meal_coordinator =  ( $login_is_meal_coordinator == "Y" ? true : false );
       $lastname = $login_lastname;
       $firstname = $login_firstname;
       $fullname = $login_fullname;
@@ -146,7 +146,7 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
   }
 }
 
-if ( empty ( $is_admin ) || ! $is_admin ) {
+if ( empty ( $is_meal_coordinator ) || ! $is_meal_coordinator ) {
   if ( strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "admin_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_template.php" ) ||

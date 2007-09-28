@@ -4,7 +4,7 @@ include_once 'includes/init.php';
 
 $error = "";
 
-if ( ! $is_admin ) {
+if ( ! $is_meal_coordinator ) {
   $error = translate("You are not authorized");
 }
 

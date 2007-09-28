@@ -45,8 +45,8 @@ if ( $use_http_auth ) {
       //SetCookie ( "webcalendar_session", $encoded_login, 0, $cookie_path );
       $out .= "  <cookieName>webcalendar_session</cookieName>\n";
       $out .= "  <cookieValue>$encoded_login</cookieValue>\n";
-      if ( $is_admin )
-        $out .= "  <admin>1</admin>\n";
+      if ( $is_meal_coordinator )
+        $out .= "  <meal_coordinator>1</meal_coordinator>\n";
     } else {
       $out .= "  <error>Invalid login</error>\n";
     }

@@ -141,7 +141,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 			    $day, $month, $year, $hour, $minute, $ampm,
 			    $menu, $head_chef, $num_cooks, $num_setup, 
 			    $num_cleanup, $num_other_crew, $walkins, $notes ) {
-  global $is_meal_coordinator, $is_admin;
+  global $is_meal_coordinator, $is_meal_coordinator;
   global $LOG_CREATE, $LOG_UPDATE;
   
 
@@ -180,10 +180,9 @@ if ( ! empty ( $hour ) ) {
 // Otherwise, someone could hand type in the URL to edit someone else's
 // event.
 // Can edit if:
-//   - user is admin
 //   - user is meal coordinator
 $can_edit = false;
-if ( $is_meal_coordinator || $is_admin ) {
+if ( $is_meal_coordinator ) {
   $can_edit = true;
 }
 if ( ! $can_edit ) {

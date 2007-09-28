@@ -31,7 +31,7 @@ print_header ( $INC, '', $BodyX );
 <?php
 $error = false;
 
-if ( ! $is_admin ) {
+if ( ! $is_meal_coordinator ) {
   etranslate ( "You are not authorized" );
   $error = true;
 }

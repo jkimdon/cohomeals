@@ -388,7 +388,7 @@ if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "";
 }
 
-$can_edit = ( $is_admin || $is_meal_coordinator );
+$can_edit = ( $is_meal_coordinator );
 if ( $login == "__public__" ) {
   $can_edit = false;
 }
@@ -416,7 +416,7 @@ if ( count ( $allmails ) > 0 ) {
 
 $show_log = false;
 
-if ( $is_admin ) {
+if ( $is_meal_coordinator ) {
   if ( empty ( $log ) ) {
     echo "<a title=\"" . 
       translate("Show activity log") . "\" class=\"nav\" " .

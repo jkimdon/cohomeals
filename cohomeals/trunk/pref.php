@@ -4,7 +4,7 @@ include_once 'includes/init.php';
 $user = mysql_safe( $user, true );
 
 if ($user != $login)
-  $user = ($is_admin && $user) ? $user : $login;
+  $user = ($is_meal_coordinator && $user) ? $user : $login;
 
 // Reload preferences into $prefarray[].
 // Get system settings first.
@@ -17,7 +17,7 @@ if ( $res ) {
   }
   dbi_free_result ( $res );
 }
-if ( $is_admin && ! empty ( $public ) && $public_access == "Y" ) {
+if ( $is_meal_coordinator && ! empty ( $public ) && $public_access == "Y" ) {
   $updating_public = true;
   $res = dbi_query ( "SELECT cal_setting, cal_value FROM webcal_user_pref " .
     "WHERE cal_login = '__public__'" );
@@ -60,7 +60,7 @@ print_header($INC);
 <br />
 
 <?php
-	if ( $is_admin ) {
+	if ( $is_meal_coordinator ) {
 	  if ( empty ( $public ) && $public_access == "Y") {
 	    echo "<blockquote><a href=\"pref.php?public=1\">" .
 	      translate("Click here") . " " .

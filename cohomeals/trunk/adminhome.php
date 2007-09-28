@@ -57,7 +57,7 @@ print_header('', $style);
 $names = array ();
 $links = array ();
 
-if ($is_admin) {
+if ($is_meal_coordinator) {
 	$names[] = translate("System Settings");
 	$links[] = "admin.php";
 }
@@ -65,7 +65,7 @@ if ($is_admin) {
 $names[] = translate("Preferences");
 $links[] = "pref.php";
 
-if ( $is_admin ) {
+if ( $is_meal_coordinator ) {
 	$names[] = translate("Users");
 	$links[] = "users.php";
 } else {
@@ -74,12 +74,12 @@ if ( $is_admin ) {
 }
 
 
-if ( $is_admin ) {
+if ( $is_meal_coordinator ) {
 	$names[] = translate("Activity Log");
 	$links[] = "activity_log.php";
 }
 
-if ( $is_admin && ! empty ($public_access) && $public_access == 'Y' ) {
+if ( $is_meal_coordinator && ! empty ($public_access) && $public_access == 'Y' ) {
 	$names[] = translate("Public Preferences");
 	$links[] = "pref.php?public=1";
 }

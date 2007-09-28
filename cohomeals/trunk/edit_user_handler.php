@@ -18,19 +18,19 @@ $uemail = getPostValue( 'uemail' );
 $ubilling_group = getPostValue( 'ubilling_group' );
 $upassword1 = getPostValue( 'upassword1' );
 $upassword2 = getPostValue( 'upassword2' );
-$uis_admin = getPostValue( 'uis_admin' );
+$uis_meal_coordinator = getPostValue( 'uis_meal_coordinator' );
 $uis_beancounter = getPostValue( 'uis_beancounter' );
 $formtype = getPostValue( 'formtype' );
 
 
-if ( ! $is_admin )
+if ( ! $is_meal_coordinator )
   $user = $login;
 $action = getValue ( "action" );
 
 // Handle delete
 if ( ( $action == "Delete" || $action == translate ("Delete") ) &&
   $formtype == "edituser" ) {
-  if ( $is_admin ) {
+  if ( $is_meal_coordinator ) {
     if ( $admin_can_delete_user ) {
       user_delete_user ( $user ); // will also delete user's events
     } else {
@@ -57,7 +57,7 @@ else if ( $formtype == "setpassword" && strlen ( $user ) ) {
 // Handle update of user info
 else if ( $formtype == "edituser" ) {
   $ubirthdate = sprintf ( "%04d%02d%02d", $birthyear, $birthmonth, $birthday );
-  if ( strlen ( $add ) && $is_admin ) {
+  if ( strlen ( $add ) && $is_meal_coordinator ) {
     if ( $upassword1 != $upassword2 ) { 
       $error = translate( "The passwords were not identical" ) . "."; 
     } else {
@@ -71,21 +71,21 @@ else if ( $formtype == "edituser" ) {
         $error = translate( "Username can not be blank" ) . ".";
       } else {
         user_add_user ( $user, $upassword1, $ufirstname, $ulastname, 
-          $ubirthdate, $uemail, $ubilling_group, $uis_admin, $uis_beancounter );
+          $ubirthdate, $uemail, $ubilling_group, $uis_meal_coordinator, $uis_beancounter );
       }
     }
-  } else if ( strlen ( $add ) && ! $is_admin ) {
+  } else if ( strlen ( $add ) && ! $is_meal_coordinator ) {
     $error = translate("You are not authorized") . ".";
   } else {
     // Don't allow a user to change themself to an admin or beancounter 
-    // by setting uis_admin/beancounter in the URL by hand.  
+    // by setting uis_meal_coordinator/beancounter in the URL by hand.  
     // They must be admin beforehand.
-    if ( ! $is_admin ) {
-      $uis_admin = "N";
+    if ( ! $is_meal_coordinator ) {
+      $uis_meal_coordinator = "N";
       $uis_beancounter = "N";
     }
     user_update_user ( $user, $ufirstname, $ulastname, $ubirthdate,
-      $uemail, $ubilling_group, $uis_admin, $uis_beancounter );
+      $uemail, $ubilling_group, $uis_meal_coordinator, $uis_beancounter );
   }
 }
 

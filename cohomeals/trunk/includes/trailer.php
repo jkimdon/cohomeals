@@ -24,7 +24,7 @@ $manage_calendar_link = array ( );
 
 // Go To links
 $can_add = false;
-if ( $is_meal_coordinator || $is_admin ) {
+if ( $is_meal_coordinator ) {
   $can_add = true;
 }
 

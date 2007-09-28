@@ -59,7 +59,7 @@ $ldays_per_month = array ( 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
  * @global array $noSet
  */
 $noSet = array (
-  "is_admin" => 1,
+  "is_meal_coordinator" => 1,
   "db_type" => 1,
   "db_host" => 1,
   "db_login" => 1,
@@ -1553,7 +1553,7 @@ function week_number ( $date ) {
  * @param bool   $ssi  Is this being called from week_ssi.php?
  */
 function print_date_entries ( $date, $ssi ) {
-  global $events, $readonly, $is_admin, $login,
+  global $events, $readonly, $is_meal_coordinator, $login,
     $public_access, $public_access_can_add;
   $cnt = 0;
 
@@ -1561,7 +1561,7 @@ function print_date_entries ( $date, $ssi ) {
   $month = substr ( $date, 4, 2 );
   $day = substr ( $date, 6, 2 );
   $dateu = mktime ( 3, 0, 0, $month, $day, $year );
-  $can_add = ( $readonly == "N" || $is_admin );
+  $can_add = ( $readonly == "N" || $is_meal_coordinator );
   if ( $public_access == "Y" && $public_access_can_add != "Y" &&
     $login == "__public__" )
     $can_add = false;
@@ -2391,7 +2391,7 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
   // admin, meal coordinator, and buddies can add others
   if ( $user == $login )
     $can_edit = true;
-  else if ( $is_meal_coordinator || $is_admin ) 
+  else if ( $is_meal_coordinator )
     $can_edit = true;
   else if ( is_signer( $user ) == true ) 
     $can_edit = true;
@@ -2581,7 +2581,7 @@ function get_signees ( $login, $include_self="false" ) {
   $ret = array ();
   $count = 0;
 
-  if ( $is_admin || $is_meal_coordinator ) {
+  if ( $is_meal_coordinator ) {
     $sql = "SELECT cal_login FROM webcal_user";
   } else {
     $sql = "SELECT cal_signee FROM webcal_buddy " .

@@ -10,7 +10,7 @@ $thisdate = '';
 // First, check to see if this user should be able to delete this event.
 if ( $id > 0 ) {
   // first see who has access to edit this entry
-  if ( $is_admin || $is_meal_coordinator ) {
+  if ( $is_meal_coordinator ) {
     $can_edit = true;
   }
 }

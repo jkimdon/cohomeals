@@ -127,7 +127,7 @@ function user_load_variables ( $login, $prefix ) {
     $GLOBALS[$prefix . "firstname"] = "";
     $GLOBALS[$prefix . "lastname"] = "";
     $GLOBALS[$prefix . "birthdate"] = "";
-    $GLOBALS[$prefix . "is_admin"] = "N";
+    $GLOBALS[$prefix . "is_meal_coordinator"] = "N";
     $GLOBALS[$prefix . "is_beancounter"] = "N";
     $GLOBALS[$prefix . "email"] = "";
     $GLOBALS[$prefix . "fullname"] = $PUBLIC_ACCESS_FULLNAME;
@@ -136,7 +136,7 @@ function user_load_variables ( $login, $prefix ) {
     return true;
   }
   $sql =
-    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_admin, cal_is_beancounter, cal_email, cal_passwd, cal_billing_group " .
+    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_meal_coordinator, cal_is_beancounter, cal_email, cal_passwd, cal_billing_group " .
     "FROM webcal_user WHERE cal_login = '" . $login . "'";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -145,7 +145,7 @@ function user_load_variables ( $login, $prefix ) {
       $GLOBALS[$prefix . "firstname"] = $row[0];
       $GLOBALS[$prefix . "lastname"] = $row[1];
       $GLOBALS[$prefix . "birthdate"] = $row[2];
-      $GLOBALS[$prefix . "is_admin"] = $row[3];
+      $GLOBALS[$prefix . "is_meal_coordinator"] = $row[3];
       $GLOBALS[$prefix . "is_beancounter"] = $row[4];
       $GLOBALS[$prefix . "email"] = empty ( $row[5] ) ? "" : $row[5];
       if ( strlen ( $row[0] ) && strlen ( $row[1] ) )
@@ -172,10 +172,10 @@ function user_load_variables ( $login, $prefix ) {
 //   $birthdate - birth date (for calculating meal prices) YYYYMMDD (int)
 //   $email - email address
 //   $billing_group - billing_group for billing
-//   $admin - is admin? ("Y" or "N")
+//   $meal_coordinator - is admin? ("Y" or "N")
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_add_user ( $user, $password, $firstname, $lastname, 
-  $birthdate, $email, $billing_group, $admin, $beancounter ) {
+  $birthdate, $email, $billing_group, $meal_coordinator, $beancounter ) {
   global $error;
 
   if ( $user == "__public__" ) {
@@ -208,16 +208,16 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     $ubirthdate = mysql_safe( $birthdate, false );
   else
     $ubirthdate = "NULL";
-  if ( $admin != "Y" )
-    $admin = "N";
+  if ( $meal_coordinator != "Y" )
+    $meal_coordinator = "N";
   if ( $beancounter != "Y" )
     $beancounter = "N";
   $sql = "INSERT INTO webcal_user " .
     "( cal_login, cal_lastname, cal_firstname, " .
-    "cal_is_admin, cal_is_beancounter, cal_passwd, cal_email, " .
+    "cal_is_meal_coordinator, cal_is_beancounter, cal_passwd, cal_email, " .
     "cal_billing_group, cal_birthdate ) " .
     "VALUES ( '$user', $ulastname, $ufirstname, " .
-    "'$admin', '$beancounter', $upassword, $uemail, " . 
+    "'$meal_coordinator', '$beancounter', $upassword, $uemail, " . 
     "$ubilling_group, $ubirthdate )";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
@@ -234,10 +234,10 @@ function user_add_user ( $user, $password, $firstname, $lastname,
 //   $birthdate - YYYYMMDD integer
 //   $email - email address
 //   $billing_group - household for billing
-//   $admin - is admin?
+//   $meal_coordinator - is admin?
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_update_user ( $user, $firstname, $lastname, $birthdate,
-			    $email, $billing_group, $admin, $beancounter ) {
+			    $email, $billing_group, $meal_coordinator, $beancounter ) {
   global $error;
 
   $user = mysql_safe( $user, true );
@@ -265,15 +265,15 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
     $ubilling_group = mysql_safe( $billing_group, true );
   else
     $ubilling_group = "'" . $user . "'";
-  if ( $admin != "Y" )
-    $admin = "N";
+  if ( $meal_coordinator != "Y" )
+    $meal_coordinator = "N";
   if ( $beancounter != "Y" )
     $beancounter = "N";
 
   $sql = "UPDATE webcal_user SET cal_lastname = $ulastname, " .
     "cal_firstname = $ufirstname, cal_email = $uemail," .
     "cal_birthdate = $ubirthdate, cal_billing_group = $ubilling_group," .
-    "cal_is_admin = '$admin', cal_is_beancounter = '$beancounter' " .
+    "cal_is_meal_coordinator = '$meal_coordinator', cal_is_beancounter = '$beancounter' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
@@ -361,12 +361,12 @@ function user_get_users () {
        "cal_login" => "__public__",
        "cal_lastname" => "",
        "cal_firstname" => "",
-       "cal_is_admin" => "N",
+       "cal_is_meal_coordinator" => "N",
        "cal_email" => "",
        "cal_password" => "",
        "cal_fullname" => $PUBLIC_ACCESS_FULLNAME );
   $res = dbi_query ( "SELECT cal_login, cal_lastname, cal_firstname, " .
-    "cal_is_admin, cal_email, cal_passwd FROM webcal_user " .
+    "cal_is_meal_coordinator, cal_email, cal_passwd FROM webcal_user " .
     "ORDER BY cal_lastname, cal_firstname, cal_login" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
@@ -378,7 +378,7 @@ function user_get_users () {
         "cal_login" => $row[0],
         "cal_lastname" => $row[1],
         "cal_firstname" => $row[2],
-        "cal_is_admin" => $row[3],
+        "cal_is_meal_coordinator" => $row[3],
         "cal_email" => empty ( $row[4] ) ? "" : $row[4],
         "cal_password" => $row[5],
         "cal_fullname" => $fullname
