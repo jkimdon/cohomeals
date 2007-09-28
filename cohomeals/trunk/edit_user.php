@@ -93,11 +93,11 @@ print_header ( '', '', '', true );
   } ?>
 </tr>
 <tr>
-  <td><label for="uhousehold">Billing group:</label></td>
+  <td><label for="ubilling_group">Billing group:</label></td>
   <?php if ( $is_admin ) {?>
-    <td><input type="text" name="uhousehold" id="uhousehold" size="20" value="<?php echo empty ( $uhousehold ) ? '' : htmlspecialchars ( $uhousehold );?>" /></td>
+    <td><input type="text" name="ubilling_group" id="ubilling_group" size="20" value="<?php echo empty ( $ubilling_group ) ? '' : htmlspecialchars ( $ubilling_group );?>" /></td>
   <?php } else {
-    echo "<td>$uhousehold</td>";
+    echo "<td>$ubilling_group</td>";
   } ?>
 </tr>
 

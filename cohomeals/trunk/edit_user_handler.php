@@ -15,7 +15,7 @@ $ufirstname = getPostValue( 'ufirstname' );
 $ulastname = getPostValue( 'ulastname' );
 $ubirthdate = getPostValue( 'ubirthdate' );
 $uemail = getPostValue( 'uemail' );
-$uhousehold = getPostValue( 'uhousehold' );
+$ubilling_group = getPostValue( 'ubilling_group' );
 $upassword1 = getPostValue( 'upassword1' );
 $upassword2 = getPostValue( 'upassword2' );
 $uis_admin = getPostValue( 'uis_admin' );
@@ -71,7 +71,7 @@ else if ( $formtype == "edituser" ) {
         $error = translate( "Username can not be blank" ) . ".";
       } else {
         user_add_user ( $user, $upassword1, $ufirstname, $ulastname, 
-          $ubirthdate, $uemail, $uhousehold, $uis_admin, $uis_beancounter );
+          $ubirthdate, $uemail, $ubilling_group, $uis_admin, $uis_beancounter );
       }
     }
   } else if ( strlen ( $add ) && ! $is_admin ) {
@@ -85,7 +85,7 @@ else if ( $formtype == "edituser" ) {
       $uis_beancounter = "N";
     }
     user_update_user ( $user, $ufirstname, $ulastname, $ubirthdate,
-      $uemail, $uhousehold, $uis_admin, $uis_beancounter );
+      $uemail, $ubilling_group, $uis_admin, $uis_beancounter );
   }
 }
 

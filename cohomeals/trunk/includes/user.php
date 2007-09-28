@@ -132,11 +132,11 @@ function user_load_variables ( $login, $prefix ) {
     $GLOBALS[$prefix . "email"] = "";
     $GLOBALS[$prefix . "fullname"] = $PUBLIC_ACCESS_FULLNAME;
     $GLOBALS[$prefix . "password"] = "";
-    $GLOBALS[$prefix . "household"] = "";
+    $GLOBALS[$prefix . "billing_group"] = "";
     return true;
   }
   $sql =
-    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_admin, cal_is_beancounter, cal_email, cal_passwd, cal_household " .
+    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_admin, cal_is_beancounter, cal_email, cal_passwd, cal_billing_group " .
     "FROM webcal_user WHERE cal_login = '" . $login . "'";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -153,7 +153,7 @@ function user_load_variables ( $login, $prefix ) {
       else
         $GLOBALS[$prefix . "fullname"] = $login;
       $GLOBALS[$prefix . "password"] = $row[6];
-      $GLOBALS[$prefix . "household"] = $row[7];
+      $GLOBALS[$prefix . "billing_group"] = $row[7];
     }
     dbi_free_result ( $res );
   } else {
@@ -171,11 +171,11 @@ function user_load_variables ( $login, $prefix ) {
 //   $lastname - last name
 //   $birthdate - birth date (for calculating meal prices) YYYYMMDD (int)
 //   $email - email address
-//   $household - household for billing
+//   $billing_group - billing_group for billing
 //   $admin - is admin? ("Y" or "N")
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_add_user ( $user, $password, $firstname, $lastname, 
-  $birthdate, $email, $household, $admin, $beancounter ) {
+  $birthdate, $email, $billing_group, $admin, $beancounter ) {
   global $error;
 
   if ( $user == "__public__" ) {
@@ -200,10 +200,10 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     $upassword = "'" . md5($password) . "'";
   else
     $upassword = "NULL";
-  if ( strlen ( $household ) )
-    $uhousehold = mysql_safe( $household, true );
+  if ( strlen ( $billing_group ) )
+    $ubilling_group = mysql_safe( $billing_group, true );
   else
-    $uhousehold = "'" . $user . "'";
+    $ubilling_group = "'" . $user . "'";
   if ( strlen ( $birthdate ) )
     $ubirthdate = mysql_safe( $birthdate, false );
   else
@@ -215,10 +215,10 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   $sql = "INSERT INTO webcal_user " .
     "( cal_login, cal_lastname, cal_firstname, " .
     "cal_is_admin, cal_is_beancounter, cal_passwd, cal_email, " .
-    "cal_household, cal_birthdate ) " .
+    "cal_billing_group, cal_birthdate ) " .
     "VALUES ( '$user', $ulastname, $ufirstname, " .
     "'$admin', '$beancounter', $upassword, $uemail, " . 
-    "$uhousehold, $ubirthdate )";
+    "$ubilling_group, $ubirthdate )";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
     return false;
@@ -233,11 +233,11 @@ function user_add_user ( $user, $password, $firstname, $lastname,
 //   $lastname - last name
 //   $birthdate - YYYYMMDD integer
 //   $email - email address
-//   $household - household for billing
+//   $billing_group - household for billing
 //   $admin - is admin?
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_update_user ( $user, $firstname, $lastname, $birthdate,
-			    $email, $household, $admin, $beancounter ) {
+			    $email, $billing_group, $admin, $beancounter ) {
   global $error;
 
   $user = mysql_safe( $user, true );
@@ -261,10 +261,10 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
     $ubirthdate = mysql_safe( $birthdate, false );
   else
     $ubirthdate = "NULL";
-  if ( strlen ( $household ) )
-    $uhousehold = mysql_safe( $household, true );
+  if ( strlen ( $billing_group ) )
+    $ubilling_group = mysql_safe( $billing_group, true );
   else
-    $uhousehold = "'" . $user . "'";
+    $ubilling_group = "'" . $user . "'";
   if ( $admin != "Y" )
     $admin = "N";
   if ( $beancounter != "Y" )
@@ -272,7 +272,7 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
 
   $sql = "UPDATE webcal_user SET cal_lastname = $ulastname, " .
     "cal_firstname = $ufirstname, cal_email = $uemail," .
-    "cal_birthdate = $ubirthdate, cal_household = $uhousehold," .
+    "cal_birthdate = $ubirthdate, cal_billing_group = $ubilling_group," .
     "cal_is_admin = '$admin', cal_is_beancounter = '$beancounter' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
