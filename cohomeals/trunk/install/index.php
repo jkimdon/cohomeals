@@ -20,8 +20,8 @@
  */
 include_once '../includes/php-dbi.php';
 
-$file = "../includes/settings.php";
-$fileDir = "../includes";
+$file = "../../../www-safe/settings.php";
+$fileDir = "../../../www-safe";
 
 // Get value from POST form
 function getPostValue ( $name ) {
@@ -671,10 +671,11 @@ You should select "Web Server" from the list of
 $php_settings = array (
   //array ('Safe Mode','safe_mode','OFF'),
   array ('Magic Quotes GPC','magic_quotes_gpc','ON'),
-  array ('Register Globals','register_globals','ON'),
+  //  array ('Register Globals','register_globals','ON'),
   array ('Display Errors','display_errors','ON'),
-  //array ('Register Globals','register_globals','OFF'),
-  array ('File Uploads','file_uploads','ON'),
+  array ('Register Globals','register_globals','OFF'),
+  //  array ('File Uploads','file_uploads','ON'),
+  array ('File Uploads','file_uploads','OFF'),
 );
 
 ?>

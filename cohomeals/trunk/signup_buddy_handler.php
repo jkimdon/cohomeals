@@ -1,9 +1,9 @@
 <?php
 include_once 'includes/init.php';
 
-$id = getPostValue( 'id' );
+$id = mysql_safe( getPostValue( 'id' ), false );
 $action = getPostValue( 'action' );
-$type = getPostValue( 'type' );
+$type = mysql_safe( getPostValue( 'type' ), true );
 
 /// figure out if there is a limit to the number we can sign up
 $limited = false;

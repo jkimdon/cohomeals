@@ -1,4 +1,5 @@
 <?php
+// fixme: not security checked
 include_once 'includes/init.php';
 include_once 'includes/site_extras.php';
 $PAGE_SIZE = 25;

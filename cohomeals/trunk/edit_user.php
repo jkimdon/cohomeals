@@ -2,6 +2,8 @@
 /* $Id: edit_user.php,v 1.41 2005/02/26 06:49:45 cknudsen Exp $ */
 include_once 'includes/init.php';
 
+$user = getGetValue( 'user' );
+
 if ( ! $is_admin )
   $user = $login;
 
@@ -14,19 +16,12 @@ if ( empty ( $user ) ) {
   // asking to create a new user
   if ( ! $is_admin ) {
     // must be admin...
-    do_redirect ( empty ( $STARTVIEW ) ? "month.php" : "$STARTVIEW" );
-    exit;
-  }
-  if ( ! $admin_can_add_user ) {
-    // if adding users is not allowed...
-    do_redirect ( empty ( $STARTVIEW ) ? "month.php" : "$STARTVIEW" );
+    do_redirect ( "month.php" );
     exit;
   }
 }
 
-$disableCustom = true;
-
-print_header ( '', '', '', $disableCustom );
+print_header ( '', '', '', true );
 ?>
 <table style="border-width:0px;">
 <tr><td style="vertical-align:top; width:50%;">
@@ -161,13 +156,9 @@ if ( $is_admin ) { ?>
 		<label for="newpass2"><?php etranslate("New Password")?> (<?php etranslate("again")?>):</label></td><td>
 		<input name="upassword2" id="newpass2" type="password" size="15" />
 	</td></tr>
-	<tr><td colspan="2">
-		<?php if ( $demo_mode == "Y" ) { ?>
-			<input type="button" value="<?php etranslate("Set Password")?>" onclick="alert('<?php etranslate("Disabled for demo")?>')" />
-		<?php } else { ?>
-			<input type="submit" value="<?php etranslate("Set Password")?>" />
-		<?php } ?>
-	</td></tr>
+	<tr>
+	<td colspan="2"><input type="submit" value="Set Password" /></td>
+        </tr>
 </table>
 </form>
 <?php } ?>

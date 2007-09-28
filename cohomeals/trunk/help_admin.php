@@ -167,10 +167,6 @@ print_header('', '', '', true);
 <h3><?php etranslate("Other")?></h3>
 <table style="border-width:0px;">
 <tr><td class="help">
- <?php etranslate("Reports enabled")?>:</td><td>
- <?php etranslate("reports-enabled-help")?>
-</td></tr>
-<tr><td class="help">
  <?php etranslate("Allow remote subscriptions")?>:</td><td>
  <?php etranslate("subscriptions-enabled-help")?>
 </td></tr>

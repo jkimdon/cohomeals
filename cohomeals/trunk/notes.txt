@@ -53,6 +53,7 @@ questions:
 
 ----
 todo:
+get rid of admin -- only meal coordinator (harder name to guess)
 add_entry should be renamed to something like participate_in_meal
 deal with ssi
 deal with public access
@@ -144,7 +145,7 @@ highlight self in view
 
 security:
 
-- turn register_globals off
+done- turn register_globals off
 - check inputs and escape or remove funny characters, like ', ", # (see mysql_real_escape_string and get_magic_quotes_gpc)
 - make sure you have correctly set "open_basedir" in your php.ini file
 - have set "allow_url_fopen" to "off"

@@ -11,12 +11,17 @@ print_header($INC,'','',true);
 ?>
 
 <?php 
-$drawyear=$startyear;
-$drawmonth=$startmonth;
-$drawday=$startday;
+$user = mysql_safe( getValue( 'user' ) );
+
+$drawyear = getValue( 'startyear' );
+$drawmonth = getValue ( 'startmonth' );
+$drawday = getValue( 'startday' );
 $drawdate = sprintf( "%04d%02d%02d", $drawyear, $drawmonth, $drawday );
 $startdate = $drawdate;
 
+$endyear = getValue( 'endyear' );
+$endmonth = getValue ( 'endmonth' );
+$endday = getValue( 'endday' );
 $enddate = sprintf( "%04d%02d%02d", $endyear, $endmonth, $endday );
 
 $sql = "SELECT cal_date, cal_id FROM webcal_meal " .
@@ -52,17 +57,13 @@ while ( $drawdate <= $enddate ) {
 
    <?php
    echo "<tr class=\"day\">\n";
-   if ( $WEEK_START == 0 ) echo "<td>" . weekday_short_name ( 0 ) . "</td>\n";
+   echo "<td>" . weekday_short_name ( 0 ) . "</td>\n";
    for ( $i = 1; $i < 7; $i++ ) {
      echo "<td>" .
        weekday_short_name ( $i ) . "</td>\n";
    }
-   if ( $WEEK_START == 1 ) echo "<td>" . weekday_short_name ( 0 ) . "</td>\n";
    echo "</tr>\n";
-   if ( $WEEK_START == "1" )
-     $wkstart = get_monday_before ( $drawyear, $drawmonth, 1 );
-   else
-     $wkstart = get_sunday_before ( $drawyear, $drawmonth, 1 );
+   $wkstart = get_sunday_before ( $drawyear, $drawmonth, 1 );
    $monthstart = mktime ( 3, 0, 0, $drawmonth, 1, $drawyear );
    $monthend = mktime ( 3, 0, 0, $drawmonth + 1, 0, $drawyear );
    for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
@@ -74,7 +75,8 @@ while ( $drawdate <= $enddate ) {
        if ( date ( "Ymd", $date ) >= date ( "Ymd", $monthstart ) &&
 	    date ( "Ymd", $date ) <= date ( "Ymd", $monthend ) ) {
 	 if ( $nextdate == $formatted_date ) {
-	   $maxid = $nextid;
+	   if ( $nextid < $minid ) $minid = $nextid;
+	   if ( $nextid > $maxid ) $maxid = $nextid;
 	   print_checked_day ( $date, $nextid );
 	   $count++;
 	   $row = dbi_fetch_row ( $res );
@@ -103,7 +105,7 @@ while ( $drawdate <= $enddate ) {
 } ?>
 
 
-<input type="hidden" name="count" value="<?php echo $action;?>" />
+<input type="hidden" name="user" value="<?php echo $user;?>" />
 <input type="hidden" name="startdate" value="<?php echo $startdate;?>" />
 <input type="hidden" name="enddate" value="<?php echo $enddate;?>" />
 

@@ -81,6 +81,7 @@ function print_event_xml ( $id, $event_date ) {
 
   // get participants first...
  
+  $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id " .
     "ORDER BY cal_login";

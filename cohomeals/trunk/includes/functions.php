@@ -80,55 +80,10 @@ $noSet = array (
   "noSet" => 1,
 );
 
+
 // This code is a temporary hack to make the application work when
 // register_globals is set to Off in php.ini (the default setting in
 // PHP 4.2.0 and after).
-if ( empty ( $HTTP_GET_VARS ) ) $HTTP_GET_VARS = $_GET;
-if ( ! empty ( $HTTP_GET_VARS ) ) {
-  while (list($key, $val) = @each($HTTP_GET_VARS)) {
-    // don't allow anything to have <script> in it...
-    if ( ! is_array ( $val ) ) {
-      if ( preg_match ( "/<\s*script/i", $val ) ) {
-        echo "Security violation!"; exit;
-      }
-    }
-    if ( $key == "login" ) {
-      if ( strstr ( $PHP_SELF, "login.php" ) ) {
-        //$GLOBALS[$key] = $val;
-        $GLOBALS[$key] = $val;
-      }
-    } else {
-      if ( empty ( $noSet[$key] ) ) {
-        $GLOBALS[$key] = $val;
-        //echo "XXX $key<br />\n";
-      }
-    }
-    //echo "GET var '$key' = '$val' <br />\n";
-  }
-  reset ( $HTTP_GET_VARS );
-}
-
-if ( empty ( $HTTP_POST_VARS ) ) $HTTP_POST_VARS = $_POST;
-if ( ! empty ( $HTTP_POST_VARS ) ) {
-  while (list($key, $val) = @each($HTTP_POST_VARS)) {
-    // don't allow anything to have <script> in it... except 'template'
-    if ( ! is_array ( $val ) && $key != 'template' ) {
-      if ( preg_match ( "/<\s*script/i", $val ) ) {
-        echo "Security violation!"; exit;
-      }
-    }
-    if ( empty ( $noSet[$key] ) ) {
-      $GLOBALS[$key] = $val;
-    }
-  }
-  reset ( $HTTP_POST_VARS );
-}
-//while (list($key, $val) = @each($HTTP_POST_FILES)) {
-//       $GLOBALS[$key] = $val;
-//}
-//while (list($key, $val) = @each($HTTP_SESSION_VARS)) {
-//       $GLOBALS[$key] = $val;
-//}
 if ( empty ( $HTTP_COOKIE_VARS ) ) $HTTP_COOKIE_VARS = $_COOKIE;
 if ( ! empty ( $HTTP_COOKIE_VARS ) ) {
   while (list($key, $val) = @each($HTTP_COOKIE_VARS)) {
@@ -149,6 +104,12 @@ if ( empty ( $PHP_SELF ) )
 if ( ! strstr ( $PHP_SELF, "login.php" ) && ! empty ( $GLOBALS["login"] ) ) {
   $GLOBALS["login"] = "";
 }
+
+if ( empty ( $c ) ) {
+  $c = dbi_connect ( $db_host, $db_login, $db_password, $db_database );
+}
+
+$GLOBALS['login'] = mysql_safe( $GLOBALS['login'], true );
 
 // Define an array to use to jumble up the key: $offsets
 // We define a unique key to scramble the cookie we generate.
@@ -317,6 +278,22 @@ function getValue ( $name, $format="", $fatal=false ) {
 function getIntValue ( $name, $fatal=false ) {
   $val = getValue ( $name, "-?[0-9]+", $fatal );
   return $val;
+}
+
+
+/** 
+ * protect from mysql injection attacks
+ **/
+function mysql_safe( $data, $string=true ) {
+  if ( get_magic_quotes_gpc() )
+    $data = stripslashes($data);
+  if ( $string == true ) {
+    $data = htmlentities($data,ENT_QUOTES);
+    $data = mysql_real_escape_string($data);
+  } else {
+    $data = intval( $data );
+  }
+  return $data; 
 }
 
 /**
@@ -496,63 +473,7 @@ function do_debug ( $msg ) {
   //  2, "sockieman:2000" );
 }
 
-/**
- * Gets user's preferred view.
- *
- * The user's preferred view is stored in the $STARTVIEW global variable.  This
- * is loaded from the user preferences (or system settings if there are no user
- * prefererences.)
- *
- * @param string $indate Date to pass to preferred view in YYYYMMDD format
- * @param string $args   Arguments to include in the URL (such as "user=joe")
- *
- * @return string URL of the user's preferred view
- */
-function get_preferred_view ( $indate="", $args="" ) {
-  global $STARTVIEW, $thisdate;
 
-  $url = empty ( $STARTVIEW ) ? "month.php" : $STARTVIEW;
-  // We used to just store "month" in $STARTVIEW without the ".php"
-  // This is just to prevent users from getting a "404 not found" if
-  // they have not updated their preferences.
-  if ( $url == "month" || $url == "day" || $url == "week" || $url == "year" )
-    $url .= ".php";
-
-  $url = str_replace ( '&amp;', '&', $url );
-  $url = str_replace ( '&', '&amp;', $url );
-
-  $xdate = empty ( $indate ) ? $thisdate : $indate;
-  if ( ! empty ( $xdate ) ) {
-    if ( strstr ( $url, "?" ) )
-      $url .= '&amp;' . "date=$xdate";
-    else
-      $url .= '?' . "date=$xdate";
-  }
-
-  if ( ! empty ( $args ) ) {
-    if ( strstr ( $url, "?" ) )
-      $url .= '&amp;' . $args;
-    else
-      $url .= '?' . $args;
-  }
-
-  return $url;
-}
-
-/**
- * Sends a redirect to the user's preferred view.
- *
- * The user's preferred view is stored in the $STARTVIEW global variable.  This
- * is loaded from the user preferences (or system settings if there are no user
- * prefererences.)
- *
- * @param string $indate Date to pass to preferred view in YYYYMMDD format
- * @param string $args   Arguments to include in the URL (such as "user=joe")
- */
-function send_to_preferred_view ( $indate="", $args="" ) {
-  $url = get_preferred_view ( $indate, $args );
-  do_redirect ( $url );
-}
 
 /** Sends a redirect to the specified page.
  *
@@ -710,7 +631,7 @@ function send_no_cache_header () {
  */
 function load_user_preferences () {
   global $login, $browser, $prefarray,
-    $user, $allow_color_customization;
+    $allow_color_customization;
   $lang_found = false;
   $colors = array (
     "BGCOLOR" => 1,
@@ -781,6 +702,7 @@ function event_get_external_users ( $event_id, $use_mailto=0 ) {
   global $error;
   $ret = "";
 
+  $event_id = mysql_safe( $event_id, false );
   $res = dbi_query ( "SELECT cal_fullname, cal_email " .
     "FROM webcal_entry_ext_user " .
     "WHERE cal_id = $event_id " .
@@ -850,6 +772,11 @@ function activity_log ( $event_id, $user, $user_cal, $type, $text ) {
   $sql_text = empty ( $text ) ? "NULL" : "'$text'";
   $sql_user_cal = empty ( $user_cal ) ? "NULL" : "'$user_cal'";
 
+  $event_id = mysql_safe( $event_id, false );
+  $user = mysql_safe( $user, true );
+  $sql_user_cal = mysql_safe( $sql_user_cal, true );
+  $type = mysql_safe( $type, true );
+  $sql_text = mysql_safe( $sql_text, true );
   $sql = "INSERT INTO webcal_entry_log ( " .
     "cal_log_id, cal_entry_id, cal_login, cal_user_cal, cal_type, " .
     "cal_date, cal_time, cal_text ) VALUES ( $next_id, $event_id, " .
@@ -861,78 +788,6 @@ function activity_log ( $event_id, $user, $user_cal, $type, $text ) {
   }
 }
 
-/**
- * Gets a list of users.
- *
- * If groups are enabled, this will restrict the list of users to only those
- * users who are in the same group(s) as the user (unless the user is an admin
- * user).  We allow admin users to see all users because they can also edit
- * someone else's events (so they may need access to users who are not in the
- * same groups that they are in).
- *
- * @return array Array of users, where each element in the array is an array
- *               with the following keys:
- *    - cal_login
- *    - cal_lastname
- *    - cal_firstname
- *    - cal_is_admin
- *    - cal_is_admin
- *    - cal_email
- *    - cal_password
- *    - cal_fullname
- */
-function get_my_users () {
-  global $login, $is_admin, $groups_enabled, $user_sees_only_his_groups;
-
-  if ( $groups_enabled == "Y" && $user_sees_only_his_groups == "Y" &&
-    ! $is_admin ) {
-    // get groups that current user is in
-    $res = dbi_query ( "SELECT cal_group_id FROM webcal_group_user " .
-      "WHERE cal_login = '$login'" );
-    $groups = array ();
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $groups[] = $row[0];
-      }
-      dbi_fetch_row ( $res );
-    }
-    $u = user_get_users ();
-    $u_byname = array ();
-    for ( $i = 0; $i < count ( $u ); $i++ ) {
-      $name = $u[$i]['cal_login'];
-      $u_byname[$name] = $u[$i];
-    }
-    $ret = array ();
-    if ( count ( $groups ) == 0 ) {
-      // Eek.  User is in no groups... Return only themselves
-      $ret[] = $u_byname[$login];
-      return $ret;
-    }
-    // get list of users in the same groups as current user
-    $sql = "SELECT DISTINCT(webcal_group_user.cal_login), cal_lastname, cal_firstname from webcal_group_user " .
-      "LEFT JOIN webcal_user ON webcal_group_user.cal_login = webcal_user.cal_login " .
-      "WHERE cal_group_id ";
-    if ( count ( $groups ) == 1 )
-      $sql .= "= " . $groups[0];
-    else {
-      $sql .= "IN ( " . implode ( ", ", $groups ) . " )";
-    }
-    $sql .= " ORDER BY cal_lastname, cal_firstname, webcal_group_user.cal_login";
-    //echo "SQL: $sql <br />\n";
-    $res = dbi_query ( $sql );
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $ret[] = $u_byname[$row[0]];
-      }
-      dbi_free_result ( $res );
-    }
-    return $ret;
-  } else {
-    // groups not enabled... return all users
-    //echo "No groups. ";
-    return user_get_users ();
-  }
-}
 
 /**
  * Gets a preference setting for the specified user.
@@ -958,6 +813,8 @@ function get_pref_setting ( $user, $setting ) {
     $ret = $GLOBALS["sys_" .$setting];
   }
 
+  $user = mysql_safe( $user, true );
+  $setting = mysql_safe( $setting, true );
   $sql = "SELECT cal_value FROM webcal_user_pref " .
     "WHERE cal_login = '" . $user . "' AND " .
     "cal_setting = '" . $setting . "'";
@@ -1347,6 +1204,7 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
   global $login;
   static $key = 0;
 
+  $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = '$id' AND cal_login = '$login'";
   if ( $res = dbi_query ( $sql ) ) {
     if ( dbi_fetch_row ( $res ) ) 
@@ -1392,6 +1250,7 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
  *    - <var>cal_data</var>
  */
 function get_site_extra_fields ( $eventid ) {
+  $eventid = mysql_safe( $eventid, false );
   $sql = "SELECT cal_name, cal_type, cal_date, cal_remind, cal_data " .
     "FROM webcal_site_extras " .
     "WHERE cal_id = $eventid";
@@ -2482,6 +2341,9 @@ function background_css ( $color, $height = '', $percent = '' ) {
 function is_participating ( $id, $user, $type ) {
   $ret = false;
 
+  $id = mysql_safe( $id, false );
+  $user = mysql_safe( $user, true );
+  $type = mysql_safe( $type, true );
   if ( $type == "B" ) {
     $sql = "SELECT cal_login FROM webcal_subscriptions " .
       "WHERE cal_login = '$user' AND cal_suit = 'club' " .
@@ -2538,7 +2400,7 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
     echo "Not authorized";
     return;
   }
-    
+
 
   // make sure input is reasonable
   if ( ($action != 'D') && ($action != 'A') )
@@ -2558,6 +2420,9 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
     $can_change = true;
   
   // find out the current status of the user for this meal
+  $id = mysql_safe( $id, false );
+  $user = mysql_safe( $user, true );
+  $type = mysql_safe( $type, true );
   $sql = "SELECT cal_type FROM webcal_meal_participant " .
     "WHERE (cal_id = $id) AND (cal_login = '$user') AND (cal_type = '$type')";
   $res = dbi_query ( $sql );
@@ -2574,7 +2439,6 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
 	$can_change = false; // already there
     }
   }
-  
   
   ///////
   // make the change
@@ -2611,6 +2475,10 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
 
 
 function edit_club_subscription( $club_id, $user, $action ) {
+
+  $club_id = mysql_safe( $club_id, false );
+  $user = mysql_safe( $user, true );
+  $action = mysql_safe( $actions, true );
 
   //// un/subscribe
   if ( $action == 'A' ) {
@@ -2691,7 +2559,7 @@ function get_nonsigners() {
   $all = user_get_users();
 
   for ( $i = 0; $i < count( $all ); $i++ ) {
-    $cur_login = $all[$i]['cal_login'];
+    $cur_login = mysql_safe( $all[$i]['cal_login'], true );
     $sql = "SELECT cal_signer " .
       "FROM webcal_buddy " .
       "WHERE cal_signer = '$cur_login' AND cal_signee = '$login'";
@@ -2741,6 +2609,7 @@ function get_signees ( $login, $include_self="false" ) {
 function is_signer( $signee ) {
   $ret = false;
 
+  $signee = mysql_safe( $signee, true );
   $sql = "SELECT cal_signer FROM webcal_buddy " .
     "WHERE cal_signee = '$signee'";
   if ( $res = dbi_query( $sql ) ) {

@@ -166,7 +166,8 @@ function send_reminder ( $id, $event_date ) {
   global $allow_external_users, $external_reminders;
 
   // get participants first...
- 
+
+  $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id " . 
     "ORDER BY cal_login";
@@ -336,6 +337,9 @@ function send_reminder ( $id, $event_date ) {
 function log_reminder ( $id, $name, $event_date ) {
   global $only_testing;
 
+  $id = mysql_safe( $id, false );
+  $name = mysql_safe( $name, true );
+  $event_date = mysql_safe( $event_date, false );
   if ( ! $only_testing ) {
     dbi_query ( "DELETE FROM webcal_reminder_log " .
       "WHERE cal_id = $id AND cal_name = '$name' " .
@@ -400,6 +404,9 @@ function process_event ( $id, $name, $event_date, $event_time ) {
       if ( time() >= $remind_time ) {
         // It's remind time or later. See if one has already been sent
         $last_sent = 0;
+	$id = mysql_safe( $id, false );
+	$event_date = mysql_safe( $event_date, false );
+	$extra_name = mysql_safe( $extra_name, true );
         $res = dbi_query ( "SELECT MAX(cal_last_sent) FROM " .
           "webcal_reminder_log WHERE cal_id = " . $id .
           " AND cal_event_date = $event_date" .

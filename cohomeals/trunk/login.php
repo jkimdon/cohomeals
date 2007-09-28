@@ -163,35 +163,9 @@ function myOnLoad() {
 <?php 
  include "includes/styles.php";
 
- // Print custom header (since we do not call print_header function)
- if ( ! empty ( $CUSTOM_SCRIPT ) && $CUSTOM_SCRIPT == 'Y' ) {
-   $res = dbi_query (
-     "SELECT cal_template_text FROM webcal_report_template " .
-     "WHERE cal_template_type = 'S' and cal_report_id = 0" );
-   if ( $res ) {
-     if ( $row = dbi_fetch_row ( $res ) ) {
-       echo $row[0];
-     }
-     dbi_free_result ( $res );
-   }
- }
 ?>
 </head>
 <body onload="myOnLoad();">
-<?php
-// Print custom header (since we do not call print_header function)
-if ( ! empty ( $CUSTOM_HEADER ) && $CUSTOM_HEADER == 'Y' ) {
-  $res = dbi_query (
-    "SELECT cal_template_text FROM webcal_report_template " .
-    "WHERE cal_template_type = 'H' and cal_report_id = 0" );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      echo $row[0];
-    }
-    dbi_free_result ( $res );
-  }
-}
-?>
 
 <h2><?php 
 // If Application Name is set to Title then get translation
@@ -261,17 +235,5 @@ if ( ! empty ( $return_path ) ) {
 <br /><br />
 <a href="<?php echo $PROGRAM_URL ?>" id="programname"><?php echo $PROGRAM_NAME?></a>
 
-<?php // Print custom trailer (since we do not call print_trailer function)
-if ( ! empty ( $CUSTOM_TRAILER ) && $CUSTOM_TRAILER == 'Y' ) {
-  $res = dbi_query (
-    "SELECT cal_template_text FROM webcal_report_template " .
-    "WHERE cal_template_type = 'T' and cal_report_id = 0" );
-  if ( $res ) {
-    if ( $row = dbi_fetch_row ( $res ) ) {
-      echo $row[0];
-    }
-    dbi_free_result ( $res );
-  }
-} ?>
 </body>
 </html>

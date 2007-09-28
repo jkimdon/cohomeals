@@ -182,17 +182,18 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     $error = translate ("Invalid user login");
     return false;
   }
+  $user = mysql_safe( $user, true );
 
   if ( strlen ( $email ) )
-    $uemail = "'" . $email . "'";
+    $uemail = mysql_safe( $email, true );
   else
     $uemail = "NULL";
   if ( strlen ( $firstname ) )
-    $ufirstname = "'" . $firstname . "'";
+    $ufirstname = mysql_safe( $firstname, true );
   else
     $ufirstname = "NULL";
   if ( strlen ( $lastname ) )
-    $ulastname = "'" . $lastname . "'";
+    $ulastname = mysql_safe( $lastname, true );
   else
     $ulastname = "NULL";
   if ( strlen ( $password ) )
@@ -200,11 +201,11 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   else
     $upassword = "NULL";
   if ( strlen ( $household ) )
-    $uhousehold = "'" . $household . "'";
+    $uhousehold = mysql_safe( $household, true );
   else
     $uhousehold = "'" . $user . "'";
   if ( strlen ( $birthdate ) )
-    $ubirthdate = "'" . $birthdate . "'";
+    $ubirthdate = mysql_safe( $birthdate, false );
   else
     $ubirthdate = "NULL";
   if ( $admin != "Y" )
@@ -239,28 +240,29 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
 			    $email, $household, $admin, $beancounter ) {
   global $error;
 
+  $user = mysql_safe( $user, true );
   if ( $user == "__public__" ) {
     $error = translate ("Invalid user login");
     return false;
   }
   if ( strlen ( $email ) )
-    $uemail = "'" . $email . "'";
+    $uemail = mysql_safe( $email, true );
   else
     $uemail = "NULL";
   if ( strlen ( $firstname ) )
-    $ufirstname = "'" . $firstname . "'";
+    $ufirstname = mysql_safe( $firstname, true );
   else
     $ufirstname = "NULL";
   if ( strlen ( $lastname ) )
-    $ulastname = "'" . $lastname . "'";
+    $ulastname = mysql_safe( $lastname, true );
   else
     $ulastname = "NULL";
   if ( strlen ( $birthdate ) )
-    $ubirthdate = "'" . $birthdate . "'";
+    $ubirthdate = mysql_safe( $birthdate, false );
   else
     $ubirthdate = "NULL";
   if ( strlen ( $household ) )
-    $uhousehold = "'" . $household . "'";
+    $uhousehold = mysql_safe( $household, true );
   else
     $uhousehold = "'" . $user . "'";
   if ( $admin != "Y" )
@@ -287,6 +289,7 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
 function user_update_user_password ( $user, $password ) {
   global $error;
 
+  $user = mysql_safe( $user, true );
   $sql = "UPDATE webcal_user SET cal_passwd = '".md5($password)."' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
@@ -304,6 +307,7 @@ function user_update_user_password ( $user, $password ) {
 function user_delete_user ( $user ) {
   // Get event ids for all events this user is a participant
   $events = array ();
+  $user = mysql_safe( $user, true );
   $res = dbi_query ( "SELECT webcal_meal.cal_id " .
     "FROM webcal_meal, webcal_meal_participant " .
     "WHERE webcal_meal.cal_id = webcal_meal_participant.cal_id " .

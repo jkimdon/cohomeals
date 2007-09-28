@@ -31,6 +31,9 @@ if ( $is_meal_coordinator || $is_admin ) {
 $external_users = "";
 $participants = array ();
 $repeats = false;
+$newevent = false;
+
+$id = mysql_safe( getValue('id'), false );
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
@@ -165,11 +168,6 @@ if ( ! empty ( $id ) && ( empty ( $copy ) || $copy != '1' ) ) echo "<input type=
 // additional hidden input fields
 echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
 echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
-
-// if has cal_group_id was set, need to send parent = $parent
-if ( ! empty ( $parent ) )
-   echo "<input type=\"hidden\" name=\"parent\" value=\"$parent\" />\n";
-
 ?>
 
 <input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
@@ -222,18 +220,18 @@ if ( ! empty ( $parent ) )
   <?php if ( $newevent == true ) { ?>
   <tr id="suitdayofweek">
     <td class="tooltip">Day(s) of the week:</td>
-    <td><input type="checkbox" name="onSun" checked>Sun</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onMon" checked>Mon</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onTue" checked>Tue</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onWed" checked>Wed</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onThurs" checked>Thu</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onFri" checked>Fri</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="onSat" checked>Sat</input></td>
+    <td><input type="checkbox" name="d0" checked>Sun</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d1" checked>Mon</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d2" checked>Tue</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d3" checked>Wed</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d4" checked>Thu</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d5" checked>Fri</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d6" checked>Sat</input></td>
   </td></tr>
   <?php } ?>
 
-  <tr><td class="tooltip" title="<?php etooltip("time-help")?>">
-   <?php echo translate("Time") . ":"; ?></td><td colspan="2">
+  <tr><td class="tooltip" title="<?php etooltip("time-help")?>">Time:</td>
+      <td colspan="2">
 <?php
 $h12 = $hour;
 $pmsel = " checked=\"checked\""; $amsel = "";

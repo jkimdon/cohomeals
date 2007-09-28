@@ -5,8 +5,9 @@ $error = "";
 $startyear = getPostValue( 'startyear' );
 $startmonth = getPostValue( 'startmonth' );
 $startday = getPostValue( 'startday' );
-$user = getPostValue( 'user' );
-$skipday = getPostValue( 'skipday' );
+$user = mysql_safe( getPostValue( 'user' ), true );
+$action = getPostValue( 'action' );
+$skipday = mysql_safe( getPostValue( 'skipday' ), false );
 
 
 $start_date = sprintf( "%04d%02d%02d", $startyear, $startmonth, $startday ); 

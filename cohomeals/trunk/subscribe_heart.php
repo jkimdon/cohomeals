@@ -11,8 +11,8 @@ $BodyX = '';
 print_header ( $INC, '', $BodyX );
 
 
-$cur_user = getGetValue( 'user' );
-if ( !isset( $user ) || !is_signer( $user ) ) 
+$cur_user = mysql_safe( getGetValue( 'user' ), true );
+if ( !isset( $cur_user ) || !is_signer( $cur_user ) ) 
   $cur_user = $login;
 $signees = get_signees( $login, true );
 
@@ -20,11 +20,11 @@ $signees = get_signees( $login, true );
 ?>
 <h2>Heart subscriptions</h2>
 
-<form action="subscribe_heart.php" method="get">
+<form action="subscribe_heart.php" method="get" name="subchooseuserform">
 <table>
 <tr>
   <td>Managing heart subscriptions for the following person:</td>
-  <td><select name="user">
+  <td><select name="user" onchange="document.subchooseuserform.submit()">
   <?php 
   for ( $i=0; $i<count( $signees ); $i++ ) {
     $person = $signees[$i]['cal_login'];
@@ -33,7 +33,6 @@ $signees = get_signees( $login, true );
       echo " selected";
     echo ">" . $signees[$i]['cal_fullname'] . "</option>";
   }?></select></td>
-  <td><input type="submit" value="Change user"/></td>
 </tr>
 </table>
 </form>
@@ -41,6 +40,8 @@ $signees = get_signees( $login, true );
 <hr>
 
 <?php 
+$subscribed = false;
+$off_day = -1;
 $sql = "SELECT cal_off_day FROM webcal_subscriptions " .
        "WHERE cal_login = '$cur_user' AND cal_suit = 'heart'";
 if ( $res = dbi_query ( $sql ) ) {
@@ -60,6 +61,7 @@ if ( $res = dbi_query ( $sql ) ) {
 
 $meals = array ();
 $eating = array ();
+$weekday = array ();
 $some_meals = false;
 $datedone = false;
 $today_date = date( "Ymd" );//sprintf( "%04d%02d%02d", $thisyear, $thismonth, $thisday );

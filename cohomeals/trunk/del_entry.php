@@ -1,7 +1,11 @@
 <?php
 include_once 'includes/init.php';
 
+$id = getIntValue( 'id' );
+$date = getIntValue( 'date' );
+
 $can_edit = false;
+$thisdate = '';
 
 // First, check to see if this user should be able to delete this event.
 if ( $id > 0 ) {
@@ -15,6 +19,7 @@ if ( ! $can_edit ) {
   $error = "You are not authorized";
 }
 
+$id = mysql_safe( $id, false );
 if ( $id > 0 && empty ( $error ) ) {
   if ( ! empty ( $date ) ) {
     $thisdate = $date;
@@ -83,17 +88,14 @@ if ( $id > 0 && empty ( $error ) ) {
   
 }
 
-$ret = getValue ( "ret" );
-$url = get_preferred_view ( "", "" );
-
 if ( empty ( $error ) ) {
-  do_redirect ( $url );
+  do_redirect ( "month.php" );
   exit;
 }
 print_header();
 ?>
 
-<h2><?php etranslate("Error")?></h2>
+<h2>Error</h2>
 <blockquote>
 <?php echo $error; ?>
 </blockquote>

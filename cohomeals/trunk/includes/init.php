@@ -78,6 +78,7 @@ include_once "includes/$user_inc";
 include_once 'includes/validate.php';
 include_once 'includes/connect.php';
 
+
 load_global_settings ();
 
 if ( empty ( $ovrd ) )
@@ -114,18 +115,6 @@ if ($DMW) {
       $user = ""; // security precaution
   }
 
-  if ( $groups_enabled == "Y" && $user_sees_only_his_groups == "Y" &&
-    ! $is_admin ) {
-    $valid_user = false;
-    $userlist = get_my_users();
-    for ( $i = 0; $i < count ( $userlist ); $i++ ) {
-      if ( $user == $userlist[$i]['cal_login'] ) $valid_user = true;
-    } 
-    if ($valid_user == false) { 
-      $user = ""; // security precaution
-    }
-  }
-
   if ( ! empty ( $user ) ) {
     $u_url = "user=$user&amp;";
     user_load_variables ( $user, "user_" );
@@ -153,11 +142,8 @@ $bodyid = array(
  "day.php" => "day",
  "del_entry.php" => "delentry",
  "edit_entry.php" => "editentry",
- "edit_report.php" => "editreport",
- "edit_template.php" => "edittemplate",
  "edit_user.php" => "edituser",
  "edit_user_handler.php" => "edituserhandler",
- "edit_buddy_handler.php" => "editbuddyhandler",
  "help_admin.php" => "helpadmin",
  "help_bug.php" => "helpbug",
  "help_edit_entry.php" => "helpeditentry",
@@ -168,10 +154,8 @@ $bodyid = array(
  "month.php" => "month",
  "pref.php" => "pref",
  "purge.php" => "purge",
- "report.php" => "report",
  "search.php" => "search",
  "users.php" => "users",
- "usersel.php" => "usersel",
  "view_entry.php" => "viewentry",
  "week.php" => "week",
  "week_details.php" => "weekdetails",
@@ -248,19 +232,6 @@ function print_header($includes = '', $HeadX = '', $BodyX = '',
     include_once 'includes/styles.php';
   }
 
-  // Add custom script/stylesheet if enabled
-  if ( $CUSTOM_SCRIPT == 'Y' && ! $disableCustom ) {
-    $res = dbi_query (
-      "SELECT cal_template_text FROM webcal_report_template " .
-      "WHERE cal_template_type = 'S' and cal_report_id = 0" );
-    if ( $res ) {
-      if ( $row = dbi_fetch_row ( $res ) ) {
-        echo $row[0];
-      }
-      dbi_free_result ( $res );
-    }
-  }
-
   // Include includes/print_styles.css as a media="print" stylesheet. When the
   // user clicks on the "Printer Friendly" link, $friendly will be non-empty,
   // including this as a normal stylesheet so they can see how it will look 
@@ -284,18 +255,6 @@ function print_header($includes = '', $HeadX = '', $BodyX = '',
     echo " $BodyX";
   echo ">\n";
 
-  // Add custom header if enabled
-  if ( $CUSTOM_HEADER == 'Y' && ! $disableCustom ) {
-    $res = dbi_query (
-      "SELECT cal_template_text FROM webcal_report_template " .
-      "WHERE cal_template_type = 'H' and cal_report_id = 0" );
-    if ( $res ) {
-      if ( $row = dbi_fetch_row ( $res ) ) {
-        echo $row[0];
-      }
-      dbi_free_result ( $res );
-    }
-  }
 }
 
 
@@ -318,24 +277,10 @@ function print_trailer ( $include_nav_links=true, $closeDb=true,
     $readonly, $is_admin, $public_access, $public_access_can_add,
     $use_http_auth, $login_return_path,
     $public_access_others, $allow_view_other,
-    $reports_enabled,
-    $groups_enabled, $fullname;
+    $fullname;
   
   if ( $include_nav_links ) {
     include_once "includes/trailer.php";
-  }
-
-  // Add custom trailer if enabled
-  if ( $CUSTOM_TRAILER == 'Y' && ! $disableCustom && isset ( $c ) ) {
-    $res = dbi_query (
-      "SELECT cal_template_text FROM webcal_report_template " .
-      "WHERE cal_template_type = 'T' and cal_report_id = 0" );
-    if ( $res ) {
-      if ( $row = dbi_fetch_row ( $res ) ) {
-        echo $row[0];
-      }
-      dbi_free_result ( $res );
-    }
   }
 
   if ( $closeDb ) {

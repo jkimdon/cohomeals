@@ -447,16 +447,6 @@ if ( ! $error ) {
 </div>
 
 
-<!-- BEGIN REPORTS -->
-<div id="tabscontent_other">
-<table cellspacing="0" cellpadding="3">
-<tr><td class="tooltip" title="<?php etooltip("reports-enabled-help")?>">
- <?php etranslate("Reports enabled")?>:</td><td>
- <label><input type="radio" name="admin_reports_enabled" value="Y" <?php if ( $s["reports_enabled"] == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label>&nbsp;
- <label><input type="radio" name="admin_reports_enabled" value="N" <?php if ( $s["reports_enabled"] != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
-</td></tr>
-</table>
-
 <!-- BEGIN PUBLISHING -->
 <table cellspacing="0" cellpadding="3">
 <tr><td class="tooltip" title="<?php etooltip("subscriptions-enabled-help")?>">

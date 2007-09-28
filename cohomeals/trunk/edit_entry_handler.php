@@ -4,29 +4,36 @@ include_once 'includes/site_extras.php';
 
 $error = "";
 
-for ( $i=0; $i<7; $i++ ) 
+$repeats = getPostValue( 'repeats' );
+$newevent = getPostValue( 'newevent' );
+$id = mysql_safe( getPostValue( 'id' ), false );
+$suit = mysql_safe( getPostValue( 'suit' ), true );
+$day = getPostValue( 'day' );
+$month = getPostValue( 'month' );
+$year = getPostValue( 'year' );
+$endday = getPostValue( 'endday' );
+$endmonth = getPostValue( 'endmonth' );
+$endyear = getPostValue( 'endyear' );
+$hour = getPostValue( 'hour' );
+$minute = getPostValue( 'minute' );
+$ampm = getPostValue( 'ampm' );
+$menu = mysql_safe( getPostValue( 'menu' ), true );
+$head_chef = mysql_safe( getPostValue( 'head_chef' ), true );
+$num_cooks = mysql_safe( getPostValue( 'num_cooks' ), false );
+$num_setup = mysql_safe( getPostValue( 'num_setup' ), false );
+$num_cleanup = mysql_safe( getPostValue( 'num_cleanup' ), false );
+$num_other_crew = mysql_safe( getPostValue( 'num_other_crew' ), false );
+$walkins = mysql_safe( getPostValue( 'walkins' ), true );
+$notes = mysql_safe( getPostValue( 'notes' ), true );
+
+
+for ( $i=0; $i<7; $i++ ) {
   $repday[$i] = 0;
-if ( $onSun == true ) {
-  $repday[0] = 1;
+  $key = "d$i";
+  if ( getPostValue( $key ) == true ) 
+    $repday[$i] = 1;
 }
-if ( $onMon == true ) {
-  $repday[1] = 1;
-}
-if ( $onTue == true ) {
-  $repday[2] = 1;
-}
-if ( $onWed == true ) {
-  $repday[3] = 1;
-}
-if ( $onThurs == true ) {
-  $repday[4] = 1;
-}
-if ( $onFri == true ) {
-  $repday[5] = 1;
-}
-if ( $onSat == true ) {
-  $repday[6] = 1;
-}
+
 
 $current_date = sprintf ( "%04d%02d%02d", $year, $month, $day );
 $first_date = $current_date;
@@ -398,6 +405,7 @@ if ( empty ( $error ) ) {
     // Some users report that they get an error on duplicate keys
     // on the following add... As a safety measure, delete any
     // existing entry with the id.  Ignore the result.
+    $participants[$i] = mysql_safe( $participants[$i], true );
     dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id " .
       "AND cal_login = '$participants[$i]'" );
     $sql = "INSERT INTO webcal_meal_participant " .
@@ -484,6 +492,8 @@ if ( empty ( $error ) ) {
   if ( is_array ( $ext_names ) && is_array ( $ext_emails ) ) {
     for ( $i = 0; $i < count ( $ext_names ); $i++ ) {
       if ( strlen ( $ext_names[$i] ) ) {
+	$ext_names[$i] = mysql_safe( $ext_names[$i], true );
+	$ext_emails[$i] = mysql_safe( $ext_emails[$i], true );
         $sql = "INSERT INTO webcal_entry_ext_user " .
           "( cal_id, cal_fullname, cal_email ) VALUES ( " .
           "$id, '$ext_names[$i]', ";
@@ -536,65 +546,6 @@ if ( empty ( $error ) ) {
       }
     }
   }
-
-  // add site extras
-  for ( $i = 0; $i < count ( $site_extras ) && empty ( $error ); $i++ ) {
-    $sql = "";
-    $extra_name = $site_extras[$i][0];
-    $extra_type = $site_extras[$i][2];
-    $extra_arg1 = $site_extras[$i][3];
-    $extra_arg2 = $site_extras[$i][4];
-    $value = $$extra_name;
-    //echo "Looking for $extra_name... value = " . $value . " ... type = " .
-    // $extra_type . "<br />\n";
-    if ( strlen ( $$extra_name ) || $extra_type == $EXTRA_DATE ) {
-      if ( $extra_type == $EXTRA_URL || $extra_type == $EXTRA_EMAIL ||
-        $extra_type == $EXTRA_TEXT || $extra_type == $EXTRA_USER ||
-        $extra_type == $EXTRA_MULTILINETEXT ||
-        $extra_type == $EXTRA_SELECTLIST  ) {
-        $sql = "INSERT INTO webcal_site_extras " .
-          "( cal_id, cal_name, cal_type, cal_data ) VALUES ( " .
-          "$id, '$extra_name', $extra_type, '$value' )";
-      } else if ( $extra_type == $EXTRA_REMINDER && $value == "1" ) {
-        if ( ( $extra_arg2 & $EXTRA_REMINDER_WITH_DATE ) > 0 ) {
-          $yname = $extra_name . "year";
-          $mname = $extra_name . "month";
-          $dname = $extra_name . "day";
-          $edate = sprintf ( "%04d%02d%02d", $$yname, $$mname, $$dname );
-          $sql = "INSERT INTO webcal_site_extras " .
-            "( cal_id, cal_name, cal_type, cal_remind, cal_date ) VALUES ( " .
-            "$id, '$extra_name', $extra_type, 1, $edate )";
-        } else if ( ( $extra_arg2 & $EXTRA_REMINDER_WITH_OFFSET ) > 0 ) {
-          $dname = $extra_name . "_days";
-          $hname = $extra_name . "_hours";
-          $mname = $extra_name . "_minutes";
-          $minutes = ( $$dname * 24 * 60 ) + ( $$hname * 60 ) + $$mname;
-          $sql = "INSERT INTO webcal_site_extras " .
-            "( cal_id, cal_name, cal_type, cal_remind, cal_data ) VALUES ( " .
-            "$id, '$extra_name', $extra_type, 1, '" . $minutes . "' )";
-        } else {
-          $sql = "INSERT INTO webcal_site_extras " .
-          "( cal_id, cal_name, cal_type, cal_remind ) VALUES ( " .
-          "$id, '$extra_name', $extra_type, 1 )";
-        }
-      } else if ( $extra_type == $EXTRA_DATE )  {
-        $yname = $extra_name . "year";
-        $mname = $extra_name . "month";
-        $dname = $extra_name . "day";
-        $edate = sprintf ( "%04d%02d%02d", $$yname, $$mname, $$dname );
-        $sql = "INSERT INTO webcal_site_extras " .
-          "( cal_id, cal_name, cal_type, cal_date ) VALUES ( " .
-          "$id, '$extra_name', $extra_type, $edate )";
-      }
-    }
-    if ( strlen ( $sql ) && empty ( $error ) ) {
-      //echo "SQL: $sql<BR>\n";
-      if ( ! dbi_query ( $sql ) ) {
-        $error = translate("Database error") . ": " . dbi_error ();
-      }
-    }
-  }
-
 }
 }
  return $id; 
@@ -604,8 +555,7 @@ if ( empty ( $error ) ) {
 // month).  If this is a new event, then go to the preferred view for
 // the date range that this event was added to.
 if ( empty ( $error ) ) {
-  $user_args = ( empty ( $user ) ? '' : "user=$user" );
-  send_to_preferred_view ( $first_date, $user_args );
+  do_redirect( "month.php" );
 }
 
 print_header();

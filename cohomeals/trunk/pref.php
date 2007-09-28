@@ -1,6 +1,8 @@
 <?php
 include_once 'includes/init.php';
 
+$user = mysql_safe( $user, true );
+
 if ($user != $login)
   $user = ($is_admin && $user) ? $user : $login;
 

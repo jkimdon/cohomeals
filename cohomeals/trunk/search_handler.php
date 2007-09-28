@@ -3,8 +3,7 @@ include_once 'includes/init.php';
 
 $error = "";
 
-$keywords = getValue ( "keywords" );
-$advanced = getValue ( "advanced" );
+$keywords = mysql_safe( getValue ( "keywords" ), true );
 
 if ( strlen ( $keywords ) == 0 )
   $error = translate("You must enter one or more search keywords") . ".";

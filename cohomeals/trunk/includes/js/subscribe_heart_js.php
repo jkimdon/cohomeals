@@ -27,6 +27,8 @@ function check_time_period() {
 
   obj = document.subheartform;
 
+  var user = obj.user.value;
+
   var start_day = parseInt( obj.substartday.options[obj.substartday.selectedIndex].value );
   var start_month = parseInt( obj.substartmonth.options[obj.substartmonth.selectedIndex].value );
   var start_year = parseInt( obj.substartyear.options[obj.substartyear.selectedIndex].value );
@@ -44,7 +46,8 @@ function check_time_period() {
     return false;
   }
 
-  url = "limited_heart.php?startday=" + start_day + "&startmonth=" + start_month + 
+  url = "limited_heart.php?user=" + user + 
+    "&startday=" + start_day + "&startmonth=" + start_month + 
     "&startyear=" + start_year + "&endday=" + end_day + "&endmonth=" + end_month +
     "&endyear=" + end_year;
   window.open ( url, "Select dates", "width=300,height=600,resizable=yes,scrollbars=yes" );
@@ -53,18 +56,19 @@ function check_time_period() {
 
 
 function check_number_meals( minid, maxid, count ) {
-  
+
   num_checked = 0;
   cutoff = 0.66 * parseFloat( count );
 
-  for ( i = minid; i < maxid; i++ ) {
+  for ( i = minid; i <= maxid; i++ ) {
     is_checked = eval ( 'document.limitedheartform.d' + i + '.checked' );
-    if ( is_checked == true ) 
+    if ( is_checked == true ) {
       num_checked++;
+    }
   }
 
   if ( parseFloat( num_checked ) < cutoff ) {
-    alert ( "You must commit to at least 2/3 of the dates to obtain the volume discount." );
+    alert ( "You must commit to at least 2/3 of the dates to obtain the volume discount. You must choose at least " + cutoff + " days, but you have only chosen " + num_checked + "." );
     return false;
   }
 
@@ -99,31 +103,6 @@ function selectDate (  day, month, year, current, evt ) {
     "&fmonth=" + month + "&fyear=" + year + "&date=" + date;
   var colorWindow = window.open(url,"DateSelection","width=300,height=200,"  + MyPosition);
 }
-
-<?php if ( $groups_enabled == "Y" ) { 
-?>function selectUsers () {
-  // find id of user selection object
-  var listid = 0;
-  for ( i = 0; i < document.subheartform.elements.length; i++ ) {
-    if ( document.subheartform.elements[i].name == "participants[]" )
-      listid = i;
-  }
-  url = "usersel.php?form=subheartform&listid=" + listid + "&users=";
-  // add currently selected users
-  for ( i = 0, j = 0; i < document.subheartform.elements[listid].length; i++ ) {
-    if ( document.subheartform.elements[listid].options[i].selected ) {
-      if ( j != 0 )
-	       url += ",";
-      j++;
-      url += document.subheartform.elements[listid].options[i].value;
-    }
-  }
-  //alert ( "URL: " + url );
-  // open window
-  window.open ( url, "UserSelection",
-    "width=500,height=500,resizable=yes,scrollbars=yes" );
-}
-<?php } ?>
 
 
 //]]> -->

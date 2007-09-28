@@ -130,8 +130,6 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
   if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
     strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "admin_handler.php" ) ||
-    strstr ( $PHP_SELF, "groups.php" ) ||
-    strstr ( $PHP_SELF, "group_edit_handler.php" ) ||
     strstr ( $PHP_SELF, "pref.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_user.php" ) ||
@@ -151,9 +149,6 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
 if ( empty ( $is_admin ) || ! $is_admin ) {
   if ( strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "admin_handler.php" ) ||
-    strstr ( $PHP_SELF, "groups.php" ) ||
-    strstr ( $PHP_SELF, "group_edit.php" ) ||
-    strstr ( $PHP_SELF, "group_edit_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_template.php" ) ||
     strstr ( $PHP_SELF, "activity_log.php" ) ) {
     $not_auth = true;
@@ -165,13 +160,9 @@ if ( $readonly == "Y" ) {
   if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
     strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
-    strstr ( $PHP_SELF, "edit_report_handler.php" ) ||
-    strstr ( $PHP_SELF, "edit_report.php" ) ||
     strstr ( $PHP_SELF, "edit_template.php" ) ||
     strstr ( $PHP_SELF, "edit_user_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_user.php" ) ||
-    strstr ( $PHP_SELF, "group_edit_handler.php" ) ||
-    strstr ( $PHP_SELF, "groups.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "pref.php" ) ||
     strstr ( $PHP_SELF, "pref_handler.php" ) ||

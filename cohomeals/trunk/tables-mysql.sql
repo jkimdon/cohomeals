@@ -123,7 +123,7 @@ CREATE TABLE webcal_subscriptions (
   cal_club_id INT NULL,
   /* optional day of the week skipped for heart meals. 0 = Sun to 6 = Sat */
   cal_off_day INT NULL,
-  PRIMARY KEY ( cal_login, cal_suit )
+  PRIMARY KEY ( cal_login, cal_suit, cal_club_id )
 );
 
 
@@ -303,8 +303,6 @@ INSERT INTO webcal_config ( cal_setting, cal_value )
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ('allow_html_description', 'N');
 INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ('reports_enabled', 'N');
-INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ('DISPLAY_WEEKENDS', 'Y');
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ('DISPLAY_DESC_PRINT_DAY', 'N');
@@ -391,111 +389,4 @@ CREATE TABLE webcal_entry_log (
   /* optional text */
   cal_text TEXT,
   PRIMARY KEY ( cal_log_id )
-);
-
-
-/*
- * Defines a custom report created by a user.
- */
-CREATE TABLE webcal_report (
-  /* creator of report */
-  cal_login VARCHAR(25) NOT NULL,
-  /* unique id of this report */
-  cal_report_id INT NOT NULL,
-  /* is this a global report (can it be accessed by other users) ('Y' or 'N') */
-  cal_is_global CHAR(1) DEFAULT 'N' NOT NULL,
-  /* format of report (html, plain or csv) */
-  cal_report_type VARCHAR(20) NOT NULL,
-  /* if cal_report_type is 'html', should the default HTML header and */
-  /* trailer be included? ('Y' or 'N') */
-  cal_include_header CHAR(1) DEFAULT 'Y' NOT NULL,
-  /* name of the report */
-  cal_report_name VARCHAR(50) NOT NULL,
-  /* time range for report:  <ul> */
-  /* <li>0 = tomorrow</li> */
-  /* <li>1 = today</li> */
-  /* <li>2 = yesterday</li> */
-  /* <li>3 = day before yesterday</li> */
-  /* <li>10 = next week</li> */
-  /* <li>11 = current week</li> */
-  /* <li>12 = last week</li> */
-  /* <li>13 = week before last</li> */
-  /* <li>20 = next week and week after</li> */
-  /* <li>21 = current week and next week</li> */
-  /* <li>22 = last week and this week</li> */
-  /* <li>23 = last two weeks</li> */
-  /* <li>30 = next month</li> */
-  /* <li>31 = current month</li> */
-  /* <li>32 = last month</li> */
-  /* <li>33 = month before last</li> */
-  /* <li>40 = next year</li> */
-  /* <li>41 = current year</li> */
-  /* <li>42 = last year</li> */
-  /* <li>43 = year before last</li> */
-  /* </ul> */
-  cal_time_range INT NOT NULL,
-  /* user calendar to display (NULL indicates current user) */
-  cal_user VARCHAR(25) NULL,
-  /* allow user to navigate to different dates with next/previous ('Y' or 'N') */
-  cal_allow_nav CHAR(1) DEFAULT 'Y',
-  /* category to filter on (optional) */
-  cal_cat_id INT NULL,
-  /* include empty dates in report ('Y' or 'N') */
-  cal_include_empty CHAR(1) DEFAULT 'N',
-  /* include a link for this report in the "Go to" section of the navigation */
-  /* in the page trailer ('Y' or 'N') */
-  cal_show_in_trailer CHAR(1) DEFAULT 'N',
-  /* date created or last updated (in YYYYMMDD format) */
-  cal_update_date INT NOT NULL,
-  PRIMARY KEY ( cal_report_id )
-);
-
-/*
- * Defines one of the templates used for a report.
- * Each report has three templates:
- * <ol>
- * <li>Page template - Defines the entire page (except for header and
- *   footer).  The following variables can be defined:
- *   <ul>
- *     <li>${days}<sup>*</sup> - the HTML of all dates (generated from the Date template)</li>
- *   </ul></li>
- * <li>Date template - Defines events for one day.  If the report
- *   is for a week or month, then the results of each day will be
- *   concatenated and used as the ${days} variable in the Page template.
- *   The following variables can be defined:
- *   <ul>
- *     <li>${events}<sup>*</sup> - the HTML of all events
- *          for the data (generated from the Event template)</li>
- *     <li>${date} - the date</li>
- *     <li>${fulldate} - date (includes weekday)</li>
- *   </ul></li>
- * <li>Event template - Defines a single event.
- *      The following variables can be defined:
- *   <ul>
- *     <li>${name}<sup>*</sup> - Brief Description of event</li>
- *     <li>${description} - Full Description of event</li>
- *     <li>${date} - Date of event</li>
- *     <li>${fulldate} - Date of event (includes weekday)</li>
- *     <li>${time} - Time of event (4:00pm - 4:30pm)</li>
- *     <li>${starttime} - Start time of event</li>
- *     <li>${endtime} - End time of event</li>
- *     <li>${duration} - Duration of event (in minutes)</li>
- *     <li>${priority} - Priority of event</li>
- *     <li>${href} - URL to view event details</li>
- *   </ul></li>
- * </ol>
- * <sup>*</sup> denotes a required template variable
- */
-CREATE TABLE webcal_report_template (
-  /* report id (in webcal_report table) */
-  cal_report_id INT NOT NULL,
-  /* type of template: <ul> */
-  /* <li>'P': page template represents entire document</li> */
-  /* <li>'D': date template represents a single day of events</li> */
-  /* <li>'E': event template represents a single event</li> */
-  /* </ul> */
-  cal_template_type CHAR(1) NOT NULL,
-  /* text of template */
-  cal_template_text TEXT,
-  PRIMARY KEY ( cal_report_id, cal_template_type )
 );

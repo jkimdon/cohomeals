@@ -74,11 +74,6 @@ if ( $is_admin ) {
 }
 
 
-if ( $reports_enabled == 'Y' ) {
-	$names[] = translate("Reports");
-	$links[] = "report.php";
-}
-
 if ( $is_admin ) {
 	$names[] = translate("Activity Log");
 	$links[] = "activity_log.php";

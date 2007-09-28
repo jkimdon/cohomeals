@@ -9,6 +9,20 @@
 include_once 'includes/init.php';
 
 $error = "";
+$add = getPostValue( 'add' );
+$user = getPostValue( 'user' );
+$ufirstname = getPostValue( 'ufirstname' );
+$ulastname = getPostValue( 'ulastname' );
+$ubirthdate = getPostValue( 'ubirthdate' );
+$uemail = getPostValue( 'uemail' );
+$uhousehold = getPostValue( 'uhousehold' );
+$upassword1 = getPostValue( 'upassword1' );
+$upassword2 = getPostValue( 'upassword2' );
+$uis_admin = getPostValue( 'uis_admin' );
+$uis_beancounter = getPostValue( 'uis_beancounter' );
+$formtype = getPostValue( 'formtype' );
+
+
 if ( ! $is_admin )
   $user = $login;
 $action = getValue ( "action" );

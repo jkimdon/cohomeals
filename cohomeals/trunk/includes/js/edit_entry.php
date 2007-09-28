@@ -79,30 +79,6 @@ function selectDate (  day, month, year, current, evt ) {
   var colorWindow = window.open(url,"DateSelection","width=300,height=200,"  + MyPosition);
 }
 
-<?php if ( $groups_enabled == "Y" ) { 
-?>function selectUsers () {
-  // find id of user selection object
-  var listid = 0;
-  for ( i = 0; i < document.editentryform.elements.length; i++ ) {
-    if ( document.editentryform.elements[i].name == "participants[]" )
-      listid = i;
-  }
-  url = "usersel.php?form=editentryform&listid=" + listid + "&users=";
-  // add currently selected users
-  for ( i = 0, j = 0; i < document.editentryform.elements[listid].length; i++ ) {
-    if ( document.editentryform.elements[listid].options[i].selected ) {
-      if ( j != 0 )
-	       url += ",";
-      j++;
-      url += document.editentryform.elements[listid].options[i].value;
-    }
-  }
-  //alert ( "URL: " + url );
-  // open window
-  window.open ( url, "UserSelection",
-    "width=500,height=500,resizable=yes,scrollbars=yes" );
-}
-<?php } ?>
 
 
 function suittype_handler() {

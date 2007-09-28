@@ -5,8 +5,8 @@ $error = "";
 $removebuddy = "";
 $addbuddy = "";
 
+$removebuddy = mysql_safe( getGetValue( 'removebuddy' ), true );
 
-$removebuddy = getGetValue( 'removebuddy' );
 if ( $removebuddy != "" ) {
   $sql = "DELETE FROM webcal_buddy " .
     "WHERE cal_signer = '$removebuddy' " .
@@ -15,7 +15,7 @@ if ( $removebuddy != "" ) {
     $error = "Database error: " . dbi_error ();
   }
 } else {
-  $addbuddy = getPostValue( 'newbuddy' );
+  $addbuddy = mysql_safe( getPostValue( 'newbuddy' ), true );
   if ( $addbuddy != "" ) {
     $sql = "INSERT INTO webcal_buddy ( cal_signer, cal_signee ) " .
       "VALUES ( '$addbuddy', '$login' )";

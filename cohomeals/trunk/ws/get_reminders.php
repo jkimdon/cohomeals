@@ -113,7 +113,8 @@ function list_reminder ( $id, $event_date, $remind_time ) {
     $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LANGUAGE, $LOG_REMINDER;
 
   // get participants first...
- 
+
+  $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id " . 
     "ORDER BY cal_login";

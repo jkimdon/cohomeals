@@ -16,6 +16,7 @@ include_once 'includes/site_extras.php';
 
 $error = '';
 
+$id = mysql_safe( getValue( 'id' ), false );
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
   $error = translate ( "Invalid entry id" ) . "."; 
 }
@@ -484,7 +485,10 @@ if ( $show_log ) {
 
 <?php
 function display_crew( $title, $type, $number, $rowcolor ) {
-  global $id, $login;
+  global $login;
+
+  $id = mysql_safe( $GLOBALS['id'], false );
+  $type = mysql_safe( $type, true );
 
   echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
   echo "<td>";

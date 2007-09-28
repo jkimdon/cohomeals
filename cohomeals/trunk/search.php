@@ -29,7 +29,7 @@ if ( $is_admin == "Y" ) {
 <tr><td style="vertical-align:top; text-align:right; font-weight:bold; width:60px;">
 	<?php etranslate("Users"); ?>:&nbsp;</td><td>
 <?php
-  $users = get_my_users ();
+  $users = user_get_users ();
   $size = 0;
   $out = "";
   for ( $i = 0; $i < count ( $users ); $i++ ) {
@@ -46,12 +46,6 @@ if ( $is_admin == "Y" ) {
     $size = count ( $users );
 ?>
 <select name="users[]" size="<?php echo $size;?>" multiple="multiple"><?php echo $out; ?></select>
-<?php 
-  if ( $groups_enabled == "Y" ) {
-   echo "<input type=\"button\" onclick=\"selectUsers()\" value=\"" .
-      translate("Select") . "...\" />\n";
-  }
-?>
 </td></tr>
 </table>
 </form>
