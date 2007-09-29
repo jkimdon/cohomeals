@@ -2,9 +2,9 @@
  * a few users
  * 
  */
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'jkimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'Joey', 'Kimdon', 'Y', 'Y', 'Kimdons', '19770904' );
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'dkimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19751223' );
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'akimdon', 'ae7a69fb6570aaeada5e8718ea54570e', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons', '20050914' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'jkimdon', '7cc84b002339a323cb3673a9380a76be', 'Joey', 'Kimdon', 'Y', 'Y', 'Kimdons', '19900101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'dkimdon', '6e94eaa1627b7d5ddfbbff8cc65d2f57', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19900101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_admin, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'akimdon', '26c204028871ea49ed25', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons', '20000101' );
 /* 
  * a few buddies
  * 
