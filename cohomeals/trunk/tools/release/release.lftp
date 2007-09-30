@@ -1,0 +1,10 @@
+# release.lftp : lftp script to mirror the current directory
+# to http://cohoecovillage.org/meals/ 
+
+# FIXME: A bug or misconfiguration somewhere makes tls fail, disable TLS.
+set ftp:ssl-allow no
+
+connect cohoecovillage.org
+login meals@cohoecovillage.org flaG3polE4 
+mirror -R -c -e -v . .
+
