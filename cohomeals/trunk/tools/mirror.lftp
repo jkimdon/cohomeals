@@ -1,0 +1,7 @@
+debug
+# a bug somewhere makes tls fail 
+set ftp:ssl-allow no
+connect cohoecovillage.org
+login meals@cohoecovillage.org flaG3polE4 
+mirror -R -c -e -v . .
+
