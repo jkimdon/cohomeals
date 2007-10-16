@@ -34,6 +34,10 @@ for ( $i=0; $i<7; $i++ ) {
     $repday[$i] = 1;
 }
 
+if ( !$is_meal_coordinator ) {
+  $error = "Not authorized.";
+  return;
+}
 
 $current_date = sprintf ( "%04d%02d%02d", $year, $month, $day );
 $first_date = $current_date;
@@ -78,16 +82,21 @@ else {
   $club_id = 0;
 }
 
+$count = array();
+for ( $i=0; $i<7; $i++ ) 
+  $count[$i] = 0;
 
 while ( $current_date <= $end_date ) {
 
-  $newid = add_or_edit_entry( $newevent, $id, $club_id, $suit, $day, $month, $year, 
+  $newid = add_or_edit_entry( $newevent, $id, $club_id, 
+			      $suit, $day, $month, $year, 
 			      $hour, $minute, $ampm,
-			      $menu, $head_chef, $num_cooks, $num_setup, 
-			      $num_cleanup, $num_other_crew, $walkins, $notes );
+			      $menu, $head_chef, $num_cooks, 
+			      $num_setup, $num_cleanup, 
+			      $num_other_crew, $walkins, $notes );
 
   if ( $suit == "heart" ) {
-    add_subscribed_diners( $newid, $day, $month, $year );
+    add_subscribed_diners( $newid, $day, $month, $year, $count );
   }
 
 
@@ -111,9 +120,17 @@ while ( $current_date <= $end_date ) {
   }
 }
 
+if ( $suit == "heart" )
+  add_financial_log_for_subscribers( $count );
+
+
+
+
+
+
 
 ////////////////////////////////////////////
-function add_subscribed_diners( $id, $day, $month, $year ) {
+function add_subscribed_diners( $id, $day, $month, $year, &$count ) {
 
   $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
     "WHERE cal_suit = 'heart'";
@@ -123,17 +140,53 @@ function add_subscribed_diners( $id, $day, $month, $year ) {
       $w = $row[1];
       $skipday = date ( "w", mktime( 3,0,0, $month, $day, $year ) );
       if ( $w != $skipday ) {
-	edit_participation ( $id, 'A', 'M', $row[0] );
+	$mod = edit_participation ( $id, 'A', 'M', $row[0] );
+	if ( $mod == true )
+	  $count[$skipday]++;
       }
     }
     dbi_free_result ( $res );
   } else {
     $error = translate("Database error") . ": " . dbi_error ();
   }
-  
 
 }
 
+
+
+////////////////////////////////////////////
+/// add the financial log events for subscribers
+function add_financial_log_for_subscribers( $count ) {
+
+  $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
+    "WHERE cal_suit = 'heart'";
+  $res = dbi_query ( $sql );
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $user = $row[0];
+      $w = $row[1];
+      $ct = 0;
+      for ( $i=0; $i<7; $i++ ) {
+	if ( $w != $i ) {
+	  $ct += $count[$i];
+	}
+      }
+
+      user_load_variables( $user, "temp" );
+      $description = $GLOBALS[tempfullname] . 
+	": ongoing heart subscription";
+      $amount = get_price( 0, $user, true );
+      $amount *= $ct;
+      $billing = get_billing_group( $user );
+      add_financial_event( $billing, $amount, 
+			   $description, 0, "" );
+    }
+    dbi_free_result ( $res );
+  } else {
+    $error = translate("Database error") . ": " . dbi_error ();
+  }
+
+}
 
 
 ///////////////////////////////////////////////////////

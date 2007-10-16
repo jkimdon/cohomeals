@@ -126,17 +126,17 @@ function user_load_variables ( $login, $prefix ) {
     $GLOBALS[$prefix . "login"] = $login;
     $GLOBALS[$prefix . "firstname"] = "";
     $GLOBALS[$prefix . "lastname"] = "";
-    $GLOBALS[$prefix . "birthdate"] = "";
     $GLOBALS[$prefix . "is_meal_coordinator"] = "N";
     $GLOBALS[$prefix . "is_beancounter"] = "N";
     $GLOBALS[$prefix . "email"] = "";
+    $GLOBALS[$prefix . "birthdate"] = "";
     $GLOBALS[$prefix . "fullname"] = $PUBLIC_ACCESS_FULLNAME;
     $GLOBALS[$prefix . "password"] = "";
     $GLOBALS[$prefix . "billing_group"] = "";
     return true;
   }
   $sql =
-    "SELECT cal_firstname, cal_lastname, cal_birthdate, cal_is_meal_coordinator, cal_is_beancounter, cal_email, cal_passwd, cal_billing_group " .
+    "SELECT cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_email, cal_birthdate, cal_passwd, cal_billing_group " .
     "FROM webcal_user WHERE cal_login = '" . $login . "'";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -144,14 +144,14 @@ function user_load_variables ( $login, $prefix ) {
       $GLOBALS[$prefix . "login"] = $login;
       $GLOBALS[$prefix . "firstname"] = $row[0];
       $GLOBALS[$prefix . "lastname"] = $row[1];
-      $GLOBALS[$prefix . "birthdate"] = $row[2];
-      $GLOBALS[$prefix . "is_meal_coordinator"] = $row[3];
-      $GLOBALS[$prefix . "is_beancounter"] = $row[4];
-      $GLOBALS[$prefix . "email"] = empty ( $row[5] ) ? "" : $row[5];
+      $GLOBALS[$prefix . "is_meal_coordinator"] = $row[2];
+      $GLOBALS[$prefix . "is_beancounter"] = $row[3];
+      $GLOBALS[$prefix . "email"] = $row[4];
       if ( strlen ( $row[0] ) && strlen ( $row[1] ) )
         $GLOBALS[$prefix . "fullname"] = "$row[0] $row[1]";
       else
         $GLOBALS[$prefix . "fullname"] = $login;
+      $GLOBALS[$prefix . "birthdate"] = $row[5];
       $GLOBALS[$prefix . "password"] = $row[6];
       $GLOBALS[$prefix . "billing_group"] = $row[7];
     }
@@ -187,27 +187,27 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   if ( strlen ( $email ) )
     $uemail = mysql_safe( $email, true );
   else
-    $uemail = "NULL";
+    $uemail = "";
   if ( strlen ( $firstname ) )
     $ufirstname = mysql_safe( $firstname, true );
   else
-    $ufirstname = "NULL";
+    $ufirstname = "";
   if ( strlen ( $lastname ) )
     $ulastname = mysql_safe( $lastname, true );
   else
-    $ulastname = "NULL";
+    $ulastname = "";
   if ( strlen ( $password ) )
     $upassword = "'" . md5($password) . "'";
   else
-    $upassword = "NULL";
+    $upassword = "";
   if ( strlen ( $billing_group ) )
     $ubilling_group = mysql_safe( $billing_group, true );
   else
-    $ubilling_group = "'" . $user . "'";
+    $ubilling_group = $user;
   if ( strlen ( $birthdate ) )
     $ubirthdate = mysql_safe( $birthdate, false );
   else
-    $ubirthdate = "NULL";
+    $ubirthdate = "";
   if ( $meal_coordinator != "Y" )
     $meal_coordinator = "N";
   if ( $beancounter != "Y" )
@@ -216,9 +216,9 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     "( cal_login, cal_lastname, cal_firstname, " .
     "cal_is_meal_coordinator, cal_is_beancounter, cal_passwd, cal_email, " .
     "cal_billing_group, cal_birthdate ) " .
-    "VALUES ( '$user', $ulastname, $ufirstname, " .
-    "'$meal_coordinator', '$beancounter', $upassword, $uemail, " . 
-    "$ubilling_group, $ubirthdate )";
+    "VALUES ( '$user', '$ulastname', '$ufirstname', " .
+    "'$meal_coordinator', '$beancounter', $upassword, '$uemail', " . 
+    "'$ubilling_group', '$ubirthdate' )";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
     return false;
@@ -248,32 +248,34 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
   if ( strlen ( $email ) )
     $uemail = mysql_safe( $email, true );
   else
-    $uemail = "NULL";
+    $uemail = "";
   if ( strlen ( $firstname ) )
     $ufirstname = mysql_safe( $firstname, true );
   else
-    $ufirstname = "NULL";
+    $ufirstname = "";
   if ( strlen ( $lastname ) )
     $ulastname = mysql_safe( $lastname, true );
   else
-    $ulastname = "NULL";
+    $ulastname = "";
   if ( strlen ( $birthdate ) )
     $ubirthdate = mysql_safe( $birthdate, false );
   else
-    $ubirthdate = "NULL";
+    $ubirthdate = "";
   if ( strlen ( $billing_group ) )
     $ubilling_group = mysql_safe( $billing_group, true );
   else
-    $ubilling_group = "'" . $user . "'";
+    $ubilling_group = $user;
   if ( $meal_coordinator != "Y" )
     $meal_coordinator = "N";
   if ( $beancounter != "Y" )
     $beancounter = "N";
 
-  $sql = "UPDATE webcal_user SET cal_lastname = $ulastname, " .
-    "cal_firstname = $ufirstname, cal_email = $uemail," .
-    "cal_birthdate = $ubirthdate, cal_billing_group = $ubilling_group," .
-    "cal_is_meal_coordinator = '$meal_coordinator', cal_is_beancounter = '$beancounter' " .
+  $sql = "UPDATE webcal_user SET cal_lastname = '$ulastname', " .
+    "cal_firstname = '$ufirstname', cal_email = '$uemail'," .
+    "cal_birthdate = '$ubirthdate', " . 
+    "cal_billing_group = '$ubilling_group'," .
+    "cal_is_meal_coordinator = '$meal_coordinator', " . 
+    "cal_is_beancounter = '$beancounter' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();

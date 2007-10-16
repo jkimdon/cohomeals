@@ -2,16 +2,20 @@
  * a few users
  * 
  */
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'jkimdon', '7cc84b002339a323cb3673a9380a76be', 'Joey', 'Kimdon', 'Y', 'Y', 'Kimdons', '19900101' );
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'dkimdon', '6e94eaa1627b7d5ddfbbff8cc65d2f57', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19900101' );
-INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_household, cal_birthdate ) VALUES ( 'akimdon', '26c204028871ea49ed25', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons', '20000101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'jkimdon', '7cc84b002339a323cb3673a9380a76be', 'Joey', 'Kimdon', 'Y', 'Y', 'Kimdons', '19770101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'dkimdon', '6e94eaa1627b7d5ddfbbff8cc65d2f57', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'akimdon', '26c204028871ea49ed25', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons2', '20050101' );
+/*
+ * financial log entries
+ */
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 1, 'Kimdons', 'payment', 0, 10050, 10050, 'The first payment: check sent to bean counter' );
 /* 
  * a few buddies
  * 
  */
 INSERT INTO webcal_buddy ( cal_signer, cal_signee ) VALUES ( 'jkimdon', 'akimdon' );
 INSERT INTO webcal_buddy ( cal_signer, cal_signee ) VALUES ( 'dkimdon', 'akimdon' );
-INSERT INTO webcal_buddy ( cal_signer, cal_signee ) VALUES ( 'jkimdon', 'dkimdon' );
+INSERT INTO webcal_buddy ( cal_signer, cal_signee ) VALUES ( 'akimdon', 'dkimdon' );
 /* 
  * one club
  * 
@@ -29,10 +33,12 @@ INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal
 INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_head_chef, cal_num_cooks, cal_num_cleanup, cal_num_setup, cal_num_other_crew, cal_menu, cal_notes ) VALUES ( '7', '2', '20070911', '180000', 'club', 'D', 'not selected', '2', '2', '2', '0', 'berries and sauce', 'This is the Leftovers Club' );
 INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_head_chef, cal_num_cooks, cal_num_cleanup, cal_num_setup, cal_num_other_crew, cal_menu, cal_notes ) VALUES ( '8', '2', '20070918', '180000', 'club', 'D', 'not selected', '2', '2', '2', '0', 'berries and sauce', 'This is the Leftovers Club' );
 /*
- * wild
+ * wild with a participant and a billing
  *
  */
 INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_head_chef, cal_num_cooks, cal_num_cleanup, cal_num_setup, cal_num_other_crew, cal_menu, cal_notes ) VALUES ( '9', '0', '20070913', '183000', 'wild', 'E', 'not selected', '3', '2', '2', '0', 'baby food', 'babies only' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'jkimdon', 'M', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 2, 'Kimdons', 'dining', 9, -400, 9650, '' );
 /* 
  * some hearts
  * 

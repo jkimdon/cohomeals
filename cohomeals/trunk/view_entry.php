@@ -206,7 +206,8 @@ if ( $num_other_crew != 0 ) {
 
 
 
-<?php // participants
+<?php //////////////////////
+//////// participants //////////////////////
 $allmails = array ();
 $sql = "SELECT cal_login FROM webcal_meal_participant " .
        "WHERE cal_login = '$login' AND cal_id = $id " .
@@ -258,7 +259,7 @@ if ( $res ) {
 	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=D\">" . 
 	  "Remove</a>";
 	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=A\">" . 
+	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=C\">" . 
 	  "Change to take-home plate</a><br>";
       }
       echo "<br />\n";
@@ -319,7 +320,7 @@ for ( $i = 0; $i < $num_app; $i++ ) {
       "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=D\">" . 
       "Remove</a>";
     echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=A\">" . 
+      "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=C\">" . 
       "Change to on-site dining</a><br>";
   }
   echo "<br />\n";

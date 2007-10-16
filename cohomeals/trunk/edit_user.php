@@ -26,12 +26,19 @@ print_header ( '', '', '', true );
 <table style="border-width:0px;">
 <tr><td style="vertical-align:top; width:50%;">
 <h2><?php
-	if ( ! empty ( $user ) ) {
-		user_load_variables ( $user, "u" );
-		echo "User info";
-	} else {
-		echo "Add User";
-	}
+  if ( ! empty ( $user ) ) {
+    user_load_variables ( $user, "u" );
+    $ufirstname = $GLOBALS['ufirstname'];
+    $ulastname = $GLOBALS['ulastname'];
+    $ubirthdate = $GLOBALS['ubirthdate'];
+    $uemail = $GLOBALS['uemail'];
+    $ubilling_group = $GLOBALS['ubilling_group'];
+    $uis_meal_coordinator = $GLOBALS['uis_meal_coordinator'];
+    $uis_beancounter = $GLOBALS['uis_beancounter'];
+    echo "User info";
+  } else {
+    echo "Add User";
+  }
 ?></h2>
 <form action="edit_user_handler.php" method="post">
 <input type="hidden" name="formtype" value="edituser" />

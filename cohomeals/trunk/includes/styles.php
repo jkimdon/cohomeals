@@ -141,6 +141,8 @@ a:hover {
 #tabscontent_participants,
 #tabscontent_sched,
 #tabscontent_pete,
+#tabscontent_add,
+#tabscontent_show,
 #useriframe {
  display: none;
 }
@@ -946,9 +948,11 @@ abbr {
 }
 tr.d0 td {
   background-color: #FFFFFF;
+  padding: 3px;
 }
 tr.d1 td {
   background-color: #EEEEEE;
+ padding: 3px;
 }
 -->
 </style>

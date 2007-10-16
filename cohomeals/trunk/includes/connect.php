@@ -97,18 +97,22 @@ if ( empty ( $login ) && $use_http_auth ) {
     // ignore since login.php will redirect to index.php
   } else if ( $login == "__public__" ) {
     $is_meal_coordinator =  false;
+    $is_beancounter = false;
     $lastname = "";
     $firstname = "";
     $fullname = "Public Access";
     $user_email = "";
+    $billing_group = "";
   } else {
     user_load_variables ( $login, "login_" );
     if ( ! empty ( $login_login ) ) {
       $is_meal_coordinator =  ( $login_is_meal_coordinator == "Y" ? true : false );
+      $is_beancounter =  ( $login_is_beancounter == "Y" ? true : false );
       $lastname = $login_lastname;
       $firstname = $login_firstname;
       $fullname = $login_fullname;
       $user_email = $login_email;
+      $billing_group = $login_billing_group;
     } else {
       // Invalid login
       if ( $use_http_auth ) {

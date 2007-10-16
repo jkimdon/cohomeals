@@ -30,7 +30,7 @@ CREATE TABLE webcal_user (
   /* user's email address */
   cal_email VARCHAR(75) NULL,
   /* billing is by household */
-  cal_household VARCHAR(25) NOT NULL,
+  cal_billing_group VARCHAR(25) NOT NULL,
   /* user birthdate (for determining work/eat ratios and meal prices)
      If not entered, assume they are an adult. */
   cal_birthdate INT,
@@ -390,3 +390,35 @@ CREATE TABLE webcal_entry_log (
   cal_text TEXT,
   PRIMARY KEY ( cal_log_id )
 );
+
+
+/*
+ * log of financial activity
+ *
+ * bean counter can add events in here, such as payments. Each event should have a description,
+ * which is shown in the user's financial history report
+ * 
+ * when a meal occurs, a debit event is created. this allows households
+ * to change over time.
+ */
+CREATE TABLE webcal_financial_log (
+  /* unique id of this log entry */
+  cal_log_id INT NOT NULL,
+  /* which household is affected */
+  cal_billing_group VARCHAR(25) NOT NULL,
+  /* describe event */
+  cal_description VARCHAR(80) NOT NULL,
+  /* timestamp of posting of event in this log */
+  cal_timestamp TIMESTAMP NOT NULL,
+  /* if a meal debit, link to meal event */
+  cal_meal_id INT NULL,
+  /* amount, in cents. positive = payment, negative = debit */
+  cal_amount INT SIGNED NOT NULL,
+  /* running total for a billing group 
+     (is rechecked with each new event) */
+  cal_running_balance INT SIGNED NOT NULL,
+  /* optional text */
+  cal_text TEXT,
+  PRIMARY KEY ( cal_log_id ) 
+);
+

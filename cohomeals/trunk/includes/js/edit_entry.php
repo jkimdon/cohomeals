@@ -28,17 +28,16 @@ function validate_and_submit () {
     return false;
   }
 
-
   // make sure at least one weekday has been checked 
   if ( document.editentryform.repeats.value == "true" ) {
     dayok = false;
-    if ( document.editentryform.onSun.checked == true ) dayok = true;
-    if ( document.editentryform.onMon.checked == true ) dayok = true;
-    if ( document.editentryform.onTue.checked == true ) dayok = true;
-    if ( document.editentryform.onWed.checked == true ) dayok = true;
-    if ( document.editentryform.onThurs.checked == true ) dayok = true;
-    if ( document.editentryform.onFri.checked == true ) dayok = true;
-    if ( document.editentryform.onSat.checked == true ) dayok = true;
+    if ( document.editentryform.d0.checked == true ) dayok = true;
+    if ( document.editentryform.d1.checked == true ) dayok = true;
+    if ( document.editentryform.d2.checked == true ) dayok = true;
+    if ( document.editentryform.d3.checked == true ) dayok = true;
+    if ( document.editentryform.d4.checked == true ) dayok = true;
+    if ( document.editentryform.d5.checked == true ) dayok = true;
+    if ( document.editentryform.d6.checked == true ) dayok = true;
     if ( dayok == false ) {
       alert ( "You have not entered a day of the week." );
       return false;
@@ -76,7 +75,7 @@ function selectDate (  day, month, year, current, evt ) {
   date += "01";
   url = "datesel.php?form=editentryform&fday=" + day +
     "&fmonth=" + month + "&fyear=" + year + "&date=" + date;
-  var colorWindow = window.open(url,"DateSelection","width=300,height=200,"  + MyPosition);
+  var colorWindow = window.open(url,"DateSelection","width=280,height=280,"  + MyPosition);
 }
 
 
@@ -104,23 +103,23 @@ function suittype_handler() {
   }
 
   if ( (val == "diamond" ) ) {
-    document.editentryform.onSun.checked = true;
+    document.editentryform.d0.checked = true;
 
-    document.editentryform.onMon.checked = false;
-    document.editentryform.onTue.checked = false;
-    document.editentryform.onWed.checked = false;
-    document.editentryform.onThurs.checked = false;
-    document.editentryform.onFri.checked = false;
-    document.editentryform.onSat.checked = false;
+    document.editentryform.d1.checked = false;
+    document.editentryform.d2.checked = false;
+    document.editentryform.d3.checked = false;
+    document.editentryform.d4.checked = false;
+    document.editentryform.d5.checked = false;
+    document.editentryform.d6.checked = false;
   }
   else {
-    document.editentryform.onSun.checked = false;
-    document.editentryform.onMon.checked = false;
-    document.editentryform.onTue.checked = false;
-    document.editentryform.onWed.checked = false;
-    document.editentryform.onThurs.checked = false;
-    document.editentryform.onFri.checked = false;
-    document.editentryform.onSat.checked = false;
+    document.editentryform.d0.checked = false;
+    document.editentryform.d1.checked = false;
+    document.editentryform.d2.checked = false;
+    document.editentryform.d3.checked = false;
+    document.editentryform.d4.checked = false;
+    document.editentryform.d5.checked = false;
+    document.editentryform.d6.checked = false;
   }
 }
 

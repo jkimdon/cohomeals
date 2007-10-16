@@ -12,10 +12,11 @@ print_header ( $INC, '', $BodyX );
 
 
 $cur_user = mysql_safe( getGetValue( 'user' ), true );
-if ( !isset( $cur_user ) || !is_signer( $cur_user ) ) 
+if ( $cur_user == "" || 
+     !isset( $cur_user ) || 
+     !is_signer( $cur_user ) ) 
   $cur_user = $login;
 $signees = get_signees( $login, true );
-
 
 ?>
 <h2>Heart subscriptions</h2>

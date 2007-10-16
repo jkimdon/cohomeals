@@ -79,9 +79,9 @@ print_header( $INC );
     ?>
     </ul>
     *&nbsp; denotes administrative user<br />
-    <iframe name="useriframe" id="useriframe" style="width:90%;border-width:0px; height:350px;"></iframe>
+    <iframe name="useriframe" id="useriframe" style="width:100%;border-width:0px; height:450px;"></iframe>
   <?php } else { ?>
-    <iframe src="edit_user.php" name="accountiframe" id="accountiframe" style="width:90%;border-width:0px; height:350px;"></iframe>
+    <iframe src="edit_user.php" name="accountiframe" id="accountiframe" style="width:100%;border-width:0px; height:400px;"></iframe>
   <?php } ?>
   </div>
 

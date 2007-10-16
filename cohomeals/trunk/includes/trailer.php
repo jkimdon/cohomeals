@@ -73,8 +73,7 @@ if ( $login != '__public__' && $readonly == 'N' ) {
 $subscribe_link[] = "<a href=\"subscribe_heart.php\">Heart</a>";
 $subscribe_link[] = "<a href=\"subscribe_club.php\">Club</a>";
 if ( $can_add ) {
-  $url = "<a title=\"" . 
-    translate("Add New Meal") . "\" href=\"edit_entry.php";
+  $url = "<a title=\"Add New Meal\" href=\"edit_entry.php";
   if ( ! empty ( $thisyear ) ) {
     $url .= "?year=$thisyear";
     if ( ! empty ( $thismonth ) ) {
@@ -87,6 +86,14 @@ if ( $can_add ) {
   $url .= "\">Add New Meal</a>";
   $special_link[] = $url;
 }
+
+if ( $is_beancounter || $is_meal_coordinator ) {
+  $url = "<a title=\"Add Financial Info\" ";
+  $url .= "href=\"admin_financial.php?billing=all";
+  $url .= "\">Group Finances</a>";
+  $special_link[] = $url;
+}
+  
 
 if ( $login != '__public__' ) {
   $goto_link[] = "<a title=\"" . 

@@ -74,6 +74,7 @@ unset($user_inc);
 include_once 'includes/config.php';
 include_once 'includes/php-dbi.php';
 include_once 'includes/functions.php';
+include_once 'includes/fin_functions.php';
 include_once "includes/$user_inc";
 include_once 'includes/validate.php';
 include_once 'includes/connect.php';

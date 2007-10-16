@@ -2380,7 +2380,7 @@ function is_participating ( $id, $user, $type ) {
  * signs people up or removes them from dining or crew duties
  *********************************/
 function edit_participation ( $id, $action, $type='M', $user="" ) {
-  global $login;
+  global $login, $is_meal_coordinator;
 
 
   if ( ($user == "") )
@@ -2403,11 +2403,12 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
 
 
   // make sure input is reasonable
-  if ( ($action != 'D') && ($action != 'A') )
-    return;
+  if ( ($action != 'D') && ($action != 'A') && 
+       ($action != 'C') )
+    return false;
   if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && ($type != 'S') &&
        ($type != 'L') && ($type != 'O') )
-    return;
+    return false;
 
   
   
@@ -2429,17 +2430,22 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
   if ( !$res ) {
     if ( $action == 'D' )
       $can_change = false; // already not participating so no need to delete
-    else 
+    else if ( $action == 'A' ) 
       $can_change = true; // can add since there was no previous participation
+    else  // action == C
+      $can_change = false; // not participating so can't change away from it
   } else {
     while ( $row = dbi_fetch_row ( $res ) ) {
       if ( $action == 'D' )
 	$can_change = true; // is there so is ok to delete
-      else
+      else if ( $action == 'A' ) 
 	$can_change = false; // already there
+      else // action == C
+	$can_change = true;
     }
   }
-  
+
+
   ///////
   // make the change
   if ( $can_change == true ) {
@@ -2462,14 +2468,28 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
       }
       
     }
-    else { // delete
+    else if ( $action == 'D') { // delete
       $sql = "DELETE FROM webcal_meal_participant " .
 	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
       if ( !dbi_query( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
     }
+    else { // change between take-home and dine-in
+      if ( $type == 'M' ) $new_type = 'T';
+      else $new_type = 'M';
+      $sql = "DELETE FROM webcal_meal_participant " .
+	"WHERE cal_id = $id AND cal_login = '$user' " .
+	"AND cal_type = '$type'";
+      dbi_query( $sql );
+      $sql = "INSERT INTO webcal_meal_participant " . 
+	"( cal_id, cal_login, cal_type ) " . 
+	"VALUES ( $id, '$user', '$new_type' )";
+      dbi_query( $sql );
+    }
+
   }
-  
+
+  return $can_change;
 }
 
 
@@ -2478,42 +2498,65 @@ function edit_club_subscription( $club_id, $user, $action ) {
 
   $club_id = mysql_safe( $club_id, false );
   $user = mysql_safe( $user, true );
-  $action = mysql_safe( $actions, true );
+  $action = mysql_safe( $action, true );
 
-  //// un/subscribe
-  if ( $action == 'A' ) {
-    $sql = "INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_club_id ) " .
-      "VALUES ( '$user', 'club', '$club_id' )"; 
-    if ( ! dbi_query ( $sql ) ) {
-      $error = "Database error: " . dbi_error ();
-    }
-  } else {
-    $sql = "DELETE FROM webcal_subscriptions " .
-      "WHERE cal_login = '$user' AND cal_suit = 'club' " . 
-      "AND cal_club_id = '$club_id'";
-    if ( ! dbi_query ( $sql ) ) {
-      $error = "Database error: " . dbi_error ();
-    }
-  }
-  
+  if ( is_signer( $user ) ) {
 
-
-  /// add or remove diner from meals
-  $sql = "SELECT cal_id FROM webcal_meal WHERE cal_club_id = '$club_id'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $cal_id = $row[0];
-      if ( $action == 'A' ) {
-	edit_participation ( $cal_id, 'A', 'M', $user );
+    //// un/subscribe
+    if ( $action == 'A' ) {
+      $sql = "INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_club_id ) " .
+	"VALUES ( '$user', 'club', '$club_id' )"; 
+      if ( ! dbi_query ( $sql ) ) {
+	$error = "Database error: " . dbi_error ();
       }
-      else {
-	edit_participation ( $cal_id, 'D', 'M', $user );
-	edit_participation ( $cal_id, 'D', 'F', $user );
+    } else {
+      $sql = "DELETE FROM webcal_subscriptions " .
+	"WHERE cal_login = '$user' AND cal_suit = 'club' " . 
+	"AND cal_club_id = '$club_id'";
+      if ( ! dbi_query ( $sql ) ) {
+	$error = "Database error: " . dbi_error ();
       }
     }
-  }
-
+    
+    
+    
+    /// add or remove diner from meals
+    $count = 0;
+    $sql = "SELECT cal_id FROM webcal_meal WHERE cal_club_id = '$club_id'";
+    $res = dbi_query ( $sql );
+    if ( $res ) {
+      while ( $row = dbi_fetch_row ( $res ) ) {
+	$cal_id = $row[0];
+	if ( $action == 'A' ) {
+	  $mod = edit_participation ( $cal_id, 'A', 'M', $user );
+	  if ( $mod == true ) $count++;
+	}
+	else {
+	  $mod = edit_participation ( $cal_id, 
+				      'D', 'M', $user );
+	  if ( $mod == true ) $count++;
+	  $mod = edit_participation ( $cal_id, 
+				      'D', 'F', $user );
+	  if ( $mod == true ) $count++;
+	}
+      }
+      dbi_free_result( $res );
+    }
+    $amount = get_price( $cal_id, $user );
+    user_load_variables( $user, "temp" );
+    if ( $action == 'D' ) {
+      $amount *= -1;
+      $description = $GLOBALS[tempfullname] . 
+	" unsubscribing to club meals";
+    } else {
+      $description = $GLOBALS[tempfullname] . 
+	" subscribing to club meals";
+    }
+    $amount *= $count;
+    $billing = get_billing_group( $user );
+    add_financial_event( $billing, $amount, $description,
+			 0, "" );
+  }    
 }
 
 
@@ -2577,6 +2620,7 @@ function get_nonsigners() {
 
 
 function get_signees ( $login, $include_self="false" ) {
+  global $is_meal_coordinator;
 
   $ret = array ();
   $count = 0;
@@ -2596,7 +2640,7 @@ function get_signees ( $login, $include_self="false" ) {
   }
   dbi_free_result ( $res );
 
-  if ( $include_self == true ) {
+  if ( ($include_self == true) && (!$is_meal_coordinator) ) {
     user_load_variables( $login, "temp" );
     $ret[$count] = array ( "cal_login" => $login,
 			   "cal_fullname" => $GLOBALS["tempfullname"] );
@@ -2607,7 +2651,15 @@ function get_signees ( $login, $include_self="false" ) {
 
 
 function is_signer( $signee ) {
+  global $is_meal_coordinator, $is_beancounter, $login;
+
   $ret = false;
+
+  if ( $signee == $login ) 
+    $ret = true;
+
+  if ( $is_meal_coordinator || $is_beancounter ) 
+    $ret = true;
 
   $signee = mysql_safe( $signee, true );
   $sql = "SELECT cal_signer FROM webcal_buddy " .
@@ -2619,6 +2671,7 @@ function is_signer( $signee ) {
 
   return $ret;
 }
+
 
 
 ?>

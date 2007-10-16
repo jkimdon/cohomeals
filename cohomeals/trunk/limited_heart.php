@@ -25,7 +25,8 @@ $endday = getValue( 'endday' );
 $enddate = sprintf( "%04d%02d%02d", $endyear, $endmonth, $endday );
 
 $sql = "SELECT cal_date, cal_id FROM webcal_meal " .
-       "WHERE cal_suit = 'heart' AND cal_date >= '$drawdate' AND cal_date <= '$enddate' " .
+       "WHERE cal_suit = 'heart' AND cal_date >= '$drawdate' " .
+       "AND cal_date <= '$enddate' " .
        "ORDER BY cal_date";
 if ( ! ($res = dbi_query ( $sql )) ) {
   echo "Database error: " . dbi_error() . "<br />\n";
@@ -72,12 +73,12 @@ while ( $drawdate <= $enddate ) {
      for ( $j = 0; $j < 7; $j++ ) {
        $date = $i + ( $j * 24 * 3600 );
        $formatted_date = date ( "Ymd", $date );
-       if ( date ( "Ymd", $date ) >= date ( "Ymd", $monthstart ) &&
-	    date ( "Ymd", $date ) <= date ( "Ymd", $monthend ) ) {
+       if ( $formatted_date >= date ( "Ymd", $monthstart ) &&
+	    $formatted_date <= date ( "Ymd", $monthend ) ) {
 	 if ( $nextdate == $formatted_date ) {
 	   if ( $nextid < $minid ) $minid = $nextid;
 	   if ( $nextid > $maxid ) $maxid = $nextid;
-	   print_checked_day ( $date, $nextid );
+	   print_checked_day ( $date, $nextid, $user );
 	   $count++;
 	   $row = dbi_fetch_row ( $res );
 	   $nextdate = $row[0];
@@ -131,12 +132,12 @@ function print_unchecked_day ( $date ) {
 }
 
 
-function print_checked_day ( $date, $id ) {
+function print_checked_day ( $date, $id, $user ) {
 
   $formatted_date = date ( "Ymd", $date );
 
   $sql2 = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = '$id'";
+    "WHERE cal_id = '$id' AND cal_login = '$user'";
   $res2 = dbi_query ( $sql2 );
   if ( !$res2 ) echo "Database error: " . dbi_error() . "<br />\n";
   else if ( $row2 = dbi_fetch_row ( $res2 ) ) 

@@ -98,11 +98,11 @@ function print_one_club ( $club_id, $time, $notes, $weekdays, $dates, $row_num )
   </td><td style="font-weight:bold">Club info:</td><td></td></tr>
 
   <?php echo "<tr class=\"d$row_num\">";?>
-  <td><a href class="addbutton" onclick="window.open('<?php echo "signup_buddy.php?id=$club_id&type=B&action=A";?>', 'Subscribe buddies', 'width=150,height=300,resizable=yes,scrollbars=yes');">Subscribe buddy</a></td>
+  <td><a href class="addbutton" onclick="window.open('<?php echo "signup_buddy.php?id=$club_id&type=B&action=A";?>', 'Subscribe buddies', 'width=200,height=300,resizable=yes,scrollbars=yes');">Subscribe buddy</a></td>
   <td>time:</td>
   <?php echo "<td>" . display_time ( $time ) . "</td></tr>";
   echo "<tr class=\"d$row_num\">"; ?>
-  <td><a href class="addbutton" onclick="window.open('<?php echo "signup_buddy.php?id=$club_id&type=B&action=D";?>', 'Unsubscribe buddies', 'width=150,height=300,resizable=yes,scrollbars=yes');">Unsubscribe buddy</a></td>
+  <td><a href class="addbutton" onclick="window.open('<?php echo "signup_buddy.php?id=$club_id&type=B&action=D";?>', 'Unsubscribe buddies', 'width=200,height=300,resizable=yes,scrollbars=yes');">Unsubscribe buddy</a></td>
   <td>meal notes:</td>
   <?php echo "<td>" . $notes . "</td></tr>";
   echo "<tr class=\"d$row_num\"><td></td><td>dates:</td><td>" . $dates[0] . " to " . $dates[1] . "</td></tr>";
