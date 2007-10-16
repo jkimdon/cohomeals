@@ -120,13 +120,12 @@ print_header ( '', '', '', true );
 	</td></tr>
 <?php }
 if ( $is_meal_coordinator ) { ?>
- <tr><td style="font-weight:bold;">Meal coordinator?:</td>
+ <tr><td style="font-weight:bold;">Meal coordinator:</td>
     <td><label><input type="radio" name="uis_meal_coordinator" value="Y"<?php if ( ! empty ( $uis_meal_coordinator ) && $uis_meal_coordinator == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
 		<label><input type="radio" name="uis_meal_coordinator" value="N"<?php if ( empty ( $uis_meal_coordinator ) || $uis_meal_coordinator != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
 	</td></tr>
 
-	<tr><td style="font-weight:bold;">
-		<?php etranslate("Bean counter")?>:</td><td>
+	<tr><td style="font-weight:bold;">Bookkeeper:</td><td>
 		<label><input type="radio" name="uis_beancounter" value="Y"<?php if ( ! empty ( $uis_beancounter ) && $uis_beancounter == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
 		<label><input type="radio" name="uis_beancounter" value="N"<?php if ( empty ( $uis_beancounter ) || $uis_beancounter != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
 	</td></tr>
