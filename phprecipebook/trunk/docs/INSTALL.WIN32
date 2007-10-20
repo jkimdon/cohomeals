@@ -1,0 +1,23 @@
+Howto Get PHPRecipBook Running in windows
+
+1.) Get FoxServ (http://www.foxserv.net), download the latest stable version.
+2.) Set php password/user using the foxserv setup, remember these for later
+3.) Create the database, in a dos prompt (run->cmd)
+	cd C:\foxserv\mysql\bin
+	mysqladmin -u user -p create recipedb  (Note: the user and password are the ones you created earlier)
+	mysql -u user -p recipedb 
+	Note: you can do this in phpMyAdmin, but sometimes it does not show new databases like it should....
+4.) Extract the phprecipebook code to somewhere in the web path, i.e
+		C:\FoxServ\www\
+		Rename the extracted dir to something that does not have the version in it like phprecipebook-2.00 becomes
+		phprecipebook (optional step).
+5.) Create the schema (do this from the mysql\bin directory so you have it in your path)
+	mysql -u user -p recipedb < C:\foxserv\www\phprecipebook\sql\recipedb.mysql
+	mysql -u user -p recipedb < C:\foxserv\www\phprecipebook\sql\recipedb_data_en.sql
+	mysql -u user -p recipedb < C:\foxserv\www\phprecipebook\sql\recipedb_ingredients_en.sql (optional step)
+
+	Note: where 'user' is the user you created in the early step with the password as well
+6.) Edit custom_inc.php to match your path information.
+7.) Load http://localhost/phprecipebook in your browser. Login as admin/passwd.
+	Note: using IE on windows does not seem to display the top logo correctly, it is displayed correctly in Mozilla and with IE on the Mac, so I think it is just a windows thing, you can replace it if you want (the browser or the image, there is a suppied jpg of the banner).
+8.) CHANGE THE ADMIN PASSWORD OF PHPRECIPEBOOK!
