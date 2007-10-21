@@ -154,17 +154,28 @@ CREATE TABLE recipe_meals (
 	PRIMARY KEY (meal_id));
 
 CREATE TABLE recipe_mealplans (
-	mplan_date DATE NOT NULL DEFAULT 'now()',
+	mplan_date DATE NOT NULL,
 	mplan_meal INT NOT NULL REFERENCES recipe_meals(meal_id) ON DELETE CASCADE,
 	mplan_recipe INT NOT NULL REFERENCES recipe_recipes(recipe_id) ON DELETE CASCADE,
 	mplan_servings INT NOT NULL DEFAULT 0,
 	mplan_owner VARCHAR(32) NOT NULL REFERENCES security_users(user_login) ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY (mplan_date,mplan_meal,mplan_recipe,mplan_owner));
 
+delimiter //
+
+CREATE TRIGGER recipe_mealplans_trigger
+	BEFORE INSERT ON recipe_mealplans FOR EACH ROW BEGIN
+		IF NEW.mplan_date IS NULL THEN
+			SET NEW.mplan_date = CURDATE();
+		END IF;
+	END;//
+
+delimiter ;
+
 CREATE TABLE recipe_reviews (
 	review_recipe INT NOT NULL REFERENCES recipe_recipes(recipe_id) ON DELETE CASCADE,
 	review_comments VARCHAR(255) NOT NULL,
-	review_date TIMESTAMP DEFAULT 'now()',
+	review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	review_owner VARCHAR(32) NOT NULL REFERENCES security_users(user_login) ON DELETE SET NULL ON UPDATE CASCADE,
 	PRIMARY KEY (review_recipe,review_comments,review_owner));
 
