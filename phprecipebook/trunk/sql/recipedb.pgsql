@@ -11,7 +11,6 @@ CREATE SEQUENCE recipe_time_id_seq;
 CREATE SEQUENCE recipe_base_id_seq;
 CREATE SEQUENCE	recipe_location_id_seq;
 CREATE SEQUENCE recipe_ethnic_id_seq;
-CREATE SEQUENCE recipe_restaurant_id_seq;
 CREATE SEQUENCE recipe_price_id_seq;
 CREATE SEQUENCE recipe_store_id_seq;
 CREATE SEQUENCE recipe_source_id_seq;
@@ -216,35 +215,6 @@ CREATE TABLE recipe_ratings (
 	PRIMARY KEY (rating_recipe, rating_ip)
 );
 	
-CREATE TABLE recipe_prices (
-	price_id INTEGER DEFAULT nextval('recipe_price_id_seq'),
-	price_desc VARCHAR(16),
-	PRIMARY KEY (price_id)
-);
-	
-CREATE TABLE recipe_restaurants (
-	restaurant_id INTEGER DEFAULT nextval('recipe_restaurant_id_seq'),
-	restaurant_name VARCHAR(64) NOT NULL,
-	restaurant_address VARCHAR(128),
-	restaurant_city VARCHAR(32),
-	restaurant_state VARCHAR(2),
-	restaurant_zip VARCHAR(16),
-	restaurant_country VARCHAR(64),
-	restaurant_phone VARCHAR(128),
-	restaurant_hours TEXT,
-	restaurant_picture OID,
-	restaurant_picture_type VARCHAR(64),
-	restaurant_menu_text TEXT,
-	restaurant_comments TEXT,
-	restaurant_price INTEGER REFERENCES recipe_prices(price_id) ON DELETE SET NULL,
-	restaurant_delivery BOOLEAN,
-	restaurant_carry_out BOOLEAN,
-	restaurant_dine_in BOOLEAN,
-	restaurant_credit BOOLEAN,
-	restaurant_website VARCHAR(254),
-	PRIMARY KEY (restaurant_id)
-);
-
 
 INSERT INTO recipe_settings (setting_version,setting_mp_day) VALUES(2.33,0);
 INSERT INTO security_users (user_login,user_password,user_name,user_access_level,user_country,user_email) VALUES ('admin', '76a2173be6393254e72ffa4d6df1030a', 'Administrator', '99','us','user@localhost');

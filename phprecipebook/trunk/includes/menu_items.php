@@ -38,13 +38,6 @@ if ($SMObj->getUserLoginID()!="") {
 	$menu_items['lists'][2] = array( $LangUI->_('Saved Lists'), "index.php?m=lists&amp;a=saved" );
 }
 
-// Restaurant Listing
-$menu_items['restaurants'][0] = array( $LangUI->_('Restaurants'), "index.php?m=restaurants");
-$menu_items['restaurants'][1] = array( $LangUI->_('A-Z'), "index.php?m=restaurants");
-if ($SMObj->checkAccessLevel("EDITOR")) {
-	$menu_items['restaurants'][2] = array( $LangUI->_('Add Restaurant'), "index.php?m=restaurants&amp;a=addedit");
-}
-
 // Administration
 if ($SMObj->getUserLoginID()!="") {
 	$menu_items['admin'][0] = array( $LangUI->_('Administration'), "index.php?m=admin");

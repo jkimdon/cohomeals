@@ -185,33 +185,6 @@ CREATE TABLE recipe_ratings (
 	rating_ip VARCHAR(32) NOT NULL,
 	PRIMARY KEY (rating_recipe, rating_ip));
 	
-CREATE TABLE recipe_prices (
-	price_id INT NOT NULL AUTO_INCREMENT,
-	price_desc VARCHAR(16),
-	PRIMARY KEY (price_id));
-	
-CREATE TABLE recipe_restaurants (
-	restaurant_id INT NOT NULL AUTO_INCREMENT,
-	restaurant_name VARCHAR(64) NOT NULL,
-	restaurant_address VARCHAR(128),
-	restaurant_city VARCHAR(64),
-	restaurant_state VARCHAR(2),
-	restaurant_zip VARCHAR(16),
-	restaurant_country VARCHAR(64),
-	restaurant_phone VARCHAR(128),
-	restaurant_hours TEXT,
-	restaurant_picture MEDIUMBLOB,
-	restaurant_picture_type VARCHAR(64),
-	restaurant_menu_text TEXT,
-	restaurant_comments TEXT,
-	restaurant_price INT REFERENCES recipe_prices(price_id) ON DELETE SET NULL,
-	restaurant_delivery BOOL,
-	restaurant_carry_out BOOL,
-	restaurant_dine_in BOOL,
-	restaurant_credit BOOL,
-	restaurant_website VARCHAR(254),
-	PRIMARY KEY (restaurant_id));
-	
 INSERT INTO recipe_settings (setting_version,setting_mp_day) VALUES(2.33,0);
 INSERT INTO security_users (user_login,user_password,user_name,user_access_level,user_country,user_email) VALUES ('admin', '76a2173be6393254e72ffa4d6df1030a', 'Administrator', '99','us','user@localhost');
 INSERT INTO recipe_stores (store_name, store_layout, store_owner) VALUES('default', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43','admin');

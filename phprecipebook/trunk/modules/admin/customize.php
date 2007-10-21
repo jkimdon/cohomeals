@@ -42,7 +42,6 @@ if ($SMObj->checkAccessLevel($SMObj->getSuperUserLevel())) {
 				$db_table_courses => $LangUI->_('Courses'),
 				$db_table_difficulty => $LangUI->_('Difficulty'),
 				$db_table_locations => $LangUI->_('Store Sections'),
-				$db_table_prices => $LangUI->_('Restaurant Prices'),
 				$db_table_meals => $LangUI->_('Meals'),
 				$db_table_sources => $LangUI->_('Sources')
 			);

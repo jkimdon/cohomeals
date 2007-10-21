@@ -127,10 +127,3 @@ INSERT INTO recipe_meals (meal_name) VALUES ('Afternoon Snack');
 INSERT INTO recipe_meals (meal_name) VALUES ('Dinner');
 INSERT INTO recipe_meals (meal_name) VALUES ('Dessert');
 
-INSERT INTO recipe_prices (price_desc) VALUES ('$0-$10');
-INSERT INTO recipe_prices (price_desc) VALUES ('$10-$15');
-INSERT INTO recipe_prices (price_desc) VALUES ('$15-$20');
-INSERT INTO recipe_prices (price_desc) VALUES ('$20-$25');
-INSERT INTO recipe_prices (price_desc) VALUES ('$25-$30');
-INSERT INTO recipe_prices (price_desc) VALUES ('$30+');
-

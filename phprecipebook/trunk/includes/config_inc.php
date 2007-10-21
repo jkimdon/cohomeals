@@ -156,7 +156,6 @@
 	$g_rb_list_id_seq = "recipe_list_id_seq";
 	$g_rb_recipe_id_seq = "recipe_recipe_id_seq";
 	$g_rb_ingredient_id_seq = "recipe_ingredient_id_seq";
-	$g_rb_restaurant_id_seq = "recipe_restaurant_id_seq";
 	
 	########################################
 	## The table names		      		  ##
@@ -195,8 +194,6 @@
 	$db_table_meals = $db_prefix . "meals";
 	$db_table_mealplans = $db_prefix . "mealplans";
 	$db_table_mealplan_items = $db_prefix . "mealplan_items";
-	$db_table_restaurants = $db_prefix . "restaurants";
-	$db_table_prices = $db_prefix . "prices";
 	$db_table_sources = $db_prefix . "sources";
 	
 	global $db_fields;
@@ -212,7 +209,6 @@
 		$db_table_courses => array( "course_id", "course_desc" ),
 		$db_table_difficulty => array( "difficult_id", "difficult_desc" ),
 		$db_table_locations => array( "location_id", "location_desc"),
-		$db_table_prices => array( "price_id", "price_desc"),
 		$db_table_meals => array("meal_id", "meal_name"),
 		$db_table_sources => array("source_id", "source_title", "source_desc")
 	);
