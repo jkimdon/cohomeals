@@ -29,7 +29,7 @@
 
 	// Set the Theme
 	global $g_rb_theme;
-	$g_rb_theme="default";
+	$g_rb_theme="coho";
 	
 	#############################################
 	## Database Connection options (required)  ##
@@ -49,9 +49,10 @@
 	
 	// Example MySQL settings
 	$g_rb_database_type = "mysql";
-	$g_rb_database_host = "localhost:/var/lib/mysql/mysql.sock";
+	$g_rb_database_host = "localhost";
 	$g_rb_database_name = "recipedb";
-	$g_rb_database_user = "root";
-	$g_rb_database_password = "";
-	
+	$g_rb_database_user = "cohoadmin";
+	$g_rb_database_password = "flaGpolE";
+
+	$g_rb_project_name = "Coho Meals";
 ?>
