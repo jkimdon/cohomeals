@@ -141,6 +141,8 @@ highlight self in view
 - when mc chooses crew, shows ratio of work/eat, show who's working. also showexperience on thpose already signed up?
 
 
+- hover turns blue on all links
+
 ********************************************
 
 security:

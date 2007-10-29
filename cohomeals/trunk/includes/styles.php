@@ -949,10 +949,12 @@ abbr {
 tr.d0 td {
   background-color: #FFFFFF;
   padding: 3px;
+  padding-right: 15px;
 }
 tr.d1 td {
   background-color: #EEEEEE;
- padding: 3px;
+  padding: 3px;
+  padding-right: 15px;
 }
 -->
 </style>

@@ -2673,5 +2673,127 @@ function is_signer( $signee ) {
 }
 
 
+function display_workeat_log( $startdate, $enddate ) {
+  global $login, $is_meal_coordinator, $is_beancounter;
+
+    $can_view = false;
+  if ( $is_meal_coordinator || $is_beancounter )
+    $can_view = true;
+  else if ( $billing_group == $cur_group ) 
+    $can_view = true;
+
+
+  if ( $can_view ) {
+
+
+    /////////// collect work/eat events
+    $sql = "SELECT cal_type, cal_id " .
+      "FROM webcal_meal_participant " .
+      "WHERE cal_login = '$login'";
+    
+    $work = 0;
+    $eat = 0;
+    $count = 0;
+    $balance_work = 0;
+    $balance_eat = 0;
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$type = $row[0];
+	$id = $row[1];
+	$sql2 = "SELECT cal_date " .
+	  "FROM webcal_meal " .
+	  "WHERE cal_id = $id";
+	if ( $res2 = dbi_query( $sql2 ) ) {	
+	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
+	    if ( $row2[0] < $startdate ) {
+	      if ( ($type == 'M') || ($type == 'T') ) $balance_eat++;
+	      else $balance_work++;
+	    }
+	  }
+	  dbi_free_result( $res2 );
+	}
+	$count++;
+	if ( ($type == 'M') || ($type == 'T') ) $eat++;
+	else $work++;
+      }
+      dbi_free_result( $res );
+    }
+
+
+
+    /////////// display log for desired time period
+    echo "<h3>Work/eat log</h3>";
+    echo "<p><table>";
+    echo "<tr class=\"d0\">";
+    echo "<td> Date </td>" .
+      "<td> Role </td>" .
+      "<td> Meal </td>" .
+      "<td> Balance (work/eat)</td></tr>";
+    $row_num = 1;
+
+
+    $sql = "SELECT cal_id, cal_date, cal_suit " .
+      "FROM webcal_meal " .
+      "WHERE cal_date <= $enddate " .
+      "AND cal_date >= $startdate";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+
+	$meal_id = $row[0];
+	$date = $row[1];
+	$suit = $row[2];
+	$sql2 = "SELECT cal_type " .
+	  "FROM webcal_meal_participant " .
+	  "WHERE cal_login = '$login' " .
+	  "AND cal_id = $meal_id";
+	if ( $res2 = dbi_query( $sql2 ) ) {
+	  while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	    $type = $row2[0];
+
+	    echo "<tr class= \"d$row_num\">";
+	    $row_num = ( $row_num == 1 ) ? 0:1;
+	    // Date
+	    echo "<td>" . date_to_str( $date, "", false, true, "" ) . "</td>";
+	    // Role
+	    $print = ( ($type == 'M') || ($type == 'T') ) ? "Eat":"Work";
+	    echo "<td>$print</td>";
+	    // Meal
+	    echo "<td><a href=\"view_entry.php?id=" . $meal_id .
+	      "\">" . $suit . " meal</a></td>";
+	    // work/eat Balance
+	    if ( ($type == 'M') || ($type == 'T') ) $balance_eat++;
+	    else $balance_work++;
+	    
+	    if ( ($balance_eat == 0) || ($balance_work == 0) ) 
+	      echo "<td> $balance_work : $balance_eat </td>";
+	    else
+	      echo "<td>" . $balance_work/$balance_eat . "</td>";
+	    echo "</tr>";
+	  }
+	  dbi_free_result( $res2 );
+	}
+      }
+      dbi_free_result( $res );
+    }
+    
+    echo "</table>";
+
+
+    //// display summary
+    echo "<p><h3>Total summary</h3> (all dates, not just those above):</p><p>";
+    echo "Meals worked = $work<br>" .
+      "Meals eaten = $eat<br>";
+    if ( ($eat == 0) || ($work == 0) ) 
+      echo "Ratio work/eat = $work : $eat <br>";
+    else 
+      echo "Ratio work/eat = " . $work/$eat . "<br>";
+    echo "</p>";
+
+
+
+
+  }
+}
+
 
 ?>
