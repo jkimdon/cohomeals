@@ -529,7 +529,7 @@ function display_crew( $title, $type, $number, $rowcolor ) {
       "Add me</a>";
     $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
     ?>&nbsp;&nbsp;&nbsp;
-    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=150,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
     <?php
     $i += 1;
   }

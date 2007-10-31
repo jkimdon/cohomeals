@@ -96,13 +96,10 @@ if ( $is_beancounter || $is_meal_coordinator ) {
   
 
 if ( $login != '__public__' ) {
-  $goto_link[] = "<a title=\"" . 
-    translate("Help") . "\" href=\"#\" onclick=\"window.open " .
+  $goto_link[] = "<a title=\"Help\" href=\"#\" onclick=\"window.open " .
     "( 'help_index.php', 'cal_help', 'dependent,menubar,scrollbars, " .
     "height=400,width=400,innerHeight=420,outerWidth=420' );\"  " .
-    "onmouseover=\"window.status='" . 
-    translate("Help") . "'\">" . 
-    translate("Help") . "</a>";
+    "onmouseover=\"window.status='Help'\">Help</a>";
 }
 
 echo "<hr>";

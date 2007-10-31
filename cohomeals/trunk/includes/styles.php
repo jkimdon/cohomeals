@@ -214,6 +214,9 @@ label {
   color: <?php echo $GLOBALS['TEXTCOLOR']; ?>;
   text-decoration: none;
 }
+#menu a:hover {
+  color: #0000FF;
+}
 .prefix {
   font-weight: bold;
   font-size: 14px;

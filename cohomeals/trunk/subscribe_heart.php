@@ -131,7 +131,7 @@ if ( $subscribed == true ) {
 
 <?php if ( $subscribed == false ) { ?>
  <p>
- <b>Sign me up :</b> 
+ <b>Sign up :</b> 
   <select name="subtype" onchange="subtype_handler()">
    <option value="none">not selected</option>
    <option value="ongoing">on an ongoing basis</option>
