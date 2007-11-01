@@ -43,10 +43,8 @@ if ( ! empty ( $GLOBALS['SCRIPT_NAME'] ) ) {
 } else if ( ! empty ( $_SERVER['SCRIPT_NAME'] ) ) {
   $reqURI = $_SERVER['SCRIPT_NAME'];
 }
-if ( ! strstr ( $reqURI, "month.php" ) &&
-   ! strstr ( $reqURI, "week.php" ) &&
-   ! strstr ( $reqURI, "day.php" ) ) {
-  $todayURL = 'day.php';
+if ( ! strstr ( $reqURI, "month.php" ) ) {
+  $todayURL = 'month.php';
 } else {
   $todayURL = $reqURI;
 }

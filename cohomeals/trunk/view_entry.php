@@ -380,8 +380,11 @@ if ( $walkins == "W" ) {
 
 </table>
 
-<br /><?php
+<br>
+<input type="button" value="Print meal summary sheet" />
+<p />
 
+<?php
 
 if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "&amp;user=$user";

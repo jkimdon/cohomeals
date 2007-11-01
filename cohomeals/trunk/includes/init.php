@@ -9,7 +9,6 @@
  * <b>Comments:</b>
  * The following scripts do not use this file:
  * - login.php
- * - week_ssi.php
  * - upcoming.php
  * - tools/send_reminders.php
  *
@@ -31,7 +30,7 @@
  * - include_once 'includes/translate.php';
  * - include_once 'includes/styles.php';
  *
- * Also, for month.php, day.php, week.php, week_details.php:
+ * Also, for month.php:
  * - {@link send_no_cache_header()};
  *
  * @version $Id: init.php,v 1.53.2.1 2005/07/14 23:00:37 cknudsen Exp $
@@ -65,7 +64,7 @@ preg_match ( "/\/(\w+\.php)/", $self, $match);
 $SCRIPT = $match[1];
 
 // Several files need a no-cache header and some of the same code
-$special = array('month.php', 'day.php', 'week.php', 'week_details.php', 'year.php');
+$special = array('month.php', 'year.php');
 $DMW = in_array($SCRIPT, $special);
 
 // Unset some variables that shouldn't be set
@@ -140,7 +139,6 @@ $bodyid = array(
  "activity_log.php" => "activitylog",
  "add_entry.php" => "addentry",
  "admin.php" => "admin",
- "day.php" => "day",
  "del_entry.php" => "delentry",
  "edit_entry.php" => "editentry",
  "edit_user.php" => "edituser",
@@ -158,9 +156,6 @@ $bodyid = array(
  "search.php" => "search",
  "users.php" => "users",
  "view_entry.php" => "viewentry",
- "week.php" => "week",
- "week_details.php" => "weekdetails",
- "week_ssi.php" => "weekssi",
  "year.php" => "year"
 );
 

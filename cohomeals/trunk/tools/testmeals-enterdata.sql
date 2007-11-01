@@ -5,6 +5,11 @@
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'jkimdon', '7cc84b002339a323cb3673a9380a76be', 'Joey', 'Kimdon', 'Y', 'Y', 'Kimdons', '19770101' );
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'dkimdon', '6e94eaa1627b7d5ddfbbff8cc65d2f57', 'David', 'Kimdon', 'N', 'N', 'Kimdons', '19750101' );
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'akimdon', '26c204028871ea49ed25', 'Aria', 'Kimdon', 'N', 'N', 'Kimdons2', '20050101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userA', 'a6fcd06cf913ba61a22b62058e6508cf', 'Ima', 'User', 'N', 'N', 'coolKids', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userB', 'c776586bf146463bc87074f5ae8d1aec', 'Meow', 'Cat', 'N', 'N', 'pets', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userC', 'fb7a36af7be102d0a7eda2fd25d556b9', 'Bark', 'Dog', 'N', 'N', 'pets', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userD', '858bf7ad5beb8e22f127c136c4f6797b', 'Ura', 'User', 'N', 'N', 'coolKids', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userE', 'd200ffdec60228074a7f91bf92d17245', 'Weera', 'User', 'N', 'N', 'coolKids', '19750101' );
 /*
  * financial log entries
  */

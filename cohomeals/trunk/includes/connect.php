@@ -187,7 +187,7 @@ if ( $not_auth ) {
   echo "<h2>" . translate ( "Error" ) . "</h2>\n" .
     translate ( "You are not authorized" );
   */
-  do_redirect ( "week.php" );
+  do_redirect ( "month.php" );
 }
 
 ?>

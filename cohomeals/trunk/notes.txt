@@ -160,3 +160,6 @@ done- turn register_globals off
 - track ip addresses for login attempts
 - views (?) or some way to never delete
 - check out: safe_mode, disable_functions, not using eval(), (look at php.ini for some of this)
+
+
+- consider removing webcalendar_login since no longer use ssi (see login.php)

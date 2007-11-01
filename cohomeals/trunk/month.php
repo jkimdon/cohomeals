@@ -36,20 +36,22 @@ print_header($INC,$HeadX);
 $events = read_events ( $startdate, $enddate );
 
 $monthURL = 'month.php?';
-display_small_month ( $prevmonth, $prevyear, true, true, "prevmonth",
+display_small_month ( $prevmonth, $prevyear, true, "prevmonth",
   $monthURL );
-display_small_month ( $nextmonth, $nextyear, true, true, "nextmonth",
+display_small_month ( $nextmonth, $nextyear, true, "nextmonth",
   $monthURL );
 ?>
 <div class="title">
-<span class="date"><br /><?php
-  echo date_to_str ( sprintf ( "%04d%02d01", $thisyear, $thismonth ),
-    $DATE_FORMAT_MY, false, false );
-?></span>
 <span class="user"><?php
   echo "<br />\n";
   echo $user_fullname;
 ?></span>
+<p>
+<span class="date"><br /><?php
+  echo date_to_str ( sprintf ( "%04d%02d01", $thisyear, $thismonth ),
+    $DATE_FORMAT_MY, false, false );
+?></span>
+</p>
 </div>
 
 <table class="main" style="clear:both;" cellspacing="0" cellpadding="0">
@@ -106,8 +108,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
       }
       echo ">";
       //echo date ( "D, m-d-Y H:i:s", $date ) . "<br />";
-      print_date_entries ( date ( "Ymd", $date ),
-        false );
+      print_date_entries ( date ( "Ymd", $date ) );
       print "</td>\n";
     } else {
       print "<td>&nbsp;</td>\n";

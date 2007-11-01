@@ -1040,22 +1040,17 @@ function date_selection_html ( $prefix, $date, $num_years ) {
 /**
  * Prints out a minicalendar for a month.
  *
- * @todo Make day.php NOT be a special case
- *
  * @param int    $thismonth     Number of the month to print
  * @param int    $thisyear      Number of the year
  * @param bool   $showyear      Show the year in the calendar's title?
- * @param bool   $show_weeknums Show week numbers to the left of each row?
  * @param string $minical_id    id attribute for the minical table
  * @param string $month_link    URL and query string for month link that should
  *                              come before the date specification (e.g.
  *                              month.php?  or  view_l.php?id=7&amp;)
  */
 function display_small_month ( $thismonth, $thisyear, $showyear,
-  $show_weeknums=false, $minical_id='', $month_link='month.php?' ) {
+  $minical_id='', $month_link='month.php?' ) {
   global $WEEK_START, $user, $login, $boldDays, $get_unapproved;
-  global $DISPLAY_WEEKNUMBER;
-  global $SCRIPT, $thisday; // Needed for day.php
   global $today;
 
   if ( $user != $login && ! empty ( $user ) ) {
@@ -1074,39 +1069,12 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   $monthstart = mktime(2,0,0,$thismonth,1,$thisyear);
   $monthend = mktime(2,0,0,$thismonth + 1,0,$thisyear);
 
-  if ( $SCRIPT == 'day.php' ) {
-    $month_ago = date ( "Ymd",
-      mktime ( 3, 0, 0, $thismonth - 1, $thisday, $thisyear ) );
-    $month_ahead = date ( "Ymd",
-      mktime ( 3, 0, 0, $thismonth + 1, $thisday, $thisyear ) );
+  //print the month name
+  echo "<caption><a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
+  echo month_name ( $thismonth - 1 ) . ( $showyear ? " $thisyear" : "" );
+  echo "</a></caption>\n";
+  echo "<thead>\n<tr>\n";
 
-    echo "<caption>$thisday</caption>\n";
-    echo "<thead>\n";
-    echo "<tr class=\"monthnav\"><th colspan=\"7\">\n";
-    echo "<a title=\"" . 
- translate("Previous") . "\" class=\"prev\" href=\"day.php?" . $u_url  .
- "date=$month_ago\"><img src=\"leftarrowsmall.gif\" alt=\"" .
- translate("Previous") . "\" /></a>\n";
-    echo "<a title=\"" . 
- translate("Next") . "\" class=\"next\" href=\"day.php?" . $u_url .
- "date=$month_ahead\"><img src=\"rightarrowsmall.gif\" alt=\"" .
- translate("Next") . "\" /></a>\n";
-    echo "<a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
-    echo month_name ( $thismonth - 1 );
-    if ( $showyear != '' ) {
-      echo " $thisyear";
-    }
-    echo "</a>\n";
-    echo "</th></tr>\n<tr>\n";
-  } else {  //not day script
-    //print the month name
-    echo "<caption><a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
- echo month_name ( $thismonth - 1 ) .
-  ( $showyear ? " $thisyear" : "" );
-    echo "</a></caption>\n";
-
-    echo "<thead>\n<tr>\n";
-  }
 
   //determine if the week starts on sunday or monday
   if ( $WEEK_START == "1" ) {
@@ -1116,9 +1084,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   }
   //print the headers to display the day of the week (sun, mon, tues, etc.)
 
-  // if we're showing week numbers we need an extra column
-  if ( $show_weeknums && $DISPLAY_WEEKNUMBER == 'Y' )
-    echo "<th class=\"empty\">&nbsp;</th>\n";
   //if the week doesn't start on monday, print the day
   if ( $WEEK_START == 0 ) echo "<th>" .
     weekday_short_name ( 0 ) . "</th>\n";
@@ -1134,10 +1099,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   for ($i = $wkstart; date("Ymd",$i) <= date ("Ymd",$monthend);
     $i += (24 * 3600 * 7) ) {
     echo "<tr>\n";
-    if ( $show_weeknums && $DISPLAY_WEEKNUMBER == 'Y' ) {
-      echo "<td class=\"weeknumber\"><a href=\"week.php?" . $u_url .
-        "date=".date("Ymd", $i)."\">(" . week_number($i) . ")</a></td>\n";
-    }
     for ($j = 0; $j < 7; $j++) {
       $date = $i + ($j * 24 * 3600);
       $dateYmd = date ( "Ymd", $date );
@@ -1153,15 +1114,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
         echo "<td";
         $wday = date ( 'w', $date );
         $class = '';
-  //if the day being viewed is today's date AND script = day.php
-        if ( $dateYmd == $thisyear . $thismonth . $thisday &&
-          $SCRIPT == 'day.php'  ) {
-    //if it's also a weekend, add a space between class names to combine styles
-    if ( $class != '' ) {
-            $class .= ' ';
-          }
-          $class .= "selectedday";
-        }
         if ( $hasEvents ) {
           if ( $class != '' ) {
             $class .= ' ';
@@ -1174,9 +1126,8 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
         if ( date ( "Ymd", $date  ) == date ( "Ymd", $today ) ){
           echo " id=\"today\"";
         }
-        echo "><a href=\"day.php?" .$u_url  . "date=" .  $dateYmd . 
-          "\">";
-        echo date ( "d", $date ) . "</a></td>\n";
+        echo ">";
+        echo date ( "d", $date ) . "</td>\n";
         } else {
           echo "<td class=\"empty\">&nbsp;</td>\n";
         }
@@ -1528,31 +1479,14 @@ function get_monday_before ( $year, $month, $day ) {
   return mktime ( 3, 0, 0, $month, $day - ( $weekday - 1 ), $year );
 }
 
-/**
- * Returns the week number for specified date.
- * 
- * Depends on week numbering settings.
- *
- * @param int $date Date in UNIX timestamp format
- *
- * @return string The week number of the specified date
- */
-function week_number ( $date ) {
-  $tmp = getdate($date);
-  $iso = gregorianToISO($tmp['mday'], $tmp['mon'], $tmp['year']);
-  $parts = explode('-',$iso);
-  $week_number = intval($parts[1]);
-  return sprintf("%02d",$week_number);
-}
 
 
 /**
  * Prints all the calendar entries for the specified date.
  *
  * @param string $date Date in YYYYMMDD format
- * @param bool   $ssi  Is this being called from week_ssi.php?
  */
-function print_date_entries ( $date, $ssi ) {
+function print_date_entries ( $date ) {
   global $events, $readonly, $is_meal_coordinator, $login,
     $public_access, $public_access_can_add;
   $cnt = 0;
@@ -1567,27 +1501,9 @@ function print_date_entries ( $date, $ssi ) {
     $can_add = false;
   if ( $readonly == 'Y' )
     $can_add = false;
-  if ( ! $ssi && $can_add ) {
-    print "<a title=\"" .
-      translate("New Entry") . "\" href=\"edit_entry.php?";
-    print "date=$date\"><img src=\"new.gif\" alt=\"" .
-      translate("New Entry") . "\" class=\"new\" /></a>";
-    $cnt++;
-  }
-  if ( ! $ssi ) {
-    echo "<a title=\"dayofmonth$day\" class=\"dayofmonth\" href=\"day.php?";
-    echo "date=$date\">$day</a>";
-    if ( $GLOBALS["DISPLAY_WEEKNUMBER"] == "Y" &&
-      date ( "w", $dateu ) == $GLOBALS["WEEK_START"] ) {
-      echo "&nbsp;<a title=\"" .
-        translate("Week") . "&nbsp;" . week_number ( $dateu ) . "\" href=\"week.php?date=$date";
-       echo "\" class=\"weeknumber\">";
-      echo "(" .
-        translate("Week") . "&nbsp;" . week_number ( $dateu ) . ")</a>";
-    }
-    print "<br />\n";
-    $cnt++;
-  }
+  echo "$day";
+  print "<br />\n";
+  $cnt++;
   
   // get all events for this date and store in $ev
   $ev = get_entries ( $date );
@@ -1655,36 +1571,6 @@ function calc_time_slot ( $time, $round_down = false ) {
   return $ret;
 }
 
-/**
- * Generates the HTML for an icon to add a new event.
- *
- * @param string $date   Date for new event in YYYYMMDD format
- * @param int    $hour   Hour of day (0-23)
- * @param int    $minute Minute of the hour (0-59)
- *
- * @return string The HTML for the add event icon
- */
-function html_for_add_icon ( $date=0,$hour="", $minute="" ) {
-  global $TZ_OFFSET;
-  global $login, $readonly;
-  $u_url = '';
-
-  if ( $readonly == 'Y' )
-    return '';
-
-  if ( $minute < 0 ) {
-   $minute = abs($minute);
-   $hour = $hour -1;
-  }
-  if ( isset ( $hour ) && $hour != NULL )
-    $hour += $TZ_OFFSET;
-  return "<a title=\"" . 
- translate("New Entry") . "\" href=\"edit_entry.php?" .
-    "date=$date" . ( isset ( $hour ) && $hour != NULL && $hour >= 0 ? "&amp;hour=$hour" : ""  ) .
-    ( $minute > 0 ? "&amp;minute=$minute" : "" ) .
-    "\"><img src=\"new.gif\" class=\"new\" alt=\"" . 
- translate("New Entry") . "\" /></a>\n";
-}
 
 
 
@@ -2137,81 +2023,6 @@ function set_today($date) {
   $thisdate = sprintf ( "%04d%02d%02d", $thisyear, $thismonth, $thisday );
 }
 
-/**
- * Converts from Gregorian Year-Month-Day to ISO YearNumber-WeekNumber-WeekDay.
- *
- * @internal JGH borrowed gregorianToISO from PEAR Date_Calc Class and added
- * $GLOBALS["WEEK_START"] (change noted)
- *
- * @param int $day   Day of month
- * @param int $month Number of month
- * @param int $year  Year
- *
- * @return string Date in ISO YearNumber-WeekNumber-WeekDay format
- *
- * @ignore
- */
-function gregorianToISO($day,$month,$year) {
-    $mnth = array (0,31,59,90,120,151,181,212,243,273,304,334);
-    $y_isleap = isLeapYear($year);
-    $y_1_isleap = isLeapYear($year - 1);
-    $day_of_year_number = $day + $mnth[$month - 1];
-    if ($y_isleap && $month > 2) {
-        $day_of_year_number++;
-    }
-    // find Jan 1 weekday (monday = 1, sunday = 7)
-    $yy = ($year - 1) % 100;
-    $c = ($year - 1) - $yy;
-    $g = $yy + intval($yy/4);
-    $jan1_weekday = 1 + intval((((($c / 100) % 4) * 5) + $g) % 7);
-
-
-    // JGH added next if/else to compensate for week begins on Sunday
-    if (! $GLOBALS["WEEK_START"] && $jan1_weekday < 7) {
-      $jan1_weekday++;
-    } elseif (! $GLOBALS["WEEK_START"] && $jan1_weekday == 7) {
-      $jan1_weekday=1;
-    }
-
-    // weekday for year-month-day
-    $h = $day_of_year_number + ($jan1_weekday - 1);
-    $weekday = 1 + intval(($h - 1) % 7);
-    // find if Y M D falls in YearNumber Y-1, WeekNumber 52 or
-    if ($day_of_year_number <= (8 - $jan1_weekday) && $jan1_weekday > 4){
-        $yearnumber = $year - 1;
-        if ($jan1_weekday == 5 || ($jan1_weekday == 6 && $y_1_isleap)) {
-            $weeknumber = 53;
-        } else {
-            $weeknumber = 52;
-        }
-    } else {
-        $yearnumber = $year;
-    }
-    // find if Y M D falls in YearNumber Y+1, WeekNumber 1
-    if ($yearnumber == $year) {
-        if ($y_isleap) {
-            $i = 366;
-        } else {
-            $i = 365;
-        }
-        if (($i - $day_of_year_number) < (4 - $weekday)) {
-            $yearnumber++;
-            $weeknumber = 1;
-        }
-    }
-    // find if Y M D falls in YearNumber Y, WeekNumber 1 through 53
-    if ($yearnumber == $year) {
-        $j = $day_of_year_number + (7 - $weekday) + ($jan1_weekday - 1);
-        $weeknumber = intval($j / 7);
-        if ($jan1_weekday > 4) {
-            $weeknumber--;
-        }
-    }
-    // put it all together
-    if ($weeknumber < 10)
-        $weeknumber = '0'.$weeknumber;
-    return "{$yearnumber}-{$weeknumber}-{$weekday}";
-}
 
 /**
  * Is this a leap year?

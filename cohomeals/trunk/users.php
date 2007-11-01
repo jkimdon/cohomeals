@@ -44,6 +44,8 @@ print_header( $INC );
 
   <span class="tabbak" id="tab_buddies"><a href="#tabbuddies" onclick="return showTab('buddies')">Buddies</a></span>
 
+  <span class="tabbak" id="tab_foodpref"><a href="#tabfoodpref" onclick="return showTab('foodpref')">Food preferences</a></span>
+
 </div>
 
 
@@ -157,6 +159,14 @@ print_header( $INC );
 
   </div>
 
+
+  <!-- FOOD PREFERENCES -->
+  <a name="tabfoodpref"></a>
+  <div id="tabscontent_foodpref">
+
+    This part will include personal food preferences.
+ 
+  </div>
 
 
 </div>
