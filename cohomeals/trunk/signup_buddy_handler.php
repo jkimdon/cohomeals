@@ -7,6 +7,7 @@ $type = mysql_safe( getPostValue( 'type' ), true );
 
 /// figure out if there is a limit to the number we can sign up
 $limited = false;
+$number = 1;
 if ( ($type == "C") || ($type == "S") || ($type == "L") || ($type == "O") ) {
   $limited = true;
   switch( $type ) {
@@ -30,7 +31,11 @@ if ( ($type == "C") || ($type == "S") || ($type == "L") || ($type == "O") ) {
     }
   }
   dbi_free_result( $res );
+} else if ( $type == 'H' ) {
+  $limited = true;
+  $number = 1;
 }
+
 
 
 /// if there is a limit, find out how many are already signed up

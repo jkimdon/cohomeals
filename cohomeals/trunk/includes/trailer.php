@@ -22,13 +22,6 @@ $goto_link = array ( );
 $reports_link = array ( );
 $manage_calendar_link = array ( );
 
-// Go To links
-$can_add = false;
-if ( $is_meal_coordinator ) {
-  $can_add = true;
-}
-
-
 if ( ! empty ( $GLOBALS['STARTVIEW'] ) ) {
   $mycal = $GLOBALS['STARTVIEW'];
 } else {
@@ -70,20 +63,18 @@ if ( $login != '__public__' && $readonly == 'N' ) {
 /// adding/subscribing links
 $subscribe_link[] = "<a href=\"subscribe_heart.php\">Heart</a>";
 $subscribe_link[] = "<a href=\"subscribe_club.php\">Club</a>";
-if ( $can_add ) {
-  $url = "<a title=\"Add New Meal\" href=\"edit_entry.php";
-  if ( ! empty ( $thisyear ) ) {
-    $url .= "?year=$thisyear";
-    if ( ! empty ( $thismonth ) ) {
-      $url .= "&amp;month=$thismonth";
-    }
-    if ( ! empty ( $thisday ) ) {
-      $url .= "&amp;day=$thisday";
-    }
+$url = "<a title=\"Add New Meal\" href=\"edit_entry.php";
+if ( ! empty ( $thisyear ) ) {
+  $url .= "?year=$thisyear";
+  if ( ! empty ( $thismonth ) ) {
+    $url .= "&amp;month=$thismonth";
   }
-  $url .= "\">Add New Meal</a>";
-  $special_link[] = $url;
+  if ( ! empty ( $thisday ) ) {
+    $url .= "&amp;day=$thisday";
+  }
 }
+$url .= "\">Add New Meal</a>";
+$special_link[] = $url;
 
 if ( $is_beancounter || $is_meal_coordinator ) {
   $url = "<a title=\"Add Financial Info\" ";

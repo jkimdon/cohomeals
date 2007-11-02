@@ -23,24 +23,36 @@ if ( empty ( $EVENT_EDIT_TABS ) )
   $EVENT_EDIT_TABS = 'Y'; // default
 $useTabs = ( $EVENT_EDIT_TABS == 'Y' );
 
+$id = mysql_safe( getValue('id'), false );
+
+
+$edit_special = false;
 $can_edit = false;
 if ( $is_meal_coordinator ) {
+  $edit_special = true;
   $can_edit = true;
 }
+if ( $id ) {
+  if ( is_head_chef( $id ) ) {
+    $can_edit = true;
+  }
+} else {
+  $can_edit = true;
+}
+
 
 $external_users = "";
 $participants = array ();
 $repeats = false;
 $newevent = false;
 
-$id = mysql_safe( getValue('id'), false );
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
   $newevent = false;
   $repeats = false;
   $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
+    "cal_suit, cal_menu, cal_num_cooks, " .
     "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
     "cal_walkins, cal_notes " .
     "FROM webcal_meal WHERE cal_id = " . $id;
@@ -57,13 +69,12 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $minute = ( $time / 100 ) % 100;
     $suit = $row[2];
     $menu = $row[3];
-    $head_chef = $row[4];
-    $num_cooks = $row[5];
-    $num_cleanup = $row[6];
-    $num_setup = $row[7];
-    $num_other_crew = $row[8];
-    $walkins = $row[9];
-    $notes = $row[10];
+    $num_cooks = $row[4];
+    $num_cleanup = $row[5];
+    $num_setup = $row[6];
+    $num_other_crew = $row[7];
+    $walkins = $row[8];
+    $notes = $row[9];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -78,7 +89,6 @@ if ( ! empty ( $id ) && $id > 0 ) {
 
   // defaults
   $suit="wild";
-  $head_chef="not selected";
   $menu="";
   $num_cooks=2;
   $num_cleanup=2;
@@ -152,10 +162,6 @@ print_header ( $INC, '', $BodyX );
   if ( $id ) echo translate("Edit Meal"); 
   else echo translate("Add Meal"); 
 ?>
-&nbsp;
-<img src="help.gif" alt="Help" class="help" onclick="window.open ( 'help_edit_entry.php
-<?php if ( empty ( $id ) ) echo "?add=1"; ?>
-', 'cal_help', 'dependent,menubar,scrollbars,height=400,width=400,innerHeight=420,outerWidth=420');" />
 </h2>
 
 <?php
@@ -164,7 +170,7 @@ print_header ( $INC, '', $BodyX );
 <form action="edit_entry_handler.php" method="post" name="editentryform">
 
 <?php
-if ( ! empty ( $id ) && ( empty ( $copy ) || $copy != '1' ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
+if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
 // additional hidden input fields
 echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
 echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
@@ -189,9 +195,11 @@ echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
         if ( $newevent == true ) {
 	  select_option( "wild", $suit );
 	  select_option( "spade", $suit );
-	  select_option( "heart", $suit );
-	  select_option( "club", $suit );
-	  select_option( "diamond", $suit );
+	  if ( $edit_special == true ) {
+	    select_option( "heart", $suit );
+	    select_option( "club", $suit );
+	    select_option( "diamond", $suit );
+	  }
 	}
         else {
 	  echo "<option value=\"$suit\">$suit</option>\n";
@@ -278,31 +286,7 @@ if ( $id ) {
   <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $menu );?></textarea>
 </td></tr>
 
-<tr id="headchef"><td class="tooltip">Head chef:</td>
-  <td>
-  <select name="head_chef">
-    <option value="not selected"
-      <?php if ( $head_chef == "not selected" ) echo "selected=\"selected\""; ?>
-      >not selected</option>
-  <?php
-    $adult_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-15, date( "m" ), date( "d" ) );
-    $sql = "SELECT cal_login, cal_firstname, cal_lastname " .
-           "FROM webcal_user " .
-	   "WHERE cal_birthdate <= $adult_cutoff " . 
-           "ORDER BY cal_firstname";
-    $res = dbi_query ( $sql );
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        echo "<option value=" . $row[0];
-	if ( $row[0] == $head_chef ) echo " selected=\"selected\"";
-	echo ">" . $row[1] . " " . $row[2] . "</option>";
-      } 
-    }
-  ?>
-  </select>
-</td></tr>
-
-<tr><td class="tooltip">Number of other cooks:</td>
+<tr><td class="tooltip">Number of cooks (in addition to head chef):</td>
   <td>
   <select name="num_cooks">
   <?php

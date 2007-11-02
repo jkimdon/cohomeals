@@ -61,10 +61,12 @@ CREATE TABLE webcal_meal (
   cal_suit VARCHAR(7) NOT NULL,
   /*  walkins are: 'D' = discouraged, 'W' = welcome, 'E' = encouraged */
   cal_walkins CHAR(1) DEFAULT 'D',
+  /* deadline for signing up (YYYYMMDD format). after this date, 
+     price increases to walkin/guest price and 
+     only the admin (MC,BC) can add you to the meal */
+  cal_signup_deadline INT NOT NULL,
   /* base price (child, walkin, guest prices based on this) */
   cal_base_price DECIMAL(5,2),
-  /* head cook has special editing permissions. use cal_login of chef */
-  cal_head_chef VARCHAR(25),
   /* desired number of cooks (not counting head chef) */
   cal_num_cooks INT,
   /* desired number of cleanup crew members */
@@ -96,6 +98,7 @@ CREATE TABLE webcal_meal_participant (
   /* participant in the event */
   cal_login VARCHAR(25) NOT NULL,
   /* type of participation: 
+     'H' = head chef (only one)
      'M' = in-house muncher
      'T' = take-home plate
      'C' = cook

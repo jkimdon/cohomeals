@@ -40,7 +40,7 @@ if ( ! empty ( $error ) ) {
 
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_head_chef, cal_num_cooks, " .
+    "cal_suit, cal_menu, cal_num_cooks, " .
     "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
     "cal_walkins, cal_notes " .
     "FROM webcal_meal WHERE cal_id = $id";
@@ -56,13 +56,12 @@ if ( $row ) {
   $event_time = $row[1];
   $suit = $row[2];
   $menu = $row[3];
-  $head_chef = $row[4];
-  $num_cooks = $row[5];
-  $num_cleanup = $row[6];
-  $num_setup = $row[7];
-  $num_other_crew = $row[8];
-  $walkins = $row[9];
-  $notes = $row[10];
+  $num_cooks = $row[4];
+  $num_cleanup = $row[5];
+  $num_setup = $row[6];
+  $num_other_crew = $row[7];
+  $walkins = $row[8];
+  $notes = $row[9];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -164,23 +163,10 @@ $event_date = $row[0];
 
 
 
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Head chef:</td>
-<td>
 <?php 
-  $sql = "SELECT cal_firstname, cal_lastname " .
-         "FROM webcal_user " .
-	 "WHERE cal_login = '" . $head_chef . "'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    $row = dbi_fetch_row ( $res );
-    echo $row[0] . " " . $row[1];
-  }
-  else {
-    echo "Database error: " . dbi_error() . "<br />\n";
-  }
+  display_crew( "Head chef", 'H', 1, $row_num );
+  $row_num = ( $row_num == 1 ) ? 0:1; 
 ?>
-</td></tr>
-<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
@@ -393,17 +379,13 @@ if ( ! empty ( $user ) && $login != $user ) {
 }
 
 $can_edit = ( $is_meal_coordinator );
-if ( $login == "__public__" ) {
-  $can_edit = false;
-}
+if ( is_head_chef( $id ) ) 
+  $can_edit = true;
 
 if ( $can_edit ) {
-  echo "<a title=\"" .
-    translate("Edit entry") . "\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id$u_url\">" .
-    translate("Edit entry") . "</a><br />\n";
-  echo "<a title=\"" . 
-    translate("Delete entry") . "\" class=\"nav\" " .
+  echo "<a title=\"Edit entry\" class=\"nav\" " .
+    "href=\"edit_entry.php?id=$id$u_url\">Edit entry</a><br />\n";
+  echo "<a title=\"Delete entry\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
     translate("This will delete this entry for all users.") . "');\">" . 

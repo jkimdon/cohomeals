@@ -1157,14 +1157,11 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
 
   $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = '$id' AND cal_login = '$login'";
+  $class = "entry";
   if ( $res = dbi_query ( $sql ) ) {
     if ( dbi_fetch_row ( $res ) ) 
       $class = "participating_entry";
-    else 
-      $class = "entry";
   }
-  else 
-    $class = "entry";
 
   $popupid = "eventinfo-$id-$key";
   $key++;
@@ -2218,7 +2215,7 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
        ($action != 'C') )
     return false;
   if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && ($type != 'S') &&
-       ($type != 'L') && ($type != 'O') )
+       ($type != 'L') && ($type != 'O') && ($type != 'H') )
     return false;
 
   
@@ -2606,5 +2603,25 @@ function display_workeat_log( $startdate, $enddate ) {
   }
 }
 
+
+function is_head_chef( $id ) {
+  global $login;
+  
+  $ret = false;
+
+  $sql = "SELECT cal_login " .
+    "FROM webcal_meal_participant " . 
+    "WHERE cal_id = $id " .
+    "AND cal_login = '$login' " .
+    "AND cal_type = 'H'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( dbi_fetch_row( $res ) ) {
+      $ret = true;
+    }
+    dbi_free_result( $res );
+  }
+  
+  return $ret;
+}
 
 ?>
