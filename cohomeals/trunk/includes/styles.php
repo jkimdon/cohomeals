@@ -565,6 +565,21 @@ th {
   <?php echo background_css ( $GLOBALS['CELLBG'], 200 ); ?>
   font-size: 12px;
 }
+.bordered_table {
+  border: 1px solid #000000;
+  border-collapse: collapse;
+}
+.bordered_table td {
+  border: 1px solid #000000;
+  padding: 2px;
+}
+.bordered_table td.number {
+  text-align: center;
+  border: 1px solid #000000;
+  padding: 2px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
 .cookies {
   font-size: 13px;
 }

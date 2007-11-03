@@ -97,7 +97,7 @@ $thistime = mktime ( 3, 0, 0, $thismonth, $thisday, $thisyear );
 $thisdow = date ( "w", $thistime );
 
 // $subject is used for mailto URLs
-$subject = translate($application_name) . ": " . $name;
+$subject = translate($application_name) . ": " . $suit;
 // Remove the '"' character since it causes some mailers to barf
 $subject = str_replace ( "\"", "", $subject );
 $subject = htmlspecialchars ( $subject );
@@ -107,7 +107,26 @@ $is_private = false;
 $event_date = $row[0];
 
 ?>
-<h2><?php echo htmlspecialchars ( $name ); ?></h2>
+
+<h2>Meal details</h2>
+
+<?php
+$sy = substr ( $event_date, 0, 4 );
+$sm = substr ( $event_date, 4, 2 );
+$sd = substr ( $event_date, 6, 2 );
+$deadline = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd - 2, $sy ) );
+echo "<p>Signup deadline: " . date_to_str( $deadline ) . "</p>";
+?>
+
+<p>
+<table class="bordered_table">
+<tr><td>Prices:</td><td class="number">adult</td><td class="number">child</td><td class="number">walkin/guest</td></tr>
+<tr><td>Signing up now costs:</td><td class="number">$4.00</td><td class="number">$2.00</td><td class="number">$5.00</td></tr>
+<tr><td>Cancelling now refunds:</td><td class="number">100%</td><td class="number">100%</td><td class="number">100%</td></tr>
+</table>
+</p>
+<p></p>
+
 <table style="border-width:0px;">
 
 <?php $row_num = 1; ?>
@@ -121,7 +140,7 @@ $event_date = $row[0];
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Date:</td>
 <td>
  <?php
-  echo date_to_str ( $row[0], "", true, false, $event_time );
+  echo date_to_str ( $event_date, "", true, false, $event_time );
   ?>
 </td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
