@@ -10,6 +10,11 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, ca
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userC', 'fb7a36af7be102d0a7eda2fd25d556b9', 'Bark', 'Dog', 'N', 'N', 'pets', '19750101' );
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userD', '858bf7ad5beb8e22f127c136c4f6797b', 'Ura', 'User', 'N', 'N', 'coolKids', '19750101' );
 INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userE', 'd200ffdec60228074a7f91bf92d17245', 'Weera', 'User', 'N', 'N', 'coolKids', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userF', 'd778482b84ce9c777b1fc1dbe235f971', 'Sheeza', 'User', 'N', 'N', 'coolKids', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userG', 'a662fed8832c01c2abfe7ee11b992423', 'Heeza', 'User', 'N', 'N', 'coolKids', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userH', '4f56c02c17005ab213b79cd3bd556603', 'Oink', 'Pig', 'N', 'N', 'pets', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userI', '8ffff2b36653009deff53f2ee07b302a', 'Hiss', 'Snake', 'N', 'N', 'pets', '19750101' );
+INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_billing_group, cal_birthdate ) VALUES ( 'userJ', '5e3d387fc55b2f1a95a1b923b1b91c23', 'Croak', 'Frog', 'N', 'N', 'pets', '19750101' );
 /*
  * financial log entries
  */
