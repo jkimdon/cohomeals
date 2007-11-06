@@ -45,7 +45,7 @@ $external_users = "";
 $participants = array ();
 $repeats = false;
 $newevent = false;
-
+$uses_endday = false;
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
@@ -174,6 +174,7 @@ if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />
 // additional hidden input fields
 echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
 echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
+echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
 ?>
 
 <input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
@@ -217,7 +218,8 @@ echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
    ?>
   </td></tr>
 
-  <?php if ( $newevent == true ) { ?>
+  <?php if ( $newevent == true ) { 
+    $uses_endday = true; ?>
   <tr id="suitenddate">
     <td class="tooltip">Create meals until:</td>
     <td><?php print_date_selection ( "end", $end_date ); ?>

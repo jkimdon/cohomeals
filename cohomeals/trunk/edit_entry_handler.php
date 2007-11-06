@@ -6,6 +6,7 @@ $error = "";
 
 $repeats = getPostValue( 'repeats' );
 $newevent = getPostValue( 'newevent' );
+$uses_endday = getPostValue( 'uses_endday' );
 $id = mysql_safe( getPostValue( 'id' ), false );
 $suit = mysql_safe( getPostValue( 'suit' ), true );
 $day = getPostValue( 'day' );
@@ -82,7 +83,7 @@ if ( ($repeats == "true") && $repday[$weekday] != 1 ) {
   }
 }
 
-if ( $endday == 0 ) 
+if ( $uses_endday == 0 ) 
   $end_date = $current_date;
 else 
   $end_date = sprintf ( "%04d%02d%02d", $endyear, $endmonth, $endday );
@@ -376,6 +377,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
     if ( empty ( $error ) ) {
       if ( ! dbi_query ( $sql ) ) {
 	$error = translate("Database error") . ": " . dbi_error ();
+	echo "Error = $error<br>";
       }
     }
 

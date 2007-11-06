@@ -61,9 +61,11 @@ function check_number_meals( minid, maxid, count ) {
   cutoff = 0.66 * parseFloat( count );
 
   for ( i = minid; i <= maxid; i++ ) {
-    is_checked = eval ( 'document.limitedheartform.d' + i + '.checked' );
-    if ( is_checked == true ) {
-      num_checked++;
+    if ( eval ( 'document.limitedheartform.d' + i ) ) {
+      is_checked = eval ( 'document.limitedheartform.d' + i + '.checked' );
+      if ( is_checked == true ) {
+	num_checked++;
+      }
     }
   }
 

@@ -46,10 +46,22 @@ INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal
  * wild with a participant and a billing
  *
  */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_cooks, cal_num_cleanup, cal_num_setup, cal_num_other_crew, cal_menu, cal_notes ) VALUES ( '9', '0', '20070913', '183000', 'wild', 'E', '3', '2', '2', '0', 'baby food', 'babies only' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_cooks, cal_num_cleanup, cal_num_setup, cal_num_other_crew, cal_menu, cal_notes ) VALUES ( '9', '0', '20071113', '183000', 'wild', 'E', '3', '2', '2', '0', 'baby food', 'babies only' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'jkimdon', 'M', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 2, 'Kimdons', 'Joey Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'dkimdon', 'M', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 3, 'Kimdons', 'David Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'akimdon', 'M', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 4, 'Kimdons', 'Aria Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'userA', 'T', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 5, 'coolKids', 'Ima User dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'userB', 'T', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 6, 'pets', 'Meow Cat dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'userC', 'M', '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 7, 'pets', 'Bark Dog dining', 9, -400, 9650, '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'userC', 'C', '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_description ) VALUES ( 9, 'jkimdon', 'H', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 2, 'Kimdons', 'dining', 9, -400, 9650, '' );
+
 /* 
  * some hearts
  * 
