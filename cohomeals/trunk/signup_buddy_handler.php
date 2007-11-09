@@ -8,22 +8,9 @@ $type = mysql_safe( getPostValue( 'type' ), true );
 /// figure out if there is a limit to the number we can sign up
 $limited = false;
 $number = 1;
-if ( ($type == "C") || ($type == "S") || ($type == "L") || ($type == "O") ) {
+if ( $type == "C" ) {
   $limited = true;
-  switch( $type ) {
-  case "C":
-    $sql = "SELECT cal_num_cooks ";
-    break;
-  case "L":
-    $sql = "SELECT cal_num_cleanup ";
-    break;
-  case "S":
-    $sql = "SELECT cal_num_setup ";
-    break;
-  case "O":
-    $sql = "SELECT cal_num_other_crew ";
-    break;
-  }
+  $sql = "SELECT cal_num_crew ";
   $sql .= "FROM webcal_meal WHERE cal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {

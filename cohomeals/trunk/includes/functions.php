@@ -2214,8 +2214,8 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
   if ( ($action != 'D') && ($action != 'A') && 
        ($action != 'C') )
     return false;
-  if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && ($type != 'S') &&
-       ($type != 'L') && ($type != 'O') && ($type != 'H') )
+  if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && 
+       ($type != 'W') && ($type != 'H') )
     return false;
 
   
@@ -2515,14 +2515,14 @@ function display_workeat_log( $startdate, $enddate ) {
 	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
 	    if ( $row2[0] < $startdate ) {
 	      if ( ($type == 'M') || ($type == 'T') ) $balance_eat++;
-	      else $balance_work++;
+	      else if ( ($type == 'H') || ($type == 'C') ) $balance_work++;
 	    }
 	  }
 	  dbi_free_result( $res2 );
 	}
 	$count++;
 	if ( ($type == 'M') || ($type == 'T') ) $eat++;
-	else $work++;
+	else if ( ($type == 'H') || ($type == 'C') ) $work++;
       }
       dbi_free_result( $res );
     }
@@ -2563,14 +2563,15 @@ function display_workeat_log( $startdate, $enddate ) {
 	    // Date
 	    echo "<td>" . date_to_str( $date, "", false, true, "" ) . "</td>";
 	    // Role
-	    $print = ( ($type == 'M') || ($type == 'T') ) ? "Eat":"Work";
+	    if ( ($type == 'M') || ($type == 'T') ) $print = "Eat";
+	    else if ( ($type == 'H') || ($type == 'C') ) $print = "Work";
 	    echo "<td>$print</td>";
 	    // Meal
 	    echo "<td><a href=\"view_entry.php?id=" . $meal_id .
 	      "\">" . $suit . " meal</a></td>";
 	    // work/eat Balance
 	    if ( ($type == 'M') || ($type == 'T') ) $balance_eat++;
-	    else $balance_work++;
+	    else if ( ($type == 'H') || ($type == 'C') ) $balance_work++;
 	    
 	    if ( ($balance_eat == 0) || ($balance_work == 0) ) 
 	      echo "<td> $balance_work : $balance_eat </td>";

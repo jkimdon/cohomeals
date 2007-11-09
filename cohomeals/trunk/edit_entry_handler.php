@@ -19,10 +19,7 @@ $hour = getPostValue( 'hour' );
 $minute = getPostValue( 'minute' );
 $ampm = getPostValue( 'ampm' );
 $menu = mysql_safe( getPostValue( 'menu' ), true );
-$num_cooks = mysql_safe( getPostValue( 'num_cooks' ), false );
-$num_setup = mysql_safe( getPostValue( 'num_setup' ), false );
-$num_cleanup = mysql_safe( getPostValue( 'num_cleanup' ), false );
-$num_other_crew = mysql_safe( getPostValue( 'num_other_crew' ), false );
+$num_crew = mysql_safe( getPostValue( 'num_crew' ), false );
 $walkins = mysql_safe( getPostValue( 'walkins' ), true );
 $notes = mysql_safe( getPostValue( 'notes' ), true );
 
@@ -115,9 +112,7 @@ while ( $current_date <= $end_date ) {
   $newid = add_or_edit_entry( $newevent, $id, $club_id, 
 			      $suit, $day, $month, $year, 
 			      $hour, $minute, $ampm,
-			      $menu, $num_cooks, 
-			      $num_setup, $num_cleanup, 
-			      $num_other_crew, $walkins, $notes );
+			      $menu, $num_crew, $walkins, $notes );
 
   if ( $suit == "heart" ) {
     add_subscribed_diners( $newid, $day, $month, $year, $count );
@@ -216,8 +211,7 @@ function add_financial_log_for_subscribers( $count ) {
 ///////////////////////////////////////////////////////
 function add_or_edit_entry( $newevent, $id, $club_id, $suit, 
 			    $day, $month, $year, $hour, $minute, $ampm,
-			    $menu, $num_cooks, $num_setup, 
-			    $num_cleanup, $num_other_crew, $walkins, $notes ) {
+			    $menu, $num_crew, $walkins, $notes ) {
   global $is_meal_coordinator, $is_meal_coordinator;
   global $LOG_CREATE, $LOG_UPDATE;
 
@@ -267,62 +261,6 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
   }
   
   
-  // handle external participants
-  $ext_names = array ();
-  $ext_emails = array ();
-  $matches = array ();
-  $ext_count = 0;
-  if ( ! empty ( $allow_external_users ) && 
-       $allow_external_users == "Y" &&
-       ! empty ( $externalparticipants ) ) {
-    $lines = explode ( "\n", $externalparticipants );
-    if ( ! is_array ( $lines ) ) {
-      $lines = array ( $externalparticipants );
-    }
-    if ( is_array ( $lines ) ) {
-      for ( $i = 0; $i < count ( $lines ); $i++ ) {
-	$ext_words = explode ( " ", $lines[$i] );
-	if ( ! is_array ( $ext_words ) ) {
-	  $ext_words = array ( $lines[$i] );
-	}
-	if ( is_array ( $ext_words ) ) {
-	  $ext_names[$ext_count] = "";
-	  $ext_emails[$ext_count] = "";
-	  for ( $j = 0; $j < count ( $ext_words ); $j++ ) {
-	    // use regexp matching to pull email address out
-	    $ext_words[$j] = chop ( $ext_words[$j] ); // remove \r if there is one
-	    if ( preg_match ( "/<?\\S+@\\S+\\.\\S+>?/", $ext_words[$j],
-			      $matches ) ) {
-	      $ext_emails[$ext_count] = $matches[0];
-	      $ext_emails[$ext_count] = preg_replace ( "/[<>]/", "",
-						       $ext_emails[$ext_count] );
-	    } else {
-	      if ( strlen ( $ext_names[$ext_count] ) ) {
-		$ext_names[$ext_count] .= " ";
-	      }
-	      $ext_names[$ext_count] .= $ext_words[$j];
-	    }
-	  }
-	  // Test for duplicate Names
-	  if ( $i > 0 ) {
-	    for ( $k = $i ; $k > 0 ; $k-- ) {
-	      if ( $ext_names[$i] == $ext_names[$k] ) { 
-		$ext_names[$i]  .= "[$k]";     
-	      }
-	    }
-	  }
-	  if ( strlen ( $ext_emails[$ext_count] ) &&
-	       empty ( $ext_names[$ext_count] ) ) {
-	    $ext_names[$ext_count] = $ext_emails[$ext_count];
-	  }
-	  $ext_count++;
-	}
-      }
-    }
-  } // end external participants
-
-
-  //Avoid Undefined variable message
   $msg = '';
   
   if ( empty ( $error ) ) {
@@ -337,7 +275,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 	$id = 1;
       }
     } else {
-      // save old participants
+      // note old participants for email notification
       $sql = "SELECT cal_login FROM webcal_meal_participant " .
 	"WHERE cal_id = $id ";
       $res = dbi_query ( $sql );
@@ -347,271 +285,106 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 	}
 	dbi_free_result ( $res );
       } else {
-	$error = translate("Database error") . ": " . dbi_error ();
-      }
-      if ( empty ( $error ) ) {
-	dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
+	$error = "Database error: " . dbi_error ();
       }
     } // end old participants
+  }
 
-    $sql = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
-      "cal_date, cal_time, cal_suit, cal_menu, cal_num_cooks, " .
-      "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " .
-      "cal_walkins, cal_notes ) " .
-      "VALUES ( $id, ";
-    
-    $sql .= $club_id . ", ";
-    $date = mktime ( 3, 0, 0, $month, $day, $year );
-    $sql .= date ( "Ymd", $date ) . ", ";
-    $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
-    $sql .= "'" . $suit . "', ";
-    $sql .= "'" . $menu . "', ";
-    $sql .= $num_cooks . ", ";
-    $sql .= $num_cleanup . ", ";
-    $sql .= $num_setup . ", ";
-    $sql .= $num_other_crew . ", ";
-    $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
-    $sql .= "'" . $notes . "' )";
-    
-    
-    if ( empty ( $error ) ) {
-      if ( ! dbi_query ( $sql ) ) {
-	$error = translate("Database error") . ": " . dbi_error ();
-	echo "Error = $error<br>";
-      }
+  if ( empty ( $error ) ) {
+
+    if ( $newevent == true ) {
+      $sql = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
+	"cal_date, cal_time, cal_suit, cal_menu, cal_num_crew, " .
+	"cal_walkins, cal_notes ) " .
+	"VALUES ( ";
+      
+      $sql .= $id . ", ";	
+      $sql .= $club_id . ", ";
+      $date = mktime ( 3, 0, 0, $month, $day, $year );
+      $sql .= date ( "Ymd", $date ) . ", ";
+      $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
+      $sql .= "'" . $suit . "', ";
+      $sql .= "'" . $menu . "', ";
+      $sql .= $num_crew . ", ";
+      $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
+      $sql .= "'" . $notes . "' )";
     }
-
-
-    // log add/update
-    activity_log ( $id, $login, $login,
-		   $newevent ? $LOG_CREATE : $LOG_UPDATE, "" );
+    else { 
+      $sql = "UPDATE webcal_meal " . 
+	"SET ";
+      
+      $date = mktime ( 3, 0, 0, $month, $day, $year );
+      $sql .= "cal_date = " . date ( "Ymd", $date ) . ", ";
+      $sql .= "cal_time = " . sprintf ( "%02d%02d00, ", $hour, $minute );
+      $sql .= "cal_menu = '" . $menu . "', ";
+      $sql .= "cal_num_crew = " . $num_crew . ", ";
+      $sql .= "cal_walkins = " . 
+	empty ( $walkins ) ? "'D', " : "'$walkins', ";
+      $sql .= "cal_notes = '" . $notes . "' )";
+      
+      $sql .=	"WHERE cal_id = $id";
+    }
     
-
-    // check if participants have been removed and send out emails
-    if ( ! $newevent && count ( $old_meal_participant ) > 0 ) {  
-      while ( list ( $old_participant, $dummy ) = each ( $old_meal_participant ) ) {
-	$found_flag = false;
-	for ( $i = 0; $i < count ( $participants ); $i++ ) {
-	  if ( $participants[$i] == $old_participant ) {
-	    $found_flag = true;
-	    break;
-	  }
-	}
-	if ( !$found_flag ) {
-	  // only send mail if their email address is filled in
-	  $do_send = get_pref_setting ( $old_participant, "EMAIL_EVENT_DELETED" );
-	  $user_language = get_pref_setting ( $old_participant, "LANGUAGE" );
-	  user_load_variables ( $old_participant, "temp" );
-	  if ( $old_participant != $login && strlen ( $tempemail ) &&
-	       $do_send == "Y" && $send_email != "N" ) {
-	    
-	    $user_hour = $hour;
-	    if ( $user_hour < 0 ) {
-	      $user_hour += 24;
-	      // adjust date
-	      $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-	      $user_date -= $ONE_DAY;
-	      $user_month = date ( "m", $date );
-	      $user_day = date ( "d", $date );
-	      $user_year = date ( "Y", $date );
-	    } elseif ( $user_hour >= 24 ) {
-	      $user_hour -= 24;
-	      // adjust date
-	      $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-	      $user_date += $ONE_DAY;
-	      $user_month = date ( "m", $date );
-	      $user_day = date ( "d", $date );
-	      $user_year = date ( "Y", $date );
-	    } else {
-	      $user_month = $month;
-	      $user_day = $day;
-	      $user_year = $year;
-	    }
-	    if (($GLOBALS['LANGUAGE'] != $user_language) && 
-		! empty ( $user_language ) && ( $user_language != 'none' )){
-	      reset_language ( $user_language );
-	    }
-	    $fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
-	    $msg = translate("Hello") . ", " . $tempfullname . ".\n\n" .
-	      translate("An appointment has been canceled for you by") .
-	      " " . $login_fullname .  ". " .
-	      translate("The subject was") . " \"" . $name . "\"\n\n" .
-	      translate("The notes were") . " \"" . $notes . "\"\n" .
-	      translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
-	      ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
-		translate("Time") . ": " .
-		display_time ( ( $user_hour * 10000 ) + ( $minute * 100 ), true ) ) .
-	      "\n\n\n";
-	    // add URL to event, if we can figure it out
-	    if ( ! empty ( $server_url ) ) {
-	      $url = $server_url .  "view_entry.php?id=" .  $id;
-	      $msg .= $url . "\n\n";
-	    }
-	    
-	    if ( strlen ( $login_email ) ) {
-	      $extra_hdrs = "From: $login_email\r\nX-Mailer: " . translate($application_name);
-	    } else {
-	      $extra_hdrs = "From: $email_fallback_from\r\nX-Mailer: " . translate($application_name);
-	    }
-	    mail ( $tempemail,
-		   translate($application_name) . " " . translate("Notification") . ": " . $name,
-		   html_to_8bits ($msg), $extra_hdrs );
-	    activity_log ( $id, $login, $old_participant, $LOG_NOTIFICATION,
-			   "User removed from participants list" );
-	  }
-	} // end found old participant
-      } // end loop through old participants
-    } // end if new event and there are old participants
-
-
-    // now add participants and send out notifications
-    for ( $i = 0; $i < count ( $participants ); $i++ ) {
-
-      // Some users report that they get an error on duplicate keys
-      // on the following add... As a safety measure, delete any
-      // existing entry with the id.  Ignore the result.
-      $participants[$i] = mysql_safe( $participants[$i], true );
-      dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id " .
-		  "AND cal_login = '$participants[$i]'" );
-      $sql = "INSERT INTO webcal_meal_participant " .
-	"( cal_id, cal_login ) VALUES ( $id, '$participants[$i]' )";
-      if ( ! dbi_query ( $sql ) ) {
-	$error = translate("Database error") . ": " . dbi_error ();
-	break;
-      } else {
-	$from = $user_email;
-	if ( empty ( $from ) && ! empty ( $email_fallback_from ) )
-	  $from = $email_fallback_from;
-	// only send mail if their email address is filled in
-	$do_send = get_pref_setting ( $participants[$i],
-				      $newevent ? "EMAIL_EVENT_ADDED" : "EMAIL_EVENT_UPDATED" );
-	$user_language = get_pref_setting ( $participants[$i], "LANGUAGE" );
-	user_load_variables ( $participants[$i], "temp" );
-	if ( $participants[$i] != $login && 
-	     strlen ( $tempemail ) &&
-	     $do_send == "Y" && $send_email != "N" ) {
-	  
-	  $user_hour = $hour;
-	  if ( $user_hour < 0 ) {
-	    $user_hour += 24;
-	    // adjust date
-	    $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-	    $user_date -= $ONE_DAY;
-	    $user_month = date ( "m", $date );
-	    $user_day = date ( "d", $date );
-	    $user_year = date ( "Y", $date );
-	  } elseif ( $user_hour >= 24 ) {
-	    $user_hour -= 24;
-	    // adjust date
-	    $user_date = mktime ( 3, 0, 0, $month, $day, $year );
-	    $user_date += $ONE_DAY;
-	    $user_month = date ( "m", $date );
-	    $user_day = date ( "d", $date );
-	    $user_year = date ( "Y", $date );
-	  } else {
-	    $user_month = $month;
-	    $user_day = $day;
-	    $user_year = $year;
-	  }
-	  if (($GLOBALS['LANGUAGE'] != $user_language) && 
-	      ! empty ( $user_language ) && ( $user_language != 'none' )) {
-	    reset_language ( $user_language );
-	  }
-	  $fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
-	  $msg = translate("Hello") . ", " . $tempfullname . ".\n\n";
-	  if ( $newevent || ( empty ( $old_meal_participant[$participants[$i]] ) ) ) {
-	    $msg .= translate("A new appointment has been made for you by");
-	  } else {
-	    $msg .= translate("An appointment has been updated by");
-	  }
-	  $msg .= " " . $login_fullname .  ". " .
-	    translate("The subject is") . " \"" . $name . "\"\n\n" .
-	    translate("The notes are") . " \"" . $notes . "\"\n" .
-	    translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
-	    ( ( empty ( $user_hour ) && empty ( $minute ) ) ? "" :
-	      translate("Time") . ": " .
-	      display_time ( ( $user_hour * 10000 ) + ( $minute * 100 ), true ) . "\n" ) .
-	    translate("Please look on") . " " . translate($application_name) . " " .
-	    translate("to view this appointment") . ".";
-	  // add URL to event, if we can figure it out
-	  if ( ! empty ( $server_url ) ) {
-	    $url = $server_url .  "view_entry.php?id=" .  $id;
-	    $msg .= "\n\n" . $url;
-	  }
-	  if ( strlen ( $from ) ) {
-	    $extra_hdrs = "From: $from\r\nX-Mailer: " . translate($application_name);
-	  } else {
-	    $extra_hdrs = "X-Mailer: " . translate($application_name);
-	  }
-	  mail ( $tempemail,
-		 translate($application_name) . " " . translate("Notification") . ": " . $name,
-		 html_to_8bits ($msg), $extra_hdrs );
-	  activity_log ( $id, $login, $participants[$i], $LOG_NOTIFICATION, "" );
-	} // end sending email
-      } // end sql insertion succeeded
-    } // end add participants
+    
+    if ( ! dbi_query ( $sql ) ) {
+      $error = translate("Database error") . ": " . dbi_error ();
+      echo "Error = $error<br>";
+    }
+  }
   
-
-    // add external participants
-    // send notification if enabled.
-    if ( is_array ( $ext_names ) && is_array ( $ext_emails ) ) {
-      for ( $i = 0; $i < count ( $ext_names ); $i++ ) {
-	if ( strlen ( $ext_names[$i] ) ) {
-	  $ext_names[$i] = mysql_safe( $ext_names[$i], true );
-	  $ext_emails[$i] = mysql_safe( $ext_emails[$i], true );
-	  $sql = "INSERT INTO webcal_entry_ext_user " .
-	    "( cal_id, cal_fullname, cal_email ) VALUES ( " .
-	    "$id, '$ext_names[$i]', ";
-	  if ( strlen ( $ext_emails[$i] ) ) {
-	    $sql .= "'$ext_emails[$i]' )";
-	  } else {
-	    $sql .= "NULL )";
-	  }
-	  if ( ! dbi_query ( $sql ) ) {
-	    $error = translate("Database error") . ": " . dbi_error ();
-	  }
-	  // send mail notification if enabled
-	  // TODO: move this code into a function...
-	  if ( $external_notifications == "Y" && $send_email != "N" &&
-	       strlen ( $ext_emails[$i] ) > 0 ) {
-	    $fmtdate = sprintf ( "%04d%02d%02d", $year, $month, $day );
-	    // Strip [\d] from duplicate Names before emailing
-	    $ext_names[$i] = trim(preg_replace( '/\[[\d]]/', "", $ext_names[$i]) );
-	    $msg = translate("Hello") . ", " . $ext_names[$i] . ".\n\n";
-	    if ( $newevent ) {
-	      $msg .= translate("A new appointment has been made for you by");
-	    } else {
-	      $msg .= translate("An appointment has been updated by");
-	    }
-	    $msg .= " " . $login_fullname .  ". " .
-	      translate("The subject is") . " \"" . $name . "\"\n\n" .
-	      translate("The notes are") . " \"" . $notes . "\"\n" .
-	      translate("Date") . ": " . date_to_str ( $fmtdate ) . "\n" .
-	      ( ( empty ( $hour ) && empty ( $minute ) ) ? "" :
-		translate("Time") . ": " .
-		display_time ( ( $hour * 10000 ) + ( $minute * 100 ) ) . "\n" ) .
-	      translate("Please look on") . " " . translate($application_name) .
-	      ".";
-	    // add URL to event, if we can figure it out
-	    if ( ! empty ( $server_url ) ) {
-	      $url = $server_url .  "view_entry.php?id=" .  $id;
-	      $msg .= "\n\n" . $url;
-	    }
-	    if ( strlen ( $from ) ) {
-	      $extra_hdrs = "From: $from\r\nX-Mailer: " . translate($application_name);
-	    } else {
-	      $extra_hdrs = "X-Mailer: " . translate($application_name);
-	    }
-	    mail ( $ext_emails[$i],
-		   translate($application_name) . " " .
-		   translate("Notification") . ": " . $name,
-		   html_to_8bits ($msg), $extra_hdrs );
-	    
-	  } // end send mail for external participants
-	} // end external participants names nonzero
-      } // end going through external names
-    } // end if ext_names, emails are arrays
-  } // end add entries
+  
+  // log add/update
+  activity_log ( $id, $login, $login,
+		 $newevent ? $LOG_CREATE : $LOG_UPDATE, "" );
+  
+  
+  // now add participants and send out notifications
+  if ( ! $newevent && count ( $old_meal_participant ) > 0 ) {  
+    while ( list ( $old_participant, $dummy ) = each ( $old_meal_participant ) ) {
+      
+      $from = $user_email;
+      if ( empty ( $from ) && ! empty ( $email_fallback_from ) )
+	$from = $email_fallback_from;
+      // only send mail if their email address is filled in
+      $do_send = get_pref_setting ( $old_participant,
+				    $newevent ? "EMAIL_EVENT_ADDED" : "EMAIL_EVENT_UPDATED" );
+      user_load_variables ( $old_participant, "temp" );
+      if ( $old_participant != $login && 
+	   strlen ( $tempemail ) &&
+	   $do_send == "Y" && $send_email != "N" ) {
+	
+	$user_hour = $hour;
+	$user_month = $month;
+	$user_day = $day;
+	$user_year = $year;
+	
+	$fmtdate = sprintf ( "%04d%02d%02d", $user_year, $user_month, $user_day );
+	$msg = translate("Hello") . ", " . $tempfullname . ".\n\n";
+	$msg .= translate("A meal has been updated by");
+	
+	$msg .= " " . $login_fullname .  ". " .
+	  "The suit is " . $suit . "\"\n\n" .
+	  "Date: " . date_to_str ( $fmtdate ) . "\n" .
+	  "Time: " .
+	  display_time ( ( $user_hour * 10000 ) + ( $minute * 100 ), true ) . 
+	  "\n";
+	// add URL to event, if we can figure it out
+	if ( ! empty ( $server_url ) ) {
+	  $url = $server_url .  "view_entry.php?id=" .  $id;
+	  $msg .= "\n\n" . $url;
+	}
+	if ( strlen ( $from ) ) {
+	  $extra_hdrs = "From: $from\r\nX-Mailer: " . translate($application_name);
+	} else {
+	  $extra_hdrs = "X-Mailer: " . translate($application_name);
+	}
+	mail ( $tempemail,
+	       translate($application_name) . " " . translate("Notification") . ": " . $name,
+	       html_to_8bits ($msg), $extra_hdrs );
+	activity_log ( $id, $login, $participants[$i], $LOG_NOTIFICATION, "" );
+      } // end sending email
+    } // end loop through participants
+  } // end email participants
 
  
   if ( !empty( $error ) ) {

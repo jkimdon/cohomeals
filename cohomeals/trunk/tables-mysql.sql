@@ -67,14 +67,8 @@ CREATE TABLE webcal_meal (
   cal_signup_deadline INT NOT NULL,
   /* base price (child, walkin, guest prices based on this) */
   cal_base_price DECIMAL(5,2),
-  /* desired number of cooks (not counting head chef) */
-  cal_num_cooks INT,
-  /* desired number of cleanup crew members */
-  cal_num_cleanup INT,
-  /* desired number of setup */
-  cal_num_setup INT,
-  /* desired number of other crew members */
-  cal_num_other_crew INT,
+  /* desired number of crew (not counting head chef) */
+  cal_num_crew INT,
   /* menu. For now, is just a text box. Later we'll allow interaction with a
      recipe database. */
   cal_menu TEXT,
@@ -101,13 +95,12 @@ CREATE TABLE webcal_meal_participant (
      'H' = head chef (only one)
      'M' = in-house muncher
      'T' = take-home plate
-     'C' = cook
-     'S' = setup
-     'L' = cleanup 
-     'O' = other */
+     'C' = crew
+     'W' = crew waiting list
+  */
   cal_type CHAR(1) NOT NULL,
-  /* description of participant type if "other" */
-  cal_description VARCHAR(80) NULL,
+  /* notes, e.g. about availability or crew type preference */
+  cal_notes VARCHAR(80) NULL,
   PRIMARY KEY ( cal_id, cal_login, cal_type )
 );
 

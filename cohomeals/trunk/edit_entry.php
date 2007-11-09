@@ -52,8 +52,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $newevent = false;
   $repeats = false;
   $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_num_cooks, " .
-    "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
+    "cal_suit, cal_menu, cal_num_crew, " .
     "cal_walkins, cal_notes " .
     "FROM webcal_meal WHERE cal_id = " . $id;
   $res = dbi_query ( $sql );
@@ -69,12 +68,9 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $minute = ( $time / 100 ) % 100;
     $suit = $row[2];
     $menu = $row[3];
-    $num_cooks = $row[4];
-    $num_cleanup = $row[5];
-    $num_setup = $row[6];
-    $num_other_crew = $row[7];
-    $walkins = $row[8];
-    $notes = $row[9];
+    $num_crew = $row[4];
+    $walkins = $row[5];
+    $notes = $row[6];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -90,10 +86,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   // defaults
   $suit="wild";
   $menu="";
-  $num_cooks=2;
-  $num_cleanup=2;
-  $num_setup=2;
-  $num_other_crew=0;
+  $num_crew=3;
   $walkins="D";
   $notes="";
 }
@@ -288,45 +281,17 @@ if ( $id ) {
   <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $menu );?></textarea>
 </td></tr>
 
-<tr><td class="tooltip">Number of cooks (in addition to head chef):</td>
+<tr><td class="tooltip">Number of crew members</td><td></td></tr>
+<tr><td> (in addition to head chef):</td>
   <td>
-  <select name="num_cooks">
+  <select name="num_crew">
   <?php
     for ( $i=0; $i<11; $i++ )
-      select_option( $i, $num_cooks );
+      select_option( $i, $num_crew );
   ?>
   </select>
 </td></tr>
 
-<tr><td class="tooltip">Number of people for setup:</td>
-  <td>
-  <select name="num_setup">
-  <?php
-    for ( $i=0; $i<11; $i++ )
-      select_option( $i, $num_setup );
-  ?>
-  </select>
-</td></tr>
-
-<tr><td class="tooltip">Number of people for cleanup:</td>
-  <td>
-  <select name="num_cleanup">
-  <?php
-    for ( $i=0; $i<11; $i++ )
-      select_option( $i, $num_cleanup );
-  ?>
-  </select>
-</td></tr>
-
-<tr><td class="tooltip">Number of other crew members:</td>
-  <td>
-  <select name="num_other_crew">
-  <?php
-    for ( $i=0; $i<11; $i++ )
-      select_option( $i, $num_other_crew );
-  ?>
-  </select>
-</td></tr>
 
 <tr><td class="tooltip">Walk-ins welcome?:</td>
 <td>

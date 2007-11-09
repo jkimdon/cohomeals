@@ -40,8 +40,7 @@ if ( ! empty ( $error ) ) {
 
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_num_cooks, " .
-    "cal_num_cleanup, cal_num_setup, cal_num_other_crew, " . 
+    "cal_suit, cal_menu, cal_num_crew, " .
     "cal_walkins, cal_notes " .
     "FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
@@ -56,10 +55,7 @@ if ( $row ) {
   $event_time = $row[1];
   $suit = $row[2];
   $menu = $row[3];
-  $num_cooks = $row[4];
-  $num_cleanup = $row[5];
-  $num_setup = $row[6];
-  $num_other_crew = $row[7];
+  $num_crew = $row[4];
   $walkins = $row[8];
   $notes = $row[9];
 } else {
@@ -190,20 +186,8 @@ echo "<p>Signup deadline: " . date_to_str( $deadline ) . "</p>";
 
 
 <?php 
-if ( $num_cooks != 0 ) {
-  display_crew( "Cooks", 'C', $num_cooks, $row_num );
-  $row_num = ( $row_num == 1 ) ? 0:1;
-}
-if ( $num_setup != 0 ) {
-  display_crew( "Setup", 'S', $num_setup, $row_num );
-  $row_num = ( $row_num == 1 ) ? 0:1;
-}
-if ( $num_cleanup != 0 ) {
-  display_crew( "Cleanup", 'L', $num_cleanup, $row_num );
-  $row_num = ( $row_num == 1 ) ? 0:1;
-}
-if ( $num_other_crew != 0 ) {
-  display_crew( "Other Crew (see notes)", 'O', $num_other_crew, $row_num );
+if ( $num_crew != 0 ) {
+  display_crew( "Crew", 'C', $num_crew, $row_num );
   $row_num = ( $row_num == 1 ) ? 0:1;
 }
 ?>
@@ -539,7 +523,7 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 
   echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
   echo "<td>";
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+  $sql = "SELECT cal_login, cal_notes FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_type = '$type'";
   $res = dbi_query ( $sql );
   $im_working = false;
@@ -550,16 +534,27 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 	echo "Error: Too many crew members.<br />\n";
       else { 
 	$person = $row[0];
+	$notes = $row[1];
+	$notes = trim( $notes );
 	user_load_variables ( $person, "temp" );
 	echo $i . ". " . $GLOBALS[tempfirstname] . 
 	  " " . $GLOBALS[templastname];
+	if ( $notes != "" ) {
+	  echo " (" . $notes . ")";
+	}
 	if ( $person == $login ) {
 	  $im_working = true;
 	}
 	if ( is_signer( $person ) || ($person == $login) ) {
 	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
 	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
-	    "Remove</a><br>";
+	    "Remove</a>";
+	  $notes = htmlspecialchars( $notes );
+	  $nexturl = "crew_notes.php?user=$person&id=$id&notes=$notes";
+	  echo "&nbsp;&nbsp;&nbsp;<a href class=\"addbutton\" " .
+	    "onclick=\"window.open('$nexturl', 'Crew notes', " .
+	    "'width=300,height=200,resizable=yes,scrollbars=yes');\">" .
+	    "Edit notes</a><br>";
 	}
 	echo "<br />\n";
 	$i += 1;
