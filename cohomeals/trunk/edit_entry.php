@@ -87,7 +87,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $suit="wild";
   $menu="";
   $num_crew=3;
-  $walkins="D";
+  $walkins="C";
   $notes="";
 }
 
@@ -297,9 +297,10 @@ if ( $id ) {
 <td>
   <select name="walkins">
     <?php
-    select_option( "D", $walkins, "Discouraged" );
+    select_option( "C", $walkins, "Check with head chef ASAP" );
     select_option( "W", $walkins, "Welcome" );
-    select_option( "E", $walkins, "Encouraged" );
+    select_option( "Y", $walkins, "Needed" );
+    select_option( "N", $walkins, "No" );
     ?>
   </select>
 </td>

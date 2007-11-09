@@ -306,7 +306,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "'" . $suit . "', ";
       $sql .= "'" . $menu . "', ";
       $sql .= $num_crew . ", ";
-      $sql .= empty ( $walkins ) ? "'D', " : "'$walkins', ";
+      $sql .= "'" . $walkins . "', ";
       $sql .= "'" . $notes . "' )";
     }
     else { 
@@ -318,9 +318,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "cal_time = " . sprintf ( "%02d%02d00, ", $hour, $minute );
       $sql .= "cal_menu = '" . $menu . "', ";
       $sql .= "cal_num_crew = " . $num_crew . ", ";
-      $sql .= "cal_walkins = " . 
-	empty ( $walkins ) ? "'D', " : "'$walkins', ";
-      $sql .= "cal_notes = '" . $notes . "' )";
+      $sql .= "cal_walkins = '" . $walkins . "', ";
+      $sql .= "cal_notes = '" . $notes . "' ";
       
       $sql .=	"WHERE cal_id = $id";
     }

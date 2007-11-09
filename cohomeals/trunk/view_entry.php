@@ -56,8 +56,8 @@ if ( $row ) {
   $suit = $row[2];
   $menu = $row[3];
   $num_crew = $row[4];
-  $walkins = $row[8];
-  $notes = $row[9];
+  $walkins = $row[5];
+  $notes = $row[6];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -323,12 +323,19 @@ for ( $i = 0; $i < $num_app; $i++ ) {
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Walk-ins welcome?:</td>
 <td>
 <?php 
-if ( $walkins == "W" ) {
-  echo "Welcome";
-} else if ( $walkins == "E" ) {
-  echo "Encouraged";
-} else {
-  echo "Discouraged";
+switch ( $walkins ) {
+ case 'C':
+   echo "Check with head chef ASAP";
+   break;
+ case 'W':
+   echo "Welcome";
+   break;
+ case 'Y':
+   echo "Needed";
+   break;
+ case 'N':
+   echo "No";
+   break;
 }
 ?>
 </td>

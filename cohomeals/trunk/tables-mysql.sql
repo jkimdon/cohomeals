@@ -59,7 +59,11 @@ CREATE TABLE webcal_meal (
   cal_time INT NULL,
   /* meal suit: heart, spade, diamond, club, wild */
   cal_suit VARCHAR(7) NOT NULL,
-  /*  walkins are: 'D' = discouraged, 'W' = welcome, 'E' = encouraged */
+  /* walkins are: 
+     'N' = no;
+     'W' = welcome
+     'Y' = needed
+     'C' = check with lead chef asap  */
   cal_walkins CHAR(1) DEFAULT 'D',
   /* deadline for signing up (YYYYMMDD format). after this date, 
      price increases to walkin/guest price and 
