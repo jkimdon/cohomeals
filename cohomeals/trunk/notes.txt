@@ -106,8 +106,6 @@ hearts:
 
 - for admin and mc only: see when meal was created and who set it up (log)
 
-- everybody can add a wild card meal
-
 - signup deadlines in add meal view
   - noon always
 
@@ -135,13 +133,11 @@ highlight self in view
 
 - flow sign up diners first 
 
-- let head chef sign self up like regular crew member
-
 
 - when mc chooses crew, shows ratio of work/eat, show who's working. also showexperience on thpose already signed up?
 
 
-- hover turns blue on all links
+- web way for mc to adapt food restrictions (now is just a direct database query)
 
 ********************************************
 

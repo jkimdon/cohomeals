@@ -101,9 +101,6 @@ if ( ! empty ( $error ) ) {
 <blockquote>
 <?php
 echo $error;
-//if ( $sql != "" )
-//  echo "<br /><br /><strong>SQL:</strong> $sql";
-//?>
 </blockquote>
 </body>
 </html>

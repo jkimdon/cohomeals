@@ -44,7 +44,7 @@ print_header( $INC );
 
   <span class="tabbak" id="tab_buddies"><a href="#tabbuddies" onclick="return showTab('buddies')">Buddies</a></span>
 
-  <span class="tabbak" id="tab_foodpref"><a href="#tabfoodpref" onclick="return showTab('foodpref')">Food preferences</a></span>
+  <span class="tabbak" id="tab_foodpref"><a href="#tabfoodpref" onclick="return showTab('foodpref')">Food restrictions</a></span>
 
 </div>
 
@@ -160,11 +160,37 @@ print_header( $INC );
   </div>
 
 
-  <!-- FOOD PREFERENCES -->
+  <!-- FOOD RESTRICTIONS -->
   <a name="tabfoodpref"></a>
   <div id="tabscontent_foodpref">
 
-    This part will include personal food preferences.
+    Your personal food restrictions are as follows. Contact the meal coordinator to update them.
+    <p><table>
+    <tr class="d1"><td>Food</td><td>Reason</td><td>Request level</td></tr>
+    <tr><td><hr></td><td><hr></td><td><hr></td></tr>
+
+    <?php
+    $row_num = 0;
+    $prefs = array();
+    $prefs = user_get_food_prefs( $login );
+    
+    for ( $i=0; $i<count( $prefs ); $i++ ) {
+      $pref = $prefs[$i];
+      echo "<tr class=\"d$row_num\"><td>" . $pref['food'] . "</td>" .
+	"<td>" . $pref['reason'] . "</td>" . 
+	"<td>" . $pref['level'] . " </td></tr>\n";
+      $row_num = ( $row_num == 1 ) ? 0:1;
+    }
+    ?>
+    
+    </table></p>
+
+    <p>Reminder:<br>
+    <b>Request level 1:</b> No request for Meal Crew:  I will take one or more steps, such as--eat the rest of the meal, or pick this ingredient out of a dish, or sometimes eat some of this food, or bring my own alternative food.<br>
+    <b>Request level 2:</b> Request some changes to menu that would increase Meal Crew's time/complexity <10%, such as serving item as a side dish so I can skip it, making simple variations of the same dish and leaving this food out of one version (like soup with either milk or soy milk), or serving alternative item purchased from store (like corn tortillas in addition to flour tortillas for burrito bar).<br>
+    <b>Request level 3:</b> Request more changes to menu that would increase Meal Crew's time/complexity >10%, such as serving precooked portions of an alternative dish, or cooking a separate alternative dish, or using unfamiliar ingredients or procedures.
+   </p>
+    
  
   </div>
 

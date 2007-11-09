@@ -130,6 +130,25 @@ CREATE TABLE webcal_subscriptions (
 );
 
 
+/* food preferences for people */
+CREATE TABLE webcal_food_prefs (
+  /* user login */
+  cal_login VARCHAR(25) NOT NULL,
+  /* food */
+  cal_food VARCHAR(40) NOT NULL,
+  /* level of complexity of request to meal crew
+	1 = no or minimal request to meal crew
+	2 = < 10% time/complexity request to meal crew
+	3 = > 10% time/complexity request to meal crew
+  */
+  cal_level INT NOT NULL,
+  /* reason why don't want to eat this food */
+  cal_reason ENUM('fatal','physical','philosophical','finicky') NOT NULL,
+  PRIMARY KEY ( cal_login, cal_food )
+);
+
+
+
 /*
  * This table associates one or more external users (people who do not
  * have a WebCalendar login) with an event by the event id.

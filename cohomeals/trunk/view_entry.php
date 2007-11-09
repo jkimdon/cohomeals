@@ -353,8 +353,50 @@ if ( $walkins == "W" ) {
 
 
 
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food preferences:</td>
-<td></td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:</td>
+<td>
+ <table>
+  <tr><td>Food</td><td>Names (level)</td></tr>
+
+  <?php
+  $sql = "SELECT DISTINCT cal_food FROM webcal_food_prefs";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $food = $row[0];
+      $first = true;
+      $sql2 = "SELECT cal_login, cal_level " .
+	"FROM webcal_food_prefs " .
+	"WHERE cal_food = '$food'";
+      if ( $res2 = dbi_query( $sql2 ) ) {
+	while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	  $user = $row2[0];
+	  $level = $row2[1];
+
+	  $sql3 = "SELECT cal_login " .
+	    "FROM webcal_meal_participant " .
+	    "WHERE cal_login = '$user' " .
+	    "AND (cal_type = 'M' " .
+	    "OR cal_type = 'T')";
+	  if ( $res3 = dbi_query( $sql3 ) ) {
+	    if ( dbi_fetch_row( $res3 ) ) {
+	      if ( $first == true ) {
+		echo "<tr><td>$food</td><td>";
+		$first = false;
+	      }
+	      echo $user . "(" . $level . ") ";
+	    }
+	  }
+	}
+	dbi_free_result( $res2 );
+      }
+      echo "</td></tr>\n";
+    }
+    dbi_free_result( $res );
+  }
+  ?>
+  </table>
+
+</td>
 </tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 

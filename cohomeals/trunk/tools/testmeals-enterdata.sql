@@ -19,6 +19,13 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, ca
  * financial log entries
  */
 INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 1, 'Kimdons', 'payment', 0, 10050, 10050, 'The first payment: check sent to bean counter' );
+/*
+ * food prefs
+ */
+INSERT INTO webcal_food_prefs ( cal_login, cal_food, cal_level, cal_reason ) VALUES ( 'jkimdon', 'dairy', 2, 'physical' );
+INSERT INTO webcal_food_prefs ( cal_login, cal_food, cal_level, cal_reason ) VALUES ( 'jkimdon', 'wheat', 2, 'physical' );
+INSERT INTO webcal_food_prefs ( cal_login, cal_food, cal_level, cal_reason ) VALUES ( 'jkimdon', 'cashews', 2, 'physical' );
+INSERT INTO webcal_food_prefs ( cal_login, cal_food, cal_level, cal_reason ) VALUES ( 'akimdon', 'dairy', 2, 'physical' );
 /* 
  * a few buddies
  * 
