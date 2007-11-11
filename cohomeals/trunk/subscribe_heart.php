@@ -40,27 +40,9 @@ $signees = get_signees( $login, true );
    
 <hr>
 
-<?php 
-$subscribed = false;
-$off_day = -1;
-$sql = "SELECT cal_off_day FROM webcal_subscriptions " .
-       "WHERE cal_login = '$cur_user' AND cal_suit = 'heart'";
-if ( $res = dbi_query ( $sql ) ) {
-  if ( $row = dbi_fetch_row ( $res ) ) {
-    $subscribed = true;
-    $off_day = $row[0];
-  }
-  else
-    $subscribed = false;
-} else {
-  echo "Database error: " . dbi_error() . "<br />\n";
-}
-
-?>
 <form action="subscribe_heart_handler.php" method="post" name="subheartform">
 <?php
 
-$meals = array ();
 $eating = array ();
 $weekday = array ();
 $some_meals = false;
@@ -69,69 +51,86 @@ $today_date = date( "Ymd" );//sprintf( "%04d%02d%02d", $thisyear, $thismonth, $t
 $action = 'N';
 
 
+/// find out what days of the week heart meals are
+$sql = "SELECT cal_id, cal_date FROM webcal_meal " .
+       "WHERE cal_suit = 'heart' AND cal_date >= $today_date ";
+$res = dbi_query ( $sql );
+if ( $res ) {
+  $i = 0;
+  $j = 0;
+  while ( $row = dbi_fetch_row ( $res ) ) {
+    $id = $row[0];
+    $meals = $row[1];
+ 
+    if ( $i == 0 ) {
+      $j = 0;
+      $weekday[$j++] = date ( "w", date_to_epoch( $meals ) );
+      $i++;
+    }
+    else {
+      $datedone = false;
+      $w = date ( "w", date_to_epoch( $meals ) );
+      for ( $k=0; $k<$j; $k++ ) {
+	if ( $w == $weekday[$k] ) 
+	  $datedone = true;
+      }
+      if ( $datedone == false ) {
+	$weekday[$j++] = $w;
+      }
+    }
+  }
+}
+
+
+/// print current status
+$subscribed = false;
+$off_day = -1;
+$ongoing = 0;
+$end_date = $today_date;
+$sql = "SELECT cal_off_day, cal_ongoing, cal_end " .
+       "FROM webcal_subscriptions " .
+       "WHERE cal_login = '$cur_user' AND cal_suit = 'heart' " .
+       "AND cal_start >= '$today_date'";
+if ( $res = dbi_query ( $sql ) ) {
+  while ( $row = dbi_fetch_row ( $res ) ) {
+    $subscribed = true;
+    $off_day = $row[0];
+    $ongoing = $row[1];
+    if ( $row[2] > $end_date )
+      $end_date = $row[2];
+  }
+} else {
+  echo "Database error: " . dbi_error() . "<br />\n";
+}
+
+
 echo "<b>Current status:</b> ";
+$new_start = $today_date;
 if ( $subscribed == true ) {
-  echo "Subscribed on an ongoing basis ";
+  echo "Subscribed until " . date_to_str( $end_date );
   if ( $off_day > 0 ) {
     echo " except for " . weekday_name ( $off_day ) . "s";
   }
-  else {
+  else if ( $off_day == 0 ) {
     echo "for all heart meals.";
   }
+
+  if ( $ongoing == 1 ) 
+    echo ".<br>Unless you cancel (button below), subscription will automatically renew for another 3 month block 2 weeks before the expiration of the current block.";
+
+  $new_start = $end_date;
+
 } else {
-  $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
-         "WHERE cal_suit = 'heart' AND cal_date >= $today_date ";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    $i = 0;
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $id = $row[0];
-      $meals[$i] = $row[1];
-
-      if ( $i == 0 ) {
-	$j = 0;
-	$weekday[$j] = date ( "w", date_to_epoch( $meals[$i] ) );
-	$j++;
-      }
-      else if ( $datedone == false ) {
-	$w = date ( "w", date_to_epoch( $meals[$i] ) );
-	if ( $w == $weekday[0] ) 
-	  $datedone = true;
-	else
-	  $weekday[$j] = $w;
-	$j++;
-      }
-
-      $sql2 = "SELECT cal_login FROM webcal_meal_participant " .
-	"WHERE cal_login = '$cur_user' AND cal_id = $id " .
-	"AND (cal_type = 'M' OR cal_type = 'T')";
-      if ( $res2 = dbi_query ( $sql2 ) ) {
-	if ( dbi_fetch_row ( $res2 ) ) {
-	  $some_meals = true;
-	  $eating[$i] = true;
-	}
-	else 
-	  $eating[$i] = false;
-      } else
-	echo "Database error: " . dbi_error() . "<br />\n";
-      $i++;
-    }
-  } else
-    echo "Database error: " . dbi_error() . "<br />\n";
-
-  if ( $some_meals == true )
-    echo "Signed up for a limited number of meals.";
-  else 
-    echo "Unsubscribed.";
+  echo "Unsubscribed";
 }
 
 ?>
 
 <br />
 
-<?php if ( $subscribed == false ) { ?>
+<?php if ( $ongoing == 0 ) { ?>
  <p>
- <b>Sign up :</b> 
+ <b>Sign up or extend your subscription :</b> 
   <select name="subtype" onchange="subtype_handler()">
    <option value="none">not selected</option>
    <option value="ongoing">on an ongoing basis</option>
@@ -140,15 +139,16 @@ if ( $subscribed == true ) {
 
 
 
+
 <div id=limitedcues>
 
 <table>
 <tr>
 <td><b>Starting:</b></td>
-<td><?php print_date_selection( "substart", $today_date ); ?>
+<td><?php print_date_selection( "substart", $new_start ); ?>
 </td></tr>
 <td><b>Ending:</b></td>
-<td><?php print_date_selection( "subend", $today_date ); ?>
+<td><?php print_date_selection( "subend", $new_start ); ?>
 </td></tr>
 <tr><td></td>
 <td align="right"><input type="button" value="Submit" onclick="check_time_period()" /></td>
@@ -157,6 +157,7 @@ if ( $subscribed == true ) {
 
 
 </div>
+
 
 
 
@@ -176,15 +177,15 @@ You may sign up for all meals or you may choose one day of the week for which yo
 </select></td></tr>
 
 <tr>
-<td align="right"><b>Starting:</b></td>
-<td><?php print_date_selection( "start", $today_date );  ?>
+<td align="right">First 3 month block starting:</td>
+<td><?php print_date_selection( "start", $new_start );  ?>
 </td></tr>
 
 <?php $action = 'S'; ?>
 
 
 <tr><td></td>
-<td><input type="submit" value="Subscribe" />
+<td><input type="button" value="Subscribe" onclick="check_start_date()" />
 </td></tr>
 </table>
 
@@ -192,21 +193,18 @@ You may sign up for all meals or you may choose one day of the week for which yo
 
 
 
-<?php } else {  // i.e. subscribed == true
+
+<?php } else {  // i.e. ongoing == 1
   $action = 'U';
   ?>
   <p>
-  <table><tr>
-  <td>Unsubscribe, starting: </td>
-  <td><?php print_date_selection( "start", $today_date ); 
-  $start_date = sprintf( "%04d%02d%02d", $startyear, $startmonth, $startday );?>
-  </td>
-  </tr><tr><td></td><td><input type="submit" value="Unsubscribe" /></td></tr>
-  </table>
+  <input type="submit" value="Cancel automatic renewal" />
+  </p>
 <?php } 
 
 echo "<input type=\"hidden\" name=\"action\" value=\"$action\" />";
 echo "<input type=\"hidden\" name=\"user\" value=\"$cur_user\" />";
+echo "<input type=\"hidden\" name=\"new_start\" value=\"$new_start\" />";
 ?>
 
 

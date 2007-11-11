@@ -45,7 +45,7 @@ $external_users = "";
 $participants = array ();
 $repeats = false;
 $newevent = false;
-$uses_endday = false;
+$uses_endday = false; 
 
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
@@ -162,14 +162,6 @@ print_header ( $INC, '', $BodyX );
 ?>
 <form action="edit_entry_handler.php" method="post" name="editentryform">
 
-<?php
-if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
-// additional hidden input fields
-echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
-echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
-echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
-?>
-
 <input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
 <p />
 <!-- TABS BODY -->
@@ -223,13 +215,13 @@ echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
   <?php if ( $newevent == true ) { ?>
   <tr id="suitdayofweek">
     <td class="tooltip">Day(s) of the week:</td>
-    <td><input type="checkbox" name="d0" checked>Sun</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d1" checked>Mon</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d2" checked>Tue</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d3" checked>Wed</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d4" checked>Thu</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d5" checked>Fri</input>&nbsp;&nbsp;&nbsp;
-    <input type="checkbox" name="d6" checked>Sat</input></td>
+    <td><input type="checkbox" name="d0">Sun</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d1">Mon</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d2">Tue</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d3">Wed</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d4">Thu</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d5">Fri</input>&nbsp;&nbsp;&nbsp;
+    <input type="checkbox" name="d6">Sat</input></td>
   </td></tr>
   <?php } ?>
 
@@ -334,7 +326,15 @@ if ( $id ) {
  </noscript>
 </td></tr>
 </table>
-<input type="hidden" name="participant_list" value="" />
+
+<?php
+if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
+// additional hidden input fields
+echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
+echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
+echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
+?>
+
 </form>
 
 <?php if ( $id > 0 && $is_meal_coordinator ) { ?>

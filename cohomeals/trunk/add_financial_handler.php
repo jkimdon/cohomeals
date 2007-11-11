@@ -22,11 +22,12 @@ $id = 1;
 if ( $is_meal_coordinator || $is_beancounter ) {
 
   $amount = 100*$dollars + $cents;
-  if ( ($type == credit) && ($amount < 0) ) $amount *= -1;
-  else if ( ($type == debit) && ($amount > 0) ) $amount *= -1;
+  $print_type = "charge";
+  if ( $type == credit ) $print_type = "credit";
+  else if ( $type == debit ) $print_type = "charge";
 
-  add_financial_event( $billing, $amount, $description, 
-		       $meal_id, $notes );
+  add_financial_event( $billing, $amount, $print_type, 
+		       $description, $meal_id, $notes );
 
 } else {
   $error = "Not authorized";

@@ -2351,9 +2351,10 @@ function edit_club_subscription( $club_id, $user, $action ) {
       dbi_free_result( $res );
     }
     $amount = get_price( $cal_id, $user );
+    $type = "charge";
     user_load_variables( $user, "temp" );
     if ( $action == 'D' ) {
-      $amount *= -1;
+      $type = "credit";
       $description = $GLOBALS[tempfullname] . 
 	" unsubscribing to club meals";
     } else {
@@ -2362,8 +2363,8 @@ function edit_club_subscription( $club_id, $user, $action ) {
     }
     $amount *= $count;
     $billing = get_billing_group( $user );
-    add_financial_event( $billing, $amount, $description,
-			 0, "" );
+    add_financial_event( $billing, $amount, $type, 
+			 $description, 0, "" );
   }    
 }
 
@@ -2623,6 +2624,56 @@ function is_head_chef( $id ) {
   }
   
   return $ret;
+}
+
+
+
+/// do heart autorenewals
+function update_subscriptions() {
+
+  $today_date = date( "Ymd", 
+		      mktime( 3,0,0, date("m"), date("d"), date("Y") ) );
+  $two_weeks_later = date( "Ymd", 
+		      mktime( 3,0,0, date("m"), date("d")+14, date("Y") ) );
+
+  $sql = "SELECT cal_login, cal_off_day, cal_end " .
+    "FROM webcal_subscriptions " .
+    "WHERE cal_suit = 'heart' " .
+    "AND cal_ongoing = 1 " .
+    "AND cal_end <= $two_weeks_later";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $user = $row[0];
+      $off_day = $row[1];
+      $end = $row[2];
+
+      $end_year = substr( $end, 0, 4 );
+      $end_month = substr( $end, 4, 2 );
+      $end_day = substr( $end, 6, 2 );
+      $newstart_timestamp = mktime( 3,0,0, $end_month, $end_day, $end_year );
+      $newend_timestamp = mktime( 3,0,0, $end_month+3, $end_day, $end_year );
+
+      $new_start = date( "Ymd", $newstart_timestamp );
+      $new_end = date( "Ymd", $newend_timestamp );
+
+
+      // make this subscription finite
+      $sql2 = "UPDATE webcal_subscriptions " .
+	"SET cal_ongoing = 0 " . 
+	"WHERE cal_login = '$user' " .
+	"AND cal_suit = 'heart' " .
+	"AND cal_end = $end " .
+	"AND cal_ongoing = 1";
+      if ( !dbi_query( $sql2 ) ) $error = "Database error: " . dbi_error ();
+
+      // add another ongoing subscription
+      $sql2 = "INSERT INTO webcal_subscriptions " .
+	"( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
+	"VALUES ('$user', 'heart', $off_day, $new_start, $new_end, 1 )";
+      if ( !dbi_query( $sql2 ) ) $error = "Database error: " . dbi_error ();
+    }
+    dbi_free_result( $res );
+  }
 }
 
 ?>

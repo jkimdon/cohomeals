@@ -101,10 +101,6 @@ else {
   $club_id = 0;
 }
 
-$count = array();
-for ( $i=0; $i<7; $i++ ) 
-  $count[$i] = 0;
-
 
 /// do the actual adding/editing of each event
 while ( $current_date <= $end_date ) {
@@ -114,8 +110,12 @@ while ( $current_date <= $end_date ) {
 			      $hour, $minute, $ampm,
 			      $menu, $num_crew, $walkins, $notes );
 
-  if ( $suit == "heart" ) {
-    add_subscribed_diners( $newid, $day, $month, $year, $count );
+  $active_timestamp = mktime( 3,0,0, $month, $day, $year );
+
+  if ( ($suit == "heart") && ($newevent == true) ) {
+    $added = add_subscribed_diners( $newid, $active_timestamp, $count );
+    if ( $added == true ) 
+      add_financial_log_for_subscribers( $active_timestamp );
   }
 
 
@@ -139,29 +139,31 @@ while ( $current_date <= $end_date ) {
   }
 }
 
-if ( $suit == "heart" )
-  add_financial_log_for_subscribers( $count );
-
-
 
 
 
 
 
 ////////////////////////////////////////////
-function add_subscribed_diners( $id, $day, $month, $year, &$count ) {
+function add_subscribed_diners( $id, $active_timestamp ) {
+
+  $active_date = date( "Ymd", $active_timestamp );
+
+  $added = false;
 
   $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
-    "WHERE cal_suit = 'heart'";
+    "WHERE cal_suit = 'heart' " . 
+    "AND cal_start <= '$active_date' AND cal_end > '$active_date'";
   $res = dbi_query ( $sql );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $w = $row[1];
-      $skipday = date ( "w", mktime( 3,0,0, $month, $day, $year ) );
+      $skipday = date ( "w", $active_timestamp );
       if ( $w != $skipday ) {
 	$mod = edit_participation ( $id, 'A', 'M', $row[0] );
-	if ( $mod == true )
-	  $count[$skipday]++;
+	if ( $mod == true ) {
+	  $added = true;
+	}
       }
     }
     dbi_free_result ( $res );
@@ -169,35 +171,36 @@ function add_subscribed_diners( $id, $day, $month, $year, &$count ) {
     $error = translate("Database error") . ": " . dbi_error ();
   }
 
+  return $added;
 }
 
 
 
 ////////////////////////////////////////////
 /// add the financial log events for subscribers
-function add_financial_log_for_subscribers( $count ) {
+function add_financial_log_for_subscribers( $active_timestamp ) {
+
+  $active_date = date( "Ymd", $active_timestamp );
 
   $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
-    "WHERE cal_suit = 'heart'";
+    "WHERE cal_suit = 'heart' " .
+    "AND cal_start <= '$active_date' AND cal_end > '$active_date'";
   $res = dbi_query ( $sql );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $user = $row[0];
-      $w = $row[1];
-      $ct = 0;
-      for ( $i=0; $i<7; $i++ ) {
-	if ( $w != $i ) {
-	  $ct += $count[$i];
-	}
-      }
+      $off_day = $row[1];
+      $weekday = date( "w", $active_timestamp );
+      if ( $off_day == $weekday ) $ct = 0;
+      else $ct = 1;
 
       user_load_variables( $user, "temp" );
       $description = $GLOBALS[tempfullname] . 
-	": ongoing heart subscription";
+	": ongoing heart subscription: new meals added";
       $amount = get_price( 0, $user, true );
       $amount *= $ct;
       $billing = get_billing_group( $user );
-      add_financial_event( $billing, $amount, 
+      add_financial_event( $billing, $amount, "charge",
 			   $description, 0, "" );
     }
     dbi_free_result ( $res );

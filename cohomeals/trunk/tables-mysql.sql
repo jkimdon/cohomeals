@@ -123,7 +123,13 @@ CREATE TABLE webcal_subscriptions (
   cal_club_id INT NULL,
   /* optional day of the week skipped for heart meals. 0 = Sun to 6 = Sat */
   cal_off_day INT NULL,
-  PRIMARY KEY ( cal_login, cal_suit, cal_club_id )
+  /* start of current block */
+  cal_start INT NULL,
+  /* end of current block */
+  cal_end INT NULL,
+  /* for heart meals: does the subscription automatically renew: 0=no 1=yes */
+  cal_ongoing INT NULL,
+  PRIMARY KEY ( cal_login, cal_suit, cal_club_id, cal_end )
 );
 
 

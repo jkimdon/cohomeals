@@ -32,13 +32,21 @@ if ( is_signer( $user ) ) {
     }
     
   }
+  dbi_free_result( $res );
+  $sql = "INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
+    "VALUES ( '$user', 'heart', -1, $startdate, $enddate, 0 )";
+  if ( !dbi_query( $sql ) ) 
+    echo "Database error: " . dbi_error() . "<br />\n";
+    
+
+
   $amount = get_price( 0, $login, true );
   $amount *= $count;
   user_load_variables( $user, "temp" );
   $description = $GLOBALS[tempfullname] . 
-    ": limited time heart subscription";
+    ": heart subscription";
   $billing = get_billing_group( $user );
-  add_financial_event( $billing, $amount, $description, 0, "" );
+  add_financial_event( $billing, $amount, "charge", $description, 0, "" );
 }
 
 ?>

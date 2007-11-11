@@ -112,7 +112,7 @@ function display_financial_log( $cur_group, $startdate, $enddate ) {
 
 }
 
-function add_financial_event( $billing, $amount, $description, $meal_id, $notes ) {
+function add_financial_event( $billing, $amount, $type, $description, $meal_id, $notes ) {
 
   $balance = 0;
   $last_balance = 0;
@@ -151,6 +151,8 @@ function add_financial_event( $billing, $amount, $description, $meal_id, $notes 
   $sql .= "'" . $billing . "', ";
   $sql .= "'" . $description . "', ";
   $sql .= $meal_id . ", ";
+  if ( ($type == 'charge') && ($amount > 0) ) $amount *= -1;
+  else if ( ($type == 'credit') && ($amount < 0) ) $amount *= -1;
   $sql .= $amount . ", ";
   $balance += $amount;
   $sql .= $balance . ", ";
@@ -172,10 +174,11 @@ function auto_financial_event( $meal_id, $action, $type, $user, $subscriber=fals
     if ( ($type == 'M') || ($type == 'T') ) {
       if ( $action == 'A' ) {
 	$amount = get_price( $meal_id, $user, $subscriber );
+	$amount *= -1;
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
-	  " attending meal";
-	add_financial_event( $billing, $amount, 
+	  " dining";
+	add_financial_event( $billing, $amount, "charge",
 			     $description, $meal_id, "" );
       }
       else if ( $action == 'D' ) {
@@ -183,7 +186,7 @@ function auto_financial_event( $meal_id, $action, $type, $user, $subscriber=fals
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " cancelled meal attendance";
-	add_financial_event( $billing, $amount, 
+	add_financial_event( $billing, $amount, "credit",
 			     $description, $meal_id, "" );
       }
       // do nothing if $action == 'C'
@@ -237,7 +240,6 @@ function get_price( $id, $user, $subscriber=false ) {
 function get_refund_price( $id, $user, $subscriber ) {
 
   $price = get_price( $id, $user, $subscriber );
-  $price *= -1;
   return $price;
 }
 

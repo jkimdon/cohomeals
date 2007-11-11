@@ -225,10 +225,6 @@ if ( ! empty ( $return_path ) ) {
    <?php etranslate("Access public calendar")?></a><br />
 <?php } ?>
 
-<?php if ( $demo_mode == "Y" ) {
- // This is used on the sourceforge demo page
- echo "Demo login: user = \"demo\", password = \"demo\"<br />";
-} ?>
 <br /><br /><br />
 <span class="cookies"><?php etranslate("cookies-note")?></span><br />
 <hr />

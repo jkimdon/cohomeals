@@ -40,9 +40,15 @@ function check_time_period() {
   var end_day_count = (end_year - start_year) * 365 + end_month * 30 + end_day;
   var start_day_count = start_month * 30 + start_day;
   var diff_days = end_day_count - start_day_count + 1;
-
   if ( diff_days < 90 ) {
     alert ( "You must commit to at least three months of heart meals." );
+    return false;
+  }
+
+  var start_date = start_year * 10000 + start_month * 100 + start_day;
+  var new_start = parseInt ( obj.new_start.value );
+  if ( start_date < new_start ) {
+    alert ( "The start date must be after the end of your previous block." );
     return false;
   }
 
@@ -53,6 +59,24 @@ function check_time_period() {
   window.open ( url, "Select dates", "width=300,height=600,resizable=yes,scrollbars=yes" );
 }
 
+
+function check_start_date() {
+
+  obj = document.subheartform;
+
+  var start_day = parseInt( obj.substartday.options[obj.substartday.selectedIndex].value );
+  var start_month = parseInt( obj.substartmonth.options[obj.substartmonth.selectedIndex].value );
+  var start_year = parseInt( obj.substartyear.options[obj.substartyear.selectedIndex].value );
+
+  var start_date = start_year * 10000 + start_month * 100 + start_day;
+  var new_start = parseInt ( obj.new_start.value );
+  if ( start_date < new_start ) {
+    alert ( "The start date must be after the end of your previous block." );
+    return false;
+  }
+
+  obj.submit ();
+}
 
 
 function check_number_meals( minid, maxid, count ) {
