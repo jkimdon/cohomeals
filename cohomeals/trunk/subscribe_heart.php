@@ -48,6 +48,7 @@ $weekday = array ();
 $some_meals = false;
 $datedone = false;
 $today_date = date( "Ymd" );//sprintf( "%04d%02d%02d", $thisyear, $thismonth, $thisday );
+$two_week = get_day( $today_date, 14 );
 $action = 'N';
 
 
@@ -105,7 +106,7 @@ if ( $res = dbi_query ( $sql ) ) {
 
 
 echo "<b>Current status:</b> ";
-$new_start = $today_date;
+$new_start = get_day( $today_date, 14 );
 if ( $subscribed == true ) {
   echo "Subscribed until " . date_to_str( $end_date );
   if ( $off_day > 0 ) {
@@ -185,7 +186,7 @@ You may sign up for all meals or you may choose one day of the week for which yo
 
 
 <tr><td></td>
-<td><input type="button" value="Subscribe" onclick="check_start_date()" />
+<td><input type="button" value="Subscribe" onclick="check_start_date(<?php echo $two_week;?>)" />
 </td></tr>
 </table>
 

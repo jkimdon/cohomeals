@@ -104,13 +104,13 @@ if ( $can_view == true ) {
   
   <table style="border-width:0px;">
   <tr>
-   <td class="tooltip">Billing group affected:</td>
-   <td><select name="billing">
+   <td class="tooltip">User affected:</td>
+   <td><select name="user">
     <?php 
-    $groups = get_billing_groups();
-    for ( $i=0; $i<count( $groups ); $i++ ) {
-      $group = $groups[$i];
-      echo "<option value=\"$group\">$group</option>\n";
+    $userlist = user_get_users();
+    for ( $i=0; $i<count( $userlist ); $i++ ) {
+      $u = $userlist[$i]['cal_fullname'];
+      echo "<option value=\"$u\">$u</option>\n";
     } ?>
     </select></td>
    </tr>

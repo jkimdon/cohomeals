@@ -15,6 +15,7 @@ $year = getPostValue( 'year' );
 $endday = getPostValue( 'endday' );
 $endmonth = getPostValue( 'endmonth' );
 $endyear = getPostValue( 'endyear' );
+$deadline = getPostValue( 'deadline' );
 $hour = getPostValue( 'hour' );
 $minute = getPostValue( 'minute' );
 $ampm = getPostValue( 'ampm' );
@@ -22,6 +23,12 @@ $menu = mysql_safe( getPostValue( 'menu' ), true );
 $num_crew = mysql_safe( getPostValue( 'num_crew' ), false );
 $walkins = mysql_safe( getPostValue( 'walkins' ), true );
 $notes = mysql_safe( getPostValue( 'notes' ), true );
+$base_dollars = getPostValue( 'base_dollars' );
+$base_cents = getPostValue( 'base_cents' );
+
+$base_price = 100*$base_dollars + $base_cents;
+if ( $newevent == false ) $repeats = false;
+if ( $suit == "heart" ) $deadline = 14;
 
 
 for ( $i=0; $i<7; $i++ ) {
@@ -107,6 +114,7 @@ while ( $current_date <= $end_date ) {
 
   $newid = add_or_edit_entry( $newevent, $id, $club_id, 
 			      $suit, $day, $month, $year, 
+			      $deadline, $base_price,
 			      $hour, $minute, $ampm,
 			      $menu, $num_crew, $walkins, $notes );
 
@@ -199,8 +207,7 @@ function add_financial_log_for_subscribers( $active_timestamp ) {
 	": ongoing heart subscription: new meals added";
       $amount = get_price( 0, $user, true );
       $amount *= $ct;
-      $billing = get_billing_group( $user );
-      add_financial_event( $billing, $amount, "charge",
+      add_financial_event( $user, $amount, "charge",
 			   $description, 0, "" );
     }
     dbi_free_result ( $res );
@@ -213,7 +220,9 @@ function add_financial_log_for_subscribers( $active_timestamp ) {
 
 ///////////////////////////////////////////////////////
 function add_or_edit_entry( $newevent, $id, $club_id, $suit, 
-			    $day, $month, $year, $hour, $minute, $ampm,
+			    $day, $month, $year, 
+			    $deadline, $base_price,
+			    $hour, $minute, $ampm,
 			    $menu, $num_crew, $walkins, $notes ) {
   global $is_meal_coordinator, $is_meal_coordinator;
   global $LOG_CREATE, $LOG_UPDATE;
@@ -298,7 +307,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
     if ( $newevent == true ) {
       $sql = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
 	"cal_date, cal_time, cal_suit, cal_menu, cal_num_crew, " .
-	"cal_walkins, cal_notes ) " .
+	"cal_base_price, cal_signup_deadline, cal_walkins, cal_notes ) " .
 	"VALUES ( ";
       
       $sql .= $id . ", ";	
@@ -309,6 +318,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "'" . $suit . "', ";
       $sql .= "'" . $menu . "', ";
       $sql .= $num_crew . ", ";
+      $sql .= $base_price . ", ";
+      $sql .= $deadline . ", ";
       $sql .= "'" . $walkins . "', ";
       $sql .= "'" . $notes . "' )";
     }
@@ -321,12 +332,12 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "cal_time = " . sprintf ( "%02d%02d00, ", $hour, $minute );
       $sql .= "cal_menu = '" . $menu . "', ";
       $sql .= "cal_num_crew = " . $num_crew . ", ";
+      $sql .= "cal_signup_deadline = " . $deadline . ", ";
       $sql .= "cal_walkins = '" . $walkins . "', ";
       $sql .= "cal_notes = '" . $notes . "' ";
       
       $sql .=	"WHERE cal_id = $id";
     }
-    
     
     if ( ! dbi_query ( $sql ) ) {
       $error = translate("Database error") . ": " . dbi_error ();

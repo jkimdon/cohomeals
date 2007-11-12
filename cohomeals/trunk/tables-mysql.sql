@@ -64,13 +64,13 @@ CREATE TABLE webcal_meal (
      'W' = welcome
      'Y' = needed
      'C' = check with lead chef asap  */
-  cal_walkins CHAR(1) DEFAULT 'D',
-  /* deadline for signing up (YYYYMMDD format). after this date, 
-     price increases to walkin/guest price and 
+  cal_walkins CHAR(1) DEFAULT 'C',
+  /* deadline for signing up. format: number of days before meal. 
+     after this date, price increases to walkin/guest price and 
      only the admin (MC,BC) can add you to the meal */
-  cal_signup_deadline INT NOT NULL,
+  cal_signup_deadline INT NOT NULL DEFAULT 2,
   /* base price (child, walkin, guest prices based on this) */
-  cal_base_price DECIMAL(5,2),
+  cal_base_price DECIMAL(5,2) NOT NULL DEFAULT 400,
   /* desired number of crew (not counting head chef) */
   cal_num_crew INT,
   /* menu. For now, is just a text box. Later we'll allow interaction with a
@@ -429,6 +429,8 @@ CREATE TABLE webcal_entry_log (
 CREATE TABLE webcal_financial_log (
   /* unique id of this log entry */
   cal_log_id INT NOT NULL,
+  /* which person is affected */
+  cal_login VARCHAR(25) NOT NULL,
   /* which household is affected */
   cal_billing_group VARCHAR(25) NOT NULL,
   /* describe event */

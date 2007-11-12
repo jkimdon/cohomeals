@@ -112,7 +112,9 @@ function display_financial_log( $cur_group, $startdate, $enddate ) {
 
 }
 
-function add_financial_event( $billing, $amount, $type, $description, $meal_id, $notes ) {
+function add_financial_event( $user, $amount, $type, $description, $meal_id, $notes ) {
+
+  $billing = get_billing_group( $user );
 
   $balance = 0;
   $last_balance = 0;
@@ -143,11 +145,12 @@ function add_financial_event( $billing, $amount, $type, $description, $meal_id, 
 
   
   $sql = "INSERT INTO webcal_financial_log " .
-    "( cal_log_id, cal_billing_group, cal_description, " .
+    "( cal_log_id, cal_login, cal_billing_group, cal_description, " .
     "cal_meal_id, cal_amount, cal_running_balance, " .
     "cal_text ) " . 
     "VALUES (";
   $sql .= $id . ", ";
+  $sql .= "'" . $user . "', ";
   $sql .= "'" . $billing . "', ";
   $sql .= "'" . $description . "', ";
   $sql .= $meal_id . ", ";
@@ -165,20 +168,42 @@ function add_financial_event( $billing, $amount, $type, $description, $meal_id, 
 }
 
 
-function auto_financial_event( $meal_id, $action, $type, $user, $subscriber=false ) {
+function auto_financial_event( $meal_id, $action, $type, $user ) {
 
   if ( is_signer( $user ) ) {
 
     user_load_variables( $user, "temp" );
+
+    /// determine if subscriber
+    $event_date = date( "Ymd" );
+    $subscriber = false;
+    $sql = "SELECT cal_date FROM webcal_meal WHERE cal_id=$meal_id";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$event_date = $row[0];
+	$sql2 = "SELECT cal_login " .
+	  "FROM webcal_subscriptions " .
+	  "WHERE cal_login = '$user' " . 
+	  "AND cal_start <= $event_date " .
+	  "AND cal_end > $event_date";
+	if ( $res2 = dbi_query( $sql2 ) ) {
+	  if ( dbi_fetch_row( $res2 ) ) {
+	    $subscriber = true;
+	  }
+	  dbi_free_result( $res2 );
+	}
+      }
+      dbi_free_result( $res );
+    }
+
     
     if ( ($type == 'M') || ($type == 'T') ) {
       if ( $action == 'A' ) {
 	$amount = get_price( $meal_id, $user, $subscriber );
-	$amount *= -1;
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " dining";
-	add_financial_event( $billing, $amount, "charge",
+	add_financial_event( $user, $amount, "charge",
 			     $description, $meal_id, "" );
       }
       else if ( $action == 'D' ) {
@@ -186,7 +211,7 @@ function auto_financial_event( $meal_id, $action, $type, $user, $subscriber=fals
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " cancelled meal attendance";
-	add_financial_event( $billing, $amount, "credit",
+	add_financial_event( $user, $amount, "credit",
 			     $description, $meal_id, "" );
       }
       // do nothing if $action == 'C'
@@ -196,52 +221,170 @@ function auto_financial_event( $meal_id, $action, $type, $user, $subscriber=fals
 }
 
 
-// fixme: fix subscription method
+
 function get_price( $id, $user, $subscriber=false ) {
 
+  /// get meal details. establish base price, past_deadline
   $base_price = 400;
-  //// fixme: collect base price  
-
-  
-  //// fixme: implement deadlines
-  
-
-  //// fixme: implement different subscriber
-  if ( $subscriber == true ) 
-    $base_price = 350;
-
-  /// check user age
-  $sql = "SELECT cal_birthdate " .
-    "FROM webcal_user " .
-    "WHERE cal_login = '$user'";
-  $birthdate = "";
+  $past_deadline = true;
+  $sql = "SELECT cal_base_price, cal_date, cal_signup_deadline " .
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
-    $row = dbi_fetch_row( $res );
-    $birthdate = $row[0];
-    dbi_free_result( $res );
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $base_price = $row[0];
+      $event_date = $row[1];
+      $deadline = $row[2];
+      $signup_deadline = get_day( $event_date, -1*$deadline );
+      if ( $signup_deadline >= date("Ymd") ) $past_deadline = false;
+    }
   }
 
-  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
-  $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
 
+
+  /// establish price category based on age
+  $age = "adult";
+  if ( $user == "adult" ) $age = "adult";
+  else if ( $user == "child" ) $age = "child";
+  else if ( $user == "walkin" ) $age = "adult";
+  else {
+    /// check user age
+    $sql = "SELECT cal_birthdate " .
+      "FROM webcal_user " .
+      "WHERE cal_login = '$user'";
+    $birthdate = "";
+    if ( $res = dbi_query( $sql ) ) {
+      $row = dbi_fetch_row( $res );
+      $birthdate = $row[0];
+      dbi_free_result( $res );
+    }
+    
+    $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
+    $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
+    
+    if ( $birthdate > $free_cutoff )
+      $age = "free";
+    else if ( $birthdate > $child_cutoff ) 
+      $age = "child";
+    else $age = "adult";
+  }
+
+
+
+  /// establish price category based on preregistration or walkin
+  $category = "pre";
+  if ( $past_deadline == true ) $category = "walkin";
+  if ( $user == "walkin" ) $category = "walkin";
+
+
+  /// calculate cost based on above information
   $cost = $base_price;
-  if ( $birthdate > $free_cutoff )
-    $cost = 0;
-  else if ( $birthdate > $child_cutoff ) 
-    $cost = $base_price / 2.0;
+  if ( $category == "walkin" ) $cost += 100;
+  else if ( $subscriber == true ) $cost = $base_price * 0.875;
 
+
+  if ( $age == "free" ) $cost = 0;
+  else if ( $age == "child" ) $cost /= 2;
 
   return $cost;
 }
 
 
 
-/// fixme
-function get_refund_price( $id, $user, $subscriber ) {
 
-  $price = get_price( $id, $user, $subscriber );
+function get_refund_price( $id, $user, $subscriber=false ) {
+
+  $price = 0;
+  $past_deadline = true;
+  $today = date( "Ymd" );
+
+  $sql = "SELECT cal_date, cal_signup_deadline " .
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = $row[0];
+      $deadline = $row[1];
+      $deadline_date = get_day( $event_date, -1*$deadline );
+      if ( $deadline_date >= $today ) $past_deadline = false;
+    }
+    dbi_free_result( $res );
+  }
+
+
+
+  if ( $past_deadline == false ) {
+    $percentage = get_refund_percentage( $id, $past_deadline );
+
+    $maxT = 0;
+    $amount = 0;
+    $sql = "SELECT cal_amount, cal_timestamp " .
+      "FROM webcal_financial_log " .
+      "WHERE cal_login = '$user' " . 
+      "AND cal_meal_id = $id " .
+      "AND cal_amount < 0";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$timestamp = $row[1];
+	if ( $timestamp > $maxT ) {
+	  $maxT = $timestamp;
+	  $amount = $row[0];
+	}
+      }
+      dbi_free_result( $res );
+    }
+	  
+
+    $amount *= $percentage;
+    $amount /= 100;
+    $price = (int)$amount;
+  } // else: leave price == 0.
+
   return $price;
 }
+
+
+function get_refund_percentage( $id, $past_deadline=false ) {
+
+  $refund = 100;
+
+  if ( $past_deadline == true ) {
+    $refund = 0;
+  } else {
+
+    $suit = 'wild';
+    $today = date( "Ymd" );
+    $event_date = $today;
+    $sql = "SELECT cal_suit, cal_date " .
+      "FROM webcal_meal " .
+      "WHERE cal_id = $id";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$suit = $row[0];
+	$event_date = $row[1];
+      }
+    }
+    
+    if ( $suit == 'heart' ) {
+      $two_weeks_before = get_day( $event_date, -14 );
+      if ( $today > $two_weeks_before ) 
+	$refund = 50;
+    }
+  }
+
+
+  return $refund;
+}
+
+
+
+function price_to_str( $price ) {
+  $dollars = (int)($price / 100);
+  $cents = $price - ($dollars*100);
+  printf( "\$%d.%02d", $dollars, $cents );
+}
+
+
 
 function get_billing_group( $user ) {
   global $is_meal_coordinator, $is_beancounter;

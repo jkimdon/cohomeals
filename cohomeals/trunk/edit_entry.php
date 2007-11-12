@@ -47,13 +47,15 @@ $repeats = false;
 $newevent = false;
 $uses_endday = false; 
 
+
 if ( ! empty ( $id ) && $id > 0 ) { 
   // edit existing event
   $newevent = false;
   $repeats = false;
   $sql = "SELECT cal_date, cal_time, " .
     "cal_suit, cal_menu, cal_num_crew, " .
-    "cal_walkins, cal_notes " .
+    "cal_walkins, cal_signup_deadline, " .
+    "cal_base_price, cal_notes " .
     "FROM webcal_meal WHERE cal_id = " . $id;
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -70,7 +72,9 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $menu = $row[3];
     $num_crew = $row[4];
     $walkins = $row[5];
-    $notes = $row[6];
+    $deadline = $row[6];
+    $base_price = $row[7];
+    $notes = $row[8];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -85,46 +89,15 @@ if ( ! empty ( $id ) && $id > 0 ) {
 
   // defaults
   $suit="wild";
+  $cal_date = date( "Ymd" );
   $menu="";
   $num_crew=3;
   $walkins="C";
+  $deadline = 2;
+  $base_price = 400;
   $notes="";
 }
 
-if ( ! empty ( $year ) && $year )
-  $thisyear = $year;
-if ( ! empty ( $month ) && $month )
-  $thismonth = $month;
-if ( ! empty ( $day ) && $day )
-  $thisday = $day;
-
-// avoid error for using undefined vars
-if ( ! isset ( $hour ) )
-  $hour = -1;
-if ( empty ( $suit ) )
-  $suit = "";
-
-if ( ( empty ( $year ) || ! $year ) &&
-  ( empty ( $month ) || ! $month ) &&
-  ( ! empty ( $date ) && strlen ( $date ) ) ) {
-  $thisyear = $year = substr ( $date, 0, 4 );
-  $thismonth = $month = substr ( $date, 4, 2 );
-  $thisday = $day = substr ( $date, 6, 2 );
-  $cal_date = $date;
-} else {
-  if ( empty ( $cal_date ) )
-    $cal_date = date ( "Ymd" );
-}
-if ( empty ( $thisyear ) )
-  $thisdate = date ( "Ymd" );
-else {
-  $thisdate = sprintf ( "%04d%02d%02d",
-    empty ( $thisyear ) ? date ( "Y" ) : $thisyear,
-    empty ( $thismonth ) ? date ( "m" ) : $thismonth,
-    empty ( $thisday ) ? date ( "d" ) : $thisday );
-}
-if ( empty ( $cal_date ) || ! $cal_date )
-  $cal_date = $thisdate;
 
 if ( $allow_html_description == "Y" ){
   // Allow HTML in description
@@ -197,7 +170,7 @@ print_header ( $INC, '', $BodyX );
 
 
   </td></tr>
-  <tr><td class="tooltip" title="<?php etooltip("date-help")?>">Date:</td><td colspan="2">
+  <tr><td class="tooltip" title="date">Date:</td><td colspan="2">
    <?php
     print_date_selection ( "", $cal_date );
    ?>
@@ -285,6 +258,36 @@ if ( $id ) {
 </td></tr>
 
 
+
+<?php 
+$base_dollars = $base_price / 100;
+$base_cents = $base_price - ($base_dollars * 100);
+?>
+<tr><td class="tooltip">Base price:</td>
+<td colspan="2">
+  <?php if ( $newevent == true ) { ?>
+    $<input type="text" name="base_dollars" size="2" 
+      value="<?php echo $base_dollars;?>" maxlength="2" />.
+      <input type="text" name="base_cents" size="2"
+      value="<?php printf( "%02d", $base_cents );?>" maxlength="2" />
+  <?php } else {
+    printf( "\$%d.%02d", $base_dollars, $base_cents ); 
+    echo "<input type=\"hidden\" name=\"base_dollars\" value=\"$base_dollars\" />\n";
+    echo "<input type=\"hidden\" name=\"base_cents\" value=\"$base_cents\" />\n";
+ }?>
+</td>
+</tr>
+
+
+<tr id="signup_deadline"><td class="tooltip">Signup deadline:</td>
+<td>
+   <input type="text" name="deadline" size="2" 
+   value="<?php echo $deadline;?>" maxlength="2" /> days before meal
+</td>
+</tr>
+
+
+
 <tr><td class="tooltip">Walk-ins welcome?:</td>
 <td>
   <select name="walkins">
@@ -330,6 +333,8 @@ if ( $id ) {
 <?php
 if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
 // additional hidden input fields
+ if ( $repeats == false ) echo "debug: repeats  false<br>";
+ else echo "debug: repeats true<br>";
 echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
 echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
 echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";

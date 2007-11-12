@@ -2362,8 +2362,7 @@ function edit_club_subscription( $club_id, $user, $action ) {
 	" subscribing to club meals";
     }
     $amount *= $count;
-    $billing = get_billing_group( $user );
-    add_financial_event( $billing, $amount, $type, 
+    add_financial_event( $user, $amount, $type, 
 			 $description, 0, "" );
   }    
 }
@@ -2631,10 +2630,10 @@ function is_head_chef( $id ) {
 /// do heart autorenewals
 function update_subscriptions() {
 
-  $today_date = date( "Ymd", 
-		      mktime( 3,0,0, date("m"), date("d"), date("Y") ) );
-  $two_weeks_later = date( "Ymd", 
-		      mktime( 3,0,0, date("m"), date("d")+14, date("Y") ) );
+  $today = date( "Ymd" );
+  $today_date = get_day( $today, 0 );
+  $two_weeks_later = get_day( $today, 14 );
+
 
   $sql = "SELECT cal_login, cal_off_day, cal_end " .
     "FROM webcal_subscriptions " .
@@ -2674,6 +2673,17 @@ function update_subscriptions() {
     }
     dbi_free_result( $res );
   }
+}
+
+
+
+function get_day( $ref_date, $num_days ) {
+  $sy = substr ( $ref_date, 0, 4 );
+  $sm = substr ( $ref_date, 4, 2 );
+  $sd = substr ( $ref_date, 6, 2 );
+  $newdate = date( "Ymd", mktime( 3,0,0, $sm, $sd+$num_days, $sy ) );
+
+  return $newdate;
 }
 
 ?>

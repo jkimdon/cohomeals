@@ -19,7 +19,20 @@ INSERT INTO webcal_user ( cal_login, cal_passwd, cal_firstname, cal_lastname, ca
 /*
  * financial log entries
  */
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 1, 'Kimdons', 'payment', 0, 10050, 10050, 'The first payment: check sent to bean counter' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 1, 'jkimdon', 'Kimdons', 'payment', 0, 10050, 10050, 'The first payment: check sent to bean counter' );
+/* 
+ * a heart subscription
+ */
+INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) VALUES ( 'jkimdon', 'heart', 4, 20071114, 20071130, 1 );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 35, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 36, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 37, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 38, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 39, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 40, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 41, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 42, 'jkimdon', 'M', '' );
+INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 43, 'jkimdon', 'M', '' );
 /*
  * food prefs
  */
@@ -54,19 +67,19 @@ INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal
  * wild with a participant and a billing
  *
  */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '9', '0', '20071113', '183000', 'wild', 'C', '3', 'baby food', 'babies only' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '9', '0', '20071213', '183000', 'wild', 'C', '3', 'baby food', 'babies only' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'jkimdon', 'M', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 2, 'Kimdons', 'Joey Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 2, 'jkimdon', 'Kimdons', 'Joey Kimdon dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'dkimdon', 'M', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 3, 'Kimdons', 'David Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 3, 'dkimdon', 'Kimdons', 'David Kimdon dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'akimdon', 'M', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 4, 'Kimdons', 'Aria Kimdon dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 4, 'akimdon', 'Kimdons', 'Aria Kimdon dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'userA', 'T', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 5, 'coolKids', 'Ima User dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 5, 'userA', 'coolKids', 'Ima User dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'userB', 'T', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 6, 'pets', 'Meow Cat dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 6, 'userB', 'pets', 'Meow Cat dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'userC', 'M', '' );
-INSERT INTO webcal_financial_log ( cal_log_id, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 7, 'pets', 'Bark Dog dining', 9, -400, 9650, '' );
+INSERT INTO webcal_financial_log ( cal_log_id, cal_login, cal_billing_group, cal_description, cal_meal_id, cal_amount, cal_running_balance, cal_text ) VALUES ( 7, 'userC', 'pets', 'Bark Dog dining', 9, -400, 9650, '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'userC', 'C', '' );
 INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) VALUES ( 9, 'jkimdon', 'H', '' );
 
@@ -74,54 +87,54 @@ INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type, cal_notes ) V
  * some hearts
  * 
  */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '10', '0', '20070912', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '11', '0', '20070913', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '12', '0', '20070914', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '13', '0', '20070919', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '14', '0', '20070920', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '15', '0', '20070921', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '16', '0', '20070926', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '17', '0', '20070927', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '18', '0', '20070928', '180000', 'heart', 'C', '3', '', '' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '10', '0', '20070912', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '11', '0', '20070913', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '12', '0', '20070914', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '13', '0', '20070919', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '14', '0', '20070920', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '15', '0', '20070921', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '16', '0', '20070926', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '17', '0', '20070927', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '18', '0', '20070928', '180000', 'heart', 'C', '3', '', '', 14 );
 /* oct */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '19', '0', '20071003', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '20', '0', '20071004', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '21', '0', '20071005', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '22', '0', '20071010', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '23', '0', '20071011', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '24', '0', '20071012', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '25', '0', '20071017', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '26', '0', '20071018', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '27', '0', '20071019', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '28', '0', '20071024', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '29', '0', '20071025', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '30', '0', '20071026', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '31', '0', '20071031', '180000', 'heart', 'C', '3', '', '' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '19', '0', '20071003', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '20', '0', '20071004', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '21', '0', '20071005', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '22', '0', '20071010', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '23', '0', '20071011', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '24', '0', '20071012', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '25', '0', '20071017', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '26', '0', '20071018', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '27', '0', '20071019', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '28', '0', '20071024', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '29', '0', '20071025', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '30', '0', '20071026', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '31', '0', '20071031', '180000', 'heart', 'C', '3', '', '', 14 );
 /* nov */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '55', '0', '20071101', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '56', '0', '20071102', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '32', '0', '20071107', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '33', '0', '20071108', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '34', '0', '20071109', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '35', '0', '20071114', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '36', '0', '20071115', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '37', '0', '20071116', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '38', '0', '20071121', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '39', '0', '20071122', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '40', '0', '20071123', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '41', '0', '20071128', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '42', '0', '20071129', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '43', '0', '20071130', '180000', 'heart', 'C', '3', '', '' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '55', '0', '20071101', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '56', '0', '20071102', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '32', '0', '20071107', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '33', '0', '20071108', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '34', '0', '20071109', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '35', '0', '20071114', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '36', '0', '20071115', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '37', '0', '20071116', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '38', '0', '20071121', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '39', '0', '20071122', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '40', '0', '20071123', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '41', '0', '20071128', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '42', '0', '20071129', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '43', '0', '20071130', '180000', 'heart', 'C', '3', '', '', 14 );
 /* dec */
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '44', '0', '20071205', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '45', '0', '20071206', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '46', '0', '20071207', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '47', '0', '20071212', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '48', '0', '20071213', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '49', '0', '20071214', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '50', '0', '20071219', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '51', '0', '20071220', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '52', '0', '20071221', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '53', '0', '20071226', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '54', '0', '20071227', '180000', 'heart', 'C', '3', '', '' );
-INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes ) VALUES ( '57', '0', '20071228', '180000', 'heart', 'C', '3', '', '' );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '44', '0', '20071205', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '45', '0', '20071206', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '46', '0', '20071207', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '47', '0', '20071212', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '48', '0', '20071213', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '49', '0', '20071214', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '50', '0', '20071219', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '51', '0', '20071220', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '52', '0', '20071221', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '53', '0', '20071226', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '54', '0', '20071227', '180000', 'heart', 'C', '3', '', '', 14 );
+INSERT INTO webcal_meal ( cal_id, cal_club_id, cal_date, cal_time, cal_suit, cal_walkins, cal_num_crew, cal_menu, cal_notes, cal_signup_deadline ) VALUES ( '57', '0', '20071228', '180000', 'heart', 'C', '3', '', '', 14 );

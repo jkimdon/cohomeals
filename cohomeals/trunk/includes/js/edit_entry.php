@@ -29,7 +29,7 @@ function validate_and_submit () {
   }
 
   // make sure at least one weekday has been checked 
-  if ( document.editentryform.repeats.value == "true" ) {
+  if ( document.editentryform.repeats.value == true ) {
     dayok = false;
     if ( document.editentryform.d0.checked == true ) dayok = true;
     if ( document.editentryform.d1.checked == true ) dayok = true;
@@ -86,10 +86,10 @@ function suittype_handler() {
 
   if ( (val == "heart") || (val == "club") || (val == "diamond") ) {
     makeVisible ( "suitenddate" );
-    document.editentryform.repeats.value = "true";
+    document.editentryform.repeats.value = "1";
   } else {
     makeInvisible( "suitenddate" );
-    document.editentryform.repeats.value = "false";
+    document.editentryform.repeats.value = "";
   }
 
   if ( (val == "heart") || (val == "club") ) {
@@ -102,7 +102,13 @@ function suittype_handler() {
     makeVisible( "headchef" );
   }
 
-  if ( (val == "diamond" ) ) {
+  if ( val == "heart" ) {
+    makeVisible ( "signup_deadline" );
+  } else {
+    makeInvisible ( "signup_deadline" );
+  }
+
+  if ( val == "diamond" ) {
     document.editentryform.d0.checked = true;
 
     document.editentryform.d1.checked = false;
@@ -111,6 +117,8 @@ function suittype_handler() {
     document.editentryform.d4.checked = false;
     document.editentryform.d5.checked = false;
     document.editentryform.d6.checked = false;
+
+    document.editentryform.base_price.value = 300;
   }
   else {
     document.editentryform.d0.checked = false;
@@ -120,7 +128,10 @@ function suittype_handler() {
     document.editentryform.d4.checked = false;
     document.editentryform.d5.checked = false;
     document.editentryform.d6.checked = false;
+
+    document.editentryform.base_price.value = 400;    
   }
+
 }
 
 

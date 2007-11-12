@@ -48,7 +48,7 @@ function check_time_period() {
   var start_date = start_year * 10000 + start_month * 100 + start_day;
   var new_start = parseInt ( obj.new_start.value );
   if ( start_date < new_start ) {
-    alert ( "The start date must be after the end of your previous block." );
+    alert ( "The start date must be after the end of your previous block or at least 2 weeks from today." );
     return false;
   }
 
@@ -60,20 +60,26 @@ function check_time_period() {
 }
 
 
-function check_start_date() {
+function check_start_date( two_week ) {
 
   obj = document.subheartform;
 
-  var start_day = parseInt( obj.substartday.options[obj.substartday.selectedIndex].value );
-  var start_month = parseInt( obj.substartmonth.options[obj.substartmonth.selectedIndex].value );
-  var start_year = parseInt( obj.substartyear.options[obj.substartyear.selectedIndex].value );
+  var start_day = parseInt( obj.startday.options[obj.startday.selectedIndex].value );
+  var start_month = parseInt( obj.startmonth.options[obj.startmonth.selectedIndex].value );
+  var start_year = parseInt( obj.startyear.options[obj.startyear.selectedIndex].value );
 
   var start_date = start_year * 10000 + start_month * 100 + start_day;
   var new_start = parseInt ( obj.new_start.value );
   if ( start_date < new_start ) {
-    alert ( "The start date must be after the end of your previous block." );
+    alert ( "The start date must be after the end of your previous block or at least 2 weeks from today." );
     return false;
   }
+
+  if ( start_date < two_week ) {
+    alert ( "The start date must be at least 2 weeks in the future.");
+    return false;
+  }
+  
 
   obj.submit ();
 }

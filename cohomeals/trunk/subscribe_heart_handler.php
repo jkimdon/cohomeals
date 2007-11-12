@@ -57,8 +57,7 @@ if ( is_signer( $user ) ) {
     
     $amount = get_price( 0, $user, true );
     $amount *= $count;
-    $billing = get_billing_group( $user );
-    add_financial_event( $billing, $amount, "charge", $description, 0, "" );
+    add_financial_event( $user, $amount, "charge", $description, 0, "" );
 
   }
   

@@ -45,8 +45,7 @@ if ( is_signer( $user ) ) {
   user_load_variables( $user, "temp" );
   $description = $GLOBALS[tempfullname] . 
     ": heart subscription";
-  $billing = get_billing_group( $user );
-  add_financial_event( $billing, $amount, "charge", $description, 0, "" );
+  add_financial_event( $user, $amount, "charge", $description, 0, "" );
 }
 
 ?>

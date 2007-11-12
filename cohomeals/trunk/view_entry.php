@@ -38,9 +38,11 @@ if ( ! empty ( $error ) ) {
   exit;
 }
 
+$base_price = 400;
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
     "cal_suit, cal_menu, cal_num_crew, " .
+    "cal_signup_deadline, cal_base_price, " .
     "cal_walkins, cal_notes " .
     "FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
@@ -56,8 +58,10 @@ if ( $row ) {
   $suit = $row[2];
   $menu = $row[3];
   $num_crew = $row[4];
-  $walkins = $row[5];
-  $notes = $row[6];
+  $deadline = $row[5];
+  $base_price = $row[6];
+  $walkins = $row[7];
+  $notes = $row[8];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -67,30 +71,7 @@ if ( $row ) {
   exit;
 }
 
-// Timezone Adjustments
-if ( $event_time >= 0 && ! empty ( $TZ_OFFSET )  && $TZ_OFFSET != 0 ) { 
-  // -1 = no time specified
-  $adjusted_time = $event_time + $TZ_OFFSET * 10000;
-  $year = substr($row[0],0,4);
-  $month = substr($row[0],4,2);
-  $day = substr($row[0],-2);
-  if ( $adjusted_time > 240000 ) {
-    $gmt = mktime ( 3, 0, 0, $month, $day, $year );
-    $gmt += $ONE_DAY;
-  } else if ( $adjusted_time < 0 ) {
-    $gmt = mktime ( 3, 0, 0, $month, $day, $year );
-    $gmt -= $ONE_DAY;
-  }
-}
-// Set alterted date
-$tz_date = ( ! empty ( $gmt ) ) ? date ( "Ymd", $gmt ) : $row[0];
-
-// save date so the trailer links are for the same time period
-$thisyear = (int) ( $tz_date / 10000 );
-$thismonth = ( $tz_date / 100 ) % 100;
-$thisday = $tz_date % 100;
-$thistime = mktime ( 3, 0, 0, $thismonth, $thisday, $thisyear );
-$thisdow = date ( "w", $thistime );
+$event_date = $orig_date;
 
 // $subject is used for mailto URLs
 $subject = translate($application_name) . ": " . $suit;
@@ -98,27 +79,52 @@ $subject = translate($application_name) . ": " . $suit;
 $subject = str_replace ( "\"", "", $subject );
 $subject = htmlspecialchars ( $subject );
 
-$is_private = false;
 
-$event_date = $row[0];
 
 ?>
 
 <h2>Meal details</h2>
 
 <?php
-$sy = substr ( $event_date, 0, 4 );
-$sm = substr ( $event_date, 4, 2 );
-$sd = substr ( $event_date, 6, 2 );
-$deadline = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd - 2, $sy ) );
-echo "<p>Signup deadline: " . date_to_str( $deadline ) . "</p>";
+$signup_deadline = get_day( $event_date, -1*$deadline );
+echo "<p>Signup deadline: " . date_to_str( $signup_deadline );
+$past_deadline = false;
+if ( $signup_deadline < date("Ymd") ) $past_deadline = true;
+$can_signup = !$past_deadline;
+if ( $is_meal_coordinator || $is_beancounter ) $can_signup = true;
+
+if ( $past_deadline == true ) 
+  echo "<br>This meal is in <font color=\"#DD0000\">walkin status</font> (i.e. past signup deadline)</p>";
+else echo "</p>";
 ?>
 
 <p>
 <table class="bordered_table">
-<tr><td>Prices:</td><td class="number">adult</td><td class="number">child</td><td class="number">walkin/guest</td></tr>
-<tr><td>Signing up now costs:</td><td class="number">$4.00</td><td class="number">$2.00</td><td class="number">$5.00</td></tr>
-<tr><td>Cancelling now refunds:</td><td class="number">100%</td><td class="number">100%</td><td class="number">100%</td></tr>
+<tr>
+  <td>Prices:</td>
+  <td class="number">adult</td>
+  <td class="number">child</td>
+  <td class="number">walkin/guest</td>
+</tr>
+<tr>
+  <td>Signing up now costs:</td>
+  <td class="number">
+    <?php echo price_to_str( get_price( $id, "adult" ));?>
+  </td>
+  <td class="number">
+    <?php echo price_to_str( get_price( $id, "child" ));?>
+  </td>
+  <td class="number">
+    <?php echo price_to_str( get_price( $id, "walkin" ));?>
+  </td>
+</tr>
+<tr>
+  <td>Cancelling now refunds:</td>
+  <?php $refund = get_refund_percentage( $id, $past_deadline ); ?>
+  <td class="number"><?php echo $refund;?>%</td>
+  <td class="number"><?php echo $refund;?>%</td>
+  <td class="number"><?php echo $refund;?>%</td>
+</tr>
 </table>
 </p>
 <p></p>
@@ -227,16 +233,18 @@ if ( $res ) {
       echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
     }
 
-    if ( $already_eating == false ) {
-      echo "<a name=\"participation\" class=\"addbutton\"" .
-	"href=\"edit_participation_handler.php?user=$login&id=$id&type=M&action=A\">" .
-	"Add me</a>";
-      echo "&nbsp;&nbsp;&nbsp;";
-    }
-    $nexturl = "signup_buddy.php?id=$id&type=M&action=A";
-    ?>
-    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-    <br><?php
+    if ( $can_signup == true ) {
+      if ( $already_eating == false ) {
+	echo "<a name=\"participation\" class=\"addbutton\"" .
+	  "href=\"edit_participation_handler.php?user=$login&id=$id&type=M&action=A\">" .
+	  "Add me</a>";
+	echo "&nbsp;&nbsp;&nbsp;";
+      }
+      $nexturl = "signup_buddy.php?id=$id&type=M&action=A";
+	?>
+	<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+    <?php } 
+    echo "<br>";
     for ( $i = 0; $i < $num_app; $i++ ) {
       user_load_variables ( $approved[$i], "temp" );
       if ( strlen ( $tempemail ) ) 
@@ -244,9 +252,11 @@ if ( $res ) {
       echo $tempfirstname . " " . $templastname;
       $person = $approved[$i];
       if ( is_signer( $person ) || ($person == $login) ) {
-	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=D\">" . 
-	  "Remove</a>";
+	if ( $can_signup == true ) {
+	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=D\">" . 
+	    "Remove</a>";
+	}
 	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
 	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=C\">" . 
 	  "Change to take-home plate</a><br>";
@@ -291,23 +301,27 @@ if ( $res ) {
   echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
 }
 
-if ( $already_eating == false ) {
-  echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?user=$login&id=$id&type=T&action=A\">Add me</a>";
-  echo "&nbsp;&nbsp;&nbsp;";
-}
-$nexturl = "signup_buddy.php?id=$id&type=T&action=A";
-?>
-<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-<br><?php
+if ( $can_signup == true ) {
+  if ( $already_eating == false ) {
+    echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?user=$login&id=$id&type=T&action=A\">Add me</a>";
+    echo "&nbsp;&nbsp;&nbsp;";
+  }
+  $nexturl = "signup_buddy.php?id=$id&type=T&action=A";
+    ?>
+    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+<?php } 
+echo "<br>";
 
 for ( $i = 0; $i < $num_app; $i++ ) {
   user_load_variables ( $approved[$i], "temp" );
   echo $tempfirstname . " " . $templastname;
   $person = $approved[$i];
   if ( is_signer( $person ) || ($person == $login) ) {
-    echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=D\">" . 
-      "Remove</a>";
+    if ( $can_signup == true ) {
+      echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+	"href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=D\">" . 
+	"Remove</a>";
+    }
     echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
       "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=C\">" . 
       "Change to on-site dining</a><br>";
@@ -523,7 +537,7 @@ if ( $show_log ) {
 
 <?php
 function display_crew( $title, $type, $number, $rowcolor ) {
-  global $login;
+  global $login, $can_signup;
 
   $id = mysql_safe( $GLOBALS['id'], false );
   $type = mysql_safe( $type, true );
@@ -552,7 +566,8 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 	if ( $person == $login ) {
 	  $im_working = true;
 	}
-	if ( is_signer( $person ) || ($person == $login) ) {
+	if ( (is_signer( $person ) || ($person == $login))
+	     && ($can_signup == true) ) {
 	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
 	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
 	    "Remove</a>";
@@ -570,21 +585,25 @@ function display_crew( $title, $type, $number, $rowcolor ) {
   }
   else 
     echo "Database error: " . dbi_error() . "<br />\n";
+
   if ( ($i <= $number) && ($im_working == false) ) {
     echo $i . ". ";
-    echo "<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" . 
-      "Add me</a>";
-    $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
-    ?>&nbsp;&nbsp;&nbsp;
-    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-    <?php
+    if ( $can_signup == true ) {
+      echo "<a name=\"participation\" class=\"addbutton\"" . 
+	"href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" . 
+	"Add me</a>";
+      $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
+	?>&nbsp;&nbsp;&nbsp;
+	<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
+    <?php } else echo "???<br>";
     $i += 1;
   }
   if ( ($im_working == true) && ($i <= $number) ) {
     echo "<br>" . $i . ". ";
-    $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
-    ?><a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br><?php
+    if ( $can_signup == true ) {
+      $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
+	?><a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br><?php
+    }
     $i += 1;
   }
   if ( $i <= $number ) {

@@ -7,7 +7,7 @@ $club_id = getGetValue( 'club_id' );
 $action = getGetValue( 'action' );
 
 edit_club_subscription( $club_id, $login, $action );
-// auto_financial_event is called in edit_club_subscription
+// add_financial_event is called in edit_club_subscription
 
 
 // return to club subscription page
