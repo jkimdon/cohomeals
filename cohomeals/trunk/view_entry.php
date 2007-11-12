@@ -380,6 +380,7 @@ switch ( $walkins ) {
 	  $sql3 = "SELECT cal_login " .
 	    "FROM webcal_meal_participant " .
 	    "WHERE cal_login = '$user' " .
+	    "AND cal_id = $id " . 
 	    "AND (cal_type = 'M' " .
 	    "OR cal_type = 'T')";
 	  if ( $res3 = dbi_query( $sql3 ) ) {
@@ -387,9 +388,11 @@ switch ( $walkins ) {
 	      if ( $first == true ) {
 		echo "<tr><td>$food</td><td>";
 		$first = false;
-	      }
-	      echo $user . "(" . $level . ") ";
+	      } else echo ", ";
+	      user_load_variables( $user, "temp" );
+	      echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
 	    }
+	    dbi_free_result( $res3 );
 	  }
 	}
 	dbi_free_result( $res2 );
