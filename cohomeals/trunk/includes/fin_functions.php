@@ -348,27 +348,32 @@ function get_refund_percentage( $id, $past_deadline=false ) {
 
   $refund = 100;
 
-  if ( $past_deadline == true ) {
+  $suit = 'wild';
+  $today = date( "Ymd" );
+  $event_date = $today;
+  $sql = "SELECT cal_suit, cal_date " .
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $suit = $row[0];
+      $event_date = $row[1];
+    }
+  }
+
+  if ( ($past_deadline == true) && ($suit != 'heart') ) {
     $refund = 0;
   } else {
 
-    $suit = 'wild';
-    $today = date( "Ymd" );
-    $event_date = $today;
-    $sql = "SELECT cal_suit, cal_date " .
-      "FROM webcal_meal " .
-      "WHERE cal_id = $id";
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$suit = $row[0];
-	$event_date = $row[1];
-      }
-    }
-    
     if ( $suit == 'heart' ) {
       $two_weeks_before = get_day( $event_date, -14 );
-      if ( $today > $two_weeks_before ) 
-	$refund = 50;
+      $two_days_before = get_day( $event_date, -2 );
+      if ( $today > $two_weeks_before ) {
+	if ( $today > $two_days_before ) 
+	  $refund = 0;
+	else
+	  $refund = 50;
+      }
     }
   }
 
