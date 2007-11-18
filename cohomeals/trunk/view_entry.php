@@ -436,7 +436,8 @@ switch ( $walkins ) {
 </table>
 
 <br>
-<input type="button" value="Print meal summary sheet" />
+<a class="addbutton" href="meal_summary.php?id=<?php echo $id;?>">
+Printer-friendly meal summary sheet</a>
 <p />
 
 <?php

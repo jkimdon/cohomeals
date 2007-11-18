@@ -87,9 +87,11 @@ function suittype_handler() {
   if ( (val == "heart") || (val == "club") || (val == "diamond") ) {
     makeVisible ( "suitenddate" );
     document.editentryform.repeats.value = "1";
+    document.editentryform.uses_endday.value = "1";
   } else {
     makeInvisible( "suitenddate" );
     document.editentryform.repeats.value = "";
+    document.editentryform.uses_endday.value = "";
   }
 
   if ( (val == "heart") || (val == "club") ) {
@@ -109,25 +111,25 @@ function suittype_handler() {
   }
 
   if ( val == "diamond" ) {
-    document.editentryform.d0.checked = true;
+    document.editentryform.d0.checked = "1";
 
-    document.editentryform.d1.checked = false;
-    document.editentryform.d2.checked = false;
-    document.editentryform.d3.checked = false;
-    document.editentryform.d4.checked = false;
-    document.editentryform.d5.checked = false;
-    document.editentryform.d6.checked = false;
+    document.editentryform.d1.checked = "";
+    document.editentryform.d2.checked = "";
+    document.editentryform.d3.checked = "";
+    document.editentryform.d4.checked = "";
+    document.editentryform.d5.checked = "";
+    document.editentryform.d6.checked = "";
 
     document.editentryform.base_price.value = 300;
   }
   else {
-    document.editentryform.d0.checked = false;
-    document.editentryform.d1.checked = false;
-    document.editentryform.d2.checked = false;
-    document.editentryform.d3.checked = false;
-    document.editentryform.d4.checked = false;
-    document.editentryform.d5.checked = false;
-    document.editentryform.d6.checked = false;
+    document.editentryform.d0.checked = "";
+    document.editentryform.d1.checked = "";
+    document.editentryform.d2.checked = "";
+    document.editentryform.d3.checked = "";
+    document.editentryform.d4.checked = "";
+    document.editentryform.d5.checked = "";
+    document.editentryform.d6.checked = "";
 
     document.editentryform.base_price.value = 400;    
   }

@@ -219,15 +219,6 @@ label {
   margin-top: 10px;
   font-size: 10px;
 }
-<?php //printer-friendly links 
-?>.printer {
-  font-size: 14px;
-  color: <?php echo $GLOBALS['TEXTCOLOR']; ?>;
-  text-decoration: none;
-  clear: both;
-  display: block;
-  width: 15ex;
-}
 <?php //new event icon (i.e. '+' symbol)
 ?>.new {
   border-width: 0px;
@@ -378,6 +369,17 @@ textarea {
   font-size: 18px;
   padding: 0px;
   border-bottom: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
+}
+<?php // printer-friendly tables for meal summary sheet
+?>.printer {
+ border: 1px solid #FF0000;
+ font-size: 12px;
+ display: block;
+ text-decoration: none;
+ clear: both;
+}
+.printer tr.light_border {
+  border-top: 5px solid #00FF00;
 }
 <?php //Styles for minicalendars
       //keep font-size:12px for IE6

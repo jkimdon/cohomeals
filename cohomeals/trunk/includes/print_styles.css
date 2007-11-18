@@ -21,16 +21,3 @@ a {
 .unapprovedentry {
 	font-size: 12px;
 }
-#viewt .entry, 
-#viewt .layerentry, 
-#viewt .unapprovedentry {
-	font-size: 13px !important;
-}
-#day dl.desc {
-	display: block !important;
-}
-#viewt table,
-#viewt tr,
-#viewt td {
-	border-color: black !important;
-}

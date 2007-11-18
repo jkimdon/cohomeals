@@ -188,7 +188,7 @@ print_header ( $INC, '', $BodyX );
   <?php if ( $newevent == true ) { ?>
   <tr id="suitdayofweek">
     <td class="tooltip">Day(s) of the week:</td>
-    <td><input type="checkbox" name="d0">Sun</input>&nbsp;&nbsp;&nbsp;
+    <td><input type="checkbox" name="d0" checked>Sun</input>&nbsp;&nbsp;&nbsp;
     <input type="checkbox" name="d1">Mon</input>&nbsp;&nbsp;&nbsp;
     <input type="checkbox" name="d2">Tue</input>&nbsp;&nbsp;&nbsp;
     <input type="checkbox" name="d3">Wed</input>&nbsp;&nbsp;&nbsp;
@@ -333,8 +333,6 @@ $base_cents = $base_price - ($base_dollars * 100);
 <?php
 if ( ! empty ( $id ) ) echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />\n";
 // additional hidden input fields
- if ( $repeats == false ) echo "debug: repeats  false<br>";
- else echo "debug: repeats true<br>";
 echo "<input type=\"hidden\" name=\"repeats\" value=\"$repeats\" />\n";
 echo "<input type=\"hidden\" name=\"newevent\" value=\"$newevent\" />\n";
 echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
