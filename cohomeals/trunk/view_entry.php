@@ -222,12 +222,14 @@ if ( $res ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_type = 'M'";
     $res = dbi_query ( $sql );
+    $onsite_count = 0;
     $first = 1;
-    $num_app = $num_wait = $num_rej = 0;
+    $num_app = 0;
     if ( $res ) {
       while ( $row = dbi_fetch_row ( $res ) ) {
         $pname = $row[0];
 	$approved[$num_app++] = $pname;
+	$onsite_count++;
       }
       dbi_free_result ( $res );
     } else {
@@ -291,11 +293,13 @@ $sql = "SELECT cal_login FROM webcal_meal_participant " .
 "WHERE cal_id = $id AND cal_type = 'T'";
 $res = dbi_query ( $sql );
 $first = 1;
-$num_app = $num_wait = $num_rej = 0;
+$num_app = 0;
+$takehome_count = 0;
 if ( $res ) {
   while ( $row = dbi_fetch_row ( $res ) ) {
     $pname = $row[0];
     $approved[$num_app++] = $pname;
+    $takehome_count++;
   }
   dbi_free_result ( $res );
 } else {
@@ -333,6 +337,13 @@ for ( $i = 0; $i < $num_app; $i++ ) {
 <br></td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
+
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Total diners:</td>
+<td><?php echo $onsite_count + $takehome_count . 
+    " ( " . $onsite_count .
+    " onsite, " . $takehome_count . " take-home )"?></td>
+</tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Walk-ins welcome?:</td>
