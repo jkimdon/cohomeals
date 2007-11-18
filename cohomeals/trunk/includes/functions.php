@@ -2463,7 +2463,7 @@ function is_signer( $signee ) {
 
   $ret = false;
 
-  if ( $signee == $login ) 
+  if ( $signee == $login ) {}
     //    $ret = true; // temporary: read-only
 
   if ( $is_meal_coordinator || $is_beancounter ) 
