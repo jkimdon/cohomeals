@@ -185,6 +185,40 @@ print_header( $INC );
     
     </table></p>
 
+    <?php if ( $is_meal_coordinator ) {
+      echo "<p><h4>Everyone's preferences</h4></p><table>\n";
+      $row_num = 0;
+      $sql = "SELECT DISTINCT cal_food FROM webcal_food_prefs";
+      if ( $res = dbi_query( $sql ) ) {
+	while ( $row = dbi_fetch_row( $res ) ) {
+	  $food = $row[0];
+	  $first = true;
+	  $sql2 = "SELECT cal_login, cal_level " .
+	    "FROM webcal_food_prefs " .
+	    "WHERE cal_food = '$food'";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $user = $row2[0];
+	      $level = $row2[1];
+
+	      if ( $first == true ) {
+		echo "<tr class=\"d$row_num\"><td>$food:</td><td>";
+		$first = false;
+	      } else echo ", ";
+	      user_load_variables( $user, "temp" );
+	      echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
+	    }
+	    dbi_free_result( $res2 );
+	  }
+	  $row_num = ( $row_num == 1 ) ? 0:1;
+	  echo "</td></tr>\n";
+	}
+      }
+      dbi_free_result( $res );
+      echo "</table>\n";
+    }?>
+
+
     <p>Reminder:<br>
     <b>Request level 1:</b> No request for Meal Crew:  I will take one or more steps, such as--eat the rest of the meal, or pick this ingredient out of a dish, or sometimes eat some of this food, or bring my own alternative food.<br>
     <b>Request level 2:</b> Request some changes to menu that would increase Meal Crew's time/complexity <10%, such as serving item as a side dish so I can skip it, making simple variations of the same dish and leaving this food out of one version (like soup with either milk or soy milk), or serving alternative item purchased from store (like corn tortillas in addition to flour tortillas for burrito bar).<br>
