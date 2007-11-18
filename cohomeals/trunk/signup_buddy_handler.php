@@ -49,8 +49,11 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
     $ct++;
     if ( $type == "B" ) {
       edit_club_subscription( $id, $user, $action );
-    } else if ( ($limited == false) || ($ct <= $number) ) 
-      edit_participation( $id, $action, $type, $user );
+    } else if ( ($limited == false) || ($ct <= $number) ) {
+      $modified = edit_participation( $id, $action, $type, $user );
+      if ( $modified == true )
+	auto_financial_event ( $id, $action, $type, $user );
+    }
   }
 }
 
