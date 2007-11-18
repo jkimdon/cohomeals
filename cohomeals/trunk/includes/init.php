@@ -47,6 +47,8 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
   die ( "You can't access this file directly!" );
 }
 
+include '../../www-safe/https_redirect.php';
+
 // Make sure another app in the same domain doesn't have a 'user' cookie
 if ( empty ( $HTTP_GET_VARS ) ) $HTTP_GET_VARS = $_GET;
 if ( empty ( $HTTP_POST_VARS ) ) $HTTP_POST_VARS = $_POST;

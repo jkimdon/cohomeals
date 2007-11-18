@@ -1,4 +1,5 @@
 <?php
+include '../../www-safe/https_redirect.php';
 include "includes/config.php";
 include "includes/php-dbi.php";
 include "includes/functions.php";
