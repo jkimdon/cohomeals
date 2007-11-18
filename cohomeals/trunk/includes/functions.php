@@ -2464,7 +2464,7 @@ function is_signer( $signee ) {
   $ret = false;
 
   if ( $signee == $login ) 
-    $ret = true;
+    //    $ret = true; // temporary: read-only
 
   if ( $is_meal_coordinator || $is_beancounter ) 
     $ret = true;
@@ -2472,10 +2472,10 @@ function is_signer( $signee ) {
   $signee = mysql_safe( $signee, true );
   $sql = "SELECT cal_signer FROM webcal_buddy " .
     "WHERE cal_signee = '$signee'";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( dbi_fetch_row( $res ) ) 
-      $ret = true;
-  }
+  //  if ( $res = dbi_query( $sql ) ) {
+  //    if ( dbi_fetch_row( $res ) ) 
+      //      $ret = true; // temporary: read-only
+  //  }
 
   return $ret;
 }

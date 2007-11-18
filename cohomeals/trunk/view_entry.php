@@ -92,6 +92,7 @@ $past_deadline = false;
 if ( $signup_deadline < date("Ymd") ) $past_deadline = true;
 $can_signup = !$past_deadline;
 if ( $is_meal_coordinator || $is_beancounter ) $can_signup = true;
+else $can_signup = false; // temp for read-only
 
 if ( $past_deadline == true ) 
   echo "<br>This meal is in <font color=\"#DD0000\">walkin status</font> (i.e. past signup deadline)</p>";

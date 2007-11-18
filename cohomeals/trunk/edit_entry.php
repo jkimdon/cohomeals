@@ -34,10 +34,10 @@ if ( $is_meal_coordinator ) {
 }
 if ( $id ) {
   if ( is_head_chef( $id ) ) {
-    $can_edit = true;
+    $can_edit = false; //true; temp for read-only
   }
 } else {
-  $can_edit = true;
+  $can_edit = false; // true;  temp for read-only
 }
 
 
