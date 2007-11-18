@@ -28,16 +28,16 @@ $id = mysql_safe( getValue('id'), false );
 
 $edit_special = false;
 $can_edit = false;
-if ( $is_meal_coordinator ) {
-  $edit_special = true;
-  $can_edit = true;
-}
 if ( $id ) {
   if ( is_head_chef( $id ) ) {
     $can_edit = false; //true; temp for read-only
   }
 } else {
   $can_edit = false; // true;  temp for read-only
+}
+if ( $is_meal_coordinator ) {
+  $edit_special = true;
+  $can_edit = true;
 }
 
 

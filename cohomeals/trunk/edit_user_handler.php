@@ -97,13 +97,12 @@ if ( ! empty ( $error ) ) {
   print_header( '', '', '', true );
 
 ?>
-<h2><?php etranslate("Error")?></h2>
+<h2>Error</h2>
 <blockquote>
-<?php
-echo $error;
+<?php echo $error;?>
 </blockquote>
 </body>
 </html>
 <?php } else if ( empty ($error) ) {
-?><html><head></head><body onload="alert('<?php etranslate("Changes successfully saved");?>'); window.parent.location.href='<?php echo $nextURL;?>';">
+?><html><head></head><body onload="alert('Changes successfully saved'); window.parent.location.href='<?php echo $nextURL;?>';">
 </body></html><?php } ?>
