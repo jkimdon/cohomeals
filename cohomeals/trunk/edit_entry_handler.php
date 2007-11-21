@@ -207,7 +207,8 @@ function add_financial_log_for_subscribers( $active_timestamp ) {
 	": ongoing heart subscription: new meals added";
       $amount = get_price( 0, $user, true );
       $amount *= $ct;
-      add_financial_event( $user, $amount, "charge",
+      add_financial_event( $user, get_billing_group( $user ),
+			   $amount, "charge",
 			   $description, 0, "" );
     }
     dbi_free_result ( $res );

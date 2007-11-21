@@ -112,9 +112,7 @@ function display_financial_log( $cur_group, $startdate, $enddate ) {
 
 }
 
-function add_financial_event( $user, $amount, $type, $description, $meal_id, $notes ) {
-
-  $billing = get_billing_group( $user );
+function add_financial_event( $user, $billing, $amount, $type, $description, $meal_id, $notes ) {
 
   $balance = 0;
   $last_balance = 0;
@@ -203,7 +201,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " dining";
-	add_financial_event( $user, $amount, "charge",
+	add_financial_event( $user, $billing, $amount, "charge",
 			     $description, $meal_id, "" );
       }
       else if ( $action == 'D' ) {
@@ -211,7 +209,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " cancelled meal attendance";
-	add_financial_event( $user, $amount, "credit",
+	add_financial_event( $user, $billing, $amount, "credit",
 			     $description, $meal_id, "" );
       }
       // do nothing if $action == 'C'

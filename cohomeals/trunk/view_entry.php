@@ -449,7 +449,7 @@ switch ( $walkins ) {
 
 <br>
 <a class="addbutton" href="meal_summary.php?id=<?php echo $id;?>">
-Printer-friendly meal summary sheet</a>
+Printer-friendly meal info sheet</a>
 <p />
 
 <?php

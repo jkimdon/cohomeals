@@ -2362,7 +2362,8 @@ function edit_club_subscription( $club_id, $user, $action ) {
 	" subscribing to club meals";
     }
     $amount *= $count;
-    add_financial_event( $user, $amount, $type, 
+    add_financial_event( $user, get_billing_group( $user ),
+			 $amount, $type, 
 			 $description, 0, "" );
   }    
 }

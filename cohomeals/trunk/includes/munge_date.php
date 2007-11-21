@@ -25,8 +25,10 @@ else
 if ( ($enddate == "") || ($startdate == "") ) {
   $enddate = date( "Ymd" );
   $year = substr ( $enddate, 0, 4 );
-  $month = substr ( $enddate, 4, 2 ) - 1;
+  $month = substr ( $enddate, 4, 2 ) + 1;
   $day = substr ( $enddate, 6, 2 );
+  $enddate = date( "Ymd", mktime ( 3, 0, 0, $month, $day, $year ) );
+  $month = substr ( $enddate, 4, 2 ) - 2;
   $startdate = date( "Ymd", mktime ( 3, 0, 0, $month, $day, $year ) );
 } else {
   $startdate = date( "Ymd", mktime ( 3,0,0, $startmonth, $startday, $startyear ) );
