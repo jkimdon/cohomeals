@@ -2468,15 +2468,19 @@ function is_signer( $signee ) {
     $ret = true; 
   }
 
-  if ( $is_meal_coordinator || $is_beancounter ) 
+  if ( $is_meal_coordinator || $is_beancounter ) {
     $ret = true;
+  }
 
   $signee = mysql_safe( $signee, true );
   $sql = "SELECT cal_signer FROM webcal_buddy " .
     "WHERE cal_signee = '$signee'";
   if ( $res = dbi_query( $sql ) ) {
-    if ( dbi_fetch_row( $res ) ) 
-      $ret = true; 
+    if ( $row = dbi_fetch_row( $res ) ) {
+      if ( $row[0] == $login ) {
+	$ret = true; 
+      }
+    }
   }
 
   return $ret;
