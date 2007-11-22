@@ -2476,7 +2476,7 @@ function is_signer( $signee ) {
   $sql = "SELECT cal_signer FROM webcal_buddy " .
     "WHERE cal_signee = '$signee'";
   if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
       if ( $row[0] == $login ) {
 	$ret = true; 
       }
