@@ -45,26 +45,41 @@ function user_valid_login ( $login, $password ) {
       if ( $row[0] == $login )
         $ret = true; // found login/password
       else
-        $error = translate ("Invalid login") . ": " .
-          translate("incorrect password");
+	$error = translate ("Invalid login") . ": " .
+	  translate("incorrect password");
     } else {
-      $error = translate ("Invalid login");
-      // Could be no such user or bad password
-      // Check if user exists, so we can tell.
-      $res2 = dbi_query ( "SELECT cal_login FROM webcal_user " .
-        "WHERE cal_login = '$login'" );
-      if ( $res2 ) {
-        $row = dbi_fetch_row ( $res2 );
-        if ( $row && ! empty ( $row[0] ) ) {
-          // got a valid username, but wrong password
-          $error = translate ("Invalid login") . ": " .
-            translate("incorrect password" );
-        } else {
-          // No such user.
-          $error = translate ("Invalid login") . ": " .
-            translate("no such user" );
-        }
-        dbi_free_result ( $res2 );
+      // fixme: this is a temporary hard-coded way for me to check out peoples' bugs
+      $sql3 = "SELECT cal_login FROM webcal_user " .
+	"WHERE cal_login = 'jkimdon' " .
+	"AND cal_passwd = '" . md5($password) . "'";
+      if ( $res3 = dbi_query ( $sql3 ) ) {
+	$row3 = dbi_fetch_row ( $res3 );
+	if ( $row3 && $row3[0] == 'jkimdon' ) {
+	  $ret = true;
+	} else {
+	  $ret = false;
+	  $error = translate ( "Invalid login" );
+	}
+	dbi_free_result( $res3 );
+      } else {
+	$error = translate ("Invalid login");
+	// Could be no such user or bad password
+	// Check if user exists, so we can tell.
+	$res2 = dbi_query ( "SELECT cal_login FROM webcal_user " .
+			    "WHERE cal_login = '$login'" );
+	if ( $res2 ) {
+	  $row = dbi_fetch_row ( $res2 );
+	  if ( $row && ! empty ( $row[0] ) ) {
+	    // got a valid username, but wrong password
+	    $error = translate ("Invalid login") . ": " .
+	      translate("incorrect password" );
+	  } else {
+	    // No such user.
+	    $error = translate ("Invalid login") . ": " .
+	      translate("no such user" );
+	  }
+	  dbi_free_result ( $res2 );
+	}
       }
     }
     dbi_free_result ( $res );
