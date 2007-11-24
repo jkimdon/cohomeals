@@ -157,22 +157,30 @@ CREATE TABLE webcal_food_prefs (
 
 /*
  * This table associates one or more external users (people who do not
- * have a WebCalendar login) with an event by the event id.
- * An event must still have at least one WebCalendar user associated
- * with it.  This table is not used unless external users are enabled
- * in system settings.
- * The event can be found in
- * <a href="#webcal_entry">webcal_entry</a>.
+ * have a WebCalendar userid) with a meal by the meal id.
+ * A meal must still have at least one WebCalendar user associated
+ * with it. 
+ * The event can be found in webcal_meal.
+ * Assumes on-site dining.
  */
-CREATE TABLE webcal_entry_ext_user (
+CREATE TABLE webcal_meal_guest (
   /* event id */
-  cal_id INT DEFAULT 0 NOT NULL,
-  /* external user fill name */
+  cal_meal_id INT DEFAULT 0 NOT NULL,
+  /* external user full name */
   cal_fullname VARCHAR(50) NOT NULL,
-  /* external user email (for sending a reminder) */
-  cal_email VARCHAR(75) NULL,
-  PRIMARY KEY ( cal_id, cal_fullname )
+  /* which user is the host */
+  cal_host VARCHAR(25) NOT NULL,
+  /* fee category: 'A' = adult, 'C' = child, 'F' = free */
+  cal_fee CHAR(1) NOT NULL,
+  /* type of participation:
+	'M' = on-site diner
+	'T' = take-home plate
+  */
+  cal_type CHAR(1) NOT NULL,
+  PRIMARY KEY ( cal_meal_id, cal_fullname )
 );
+
+
 
 /*
  * Specify preferences for a user.

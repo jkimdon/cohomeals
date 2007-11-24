@@ -2285,13 +2285,10 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
     else { // change between take-home and dine-in
       if ( $type == 'M' ) $new_type = 'T';
       else $new_type = 'M';
-      $sql = "DELETE FROM webcal_meal_participant " .
+      $sql = "UPDATE webcal_meal_participant " .
+	"SET cal_type = '$new_type' " .
 	"WHERE cal_id = $id AND cal_login = '$user' " .
 	"AND cal_type = '$type'";
-      dbi_query( $sql );
-      $sql = "INSERT INTO webcal_meal_participant " . 
-	"( cal_id, cal_login, cal_type ) " . 
-	"VALUES ( $id, '$user', '$new_type' )";
       dbi_query( $sql );
     }
 

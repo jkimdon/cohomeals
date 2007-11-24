@@ -222,6 +222,37 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 
 function get_price( $id, $user, $subscriber=false ) {
 
+  /// establish price category based on age
+  $age = "A";
+  $sql = "SELECT cal_birthdate " .
+    "FROM webcal_user " .
+    "WHERE cal_login = '$user'";
+  $birthdate = "";
+  if ( $res = dbi_query( $sql ) ) {
+    $row = dbi_fetch_row( $res );
+    $birthdate = $row[0];
+    dbi_free_result( $res );
+  }
+  
+  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
+  $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
+  
+  if ( $birthdate > $free_cutoff )
+    $age = "F";
+  else if ( $birthdate > $child_cutoff ) 
+    $age = "C";
+  else $age = "A";
+
+
+  $cost = get_adjusted_price ( $id, $age, $subscriber );
+  return $cost;
+}
+
+
+
+function get_adjusted_price( $id, $fee_class, 
+			     $subscriber=false, $guest=false ) {
+
   /// get meal details. establish base price, past_deadline
   $base_price = 400;
   $past_deadline = true;
@@ -239,40 +270,10 @@ function get_price( $id, $user, $subscriber=false ) {
   }
 
 
-
-  /// establish price category based on age
-  $age = "adult";
-  if ( $user == "adult" ) $age = "adult";
-  else if ( $user == "child" ) $age = "child";
-  else if ( $user == "walkin" ) $age = "adult";
-  else {
-    /// check user age
-    $sql = "SELECT cal_birthdate " .
-      "FROM webcal_user " .
-      "WHERE cal_login = '$user'";
-    $birthdate = "";
-    if ( $res = dbi_query( $sql ) ) {
-      $row = dbi_fetch_row( $res );
-      $birthdate = $row[0];
-      dbi_free_result( $res );
-    }
-    
-    $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
-    $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
-    
-    if ( $birthdate > $free_cutoff )
-      $age = "free";
-    else if ( $birthdate > $child_cutoff ) 
-      $age = "child";
-    else $age = "adult";
-  }
-
-
-
   /// establish price category based on preregistration or walkin
   $category = "pre";
   if ( $past_deadline == true ) $category = "walkin";
-  if ( $user == "walkin" ) $category = "walkin";
+  if ( $guest == true ) $category = "walkin";
 
 
   /// calculate cost based on above information
@@ -280,12 +281,12 @@ function get_price( $id, $user, $subscriber=false ) {
   if ( $category == "walkin" ) $cost += 100;
   else if ( $subscriber == true ) $cost = $base_price * 0.875;
 
-
-  if ( $age == "free" ) $cost = 0;
-  else if ( $age == "child" ) $cost /= 2;
+  if ( $fee_class == "F" ) $cost = 0;
+  else if ( $fee_class == "C" ) $cost /= 2;
 
   return $cost;
 }
+
 
 
 
@@ -320,6 +321,59 @@ function get_refund_price( $id, $user, $subscriber=false ) {
       "FROM webcal_financial_log " .
       "WHERE cal_login = '$user' " . 
       "AND cal_meal_id = $id " .
+      "AND cal_amount < 0";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$timestamp = $row[1];
+	if ( $timestamp > $maxT ) {
+	  $maxT = $timestamp;
+	  $amount = $row[0];
+	}
+      }
+      dbi_free_result( $res );
+    }
+	  
+
+    $amount *= $percentage;
+    $amount /= 100;
+    $price = (int)$amount;
+  } // else: leave price == 0.
+
+  return $price;
+}
+
+
+function get_guest_refund_price( $id, $host, $guest_name ) {
+
+  $price = 0;
+  $past_deadline = true;
+  $today = date( "Ymd" );
+
+  $sql = "SELECT cal_date, cal_signup_deadline " .
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = $row[0];
+      $deadline = $row[1];
+      $deadline_date = get_day( $event_date, -1*$deadline );
+      if ( $deadline_date >= $today ) $past_deadline = false;
+    }
+    dbi_free_result( $res );
+  }
+
+
+
+  if ( $past_deadline == false ) {
+    $percentage = get_refund_percentage( $id, $past_deadline );
+
+    $maxT = 0;
+    $amount = 0;
+    $sql = "SELECT cal_amount, cal_timestamp " .
+      "FROM webcal_financial_log " .
+      "WHERE cal_login = '$host' " . 
+      "AND cal_meal_id = $id " .
+      "AND cal_description LIKE '%$guest_name%' " .
       "AND cal_amount < 0";
     if ( $res = dbi_query( $sql ) ) {
       if ( $row = dbi_fetch_row( $res ) ) {

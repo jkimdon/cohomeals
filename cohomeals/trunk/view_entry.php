@@ -21,12 +21,6 @@ if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
   $error = translate ( "Invalid entry id" ) . "."; 
 }
 
-if ( ! empty ( $year ) ) {
-  $thisyear = $year;
-}
-if ( ! empty ( $month ) ) {
-  $thismonth = $month;
-}
 
 print_header();
 
@@ -81,9 +75,13 @@ $subject = htmlspecialchars ( $subject );
 
 
 
+
+/////////////////////////////////
+//// display meal details
+
 ?>
 
-<h2>Meal details</h2>
+<h2>Meal details for <?php echo date_to_str( $event_date, "", true, false, $event_time )?></h2>
 
 <?php
 $signup_deadline = get_day( $event_date, -1*$deadline );
@@ -109,13 +107,13 @@ else echo "</p>";
 <tr>
   <td>Signing up now costs:</td>
   <td class="number">
-    <?php echo price_to_str( get_price( $id, "adult" ));?>
+    <?php echo price_to_str( get_adjusted_price( $id, "A" ));?>
   </td>
   <td class="number">
-    <?php echo price_to_str( get_price( $id, "child" ));?>
+    <?php echo price_to_str( get_adjusted_price( $id, "C" ));?>
   </td>
   <td class="number">
-    <?php echo price_to_str( get_price( $id, "walkin" ));?>
+    <?php echo price_to_str( get_adjusted_price( $id, "A", false, true ));?>
   </td>
 </tr>
 <tr>
@@ -136,15 +134,6 @@ else echo "</p>";
 <td><?php echo $suit; ?>
 </td>
 </tr>
-<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
-
-
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Date:</td>
-<td>
- <?php
-  echo date_to_str ( $event_date, "", true, false, $event_time );
-  ?>
-</td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
@@ -236,16 +225,14 @@ if ( $res ) {
     }
 
     if ( $can_signup == true ) {
-      if ( $already_eating == false ) {
-	echo "<a name=\"participation\" class=\"addbutton\"" .
-	  "href=\"edit_participation_handler.php?user=$login&id=$id&type=M&action=A\">" .
-	  "Add me</a>";
-	echo "&nbsp;&nbsp;&nbsp;";
-      }
-      $nexturl = "signup_buddy.php?id=$id&type=M&action=A";
-	?>
-	<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-    <?php } 
+      if ( $already_eating == false ) 
+	add_me_button( "M" );
+
+      signup_buddy_button( "M", $id );
+      signup_guest_button( "M", $id );
+      echo "<br>";
+    } 
+
     echo "<br>";
     for ( $i = 0; $i < $num_app; $i++ ) {
       user_load_variables ( $approved[$i], "temp" );
@@ -255,36 +242,48 @@ if ( $res ) {
       $person = $approved[$i];
       if ( is_signer( $person ) || ($person == $login) ) {
 	if ( $can_signup == true ) {
-	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=D\">" . 
-	    "Remove</a>";
+	  remove_button( $person, $id, "M" );
 	}
-	echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	  "href=\"edit_participation_handler.php?user=$person&id=$id&type=M&action=C\">" . 
-	  "Change to take-home plate</a><br>";
+	echo "&nbsp;&nbsp;&nbsp;";
+	change_button( $person, $id, "M" );
       }
       echo "<br />\n";
     }
 
-    // show external users here...
-    if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
-      $external_users = event_get_external_users ( $id, 1 );
-      $ext_users = explode ( "\n", $external_users );
-      if ( is_array ( $ext_users ) ) {
-	for ( $i = 0; $i < count( $ext_users ); $i++ ) {
-	  if ( ! empty ( $ext_users[$i] ) ) {
-	    echo $ext_users[$i] . " (" . translate("External User") . 
-	      ")<br />\n";
-	  }
+    // show guests
+    $sql = "SELECT cal_fullname, cal_host " .
+       "FROM webcal_meal_guest " .
+       "WHERE cal_meal_id = $id " . 
+       "AND cal_type = 'M'";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$onsite_count++;
+	$guest_name = $row[0];
+	$host = $row[1];
+	user_load_variables( $host, "temp" );
+	echo "$guest_name (guest of $tempfirstname $templastname)";
+
+	if ( ($host == $login) || ($is_meal_coordinator) ) {
+	  echo "&nbsp;&nbsp;&nbsp;";
+	  remove_guest_button( $guest_name, "M", $id );
+	  echo "&nbsp;&nbsp;&nbsp;";
+	  change_guest_button( $guest_name, "M", $id );
 	}
+
       }
+      dbi_free_result( $res );
     }
+
+
   ?>
-<br></td></tr>
+  <br></td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
+
+<?php /////////// take-home plates 
+?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;height:20px;">Take-home plates:</td>
 <td>
 <?php
@@ -307,13 +306,12 @@ if ( $res ) {
 
 if ( $can_signup == true ) {
   if ( $already_eating == false ) {
-    echo "<a name=\"participation\" class=\"addbutton\" href=\"edit_participation_handler.php?user=$login&id=$id&type=T&action=A\">Add me</a>";
-    echo "&nbsp;&nbsp;&nbsp;";
+    add_me_button( "T" );
   }
-  $nexturl = "signup_buddy.php?id=$id&type=T&action=A";
-    ?>
-    <a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-<?php } 
+  signup_buddy_button( "T", $id );
+  signup_guest_button( "T", $id );
+  echo "<br>";
+} 
 echo "<br>";
 
 for ( $i = 0; $i < $num_app; $i++ ) {
@@ -322,16 +320,38 @@ for ( $i = 0; $i < $num_app; $i++ ) {
   $person = $approved[$i];
   if ( is_signer( $person ) || ($person == $login) ) {
     if ( $can_signup == true ) {
-      echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	"href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=D\">" . 
-	"Remove</a>";
+      remove_button( $person, $id, "T" );
     }
-    echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-      "href=\"edit_participation_handler.php?user=$person&id=$id&type=T&action=C\">" . 
-      "Change to on-site dining</a><br>";
+    echo "&nbsp;&nbsp;&nbsp;";
+    change_button( $person, $id, "T" );
   }
   echo "<br />\n";
 }
+
+//// show guests
+$sql = "SELECT cal_fullname, cal_host " .
+"FROM webcal_meal_guest " .
+"WHERE cal_meal_id = $id " . 
+"AND cal_type = 'T'";
+if ( $res = dbi_query( $sql ) ) {
+  while ( $row = dbi_fetch_row( $res ) ) {
+    $takehome_count++;
+    $guest_name = $row[0];
+    $host = $row[1];
+    user_load_variables( $host, "temp" );
+    echo "$guest_name (guest of $tempfirstname $templastname)";
+    
+    if ( ($host == $login) || ($is_meal_coordinator) ) {
+      echo "&nbsp;&nbsp;&nbsp;";
+      remove_guest_button( $guest_name, "T", $id );
+      echo "&nbsp;&nbsp;&nbsp;";
+      change_guest_button( $guest_name, "T", $id );
+    }
+    
+  }
+  dbi_free_result( $res );
+}
+
 ?>
 <br></td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
@@ -369,6 +389,10 @@ switch ( $walkins ) {
 
 
 
+
+
+<?php ///////////////// food restrictions   
+?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:</td>
 <td>
  <table>
@@ -551,6 +575,73 @@ if ( $show_log ) {
 
 
 <?php
+
+function add_me_button( $type ) {
+  global $login, $id;
+
+  echo "<a name=\"participation\" class=\"addbutton\"" .
+    "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" .
+  "Add me</a>";
+  echo "&nbsp;&nbsp;&nbsp;";
+}
+
+function remove_button( $person, $id, $type ) {
+  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
+    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
+    "Remove</a>";
+}
+
+function change_button( $person, $id, $old_type ) {
+  echo "<a name=\"participation\" class=\"addbutton\"" . 
+    "href=\"edit_participation_handler.php" .
+    "?user=$person&id=$id&type=$old_type&action=C\">";
+  if ( $old_type == "M" ) 
+    echo "Change to take-home plate</a><br>";
+  else 
+    echo "Change to on-site dining</a><br>";
+}
+
+
+function signup_buddy_button( $type, $id ) {
+  $nexturl = "signup_buddy.php?id=$id&type=$type&action=A"; 
+  echo "<a href class=\"addbutton\" " .
+    "onclick=\"window.open('$nexturl', 'Buddies', " .
+    "'width=300,height=300,resizable=yes,scrollbars=yes');\">" .
+    "Add buddy</a>&nbsp;&nbsp;&nbsp;";
+}
+
+
+function signup_guest_button( $type, $id ) {
+  $nexturl = "signup_guest.php?id=$id&type=$type&action=A";
+  echo "<a href class=\"addbutton\" " .
+    "onclick=\"window.open('$nexturl', 'Guest', " .
+    "'width=300,height=300,resizable=yes,scrollbars=yes');\">" .
+    "Add guest</a>";
+}
+
+function remove_guest_button( $guest_name, $type, $id ) {
+  echo "<a name=\"participation\" class=\"addbutton\"" .
+    "href=\"signup_guest_handler.php" .
+    "?guest_name=" . trim($guest_name) .
+    "&id=$id&type=$type&action=D\">" .
+    "Remove</a>";
+}
+
+function change_guest_button( $guest_name, $old_type, $id ) {
+  echo "<a name=\"participation\" class=\"addbutton\"" .
+    "href=\"signup_guest_handler.php" .
+    "?id=$id&type=$old_type&action=C" .
+    "&guest_name=" . trim($guest_name) . 
+    "\">";
+  if ( $old_type == "M" ) 
+    echo "Change to take-home plate</a><br>";
+  else 
+    echo "Change to on-site dining</a><br>";
+  echo "<br>";
+}
+
+
+
 function display_crew( $title, $type, $number, $rowcolor ) {
   global $login, $can_signup;
 
@@ -583,9 +674,7 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 	}
 	if ( (is_signer( $person ) || ($person == $login))
 	     && ($can_signup == true) ) {
-	  echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-	    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
-	    "Remove</a>";
+	  remove_button( $person, $id, $type );
 	  $notes = htmlspecialchars( $notes );
 	  $nexturl = "crew_notes.php?user=$person&id=$id&notes=$notes";
 	  echo "&nbsp;&nbsp;&nbsp;<a href class=\"addbutton\" " .
@@ -604,20 +693,17 @@ function display_crew( $title, $type, $number, $rowcolor ) {
   if ( ($i <= $number) && ($im_working == false) ) {
     echo $i . ". ";
     if ( $can_signup == true ) {
-      echo "<a name=\"participation\" class=\"addbutton\"" . 
-	"href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" . 
-	"Add me</a>";
-      $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
-	?>&nbsp;&nbsp;&nbsp;
-	<a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br>
-    <?php } else echo "???<br>";
+      add_me_button( $type );
+      signup_buddy_button( $type, $id );
+      echo "<br><br>";
+    } else echo "???<br>";
     $i += 1;
   }
   if ( ($im_working == true) && ($i <= $number) ) {
     echo "<br>" . $i . ". ";
     if ( $can_signup == true ) {
-      $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
-	?><a href class="addbutton" onclick="window.open('<?php echo $nexturl;?>', 'Buddies', 'width=300,height=300,resizable=yes,scrollbars=yes');">Add buddy</a><br><?php
+      signup_buddy_button( $type, $id );
+      echo "<br>";
     }
     $i += 1;
   }
