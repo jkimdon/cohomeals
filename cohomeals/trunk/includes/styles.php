@@ -412,15 +412,8 @@ textarea {
   margin: 0px;
   padding: 3px;
 }
-.minical td.weekend {
-  background-color: <?php echo $GLOBALS['WEEKENDBG']; ?>;
-}
 .minical td#today {
   background-color: <?php echo $GLOBALS['TODAYCELLBG']; ?>;
-}
-.minical td.hasevents {
-  background-color: #DDDDFF;
-  font-weight: bold;
 }
 <?php //Styles for the heart subscription minicalendar
       //keep font-size:12px for IE6
@@ -541,7 +534,6 @@ th {
 #year .minical caption {
   margin: 0px auto;
 }
-#viewl .minical,
 #month .minical {
   border-width: 0px;
 }

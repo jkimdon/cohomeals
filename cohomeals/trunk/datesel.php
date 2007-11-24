@@ -88,9 +88,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
 	}
 	dbi_free_result( $res );
       }
-      if ( ($fid == $id) && ($id != 0) ) 
-	echo "<td class=hasevents>";
-      else echo "<td>";
+      echo "<td>";
       if ( $sendid == false )
 	echo "<a href=\"javascript:sendDate('" .
 	  date ( "Ymd", $date ) . "')\">";

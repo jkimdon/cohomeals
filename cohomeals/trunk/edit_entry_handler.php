@@ -412,8 +412,12 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 // If we were editing this event, then go back to the last view (week, day,
 // month).  If this is a new event, then go to the preferred view for
 // the date range that this event was added to.
+if ( $id != 0 ) 
+  $nexturl = "view_entry.php?id=$id";
+else 
+  $nexturl = "view_entry.php?id=$newid";
 if ( empty ( $error ) ) {
-  do_redirect( "month.php" );
+  do_redirect( $nexturl );
 } else {
   echo "error = $error<br>";
 }

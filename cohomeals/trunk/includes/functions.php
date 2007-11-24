@@ -1050,7 +1050,7 @@ function date_selection_html ( $prefix, $date, $num_years ) {
  */
 function display_small_month ( $thismonth, $thisyear, $showyear,
   $minical_id='', $month_link='month.php?' ) {
-  global $WEEK_START, $user, $login, $boldDays, $get_unapproved;
+  global $WEEK_START, $user, $login, $boldDays;
   global $today;
 
   if ( $user != $login && ! empty ( $user ) ) {
@@ -1103,37 +1103,37 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
       $date = $i + ($j * 24 * 3600);
       $dateYmd = date ( "Ymd", $date );
       $hasEvents = false;
+      $suit = "empty";
+      $meal_id = 0;
       if ( $boldDays ) {
         $ev = get_entries ( $dateYmd );
         if ( count ( $ev ) > 0 ) {
           $hasEvents = true;
+	  $suit = $ev[0]['cal_suit'];
+	  $meal_id = $ev[0]['cal_id'];
         } 
       }
       if ( $dateYmd >= date ("Ymd",$monthstart) &&
         $dateYmd <= date ("Ymd",$monthend) ) {
-        echo "<td";
         $wday = date ( 'w', $date );
-        $class = '';
-        if ( $hasEvents ) {
-          if ( $class != '' ) {
-            $class .= ' ';
-          }
-          $class .= "hasevents";
-        }
-        if ( $class != '' ) {
-          echo " class=\"$class\"";
-        }
+	echo "<td";
         if ( date ( "Ymd", $date  ) == date ( "Ymd", $today ) ){
           echo " id=\"today\"";
         }
         echo ">";
-        echo date ( "d", $date ) . "</td>\n";
-        } else {
-          echo "<td class=\"empty\">&nbsp;</td>\n";
-        }
-      }                 // end for $j
-      echo "</tr>\n";
-    }                         // end for $i
+	$suit .= ".jpg";
+	if ( $hasEvents ) {
+	  echo "<a href=\"view_entry.php?id=$meal_id\">";
+	} else 
+	  echo "<a/>";
+	echo date ( "j", $date ) . "<br>" .
+	  "<img width=\"15\" border=\"0\" src=\"images/$suit\" /></a></td>\n";
+      } else {
+	echo "<td class=\"empty\">&nbsp;</td>\n";
+      }
+    }                 // end for $j
+    echo "</tr>\n";
+  }                         // end for $i
   echo "</tbody>\n</table>\n";
 }
 
@@ -1170,8 +1170,10 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
     "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
   $icon = "circle.gif";
 
-  echo "<img src=\"$icon\" class=\"bullet\" alt=\"" . 
-    translate("View this entry") . "\" />";
+  $suit_img = $suit;
+  $suit_img .= ".jpg";
+  echo "<img width=\"20\" border=\"0\"" . 
+    "src=\"images/$suit\" alt=\"View this entry\" />";
 
 
   $timestr = "";
@@ -1265,68 +1267,17 @@ function read_events ( $startdate, $enddate ) {
  * @return array Array of events
  */
 function get_entries ( $date ) {
-  global $events, $TZ_OFFSET;
+  global $events;
   $n = 0;
   $ret = array ();
-
-  //echo "<br />\nChecking " . count ( $events ) . " events.  TZ_OFFSET = $TZ_OFFSET <br />\n";
-
-//print_r ( $events );
 
   for ( $i = 0; $i < count ( $events ); $i++ ) {
     // In case of data corruption (or some other bug...)
     if ( empty ( $events[$i] ) || empty ( $events[$i]['cal_id'] ) )
       continue;
-    if ( empty ( $TZ_OFFSET) ||  ( $events[$i]['cal_time'] <= 0 ) ) {
-      if ( $events[$i]['cal_date'] == $date )
-        $ret[$n++] = $events[$i];
-    } else if ( $TZ_OFFSET > 0 ) {
-      $cutoff = ( 24 - $TZ_OFFSET ) * 10000;
-      //echo "<br /> cal_time " . $events[$i]['cal_time'] . "<br />\n";
-      $sy = substr ( $date, 0, 4 );
-      $sm = substr ( $date, 4, 2 );
-      $sd = substr ( $date, 6, 2 );
-      $prev_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd - 1, $sy ) );
-        //echo "prev_date = $prev_day <br />\n";
-      if ( $events[$i]['cal_date'] == $date &&
-        $events[$i]['cal_time'] == -1 ) {
-        $ret[$n++] = $events[$i];
-        //echo "added event $events[$i][cal_id] <br />\n";
-      } else if ( $events[$i]['cal_date'] == $date &&
-        $events[$i]['cal_time'] < $cutoff ) {
-        $ret[$n++] = $events[$i];
-        //echo "added event {$events[$i][cal_id]} <br />\n";
-      } else if ( $events[$i]['cal_date'] == $prev_day &&
-        $events[$i]['cal_time'] >= $cutoff ) {
-        $ret[$n++] = $events[$i];
-        //echo "added event {$events[$i][cal_id]} <br />\n";
-      }
-    } else {
-      //TZ < 0
-      $cutoff = ( 0 - $TZ_OFFSET ) * 10000;
-      //echo "<br />\ncal_time " . $events[$i]['cal_time'] . "<br />\n";
-      $sy = substr ( $date, 0, 4 );
-      $sm = substr ( $date, 4, 2 );
-      $sd = substr ( $date, 6, 2 );
-      $next_day = date ( ( "Ymd" ), mktime ( 3, 0, 0, $sm, $sd + 1, $sy ) );
-      //echo "next_date = $next_day <br />\n";
-      if ( $events[$i]['cal_time'] == -1 ) {
-  if ( $events[$i]['cal_date'] == $date ) {
-          $ret[$n++] = $events[$i];
-          //echo "added event $events[$i][cal_id] <br />\n";
-        }
-      } else {
-  if ( $events[$i]['cal_date'] == $date &&
-          $events[$i]['cal_time'] > $cutoff ) {
-          $ret[$n++] = $events[$i];
-          //echo "added event $events[$i][cal_id] <br />\n";
-        } else if ( $events[$i]['cal_date'] == $next_day &&
-          $events[$i]['cal_time'] <= $cutoff ) {
-          $ret[$n++] = $events[$i];
-          //echo "added event $events[$i][cal_id] <br />\n";
-        }
-      }
-    }
+    if ( $events[$i]['cal_date'] == $date )
+      $ret[$n++] = $events[$i];
+
   }
   return $ret;
 }
@@ -1484,7 +1435,7 @@ function get_monday_before ( $year, $month, $day ) {
  * @param string $date Date in YYYYMMDD format
  */
 function print_date_entries ( $date ) {
-  global $events, $readonly, $is_meal_coordinator, $login,
+  global $readonly, $is_meal_coordinator, $login,
     $public_access, $public_access_can_add;
   $cnt = 0;
 
