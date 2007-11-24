@@ -268,7 +268,8 @@ if ( $res ) {
 	  remove_guest_button( $guest_name, "M", $id );
 	  echo "&nbsp;&nbsp;&nbsp;";
 	  change_guest_button( $guest_name, "M", $id );
-	}
+	} else
+	  echo "<br>";
 
       }
       dbi_free_result( $res );
@@ -346,7 +347,8 @@ if ( $res = dbi_query( $sql ) ) {
       remove_guest_button( $guest_name, "T", $id );
       echo "&nbsp;&nbsp;&nbsp;";
       change_guest_button( $guest_name, "T", $id );
-    }
+    } else
+      echo "<br>";
     
   }
   dbi_free_result( $res );
