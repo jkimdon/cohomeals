@@ -471,7 +471,8 @@ function get_billing_groups() {
   if ( $is_beancounter || $is_meal_coordinator ) {
 
     $sql = "SELECT DISTINCT cal_billing_group " .
-      "FROM webcal_user";
+      "FROM webcal_user " .
+      "ORDER BY cal_billing_group";
     if ( $res = dbi_query( $sql ) ) {
       while ( $row = dbi_fetch_row( $res ) ) {
 	$ret[$count++] = $row[0];

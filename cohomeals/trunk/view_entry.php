@@ -391,6 +391,30 @@ switch ( $walkins ) {
 
 
 
+<?php ////////notes
+?>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
+<td>
+ <?php
+  if ( ! empty ( $allow_html_description ) &&
+    $allow_html_description == 'Y' ) {
+    $str = str_replace ( '&', '&amp;', $notes );
+    $str = str_replace ( '&amp;amp;', '&amp;', $str );
+    // If there is no html found, then go ahead and replace
+    // the line breaks ("\n") with the html break.
+    if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
+      // found some html...
+      echo $str;
+    } else {
+      echo nl2br ( activate_urls ( $str ) );
+    }
+  } else {
+    echo nl2br ( activate_urls ( htmlspecialchars ( $notes ) ) );
+  }
+?></td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
+
+
 
 
 <?php ///////////////// food restrictions   
@@ -446,27 +470,6 @@ switch ( $walkins ) {
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
-
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
-<td>
- <?php
-  if ( ! empty ( $allow_html_description ) &&
-    $allow_html_description == 'Y' ) {
-    $str = str_replace ( '&', '&amp;', $notes );
-    $str = str_replace ( '&amp;amp;', '&amp;', $str );
-    // If there is no html found, then go ahead and replace
-    // the line breaks ("\n") with the html break.
-    if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
-      // found some html...
-      echo $str;
-    } else {
-      echo nl2br ( activate_urls ( $str ) );
-    }
-  } else {
-    echo nl2br ( activate_urls ( htmlspecialchars ( $notes ) ) );
-  }
-?></td></tr>
-<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
 
