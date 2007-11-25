@@ -1173,7 +1173,7 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
   $suit_img = $suit;
   $suit_img .= ".jpg";
   echo "<img width=\"20\" border=\"0\"" . 
-    "src=\"images/$suit\" alt=\"View this entry\" />";
+    "src=\"images/$suit_img\" alt=\"View this entry\" />";
 
 
   $timestr = "";
