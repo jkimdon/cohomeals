@@ -475,12 +475,32 @@ switch ( $walkins ) {
 
 </table>
 
+<?php //////// printable sheets for the meal crew
+?>
 <br>
-<a class="addbutton" href="meal_summary.php?id=<?php echo $id;?>">
-Printer-friendly meal info sheet</a>
-<p />
+<hr>
+<h4>For the head chef</h4>
 
-<?php
+<p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
+Meal crew checklist</a></p>
+<?php //<p><a class="addbutton" href="meal_summary.php?id=<?php echo $id;?>
+<?php //">
+//Meal signup sheet</a></p>
+?>
+<p><a class="addbutton" href="refs/MealSignupSheet.pdf">
+Meal signup sheet</a></p>
+<p><a class="addbutton" href="refs/MealSummarySheet.pdf">
+Meal summary sheet</a></p>
+<p><a class="addbutton" href="refs/PantryPriceList200711.pdf">
+Pantry price list</a></p>
+
+
+
+
+
+
+
+<?php /////////////////////////////////
 
 if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "&amp;user=$user";

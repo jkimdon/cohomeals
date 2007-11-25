@@ -20,7 +20,7 @@
 
 <b>Resources:</b>
 <ul>
-  <li><a href="MealPlanDesignV1.pdf">Meal plan design</a></li>
+  <li><a href="refs/MealPlanDesignV1.pdf">Meal plan design</a></li>
 </ul>
 
 <b>Quick tips:</b>
