@@ -7,7 +7,7 @@
 
 <p>From the calendar view (Click on "Calendar" in the "Go to" line on the trailer of a page to get to this view), click on the desired meal.</p>
 
-<p>Depending on the desires of the head chef, there will be up to four categories of work shifts: Setup, cleanup, cooks, and other. The number of available work slots in each of the shifts is determined by the head chef.</p>
+<p>Depending on the anticipated number of diners, the number of available work slots varies. Breakdown of crew jobs is up to the crew. We recommend meeting as a crew before working to split up tasks. Within the meal software, you may specify things like: "I'd like to work on clean-up" by clicking on the "Edit notes" button which appears after your name once you have signed up for a crew slot.</p>
 
 <p><i>To add yourself</i>: Find the desired type of work shift. If there are still open slots, there will be an "Add me" button. Click that and your name should appear.</p>
 
