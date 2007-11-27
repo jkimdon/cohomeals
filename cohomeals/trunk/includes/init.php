@@ -272,7 +272,8 @@ function print_trailer ( $include_nav_links=true, $closeDb=true,
   global $CUSTOM_TRAILER, $c, $STARTVIEW;
   global $login, $thisyear,
     $thismonth, $thisday, $DATE_FORMAT_MY, $WEEK_START, $DATE_FORMAT_MD,
-    $readonly, $is_meal_coordinator, $public_access, $public_access_can_add,
+    $readonly, $is_meal_coordinator, $is_beancounter, 
+    $public_access, $public_access_can_add,
     $use_http_auth, $login_return_path,
     $public_access_others, $allow_view_other,
     $fullname;

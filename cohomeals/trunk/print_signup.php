@@ -68,7 +68,7 @@ if ( $res = dbi_query( $sql ) ) {
 <tr>
  <td><?php echo display_time( $event_time );?> <?php echo date_to_str( $event_date,"",true,true );?></td>
 </tr>
-<tr class="light_border">
+<tr id="light_border">
  <td>Lead: <?php echo $head_chef;?></td>
 </tr>
 <tr>
@@ -82,6 +82,26 @@ if ( $res = dbi_query( $sql ) ) {
 <tr id="light_border">
  <td>Price (Adult): <?php echo $base_price;?></td>
 </tr>
+</table>
+
+
+
+<?php ////// begin names
+?>
+<table class="printer">
+<tr>
+ <td></td>
+ <td>W</td>
+ <td>Name</td>
+ <td>$L</td>
+</tr>
+<tr>
+ <td>X</td>
+ <td></td>
+ <td>Joey Kimdon</td>
+ <td></td>
+</tr>
+
 </table>
 
 

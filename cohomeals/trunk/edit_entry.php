@@ -29,7 +29,7 @@ $id = mysql_safe( getValue('id'), false );
 $edit_special = false;
 $can_edit = false;
 if ( $id ) {
-  if ( is_head_chef( $id ) ) {
+  if ( is_chef( $id ) ) {
     $can_edit = true;
   }
 } else {

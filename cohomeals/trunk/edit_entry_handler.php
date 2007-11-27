@@ -54,7 +54,7 @@ if ( $is_meal_coordinator ) {
     $can_edit = true;
   }
 } else {
-  if ( is_head_chef( $id ) ) {
+  if ( is_chef( $id ) ) {
     $can_edit = true;
   }
 }

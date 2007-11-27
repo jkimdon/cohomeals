@@ -483,11 +483,10 @@ switch ( $walkins ) {
 
 <p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
 Meal crew checklist</a></p>
-<?php //<p><a class="addbutton" href="meal_summary.php?id=<?php echo $id;?>
-<?php //">
-//Meal signup sheet</a></p>
-?>
-<p><a class="addbutton" href="refs/MealSignupSheet.pdf">
+<p><a class="addbutton" 
+<?php //href="print_signup.php?id=<?php echo $id;?>
+href="refs/MealSignUpSheet.pdf
+">
 Meal signup sheet</a></p>
 <p><a class="addbutton" href="refs/MealSummarySheet.pdf">
 Meal summary sheet</a></p>
@@ -509,12 +508,14 @@ if ( ! empty ( $user ) && $login != $user ) {
 }
 
 $can_edit = ( $is_meal_coordinator );
-if ( is_head_chef( $id ) ) 
+if ( is_chef( $id ) ) 
   $can_edit = true;
 
 if ( $can_edit ) {
   echo "<a title=\"Edit entry\" class=\"nav\" " .
     "href=\"edit_entry.php?id=$id$u_url\">Edit entry</a><br />\n";
+}
+if ( $is_meal_coordinator ) {
   echo "<a title=\"Delete entry\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
     translate("Are you sure you want to delete this entry?") . "\\n\\n" . 

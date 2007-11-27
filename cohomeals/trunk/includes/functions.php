@@ -2559,7 +2559,7 @@ function display_workeat_log( $startdate, $enddate ) {
 }
 
 
-function is_head_chef( $id ) {
+function is_chef( $id ) {
   global $login;
   
   $ret = false;
@@ -2568,7 +2568,7 @@ function is_head_chef( $id ) {
     "FROM webcal_meal_participant " . 
     "WHERE cal_id = $id " .
     "AND cal_login = '$login' " .
-    "AND cal_type = 'H'";
+    "AND cal_type = 'H' OR cal_type = 'C'";
   if ( $res = dbi_query( $sql ) ) {
     if ( dbi_fetch_row( $res ) ) {
       $ret = true;

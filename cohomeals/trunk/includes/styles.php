@@ -379,7 +379,10 @@ textarea {
  clear: both;
 }
 .printer tr.light_border {
-  border-top: 5px solid #00FF00;
+  border: 5px solid #00FF00;
+}
+.printer td.bordered {
+  border: 5px solid #0000FF;
 }
 <?php //Styles for minicalendars
       //keep font-size:12px for IE6
