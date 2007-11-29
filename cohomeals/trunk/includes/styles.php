@@ -577,6 +577,11 @@ th {
   padding-left: 20px;
   padding-right: 20px;
 }
+.bordered_table td.label {
+  border: 1px solid #000000;
+  padding: 2px;
+  background-color: #BBBBBB;
+}
 .cookies {
   font-size: 13px;
 }

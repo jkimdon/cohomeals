@@ -10,7 +10,7 @@ if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
 print_header();
 
 
-//// load meal date/time
+//// load meal date/time/price
 $event_date = 0;
 $event_time = 0;
 $menu = "";
@@ -68,7 +68,7 @@ if ( $res = dbi_query( $sql ) ) {
 <tr>
  <td><?php echo display_time( $event_time );?> <?php echo date_to_str( $event_date,"",true,true );?></td>
 </tr>
-<tr id="light_border">
+<tr>
  <td>Lead: <?php echo $head_chef;?></td>
 </tr>
 <tr>
@@ -79,8 +79,8 @@ if ( $res = dbi_query( $sql ) ) {
    }?>
  </td>
 </tr>
-<tr id="light_border">
- <td>Price (Adult): <?php echo $base_price;?></td>
+<tr>
+ <td>Price (Adult): <?php echo price_to_str( $price );?></td>
 </tr>
 </table>
 
@@ -88,12 +88,12 @@ if ( $res = dbi_query( $sql ) ) {
 
 <?php ////// begin names
 ?>
-<table class="printer">
+<table class="bordered_table">
 <tr>
- <td></td>
- <td>W</td>
- <td>Name</td>
- <td>$L</td>
+ <td class="label">D</td>
+ <td class="label">W</td>
+ <td class="label">Name</td>
+ <td class="label">L</td>
 </tr>
 <tr>
  <td>X</td>

@@ -1150,8 +1150,8 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $suit, $menu ) {
-  global $eventinfo, $PHP_SELF, $TZ_OFFSET;
+function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
+  global $eventinfo, $PHP_SELF;
   global $login;
   static $key = 0;
 
@@ -1168,7 +1168,6 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
   echo "<a class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
   echo "\" onmouseover=\"window.status='" . 
     "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
-  $icon = "circle.gif";
 
   $suit_img = $suit;
   $suit_img .= ".jpg";
@@ -1184,6 +1183,10 @@ function print_entry ( $id, $date, $time, $suit, $menu ) {
 
   echo "</a>\n";
   echo "<br />";
+  if ( $need_crew == 'H' ) 
+    echo "(need head chef)";
+  else if ( $need_crew == 'C' ) 
+    echo "(need crew members)";
   $eventinfo .= build_event_popup ( $popupid, $menu );
 }
 
@@ -1459,9 +1462,52 @@ function print_date_entries ( $date ) {
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     $viewid = $ev[$i]['cal_id'];
     $viewname = $ev[$i]['cal_suit'];
+
+    $need_crew = 'N';
+    
+    $sql = "SELECT cal_login " .
+      "FROM webcal_meal_participant " .
+      "WHERE cal_id = $viewid " .
+      "AND cal_type = 'H'";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( !dbi_fetch_row( $res ) ) {
+	$need_crew = 'H';
+      }
+      dbi_free_result( $res );
+    }
+    if ( $need_crew != 'H' ) {
+      // there is a head chef. now check crew
+
+      $num_crew = 10;
+      $sql2 = "SELECT cal_num_crew " .
+	"FROM webcal_meal " .
+	"WHERE cal_id = $viewid";
+      if ( $res2 = dbi_query( $sql2 ) ) {
+	if ( $row2 = dbi_fetch_row( $res2 ) ) {
+	  $num_crew = $row2[0];
+	}
+	dbi_free_result( $res2 );
+      }
+      
+      $count = 0;
+      $sql2 = "SELECT cal_login " .
+	"FROM webcal_meal_participant " .
+	"WHERE cal_id = $viewid " . 
+	"AND cal_type = 'C'";
+      if ( $res2 = dbi_query( $sql2 ) ) {
+	while ( dbi_fetch_row( $res2 ) ) {
+	  $count++;
+	}
+      }
+      if ( $count < $num_crew ) {
+	$need_crew = 'C';
+      }
+    }
+
+
     print_entry ( $viewid,
       $date, $ev[$i]['cal_time'],
-      $viewname, $ev[$i]['cal_menu'] );
+      $viewname, $ev[$i]['cal_menu'], $need_crew );
     $cnt++;
   }
   if ( $cnt == 0 )
