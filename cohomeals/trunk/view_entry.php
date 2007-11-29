@@ -385,7 +385,7 @@ $adults = $onsite_adults + $takehome_adults;
 $children = $onsite_children + $takehome_children;
 $free = $onsite_free + $takehome_free;
 echo $adults + $children + $free . " people: ";
-echo $adults . " adults, " . $children . " children, " . $free . " young children (free)";
+echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
 ?>
 </td>
 </tr>
