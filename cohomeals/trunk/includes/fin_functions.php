@@ -233,21 +233,29 @@ function get_price( $id, $user, $subscriber=false ) {
     $birthdate = $row[0];
     dbi_free_result( $res );
   }
-  
+
+  $age = get_fee_category( $birthdate );
+
+  $cost = get_adjusted_price ( $id, $age, $subscriber );
+  return $cost;
+}
+
+
+
+function get_fee_category( $birthdate ) {
+
   $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
   $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
-  
+
+  $age = "A";
   if ( $birthdate > $free_cutoff )
     $age = "F";
   else if ( $birthdate > $child_cutoff ) 
     $age = "C";
   else $age = "A";
 
-
-  $cost = get_adjusted_price ( $id, $age, $subscriber );
-  return $cost;
+  return $age;
 }
-
 
 
 function get_adjusted_price( $id, $fee_class, 
