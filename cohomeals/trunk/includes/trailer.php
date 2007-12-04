@@ -61,7 +61,7 @@ if ( $login != '__public__' && $readonly == 'N' ) {
 
 
 /// adding/subscribing links
-$subscribe_link[] = "<a href=\"subscribe_heart.php\">Heart</a>";
+$subscribe_link[] = "<a href=\"subscribe_heartBROKEN.php\">Heart</a>";
 $subscribe_link[] = "<a href=\"subscribe_club.php\">Club</a>";
 $url = "<a title=\"Add New Meal\" href=\"edit_entry.php";
 if ( ! empty ( $thisyear ) ) {
