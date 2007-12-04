@@ -36,17 +36,19 @@ if ( is_signer( $user ) ) {
     $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
       "WHERE cal_suit = 'heart' AND cal_date >= $start_date ";
     $res = dbi_query ( $sql );
+    $id = 0;
     if ( $res ) {
       while ( $row = dbi_fetch_row ( $res ) ) {
 	$w = date ( "w", date_to_epoch( $row[1] ) );
+	$id = $row[0];
 	if ( $w != $skipday ) {
-	  $mod = edit_participation ( $row[0], 'A', 'M', $user );
+	  $mod = edit_participation ( $id, 'A', 'M', $user );
 	  if ( $mod == true ) $count++;
 	}
 	else {
-	  $mod = edit_participation ( $row[0], 'D', 'M', $user );
+	  $mod = edit_participation ( $id, 'D', 'M', $user );
 	  if ( $mod == true ) $count--;
-	  $mod = edit_participation ( $row[0], 'D', 'T', $user );
+	  $mod = edit_participation ( $id, 'D', 'T', $user );
 	  if ( $mod == true ) $count--;
 	}
       }
@@ -55,7 +57,7 @@ if ( is_signer( $user ) ) {
       $error = "Database error: " . dbi_error ();
     dbi_free_result( $res  );
     
-    $amount = get_price( 0, $user, true );
+    $amount = get_price( $id, $user, true );
     $amount *= $count;
     add_financial_event( $user, get_billing_group( $user ),
 			 $amount, "charge", $description, 0, "" );

@@ -229,9 +229,10 @@ function get_price( $id, $user, $subscriber=false ) {
     "WHERE cal_login = '$user'";
   $birthdate = "";
   if ( $res = dbi_query( $sql ) ) {
-    $row = dbi_fetch_row( $res );
-    $birthdate = $row[0];
-    dbi_free_result( $res );
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $birthdate = $row[0];
+      dbi_free_result( $res );
+    }
   }
 
   $sql = "SELECT cal_date " . 
@@ -239,9 +240,10 @@ function get_price( $id, $user, $subscriber=false ) {
     "WHERE cal_id = $id";
   $event_date = date( "Ymd" );
   if ( $res = dbi_query( $sql ) ) {
-    $row = dbi_fetch_row( $res );
-    $event_date = $row[0];
-    dbi_free_result( $res );
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = $row[0];
+      dbi_free_result( $res );
+    }
   }
 
   $age = get_fee_category( $birthdate, $event_date );

@@ -40,7 +40,7 @@ if ( is_signer( $user ) ) {
     
 
 
-  $amount = get_price( 0, $login, true );
+  $amount = get_price( $id, $login, true );
   $amount *= $count;
   user_load_variables( $user, "temp" );
   $description = $GLOBALS[tempfullname] . 
