@@ -373,8 +373,13 @@ function user_get_users () {
 
   $count = 0;
   $ret = array ();
+  $temp_ret = array ();
+  $ordering = array ();
+  for ( $i=0; $i<10; $i++ ) {
+    $ordering[$i] = array ();
+  }
   if ( $public_access == "Y" )
-    $ret[$count++] = array (
+    $temp_ret[$count++] = array (
        "cal_login" => "__public__",
        "cal_lastname" => "",
        "cal_firstname" => "",
@@ -383,26 +388,51 @@ function user_get_users () {
        "cal_password" => "",
        "cal_fullname" => $PUBLIC_ACCESS_FULLNAME );
   $res = dbi_query ( "SELECT cal_login, cal_lastname, cal_firstname, " .
-    "cal_is_meal_coordinator, cal_email, cal_passwd FROM webcal_user " .
-    "ORDER BY cal_lastname, cal_firstname, cal_login" );
+    "cal_is_meal_coordinator, cal_email, " .
+    "cal_passwd, cal_birthdate, cal_unit FROM webcal_user " .
+    "ORDER BY cal_unit, cal_lastname, cal_firstname, cal_login" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       if ( strlen ( $row[1] ) && strlen ( $row[2] ) )
         $fullname = "$row[2] $row[1]";
       else
         $fullname = $row[0];
-      $ret[$count++] = array (
+
+      /// extract building number
+      $unit = $row[7];
+      $temp = (int)($unit / 10);
+      $temp2 = (int)($temp / 10);
+      $building = $temp - 10*$temp2;
+
+      $temp_ret[$count++] = array (
         "cal_login" => $row[0],
         "cal_lastname" => $row[1],
         "cal_firstname" => $row[2],
         "cal_is_meal_coordinator" => $row[3],
         "cal_email" => empty ( $row[4] ) ? "" : $row[4],
         "cal_password" => $row[5],
-        "cal_fullname" => $fullname
+        "cal_fullname" => $fullname,
+	"cal_birthdate" => $row[6],
+	"cal_building" => $building,
+	"cal_unit" => $unit
       );
+      
+      $c = $count - 1;
+      $ordering[$building][$c] = $c;
     }
     dbi_free_result ( $res );
   }
+
+  /// re-order by building
+  $newcount = 0;
+  for ( $i=1; $i<10; $i++ ) {
+    sort( $ordering[$i] );
+    $b = $ordering[$i];
+    foreach ( $b as $key => $value ) {
+      $ret[$newcount++] = $temp_ret[$value];
+    }
+  }
+
   return $ret;
 }
 

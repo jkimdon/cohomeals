@@ -371,18 +371,25 @@ textarea {
   border-bottom: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
 }
 <?php // printer-friendly tables for meal summary sheet
-?>.printer {
- border: 1px solid #FF0000;
- font-size: 12px;
- display: block;
- text-decoration: none;
- clear: both;
+?>
+.printer_table {
+ border: 1px solid #000000;
+ border-collapse: collapse;
+ font-size: 3px;
 }
-.printer tr.light_border {
-  border: 5px solid #00FF00;
+.printer_table td {
+  border: 1px solid #000000;
+  padding: 2px;
 }
-.printer td.bordered {
-  border: 5px solid #0000FF;
+.printer_table td.label {
+  border: 1px solid #000000;
+  padding: 2px;
+  background-color: #BBBBBB;
+}
+.printer_table td.light_label {
+  border: 1px solid #000000;
+  padding: 2px;
+  background-color: #EEEEEE;
 }
 <?php //Styles for minicalendars
       //keep font-size:12px for IE6
@@ -581,6 +588,11 @@ th {
   border: 1px solid #000000;
   padding: 2px;
   background-color: #BBBBBB;
+}
+.bordered_table td.light_label {
+  border: 1px solid #000000;
+  padding: 2px;
+  background-color: #EEEEEE;
 }
 .cookies {
   font-size: 13px;

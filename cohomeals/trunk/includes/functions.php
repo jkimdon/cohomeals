@@ -2614,7 +2614,28 @@ function is_chef( $id ) {
     "FROM webcal_meal_participant " . 
     "WHERE cal_id = $id " .
     "AND cal_login = '$login' " .
-    "AND cal_type = 'H' OR cal_type = 'C'";
+    "AND (cal_type = 'H' OR cal_type = 'C')";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( dbi_fetch_row( $res ) ) {
+      $ret = true;
+    }
+    dbi_free_result( $res );
+  }
+  
+  return $ret;
+}
+
+
+
+function is_dining( $id, $username ) {
+  
+  $ret = false;
+
+  $sql = "SELECT cal_login " .
+    "FROM webcal_meal_participant " . 
+    "WHERE cal_id = $id " .
+    "AND cal_login = '$username' " .
+    "AND (cal_type = 'M' OR cal_type = 'T')";
   if ( $res = dbi_query( $sql ) ) {
     if ( dbi_fetch_row( $res ) ) {
       $ret = true;

@@ -694,7 +694,7 @@ function change_guest_button( $guest_name, $old_type, $id ) {
 
 
 function display_crew( $title, $type, $number, $rowcolor ) {
-  global $login, $can_signup;
+  global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
   $type = mysql_safe( $type, true );
@@ -723,8 +723,7 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 	if ( $person == $login ) {
 	  $im_working = true;
 	}
-	if ( (is_signer( $person ) || ($person == $login))
-	     && ($can_signup == true) ) {
+	if ( (is_signer( $person ) || ($person == $login)) ) {
 	  remove_button( $person, $id, $type );
 	  $notes = htmlspecialchars( $notes );
 	  $nexturl = "crew_notes.php?user=$person&id=$id&notes=$notes";
@@ -743,19 +742,15 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 
   if ( ($i <= $number) && ($im_working == false) ) {
     echo $i . ". ";
-    if ( $can_signup == true ) {
-      add_me_button( $type );
-      signup_buddy_button( $type, $id );
-      echo "<br><br>";
-    } else echo "???<br>";
+    add_me_button( $type );
+    signup_buddy_button( $type, $id );
+    echo "<br><br>";
     $i += 1;
   }
   if ( ($im_working == true) && ($i <= $number) ) {
     echo "<br>" . $i . ". ";
-    if ( $can_signup == true ) {
-      signup_buddy_button( $type, $id );
-      echo "<br>";
-    }
+    signup_buddy_button( $type, $id );
+    echo "<br>";
     $i += 1;
   }
   if ( $i <= $number ) {

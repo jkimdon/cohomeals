@@ -64,7 +64,7 @@ if ( $res = dbi_query( $sql ) ) {
 
 ?>
 
-<table class="printer">
+<table><?php // class="printer">?>
 <tr>
  <td><?php echo display_time( $event_time );?> <?php echo date_to_str( $event_date,"",true,true );?></td>
 </tr>
@@ -75,7 +75,7 @@ if ( $res = dbi_query( $sql ) ) {
  <td>Crew: 
    <?php 
    for( $i=0; $i<count($crew); $i++ ) {
-     echo $crew[$i] . " ";
+     echo $crew[$i] . ", ";
    }?>
  </td>
 </tr>
@@ -87,23 +87,43 @@ if ( $res = dbi_query( $sql ) ) {
 
 
 <?php ////// begin names
+$names = user_get_users();
 ?>
-<table class="bordered_table">
-<tr>
- <td class="label">D</td>
- <td class="label">W</td>
- <td class="label">Name</td>
- <td class="label">L</td>
-</tr>
-<tr>
- <td>X</td>
- <td></td>
- <td>Joey Kimdon</td>
- <td></td>
-</tr>
-
+<table><tr><td>
+<table class="printer_table">
+<?php print_title();
+$prev_building = 0;
+foreach( $names as $name ) {
+  echo "<tr>";
+  $username = $name['cal_login'];
+  $building = $name['cal_building'];
+  if ( $building != $prev_building ) {
+    if ( ($building == 5) || ($building == 9) ) {
+      echo "</table></td><td class=\"label\">|</td><td>\n";
+      echo "<table class=\"printer_table\"><tr><td>";
+      print_title();
+    }
+    if ( $building <= 9 ) 
+      echo "<td colspan=6 align=center class=\"light_label\">Building $building</td>";
+    else 
+      echo "<td colspan=6 align=center class=\"light_label\">Friends</td>";
+    echo "</tr>\n<tr>";
+    $prev_building = $building;
+  }
+  if ( is_dining( $id, $username ) ) 
+    echo "<td>X</td>";
+  else 
+    echo "<td></td>";
+  echo "<td></td>";
+  echo "<td>" . $name['cal_unit'] . "</td>";
+  echo "<td>" . $name['cal_fullname'] . "</td>";
+  echo "<td>" . get_fee_category( $name['cal_birthdate'] ) . "</td>";
+  echo "<td></td>";
+  echo "</tr>\n";
+}
+?>
 </table>
-
+</td></tr></table>
 
 
 <?php print_trailer( false ); ?>
@@ -112,3 +132,17 @@ if ( $res = dbi_query( $sql ) ) {
 </html>
 
 
+
+<?php
+function print_title() { ?>
+<tr>
+ <td class="label">D</td>
+ <td class="label">W</td>
+ <td class="label">Unit</td>
+ <td class="label">Name</td>
+ <td class="label">A</td>
+ <td class="label">L</td>
+</tr>
+
+<?php }
+?>
