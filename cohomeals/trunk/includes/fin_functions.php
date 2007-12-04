@@ -234,7 +234,17 @@ function get_price( $id, $user, $subscriber=false ) {
     dbi_free_result( $res );
   }
 
-  $age = get_fee_category( $birthdate );
+  $sql = "SELECT cal_date " . 
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  $event_date = date( "Ymd" );
+  if ( $res = dbi_query( $sql ) ) {
+    $row = dbi_fetch_row( $res );
+    $event_date = $row[0];
+    dbi_free_result( $res );
+  }
+
+  $age = get_fee_category( $birthdate, $event_date );
 
   $cost = get_adjusted_price ( $id, $age, $subscriber );
   return $cost;
@@ -242,10 +252,13 @@ function get_price( $id, $user, $subscriber=false ) {
 
 
 
-function get_fee_category( $birthdate ) {
+function get_fee_category( $birthdate, $event_date ) {
 
-  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-4, date( "m" ), date( "d" ) );
-  $child_cutoff = sprintf( "%04d%02d%02d", date( "Y" )-13, date( "m" ), date( "d" ) );
+  $epoch = date_to_epoch( $event_date );
+  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-4, 
+			  date( "m", $epoch ), date( "d", $epoch ) );
+  $child_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-13, 
+			   date( "m", $epoch ), date( "d", $epoch ) );
 
   $age = "A";
   if ( $birthdate > $free_cutoff )

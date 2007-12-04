@@ -117,7 +117,7 @@ foreach( $names as $name ) {
   echo "<td></td>";
   echo "<td>" . $name['cal_unit'] . "</td>";
   echo "<td>" . $name['cal_fullname'] . "</td>";
-  echo "<td>" . get_fee_category( $name['cal_birthdate'] ) . "</td>";
+  echo "<td>" . get_fee_category( $name['cal_birthdate'], $event_date ) . "</td>";
   echo "<td></td>";
   echo "</tr>\n";
 }

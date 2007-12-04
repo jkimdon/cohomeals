@@ -220,7 +220,7 @@ if ( $res ) {
         $pname = $row[0];
 	$approved[$num_app++] = $pname;
 	user_load_variables( $pname, "temp" );
-	$age = get_fee_category( $GLOBALS[tempbirthdate] );
+	$age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
 	if ( $age == "C" ) $onsite_children++;
 	else if ( $age == "F" ) $onsite_free++;
 	else $onsite_adults++; // $age == "A"
@@ -311,7 +311,7 @@ if ( $res ) {
     $pname = $row[0];
     $approved[$num_app++] = $pname;
     user_load_variables( $pname, "temp" );
-    $age = get_fee_category( $GLOBALS[tempbirthdate] );
+    $age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
     if ( $age == "C" ) $takehome_children++;
     else if ( $age == "F" ) $takehome_free++;
     else $takehome_adults++; // $age == "A"
@@ -509,8 +509,8 @@ switch ( $walkins ) {
 <p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
 Meal crew checklist</a></p>
 <p><a class="addbutton" 
-<?php //href="print_signup.php?id=<?php echo $id;?>
-href="refs/MealSignUpSheet.pdf
+href="print_signup.php?id=<?php echo $id;?>
+<?php //href="refs/MealSignUpSheet.pdf?>
 ">
 Meal signup sheet</a></p>
 <p><a class="addbutton" href="refs/MealSummarySheet.pdf">
