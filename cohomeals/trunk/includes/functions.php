@@ -1050,7 +1050,7 @@ function date_selection_html ( $prefix, $date, $num_years ) {
  */
 function display_small_month ( $thismonth, $thisyear, $showyear,
   $minical_id='', $month_link='month.php?' ) {
-  global $WEEK_START, $user, $login, $boldDays;
+  global $WEEK_START, $user, $login;
   global $today;
 
   if ( $user != $login && ! empty ( $user ) ) {
@@ -1105,14 +1105,12 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
       $hasEvents = false;
       $suit = "empty";
       $meal_id = 0;
-      if ( $boldDays ) {
-        $ev = get_entries ( $dateYmd );
-        if ( count ( $ev ) > 0 ) {
-          $hasEvents = true;
-	  $suit = $ev[0]['cal_suit'];
-	  $meal_id = $ev[0]['cal_id'];
-        } 
-      }
+      $ev = get_entries ( $dateYmd );
+      if ( count ( $ev ) > 0 ) {
+	$hasEvents = true;
+	$suit = $ev[0]['cal_suit'];
+	$meal_id = $ev[0]['cal_id'];
+      } 
       if ( $dateYmd >= date ("Ymd",$monthstart) &&
         $dateYmd <= date ("Ymd",$monthend) ) {
         $wday = date ( 'w', $date );

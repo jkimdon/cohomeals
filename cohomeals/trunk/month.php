@@ -12,15 +12,8 @@ $prevyear = date ( "Y", $prev );
 $prevmonth = date ( "m", $prev );
 //$prevdate = date ( "Ymd" );
 
-if ( ! empty ( $bold_days_in_year ) && $bold_days_in_year == 'Y' ) {
-  $boldDays = true;
-  $startdate = sprintf ( "%04d%02d01", $prevyear, $prevmonth );
-  $enddate = sprintf ( "%04d%02d31", $nextyear, $nextmonth );
-} else {
-  $boldDays = false;
-  $startdate = sprintf ( "%04d%02d01", $thisyear, $thismonth );
-  $enddate = sprintf ( "%04d%02d31", $thisyear, $thismonth );
-}
+$startdate = sprintf ( "%04d%02d01", $prevyear, $prevmonth );
+$enddate = sprintf ( "%04d%02d31", $nextyear, $nextmonth );
 
 $HeadX = '';
 if ( $auto_refresh == "Y" && ! empty ( $auto_refresh_time ) ) {

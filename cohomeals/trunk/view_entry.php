@@ -503,7 +503,9 @@ switch ( $walkins ) {
 <?php //////// printable sheets for the meal crew
 ?>
 <br>
-<hr>
+<table>
+<tr><td width="68%">
+
 <h4>For the head chef</h4>
 
 <p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
@@ -518,9 +520,33 @@ Meal summary sheet</a></p>
 <p><a class="addbutton" href="refs/PantryPriceList200711.pdf">
 Pantry price list</a></p>
 
+<?php
+$can_edit = ( $is_meal_coordinator );
+if ( is_chef( $id ) ) 
+  $can_edit = true;
 
+if ( $can_edit ) {
+  echo "<p><a title=\"Edit meal\" class=\"nav\" " .
+    "href=\"edit_entry.php?id=$id$u_url\">Edit meal</a></p>\n";
+}
+?>
 
+</td><td align="center">
 
+<?php
+$event_epoch = date_to_epoch( $event_date );
+$thismonth = date( "m", $event_epoch );
+$thisyear = date( "Y", $event_epoch );
+$startdate = sprintf ( "%04d%02d01", $thisyear, $thismonth );
+$enddate = sprintf ( "%04d%02d31", $thisyear, $thismonth );
+$events = read_events ( $startdate, $enddate );
+echo "Jump to other meals:<br>";
+display_small_month( $thismonth, $thisyear,
+		     true, "nextmonth", "month.php?" );
+?>
+
+</td></tr>
+</table>
 
 
 
@@ -532,20 +558,12 @@ if ( ! empty ( $user ) && $login != $user ) {
   $u_url = "";
 }
 
-$can_edit = ( $is_meal_coordinator );
-if ( is_chef( $id ) ) 
-  $can_edit = true;
-
-if ( $can_edit ) {
-  echo "<a title=\"Edit entry\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id$u_url\">Edit entry</a><br />\n";
-}
 if ( $is_meal_coordinator ) {
-  echo "<a title=\"Delete entry\" class=\"nav\" " .
+  echo "<a title=\"Delete meal\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
-    translate("Are you sure you want to delete this entry?") . "\\n\\n" . 
-    translate("This will delete this entry for all users.") . "');\">" . 
-    translate("Delete entry") . "</a><br />\n";
+    translate("Are you sure you want to delete this meal?") . "\\n\\n" . 
+    translate("This will delete this meal for all users.") . "');\">" . 
+    translate("Delete meal") . "</a><br />\n";
 }
 
 if ( count ( $allmails ) > 0 ) {

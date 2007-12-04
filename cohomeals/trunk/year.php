@@ -20,12 +20,8 @@ $nextYear= $year + 1;
 if ( $allow_view_other != "Y" && ! $is_meal_coordinator )
   $user = "";
 
-$boldDays = false;
-if ( ! empty ( $bold_days_in_year ) && $bold_days_in_year == 'Y' ) {
-  /* Pre-load the events for quicker access */
-  $events = read_events ( $year . "0101", $year . "1231" );
-  $boldDays = true;
-}
+/* Pre-load the events for quicker access */
+$events = read_events ( $year . "0101", $year . "1231" );
 
  print_header();
  ?>
