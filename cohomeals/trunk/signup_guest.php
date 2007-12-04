@@ -30,6 +30,25 @@ Enter their cost class:
 </select>
 </p>
 
+<?php 
+$host = $login;
+if ( $is_meal_coordinator ) {
+  echo "<p>Host: ";
+  echo "<select name=\"host\">\n";
+  $user_list = user_get_users();
+  for ( $i = 0; $i < count( $user_list ); $i++ ) {
+    echo "<option value=\"" . $user_list[$i]['cal_login'] .
+      "\">" . $user_list[$i]['cal_fullname'] . 
+      "</option>\n";
+  }
+  echo "</select>\n";
+  echo "</p>\n";
+} else {
+  echo "<input type=\"hidden\" name=\"host\" value=\"$host\" />\n";
+}
+?>
+
+
 <input type="hidden" name="id" value="<?php echo $id;?>" />
 <input type="hidden" name="action" value="<?php echo $action;?>" />
 <input type="hidden" name="type" value="<?php echo $type;?>" />

@@ -5,6 +5,7 @@ $id = mysql_safe( getValue( 'id' ), false );
 $action = getValue( 'action' );
 $type = mysql_safe( getValue( 'type' ), true );
 $guest_name = mysql_safe( getValue( 'guest_name' ), true );
+$host = mysql_safe( getValue( 'host' ), true );
 $fee_class = mysql_safe( getValue( 'age' ), true );
 $miniwindow = false;
 $miniwindow = getValue( 'miniwindow' );
@@ -17,7 +18,7 @@ if ( $action == 'A' ) {
   // add to the database
   $sql = "INSERT INTO webcal_meal_guest " .
     "( cal_meal_id, cal_fullname, cal_host, cal_fee, cal_type ) " .
-    "VALUES ( $id, '$guest_name', '$login', '$fee_class', '$type' )";
+    "VALUES ( $id, '$guest_name', '$host', '$fee_class', '$type' )";
   if ( !dbi_query( $sql ) ) {
     $error = "Database entry failed";
   }
@@ -25,9 +26,9 @@ if ( $action == 'A' ) {
 
   // charge host's account
   $amount = get_adjusted_price( $id, $fee_class, false, true );
-  $billing = get_billing_group( $login );
+  $billing = get_billing_group( $host );
   $description = "Guest: $guest_name dining";
-  add_financial_event( $login, $billing, $amount, "charge",
+  add_financial_event( $host, $billing, $amount, "charge",
 		       $description, $id, "" );
 
 } else if ( $action == 'D' ) {
