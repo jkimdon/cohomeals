@@ -121,6 +121,8 @@ $next = mktime ( 3, 0, 0, $thismonth + 1, $thisday, $thisyear );
 $prev = mktime ( 3, 0, 0, $thismonth - 1, $thisday, $thisyear );
 ?>
 
+<p align="center">E = you are signed up to eat that meal, W = you are signed up to work</p>
+
 <div id="monthnav">
 
 <span id="arrow">

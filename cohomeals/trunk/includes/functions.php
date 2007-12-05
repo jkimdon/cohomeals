@@ -1154,12 +1154,30 @@ function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
   static $key = 0;
 
   $id = mysql_safe( $id, false );
-  $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = '$id' AND cal_login = '$login'";
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_login = '$login' " .
+    "AND ( cal_type = 'M' OR cal_type = 'T' )";
   $class = "entry";
+  $eating = false;
   if ( $res = dbi_query ( $sql ) ) {
-    if ( dbi_fetch_row ( $res ) ) 
+    if ( dbi_fetch_row ( $res ) ) {
       $class = "participating_entry";
+      $eating = true;
+    }
+    dbi_free_result( $res );
   }
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_login = '$login' " .
+    "AND ( cal_type = 'H' OR cal_type = 'C' )";
+  $working = false;
+  if ( $res = dbi_query ( $sql ) ) {
+    if ( dbi_fetch_row ( $res ) ) {
+      $class = "participating_entry";
+      $working = true;
+    }
+    dbi_free_result( $res );
+  }
+
 
   $popupid = "eventinfo-$id-$key";
   $key++;
@@ -1176,10 +1194,20 @@ function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
   $timestr = "";
   $timestr = display_time ( $time );
   $time_short = preg_replace ("/(:00)/", '', $timestr);
-  echo $time_short . "&raquo;&nbsp;";
-  echo htmlspecialchars ( $suit );
+  echo "&nbsp;" . $time_short; //. "&raquo;&nbsp;";
+  //  echo htmlspecialchars ( $suit );
 
   echo "</a>\n";
+  
+  if ( $class == "participating_entry" ) {
+    echo " (";
+    if ( $eating == true )
+      echo "E";
+    if ( $working == true )
+      echo "W";
+    echo ")";
+  }
+
   echo "<br />";
   if ( $need_crew == 'H' ) 
     echo "(need head chef)";
