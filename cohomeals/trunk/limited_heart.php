@@ -137,7 +137,8 @@ function print_checked_day ( $date, $id, $user ) {
   $formatted_date = date ( "Ymd", $date );
 
   $sql2 = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = '$id' AND cal_login = '$user'";
+    "WHERE cal_id = '$id' AND cal_login = '$user' " .
+    "AND ( cal_type = 'M' OR cal_type = 'T' )";
   $res2 = dbi_query ( $sql2 );
   if ( !$res2 ) echo "Database error: " . dbi_error() . "<br />\n";
   else if ( $row2 = dbi_fetch_row ( $res2 ) ) 
