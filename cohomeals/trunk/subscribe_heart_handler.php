@@ -19,52 +19,12 @@ $description = "Heart meal subscription error";
 
 if ( is_signer( $user ) ) {
 
-  user_load_variables( $user, "temp" );
-
   if ( $action == 'S' ) {
-    $description = $GLOBALS[tempfullname] . 
-      " subscribing to heart meals";
-    
-    $sql = "INSERT INTO webcal_subscriptions ( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
-      "VALUES ( '$user', 'heart', '$skipday', $start_date, $end_date, 1 )";
-    if ( ! dbi_query ( $sql ) ) {
-      $error = "Database error: " . dbi_error ();
-    }
-    
-    
-    /// enter user as in-house diner for all currently entered heart meals 
-    $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
-      "WHERE cal_suit = 'heart' AND cal_date >= $start_date ";
-    $res = dbi_query ( $sql );
-    $id = 0;
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-	$w = date ( "w", date_to_epoch( $row[1] ) );
-	$id = $row[0];
-	if ( $w != $skipday ) {
-	  $mod = edit_participation ( $id, 'A', 'M', $user );
-	  if ( $mod == true ) $count++;
-	}
-	else {
-	  $mod = edit_participation ( $id, 'D', 'M', $user );
-	  if ( $mod == true ) $count--;
-	  $mod = edit_participation ( $id, 'D', 'T', $user );
-	  if ( $mod == true ) $count--;
-	}
-      }
-    }
-    else 
-      $error = "Database error: " . dbi_error ();
-    dbi_free_result( $res  );
-    
-    $amount = get_price( $id, $user, true );
-    $amount *= $count;
-    add_financial_event( $user, get_billing_group( $user ),
-			 $amount, "charge", $description, 0, "" );
-
+    subscribe_ongoing_heart( $user, $skipday, $start_date, $end_date );
   }
   
   else if ( $action == 'U' ) {
+    user_load_variables( $user, "temp" );
     $description = $GLOBALS[tempfullname] . 
       " unsubscribing to heart meals";
     

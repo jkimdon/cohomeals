@@ -2712,16 +2712,60 @@ function update_subscriptions() {
 	"AND cal_ongoing = 1";
       if ( !dbi_query( $sql2 ) ) $error = "Database error: " . dbi_error ();
 
-      // add another ongoing subscription
-      $sql2 = "INSERT INTO webcal_subscriptions " .
-	"( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
-	"VALUES ('$user', 'heart', $off_day, $new_start, $new_end, 1 )";
-      if ( !dbi_query( $sql2 ) ) $error = "Database error: " . dbi_error ();
+      // add another 3 months of ongoing subscription
+      subscribe_ongoing_heart( $user, $off_day, $new_start, $new_end );
     }
     dbi_free_result( $res );
   }
+
 }
 
+
+function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
+
+  // enter into subscription table
+  $sql = "INSERT INTO webcal_subscriptions " .
+    "( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
+    "VALUES ('$user', 'heart', $off_day, $start_date, $end_date, 1 )";
+  if ( !dbi_query( $sql ) ) $error = "Database error: " . dbi_error ();
+
+
+  $count = 0;
+  /// enter user as in-house diner for all currently entered heart meals 
+  $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
+    "WHERE cal_suit = 'heart' " .
+    "AND cal_date >= $start_date " .
+    "AND cal_date < $end_date";
+  $res = dbi_query ( $sql );
+  $id = 0;
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $w = date ( "w", date_to_epoch( $row[1] ) );
+      $id = $row[0];
+      if ( $w != $off_day ) {
+	$mod = edit_participation ( $id, 'A', 'M', $user );
+	if ( $mod == true ) $count++;
+      }
+      else {
+	$mod = edit_participation ( $id, 'D', 'M', $user );
+	if ( $mod == true ) $count--;
+	$mod = edit_participation ( $id, 'D', 'T', $user );
+	if ( $mod == true ) $count--;
+      }
+    }
+  }
+  else 
+    $error = "Database error: " . dbi_error ();
+  dbi_free_result( $res  );
+  
+  user_load_variables( $user, "temp" );
+  $description = $GLOBALS[tempfullname] . 
+    " subscribing to heart meals";
+  $amount = get_price( $id, $user, true );
+  $amount *= $count;
+  add_financial_event( $user, get_billing_group( $user ),
+		       $amount, "charge", $description, 0, "" );
+}
 
 
 function get_day( $ref_date, $num_days ) {
