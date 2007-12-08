@@ -97,7 +97,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
 	  $id . "', '" . $suit . "', '" . 
 	  date ( "Ymd", $date ) . "')\">";
 
-      $suit .= ".jpg";
+      $suit .= ".png";
       echo date ( "j", $date ) . "<br>" . 
 	"<img width=\"15\" border=\"0\" src=\"images/$suit\" /></a></td>\n";
     } else {
