@@ -1119,7 +1119,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
           echo " id=\"today\"";
         }
         echo ">";
-	$suit .= ".png";
+	$suit .= "_15x15.png";
 	if ( $hasEvents ) {
 	  echo "<a href=\"view_entry.php?id=$meal_id\">";
 	} else 
@@ -1186,7 +1186,7 @@ function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
     "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
 
   $suit_img = $suit;
-  $suit_img .= ".png";
+  $suit_img .= "_20x20.png";
   echo "<img width=\"20\" border=\"0\"" . 
     "src=\"images/$suit_img\" alt=\"View this entry\" />";
 
