@@ -105,7 +105,7 @@ if ( $can_view == true ) {
   <table style="border-width:0px;">
   <tr>
    <td class="tooltip">Billing group:</td>
-   <td><select name="group_new">
+   <td><select multiple name="group_new[]" size=5>
     <?php 
     $groups = get_billing_groups();       
     for ( $i=0; $i<count( $groups ); $i++ ) {
