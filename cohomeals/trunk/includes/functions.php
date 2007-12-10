@@ -1148,7 +1148,8 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
+function print_entry ( $id, $date, $time, $suit, $menu, 
+		       $need_crew, $deadline ) {
   global $eventinfo, $PHP_SELF;
   global $login;
   static $key = 0;
@@ -1213,6 +1214,12 @@ function print_entry ( $id, $date, $time, $suit, $menu, $need_crew ) {
     echo "(need head chef)";
   else if ( $need_crew == 'C' ) 
     echo "(need crew members)";
+
+  echo "<br />";
+  for ( $i=0; $i<count($deadline); $i++ )
+    echo "<br>Deadline for " . 
+      date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
+
   $eventinfo .= build_event_popup ( $popupid, $menu );
 }
 
@@ -1485,6 +1492,8 @@ function print_date_entries ( $date ) {
   // get all events for this date and store in $ev
   $ev = get_entries ( $date );
 
+
+  /// check if need crew/head chef
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     $viewid = $ev[$i]['cal_id'];
     $viewname = $ev[$i]['cal_suit'];
@@ -1524,16 +1533,35 @@ function print_date_entries ( $date ) {
 	while ( dbi_fetch_row( $res2 ) ) {
 	  $count++;
 	}
+	dbi_free_result( $res2 );
       }
       if ( $count < $num_crew ) {
 	$need_crew = 'C';
       }
     }
 
+    //// check if this is the deadline for any meals
+    $deadline = array();
+    $ct = 0;
+    $sql = "SELECT cal_date, cal_signup_deadline " .
+      "FROM webcal_meal " .
+      "WHERE cal_date >= $date";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$event_date = $row[0];
+	$d = $row[1];
+	$deadline_day = get_day( $event_date, -1*$d );
+	if ( $date == $deadline_day ) {
+	  $deadline[$ct++] = $event_date;
+	}
+      }
+      dbi_free_result( $res );
+    }
+
 
     print_entry ( $viewid,
       $date, $ev[$i]['cal_time'],
-      $viewname, $ev[$i]['cal_menu'], $need_crew );
+      $viewname, $ev[$i]['cal_menu'], $need_crew, $deadline );
     $cnt++;
   }
   if ( $cnt == 0 )
