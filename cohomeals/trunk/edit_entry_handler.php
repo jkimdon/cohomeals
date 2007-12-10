@@ -28,7 +28,7 @@ $base_cents = getPostValue( 'base_cents' );
 
 $base_price = 100*$base_dollars + $base_cents;
 if ( $newevent == false ) $repeats = false;
-if ( $suit == "heart" ) $deadline = 14;
+//if ( $suit == "heart" ) $deadline = 14;
 
 
 for ( $i=0; $i<7; $i++ ) {
