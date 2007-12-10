@@ -87,22 +87,8 @@ function display_financial_log( $cur_group, $startdate, $enddate ) {
 	  echo "<td>None</td>";
 	}
 	echo "<td>" . htmlspecialchars( $text ) . "</td>";
-	$sign = "";
-	if ( $amount < 0 ) {
-	  $amount *= -1.0;
-	  $sign = "-";
-	}
-	echo "<td align=right>" .
-	  sprintf( "%s$%01.2f", $sign, $amount/100 ) . 
-	  "</td>";
-	$sign = "";
-	if ( $balance < 0 ) {
-	  $balance *= -1.0;
-	  $sign = "-";
-	}
-	echo "<td align=right>" .
-	  sprintf( "%s$%01.2f", $sign, $balance/100 ) . 
-	  "</td>";
+	echo "<td align=right>" . price_to_str( $amount ) . "</td>";
+	echo "<td align=right>" . price_to_str( $balance ) . "</td>";
 	echo "</tr>";
 	$row_num = ( $row_num == 1 ) ? 0:1;
       }
@@ -131,6 +117,7 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
 
   if ( $last_balance != $balance ) {
     $error = "mismatched balance";
+    echo $error;
   }
 
 
@@ -457,11 +444,32 @@ function get_refund_percentage( $id, $past_deadline=false ) {
 }
 
 
+function get_money_for_meal( $id ) {
+  $total = 0;
+
+  $sql = "SELECT cal_amount FROM webcal_financial_log " .
+    "WHERE cal_meal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $total += $row[0];
+    }
+    dbi_free_result( $res );
+  }
+
+  return $total;
+}
+
 
 function price_to_str( $price ) {
+  $sign = "";
+  if ( $price < 0 ) {
+    $price *= -1.0;
+    $sign = "-";
+  }
   $dollars = (int)($price / 100);
   $cents = $price - ($dollars*100);
-  printf( "\$%d.%02d", $dollars, $cents );
+  $ret = sprintf( "%s\$%d.%02d", $sign, $dollars, $cents );
+  return $ret;
 }
 
 

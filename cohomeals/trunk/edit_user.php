@@ -33,6 +33,7 @@ print_header ( '', '', '', true );
     $ubirthdate = $GLOBALS['ubirthdate'];
     $uemail = $GLOBALS['uemail'];
     $ubilling_group = $GLOBALS['ubilling_group'];
+    $uunit = $GLOBALS['uunit'];
     $uis_meal_coordinator = $GLOBALS['uis_meal_coordinator'];
     $uis_beancounter = $GLOBALS['uis_beancounter'];
     echo "User info";
@@ -99,14 +100,13 @@ print_header ( '', '', '', true );
     echo "<td>$uemail</td>";
   } ?>
 </tr>
-<tr>
-  <td><label for="ubilling_group">Billing group:</label></td>
-  <?php if ( $is_meal_coordinator ) {?>
-    <td><input type="text" name="ubilling_group" id="ubilling_group" size="20" value="<?php echo empty ( $ubilling_group ) ? '' : htmlspecialchars ( $ubilling_group );?>" /></td>
-  <?php } else {
-    echo "<td>$ubilling_group</td>";
-  } ?>
-</tr>
+
+<?php 
+make_text_row( "Billing group", $ubilling_group, "ubilling_group" ); 
+make_text_row( "Unit", $uunit, "uunit" ); 
+
+?>
+
 
 
 <?php if ( empty ( $user ) && ! $use_http_auth && $user_can_update_password ) { ?>
@@ -172,3 +172,24 @@ if ( $is_meal_coordinator ) { ?>
 <?php print_trailer ( false, true, true ); ?>
 </body>
 </html>
+
+
+
+<?php 
+
+function make_text_row( $label, $var, $name ) {
+  global $is_meal_coordinator;
+
+  echo "<tr>";
+  echo "<td><label>" . $label . ": </label></td>";
+  if ( $is_meal_coordinator ) {
+    echo "<td><input type=\"text\" name=\"$name\" id=\"$name\" size=\"20\" value=\"" .
+      htmlspecialchars( $var ) . "\" /></td>";
+  } else {
+    echo "<td>$var</td>";
+  }
+  echo "</tr>";
+}
+
+
+?>

@@ -2673,6 +2673,39 @@ function is_dining( $id, $username ) {
 }
 
 
+function is_walkin( $id, $username ) {
+  $ret = false;
+
+  $signup_deadline = "";
+  $sql = "SELECT cal_date, cal_signup_deadline " .
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = UNIX_TIMESTAMP( $row[0] );
+      $deadline = $row[1];
+      $signup_deadline = get_day( $event_date, -1*$deadline );
+    }
+    dbi_free_result( $res );
+  }
+      
+
+  $sql = "SELECT cal_timestamp " .
+    "FROM webcal_meal_participant " . 
+    "WHERE cal_id = $id " .
+    "AND cal_login = '$username' " .
+    "AND (cal_type = 'M' OR cal_type = 'T')";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      if ( $signup_deadline < $signup_date ) 
+	$ret = true;
+    }
+    dbi_free_result( $res );
+  }
+  
+  return $ret;
+
+}
 
 /// do heart autorenewals
 function update_subscriptions() {
@@ -2744,13 +2777,22 @@ function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
       $id = $row[0];
       if ( $w != $off_day ) {
 	$mod = edit_participation ( $id, 'A', 'M', $user );
-	if ( $mod == true ) $count++;
+	if ( $mod == true ) {
+	  $count++;
+	  auto_financial_event( $id, 'A', 'M', $user );
+	}
       }
       else {
 	$mod = edit_participation ( $id, 'D', 'M', $user );
-	if ( $mod == true ) $count--;
+	if ( $mod == true ) {
+	  $count--;
+	  auto_financial_event( $id, 'D', 'M', $user );
+	}
 	$mod = edit_participation ( $id, 'D', 'T', $user );
-	if ( $mod == true ) $count--;
+	if ( $mod == true ) {
+	  $count--;
+	  auto_financial_event( $id, 'D', 'T', $user );
+	}
       }
     }
   }
@@ -2758,13 +2800,6 @@ function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
     $error = "Database error: " . dbi_error ();
   dbi_free_result( $res  );
   
-  user_load_variables( $user, "temp" );
-  $description = $GLOBALS[tempfullname] . 
-    " subscribing to heart meals";
-  $amount = get_price( $id, $user, true );
-  $amount *= $count;
-  add_financial_event( $user, get_billing_group( $user ),
-		       $amount, "charge", $description, 0, "" );
 }
 
 

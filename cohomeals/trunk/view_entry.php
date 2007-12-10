@@ -152,23 +152,8 @@ else echo "</p>";
 
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Menu:</td>
  <td>
- <?php
-  if ( ! empty ( $allow_html_description ) &&
-    $allow_html_description == 'Y' ) {
-    $menu_str = str_replace ( '&', '&amp;', $menu );
-    $menu_str = str_replace ( '&amp;amp;', '&amp;', $str );
-    // If there is no html found, then go ahead and replace
-    // the line breaks ("\n") with the html break.
-    if ( strstr ( $menu_str, "<" ) && strstr ( $menu_str, ">" ) ) {
-      // found some html...
-      echo $menu_str;
-    } else {
-      echo nl2br ( activate_urls ( $menu_str ) );
-    }
-  } else {
-    echo nl2br ( activate_urls ( htmlspecialchars ( $menu ) ) );
-  }
-?></td></tr>
+<?php echo $menu; ?>
+</td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
@@ -386,6 +371,7 @@ $children = $onsite_children + $takehome_children;
 $free = $onsite_free + $takehome_free;
 echo $adults + $children + $free . " people: ";
 echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
+//echo " (" . price_to_str( get_money_for_meal( $id )) . " available to spend)";
 ?>
 </td>
 </tr>
@@ -420,23 +406,8 @@ switch ( $walkins ) {
 ?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
 <td>
- <?php
-  if ( ! empty ( $allow_html_description ) &&
-    $allow_html_description == 'Y' ) {
-    $str = str_replace ( '&', '&amp;', $notes );
-    $str = str_replace ( '&amp;amp;', '&amp;', $str );
-    // If there is no html found, then go ahead and replace
-    // the line breaks ("\n") with the html break.
-    if ( strstr ( $str, "<" ) && strstr ( $str, ">" ) ) {
-      // found some html...
-      echo $str;
-    } else {
-      echo nl2br ( activate_urls ( $str ) );
-    }
-  } else {
-    echo nl2br ( activate_urls ( htmlspecialchars ( $notes ) ) );
-  }
-?></td></tr>
+<?php echo $notes; ?>
+</td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
@@ -511,8 +482,8 @@ switch ( $walkins ) {
 <p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
 Meal crew checklist</a></p>
 <p><a class="addbutton" 
-href="print_signup.php?id=<?php echo $id;?>
-<?php //href="refs/MealSignUpSheet.pdf?>
+<?php //href="print_signup.php?id=<?php echo $id;?>
+href="refs/MealSignUpSheet.pdf
 ">
 Meal signup sheet</a></p>
 <p><a class="addbutton" href="refs/MealSummarySheet.pdf">
@@ -743,8 +714,7 @@ function display_crew( $title, $type, $number, $rowcolor ) {
 	}
 	if ( (is_signer( $person ) || ($person == $login)) ) {
 	  remove_button( $person, $id, $type );
-	  $notes = htmlspecialchars( $notes );
-	  $nexturl = "crew_notes.php?user=$person&id=$id&notes=$notes";
+	  $nexturl = "crew_notes.php?user=$person&id=$id";
 	  echo "&nbsp;&nbsp;&nbsp;<a href class=\"addbutton\" " .
 	    "onclick=\"window.open('$nexturl', 'Crew notes', " .
 	    "'width=300,height=200,resizable=yes,scrollbars=yes');\">" .

@@ -7,8 +7,20 @@ $error = '';
 
 $id = mysql_safe( getGetValue( 'id' ), false );
 $user = mysql_safe( getGetValue( 'user' ), true );
-$notes = trim( mysql_safe( getGetValue( 'notes' ), true ) );
 if ( !isset( $user ) ) $user = $login;
+
+$notes = "";
+$sql = "SELECT cal_notes FROM webcal_meal_participant " .
+       "WHERE cal_id = $id AND cal_login = '$user' " .
+       "AND (cal_type = 'H' OR cal_type = 'C')";
+if ( $res = dbi_query( $sql ) ) {
+  if ( $row = dbi_fetch_row( $res ) ) {
+    $notes = $row[0];
+    $notes = html_entity_decode( $notes, ENT_QUOTES );
+  }
+  dbi_free_result( $res );
+}
+
 
 if ( is_signer( $user ) == true ) {
 

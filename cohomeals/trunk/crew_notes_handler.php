@@ -11,7 +11,8 @@ if ( is_signer( $user ) == true ) {
   $sql = "UPDATE webcal_meal_participant " .
     "SET cal_notes = '$notes' " .
     "WHERE cal_login = '$user' " .
-    "AND cal_id = $id";
+    "AND cal_id = $id " .
+    "AND (cal_type = 'C' OR cal_type = 'H' )";
   if ( !dbi_query( $sql ) ) {
     $error = "Database error";
   }

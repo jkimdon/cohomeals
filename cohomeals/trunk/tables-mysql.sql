@@ -108,6 +108,8 @@ CREATE TABLE webcal_meal_participant (
   cal_type CHAR(1) NOT NULL,
   /* notes, e.g. about availability or crew type preference */
   cal_notes VARCHAR(80) NULL,
+  /* timestamp when initially signed up */
+  cal_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ( cal_id, cal_login, cal_type )
 );
 

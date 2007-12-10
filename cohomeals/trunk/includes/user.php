@@ -151,7 +151,7 @@ function user_load_variables ( $login, $prefix ) {
     return true;
   }
   $sql =
-    "SELECT cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_email, cal_birthdate, cal_passwd, cal_billing_group " .
+    "SELECT cal_firstname, cal_lastname, cal_is_meal_coordinator, cal_is_beancounter, cal_email, cal_birthdate, cal_passwd, cal_billing_group, cal_unit " .
     "FROM webcal_user WHERE cal_login = '" . $login . "'";
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -169,6 +169,7 @@ function user_load_variables ( $login, $prefix ) {
       $GLOBALS[$prefix . "birthdate"] = $row[5];
       $GLOBALS[$prefix . "password"] = $row[6];
       $GLOBALS[$prefix . "billing_group"] = $row[7];
+      $GLOBALS[$prefix . "unit"] = $row[8];
     }
     dbi_free_result ( $res );
   } else {
@@ -190,7 +191,7 @@ function user_load_variables ( $login, $prefix ) {
 //   $meal_coordinator - is admin? ("Y" or "N")
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_add_user ( $user, $password, $firstname, $lastname, 
-  $birthdate, $email, $billing_group, $meal_coordinator, $beancounter ) {
+  $birthdate, $email, $billing_group, $unit, $meal_coordinator, $beancounter ) {
   global $error;
 
   if ( $user == "__public__" ) {
@@ -223,6 +224,11 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     $ubirthdate = mysql_safe( $birthdate, false );
   else
     $ubirthdate = "";
+  if ( strlen ( $unit ) )
+    $uunit = mysql_safe( $unit, false );
+  else
+    $uunit = 0;
+  
   if ( $meal_coordinator != "Y" )
     $meal_coordinator = "N";
   if ( $beancounter != "Y" )
@@ -230,10 +236,10 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   $sql = "INSERT INTO webcal_user " .
     "( cal_login, cal_lastname, cal_firstname, " .
     "cal_is_meal_coordinator, cal_is_beancounter, cal_passwd, cal_email, " .
-    "cal_billing_group, cal_birthdate ) " .
+    "cal_billing_group, cal_birthdate, cal_unit ) " .
     "VALUES ( '$user', '$ulastname', '$ufirstname', " .
     "'$meal_coordinator', '$beancounter', $upassword, '$uemail', " . 
-    "'$ubilling_group', '$ubirthdate' )";
+    "'$ubilling_group', '$ubirthdate', $uunit )";
   if ( ! dbi_query ( $sql ) ) {
     $error = translate ("Database error") . ": " . dbi_error ();
     return false;
@@ -252,7 +258,8 @@ function user_add_user ( $user, $password, $firstname, $lastname,
 //   $meal_coordinator - is admin?
 //   $beancounter - is beancounter? ("Y" or "N") -- has financial privileges
 function user_update_user ( $user, $firstname, $lastname, $birthdate,
-			    $email, $billing_group, $meal_coordinator, $beancounter ) {
+			    $email, $billing_group, $unit, 
+			    $meal_coordinator, $beancounter ) {
   global $error;
 
   $user = mysql_safe( $user, true );
@@ -280,6 +287,11 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
     $ubilling_group = mysql_safe( $billing_group, true );
   else
     $ubilling_group = $user;
+  if ( strlen ( $unit ) )
+    $uunit = mysql_safe( $unit, false );
+  else
+    $uunit = 0;
+
   if ( $meal_coordinator != "Y" )
     $meal_coordinator = "N";
   if ( $beancounter != "Y" )
@@ -289,6 +301,7 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
     "cal_firstname = '$ufirstname', cal_email = '$uemail'," .
     "cal_birthdate = '$ubirthdate', " . 
     "cal_billing_group = '$ubilling_group'," .
+    "cal_unit = $uunit, " .
     "cal_is_meal_coordinator = '$meal_coordinator', " . 
     "cal_is_beancounter = '$beancounter' " .
     "WHERE cal_login = '$user'";
@@ -431,6 +444,12 @@ function user_get_users () {
     foreach ( $b as $key => $value ) {
       $ret[$newcount++] = $temp_ret[$value];
     }
+  }
+
+  /// include friends (i.e. building == 0)
+  $b = $ordering[0];
+  foreach ( $b as $key => $value ) {
+    $ret[$newcount++] = $temp_ret[$value];
   }
 
   return $ret;
