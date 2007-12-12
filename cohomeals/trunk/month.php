@@ -76,13 +76,7 @@ if ( $WEEK_START == 1 ) {
 $monthstart = mktime ( 3, 0, 0, $thismonth, 1, $thisyear );
 $monthend = mktime ( 3, 0, 0, $thismonth + 1, 0, $thisyear );
 
-// debugging
-//echo "<p>sun = " . date ( "D, m-d-Y", $sun ) . "</p>\n";
-//echo "<p>monthstart = " . date ( "D, m-d-Y", $monthstart ) . "</p>\n";
-//echo "<p>monthend = " . date ( "D, m-d-Y", $monthend ) . "</p>\n";
 
-// NOTE: if you make HTML changes to this table, make the same changes
-// to the example table in pref.php.
 for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
   $i += ( 24 * 3600 * 7 ) ) {
   print "<tr>\n";
@@ -100,7 +94,6 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
       echo " class=\"$class\"";
       }
       echo ">";
-      //echo date ( "D, m-d-Y H:i:s", $date ) . "<br />";
       print_date_entries ( date ( "Ymd", $date ) );
       print "</td>\n";
     } else {

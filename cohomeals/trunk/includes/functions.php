@@ -1487,10 +1487,28 @@ function print_date_entries ( $date ) {
     $can_add = false;
   echo "$day";
   print "<br />\n";
-  $cnt++;
   
   // get all events for this date and store in $ev
   $ev = get_entries ( $date );
+
+
+  //// check if this is the deadline for any meals
+  $deadline = array();
+  $ct = 0;
+  $sql = "SELECT cal_date, cal_signup_deadline " .
+    "FROM webcal_meal " .
+    "WHERE cal_date >= $date";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = $row[0];
+      $d = $row[1];
+      $deadline_day = get_day( $event_date, -1*$d );
+      if ( $date == $deadline_day ) {
+	$deadline[$ct++] = $event_date;
+      }
+    }
+    dbi_free_result( $res );
+  }
 
 
   /// check if need crew/head chef
@@ -1540,32 +1558,19 @@ function print_date_entries ( $date ) {
       }
     }
 
-    //// check if this is the deadline for any meals
-    $deadline = array();
-    $ct = 0;
-    $sql = "SELECT cal_date, cal_signup_deadline " .
-      "FROM webcal_meal " .
-      "WHERE cal_date >= $date";
-    if ( $res = dbi_query( $sql ) ) {
-      while ( $row = dbi_fetch_row( $res ) ) {
-	$event_date = $row[0];
-	$d = $row[1];
-	$deadline_day = get_day( $event_date, -1*$d );
-	if ( $date == $deadline_day ) {
-	  $deadline[$ct++] = $event_date;
-	}
-      }
-      dbi_free_result( $res );
-    }
-
 
     print_entry ( $viewid,
       $date, $ev[$i]['cal_time'],
       $viewname, $ev[$i]['cal_menu'], $need_crew, $deadline );
     $cnt++;
   }
-  if ( $cnt == 0 )
-    echo "&nbsp;"; // so the table cell has at least something
+  if ( $cnt == 0 ) { // no events but still print deadlines
+    echo "&nbsp;<br><br>"; 
+    for ( $i=0; $i<count($deadline); $i++ )
+      echo "<br>Deadline for " . 
+	date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
+  }
+
 }
 
 
