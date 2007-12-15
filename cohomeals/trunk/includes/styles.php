@@ -609,6 +609,8 @@ abbr {
 }
 .addbutton {
   padding: 1px;
+  padding-left: 3px;
+  padding-right: 3px;
   width: 200px;
   text-align: center;
   background-color: #CCCCCC;

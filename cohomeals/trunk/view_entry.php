@@ -479,17 +479,30 @@ switch ( $walkins ) {
 
 <h4>For the head chef</h4>
 
-<p><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
-Meal crew checklist</a></p>
-<p><a class="addbutton" 
+<table>
+<tr class="d0">
+  <td>Meal crew task checklist:</td>
+  <td><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
+      pdf</a></td>
+  <td></td>
+</tr><tr class="d0">
+  <td>Meal signup sheet:</td>
+  <td><a class="addbutton" href="refs/MealSignupSheet.pdf">pdf</a></td>
+  <td></td>
+</tr><tr class="d0">
+  <td>Meal summary sheet:</td>
+  <td><a class="addbutton" href="refs/MealSummarySheet.pdf">pdf</a></td>
+  <td><a class="addbutton" href="refs/MealSummarySheet.xls">excel</a></td>
+</tr><tr class="d0">
+  <td>Pantry prices/purchases:</td>
+  <td><a class="addbutton" href="refs/PantryPriceList.pdf">pdf</a></td>
+  <td><a class="addbutton" href="refs/PantryPriceList.xls">excel</a></td>
+</tr><tr>
+  <td align="center" colspan=3>---Please return completed forms to Susan---</td>
+</tr>
+</table>
+
 <?php //href="print_signup.php?id=<?php echo $id;?>
-href="refs/MealSignUpSheet.pdf
-">
-Meal signup sheet</a></p>
-<p><a class="addbutton" href="refs/MealSummarySheet.pdf">
-Meal summary sheet</a></p>
-<p><a class="addbutton" href="refs/PantryPriceList200711.pdf">
-Pantry price list</a></p>
 
 <?php
 $can_edit = ( $is_meal_coordinator );
