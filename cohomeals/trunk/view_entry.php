@@ -497,6 +497,11 @@ switch ( $walkins ) {
   <td>Pantry prices/purchases:</td>
   <td><a class="addbutton" href="refs/PantryPriceList.pdf">pdf</a></td>
   <td><a class="addbutton" href="refs/PantryPriceList.xls">excel</a></td>
+</tr><tr class="d0">
+  <td>Reimbursement form:</td>
+  <td><a class="addbutton" href="refs/Reimbursement.pdf">pdf</a></td>
+  <td><a class="addbutton" href="refs/Reimbursement.doc">doc</a></td>
+  <td></td>
 </tr><tr>
   <td align="center" colspan=3>---Please return completed forms to Susan---</td>
 </tr>
