@@ -261,7 +261,7 @@ CREATE TABLE webcal_config (
 
 # default settings
 INSERT INTO webcal_config ( cal_setting, cal_value )
-  VALUES ( 'application_name', 'WebCalendar' );
+  VALUES ( 'application_name', 'Coho Ecovillage Meals' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
   VALUES ( 'LANGUAGE', 'Browser-defined' );
 INSERT INTO webcal_config ( cal_setting, cal_value )
