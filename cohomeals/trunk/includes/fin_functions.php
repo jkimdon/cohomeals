@@ -102,8 +102,9 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
 
   $balance = 0;
   $last_balance = 0;
+  $last_time = 0;
 
-  $sql = "SELECT cal_amount, cal_running_balance " .
+  $sql = "SELECT cal_amount, cal_running_balance, cal_timestamp " .
     "FROM webcal_financial_log " . 
     "WHERE cal_billing_group = '$billing' ".
     "ORDER BY cal_timestamp";
@@ -111,12 +112,15 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
     while ( $row = dbi_fetch_row( $res ) ) {
       $balance += $row[0];
       $last_balance = $row[1];
+      $last_time = $row[2];
     }
     dbi_free_result( $res );
   }
 
   if ( $last_balance != $balance ) {
-    $error = "mismatched balance";
+    $error = "mismatched balance: " . 
+      "at time $last_time, balance = $last_balance; " .
+      "balance sum = $balance<br>";
     echo $error;
   }
 
@@ -321,9 +325,8 @@ function get_refund_price( $id, $user, $subscriber=false ) {
   }
 
 
-
-  if ( $past_deadline == false ) {
-    $percentage = get_refund_percentage( $id, $past_deadline );
+  $percentage = get_refund_percentage( $id, $past_deadline );
+  if ( $percentage != 0 ) {
 
     $maxT = 0;
     $amount = 0;
