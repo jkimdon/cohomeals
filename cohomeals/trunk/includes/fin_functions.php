@@ -270,7 +270,9 @@ function get_adjusted_price( $id, $fee_class,
   /// get meal details. establish base price, past_deadline
   $base_price = 400;
   $past_deadline = true;
-  $sql = "SELECT cal_base_price, cal_date, cal_signup_deadline " .
+  $suit = "wild";
+  $sql = "SELECT cal_base_price, cal_date, " . 
+    "cal_signup_deadline, cal_suit " .
     "FROM webcal_meal " .
     "WHERE cal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
@@ -278,6 +280,7 @@ function get_adjusted_price( $id, $fee_class,
       $base_price = $row[0];
       $event_date = $row[1];
       $deadline = $row[2];
+      $suit = $row[3];
       $signup_deadline = get_day( $event_date, -1*$deadline );
       if ( $signup_deadline >= date("Ymd") ) $past_deadline = false;
     }
@@ -293,7 +296,8 @@ function get_adjusted_price( $id, $fee_class,
   /// calculate cost based on above information
   $cost = $base_price;
   if ( $category == "walkin" ) $cost += 100;
-  else if ( $subscriber == true ) $cost = $base_price * 0.875;
+  else if ( ($subscriber == true) && ($suit == "heart") ) 
+    $cost = $base_price * 0.875;
 
   if ( $fee_class == "F" ) $cost = 0;
   else if ( $fee_class == "C" ) $cost /= 2;
