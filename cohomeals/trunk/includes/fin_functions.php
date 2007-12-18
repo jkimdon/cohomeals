@@ -107,7 +107,7 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
   $sql = "SELECT cal_amount, cal_running_balance, cal_timestamp " .
     "FROM webcal_financial_log " . 
     "WHERE cal_billing_group = '$billing' ".
-    "ORDER BY cal_timestamp";
+    "ORDER BY cal_log_id";
   if ( $res = dbi_query( $sql ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $balance += $row[0];
