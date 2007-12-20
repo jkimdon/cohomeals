@@ -1053,12 +1053,6 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   global $WEEK_START, $user, $login;
   global $today;
 
-  if ( $user != $login && ! empty ( $user ) ) {
-    $u_url = "user=$user" . "&amp;";
-  } else {
-    $u_url = '';
-  }
-
   //start the minical table for each month
   echo "\n<table class=\"minical\"";
   if ( $minical_id != '' ) {
