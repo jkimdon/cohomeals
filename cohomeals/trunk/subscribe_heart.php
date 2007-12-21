@@ -91,7 +91,7 @@ $end_date = $today_date;
 $sql = "SELECT cal_off_day, cal_ongoing, cal_end " .
        "FROM webcal_subscriptions " .
        "WHERE cal_login = '$cur_user' AND cal_suit = 'heart' " .
-       "AND cal_start >= '$today_date'";
+       "AND cal_end > '$today_date' ";
 if ( $res = dbi_query ( $sql ) ) {
   while ( $row = dbi_fetch_row ( $res ) ) {
     $subscribed = true;
