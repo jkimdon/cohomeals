@@ -1064,7 +1064,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
   $monthend = mktime(2,0,0,$thismonth + 1,0,$thisyear);
 
   //print the month name
-  echo "<caption><a href=\"{$month_link}{$u_url}year=$thisyear&amp;month=$thismonth\">";
+  echo "<caption><a href=\"month.php?year=$thisyear&amp;month=$thismonth\">";
   echo month_name ( $thismonth - 1 ) . ( $showyear ? " $thisyear" : "" );
   echo "</a></caption>\n";
   echo "<thead>\n<tr>\n";
@@ -2237,7 +2237,7 @@ function is_participating ( $id, $user, $type ) {
 /********************************
  * signs people up or removes them from dining or crew duties
  *********************************/
-function edit_participation ( $id, $action, $type='M', $user="" ) {
+function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
   global $login, $is_meal_coordinator;
 
 
@@ -2307,9 +2307,11 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
   ///////
   // make the change
   if ( $can_change == true ) {
+
     if ( $action == 'A' ) {
-      $sql = "INSERT INTO webcal_meal_participant ( cal_id, cal_login, cal_type ) " . 
-	"VALUES ( $id, '$user', '$type' )";
+      $sql = "INSERT INTO webcal_meal_participant " . 
+	"( cal_id, cal_login, cal_type, cal_walkin ) " . 
+	"VALUES ( $id, '$user', '$type', $walkin )";
       if ( ! dbi_query ( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
       
@@ -2320,7 +2322,8 @@ function edit_participation ( $id, $action, $type='M', $user="" ) {
 	else
 	  $delete_type = 'M';
 	$sql = "DELETE FROM webcal_meal_participant " .
-	  "WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$delete_type'";
+	  "WHERE cal_id = $id AND cal_login = '$user' " .
+	  "AND cal_type = '$delete_type'";
 	if ( !dbi_query( $sql ) ) 
 	  $error = translate("Database error") . ": " . dbi_error ();
       }
@@ -2682,16 +2685,16 @@ function is_chef( $id ) {
 
 function is_dining( $id, $username ) {
   
-  $ret = false;
+  $ret = '';
 
-  $sql = "SELECT cal_login " .
+  $sql = "SELECT cal_type " .
     "FROM webcal_meal_participant " . 
     "WHERE cal_id = $id " .
     "AND cal_login = '$username' " .
     "AND (cal_type = 'M' OR cal_type = 'T')";
   if ( $res = dbi_query( $sql ) ) {
-    if ( dbi_fetch_row( $res ) ) {
-      $ret = true;
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $ret = $row[0];
     }
     dbi_free_result( $res );
   }
@@ -2703,36 +2706,49 @@ function is_dining( $id, $username ) {
 function is_walkin( $id, $username ) {
   $ret = false;
 
-  $signup_deadline = "";
-  $sql = "SELECT cal_date, cal_signup_deadline " .
-    "FROM webcal_meal " .
-    "WHERE cal_id = $id";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $event_date = UNIX_TIMESTAMP( $row[0] );
-      $deadline = $row[1];
-      $signup_deadline = get_day( $event_date, -1*$deadline );
-    }
-    dbi_free_result( $res );
-  }
-      
-
-  $sql = "SELECT cal_timestamp " .
-    "FROM webcal_meal_participant " . 
+  $sql = "SELECT cal_walkin " . 
+    "FROM webcal_meal_participant " .
     "WHERE cal_id = $id " .
-    "AND cal_login = '$username' " .
-    "AND (cal_type = 'M' OR cal_type = 'T')";
+    "AND cal_login = '$username'";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      if ( $signup_deadline < $signup_date ) 
+      if ( $row[0] == 1 ) 
 	$ret = true;
     }
     dbi_free_result( $res );
   }
-  
-  return $ret;
 
+  return $ret;
 }
+
+
+function is_subscriber( $id, $user ) {
+
+  $event_date = date( "Ymd" );
+  $subscriber = false;
+  $sql = "SELECT cal_date FROM webcal_meal WHERE cal_id=$id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $event_date = $row[0];
+      $sql2 = "SELECT cal_login " .
+	"FROM webcal_subscriptions " .
+	"WHERE cal_login = '$user' " . 
+	"AND cal_start <= $event_date " .
+	"AND cal_end > $event_date";
+      if ( $res2 = dbi_query( $sql2 ) ) {
+	if ( dbi_fetch_row( $res2 ) ) {
+	  $subscriber = true;
+	}
+	dbi_free_result( $res2 );
+      }
+    }
+    dbi_free_result( $res );
+  }
+
+  return $subscriber;
+}
+
+
 
 /// do heart autorenewals
 function update_subscriptions() {

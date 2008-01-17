@@ -15,16 +15,39 @@ $id = getGetValue( 'id' );
 
 $signees = get_signees( $login, true );
 $count = 0;			   
+if ( $is_meal_coordinator ) {
+  echo "W = walkin, P = pre-signup<br>";
+  echo "<hr>";
+  echo "<table>";
+  echo "<tr class=\"d1\"><td>W</td><td>P</td><td>Name</td></tr>";
+}
+else
+  echo "<table><tr></tr>";
+   
 for ( $i=0; $i<count( $signees ); $i++ ) {
   $user = $signees[$i]['cal_login'];
   $partic = is_participating( $id, $user, $type );
   if ( ( !$partic && ($action == 'A')) ||
        ( $partic && ($action == 'D') ) ) {
-    echo "<label><input type=\"checkbox\" name=\"" . $user . "\">" .
-	  $signees[$i]['cal_fullname'] . "</input><br>";
+    echo "<tr>\n";
+    if ( $is_meal_coordinator ) {
+      echo "<td><label>" .
+	"<input type=\"radio\" name=\"" . $user . 
+	"\" value = \"walkin\" \></td>\n";
+      echo "<td><label>" .
+	"<input type=\"radio\" name=\"" . $user . 
+	"\" value = \"pre\" \></td>\n";
+    } else {
+      echo "<td><label>" .
+	"<input type=\"checkbox\" name=\"" . $user . 
+	"\"\></td>";
+    }
+    echo "<td>" . $signees[$i]['cal_fullname'] . "</td>";
+    echo "</tr>\n";
     $count++;
   }
 }
+echo "</table>";
 
 if ( $count == 0 )
   echo "No one has given you permission to sign them up for meals or else all of your buddies are already signed up.\n";

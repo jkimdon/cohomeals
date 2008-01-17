@@ -108,6 +108,8 @@ CREATE TABLE webcal_meal_participant (
   cal_type CHAR(1) NOT NULL,
   /* notes, e.g. about availability or crew type preference */
   cal_notes VARCHAR(80) NULL,
+  /* flag for walkin diner (higher price). 1 = walkin, 0 = pre-signup */
+  cal_walkin CHAR(1) DEFAULT 0,
   /* timestamp when initially signed up */
   cal_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ( cal_id, cal_login, cal_type )

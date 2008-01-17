@@ -403,7 +403,7 @@ function user_get_users () {
   $res = dbi_query ( "SELECT cal_login, cal_lastname, cal_firstname, " .
     "cal_is_meal_coordinator, cal_email, " .
     "cal_passwd, cal_birthdate, cal_unit FROM webcal_user " .
-    "ORDER BY cal_unit, cal_lastname, cal_firstname, cal_login" );
+    "ORDER BY cal_unit, cal_firstname, cal_lastname, cal_login" );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       if ( strlen ( $row[1] ) && strlen ( $row[2] ) )

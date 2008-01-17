@@ -28,11 +28,8 @@ print_header($INC,$HeadX);
 /* Pre-load the events for quicker access */
 $events = read_events ( $startdate, $enddate );
 
-$monthURL = 'month.php?';
-display_small_month ( $prevmonth, $prevyear, true, "prevmonth",
-  $monthURL );
-display_small_month ( $nextmonth, $nextyear, true, "nextmonth",
-  $monthURL );
+display_small_month ( $prevmonth, $prevyear, true, "prevmonth" );
+display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
 ?>
 <div class="title">
 <span class="user"><?php

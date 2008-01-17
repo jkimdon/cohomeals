@@ -206,7 +206,7 @@ if ( $res ) {
 	$approved[$num_app++] = $pname;
 	user_load_variables( $pname, "temp" );
 	$age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
-	if ( $age == "C" ) $onsite_children++;
+	if ( $age == "K" ) $onsite_children++;
 	else if ( $age == "F" ) $onsite_free++;
 	else $onsite_adults++; // $age == "A"
       }
@@ -297,7 +297,7 @@ if ( $res ) {
     $approved[$num_app++] = $pname;
     user_load_variables( $pname, "temp" );
     $age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
-    if ( $age == "C" ) $takehome_children++;
+    if ( $age == "K" ) $takehome_children++;
     else if ( $age == "F" ) $takehome_free++;
     else $takehome_adults++; // $age == "A"
   }
@@ -371,7 +371,7 @@ $children = $onsite_children + $takehome_children;
 $free = $onsite_free + $takehome_free;
 echo $adults + $children + $free . " people: ";
 echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
-//echo " (" . price_to_str( get_money_for_meal( $id )) . " available to spend)";
+echo " (" . price_to_str( get_money_for_meal( $id )) . " available to spend)";
 ?>
 </td>
 </tr>
@@ -487,7 +487,7 @@ switch ( $walkins ) {
   <td></td>
 </tr><tr class="d0">
   <td>Meal signup sheet:</td>
-  <td><a class="addbutton" href="refs/MealSignupSheet.pdf">pdf</a></td>
+  <td><a class="addbutton" href="print_signup.php?id=<?php echo $id;?>">pdf</a></td>
   <td></td>
 </tr><tr class="d0">
   <td>Meal summary sheet:</td>
@@ -507,7 +507,7 @@ switch ( $walkins ) {
 </tr>
 </table>
 
-<?php //href="print_signup.php?id=<?php echo $id;?>
+
 
 <?php
 $can_edit = ( $is_meal_coordinator );
@@ -530,8 +530,7 @@ $startdate = sprintf ( "%04d%02d01", $thisyear, $thismonth );
 $enddate = sprintf ( "%04d%02d31", $thisyear, $thismonth );
 $events = read_events ( $startdate, $enddate );
 echo "Jump to other meals:<br>";
-display_small_month( $thismonth, $thisyear,
-		     true, "nextmonth", "month.php?" );
+display_small_month( $thismonth, $thisyear, true, "nextmonth" );
 ?>
 
 </td></tr>

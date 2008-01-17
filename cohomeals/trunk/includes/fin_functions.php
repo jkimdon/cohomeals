@@ -164,27 +164,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
     user_load_variables( $user, "temp" );
 
     /// determine if subscriber
-    $event_date = date( "Ymd" );
-    $subscriber = false;
-    $sql = "SELECT cal_date FROM webcal_meal WHERE cal_id=$meal_id";
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$event_date = $row[0];
-	$sql2 = "SELECT cal_login " .
-	  "FROM webcal_subscriptions " .
-	  "WHERE cal_login = '$user' " . 
-	  "AND cal_start <= $event_date " .
-	  "AND cal_end > $event_date";
-	if ( $res2 = dbi_query( $sql2 ) ) {
-	  if ( dbi_fetch_row( $res2 ) ) {
-	    $subscriber = true;
-	  }
-	  dbi_free_result( $res2 );
-	}
-      }
-      dbi_free_result( $res );
-    }
-
+    $subscriber = is_subscriber( $meal_id, $user );
     
     if ( ($type == 'M') || ($type == 'T') ) {
       if ( $action == 'A' ) {
@@ -239,7 +219,7 @@ function get_price( $id, $user, $subscriber=false ) {
 
   $age = get_fee_category( $birthdate, $event_date );
 
-  $cost = get_adjusted_price ( $id, $age, $subscriber );
+  $cost = get_adjusted_price ( $id, $age, $subscriber, false, $user );
   return $cost;
 }
 
@@ -257,7 +237,7 @@ function get_fee_category( $birthdate, $event_date ) {
   if ( $birthdate > $free_cutoff )
     $age = "F";
   else if ( $birthdate > $child_cutoff ) 
-    $age = "C";
+    $age = "K";
   else $age = "A";
 
   return $age;
@@ -265,7 +245,8 @@ function get_fee_category( $birthdate, $event_date ) {
 
 
 function get_adjusted_price( $id, $fee_class, 
-			     $subscriber=false, $guest=false ) {
+			     $subscriber=false, $guest=false,
+			     $user="") {
 
   /// get meal details. establish base price, past_deadline
   $base_price = 400;
@@ -289,7 +270,11 @@ function get_adjusted_price( $id, $fee_class,
 
   /// establish price category based on preregistration or walkin
   $category = "pre";
-  if ( $past_deadline == true ) $category = "walkin";
+  if ( $user != '' ) {
+    if ( is_walkin( $id, $user ) == 1 ) $category = "walkin";
+  } else {
+    if ( $past_deadline == true ) $category = "walkin";
+  }
   if ( $guest == true ) $category = "walkin";
 
 
@@ -300,7 +285,7 @@ function get_adjusted_price( $id, $fee_class,
     $cost = $base_price * 0.875;
 
   if ( $fee_class == "F" ) $cost = 0;
-  else if ( $fee_class == "C" ) $cost /= 2;
+  else if ( $fee_class == "K" ) $cost /= 2;
 
   return $cost;
 }
@@ -462,6 +447,7 @@ function get_money_for_meal( $id ) {
     }
     dbi_free_result( $res );
   }
+  $total *= -1;
 
   return $total;
 }

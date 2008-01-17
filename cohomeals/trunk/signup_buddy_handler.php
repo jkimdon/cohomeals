@@ -45,12 +45,17 @@ $signees = get_signees( $login, true );
 for ( $i=0; $i<count( $signees ); $i++ ) {
 
   $user = $signees[$i]['cal_login'];
-  if ( getPostValue( $user ) == true ) {
+  $user_status = getPostValue( $user );
+
+  if ( ($user_status == "pre") || ($user_status == "walkin") ||
+       ($user_status == true) ) {
     $ct++;
     if ( $type == "B" ) {
       edit_club_subscription( $id, $user, $action );
     } else if ( ($limited == false) || ($ct <= $number) ) {
-      $modified = edit_participation( $id, $action, $type, $user );
+      $walkin = 0;
+      if ( $user_status == "walkin" ) $walkin = 1;
+      $modified = edit_participation( $id, $action, $type, $user, $walkin );
       if ( $modified == true )
 	auto_financial_event ( $id, $action, $type, $user );
     }
