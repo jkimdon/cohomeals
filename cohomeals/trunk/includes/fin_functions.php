@@ -191,6 +191,21 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 
 
 
+function give_heart_discount( $id, $user ) {
+  if ( is_signer ( $user ) ) {
+    $full_amount = get_price( $id, $user, false );
+    $discount_amount = get_price( $id, $user, true );
+    $discount = $full_amount - $discount_amount;
+
+    user_load_variables( $user, "temp" );
+    $description = $GLOBALS[tempfirstname] . ": Heart discount";
+
+    add_financial_event( $user, get_billing_group( $user ), $discount, "credit",
+			 $description, $id, "" );
+  }
+}
+
+
 function get_price( $id, $user, $subscriber=false ) {
 
   /// establish price category based on age

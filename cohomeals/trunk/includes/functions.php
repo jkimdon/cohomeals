@@ -2823,7 +2823,10 @@ function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
 	if ( $mod == true ) {
 	  $count++;
 	  auto_financial_event( $id, 'A', 'M', $user );
+	} else {
+	  give_heart_discount( $id, $user );
 	}
+	
       }
       else {
 	$mod = edit_participation ( $id, 'D', 'M', $user );
