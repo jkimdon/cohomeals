@@ -2726,20 +2726,29 @@ function is_subscriber( $id, $user ) {
 
   $event_date = date( "Ymd" );
   $subscriber = false;
-  $sql = "SELECT cal_date FROM webcal_meal WHERE cal_id=$id";
+  $sql = "SELECT cal_suit FROM webcal_meal WHERE cal_id=$id";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      $event_date = $row[0];
-      $sql2 = "SELECT cal_login " .
-	"FROM webcal_subscriptions " .
-	"WHERE cal_login = '$user' " . 
-	"AND cal_start <= $event_date " .
-	"AND cal_end > $event_date";
-      if ( $res2 = dbi_query( $sql2 ) ) {
-	if ( dbi_fetch_row( $res2 ) ) {
-	  $subscriber = true;
+      if ( $row[0] == 'heart' ) {
+	$sql2 = "SELECT cal_date FROM webcal_meal WHERE cal_id=$id";
+	if ( $res2 = dbi_query( $sql2 ) ) {
+	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
+	    $event_date = $row2[0];
+	    $sql3 = "SELECT cal_login " .
+	      "FROM webcal_subscriptions " .
+	      "WHERE cal_login = '$user' " . 
+	      "AND cal_start <= $event_date " .
+	      "AND cal_end > $event_date " .
+	      "AND cal_suit = 'heart'";
+	    if ( $res3 = dbi_query( $sql3 ) ) {
+	      if ( dbi_fetch_row( $res3 ) ) {
+		$subscriber = true;
+	      }
+	      dbi_free_result( $res3 );
+	    }
+	  }
+	  dbi_free_result( $res2 );
 	}
-	dbi_free_result( $res2 );
       }
     }
     dbi_free_result( $res );

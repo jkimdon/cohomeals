@@ -122,14 +122,14 @@ function MealInfo( $head_chef, $crew, $menu, $price ) {
   for( $i=0; $i<count($crew); $i++ ) {
     $text .= $crew[$i] . ", ";
   }
-  $this->MultiCell( 120,5, $text );
+  $this->MultiCell( 180,5, $text );
 
   $text = "Base price: " . price_to_str( $price );
   $this->Cell( 40, 5, $text, 0,0, 'L' );
   $this->Ln(4);
 
   $text = "Menu: " . $menu;
-  $this->MultiCell( 120,5, $text );
+  $this->MultiCell( 180,5, $text );
 
   $this->Ln(4);
 }
