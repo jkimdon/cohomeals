@@ -97,6 +97,7 @@ $counts['walkin_adult'] = 0;
 $counts['walkin_kid'] = 0;
 $counts['walkin_free'] = 0;
 $counts['all'] = 0;
+$counts['takehome'] = 0;
 
 
 
@@ -281,6 +282,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
       else $label .= "_kid";
       $counts['all']++;
       $counts[$label]++;
+      if ( $takehome == "T" ) $counts['takehome']++;
     }
     
   }
@@ -328,74 +330,89 @@ function AddGuests( $guests, &$counts ) {
 
 }
 
-function SumTotals( $counts ) {
+function SumTotals( $counts, $id ) {
 
- $horiz_offset = 150;
+ $horiz_offset = 148;
  $height = 4;
+ $full_width = 42;
+ $label_width = 30;
+ $number_width = 12;
 
- $this->SetY( 200 );
+ $this->SetY( 180 );
 
  $this->SetFillColor( 200,200,200 );
  $this->Cell( $horiz_offset );
- $this->Cell( 40, $height, "Totals", 1, 1, 'C', 1 );
+ $this->Cell( $full_width, $height, "Totals", 1, 1, 'C', 1 );
 
 
  /// counts
 
 
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Total reservations: ", 1, 0, 'L' );
- $this->Cell( 10, $height, $counts['all'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Total reservations: ", 1, 0, 'L' );
+ $this->Cell( $number_width, $height, $counts['all'], 1, 1, 'C' );
+ $this->Cell( $horiz_offset );
+ $this->Cell( $label_width, $height, "(take-home): ", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['takehome'], 1, 1, 'C' );
+ $this->Cell( $horiz_offset );
+ $this->Cell( $label_width, $height, "Income", "LTR", 0, 'L' );
+ $this->Cell( $number_width, $height, "", "LTR", 1, 'C' );
+ $this->Cell( $horiz_offset );
+ $this->Cell( $label_width, $height, "(w/o walkins): ", "LBR", 0, 'R' );
+ $this->Cell( $number_width, $height, price_to_str( get_money_for_meal( $id ) ), 
+	      "LBR", 1, 'C' );
 
 
  $this->SetFillColor( 230,230,230 );
  $this->Cell( $horiz_offset );
- $this->Cell( 40, $height, "Regular price", 1, 1, 'L', 1 );
+ $this->Cell( $full_width, $height, "Regular price", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Adults", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['dining_adult'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_adult'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['dining_kid'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_kid'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['dining_free'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_free'], 1, 1, 'C' );
 
  $this->Cell( $horiz_offset );
- $this->Cell( 40, $height, "Heart discount", 1, 1, 'L', 1 );
+ $this->Cell( $full_width, $height, "Heart discount", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Adults", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['sub_adult'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['sub_adult'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['sub_kid'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['sub_kid'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( 10, $height, $counts['sub_free'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['sub_free'], 1, 1, 'C' );
 
  $this->Cell( $horiz_offset );
- $this->Cell( 40, $height, "Guests", 1, 1, 'L', 1 );
+ $this->Cell( $full_width, $height, "Guests", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Adults", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
 
  $this->Cell( $horiz_offset );
- $this->Cell( 40, $height, "Walkins", 1, 1, 'L', 1 );
+ $this->Cell( $full_width, $height, "Walkins", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Adults", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( 30, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( 10, $height, "", 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, "", 1, 1, 'C' );
+
+
 
 
 }
@@ -418,7 +435,7 @@ $pdf->PrintLegend();
 $names = user_get_users();
 $pdf->DinerTable( $names, $event_date, $id, $counts );
 $pdf->AddGuests( $guests, $counts );
-$pdf->SumTotals( $counts );
+$pdf->SumTotals( $counts, $id );
 
 
 

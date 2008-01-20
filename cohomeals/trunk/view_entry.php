@@ -371,7 +371,7 @@ $children = $onsite_children + $takehome_children;
 $free = $onsite_free + $takehome_free;
 echo $adults + $children + $free . " people: ";
 echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
-echo " (" . price_to_str( get_money_for_meal( $id )) . " available to spend)";
+echo " (" . price_to_str( get_money_for_meal( $id )) . " income)";
 ?>
 </td>
 </tr>
