@@ -157,6 +157,15 @@ else echo "</p>";
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
+<?php ////////notes
+?>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
+<td>
+<?php echo $notes; ?>
+</td></tr>
+<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
+
+
 
 <?php 
   display_crew( "Head chef", 'H', 1, $row_num );
@@ -398,16 +407,6 @@ switch ( $walkins ) {
 ?>
 </td>
 </tr>
-<?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
-
-
-
-<?php ////////notes
-?>
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Notes:</td>
-<td>
-<?php echo $notes; ?>
-</td></tr>
 <?php $row_num = ( $row_num == 1 ) ? 0:1; ?>
 
 
