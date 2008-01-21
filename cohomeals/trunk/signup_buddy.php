@@ -12,10 +12,13 @@ $action = getGetValue( 'action' );
 $type = getGetValue( 'type' );
 $id = getGetValue( 'id' );
 
+$choose_pre_or_walkin = false;
+if ( $is_meal_coordinator && ($type == "M" || $type == "T") ) 
+  $choose_pre_or_walkin = true;
 
 $signees = get_signees( $login, true );
 $count = 0;			   
-if ( $is_meal_coordinator ) {
+if ( $choose_pre_or_walkin ) {
   echo "W = walkin, P = pre-signup<br>";
   echo "<hr>";
   echo "<table>";
@@ -30,7 +33,7 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
   if ( ( !$partic && ($action == 'A')) ||
        ( $partic && ($action == 'D') ) ) {
     echo "<tr>\n";
-    if ( $is_meal_coordinator ) {
+    if ( $choose_pre_or_walkin ) {
       echo "<td><label>" .
 	"<input type=\"radio\" name=\"" . $user . 
 	"\" value = \"walkin\" \></td>\n";
