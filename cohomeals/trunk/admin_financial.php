@@ -26,6 +26,11 @@ function selectMeal( mealid ) {
 $cur_group = "";
 $cur_group = mysql_safe( getGetValue( 'billing' ), true );
 
+$bymeal = getValue( 'sortbymeal' );
+if ( $bymeal == 1 ) $sortbymeal = true;
+else $sortbymeal = false;
+
+
 $mealid = 0;
 
 $can_view = false;
@@ -80,6 +85,10 @@ if ( $can_view == true ) {
    </tr><tr>
    <td align=right>to</td>
    <td><?php print_date_selection( "end", $enddate );?></td>
+   </tr><tr>
+   <td><input type="radio" name="sortbymeal" value="0" <?php if ( $sortbymeal == false ) echo " checked=\"checked\"";?> />Sort by transaction date</td>
+   </tr><tr>
+   <td><input type="radio" name="sortbymeal" value="1" <?php if ( $sortbymeal == true ) echo " checked=\"checked\"";?> />Sort by meal date</td>
    </tr></tr>
    <td></td><td align=center><input type="submit" value="Go" /></td>
    </tr></table>
@@ -89,7 +98,8 @@ if ( $can_view == true ) {
 
 
    <?php /// display selected
-   display_financial_log( $cur_group, $startdate, $enddate );
+   $logs = collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal );
+   display_financial_log( $cur_group, $sortbymeal, $logs );
    ?>
    </div>
 

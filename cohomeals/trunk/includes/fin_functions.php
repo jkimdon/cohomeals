@@ -8,8 +8,99 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 }
 
 
+function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) {
 
-function display_financial_log( $cur_group, $startdate, $enddate ) {
+  $selected_logs = array ();
+  $ordered_logs = array ();
+  $ordering = array ();
+  $count = 0;
+
+  if ( $sortbymeal == false ) {
+
+    $sql = "SELECT cal_log_id, cal_description, cal_timestamp, cal_meal_id, cal_amount, cal_running_balance, cal_text";
+
+    $start_unixtime = mktime( 0,0,1, 
+			      substr($startdate,4,2), substr($startdate,6,2), 
+			      substr($startdate,0,4) );
+    $end_unixtime = mktime( 23,59,59, 
+			    substr($enddate,4,2), substr($enddate,6,2), 
+			    substr($enddate,0,4) );
+    
+    
+    if ( $cur_group == "all" ) 
+      $sql .= ", cal_billing_group FROM webcal_financial_log " .
+	"WHERE cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
+	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
+    else
+      $sql .= " FROM webcal_financial_log " . 
+	"WHERE cal_billing_group='$cur_group'" .
+	"AND cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
+	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$ordered_logs[$count]['log_id'] = $row[0];
+	$ordered_logs[$count]['description'] = $row[1];
+	$ordered_logs[$count]['time'] = $row[2];
+	$meal_id = $row[3];
+	$ordered_logs[$count]['meal_id'] = $meal_id;
+	$ordered_logs[$count]['amount'] = $row[4];
+	$ordered_logs[$count]['balance'] = $row[5];
+	$ordered_logs[$count]['text'] = $row[6];
+	if ( $cur_group == "all" ) $ordered_logs[$count]['billing_group'] = $row[7];
+	$count++;
+      }
+    }
+  } else { // sorting by meal
+
+    $sql = "SELECT cal_log_id, cal_description, cal_timestamp, cal_meal_id, cal_amount, cal_running_balance, cal_text";    
+    if ( $cur_group == "all" ) 
+      $sql .= ", cal_billing_group FROM webcal_financial_log ORDER BY cal_timestamp";
+    else 
+      $sql .= " FROM webcal_financial_log " .
+	"WHERE cal_billing_group = '$cur_group' " .
+	"ORDER BY cal_timestamp";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$meal_id = $row[3];
+
+	$sql2 = "SELECT cal_date FROM webcal_meal " .
+	  "WHERE cal_id = $meal_id";
+	$res2 = dbi_query( $sql2 );
+	$row2 = dbi_fetch_row( $res2 );
+	$date = $row2[0];
+
+
+	if ( ($date >= $startdate) && ($date <= $enddate) ) {
+	  $selected_logs[$count]['log_id'] = $row[0];
+	  $selected_logs[$count]['description'] = $row[1];
+	  $selected_logs[$count]['time'] = $row[2];
+	  $selected_logs[$count]['meal_id'] = $meal_id;
+	  $selected_logs[$count]['amount'] = $row[4];
+	  $selected_logs[$count]['balance'] = $row[5];
+	  $selected_logs[$count]['text'] = $row[6];
+	  if ( $cur_group == "all" ) $selected_logs[$count]['billing_group'] = $row[7];
+
+	  $ordering[$count] = $date;
+	  $count++;
+	}
+      }
+    }
+
+    $newcount = 0;
+    asort( $ordering );
+    foreach ( $ordering as $key => $value ) {
+      $ordered_logs[$newcount++] = $selected_logs[$key];
+    }
+
+    dbi_free_result( $res );
+  }
+
+  return $ordered_logs;
+}
+				
+
+
+function display_financial_log( $cur_group, $sortbymeal, $ordered_logs ) {
   global $billing_group, $is_meal_coordinator, $is_beancounter;
  
   $can_view = false;
@@ -26,75 +117,49 @@ function display_financial_log( $cur_group, $startdate, $enddate ) {
     echo "<tr class=\"d0\">";
     if ( $cur_group == "all" )
       echo "<td> Billing group </td>";
-    echo "<td> Date </td>" .
+    echo "<td> Transaction date </td>" .
       "<td> Description </td>" .
       "<td> Associated meal </td>" .
       "<td> Notes </td>" .
-      "<td> Amount </td>" .
-      "<td> Balance </td></tr>";
+      "<td> Amount </td>";
+    if ( $sortbymeal == false ) echo "<td> Balance </td></tr>";
     $row_num = 1;
 
 
-    $sql = "SELECT cal_log_id, cal_description, cal_timestamp, cal_meal_id, cal_amount, cal_running_balance, cal_text";
+    foreach ( $ordered_logs as $log ) {
 
-    $start_unixtime = mktime( 0,0,1, 
-      substr($startdate,4,2), substr($startdate,6,2), 
-      substr($startdate,0,4) );
-    $end_unixtime = mktime( 23,59,59, 
-      substr($enddate,4,2), substr($enddate,6,2), 
-      substr($enddate,0,4) );
-
-
-    if ( $cur_group == "all" ) 
-      $sql .= ", cal_billing_group FROM webcal_financial_log " .
-	"WHERE cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
-	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
-    else
-      $sql .= " FROM webcal_financial_log " . 
-	"WHERE cal_billing_group='$cur_group'" .
-	"AND cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
-	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
-    if ( $res = dbi_query( $sql ) ) {
-      while ( $row = dbi_fetch_row( $res ) ) {
-	$log_id = $row[0];
-	$description = $row[1];
-	$time = $row[2];
-	$meal_id = $row[3];
-	$amount = $row[4];
-	$balance = $row[5];
-	$text = $row[6];
-
-	echo "<tr class=\"d$row_num\">";
-	if ( $cur_group == "all" ) 
-	  echo "<td>" . htmlspecialchars( $row[7] ) . "</td.";
-	echo "<td>$time</td>" .
-	  "<td>" . htmlspecialchars( $description ) . "</td>";
-	if ( $meal_id > 0 ) {
-	  $sql2 = "SELECT cal_date, cal_suit " .
-	    "FROM webcal_meal WHERE cal_id = $meal_id";
-	  if ( $res2 = dbi_query( $sql2 ) ) {
-	    if ( $row2 = dbi_fetch_row( $res2 ) ) {
-	      $meal_date = $row2[0];
-	      $suit = $row2[1];
-	      echo "<td><a href=\"view_entry.php?id=" . 
-		$meal_id . "\">" . 
-		$suit . " meal on " .
+      echo "<tr class=\"d$row_num\">";
+      if ( $cur_group == "all" ) 
+	echo "<td>" . htmlspecialchars( $log['billing_group'] ) . "</td.";
+      echo "<td>" . $log['time'] . "</td>";
+      echo "<td>" . htmlspecialchars( $log['description'] ) . "</td>";
+      $meal_id = $log['meal_id'];
+      if ( $meal_id > 0 ) {
+	$sql2 = "SELECT cal_date, cal_suit " .
+	  "FROM webcal_meal WHERE cal_id = $meal_id";
+	if ( $res2 = dbi_query( $sql2 ) ) {
+	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
+	    $meal_date = $row2[0];
+	    $suit = $row2[1];
+	    echo "<td><a href=\"view_entry.php?id=" . 
+	      $meal_id . "\">" . 
+	      $suit . " meal on " .
 	      date_to_str( $meal_date, "", false, true, "" ) . 
-		"</a></td>";
-	    }
+	      "</a></td>";
 	  }
-	} else {
-	  echo "<td>None</td>";
 	}
-	echo "<td>" . htmlspecialchars( $text ) . "</td>";
-	echo "<td align=right>" . price_to_str( $amount ) . "</td>";
-	echo "<td align=right>" . price_to_str( $balance ) . "</td>";
-	echo "</tr>";
-	$row_num = ( $row_num == 1 ) ? 0:1;
+      } else {
+	echo "<td>None</td>";
       }
+      echo "<td>" . htmlspecialchars( $log['text'] ) . "</td>";
+      echo "<td align=right>" . price_to_str( $log['amount'] ) . "</td>";
+      if ( $sortbymeal == false ) 
+	echo "<td align=right>" . price_to_str( $log['balance'] ) . "</td>";
+      echo "</tr>";
+      $row_num = ( $row_num == 1 ) ? 0:1;
     }
-    echo "</table>";
   }
+  echo "</table>";
 
 }
 
