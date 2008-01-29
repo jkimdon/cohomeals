@@ -357,40 +357,6 @@ textarea {
   border-width: 0px;
   cursor: help;
 }
-<?php //standard table appearing mainly in prefs.php & admin.php 
-?>.standard {
-  border: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
-  background-color: <?php echo $GLOBALS['CELLBG']; ?>;
-  font-size: 12px;
-}
-.standard th {
-  color: <?php echo $GLOBALS['THFG']; ?>;
-  <?php echo background_css ( $GLOBALS['THBG'], 30 ); ?>
-  font-size: 18px;
-  padding: 0px;
-  border-bottom: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
-}
-<?php // printer-friendly tables for meal summary sheet
-?>
-.printer_table {
- border: 1px solid #000000;
- border-collapse: collapse;
- font-size: 3px;
-}
-.printer_table td {
-  border: 1px solid #000000;
-  padding: 2px;
-}
-.printer_table td.label {
-  border: 1px solid #000000;
-  padding: 2px;
-  background-color: #BBBBBB;
-}
-.printer_table td.light_label {
-  border: 1px solid #000000;
-  padding: 2px;
-  background-color: #EEEEEE;
-}
 <?php //Styles for minicalendars
       //keep font-size:12px for IE6
 ?>.minical {

@@ -132,10 +132,6 @@ if ( empty ( $login ) && $use_http_auth ) {
 $not_auth = false;
 if ( ! empty ( $login ) && $login == "__public__" ) {
   if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
-    strstr ( $PHP_SELF, "admin.php" ) ||
-    strstr ( $PHP_SELF, "admin_handler.php" ) ||
-    strstr ( $PHP_SELF, "pref.php" ) ||
-    strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_user.php" ) ||
     strstr ( $PHP_SELF, "edit_user_handler.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
@@ -150,26 +146,14 @@ if ( ! empty ( $login ) && $login == "__public__" ) {
   }
 }
 
-if ( empty ( $is_meal_coordinator ) || ! $is_meal_coordinator ) {
-  if ( strstr ( $PHP_SELF, "admin.php" ) ||
-    strstr ( $PHP_SELF, "admin_handler.php" ) ||
-    strstr ( $PHP_SELF, "edit_template.php" ) ||
-    strstr ( $PHP_SELF, "activity_log.php" ) ) {
-    $not_auth = true;
-  }
-}
 
 // restrict access if calendar is read-only
 if ( $readonly == "Y" ) {
   if ( strstr ( $PHP_SELF, "activity_log.php" ) ||
-    strstr ( $PHP_SELF, "admin.php" ) ||
     strstr ( $PHP_SELF, "del_entry.php" ) ||
     strstr ( $PHP_SELF, "edit_template.php" ) ||
     strstr ( $PHP_SELF, "edit_user_handler.php" ) ||
     strstr ( $PHP_SELF, "edit_user.php" ) ||
-    strstr ( $PHP_SELF, "pref_handler.php" ) ||
-    strstr ( $PHP_SELF, "pref.php" ) ||
-    strstr ( $PHP_SELF, "pref_handler.php" ) ||
     strstr ( $PHP_SELF, "purge.php" ) ||
     strstr ( $PHP_SELF, "users.php" ) ) {
     $not_auth = true;

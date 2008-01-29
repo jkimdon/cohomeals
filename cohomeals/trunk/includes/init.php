@@ -140,7 +140,6 @@ if ($DMW) {
 $bodyid = array(
  "activity_log.php" => "activitylog",
  "add_entry.php" => "addentry",
- "admin.php" => "admin",
  "del_entry.php" => "delentry",
  "edit_entry.php" => "editentry",
  "edit_user.php" => "edituser",
@@ -153,7 +152,6 @@ $bodyid = array(
  "index.php" => "index",
  "login.php" => "login",
  "month.php" => "month",
- "pref.php" => "pref",
  "purge.php" => "purge",
  "search.php" => "search",
  "users.php" => "users",
