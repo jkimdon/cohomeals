@@ -20,6 +20,7 @@ $id = mysql_safe( getValue( 'id' ), false );
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
   $error = translate ( "Invalid entry id" ) . "."; 
 }
+$showones = getValue('showones');
 
 
 print_header();
@@ -430,7 +431,12 @@ switch ( $walkins ) {
 
 <?php ///////////////// food restrictions   
 ?>
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:</td>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:<p>
+<?php if ( $showones == 0 ) { ?>
+    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=1">Show level 1</a></p></td>
+<?php } else { ?>
+    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=0">Hide level 1</a></p></td>
+<?php } ?>
 <td>
  <table>
   <tr><td>Food</td><td>Names (level)</td></tr>
@@ -448,23 +454,25 @@ switch ( $walkins ) {
 	while ( $row2 = dbi_fetch_row( $res2 ) ) {
 	  $user = $row2[0];
 	  $level = $row2[1];
+	  if ( ($level != 1) || ($showones == 1) ) {
 
-	  $sql3 = "SELECT cal_login " .
-	    "FROM webcal_meal_participant " .
-	    "WHERE cal_login = '$user' " .
-	    "AND cal_id = $id " . 
-	    "AND (cal_type = 'M' " .
-	    "OR cal_type = 'T')";
-	  if ( $res3 = dbi_query( $sql3 ) ) {
-	    if ( dbi_fetch_row( $res3 ) ) {
-	      if ( $first == true ) {
-		echo "<tr><td>$food</td><td>";
-		$first = false;
-	      } else echo ", ";
-	      user_load_variables( $user, "temp" );
-	      echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
+	    $sql3 = "SELECT cal_login " .
+	      "FROM webcal_meal_participant " .
+	      "WHERE cal_login = '$user' " .
+	      "AND cal_id = $id " . 
+	      "AND (cal_type = 'M' " .
+	      "OR cal_type = 'T')";
+	    if ( $res3 = dbi_query( $sql3 ) ) {
+	      if ( dbi_fetch_row( $res3 ) ) {
+		if ( $first == true ) {
+		  echo "<tr><td>$food</td><td>";
+		  $first = false;
+		} else echo ", ";
+		user_load_variables( $user, "temp" );
+		echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
+	      }
+	      dbi_free_result( $res3 );
 	    }
-	    dbi_free_result( $res3 );
 	  }
 	}
 	dbi_free_result( $res2 );
