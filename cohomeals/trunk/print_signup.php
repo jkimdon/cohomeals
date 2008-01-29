@@ -96,6 +96,9 @@ $counts['sub_free'] = 0;
 $counts['walkin_adult'] = 0;
 $counts['walkin_kid'] = 0;
 $counts['walkin_free'] = 0;
+$counts['guest_adult'] = 0;
+$counts['guest_kid'] = 0;
+$counts['guest_free'] = 0;
 $counts['all'] = 0;
 $counts['takehome'] = 0;
 
@@ -309,6 +312,10 @@ function AddGuests( $guests, &$counts ) {
     $this->Cell( 10,$height, "", 1, 0, 'C' ); // leftovers
     $this->Ln();
 
+    if ( $age == "A" ) $counts['guest_adult']++;
+    else if ( $age == "F" ) $counts['guest_free']++;
+    else $counts['guest_kid']++;
+
     $counts['all']++;
   }
 
@@ -338,7 +345,7 @@ function SumTotals( $counts, $id ) {
  $label_width = 30;
  $number_width = 12;
 
- $this->SetY( 180 );
+ $this->SetY( 200 );
 
  $this->SetFillColor( 200,200,200 );
  $this->Cell( $horiz_offset );
@@ -392,27 +399,13 @@ function SumTotals( $counts, $id ) {
  $this->Cell( $full_width, $height, "Guests", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
  $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
+ $this->Cell( $number_width, $height, $counts['guest_adult'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
  $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
+ $this->Cell( $number_width, $height, $counts['guest_kid'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
  $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
-
- $this->Cell( $horiz_offset );
- $this->Cell( $full_width, $height, "Walkins", 1, 1, 'L', 1 );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, "", 1, 1, 'C' );
-
-
+ $this->Cell( $number_width, $height, $counts['guest_free'], 1, 1, 'C' );
 
 
 }
