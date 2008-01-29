@@ -25,8 +25,10 @@ if ( $type == "C" ) {
   $sql = "SELECT cal_max_diners FROM webcal_meal WHERE cal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      $limited = true;
-      $number = $row[0];
+      if ( $row[0] > 0 ) {
+	$limited = true;
+	$number = $row[0];
+      }
     }
   }
   dbi_free_result( $res );
