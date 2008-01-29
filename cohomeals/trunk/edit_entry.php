@@ -55,7 +55,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $sql = "SELECT cal_date, cal_time, " .
     "cal_suit, cal_menu, cal_num_crew, " .
     "cal_walkins, cal_signup_deadline, " .
-    "cal_base_price, cal_notes " .
+    "cal_base_price, cal_notes, cal_max_diners " .
     "FROM webcal_meal WHERE cal_id = " . $id;
   $res = dbi_query ( $sql );
   if ( $res ) {
@@ -75,6 +75,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $deadline = $row[6];
     $base_price = $row[7];
     $notes = $row[8];
+    $max_diners = $row[9];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -96,6 +97,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $deadline = 2;
   $base_price = 400;
   $notes="";
+  $max_diners=0;
 }
 
 
@@ -253,6 +255,18 @@ if ( $id ) {
   <?php
     for ( $i=0; $i<11; $i++ )
       select_option( $i, $num_crew );
+  ?>
+  </select>
+</td></tr>
+
+
+<tr><td class="tooltip">Max number of diners</td>
+  <td>
+  <select name="max_diners">
+  <?php
+    select_option( "no limit", $max_diners );
+    for ( $i=1; $i<51; $i++ )
+      select_option( $i, $max_diners );
   ?>
   </select>
 </td></tr>

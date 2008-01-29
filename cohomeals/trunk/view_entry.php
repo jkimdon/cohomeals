@@ -37,7 +37,7 @@ $base_price = 400;
 $sql = "SELECT cal_date, cal_time, " .
     "cal_suit, cal_menu, cal_num_crew, " .
     "cal_signup_deadline, cal_base_price, " .
-    "cal_walkins, cal_notes " .
+    "cal_walkins, cal_notes, cal_max_diners " .
     "FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
 if ( ! $res ) {
@@ -56,6 +56,7 @@ if ( $row ) {
   $base_price = $row[6];
   $walkins = $row[7];
   $notes = $row[8];
+  $max_diners = $row[9];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -197,6 +198,21 @@ if ( $res ) {
   else
     $already_eating = false;
 }
+
+/////////////////////////////////
+// count how many there are in case there's a limit
+if ( $max_diners > 0 ) {
+  $max_diner_count = 0;
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND ( cal_type = 'M' OR cal_type = 'T' )";
+  $res = dbi_query( $sql );
+  while ( dbi_fetch_row( $res ) ) 
+    $max_diner_count++;
+  dbi_free_result( $res );
+  if ( $max_diner_count >= $max_diners ) $can_signup = false;
+}
+
+
 ?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:</td>
   <td>

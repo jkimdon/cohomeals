@@ -21,6 +21,15 @@ if ( $type == "C" ) {
 } else if ( $type == 'H' ) {
   $limited = true;
   $number = 1;
+} else {
+  $sql = "SELECT cal_max_diners FROM webcal_meal WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $limited = true;
+      $number = $row[0];
+    }
+  }
+  dbi_free_result( $res );
 }
 
 
@@ -66,7 +75,7 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
 if ( ($limited == true) && ($ct > $number) ) {
   ?>
   <script language="JavaScript" type="text/javascript">
-     alert( "Warning: There are not enough crew slots for the number of buddies you entered, so not all were signed up. Please double-check that the signed-up crew is satisfactory."); 
+     alert( "Warning: There are not enough slots for the number of buddies you entered, so not all were signed up. Please double-check that the signed-up crew is satisfactory."); 
   </script>
   <?php 
 }

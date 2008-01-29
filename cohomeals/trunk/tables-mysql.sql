@@ -76,6 +76,8 @@ CREATE TABLE webcal_meal (
   cal_base_price DECIMAL(5,2) NOT NULL DEFAULT 400,
   /* desired number of crew (not counting head chef) */
   cal_num_crew INT,
+  /* max number of diners 0 = unlimited */
+  cal_max_diners INT DEFAULT 0,
   /* menu. For now, is just a text box. Later we'll allow interaction with a
      recipe database. */
   cal_menu TEXT,

@@ -21,6 +21,7 @@ $minute = getPostValue( 'minute' );
 $ampm = getPostValue( 'ampm' );
 $menu = mysql_safe( getPostValue( 'menu' ), true );
 $num_crew = mysql_safe( getPostValue( 'num_crew' ), false );
+$max_diners = mysql_safe( getPostValue( 'max_diners' ), false );
 $walkins = mysql_safe( getPostValue( 'walkins' ), true );
 $notes = mysql_safe( getPostValue( 'notes' ), true );
 $base_dollars = getPostValue( 'base_dollars' );
@@ -116,7 +117,8 @@ while ( $current_date <= $end_date ) {
 			      $suit, $day, $month, $year, 
 			      $deadline, $base_price,
 			      $hour, $minute, $ampm,
-			      $menu, $num_crew, $walkins, $notes );
+			      $menu, $num_crew, $walkins, 
+			      $notes, $max_diners );
 
   $active_timestamp = mktime( 3,0,0, $month, $day, $year );
 
@@ -224,7 +226,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 			    $day, $month, $year, 
 			    $deadline, $base_price,
 			    $hour, $minute, $ampm,
-			    $menu, $num_crew, $walkins, $notes ) {
+			    $menu, $num_crew, $walkins, 
+			    $notes, $max_diners ) {
   global $is_meal_coordinator, $is_meal_coordinator;
   global $LOG_CREATE, $LOG_UPDATE;
 
@@ -308,7 +311,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
     if ( $newevent == true ) {
       $sql = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
 	"cal_date, cal_time, cal_suit, cal_menu, cal_num_crew, " .
-	"cal_base_price, cal_signup_deadline, cal_walkins, cal_notes ) " .
+	"cal_base_price, cal_signup_deadline, cal_walkins, cal_notes, " .
+	"cal_max_diners ) " .
 	"VALUES ( ";
       
       $sql .= $id . ", ";	
@@ -322,7 +326,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= $base_price . ", ";
       $sql .= $deadline . ", ";
       $sql .= "'" . $walkins . "', ";
-      $sql .= "'" . $notes . "' )";
+      $sql .= "'" . $notes . "', ";
+      $sql .= $max_diners . ")";
     }
     else { 
       $sql = "UPDATE webcal_meal " . 
@@ -335,7 +340,8 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "cal_num_crew = " . $num_crew . ", ";
       $sql .= "cal_signup_deadline = " . $deadline . ", ";
       $sql .= "cal_walkins = '" . $walkins . "', ";
-      $sql .= "cal_notes = '" . $notes . "' ";
+      $sql .= "cal_notes = '" . $notes . "', ";
+      $sql .= "cal_max_diners = " . $max_diners;
       
       $sql .=	"WHERE cal_id = $id";
     }
