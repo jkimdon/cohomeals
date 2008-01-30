@@ -343,7 +343,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= "cal_notes = '" . $notes . "', ";
       $sql .= "cal_max_diners = " . $max_diners;
       
-      $sql .=	"WHERE cal_id = $id";
+      $sql .=	" WHERE cal_id = $id";
     }
     
     if ( ! dbi_query ( $sql ) ) {
