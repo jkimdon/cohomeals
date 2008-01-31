@@ -414,20 +414,13 @@ CREATE TABLE webcal_entry_log (
   cal_entry_id INT NOT NULL,
   /* user who performed this action */
   cal_login VARCHAR(25) NOT NULL,
-  /* user of calendar affected */
-  cal_user_cal VARCHAR(25) NULL,
   /* log types:  <ul> */
   /* <li>C: Created</li>  */
-  /* <li>A: Approved/Confirmed by user</li>  */
-  /* <li>R: Rejected by user</li>  */
+  /* <li>D: Deleted</li>  */
   /* <li>U: Updated by user</li>  */
-  /* <li>M: Mail Notification sent</li>  */
-  /* <li>E: Reminder sent</li>     </ul>*/
   cal_type CHAR(1) NOT NULL,
   /* date in YYYYMMDD format */
-  cal_date INT NOT NULL,
-  /* time in HHMMSS format */
-  cal_time INT NULL,
+  cal_timestamp TIMESTAMP NOT NULL,
   /* optional text */
   cal_text TEXT,
   PRIMARY KEY ( cal_log_id )

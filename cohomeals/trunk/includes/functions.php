@@ -21,12 +21,8 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
  * @global string
  */
 $LOG_CREATE = "C";
-$LOG_APPROVE = "A";
-$LOG_REJECT = "X";
 $LOG_UPDATE = "U";
 $LOG_DELETE = "D";
-$LOG_NOTIFICATION = "N";
-$LOG_REMINDER = "R";
 /**#@-*/
 
 /**
@@ -739,18 +735,13 @@ function event_get_external_users ( $event_id, $use_mailto=0 ) {
  *
  * @param int    $event_id Event ID
  * @param string $user     Username of user doing this
- * @param string $user_cal Username of user whose calendar is affected
  * @param string $type     Type of activity we are logging:
  *   - $LOG_CREATE
- *   - $LOG_APPROVE
- *   - $LOG_REJECT
  *   - $LOG_UPDATE
  *   - $LOG_DELETE
- *   - $LOG_NOTIFICATION
- *   - $LOG_REMINDER
  * @param string $text     Text comment to add with activity log entry
  */
-function activity_log ( $event_id, $user, $user_cal, $type, $text ) {
+function activity_log ( $event_id, $user, $type, $text="" ) {
   $next_id = 1;
 
   if ( empty ( $type ) ) {
@@ -767,20 +758,16 @@ function activity_log ( $event_id, $user, $user_cal, $type, $text ) {
     dbi_free_result ( $res );
   }
 
-  $date = date ( "Ymd" );
-  $time = date ( "Gis" );
   $sql_text = empty ( $text ) ? "NULL" : "'$text'";
-  $sql_user_cal = empty ( $user_cal ) ? "NULL" : "'$user_cal'";
 
   $event_id = mysql_safe( $event_id, false );
   $user = mysql_safe( $user, true );
-  $sql_user_cal = mysql_safe( $sql_user_cal, true );
   $type = mysql_safe( $type, true );
   $sql_text = mysql_safe( $sql_text, true );
   $sql = "INSERT INTO webcal_entry_log ( " .
-    "cal_log_id, cal_entry_id, cal_login, cal_user_cal, cal_type, " .
-    "cal_date, cal_time, cal_text ) VALUES ( $next_id, $event_id, " .
-    "'$user', $sql_user_cal, '$type', $date, $time, $sql_text )";
+    "cal_log_id, cal_entry_id, cal_login, cal_type, " .
+    "cal_text ) VALUES ( $next_id, $event_id, " .
+    "'$user', '$type', $sql_text )";
   if ( ! dbi_query ( $sql ) ) {
     echo "Database error: " . dbi_error ();
     echo "<br />\nSQL:<br />\n$sql";

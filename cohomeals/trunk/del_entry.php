@@ -21,68 +21,37 @@ if ( ! $can_edit ) {
 
 $id = mysql_safe( $id, false );
 if ( $id > 0 && empty ( $error ) ) {
-  if ( ! empty ( $date ) ) {
-    $thisdate = $date;
-  } else {
-    $res = dbi_query ( "SELECT cal_date FROM webcal_meal WHERE cal_id = $id" );
-    if ( $res ) {
-      // date format is 19991231
-      $row = dbi_fetch_row ( $res );
-      $thisdate = $row[0];
-    }
+
+
+  // log the deletion, possibly through activity_log
+  activity_log( $id, $login, 'D' );
+
+
+  // process refunds
+  /// for each group, calculate and refund amount billed for the cancelled meal
+  $sql = "SELECT DISTINCT cal_billing_group " .
+    "FROM webcal_user";
+  $res = dbi_query( $sql );
+  while ( $row = dbi_fetch_row( $res ) ) {
+    $billing = $row[0];
+    $total = 0;
+
+    $sql2 = "SELECT cal_amount " .
+      "FROM webcal_financial_log " .
+      "WHERE cal_meal_id = $id AND cal_billing_group = '$billing'";
+    $res2 = dbi_query( $sql2 );
+    while( $row2 = dbi_fetch_row( $res2 ) ) 
+      $total += $row2[0];
+    if ( $total < 0 ) 
+      add_financial_event( '', $billing, $total, "credit", "refund for cancelled meal", 
+			   $id, '' );
+    
   }
 
-  // Email participants that the event was deleted
-  // First, get list of participants 
-  $sql = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = $id ";
-  $res = dbi_query ( $sql );
-  $partlogin = array ();
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      if ( $row[0] != $login )
-	$partlogin[] = $row[0];
-    }
-    dbi_free_result($res);
-  }
+  
 
-  // Get event name
-  $sql = "SELECT cal_suit, cal_date, cal_time " .
-    "FROM webcal_meal WHERE cal_id = $id";
-  $res = dbi_query($sql);
-  if ( $res ) {
-    $row = dbi_fetch_row ( $res );
-    $name = $row[0];
-    $eventdate = $row[1];
-    $eventtime = $row[2];
-    dbi_free_result ( $res );
-  }
-  for ( $i = 0; $i < count ( $partlogin ); $i++ ) {
-    // Log the deletion
-    activity_log ( $id, $login, $partlogin[$i], $LOG_DELETE, "" );
 
-    $do_send = get_pref_setting ( $partlogin[$i], "EMAIL_EVENT_DELETED" );
-    user_load_variables ( $partlogin[$i], "temp" );
-    if ( $partlogin[$i] != $login && $do_send == "Y" && 
-	 strlen ( $tempemail ) && $send_email != "N" ) {
-      $msg = "Hello " . $tempfullname . ".\n\n" .
-	"A meal you were signed up for has been canceled by " .
-	$login_fullname .  ".\n" .
-	"The suit was " . $name . "\n" .
-	"Date: " . date_to_str ($thisdate) . "\n";
-      if ( $eventtime != '-1' ) $msg .= "Time: " . display_time ($eventtime, true);
-      $msg .= "\n\n";
-      if ( strlen ( $login_email ) )
-	$extra_hdrs = "From: $login_email\r\nX-Mailer: " . $application_name;
-      else
-	$extra_hdrs = "From: $email_fallback_from\r\nX-Mailer: " . $application_name;
-      mail ( $tempemail,
-	     $application_name . " " .
-	     "Notification: " . $name,
-	     html_to_8bits ($msg), $extra_hdrs );
-    }
-  }
-
-  // Now, mark event as deleted for all users.
+  // Do the deletion
   dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id" );
   dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
   

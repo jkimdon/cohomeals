@@ -354,8 +354,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
   
   
   // log add/update
-  activity_log ( $id, $login, $login,
-		 $newevent ? $LOG_CREATE : $LOG_UPDATE, "" );
+  activity_log ( $id, $login, $newevent ? $LOG_CREATE : $LOG_UPDATE, "" );
   
   
   // now add participants and send out notifications
@@ -401,7 +400,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 	mail ( $tempemail,
 	       translate($application_name) . " " . translate("Notification") . ": " . $name,
 	       html_to_8bits ($msg), $extra_hdrs );
-	activity_log ( $id, $login, $participants[$i], $LOG_NOTIFICATION, "" );
+	activity_log ( $id, $login, $LOG_NOTIFICATION, "" );
       } // end sending email
     } // end loop through participants
   } // end email participants
