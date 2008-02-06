@@ -83,6 +83,8 @@ CREATE TABLE webcal_meal (
   cal_menu TEXT,
   /* notes, such as a description of duties of optional other crew members */
   cal_notes TEXT,
+  /* if meal was cancelled, keep it in the database for reference */
+  cal_cancelled CHAR(1) NOT NULL DEFAULT 0,
   PRIMARY KEY ( cal_id )
 );
 

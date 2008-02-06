@@ -758,12 +758,13 @@ function activity_log ( $event_id, $user, $type, $text="" ) {
     dbi_free_result ( $res );
   }
 
-  $sql_text = empty ( $text ) ? "NULL" : "'$text'";
 
   $event_id = mysql_safe( $event_id, false );
   $user = mysql_safe( $user, true );
   $type = mysql_safe( $type, true );
-  $sql_text = mysql_safe( $sql_text, true );
+  $text = mysql_safe( $text, true );
+  $sql_text = empty ( $text ) ? "NULL" : "'$text'";
+
   $sql = "INSERT INTO webcal_entry_log ( " .
     "cal_log_id, cal_entry_id, cal_login, cal_type, " .
     "cal_text ) VALUES ( $next_id, $event_id, " .
@@ -1495,6 +1496,9 @@ function print_date_entries ( $date ) {
   /// check if need crew/head chef
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     $viewid = $ev[$i]['cal_id'];
+
+    if ( is_cancelled( $viewid ) == true ) break;
+
     $viewname = $ev[$i]['cal_suit'];
 
     $need_crew = 'N';
@@ -2219,6 +2223,23 @@ function is_participating ( $id, $user, $type ) {
 
   return $ret;
 }
+
+
+function is_cancelled ( $id ) {
+  $ret = false;
+
+  $sql = "SELECT cal_cancelled FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      if ( $row[0] == 1 ) $ret = true;
+    }
+    dbi_free_result( $res );
+  }
+
+  return $ret;
+}
+
 
 
 /********************************

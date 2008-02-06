@@ -54,7 +54,8 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
 
     $sql = "SELECT cal_log_id, cal_description, cal_timestamp, cal_meal_id, cal_amount, cal_running_balance, cal_text";    
     if ( $cur_group == "all" ) 
-      $sql .= ", cal_billing_group FROM webcal_financial_log ORDER BY cal_timestamp";
+      $sql .= ", cal_billing_group FROM webcal_financial_log " .
+	"ORDER BY cal_billing_group, cal_timestamp";
     else 
       $sql .= " FROM webcal_financial_log " .
 	"WHERE cal_billing_group = '$cur_group' " .
@@ -73,6 +74,7 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
 	if ( ($date >= $startdate) && ($date <= $enddate) ) {
 	  $selected_logs[$count]['log_id'] = $row[0];
 	  $selected_logs[$count]['description'] = $row[1];
+	  $selected_logs[$count]['date'] = $date;
 	  $selected_logs[$count]['time'] = $row[2];
 	  $selected_logs[$count]['meal_id'] = $meal_id;
 	  $selected_logs[$count]['amount'] = $row[4];
@@ -81,6 +83,7 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
 	  if ( $cur_group == "all" ) $selected_logs[$count]['billing_group'] = $row[7];
 
 	  $ordering[$count] = $date;
+
 	  $count++;
 	}
       }
@@ -88,9 +91,25 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
 
     $newcount = 0;
     asort( $ordering );
+    $ct = 0;
+    $day_log = array();
     foreach ( $ordering as $key => $value ) {
-      $ordered_logs[$newcount++] = $selected_logs[$key];
+      $thisdate = $selected_logs[$key]['date'];
+      if ( $ct == 0 )
+	$prevdate = $thisdate;
+      if ( $prevdate != $thisdate ) {
+	sort( $day_log );
+	foreach ( $day_log as $dkey => $dvalue )
+	  $ordered_logs[$newcount++] = $selected_logs[$dkey];
+	$ct = 0;
+	$day_log = array();
+      }
+      $day_log[$ct++] = $key;
+      $prevdate = $thisdate;
     }
+    sort( $day_log );
+    foreach ( $day_log as $dkey => $dvalue )
+      $ordered_logs[$newcount++] = $selected_logs[$dkey];
 
     dbi_free_result( $res );
   }

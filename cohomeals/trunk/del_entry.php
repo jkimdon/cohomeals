@@ -2,14 +2,11 @@
 include_once 'includes/init.php';
 
 $id = getIntValue( 'id' );
-$date = getIntValue( 'date' );
 
 $can_edit = false;
-$thisdate = '';
 
 // First, check to see if this user should be able to delete this event.
 if ( $id > 0 ) {
-  // first see who has access to edit this entry
   if ( $is_meal_coordinator ) {
     $can_edit = true;
   }
@@ -19,12 +16,26 @@ if ( ! $can_edit ) {
   $error = "You are not authorized";
 }
 
+
+$reason = "";
+$reason = mysql_safe( getValue( 'reason' ), true );
+
+if ( $reason == "" ) { ?>
+  <form action="del_entry.php" method="get" name="deleteReasonForm">
+    Reason for deleting the meal: 
+    <input type="text" name="reason" id="reason" size="25" value="" maxlength="80"/>
+    <?php echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />";?>
+  </form>
+  <form action="del_entry.php" method="post" name="deleteReasonForm">
+<?php } else {
+
+
 $id = mysql_safe( $id, false );
 if ( $id > 0 && empty ( $error ) ) {
 
 
   // log the deletion, possibly through activity_log
-  activity_log( $id, $login, 'D' );
+  activity_log( $id, $login, 'D', $reason );
 
 
   // process refunds
@@ -50,24 +61,37 @@ if ( $id > 0 && empty ( $error ) ) {
 
   
 
-
-  // Do the deletion
+  // Take people off 
   dbi_query ( "DELETE FROM webcal_meal_participant WHERE cal_id = $id" );
-  dbi_query ( "DELETE FROM webcal_meal WHERE cal_id = $id" );
+  dbi_query ( "DELETE FROM webcal_meal_guest WHERE cal_meal_id = $id" );
+
+  /// mark as cancelled 
+  $sql = "UPDATE webcal_meal SET " .
+    "cal_notes = 'Cancelled due to: $reason', " .
+    "cal_cancelled = 1 " .
+    "WHERE cal_id = $id";
+  dbi_query ( $sql );
   
 }
+
 
 if ( empty ( $error ) ) {
   do_redirect ( "month.php" );
   exit;
 }
+
+
+}
 print_header();
-?>
+
+
+if ( $error ) { ?>
 
 <h2>Error</h2>
 <blockquote>
 <?php echo $error; ?>
 </blockquote>
+<?php } ?>
 
 <?php print_trailer(); ?>
 

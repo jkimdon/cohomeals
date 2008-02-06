@@ -539,7 +539,7 @@ if ( is_chef( $id ) )
 
 if ( $can_edit ) {
   echo "<p><a title=\"Edit meal\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id$u_url\">Edit meal</a></p>\n";
+    "href=\"edit_entry.php?id=$id\">Edit meal</a></p>\n";
 }
 ?>
 
@@ -563,15 +563,9 @@ display_small_month( $thismonth, $thisyear, true, "nextmonth" );
 
 <?php /////////////////////////////////
 
-if ( ! empty ( $user ) && $login != $user ) {
-  $u_url = "&amp;user=$user";
-} else {
-  $u_url = "";
-}
-
 if ( $is_meal_coordinator ) {
   echo "<a title=\"Delete meal\" class=\"nav\" " .
-    "href=\"del_entry.php?id=$id$u_url\" onclick=\"return confirm('" . 
+    "href=\"del_entry.php?id=$id\" onclick=\"return confirm('" . 
     translate("Are you sure you want to delete this meal?") . "\\n\\n" . 
     translate("This will delete this meal for all users.") . "');\">" . 
     translate("Delete meal") . "</a><br />\n";
