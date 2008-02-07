@@ -927,14 +927,22 @@ function site_extras_for_popup ( $id ) {
  *
  * @return string The HTML for the event popup
  */
-function build_event_popup ( $popupid, $menu ) {
+function build_event_popup ( $popupid, $head_chef, $menu ) {
   global $login, $popup_fullnames, $popuptemp_fullname;
   $ret = "<dl id=\"$popupid\" class=\"popup\">\n";
 
   if ( empty ( $popup_fullnames ) )
     $popup_fullnames = array ();
 
-  $ret .= "<dt>" . translate ("Menu") . ":</dt>\n<dd>";
+  if ( $head_chef == "None" ) $chef = "None";
+  else {
+    user_load_variables( $head_chef, "chef" );
+    $chef = $GLOBALS[cheffullname];
+  }
+
+  $ret .= "<dt>Head chef:</dt><dd>$chef</dd>";
+
+  $ret .= "<dt>Menu:</dt>\n<dd>";
   if ( ! empty ( $GLOBALS['allow_html_description'] ) &&
     $GLOBALS['allow_html_description'] == 'Y' ) {
     $str = str_replace ( "&", "&amp;", $menu );
@@ -1130,7 +1138,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $suit, $menu, 
+function print_entry ( $id, $date, $time, $suit, $head_chef,  $menu, 
 		       $need_crew, $deadline ) {
   global $eventinfo, $PHP_SELF;
   global $login;
@@ -1202,7 +1210,7 @@ function print_entry ( $id, $date, $time, $suit, $menu,
     echo "<br>Deadline for " . 
       date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
 
-  $eventinfo .= build_event_popup ( $popupid, $menu );
+  $eventinfo .= build_event_popup ( $popupid, $head_chef, $menu );
 }
 
 /** 
@@ -1508,8 +1516,11 @@ function print_date_entries ( $date ) {
       "WHERE cal_id = $viewid " .
       "AND cal_type = 'H'";
     if ( $res = dbi_query( $sql ) ) {
-      if ( !dbi_fetch_row( $res ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$head_chef = $row[0];
+      } else {
 	$need_crew = 'H';
+	$head_chef = "None";
       }
       dbi_free_result( $res );
     }
@@ -1545,8 +1556,9 @@ function print_date_entries ( $date ) {
 
 
     print_entry ( $viewid,
-      $date, $ev[$i]['cal_time'],
-      $viewname, $ev[$i]['cal_menu'], $need_crew, $deadline );
+		  $date, $ev[$i]['cal_time'],
+		  $viewname, $head_chef, $ev[$i]['cal_menu'], 
+		  $need_crew, $deadline );
     $cnt++;
   }
   if ( $cnt == 0 ) { // no events but still print deadlines
