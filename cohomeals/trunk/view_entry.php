@@ -112,7 +112,7 @@ else echo "</p>";
     <?php echo price_to_str( get_adjusted_price( $id, "A" ));?>
   </td>
   <td class="number">
-    <?php echo price_to_str( get_adjusted_price( $id, "C" ));?>
+    <?php echo price_to_str( get_adjusted_price( $id, "K" ));?>
   </td>
   <td class="number">
     <?php echo price_to_str( get_adjusted_price( $id, "A", false, true ));?>
@@ -713,6 +713,60 @@ function change_guest_button( $guest_name, $old_type, $id ) {
     echo "Change to on-site dining</a><br>";
   echo "<br>";
 }
+
+
+
+function display_head_chef( $rowcolor ) {
+  global $login;
+
+  $id = mysql_safe( $GLOBALS['id'], false );
+  $type = mysql_safe( $type, true );
+
+  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
+  echo "<td>";
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_type = 'H'";
+  $res = dbi_query ( $sql );
+  $im_working = false;
+  if ( $res ) {
+    while ( $row = dbi_fetch_row ( $res ) ) {
+      $person = $row[0];
+      user_load_variables ( $person, "temp" );
+      echo ". " . $GLOBALS[tempfirstname] . 
+	" " . $GLOBALS[templastname];
+      if ( $person == $login ) {
+	$im_working = true;
+      }
+      if ( (is_signer( $person ) || ($person == $login)) ) {
+	remove_button( $person, $id, $type );
+      }
+      echo "<br />\n";
+    }
+  }
+  else 
+    echo "Database error: " . dbi_error() . "<br />\n";
+
+  if ( ($person) && ($im_working == false) ) {
+    echo $i . ". ";
+    add_me_button( $type );
+    signup_buddy_button( $type, $id );
+    echo "<br><br>";
+    $i += 1;
+  }
+  if ( ($im_working == true) && ($i <= $number) ) {
+    echo "<br>" . $i . ". ";
+    signup_buddy_button( $type, $id );
+    echo "<br>";
+    $i += 1;
+  }
+  if ( $i <= $number ) {
+    for ( $i = $i; $i <= $number; $i++ ) {
+      echo $i . ". ???<br>";
+    } 
+  }
+  echo "<br></td></tr>";
+}
+
 
 
 

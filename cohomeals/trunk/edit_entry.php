@@ -274,8 +274,9 @@ if ( $id ) {
 
 
 <?php 
-$base_dollars = $base_price / 100;
+      $base_dollars = (int)($base_price / 100);
 $base_cents = $base_price - ($base_dollars * 100);
+ echo "debug: $base_dollars, $base_cents ";
 ?>
 <tr><td class="tooltip">Base price:</td>
 <td colspan="2">
