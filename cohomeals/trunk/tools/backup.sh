@@ -5,7 +5,7 @@ TOOLS=`dirname $0`
 
 echo "Getting token"
 curl \
-	--basic --user cohou3:Coho9999 \
+	--basic --user `cat ~/.coho-backup` \
 	-c cookies.txt \
 	--cacert $TOOLS/hathor.lunarpages.com.pem \
 	-o backup.tmp \
@@ -15,7 +15,7 @@ token=`sed -n 's/.*\(token=[0-9a-f]*\).*/\1/p' < backup.tmp  | head -1`
 
 echo "Downloading backup"
 curl \
-	--basic --user cohou3:Coho9999 \
+	--basic --user `cat ~/.coho-backup` \
 	-b cookies.txt \
 	--cacert $TOOLS/hathor.lunarpages.com.pem \
 	-o backup.sql \
