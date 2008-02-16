@@ -1527,30 +1527,16 @@ function print_date_entries ( $date ) {
     if ( $need_crew != 'H' ) {
       // there is a head chef. now check crew
 
-      $num_crew = 10;
-      $sql2 = "SELECT cal_num_crew " .
-	"FROM webcal_meal " .
-	"WHERE cal_id = $viewid";
-      if ( $res2 = dbi_query( $sql2 ) ) {
-	if ( $row2 = dbi_fetch_row( $res2 ) ) {
-	  $num_crew = $row2[0];
-	}
-	dbi_free_result( $res2 );
-      }
-      
-      $count = 0;
       $sql2 = "SELECT cal_login " .
 	"FROM webcal_meal_participant " .
 	"WHERE cal_id = $viewid " . 
 	"AND cal_type = 'C'";
       if ( $res2 = dbi_query( $sql2 ) ) {
-	while ( dbi_fetch_row( $res2 ) ) {
-	  $count++;
+	while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	  if ( ereg( "^none", $row2[0] ) ) 
+	    $need_crew = 'C';
 	}
 	dbi_free_result( $res2 );
-      }
-      if ( $count < $num_crew ) {
-	$need_crew = 'C';
       }
     }
 
@@ -2255,7 +2241,7 @@ function is_cancelled ( $id ) {
 
 
 /********************************
- * signs people up or removes them from dining or crew duties
+ * signs people up or removes them from dining or head chef duties
  *********************************/
 function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
   global $login, $is_meal_coordinator;
@@ -2370,6 +2356,60 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
   return $can_change;
 }
 
+
+function edit_crew_participation( $id, $action, $user, $job ) {
+  global $login, $is_meal_coordinator;
+
+  if ( ($user == "") )
+    $user = $login;
+
+  $can_edit = false;
+
+  // admin, meal coordinator, and buddies can add others
+  if ( $user == $login )
+    $can_edit = true;
+  else if ( $is_meal_coordinator )
+    $can_edit = true;
+  else if ( is_signer( $user ) == true ) 
+    $can_edit = true;
+
+  if ( $can_edit == false ) {
+    echo "Not authorized";
+    return;
+  }
+
+  $modified = false;
+  if ( $action == 'D' ) {
+    /// find last "none" login placeholder in participant table
+    $i=1;
+    $found = false;
+    while ( $found == false ) {
+      $none = "none" . $i;
+      $sql = "SELECT cal_login FROM webcal_meal_participant " .
+	"WHERE cal_id = $id AND cal_login = '$none' AND cal_type = 'C'";
+      if ( $res = dbi_query( $sql ) ) {
+	if ( !dbi_fetch_row( $res ) )
+	  $found = true;
+	else $i++;
+	dbi_free_result( $res );
+      }
+    }
+    $none = "none" . $i;
+
+    $sql = "UPDATE webcal_meal_participant " .
+      "SET cal_login = '$none' " .
+      "WHERE cal_id = $id AND cal_type = 'C' " .
+      "AND cal_login = '$user'";
+    if ( dbi_query( $sql ) ) $modified = true;
+  } else if ( $action == 'A' ) {
+    $sql = "UPDATE webcal_meal_participant " .
+      "SET cal_login = '$user' " .
+      "WHERE cal_id = $id AND cal_notes = '$job'";
+    if ( dbi_query( $sql ) ) $modified = true;
+  }
+
+  return $modified;
+}
 
 
 function edit_club_subscription( $club_id, $user, $action ) {

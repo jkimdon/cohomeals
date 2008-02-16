@@ -53,7 +53,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $newevent = false;
   $repeats = false;
   $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_num_crew, " .
+    "cal_suit, cal_menu, " .
     "cal_walkins, cal_signup_deadline, " .
     "cal_base_price, cal_notes, cal_max_diners " .
     "FROM webcal_meal WHERE cal_id = " . $id;
@@ -70,12 +70,11 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $minute = ( $time / 100 ) % 100;
     $suit = $row[2];
     $menu = $row[3];
-    $num_crew = $row[4];
-    $walkins = $row[5];
-    $deadline = $row[6];
-    $base_price = $row[7];
-    $notes = $row[8];
-    $max_diners = $row[9];
+    $walkins = $row[4];
+    $deadline = $row[5];
+    $base_price = $row[6];
+    $notes = $row[7];
+    $max_diners = $row[8];
   }
   if ( ! empty ( $allow_external_users ) && $allow_external_users == "Y" ) {
     $external_users = event_get_external_users ( $id );
@@ -92,7 +91,6 @@ if ( ! empty ( $id ) && $id > 0 ) {
   $suit="wild";
   $cal_date = date( "Ymd" );
   $menu="";
-  $num_crew=3;
   $walkins="C";
   $deadline = 2;
   $base_price = 400;
@@ -248,19 +246,45 @@ if ( $id ) {
   <?php echo $textareasize; ?>><?php echo htmlspecialchars ( $menu );?></textarea>
 </td></tr>
 
-<tr><td class="tooltip">Number of crew members</td><td></td></tr>
-<tr><td> (in addition to head chef):</td>
-  <td>
-  <select name="num_crew">
-  <?php
-    for ( $i=0; $i<11; $i++ )
-      select_option( $i, $num_crew );
+<tr><td class="tooltip">Desired crew</td><td></td></tr>
+<tr><td style="vertical-align:top;"> (in addition to head chef):</td>
+    <td><p>Please fill in job descriptions only for the number of crew you are requesting. Leave the rest of the slots blank. (Note that you cannot edit job descriptions once someone has signed up for that slot.)</p>
+
+  <table class="bordered_table">
+  <tr><td>Crew number</td><td>Job description (e.g. chopping help from 4:30-6pm on Wed)</td></tr>
+
+  <?php 
+ $sql = "SELECT cal_notes, cal_login FROM webcal_meal_participant " .
+         "WHERE cal_id = $id AND cal_type = 'C'";
+ $count = 0;
+ if ( $res = dbi_query( $sql ) ) {
+   while ( $row = dbi_fetch_row( $res ) ) {
+     $count++;
+     $job = $row[0];
+     $person = $row[1];
+     echo "<tr><td class=\"number\">$count</td>";
+     if ( ereg( "^none", $person ) ) 
+       echo "<td><input type=\"text\" name=\"job$count\" size=\"45\" value=\"$job\" maxlength=\"80\"/></td>";       
+     else {
+       if ( $job == "" ) $job = "???";
+       echo "<td>$job</td>";
+     }
+   }
+ }
+
+ $count++;
+ for ( $i=$count; $i<7; $i++ ) {
+   echo "<tr><td class=\"number\">$i</td>";
+   echo "<td><input type=\"text\" name=\"job$i\" size=\"45\" value=\"\" maxlength=\"80\"/></td>";
+ }
+
   ?>
-  </select>
+  </table>
+
 </td></tr>
 
 
-<tr><td class="tooltip">Max number of diners</td>
+<tr><td class="tooltip">Max number of diners:</td>
   <td>
   <select name="max_diners">
   <?php
@@ -274,9 +298,8 @@ if ( $id ) {
 
 
 <?php 
-      $base_dollars = (int)($base_price / 100);
+$base_dollars = (int)($base_price / 100);
 $base_cents = $base_price - ($base_dollars * 100);
- echo "debug: $base_dollars, $base_cents ";
 ?>
 <tr><td class="tooltip">Base price:</td>
 <td colspan="2">

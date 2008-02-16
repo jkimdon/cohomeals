@@ -11,6 +11,7 @@ print_header($INC,'','',true);
 $action = getGetValue( 'action' );
 $type = getGetValue( 'type' );
 $id = getGetValue( 'id' );
+$placeholder = mysql_safe( getValue( 'olduser' ), true );
 
 $choose_pre_or_walkin = false;
 if ( $is_meal_coordinator && ($type == "M" || $type == "T") ) 
@@ -60,6 +61,7 @@ if ( $count == 0 )
 <input type="hidden" name="id" value="<?php echo $id;?>" />
 <input type="hidden" name="action" value="<?php echo $action;?>" />
 <input type="hidden" name="type" value="<?php echo $type;?>" />
+<input type="hidden" name="placeholder" value="<?php echo $placeholder;?>" />
 
 <p align="center"><input type="submit" value="Submit"/></p>
 </form>

@@ -36,7 +36,7 @@ if ( ! empty ( $error ) ) {
 $base_price = 400;
 // Load event info now.
 $sql = "SELECT cal_date, cal_time, " .
-    "cal_suit, cal_menu, cal_num_crew, " .
+    "cal_suit, cal_menu, " .
     "cal_signup_deadline, cal_base_price, " .
     "cal_walkins, cal_notes, cal_max_diners " .
     "FROM webcal_meal WHERE cal_id = $id";
@@ -52,12 +52,11 @@ if ( $row ) {
   $event_time = $row[1];
   $suit = $row[2];
   $menu = $row[3];
-  $num_crew = $row[4];
-  $deadline = $row[5];
-  $base_price = $row[6];
-  $walkins = $row[7];
-  $notes = $row[8];
-  $max_diners = $row[9];
+  $deadline = $row[4];
+  $base_price = $row[5];
+  $walkins = $row[6];
+  $notes = $row[7];
+  $max_diners = $row[8];
 } else {
   echo "<h2>" . 
     translate("Error") . "</h2>" . 
@@ -170,17 +169,15 @@ else echo "</p>";
 
 
 <?php 
-  display_crew( "Head chef", 'H', 1, $row_num );
+  display_head_chef( $row_num );
   $row_num = ( $row_num == 1 ) ? 0:1; 
 ?>
 
 
 
 <?php 
-if ( $num_crew != 0 ) {
-  display_crew( "Crew", 'C', $num_crew, $row_num );
-  $row_num = ( $row_num == 1 ) ? 0:1;
-}
+display_crew( 'C', $row_num );
+$row_num = ( $row_num == 1 ) ? 0:1;
 ?>
 
 
@@ -650,18 +647,30 @@ if ( $show_log ) {
 
 <?php
 
-function add_me_button( $type ) {
+function add_me_button( $type, $job="" ) {
   global $login, $id;
 
+  $olduser = "";
+  if ( $type == 'C' ) {
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
+      "WHERE cal_id = $id AND cal_notes = '$job'";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) 
+	$olduser = $row[0];
+    }
+  }
+
   echo "<a name=\"participation\" class=\"addbutton\"" .
-    "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A\">" .
+    "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A&" .
+    "olduser=$olduser\">" .
   "Add me</a>";
   echo "&nbsp;&nbsp;&nbsp;";
 }
 
 function remove_button( $person, $id, $type ) {
+
   echo "&nbsp;&nbsp;&nbsp;<a name=\"participation\" class=\"addbutton\"" . 
-    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D\">" . 
+    "href=\"edit_participation_handler.php?user=$person&id=$id&type=$type&action=D&olduser=$person\">" . 
     "Remove</a>";
 }
 
@@ -676,8 +685,18 @@ function change_button( $person, $id, $old_type ) {
 }
 
 
-function signup_buddy_button( $type, $id ) {
-  $nexturl = "signup_buddy.php?id=$id&type=$type&action=A"; 
+function signup_buddy_button( $type, $id, $job="" ) {
+  $olduser = "";
+  if ( $type == 'C' ) {
+    $sql = "SELECT cal_login FROM webcal_meal_participant " .
+      "WHERE cal_id = $id AND cal_notes = '$job'";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) 
+	$olduser = $row[0];
+    }
+  }
+
+  $nexturl = "signup_buddy.php?id=$id&type=$type&action=A&olduser=$olduser"; 
   echo "<a href class=\"addbutton\" " .
     "onclick=\"window.open('$nexturl', 'Buddies', " .
     "'width=300,height=300,resizable=yes,scrollbars=yes');\">" .
@@ -720,49 +739,38 @@ function display_head_chef( $rowcolor ) {
   global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
-  $type = mysql_safe( $type, true );
 
-  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
+  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">Head chef:</td>";
   echo "<td>";
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_type = 'H'";
   $res = dbi_query ( $sql );
   $im_working = false;
+  $filled = false;
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $person = $row[0];
+      $filled = true;
       user_load_variables ( $person, "temp" );
-      echo ". " . $GLOBALS[tempfirstname] . 
-	" " . $GLOBALS[templastname];
+      echo $GLOBALS[tempfirstname] . " " . $GLOBALS[templastname];
       if ( $person == $login ) {
 	$im_working = true;
       }
       if ( (is_signer( $person ) || ($person == $login)) ) {
-	remove_button( $person, $id, $type );
+	remove_button( $person, $id, 'H' );
       }
-      echo "<br />\n";
+      echo "\n";
     }
   }
   else 
     echo "Database error: " . dbi_error() . "<br />\n";
 
-  if ( ($person) && ($im_working == false) ) {
-    echo $i . ". ";
-    add_me_button( $type );
-    signup_buddy_button( $type, $id );
-    echo "<br><br>";
-    $i += 1;
+  if ( ($filled == false) && ($im_working == false) ) {
+    add_me_button( 'H' );
+    signup_buddy_button( 'H', $id );
   }
-  if ( ($im_working == true) && ($i <= $number) ) {
-    echo "<br>" . $i . ". ";
-    signup_buddy_button( $type, $id );
-    echo "<br>";
-    $i += 1;
-  }
-  if ( $i <= $number ) {
-    for ( $i = $i; $i <= $number; $i++ ) {
-      echo $i . ". ???<br>";
-    } 
+  if ( ($filled == false) && ($im_working == true) ) {
+    signup_buddy_button( 'H', $id );
   }
   echo "<br></td></tr>";
 }
@@ -770,70 +778,63 @@ function display_head_chef( $rowcolor ) {
 
 
 
-function display_crew( $title, $type, $number, $rowcolor ) {
+function display_crew( $type, $rowcolor ) {
   global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
   $type = mysql_safe( $type, true );
 
-  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">$title:</td>";
-  echo "<td>";
+  echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">Crew:</td><td>";
+
+  ?>
+  <table class="bordered_table">
+     <tr><td>Desired crew description</td><td>Volunteer</td></tr>
+  <?php 
+
+  /// find out if working
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+     "WHERE cal_id = $id AND cal_login = '$login' " .
+     "AND (cal_type = 'C' OR cal_type = 'H')";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( dbi_fetch_row( $res ) ) $im_working = true;
+    else $im_working = false;
+    dbi_free_result( $res );
+  }
+
+
   $sql = "SELECT cal_login, cal_notes FROM webcal_meal_participant " .
-    "WHERE cal_id = $id AND cal_type = '$type'";
+    "WHERE cal_id = $id AND cal_type = 'C'";
   $res = dbi_query ( $sql );
   $im_working = false;
-  $i = 1;
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
-      if ( $i > $number ) 
-	echo "Error: Too many crew members.<br />\n";
-      else { 
-	$person = $row[0];
-	$notes = $row[1];
-	$notes = trim( $notes );
+      $person = $row[0];
+      $description = $row[1];
+      $description = trim( $description );
+      if ( $description == "" ) $description = "???";
+
+      echo "<tr><td>$description</td>";
+
+      if ( ereg( "^none", $person ) ) {
+	echo "<td> none yet "; 
+	if ( $im_working == false ) add_me_button( 'C', $description, $job );
+	signup_buddy_button( 'C', $id, $description, $job );
+      } else {
 	user_load_variables ( $person, "temp" );
-	echo $i . ". " . $GLOBALS[tempfirstname] . 
-	  " " . $GLOBALS[templastname];
-	if ( $notes != "" ) {
-	  echo " (" . $notes . ")";
-	}
-	if ( $person == $login ) {
-	  $im_working = true;
-	}
+	echo "<td> " . $GLOBALS[tempfirstname] . 
+	" " . $GLOBALS[templastname];
 	if ( (is_signer( $person ) || ($person == $login)) ) {
 	  remove_button( $person, $id, $type );
-	  $nexturl = "crew_notes.php?user=$person&id=$id";
-	  echo "&nbsp;&nbsp;&nbsp;<a href class=\"addbutton\" " .
-	    "onclick=\"window.open('$nexturl', 'Crew notes', " .
-	    "'width=300,height=200,resizable=yes,scrollbars=yes');\">" .
-	    "Edit notes</a><br>";
+	  echo "</td>";
 	}
-	echo "<br />\n";
-	$i += 1;
       }
+
+      echo "</tr>";
     }
   }
   else 
     echo "Database error: " . dbi_error() . "<br />\n";
 
-  if ( ($i <= $number) && ($im_working == false) ) {
-    echo $i . ". ";
-    add_me_button( $type );
-    signup_buddy_button( $type, $id );
-    echo "<br><br>";
-    $i += 1;
-  }
-  if ( ($im_working == true) && ($i <= $number) ) {
-    echo "<br>" . $i . ". ";
-    signup_buddy_button( $type, $id );
-    echo "<br>";
-    $i += 1;
-  }
-  if ( $i <= $number ) {
-    for ( $i = $i; $i <= $number; $i++ ) {
-      echo $i . ". ???<br>";
-    } 
-  }
-  echo "<br></td></tr>";
+  echo "</table></td></tr>";
 }
 ?>

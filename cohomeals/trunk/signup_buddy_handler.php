@@ -4,20 +4,14 @@ include_once 'includes/init.php';
 $id = mysql_safe( getPostValue( 'id' ), false );
 $action = getPostValue( 'action' );
 $type = mysql_safe( getPostValue( 'type' ), true );
+$placeholder = mysql_safe( getPostValue( 'placeholder' ), true );
 
 /// figure out if there is a limit to the number we can sign up
 $limited = false;
 $number = 1;
 if ( $type == "C" ) {
   $limited = true;
-  $sql = "SELECT cal_num_crew ";
-  $sql .= "FROM webcal_meal WHERE cal_id = $id";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $number = $row[0];
-    }
-  }
-  dbi_free_result( $res );
+  $number = 1;
 } else if ( $type == 'H' ) {
   $limited = true;
   $number = 1;
@@ -66,7 +60,18 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
     } else if ( ($limited == false) || ($ct <= $number) ) {
       $walkin = 0;
       if ( $user_status == "walkin" ) $walkin = 1;
-      $modified = edit_participation( $id, $action, $type, $user, $walkin );
+      if ( $type != 'C' ) 
+	$modified = edit_participation( $id, $action, $type, $user, $walkin );
+      else {
+	$sql = "SELECT cal_notes FROM webcal_meal_participant " .
+	  "WHERE cal_id = $id AND cal_login = '$placeholder' AND cal_type = 'C'";
+	if ( $res = dbi_query( $sql ) ) {
+	  if ( $row = dbi_fetch_row( $res ) ) 
+	    $job = $row[0];
+	  dbi_free_result( $res );
+	}
+	$modified = edit_crew_participation( $id, $action, $user, $job );
+      }
       if ( $modified == true )
 	auto_financial_event ( $id, $action, $type, $user );
     }
