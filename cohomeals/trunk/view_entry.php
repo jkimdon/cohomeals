@@ -805,7 +805,6 @@ function display_crew( $type, $rowcolor ) {
   $sql = "SELECT cal_login, cal_notes FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_type = 'C'";
   $res = dbi_query ( $sql );
-  $im_working = false;
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       $person = $row[0];
