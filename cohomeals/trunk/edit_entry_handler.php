@@ -342,6 +342,10 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       echo "Error = $error<br>";
     }
 
+
+    $sqla = "DELETE FROM webcal_meal_participant " .
+      "WHERE cal_id = $id AND cal_login LIKE 'none%'";
+    dbi_query( $sqla );
     for ( $i=1; $i<$max_jobs; $i++ ) {
       if ( $job[$i] != "" ) {
 	$none = "none" . $i;
