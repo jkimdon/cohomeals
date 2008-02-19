@@ -2357,7 +2357,7 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
 }
 
 
-function edit_crew_participation( $id, $action, $user, $job ) {
+function edit_crew_participation( $id, $action, $user, $job, $olduser = "" ) {
   global $login, $is_meal_coordinator;
 
   if ( ($user == "") )
@@ -2405,6 +2405,8 @@ function edit_crew_participation( $id, $action, $user, $job ) {
     $sql = "UPDATE webcal_meal_participant " .
       "SET cal_login = '$user' " .
       "WHERE cal_id = $id AND cal_notes = '$job'";
+    if ( $olduser != "" ) 
+      $sql .= " AND cal_login = '$olduser'";
     if ( dbi_query( $sql ) ) $modified = true;
   }
 

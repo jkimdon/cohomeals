@@ -11,7 +11,11 @@ $limited = false;
 $number = 1;
 if ( $type == "C" ) {
   $limited = true;
-  $number = 1;
+  $sql = "SELECT COUNT(*) FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_type = 'C'";
+  $res = dbi_query( $sql );
+  $row = dbi_fetch_row( $res );
+  $number = $row[0];
 } else if ( $type == 'H' ) {
   $limited = true;
   $number = 1;
@@ -34,7 +38,8 @@ if ( $type == "C" ) {
 $ct = 0;
 if ( $limited == true ) {
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_type = '$type' AND cal_id = $id";
+    "WHERE cal_type = '$type' AND cal_id = $id " .
+    "AND cal_login NOT LIKE 'none%'";
   if ( $res = dbi_query( $sql ) ) {
     while ( dbi_fetch_row( $res ) ) 
       $ct++;;
@@ -70,7 +75,7 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
 	    $job = $row[0];
 	  dbi_free_result( $res );
 	}
-	$modified = edit_crew_participation( $id, $action, $user, $job );
+	$modified = edit_crew_participation( $id, $action, $user, $job, $placeholder );
       }
       if ( $modified == true )
 	auto_financial_event ( $id, $action, $type, $user );
