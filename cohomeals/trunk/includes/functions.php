@@ -1505,7 +1505,7 @@ function print_date_entries ( $date ) {
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     $viewid = $ev[$i]['cal_id'];
 
-    if ( is_cancelled( $viewid ) == true ) break;
+    if ( is_cancelled( $viewid ) == true ) continue;
 
     $viewname = $ev[$i]['cal_suit'];
 
