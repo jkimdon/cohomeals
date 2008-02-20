@@ -1487,7 +1487,7 @@ function print_date_entries ( $date ) {
   $ct = 0;
   $sql = "SELECT cal_date, cal_signup_deadline " .
     "FROM webcal_meal " .
-    "WHERE cal_date >= $date";
+    "WHERE cal_cancelled = 0 AND cal_date >= $date";
   if ( $res = dbi_query( $sql ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $event_date = $row[0];
