@@ -250,12 +250,12 @@ if ( $max_diners > 0 ) {
 	else if ( $age == "F" ) $onsite_free++;
 	else $onsite_adults++; // $age == "A"
 	echo $name['cal_fullname'];
-	if ( is_signer( $person ) || ($person == $login) ) {
+	if ( is_signer( $username ) || ($username == $login) ) {
 	  if ( $can_signup == true ) {
-	    remove_button( $person, $id, "M" );
+	    remove_button( $username, $id, "M" );
 	  }
 	  echo "&nbsp;&nbsp;&nbsp;";
-	  change_button( $person, $id, "M" );
+	  change_button( $username, $id, "M" );
 	}
 	echo "<br />\n";
       }
@@ -264,6 +264,7 @@ if ( $max_diners > 0 ) {
       
 
     // show guests
+    echo "<b>Guests</b><br>";
     $sql = "SELECT cal_fullname, cal_host, cal_fee " .
        "FROM webcal_meal_guest " .
        "WHERE cal_meal_id = $id " . 
