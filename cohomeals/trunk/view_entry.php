@@ -215,29 +215,6 @@ if ( $max_diners > 0 ) {
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;height:20px;">On-site diners:</td>
   <td>
   <?php
-    $sql = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = $id AND cal_type = 'M'";
-    $res = dbi_query ( $sql );
-    $onsite_adults = 0;
-    $onsite_children = 0;
-    $onsite_free = 0;
-    $first = 1;
-    $num_app = 0;
-    if ( $res ) {
-      while ( $row = dbi_fetch_row ( $res ) ) {
-        $pname = $row[0];
-	$approved[$num_app++] = $pname;
-	user_load_variables( $pname, "temp" );
-	$age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
-	if ( $age == "K" ) $onsite_children++;
-	else if ( $age == "F" ) $onsite_free++;
-	else $onsite_adults++; // $age == "A"
-      }
-      dbi_free_result ( $res );
-    } else {
-      echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
-    }
-
     if ( $can_signup == true ) {
       if ( $already_eating == false ) 
 	add_me_button( "M" );
@@ -246,23 +223,45 @@ if ( $max_diners > 0 ) {
       signup_guest_button( "M", $id );
       echo "<br>";
     } 
-
     echo "<br>";
-    for ( $i = 0; $i < $num_app; $i++ ) {
-      user_load_variables ( $approved[$i], "temp" );
-      if ( strlen ( $tempemail ) ) 
-	$allmails[] = $tempemail;
-      echo $tempfirstname . " " . $templastname;
-      $person = $approved[$i];
-      if ( is_signer( $person ) || ($person == $login) ) {
-	if ( $can_signup == true ) {
-	  remove_button( $person, $id, "M" );
-	}
-	echo "&nbsp;&nbsp;&nbsp;";
-	change_button( $person, $id, "M" );
+
+
+    $onsite_adults = 0;
+    $onsite_children = 0;
+    $onsite_free = 0;
+
+    $names = user_get_users();
+    $prev_building = 0;
+    foreach ( $names as $name ) {
+      $username = $name['cal_login'];
+      $building = $name['cal_building'];
+      if ( $building != $prev_building ) {
+	if ( ($building <= 9) && ($building > 0) ) 
+	  echo "<b>Building " . $building . "</b><br>";
+	else 
+	  echo "<b>Additional meal plan participants</b><br>";
+	$prev_building = $building;
       }
-      echo "<br />\n";
+
+      // check dining status
+      if ( is_dining( $id, $username ) == "M" ) {
+	$age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
+	if ( $age == "K" ) $onsite_children++;
+	else if ( $age == "F" ) $onsite_free++;
+	else $onsite_adults++; // $age == "A"
+	echo $name['cal_fullname'];
+	if ( is_signer( $person ) || ($person == $login) ) {
+	  if ( $can_signup == true ) {
+	    remove_button( $person, $id, "M" );
+	  }
+	  echo "&nbsp;&nbsp;&nbsp;";
+	  change_button( $person, $id, "M" );
+	}
+	echo "<br />\n";
+      }
+
     }
+      
 
     // show guests
     $sql = "SELECT cal_fullname, cal_host, cal_fee " .
