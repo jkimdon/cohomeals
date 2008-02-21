@@ -514,22 +514,9 @@ function get_refund_percentage( $id, $past_deadline=false ) {
     }
   }
 
-  if ( ($past_deadline == true) && ($suit != 'heart') ) {
+  if ( $past_deadline == true ) {
     $refund = 0;
-  } else {
-
-    if ( $suit == 'heart' ) {
-      $two_weeks_before = get_day( $event_date, -14 );
-      $two_days_before = get_day( $event_date, -2 );
-      if ( $today > $two_weeks_before ) {
-	if ( $today > $two_days_before ) 
-	  $refund = 0;
-	else
-	  $refund = 50;
-      }
-    }
-  }
-
+  } 
 
   return $refund;
 }
