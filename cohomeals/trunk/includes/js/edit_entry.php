@@ -105,9 +105,9 @@ function suittype_handler() {
   }
 
   if ( val == "heart" ) {
-    makeVisible ( "signup_deadline" );
-  } else {
     makeInvisible ( "signup_deadline" );
+  } else {
+    makeVisible ( "signup_deadline" );
   }
 
   if ( val == "diamond" ) {

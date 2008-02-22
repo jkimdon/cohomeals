@@ -74,6 +74,7 @@ if ( $can_edit == false ) {
 $current_date = sprintf ( "%04d%02d%02d", $year, $month, $day );
 $first_date = $current_date;
 $weekday = date ( "w", mktime ( 3, 0, 0, $month, $day, $year ) );
+$timestamp = mktime ( 3, 0, 0, $month, $day, $year );
 
 // get situated on the correct starting date
 if ( ($repeats == "true") && $repday[$weekday] != 1 ) {
@@ -92,6 +93,9 @@ if ( ($repeats == "true") && $repday[$weekday] != 1 ) {
     }
   }
 }
+
+if ( ($suit == "heart") && ($newevent == true) )
+  $deadline = 2 + date ( "w", $timestamp );
 
 if ( $uses_endday == 0 ) 
   $end_date = $current_date;
@@ -152,6 +156,10 @@ while ( $current_date <= $end_date ) {
       break;
     }
   }
+
+  if ( ($suit == "heart") && ($newevent == true) )
+    $deadline = 2 + date ( "w", $timestamp );
+
 }
 
 
