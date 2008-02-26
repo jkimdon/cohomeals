@@ -365,7 +365,7 @@ function SumTotals( $counts, $id ) {
  $this->Cell( $label_width, $height, "Income", "LTR", 0, 'L' );
  $this->Cell( $number_width, $height, "", "LTR", 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "(w/o walkins): ", "LBR", 0, 'R' );
+ $this->Cell( $label_width, $height, "(at time of printing):", "LBR", 0, 'R' );
  $this->Cell( $number_width, $height, price_to_str( get_money_for_meal( $id ) ), 
 	      "LBR", 1, 'C' );
 
