@@ -653,7 +653,8 @@ function add_me_button( $type, $job="" ) {
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_notes = '$job'";
+      "WHERE cal_id = $id AND cal_notes = '$job' " .
+      "AND cal_login LIKE 'none%'";
     if ( $res = dbi_query( $sql ) ) {
       if ( $row = dbi_fetch_row( $res ) ) 
 	$olduser = $row[0];
@@ -689,7 +690,8 @@ function signup_buddy_button( $type, $id, $job="" ) {
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_notes = '$job'";
+      "WHERE cal_id = $id AND cal_notes = '$job' " .
+      "AND cal_login LIKE 'none%'";
     if ( $res = dbi_query( $sql ) ) {
       if ( $row = dbi_fetch_row( $res ) ) 
 	$olduser = $row[0];
