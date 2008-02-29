@@ -21,7 +21,7 @@ if ( is_signer( $user ) == true ) {
     $res = dbi_query( $sql );
     $row = dbi_fetch_row( $res );
     $job = $row[0];
-    $modified = edit_crew_participation ( $id, $action, $user, $job );
+    $modified = edit_crew_participation ( $id, $action, $user, $job, $olduser );
   }
 
   if ( $modified == true ) 
