@@ -2404,7 +2404,9 @@ function edit_crew_participation( $id, $action, $user, $job, $olduser = "" ) {
   } else if ( $action == 'A' ) {
     $sql = "UPDATE webcal_meal_participant " .
       "SET cal_login = '$user' " .
-      "WHERE cal_id = $id AND cal_notes = '$job'";
+      "WHERE cal_id = $id AND cal_type = 'C'";
+    if ( $job != "" ) 
+      $sql .= " AND cal_notes = '$job'";
     if ( $olduser != "" ) 
       $sql .= " AND cal_login = '$olduser'";
     if ( dbi_query( $sql ) ) $modified = true;

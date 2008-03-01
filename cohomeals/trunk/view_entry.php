@@ -653,8 +653,11 @@ function add_me_button( $type, $job="" ) {
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_notes = '$job' " .
+      "WHERE cal_id = $id AND cal_type = 'C' " .
       "AND cal_login LIKE 'none%'";
+    if ( $job != "" ) 
+      $sql .= " AND cal_notes = '$job'";
+    
     if ( $res = dbi_query( $sql ) ) {
       if ( $row = dbi_fetch_row( $res ) ) 
 	$olduser = $row[0];
@@ -690,8 +693,11 @@ function signup_buddy_button( $type, $id, $job="" ) {
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_notes = '$job' " .
+      "WHERE cal_id = $id AND cal_type = 'C' " .
       "AND cal_login LIKE 'none%'";
+    if ( $job != "" ) 
+      $sql .= " AND cal_notes = '$job'";
+
     if ( $res = dbi_query( $sql ) ) {
       if ( $row = dbi_fetch_row( $res ) ) 
 	$olduser = $row[0];
@@ -812,14 +818,15 @@ function display_crew( $type, $rowcolor ) {
       $person = $row[0];
       $description = $row[1];
       $description = trim( $description );
+      $job = $description;
       if ( $description == "" ) $description = "???";
 
       echo "<tr><td>$description</td>";
 
       if ( ereg( "^none", $person ) ) {
 	echo "<td> none yet "; 
-	if ( $im_working == false ) add_me_button( 'C', $description, $job );
-	signup_buddy_button( 'C', $id, $description, $job );
+	if ( $im_working == false ) add_me_button( 'C', $job );
+	signup_buddy_button( 'C', $id, $job );
       } else {
 	user_load_variables ( $person, "temp" );
 	echo "<td> " . $GLOBALS[tempfirstname] . 
