@@ -11,17 +11,15 @@ if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
 //// load meal date/time/price
 $event_date = 0;
 $event_time = 0;
-$menu = "";
 $price = 0;
-$sql = "SELECT cal_date, cal_time, cal_menu, cal_base_price " .
+$sql = "SELECT cal_date, cal_time, cal_base_price " .
  "FROM webcal_meal " .
  "WHERE cal_id = $id";
 if ( $res = dbi_query( $sql ) ) {
   if ( $row = dbi_fetch_row( $res ) ) {
     $event_date = $row[0];
     $event_time = $row[1];
-    $menu = $row[2];
-    $price = $row[3];
+    $price = $row[2];
   }
   dbi_free_result( $res );
 } else {
@@ -117,7 +115,7 @@ function MyHeader( $date, $time ) {
   $this->Cell( 50,10, $text, 0,1, 'C' );
 }
 
-function MealInfo( $head_chef, $crew, $menu, $price ) {
+function MealInfo( $head_chef, $crew, $price ) {
   $text = "Lead: " . $head_chef;
   $this->Cell( 40,5, $text, 0,0, 'L' );
   $this->Ln( 4 );
@@ -131,9 +129,6 @@ function MealInfo( $head_chef, $crew, $menu, $price ) {
   $text = "Base price: " . price_to_str( $price );
   $this->Cell( 40, 5, $text, 0,0, 'L' );
   $this->Ln(4);
-
-  $text = "Menu: " . $menu;
-  $this->MultiCell( 180,5, $text );
 
   $this->Ln(4);
 }
@@ -422,7 +417,7 @@ $pdf->AddPage();
 $pdf->MyHeader( $event_date, $event_time );
 
 $pdf->SetFont('Times','',10);
-$pdf->MealInfo( $head_chef, $crew, $menu, $price );
+$pdf->MealInfo( $head_chef, $crew, $price );
 $pdf->PrintLegend();
 
 $names = user_get_users();
