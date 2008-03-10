@@ -100,7 +100,7 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
       if ( $prevdate != $thisdate ) {
 	sort( $day_log );
 	foreach ( $day_log as $dkey => $dvalue )
-	  $ordered_logs[$newcount++] = $selected_logs[$dkey];
+	  $ordered_logs[$newcount++] = $selected_logs[$dvalue];
 	$ct = 0;
 	$day_log = array();
       }
@@ -109,8 +109,7 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
     }
     sort( $day_log );
     foreach ( $day_log as $dkey => $dvalue )
-      $ordered_logs[$newcount++] = $selected_logs[$dkey];
-
+      $ordered_logs[$newcount++] = $selected_logs[$dvalue];
     dbi_free_result( $res );
   }
 
