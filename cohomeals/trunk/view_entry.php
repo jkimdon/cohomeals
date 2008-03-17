@@ -520,6 +520,7 @@ switch ( $walkins ) {
 </tr><tr class="d0">
   <td>Reimbursement form:</td>
   <td><a class="addbutton" href="refs/Reimbursement.pdf">pdf</a></td>
+  <td><a class="addbutton" href="refs/Reimbursement.xls">excel</a></td>
   <td><a class="addbutton" href="refs/Reimbursement.doc">doc</a></td>
   <td></td>
 </tr><tr>
