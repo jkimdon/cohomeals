@@ -8,13 +8,15 @@ $action = getGetValue( 'action' );
 $type = getGetValue( 'type' );
 $user = getGetValue( 'user' );
 $olduser = getGetValue( 'olduser' );
+$added_dining = false;
 if ( !isset( $user ) ) $user = $login;
 
 if ( is_signer( $user ) == true ) {
 
-  if ( $type != 'C' ) 
+  if ( $type != 'C' ) {
     $modified = edit_participation ( $id, $action, 
 				     $type, $user );
+  }
   else {
     $sql = "SELECT cal_notes FROM webcal_meal_participant " .
       "WHERE cal_id = $id AND cal_login = '$olduser' AND cal_type = 'C'";
@@ -24,8 +26,10 @@ if ( is_signer( $user ) == true ) {
     $modified = edit_crew_participation ( $id, $action, $user, $job, $olduser );
   }
 
-  if ( $modified == true ) 
-    auto_financial_event ( $id, $action, $type, $user );
+  if ( ($type == 'H') && ($action == 'A') ) {
+    $added_dining = edit_participation ( $id, 'A', 'M', $user, 0 );
+  }
+
 
 } else {
   $error = "Not authorized";

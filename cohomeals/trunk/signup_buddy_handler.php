@@ -65,8 +65,9 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
     } else if ( ($limited == false) || ($ct <= $number) ) {
       $walkin = 0;
       if ( $user_status == "walkin" ) $walkin = 1;
-      if ( $type != 'C' ) 
-	$modified = edit_participation( $id, $action, $type, $user, $walkin );
+      if ( $type != 'C' ) {
+	edit_participation( $id, $action, $type, $user, $walkin );
+      }
       else {
 	$sql = "SELECT cal_notes FROM webcal_meal_participant " .
 	  "WHERE cal_id = $id AND cal_login = '$placeholder' AND cal_type = 'C'";
@@ -75,10 +76,13 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
 	    $job = $row[0];
 	  dbi_free_result( $res );
 	}
-	$modified = edit_crew_participation( $id, $action, $user, $job, $placeholder );
+	edit_crew_participation( $id, $action, $user, $job, $placeholder );
       }
-      if ( $modified == true )
-	auto_financial_event ( $id, $action, $type, $user );
+
+      if ( ($type == 'H') && ($action == 'A') ) {
+	edit_participation ( $id, 'A', 'M', $user, 0 );
+      }
+
     }
   }
 }

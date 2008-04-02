@@ -2271,7 +2271,7 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
        ($action != 'C') )
     return false;
   if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && 
-       ($type != 'W') && ($type != 'H') )
+       ($type != 'H') )
     return false;
 
   
@@ -2291,20 +2291,38 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
   $sql = "SELECT cal_type FROM webcal_meal_participant " .
     "WHERE (cal_id = $id) AND (cal_login = '$user') AND (cal_type = '$type')";
   $res = dbi_query ( $sql );
-  if ( !$res ) {
+  $exists = false;
+  $other_dining_option_found = false;
+  if ( $res ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $found_type = $row[0];
+
+      if ( $found_type == $type ) $exists = true;
+      if ( ( ($found_type == 'M') && ($type == 'T') ) ||
+	   ( ($found_type == 'T') && ($type == 'M') ) ) $other_dining_option_found = true;
+    }
+  }
+      
+    
+
+  if ( $exists == false ) {
     if ( $action == 'D' )
       $can_change = false; // already not participating so no need to delete
-    else if ( $action == 'A' ) 
-      $can_change = true; // can add since there was no previous participation
+    else if ( $action == 'A' ) {
+      if ( $other_dining_option_found == false )
+	$can_change = true; // can add since there was no previous participation
+    }
     else  // action == C
       $can_change = false; // not participating so can't change away from it
-  } else {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      if ( $action == 'D' )
+  } else { // exists
+    if ( $action == 'D' ) {
+      if ( $other_dining_option_found == false ) 
 	$can_change = true; // is there so is ok to delete
-      else if ( $action == 'A' ) 
-	$can_change = false; // already there
-      else // action == C
+    }
+    else if ( $action == 'A' ) 
+      $can_change = false; // already there
+    else { // action == C
+      if ( $other_dining_option_found == false )
 	$can_change = true;
     }
   }
@@ -2320,27 +2338,23 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
 	"VALUES ( $id, '$user', '$type', $walkin )";
       if ( ! dbi_query ( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
-      
-      // dining in and taking out are mutually exclusive
-      if ( ($type == 'M') || ($type == 'T') ) {
-	if ( $type == 'M' )
-	  $delete_type = 'T';
-	else
-	  $delete_type = 'M';
-	$sql = "DELETE FROM webcal_meal_participant " .
-	  "WHERE cal_id = $id AND cal_login = '$user' " .
-	  "AND cal_type = '$delete_type'";
-	if ( !dbi_query( $sql ) ) 
-	  $error = translate("Database error") . ": " . dbi_error ();
+      else if ( ($type == 'M') || ($type == 'T') ) {
+	auto_financial_event( $id, 'A', $type, $user, $walkin );
       }
-      
+
+      if ( $type == 'H' ) edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
     }
+
     else if ( $action == 'D') { // delete
       $sql = "DELETE FROM webcal_meal_participant " .
 	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
       if ( !dbi_query( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
+      else if ( ($type == 'M') || ($type == 'T') ) {
+	auto_financial_event( $id, 'D', $type, $user );
+      }
     }
+
     else { // change between take-home and dine-in
       if ( $type == 'M' ) $new_type = 'T';
       else $new_type = 'M';
@@ -2409,7 +2423,10 @@ function edit_crew_participation( $id, $action, $user, $job, $olduser = "" ) {
       $sql .= " AND cal_notes = '$job'";
     if ( $olduser != "" ) 
       $sql .= " AND cal_login = '$olduser'";
-    if ( dbi_query( $sql ) ) $modified = true;
+    if ( dbi_query( $sql ) ) {
+      $modified = true;
+      edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
+    }
   }
 
   return $modified;
@@ -2895,7 +2912,6 @@ function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
 	$mod = edit_participation ( $id, 'A', 'M', $user );
 	if ( $mod == true ) {
 	  $count++;
-	  auto_financial_event( $id, 'A', 'M', $user );
 	} else {
 	  give_heart_discount( $id, $user );
 	}
@@ -2905,12 +2921,10 @@ function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
 	$mod = edit_participation ( $id, 'D', 'M', $user );
 	if ( $mod == true ) {
 	  $count--;
-	  auto_financial_event( $id, 'D', 'M', $user );
 	}
 	$mod = edit_participation ( $id, 'D', 'T', $user );
 	if ( $mod == true ) {
 	  $count--;
-	  auto_financial_event( $id, 'D', 'T', $user );
 	}
       }
     }

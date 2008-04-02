@@ -107,7 +107,6 @@ CREATE TABLE webcal_meal_participant (
      'M' = in-house muncher
      'T' = take-home plate
      'C' = crew
-     'W' = crew waiting list
   */
   cal_type CHAR(1) NOT NULL,
   /* notes, e.g. about availability or crew type preference */

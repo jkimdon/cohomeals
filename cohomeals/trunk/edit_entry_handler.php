@@ -132,9 +132,7 @@ while ( $current_date <= $end_date ) {
   $active_timestamp = mktime( 3,0,0, $month, $day, $year );
 
   if ( ($suit == "heart") && ($newevent == true) ) {
-    $added = add_subscribed_diners( $newid, $active_timestamp, $count );
-    if ( $added == true ) 
-      add_financial_log_for_subscribers( $active_timestamp );
+    add_subscribed_diners( $newid, $active_timestamp, $count );
   }
 
 

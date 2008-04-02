@@ -34,18 +34,15 @@ if ( is_signer( $user ) ) {
       $mod = edit_participation ( $id, 'A', 'M', $user );
       if ( $mod == true ) {
 	$count++;
-	auto_financial_event( $id, 'A', 'M', $user );
       }
     } else {
       $mod = edit_participation ( $id, 'D', 'M', $user );
       if ( $mod == true ) {
 	$count--;
-	auto_financial_event( $id, 'D', 'M', $user );
       }
       $mod = edit_participation ( $id, 'D', 'T', $user );
       if ( $mod == true ) {
 	$count--;
-	auto_financial_event( $id, 'D', 'T', $user );
       }
     }
     
