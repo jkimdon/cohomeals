@@ -16,7 +16,7 @@ print_header ( $INC, '', $BodyX );
 <?php
 $row_num = 1;
 
-
+$club_id = 0;
 $sql = "SELECT cal_id, cal_club_id, cal_date, cal_time, cal_notes " .
        "FROM webcal_meal " .
        "WHERE cal_suit = 'club' " .
@@ -55,7 +55,10 @@ if ( $res ) {
   }
   dbi_free_result ( $res );
 
-  print_one_club ( $club_id, $time, $notes, $weekdays, $dates, $row_num );
+  if ( $club_id != 0 )
+    print_one_club ( $club_id, $time, $notes, $weekdays, $dates, $row_num );
+  else 
+    echo "There are no clubs available.<br>";
   
 }
 else {
