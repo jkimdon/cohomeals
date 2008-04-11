@@ -103,7 +103,7 @@ else echo "</p>";
   <td>Prices:</td>
   <td class="number">adult</td>
   <td class="number">child</td>
-  <td class="number">walkin/guest</td>
+  <td class="number">walkin</td>
 </tr>
 <tr>
   <td>Signing up now costs:</td>
@@ -116,13 +116,6 @@ else echo "</p>";
   <td class="number">
     <?php echo price_to_str( get_adjusted_price( $id, "A", false, true ));?>
   </td>
-</tr>
-<tr>
-  <td>Cancelling now refunds:</td>
-  <?php $refund = get_refund_percentage( $id, $past_deadline ); ?>
-  <td class="number"><?php echo $refund;?>%</td>
-  <td class="number"><?php echo $refund;?>%</td>
-  <td class="number"><?php echo $refund;?>%</td>
 </tr>
 </table>
 </p>

@@ -343,7 +343,7 @@ function get_fee_category( $birthdate, $event_date ) {
 
 
 function get_adjusted_price( $id, $fee_class, 
-			     $subscriber=false, $guest=false,
+			     $subscriber=false, $known_walkin=false,
 			     $user="") {
 
   /// get meal details. establish base price, past_deadline
@@ -372,8 +372,8 @@ function get_adjusted_price( $id, $fee_class,
     if ( is_walkin( $id, $user ) == 1 ) $category = "walkin";
   } else {
     if ( $past_deadline == true ) $category = "walkin";
+    else if ( $known_walkin == true ) $category = "walkin";
   }
-  if ( $guest == true ) $category = "walkin";
 
 
   /// calculate cost based on above information
@@ -499,19 +499,6 @@ function get_guest_refund_price( $id, $host, $guest_name ) {
 function get_refund_percentage( $id, $past_deadline=false ) {
 
   $refund = 100;
-
-  $suit = 'wild';
-  $today = date( "Ymd" );
-  $event_date = $today;
-  $sql = "SELECT cal_suit, cal_date " .
-    "FROM webcal_meal " .
-    "WHERE cal_id = $id";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $suit = $row[0];
-      $event_date = $row[1];
-    }
-  }
 
   if ( $past_deadline == true ) {
     $refund = 0;
