@@ -138,7 +138,6 @@ function PrintLabels( $horiz_offset ) {
   $this->Cell( 8,$height, "Unit", 1, 0, 'C', 1 );
   $this->Cell( 37,$height, "Name", 1, 0, 'C', 1 );
   $this->Cell( 5,$height, "P", 1, 0, 'C', 1 );
-  $this->Cell( 10,$height, "L", 1, 0, 'C', 1 );
   $this->Ln();
 }
 
@@ -187,9 +186,6 @@ function PrintLegend() {
   $this->Cell( $remaining_width, $height, "(F = free <4 yrs)", "RTB",1,'L');
 
 
-  $this->Cell( $horiz_offset );
-  $this->Cell( $total_width, $height, "L = Leftovers (write $ amount)", 1,1,'L');
-
   $this->SetX( $saveX );
   $this->SetY( $saveY );
 
@@ -198,7 +194,7 @@ function PrintLegend() {
 function Building( $label, $horiz_offset ) {
   $this->SetFillColor( 230,230,230 );
   $this->Cell( $horiz_offset );
-  $this->Cell( 70,4, $label, 1, 1, 'C', 1 );
+  $this->Cell( 60,4, $label, 1, 1, 'C', 1 );
 }
 
 
@@ -249,7 +245,6 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     $this->Cell( 8,$height, $name['cal_unit'], 1, 0, 'C', $fill );
     $this->Cell( 37,$height, $name['cal_fullname'], 1, 0, 'L', $fill );
     $this->Cell( 5,$height, $age, 1, 0, 'C', $fill );
-    $this->Cell( 10,$height, "", 1, 0, 'C', $fill ); // leftovers
     $this->Ln();
     
     
@@ -290,7 +285,6 @@ function AddGuests( $guests, &$counts ) {
     $this->Cell( 8,$height, $host_unit, 1, 0, 'C' );
     $this->Cell( 37,$height, $fullname, 1, 0, 'L' );
     $this->Cell( 5,$height, $age, 1, 0, 'C' );
-    $this->Cell( 10,$height, "", 1, 0, 'C' ); // leftovers
     $this->Ln();
 
     if ( $age == "A" ) $counts['dining_adult']++;
@@ -303,7 +297,7 @@ function AddGuests( $guests, &$counts ) {
 
   // put in slots for walkin guests
   $this->Cell( $horiz_offset );
-  $this->Cell( 70, $height, "Enter host's unit number for additional guests", 
+  $this->Cell( 60, $height, "Enter host's unit number for guests", 
 	       'RL',1,'C');
   for ( $i=0; $i<5; $i++ ) {
     $this->Cell( $horiz_offset );
@@ -312,7 +306,6 @@ function AddGuests( $guests, &$counts ) {
     $this->Cell( 8,$height, "", 1, 0, 'C' );
     $this->Cell( 37,$height, "", 1, 0, 'L' );
     $this->Cell( 5,$height, "", 1, 0, 'C' );
-    $this->Cell( 10,$height, "", 1, 0, 'C' ); // leftovers
     $this->Ln();
   }
 
