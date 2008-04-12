@@ -88,15 +88,9 @@ $counts = array();
 $counts['dining_adult'] = 0;
 $counts['dining_kid'] = 0;
 $counts['dining_free'] = 0;
-$counts['sub_adult'] = 0;
-$counts['sub_kid'] = 0;
-$counts['sub_free'] = 0;
 $counts['walkin_adult'] = 0;
 $counts['walkin_kid'] = 0;
 $counts['walkin_free'] = 0;
-$counts['guest_adult'] = 0;
-$counts['guest_kid'] = 0;
-$counts['guest_free'] = 0;
 $counts['all'] = 0;
 $counts['takehome'] = 0;
 
@@ -172,9 +166,6 @@ function PrintLegend() {
   $this->Cell( $remaining_width, $height, "(X = regular)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(D = heart discount)", "RTB",1,'L');
-  $this->Cell( $horiz_offset );
-  $this->Cell( $space_width, $height, "", "LTB" );
   $this->Cell( $remaining_width, $height, "(G = guest)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
@@ -241,8 +232,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     
     // check dining status
     if ( $onsite = is_dining( $id, $username ) ) {
-      if ( is_subscriber( $id, $username ) )  $dining = "D";
-      else if ( is_walkin( $id, $username ) )  $dining = "W";
+      if ( is_walkin( $id, $username ) )  $dining = "W";
       else $dining = "X";
     }
     else 
@@ -268,11 +258,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     if ( $dining != "" ) {
       if ( $dining == "W" ) 
 	$label = "walkin";
-      else {
-	if ( $dining == "D" )
-	  $label = "sub";
-	else $label = "dining";
-      }
+      else $label = "dining";
       if ( $age == "A" ) 
 	$label .= "_adult";
       else if ( $age == "F" )
@@ -307,9 +293,9 @@ function AddGuests( $guests, &$counts ) {
     $this->Cell( 10,$height, "", 1, 0, 'C' ); // leftovers
     $this->Ln();
 
-    if ( $age == "A" ) $counts['guest_adult']++;
-    else if ( $age == "F" ) $counts['guest_free']++;
-    else $counts['guest_kid']++;
+    if ( $age == "A" ) $counts['dining_adult']++;
+    else if ( $age == "F" ) $counts['dining_free']++;
+    else $counts['dining_kid']++;
 
     $counts['all']++;
   }
@@ -340,7 +326,7 @@ function SumTotals( $counts, $id ) {
  $label_width = 30;
  $number_width = 12;
 
- $this->SetY( 200 );
+ $this->SetY( 225 );
 
  $this->SetFillColor( 200,200,200 );
  $this->Cell( $horiz_offset );
@@ -367,7 +353,7 @@ function SumTotals( $counts, $id ) {
 
  $this->SetFillColor( 230,230,230 );
  $this->Cell( $horiz_offset );
- $this->Cell( $full_width, $height, "Regular price", 1, 1, 'L', 1 );
+ $this->Cell( $full_width, $height, "Price classes:", 1, 1, 'L', 1 );
  $this->Cell( $horiz_offset );
  $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_adult'], 1, 1, 'C' );
@@ -377,31 +363,6 @@ function SumTotals( $counts, $id ) {
  $this->Cell( $horiz_offset );
  $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_free'], 1, 1, 'C' );
-
- $this->Cell( $horiz_offset );
- $this->Cell( $full_width, $height, "Heart discount", 1, 1, 'L', 1 );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['sub_adult'], 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['sub_kid'], 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['sub_free'], 1, 1, 'C' );
-
- $this->Cell( $horiz_offset );
- $this->Cell( $full_width, $height, "Guests", 1, 1, 'L', 1 );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['guest_adult'], 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['guest_kid'], 1, 1, 'C' );
- $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['guest_free'], 1, 1, 'C' );
-
 
 }
 

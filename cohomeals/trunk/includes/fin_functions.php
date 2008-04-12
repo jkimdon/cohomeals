@@ -246,12 +246,9 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 
     user_load_variables( $user, "temp" );
 
-    /// determine if subscriber
-    $subscriber = is_subscriber( $meal_id, $user );
-    
     if ( ($type == 'M') || ($type == 'T') ) {
       if ( $action == 'A' ) {
-	$amount = get_price( $meal_id, $user, $subscriber );
+	$amount = get_price( $meal_id, $user );
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " dining";
@@ -259,7 +256,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
 			     $description, $meal_id, "" );
       }
       else if ( $action == 'D' ) {
-	$amount = get_refund_price( $meal_id, $user, $subscriber );
+	$amount = get_refund_price( $meal_id, $user );
 	$billing = get_billing_group( $user );
 	$description = $GLOBALS[tempfullname] . 
 	  " cancelled meal attendance";
@@ -289,7 +286,7 @@ function give_heart_discount( $id, $user ) {
 }
 
 
-function get_price( $id, $user, $subscriber=false ) {
+function get_price( $id, $user ) {
 
   /// establish price category based on age
   $age = "A";
@@ -317,7 +314,7 @@ function get_price( $id, $user, $subscriber=false ) {
 
   $age = get_fee_category( $birthdate, $event_date );
 
-  $cost = get_adjusted_price ( $id, $age, $subscriber, false, $user );
+  $cost = get_adjusted_price ( $id, $age, false, $user );
   return $cost;
 }
 
@@ -342,8 +339,7 @@ function get_fee_category( $birthdate, $event_date ) {
 }
 
 
-function get_adjusted_price( $id, $fee_class, 
-			     $subscriber=false, $known_walkin=false,
+function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 			     $user="") {
 
   /// get meal details. establish base price, past_deadline
@@ -379,8 +375,6 @@ function get_adjusted_price( $id, $fee_class,
   /// calculate cost based on above information
   $cost = $base_price;
   if ( $category == "walkin" ) $cost += 100;
-  else if ( ($subscriber == true) && ($suit == "heart") ) 
-    $cost = $base_price * 0.875;
 
   if ( $fee_class == "F" ) $cost = 0;
   else if ( $fee_class == "K" ) $cost /= 2;
@@ -392,7 +386,7 @@ function get_adjusted_price( $id, $fee_class,
 
 
 
-function get_refund_price( $id, $user, $subscriber=false ) {
+function get_refund_price( $id, $user ) {
 
   $price = 0;
   $past_deadline = true;
