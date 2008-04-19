@@ -504,8 +504,8 @@ switch ( $walkins ) {
   <td></td>
 </tr><tr class="d0">
   <td>Meal summary sheet:</td>
-  <td><a class="addbutton" href="refs/MealSummarySheet.pdf">pdf</a></td>
-  <td><a class="addbutton" href="refs/MealSummarySheet.xls">excel</a></td>
+  <td><a class="addbutton" href="refs/MealSummarySheetnew.xls">excel</a></td>
+  <td><a class="addbutton" href="refs/MealSummarySheet.xls">excel (pre April 19)</a></td>
 </tr><tr class="d0">
   <td>Pantry prices/purchases:</td>
   <td><a class="addbutton" href="refs/PantryPriceList.pdf">pdf</a></td>
