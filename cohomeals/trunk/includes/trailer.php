@@ -53,9 +53,6 @@ if ( $login != '__public__' && $readonly == 'N' ) {
   $goto_link[] = "<a title=\"Financial history\" href=\"financeHistory.php\">Financial history</a>";
 }
 if ( $login != '__public__' && $readonly == 'N' ) {
-  $goto_link[] = "<a title=\"Work/eat history\" href=\"workeatHistory.php\">Work/eat history</a>";
-}
-if ( $login != '__public__' && $readonly == 'N' ) {
   $goto_link[] = "<a title=\"Recipes\" href=\"recipes.php\">Recipes</a>";
 }
 
