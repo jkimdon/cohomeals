@@ -114,7 +114,7 @@ else echo "</p>";
     <?php echo price_to_str( get_adjusted_price( $id, "K" ));?>
   </td>
   <td class="number">
-    <?php echo price_to_str( get_adjusted_price( $id, "A", false, true ));?>
+  <?php echo price_to_str( get_adjusted_price( $id, "A", true ));?>
   </td>
 </tr>
 </table>
