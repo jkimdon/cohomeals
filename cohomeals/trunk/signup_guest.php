@@ -37,9 +37,9 @@ if ( $is_meal_coordinator ) {
   echo "<select name=\"host\">\n";
   $user_list = user_get_users();
   for ( $i = 0; $i < count( $user_list ); $i++ ) {
-    echo "<option value=\"" . $user_list[$i]['cal_login'];
-    if ( $user_list[$i]['cal_login'] == $login ) echo " selected=\"selected\" ";
-    echo "\">" . $user_list[$i]['cal_fullname'] . 
+    echo "<option value=\"" . $user_list[$i]['cal_login'] . "\"";
+    if ( $user_list[$i]['cal_login'] == $login ) echo " selected=\"selected\"";
+    echo ">" . $user_list[$i]['cal_fullname'] . 
       "</option>\n";
   }
   echo "</select>\n";
