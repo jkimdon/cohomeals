@@ -8,13 +8,13 @@
 // reasons, you would need to change $includedir to point to the
 // webcalendar include directory.
 // We set these twice since config.php unsets these.
-$includedir = "../public_html/meals/includes"; // Set again after config.php
+$includedir = "../includes"; // Set again after config.php
 
 include "$includedir/config.php";
 
-$basedir = "../public_html/meals/"; // points to the base WebCalendar directory relative to
+$basedir = "../meals/"; // points to the base WebCalendar directory relative to
                  // current working directory
-$includedir = "../public_html/meals/includes";
+$includedir = "../includes";
 
 include "$includedir/php-dbi.php";
 include "$includedir/functions.php";
