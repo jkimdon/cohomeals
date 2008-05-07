@@ -109,7 +109,7 @@ for ( $d = $eat_cutoff_start ;  $d < $work_cutoff_end ; $d = $d + 24 * 3600 ) {
       }
       $info .= "Need " . $need . ".\n";
     }
-    $info = wordwrap(html_entity_decode($info), 75, "\n              ");
+    $info = wordwrap(html_entity_decode($info, ENT_QUOTES), 75, "\n              ");
     $body .= $info;
   }
 }
