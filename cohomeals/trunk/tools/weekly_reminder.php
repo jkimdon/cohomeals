@@ -114,9 +114,9 @@ for ( $d = $eat_cutoff_start ;  $d < $work_cutoff_end ; $d = $d + 24 * 3600 ) {
   }
 }
 
-$extra_hdrs = "From: David Kimdon <dkimdon@gmail.com>\r\n";
+$extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 
-mail( "cohochat@yahoogroups.com, David Demaree <ddemarya@yahoo.com>",
+mail( $GLOBALS['weekly_reminder_to'],
       "Weekly meal signup reminder", $body, $extra_hdrs );
 
 ?>
