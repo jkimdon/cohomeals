@@ -1096,10 +1096,13 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
       $suit = "empty";
       $meal_id = 0;
       $ev = get_entries ( $dateYmd );
-      if ( count ( $ev ) > 0 ) {
+      for ( $k = 0; $k < count ( $ev ) && $hasEvents == false ; $k++ ) {
+        $viewid = $ev[$k]['cal_id'];
+        if ( is_cancelled( $viewid ) == true )
+          continue;
 	$hasEvents = true;
-	$suit = $ev[0]['cal_suit'];
-	$meal_id = $ev[0]['cal_id'];
+	$suit = $ev[$k]['cal_suit'];
+	$meal_id = $ev[$k]['cal_id'];
       } 
       if ( $dateYmd >= date ("Ymd",$monthstart) &&
         $dateYmd <= date ("Ymd",$monthend) ) {
