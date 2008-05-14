@@ -83,7 +83,7 @@ if ( $id > 0 && empty ( $error ) ) {
     load_global_settings();
     $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 
-    echo "mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );";
+    mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );
   }
 }
 
