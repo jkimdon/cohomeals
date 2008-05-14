@@ -72,6 +72,19 @@ if ( $id > 0 && empty ( $error ) ) {
     "WHERE cal_id = $id";
   dbi_query ( $sql );
   
+  $sql = "SELECT cal_date, cal_time FROM webcal_meal WHERE cal_id = $id";
+  if ( ( $res = dbi_query( $sql ) ) &&
+       ( $row = dbi_fetch_row( $res ) ) ) {
+
+    $meal_time = date_to_str( $row[0] ) . ", " . display_time ( $row[1] );
+
+    $subject = "$meal_time meal canceled ($reason)";
+    $body = "The meal scheduled for $meal_time has been canceled ($reason)";
+    load_global_settings();
+    $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
+
+    echo "mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );";
+  }
 }
 
 
