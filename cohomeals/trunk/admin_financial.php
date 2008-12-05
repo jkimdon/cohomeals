@@ -2,7 +2,7 @@
 include_once 'includes/init.php';
 include_once 'includes/munge_date.php';
 
-$INC = array('js/visible.php');
+$INC = array('js/visible.php', 'js/functions.php' );
 print_header( $INC );
 ?>
 
@@ -10,6 +10,7 @@ print_header( $INC );
 var tabs = new Array();
 tabs[1] = "add";
 tabs[2] = "show";
+tabs[3] = "delinquent";
 
 <!-- <![CDATA[
 function selectMeal( mealid ) {
@@ -30,6 +31,9 @@ $bymeal = getValue( 'sortbymeal' );
 if ( $bymeal == 1 ) $sortbymeal = true;
 else $sortbymeal = false;
 
+$creditsonly = false;
+$creditsonly = getValue( 'creditsonly' );
+
 
 $mealid = 0;
 
@@ -47,6 +51,7 @@ if ( $can_view == true ) {
   <div id="tabs">
    <span class="tabfor" id="tab_show"><a href="#tabshow" onclick="return showTab('show')">Logs</a></span>
    <span class="tabbak" id="tab_add"><a href="#tabadd" onclick="return showTab('add')">Add entry</a></span>
+   <span class="tabbak" id="tab_delinquent"><a href="#tabdelinquent" onclick="return showTab('delinquent')">Delinquencies</a></span>
   </div>
 
 
@@ -81,14 +86,16 @@ if ( $can_view == true ) {
    <p></p>
    <table><tr>
    <td>View history from</td>
-   <td><?php print_date_selection( "start", $startdate );?></td>
+       <td><?php print_date_selection( "start", $startdate, "financial_chooseuser_form" );?></td>
    </tr><tr>
    <td align=right>to</td>
-   <td><?php print_date_selection( "end", $enddate );?></td>
+       <td><?php print_date_selection( "end", $enddate, "financial_chooseuser_form" );?></td>
    </tr><tr>
    <td><input type="radio" name="sortbymeal" value="0" <?php if ( $sortbymeal == false ) echo " checked=\"checked\"";?> />Sort by transaction date</td>
    </tr><tr>
    <td><input type="radio" name="sortbymeal" value="1" <?php if ( $sortbymeal == true ) echo " checked=\"checked\"";?> />Sort by meal date</td>
+   </tr></tr>
+   <td><input type="checkbox" name="creditsonly" <?php if ( $creditsonly == true ) echo " checked=\"checked\"";?> />Credits only</td>
    </tr></tr>
    <td></td><td align=center><input type="submit" value="Go" /></td>
    </tr></table>
@@ -98,7 +105,7 @@ if ( $can_view == true ) {
 
 
    <?php /// display selected
-   $logs = collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal );
+   $logs = collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal, $creditsonly );
    display_financial_log( $cur_group, $sortbymeal, $logs );
    ?>
    </div>
@@ -170,8 +177,58 @@ if ( $can_view == true ) {
 
 
 
+  <!-- LIST DELINQUENT ACCOUNTS -->
+  <a name="tabdelinquent"></a>
+  <div id="tabscontent_delinquent">
 
+  <h3>Accounts below zero</h3>
+  <table>
+    <tr class="n1"><td>Billing group</td><td>Balance</td></tr>
+  
+    <?php 
+      $groups = get_billing_groups();
+      for ( $i=0; $i<count( $groups ); $i++ ) {
+	$group_new = $groups[$i];
+	$balance_new = get_balance( $group_new );
+	if ( $balance_new < 0 ) {
+	  echo "<tr><td>$group_new</td><td>" . price_to_str( $balance_new ) . "</td></tr>";
+	}
+      }
+    ?>
+
+  </table>
+
+  <h3>Incomplete paperwork</h3>
+
+  <table>
+    <tr class="n1"><td>Meal</td><td>Head chef</td>
+
+    <?php
+    $today = date( "Ymd" );
+    $sql = "SELECT cal_id FROM webcal_meal WHERE cal_date >= 20080704 AND cal_date <= $today";
+    if ( $res = dbi_query( $sql ) ) {
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$meal_id = $row[0];
+	if ( (paperwork_done( $meal_id ) == false) && (is_cancelled( $meal_id ) == false) ) {
+	  $sql2 = "SELECT cal_login FROM webcal_meal_participant WHERE cal_id = $meal_id AND cal_type = 'H'";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $head_chef = $row2[0];
+	      user_load_variables( $head_chef, "temp" );
+	      $meal_url = "view_entry.php?id=$meal_id";
+	      echo "<tr><td><a href=$meal_url>$meal_id</a></td><td>" . $GLOBALS['tempfullname'] . "</td></tr>";
+	    }
+	  }
+	}
+      }
+    }
+    ?>
+    </table>
   </div>
+
+
+ </div>
+
 
 
 <?php

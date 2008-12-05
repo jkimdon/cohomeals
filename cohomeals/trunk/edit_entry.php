@@ -106,16 +106,16 @@ if ( $allow_html_description == "Y" ){
   if ( file_exists ( "includes/htmlarea/htmlarea.php" ) ) {
     $BodyX = 'onload="initEditor();"';
     $INC = array ( 'htmlarea/htmlarea.php', 'js/edit_entry.php',
-      'js/visible.php', 'htmlarea/core.php' );
+		   'js/visible.php', 'js/functions.php', 'htmlarea/core.php' );
   } else {
     // No htmlarea files found...
     $BodyX = 'onload=""';
-    $INC = array ( 'js/edit_entry.php', 'js/visible.php' );
+    $INC = array ( 'js/edit_entry.php', 'js/visible.php', 'js/functions.php' );
   }
 } else {
   $textareasize = 'rows="5" cols="40"';
   $BodyX = 'onload=""';
-  $INC = array('js/edit_entry.php','js/visible.php');
+  $INC = array('js/edit_entry.php','js/visible.php', 'js/functions.php' );
 }
 
 
@@ -136,6 +136,9 @@ print_header ( $INC, '', $BodyX );
 <form action="edit_entry_handler.php" method="post" name="editentryform">
 
 <input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
+     <?php if ( $is_meal_coordinator ) {
+     echo " OR <a class=\"addbutton\" href=\"add_standard_meals.php\">Add standard meals</a>";
+   } ?>
 <p />
 <!-- TABS BODY -->
 <?php if ( $useTabs ) { ?>
@@ -172,7 +175,7 @@ print_header ( $INC, '', $BodyX );
   </td></tr>
   <tr><td class="tooltip" title="date">Date:</td><td colspan="2">
    <?php
-    print_date_selection ( "", $cal_date );
+	print_date_selection ( "", $cal_date, "editentryform" );
    ?>
   </td></tr>
 
@@ -180,7 +183,7 @@ print_header ( $INC, '', $BodyX );
     $uses_endday = true; ?>
   <tr id="suitenddate">
     <td class="tooltip">Create meals until:</td>
-    <td><?php print_date_selection ( "end", $end_date ); ?>
+     <td><?php print_date_selection ( "end", $end_date, "editentryform" ); ?>
   </td></tr>
   <?php } ?>
 

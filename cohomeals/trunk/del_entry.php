@@ -23,7 +23,8 @@ $reason = mysql_safe( getValue( 'reason' ), true );
 if ( $reason == "" ) { ?>
   <form action="del_entry.php" method="get" name="deleteReasonForm">
     Reason for deleting the meal: 
-    <input type="text" name="reason" id="reason" size="25" value="" maxlength="80"/>
+    <input type="text" name="reason" id="reason" size="25" value="" maxlength="80"/><br>
+    <input type="checkbox" name="sendmail" value="unchecked"/> Send email notification<br>
     <?php echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />";?>
   </form>
   <form action="del_entry.php" method="post" name="deleteReasonForm">
@@ -83,7 +84,10 @@ if ( $id > 0 && empty ( $error ) ) {
     load_global_settings();
     $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 
-    mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );
+    $sendmail = false;
+    $sendmail = getValue( "sendmail" );
+    if ( $sendmail == true ) 
+      mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );
   }
 }
 

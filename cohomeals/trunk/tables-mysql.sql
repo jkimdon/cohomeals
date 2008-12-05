@@ -1,3 +1,4 @@
+
 /*
  * Description:
  * This file is used to create all tables used by WebCalendar and
@@ -88,6 +89,30 @@ CREATE TABLE webcal_meal (
   PRIMARY KEY ( cal_id )
 );
 
+/* 
+ * For regular meals each month
+ */
+CREATE TABLE webcal_standard_meals (
+  /* day of the week, starting with 0=Sunday */
+  cal_day_of_week INT NOT NULL,
+  /* which week in the month, e.g. first, fifth */
+  cal_which_week INT NOT NULL,
+  /* if this is only for one month (i.e. not regular), indicate which month */
+  cal_temp_change INT DEFAULT 0,
+  /* standard time */
+  cal_time INT NOT NULL,
+  /* meal suit: heart, spade, diamond, club, wild */
+  cal_suit VARCHAR(7) NOT NULL,
+  /* base price (child, walkin, guest prices based on this) */
+  cal_base_price DECIMAL(5,2) NOT NULL DEFAULT 400,
+  /* menu if regular */
+  cal_menu TEXT,
+  /* regular head chef or "none" */
+  cal_head_chef VARCHAR(25) NOT NULL,
+  /* regular crew slots: job, login, job, login, ... */
+  cal_regular_crew VARCHAR(1000),
+  PRIMARY KEY ( cal_day_of_week, cal_which_week, cal_time, cal_temp_change )
+);
 
 
 /*
@@ -107,6 +132,7 @@ CREATE TABLE webcal_meal_participant (
      'M' = in-house muncher
      'T' = take-home plate
      'C' = crew
+     'B' = blocked (block auto-signup for this meal only)
   */
   cal_type CHAR(1) NOT NULL,
   /* notes, e.g. about availability or crew type preference */
@@ -131,15 +157,15 @@ CREATE TABLE webcal_subscriptions (
   cal_suit VARCHAR(7) NOT NULL,
   /* identify which of the many club meals. Unused for heart meals. */
   cal_club_id INT NULL,
-  /* optional day of the week skipped for heart meals. 0 = Sun to 6 = Sat */
-  cal_off_day INT NULL,
+  /* day of the week subscribed for heart meals. 0 = Sun to 6 = Sat */
+  cal_day INT NULL,
   /* start of current block */
   cal_start INT NULL,
   /* end of current block */
   cal_end INT NULL,
   /* for heart meals: does the subscription automatically renew: 0=no 1=yes */
   cal_ongoing INT NULL,
-  PRIMARY KEY ( cal_login, cal_suit, cal_club_id, cal_end )
+  PRIMARY KEY ( cal_login, cal_suit, cal_club_id, cal_day, cal_ongoing )
 );
 
 
@@ -184,6 +210,8 @@ CREATE TABLE webcal_meal_guest (
 	'T' = take-home plate
   */
   cal_type CHAR(1) NOT NULL,
+  /* flag for walkin diner (higher price). 1 = walkin, 0 = pre-signup */
+  cal_walkin CHAR(1) DEFAULT 0,
   PRIMARY KEY ( cal_meal_id, cal_fullname )
 );
 
@@ -460,3 +488,77 @@ CREATE TABLE webcal_financial_log (
   PRIMARY KEY ( cal_log_id ) 
 );
 
+
+/* 
+ * log of food expenditures
+ *
+ */
+CREATE TABLE webcal_food_expenditures (
+  /* unique id of this log entry */
+  cal_log_id INT NOT NULL,
+  /* User login of who spent the money */
+  cal_purchaser VARCHAR(25) NOT NULL,
+  /* amount spent in cents */
+  cal_amount INT SIGNED NOT NULL,
+  /* meal id for food purchased for a specific meal. 0 if for general pantry */
+  cal_meal_id INT NULL,
+  /* timestamp of posting of event in this log */
+  cal_timestamp TIMESTAMP NOT NULL default CURRENT_TIMESTAMP,
+  /* where the money went to, e.g. co-op */
+  cal_source VARCHAR(80) NULL,
+  /* notes. including purpose of purchase if not directly for a meal (e.g. pantry, farmer's market) */
+  cal_notes VARCHAR(80) NULL,
+  PRIMARY KEY ( cal_log_id )
+);
+
+
+/*
+ * types and prices of food in the pantry
+ */
+CREATE TABLE webcal_pantry_food (
+  /* unique food id */
+  cal_food_id INT NOT NULL,
+  /* description of food */
+  cal_description VARCHAR(80) NOT NULL,
+  /* food category (for organizing the display) */
+  cal_category VARCHAR(80) NULL,
+  /* unit (e.g. cup, can) */
+  cal_unit VARCHAR(25) NOT NULL,
+  /* price per unit in cents (will be updated) */
+  cal_unit_price INT SIGNED NOT NULL,
+  /* timestamp of most recent update (most recent price change) */
+  cal_timestamp TIMESTAMP NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  /* flag if the item is currently available in the pantry for meals */
+  cal_available_meals INT NULL,
+  /* flag if the item is currently available for individual purchase */
+  cal_available_individuals INT NULL,
+  /* Special flags: currently O=organic, L=local, S=spray-free, D=grower direct */
+  cal_flags VARCHAR(4) NULL,
+  /* optional notes */
+  cal_notes VARCHAR(80) NULL,
+  PRIMARY KEY ( cal_food_id )
+);
+
+
+/*
+ * logs pantry purchases and uses. for data mining 
+ */
+CREATE TABLE webcal_pantry_purchases (
+  /* unique log id */
+  cal_log_id INT NOT NULL,
+  /* food id from pantry_food table */
+  cal_food_id INT NOT NULL,
+  /* number of units in this transaction */
+  cal_number_units DECIMAL(10,2) NOT NULL,
+  /* purchase price (cents) based on number of units and current price */
+  cal_total_price INT NOT NULL,
+  /* type of transaction: 0 = supply, 1 = used */
+  cal_type INT NOT NULL,
+  /* timestamp of log entry */
+  cal_timestamp	TIMESTAMP NOT NULL default CURRENT_TIMESTAMP,
+  /* purchase date if type = supply */
+  cal_purchase_date TIMESTAMP NULL,
+  /* meal id if type = used */
+  cal_meal_id INT NULL,
+  PRIMARY KEY ( cal_log_id )
+);

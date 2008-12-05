@@ -143,6 +143,7 @@ a:hover {
 #tabscontent_pete,
 #tabscontent_add,
 #tabscontent_show,
+#tabscontent_delinquent,
 #useriframe {
  display: none;
 }
@@ -594,6 +595,12 @@ tr.d1 td {
   background-color: #EEEEEE;
   padding: 3px;
   padding-right: 15px;
+}
+tr.n0 td {
+  background-color: #FFFFFF;
+}
+tr.n1 td {
+  background-color: #EEEEEE;
 }
 -->
 </style>

@@ -8,7 +8,7 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
 }
 
 
-function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) {
+function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal, $creditsonly=false ) {
 
   $selected_logs = array ();
   $ordered_logs = array ();
@@ -30,24 +30,28 @@ function collect_financial_log( $cur_group, $startdate, $enddate, $sortbymeal ) 
     if ( $cur_group == "all" ) 
       $sql .= ", cal_billing_group FROM webcal_financial_log " .
 	"WHERE cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
-	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
+	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime) ORDER BY cal_log_id";
     else
       $sql .= " FROM webcal_financial_log " . 
 	"WHERE cal_billing_group='$cur_group'" .
 	"AND cal_timestamp >= FROM_UNIXTIME($start_unixtime) " .
-	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime)";
+	"AND cal_timestamp <= FROM_UNIXTIME($end_unixtime) ORDER BY cal_log_id";
     if ( $res = dbi_query( $sql ) ) {
       while ( $row = dbi_fetch_row( $res ) ) {
-	$ordered_logs[$count]['log_id'] = $row[0];
-	$ordered_logs[$count]['description'] = $row[1];
-	$ordered_logs[$count]['time'] = $row[2];
-	$meal_id = $row[3];
-	$ordered_logs[$count]['meal_id'] = $meal_id;
-	$ordered_logs[$count]['amount'] = $row[4];
-	$ordered_logs[$count]['balance'] = $row[5];
-	$ordered_logs[$count]['text'] = $row[6];
-	if ( $cur_group == "all" ) $ordered_logs[$count]['billing_group'] = $row[7];
-	$count++;
+	$amount = $row[4];
+	if ( ($creditsonly == false) || ($amount > 0) ) {
+
+	  $ordered_logs[$count]['log_id'] = $row[0];
+	  $ordered_logs[$count]['description'] = $row[1];
+	  $ordered_logs[$count]['time'] = $row[2];
+	  $meal_id = $row[3];
+	  $ordered_logs[$count]['meal_id'] = $meal_id;
+	  $ordered_logs[$count]['amount'] = $amount;
+	  $ordered_logs[$count]['balance'] = $row[5];
+	  $ordered_logs[$count]['text'] = $row[6];
+	  if ( $cur_group == "all" ) $ordered_logs[$count]['billing_group'] = $row[7];
+	  $count++;
+	}
       }
     }
   } else { // sorting by meal
@@ -201,7 +205,7 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
   }
 
   if ( $last_balance != $balance ) {
-    $error = "mismatched balance: " . 
+    $error = "mismatched balance for billing group $billing: " . 
       "at time $last_time, balance = $last_balance; " .
       "balance sum = $balance<br>";
     echo $error;
@@ -224,16 +228,15 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
   $sql .= $id . ", ";
   $sql .= "'" . $user . "', ";
   $sql .= "'" . $billing . "', ";
-  $sql .= "'" . $description . "', ";
+  $sql .= "'" . mysql_safe($description,true) . "', ";
   $sql .= $meal_id . ", ";
   if ( ($type == 'charge') && ($amount > 0) ) $amount *= -1;
   else if ( ($type == 'credit') && ($amount < 0) ) $amount *= -1;
   $sql .= $amount . ", ";
   $balance += $amount;
   $sql .= $balance . ", ";
-  $sql .= "'" . $notes . "'";
+  $sql .= "'" . mysql_safe($notes,true) . "'";
   $sql .= " )";
-  
   if ( !dbi_query( $sql ) ) 
     $error = "Database error: " . dbi_error ();
 
@@ -242,7 +245,7 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
 
 function auto_financial_event( $meal_id, $action, $type, $user ) {
 
-  if ( is_signer( $user ) ) {
+  if ( (is_signer( $user )) || (is_chef( $meal_id, $login ) ) ) {
 
     user_load_variables( $user, "temp" );
 
@@ -250,7 +253,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
       if ( $action == 'A' ) {
 	$amount = get_price( $meal_id, $user );
 	$billing = get_billing_group( $user );
-	$description = $GLOBALS[tempfullname] . 
+	$description = mysql_safe( $GLOBALS[tempfullname], true ) . 
 	  " dining";
 	add_financial_event( $user, $billing, $amount, "charge",
 			     $description, $meal_id, "" );
@@ -258,7 +261,7 @@ function auto_financial_event( $meal_id, $action, $type, $user ) {
       else if ( $action == 'D' ) {
 	$amount = get_refund_price( $meal_id, $user );
 	$billing = get_billing_group( $user );
-	$description = $GLOBALS[tempfullname] . 
+	$description = mysql_safe( $GLOBALS[tempfullname], true ) . 
 	  " cancelled meal attendance";
 	add_financial_event( $user, $billing, $amount, "credit",
 			     $description, $meal_id, "" );
@@ -386,43 +389,38 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 
 
 
-function get_refund_price( $id, $user ) {
+function get_refund_price( $id, $user, $past_deadline="notset" ) {
 
   $price = 0;
-  $past_deadline = true;
   $today = date( "Ymd" );
 
-  $sql = "SELECT cal_date, cal_signup_deadline " .
-    "FROM webcal_meal " .
-    "WHERE cal_id = $id";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $event_date = $row[0];
-      $deadline = $row[1];
-      $deadline_date = get_day( $event_date, -1*$deadline );
-      if ( $deadline_date >= $today ) $past_deadline = false;
+  if ( $past_deadline == "notset" ) {
+    $past_deadline = true;
+    $sql = "SELECT cal_date, cal_signup_deadline " .
+      "FROM webcal_meal " .
+      "WHERE cal_id = $id";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$event_date = $row[0];
+	$deadline = $row[1];
+	$deadline_date = get_day( $event_date, -1*$deadline );
+	if ( $deadline_date >= $today ) $past_deadline = false;
+      }
+      dbi_free_result( $res );
     }
-    dbi_free_result( $res );
   }
-
 
   $percentage = get_refund_percentage( $id, $past_deadline );
   if ( $percentage != 0 ) {
 
-    $maxT = 0;
     $amount = 0;
-    $sql = "SELECT cal_amount, cal_timestamp " .
+    $sql = "SELECT cal_amount " .
       "FROM webcal_financial_log " .
       "WHERE cal_login = '$user' " . 
-      "AND cal_meal_id = $id " .
-      "AND cal_amount < 0";
+      "AND cal_meal_id = $id";
     if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$timestamp = $row[1];
-	if ( $timestamp > $maxT ) {
-	  $maxT = $timestamp;
-	  $amount = $row[0];
-	}
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$amount += $row[0];
       }
       dbi_free_result( $res );
     }
@@ -534,18 +532,14 @@ function price_to_str( $price ) {
 
 
 function get_billing_group( $user ) {
-  global $is_meal_coordinator, $is_beancounter;
 
   $ret = "";
-  if ( is_signer( $user ) ) {
-
-    $sql = "SELECT cal_billing_group " .
-      "FROM webcal_user " .
-      "WHERE cal_login = '$user'";
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$ret = $row[0];
-      }
+  $sql = "SELECT cal_billing_group " .
+    "FROM webcal_user " .
+    "WHERE cal_login = '$user'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $ret = $row[0];
     }
   }
   
@@ -573,6 +567,30 @@ function get_billing_groups() {
   return $ret;
 }
 
+
+function get_balance( $billing_group ) {
+  $balance = -1000000; // something absurd so errors are obvious
+
+  $last_log = 0;
+  $sql = "SELECT MAX(cal_log_id) FROM webcal_financial_log WHERE cal_billing_group = '$billing_group'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) 
+      $last_log = $row[0];
+  }
+  dbi_free_result( $res );
+
+  if ( $last_log == 0 ) $balance = 0;
+  else {
+    $sql = "SELECT cal_running_balance FROM webcal_financial_log " .
+      "WHERE cal_billing_group = '$billing_group' AND cal_log_id = $last_log";
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) 
+	$balance = $row[0];
+    }
+  }
+
+  return $balance;
+}
 
 
 ?>

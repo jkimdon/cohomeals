@@ -131,11 +131,6 @@ while ( $current_date <= $end_date ) {
 
   $active_timestamp = mktime( 3,0,0, $month, $day, $year );
 
-  if ( ($suit == "heart") && ($newevent == true) ) {
-    add_subscribed_diners( $newid, $active_timestamp, $count );
-  }
-
-
   if ( $repeats == false ) {
     break;
   } 
@@ -162,74 +157,6 @@ while ( $current_date <= $end_date ) {
 
 
 
-
-
-
-////////////////////////////////////////////
-function add_subscribed_diners( $id, $active_timestamp ) {
-
-  $active_date = date( "Ymd", $active_timestamp );
-
-  $added = false;
-
-  $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
-    "WHERE cal_suit = 'heart' " . 
-    "AND cal_start <= '$active_date' AND cal_end > '$active_date'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $w = $row[1];
-      $skipday = date ( "w", $active_timestamp );
-      if ( $w != $skipday ) {
-	$mod = edit_participation ( $id, 'A', 'M', $row[0] );
-	if ( $mod == true ) {
-	  $added = true;
-	}
-      }
-    }
-    dbi_free_result ( $res );
-  } else {
-    $error = translate("Database error") . ": " . dbi_error ();
-  }
-
-  return $added;
-}
-
-
-
-////////////////////////////////////////////
-/// add the financial log events for subscribers
-function add_financial_log_for_subscribers( $active_timestamp ) {
-
-  $active_date = date( "Ymd", $active_timestamp );
-
-  $sql = "SELECT cal_login, cal_off_day FROM webcal_subscriptions " .
-    "WHERE cal_suit = 'heart' " .
-    "AND cal_start <= '$active_date' AND cal_end > '$active_date'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $user = $row[0];
-      $off_day = $row[1];
-      $weekday = date( "w", $active_timestamp );
-      if ( $off_day == $weekday ) $ct = 0;
-      else $ct = 1;
-
-      user_load_variables( $user, "temp" );
-      $description = $GLOBALS[tempfullname] . 
-	": ongoing heart subscription: new meals added";
-      $amount = get_price( 0, $user, true );
-      $amount *= $ct;
-      add_financial_event( $user, get_billing_group( $user ),
-			   $amount, "charge",
-			   $description, 0, "" );
-    }
-    dbi_free_result ( $res );
-  } else {
-    $error = translate("Database error") . ": " . dbi_error ();
-  }
-
-}
 
 
 ///////////////////////////////////////////////////////
@@ -319,11 +246,11 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
       $sql .= date ( "Ymd", $date ) . ", ";
       $sql .= sprintf ( "%02d%02d00, ", $hour, $minute );
       $sql .= "'" . $suit . "', ";
-      $sql .= "'" . $menu . "', ";
+      $sql .= "'" . mysql_safe($menu,true) . "', ";
       $sql .= $base_price . ", ";
       $sql .= $deadline . ", ";
       $sql .= "'" . $walkins . "', ";
-      $sql .= "'" . $notes . "', ";
+      $sql .= "'" . mysql_safe($notes,true) . "', ";
       $sql .= $max_diners . ")";
 
     }
@@ -366,7 +293,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 	    $sql3 .= $id . ", ";
 	    $sql3 .= "'none" . $i . "', ";
 	    $sql3 .= "'C', ";
-	    $sql3 .= "'" . $job[$i] . "')";
+	    $sql3 .= "'" . mysql_safe($job[$i],true) . "')";
 	    
 	  } else {
 	    

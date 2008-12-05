@@ -42,6 +42,48 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
     $DATE_FORMAT_MY, false, false );
 ?></span>
 </p>
+
+<p>
+<span class="date"><br /><?php
+  $billing = get_billing_group( $login );
+  echo "Your account balance is " . price_to_str( get_balance( $billing ) );
+?></span>
+</p>
+
+<p>
+<span class="date"><br /><?php
+  $sql = "SELECT cal_id FROM webcal_meal_participant WHERE cal_type = 'H' AND cal_login = '$login'";
+  $first = true;
+  $today = date( "Ymd" );
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $meal_id = $row[0];
+
+      if ( (paperwork_done( $meal_id ) == false) && (is_cancelled( $meal_id ) == false) ) {
+	$sql2 = "SELECT cal_date, cal_time, cal_suit FROM webcal_meal WHERE cal_id = $meal_id " . 
+	  "AND cal_date >= 20080704 AND cal_date <= $today";
+	if ( $res2 = dbi_query( $sql2 ) ) {
+	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
+	    $day = $row2[0];
+	    $time = $row2[1];
+	    $suit = $row2[2];
+	    
+	    if ( $first == true ) {
+	      echo "Please complete meal summaries for the following meals:<br>";
+	      $first = false;
+	    }
+	    
+	    $identifying_text = $suit . " meal on " . date_to_str( $day, "", true, false, $time ) .
+	      " at " . display_time( $time );
+	    $meal_url = "view_entry.php?id=$meal_id";
+	    echo "<a href=$meal_url> $identifying_text </a><br>";
+	  }
+	}
+      }
+    }
+  }
+?>
+</span></p>
 </div>
 
 <table class="main" style="clear:both;" cellspacing="0" cellpadding="0">

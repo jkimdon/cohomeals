@@ -11,11 +11,12 @@ $olduser = getGetValue( 'olduser' );
 $added_dining = false;
 if ( !isset( $user ) ) $user = $login;
 
-if ( is_signer( $user ) == true ) {
+if ( (is_signer( $user ) == true ) || (is_chef( $id, $login ) ) ) {
 
-  if ( $type != 'C' ) {
-    $modified = edit_participation ( $id, $action, 
-				     $type, $user );
+  if ( $type == 'H' ) {
+    $modified = edit_head_chef_participation( $id, $action, $user );
+  } else if ( $type != 'C' ) {
+    $modified = edit_participation ( $id, $action, $type, $user );
   }
   else {
     $sql = "SELECT cal_notes FROM webcal_meal_participant " .
@@ -25,11 +26,6 @@ if ( is_signer( $user ) == true ) {
     $job = $row[0];
     $modified = edit_crew_participation ( $id, $action, $user, $job, $olduser );
   }
-
-  if ( ($type == 'H') && ($action == 'A') ) {
-    $added_dining = edit_participation ( $id, 'A', 'M', $user, 0 );
-  }
-
 
 } else {
   $error = "Not authorized";

@@ -85,6 +85,8 @@ $subject = htmlspecialchars ( $subject );
 <h2>Meal details for <?php echo date_to_str( $event_date, "", true, false, $event_time )?></h2>
 
 <?php
+if ( is_cancelled( $id ) == true ) echo "<h2>***** This meal has been <font color=\"#DD0000\">cancelled</font> *****</h2>";
+
 $signup_deadline = get_day( $event_date, -1*$deadline );
 echo "<p>Signup deadline: " . date_to_str( $signup_deadline );
 $past_deadline = false;
@@ -120,6 +122,13 @@ else echo "</p>";
 </table>
 </p>
 <p></p>
+
+<?php 
+  if ( has_head_chef( $id ) == "" ) {
+    echo "<p>***Note: If you (or a buddy) are subscribed to meals on this day of the week and you want want to prevent yourself (or a buddy) from being automatically signed up for this meal only, click <a href=\"block_diner.php?id=$id\">here</a>.</p>";
+  }
+
+?>
 
 <table style="border-width:0px;">
 
@@ -484,7 +493,7 @@ switch ( $walkins ) {
 
 </table>
 
-<?php //////// printable sheets for the meal crew
+<?php //////// meal crew summary/paperwork
 ?>
 <br>
 <table>
@@ -492,32 +501,31 @@ switch ( $walkins ) {
 
 <h4>For the head chef</h4>
 
+<p>When your meal is complete, please complete the online summary then submit your receipts and reimbursement form to Xochil.</p>
+<?php 
+if ( paperwork_done( $id ) ) 
+  echo "<p>Online summary for this meal has been completed. Click <a class=\"addbutton\" href=\"display_meal_summary.php?id=$id\">here</a> to view.</p>";
+else  
+  echo "Click <a class=\"addbutton\" href=\"meal_summary.php?meal_id=$id\">here</a> to begin the process.</p>";
+?>
+
+
+<p>The following documents are available for your reference. An updated pantry price list is posted in the pantry.<br>
 <table>
 <tr class="d0">
-  <td>Meal crew task checklist:</td>
-  <td><a class="addbutton" href="refs/CoHoMealCrewChecklist.pdf">
-      pdf</a></td>
-  <td></td>
-</tr><tr class="d0">
   <td>Meal signup sheet:</td>
   <td><a class="addbutton" href="print_signup.php?id=<?php echo $id;?>">pdf</a></td>
   <td></td>
 </tr><tr class="d0">
-  <td>Meal summary sheet:</td>
-  <td><a class="addbutton" href="refs/MealSummarySheetnew.xls">excel</a></td>
-  <td><a class="addbutton" href="refs/MealSummarySheet.xls">excel (pre April 19)</a></td>
-</tr><tr class="d0">
-  <td>Pantry prices/purchases:</td>
-  <td><a class="addbutton" href="refs/PantryPriceList.pdf">pdf</a></td>
-  <td><a class="addbutton" href="refs/PantryPriceList.xls">excel</a></td>
+  <td>Pantry price list:</td>
+  <td><a class="addbutton" href="print_pantry.php">pdf</a></td>
+  <td></td>
 </tr><tr class="d0">
   <td>Reimbursement form:</td>
   <td><a class="addbutton" href="refs/Reimbursement.pdf">pdf</a></td>
   <td><a class="addbutton" href="refs/Reimbursement.xls">excel</a></td>
   <td><a class="addbutton" href="refs/Reimbursement.doc">doc</a></td>
   <td></td>
-</tr><tr>
-  <td align="center" colspan=3>---Please return completed forms to Susan---</td>
 </tr>
 </table>
 

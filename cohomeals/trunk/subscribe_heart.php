@@ -1,12 +1,12 @@
 <?php
 /*
  * Description:
- * Manage heart meal subscriptions
+ * Manage heart and diamond meal subscriptions
  *
  */
 include_once 'includes/init.php';
 
-$INC = array('js/popups.php', 'js/subscribe_heart_js.php', 'js/visible.php' );
+$INC = array('js/popups.php', 'js/functions.php', 'js/visible.php' );
 $BodyX = '';
 print_header ( $INC, '', $BodyX );
 
@@ -19,12 +19,12 @@ if ( $cur_user == "" ||
 $signees = get_signees( $login, true );
 
 ?>
-<h2>Heart subscriptions</h2>
+<h2>Ongoing subscriptions (heart and diamond)</h2>
 
 <form action="subscribe_heart.php" method="get" name="subchooseuserform">
 <table>
 <tr>
-  <td>Managing heart subscriptions for the following person:</td>
+  <td>Managing an ongoing meal subscription for the following person:</td>
   <td><select name="user" onchange="document.subchooseuserform.submit()">
   <?php 
   for ( $i=0; $i<count( $signees ); $i++ ) {
@@ -48,13 +48,12 @@ $weekday = array ();
 $some_meals = false;
 $datedone = false;
 $today_date = date( "Ymd" );//sprintf( "%04d%02d%02d", $thisyear, $thismonth, $thisday );
-$two_week = get_day( $today_date, 14 );
 $action = 'N';
 
 
 /// find out what days of the week heart meals are
 $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
-       "WHERE cal_suit = 'heart' AND cal_date >= $today_date ";
+       "WHERE cal_suit = 'heart' AND cal_date > $today_date AND cal_cancelled = 0";
 $res = dbi_query ( $sql );
 if ( $res ) {
   $i = 0;
@@ -84,18 +83,20 @@ if ( $res ) {
 
 
 /// print current status
-$subscribed = false;
-$off_day = -1;
+$subscribed_heart = false;
+$day_of_week = array();
+for ( $i=0; $i<7; $i++ ) $day_of_week[$i] = false;
 $ongoing = 0;
 $end_date = $today_date;
-$sql = "SELECT cal_off_day, cal_ongoing, cal_end " .
+$sql = "SELECT cal_day, cal_ongoing, cal_end " .
        "FROM webcal_subscriptions " .
        "WHERE cal_login = '$cur_user' AND cal_suit = 'heart' " .
-       "AND cal_end > '$today_date' ";
+       "AND cal_start <= $today_date " .
+       "AND (cal_end > $today_date OR cal_ongoing = 1) ";
 if ( $res = dbi_query ( $sql ) ) {
   while ( $row = dbi_fetch_row ( $res ) ) {
-    $subscribed = true;
-    $off_day = $row[0];
+    $subscribed_heart = true;
+    $day_of_week[$row[0]] = true;
     $ongoing = $row[1];
     if ( $row[2] > $end_date )
       $end_date = $row[2];
@@ -104,23 +105,35 @@ if ( $res = dbi_query ( $sql ) ) {
   echo "Database error: " . dbi_error() . "<br />\n";
 }
 
+$subscribed_diamond = false;
+$sql = "SELECT cal_ongoing, cal_end " .
+  "FROM webcal_subscriptions " .
+  "WHERE cal_login = '$cur_user' AND cal_suit = 'diamond' " .
+  "AND cal_start <= $today_date " .
+  "AND (cal_end > $today_date OR cal_ongoing = 1) ";
+if ( $res = dbi_query ( $sql ) ) {
+  if ( $row = dbi_fetch_row ( $res ) ) {
+    $subscribed_diamond = true;
+    if ( $row[1] > $end_date )
+      $end_date = $row[1];
+  }
+} else {
+  echo "Database error: " . dbi_error() . "<br />\n";
+}
+
 
 echo "<b>Current status:</b> ";
 $new_start = get_day( $today_date, 14 );
-if ( $subscribed == true ) {
-  echo "Subscribed until " . date_to_str( $end_date );
-  if ( $off_day > 0 ) {
-    echo " except for " . weekday_name ( $off_day ) . "s";
+if ( ($subscribed_heart == true) || ($subscribed_diamond == true) ) {
+  echo "Subscribed ";
+  if ( $ongoing == 0 ) 
+    echo "until " . date_to_str( $end_date );
+  echo " for meals on ";
+  for ( $i=0; $i<7; $i++ ) {
+    if ( $day_of_week[$i] == true ) 
+      echo weekday_name( $i ) . "s ";
   }
-  else if ( $off_day == 0 ) {
-    echo "for all heart meals.";
-  }
-
-  if ( $ongoing == 1 ) 
-    echo ".<br>Unless you cancel (button below), subscription will automatically renew for another 3 month block 2 weeks before the expiration of the current block.";
-
-  $new_start = $end_date;
-
+  if ( $subscribed_diamond == true ) echo "Sundays ";
 } else {
   echo "Unsubscribed";
 }
@@ -131,67 +144,30 @@ if ( $subscribed == true ) {
 
 <?php if ( $ongoing == 0 ) { ?>
  <p>
- <b>Sign up or extend your subscription :</b> 
-  <select name="subtype" onchange="subtype_handler()">
-   <option value="none">not selected</option>
-   <option value="ongoing">on an ongoing basis</option>
-   <option value="limited">for a limited time</option>
-  </select>
-
-
-
-
-<div id=limitedcues>
-
-<table>
-<tr>
-<td><b>Starting:</b></td>
-<td><?php print_date_selection( "substart", $new_start ); ?>
-</td></tr>
-<td><b>Ending:</b></td>
-<td><?php print_date_selection( "subend", $new_start ); ?>
-</td></tr>
-<tr><td></td>
-<td align="right"><input type="button" value="Submit" onclick="check_time_period()" /></td>
-</tr>
-</table>
-
-
-</div>
-
-
-
-
-<div id=ongoingcues>
-
+     "Subscribing" means that you indicate that you would like to be automatically signed up for heart or Sunday meals. If you are subscribed, your name will be added to a meal when someone signs up to be head chef for that meal. You still have the option of removing yourself from a meal, as long as it is before the signup deadline. 
 <p>
-You may sign up for all meals or you may choose one day of the week for which you will not attend heart meals. 
-<p>
-<table>
-<tr>
-<td>Please select the day which you wish to <b>skip</b>:</td>
-<td><select name="skipday" >
-  <option value="-1">none. Sign me up for all meals.</option>
-  <?php for ( $i=0; $i < count( $weekday ); $i++ ) {
-    echo "<option value=\"$weekday[$i]\">" . weekday_name( $weekday[$i] ) . "</option>";
-  } ?>
-</select></td></tr>
+  <b>Subscribe for meals on an ongoing basis:</b> 
+					     <br>Heart meals on:
+     <?php for ( $i=0; $i<7; $i++ ) {
+	  $print = false;
+	  for ( $j=0; $j<count( $weekday ); $j++ ) {
+	    if ( $weekday[$j] == $i ) {
+	      $print = true;
+	      break;
+	    }
+	  }
+	  if ( $print == true ) {
+	    echo "<input type=\"checkbox\" checked=\"checked\" name=\"weekday_" . 
+	      $weekday[$j] . "\">" .
+	      weekday_name( $weekday[$j] ) . "</input>&nbsp;&nbsp;&nbsp;";
+	  }
+	}
+  echo "<br>Diamond meals on: <input type=\"checkbox\" checked=\"checked\" " . 
+    "name=\"weekday_0\">" . weekday_name( 0 ) . "</input>&nbsp;&nbsp;&nbsp;<br>";
+  $action = 'S';
+?>
 
-<tr>
-<td align="right">First 3 month block starting:</td>
-<td><?php print_date_selection( "start", $new_start );  ?>
-</td></tr>
-
-<?php $action = 'S'; ?>
-
-
-<tr><td></td>
-<td><input type="button" value="Subscribe" onclick="check_start_date(<?php echo $two_week;?>)" />
-</td></tr>
-</table>
-
-</div>     
-
+<input type="submit" value="Subscribe" />
 
 
 
@@ -199,7 +175,12 @@ You may sign up for all meals or you may choose one day of the week for which yo
   $action = 'U';
   ?>
   <p>
-  <input type="submit" value="Cancel automatic renewal" />
+  <b>Cancellation option:</b>  End my ongoing subscription on: 
+  <?php print_date_selection( "entered", $today_date, "subheartform" );?>
+  <br>
+     <input type="submit" value="Submit cancellation" /> 
+     <br>NOTE: This will NOT remove you from meals you're already signed up for. Recall that subscribers are automatically signed up for a meal when someone signs up to be a head chef.
+     <br>NOTE: To change the days of the week for which you're subscribed, cancel your subscription and resubscribe.
   </p>
 <?php } 
 
@@ -210,11 +191,6 @@ echo "<input type=\"hidden\" name=\"new_start\" value=\"$new_start\" />";
 
 
 </form>  
-
-<script language="JavaScript" type="text/javascript">
-subtype_handler();	
-</script>
-
 
 <?php print_trailer(); ?>
 </body>
