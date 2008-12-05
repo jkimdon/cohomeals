@@ -48,7 +48,9 @@ $body = "This is your reminder to sign up by " .
   date( "D, F j", $eat_cutoff_end ) .
   " and to work at meals " . 
   date( "D, F j", $work_cutoff_start ) . " - " .
-  date( "D, F j", $work_cutoff_end ) . ".\n\n";
+  date( "D, F j", $work_cutoff_end ) . "." .
+  "  You can sign up to participate on the web at:\n" .
+  "https://www.cohoecovillage.org/meals/\n\n";
 
 $body .= "The following meals need head chefs and/or crews:\n\n";
 
