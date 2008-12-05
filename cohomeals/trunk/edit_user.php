@@ -85,7 +85,7 @@ print_header ( '', '', '', true );
 <tr>
   <td><label for="ubirthdate">Birthdate:</label></td>
   <?php if ( $is_meal_coordinator ) {?>
-    <td><?php print_birthdate_selection( $ubirthdate ); ?></td>
+    <td><?php print_birthdate_selection( $ubirthdate, "edituserform" ); ?></td>
   <?php } else {
     echo "<td>" . substr( $ubirthdate, 6, 2 ) .
       " " . month_short_name ( substr ( $ubirthdate, 4, 2 ) - 1 ) . 
@@ -147,7 +147,7 @@ if ( $is_meal_coordinator ) { ?>
 <td style="vertical-align:top;">
 
 <h2><?php etranslate("Change Password")?></h2>
-<form action="edit_user_handler.php" method="post">
+<form action="edit_user_handler.php" method="post" name='edituserform'>
 <input type="hidden" name="formtype" value="setpassword" />
 <?php if ( $is_meal_coordinator ) { ?>
 	<input type="hidden" name="user" value="<?php echo $user;?>" />

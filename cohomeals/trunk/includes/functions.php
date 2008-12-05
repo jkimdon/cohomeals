@@ -284,7 +284,7 @@ function mysql_safe( $data, $string=true ) {
   if ( get_magic_quotes_gpc() )
     $data = stripslashes($data);
   if ( $string == true ) {
-    $data = htmlentities($data,ENT_QUOTES);
+    //   $data = htmlentities($data,ENT_QUOTES);
     $data = mysql_real_escape_string($data);
   } else {
     $data = intval( $data );
@@ -973,8 +973,8 @@ function build_event_popup ( $popupid, $head_chef, $menu ) {
  *
  * @uses date_selection_html
  */
-function print_date_selection ( $prefix, $date ) {
-  print date_selection_html ( $prefix, $date, 20 );
+function print_date_selection ( $prefix, $date, $formname ) {
+  print date_selection_html ( $prefix, $date, 20, $formname );
 }
 
 /**
@@ -985,8 +985,8 @@ function print_date_selection ( $prefix, $date ) {
  *
  * @uses date_selection_html
  */
-function print_birthdate_selection ( $date ) {
-  print date_selection_html ( 'birth', $date, 200 );
+function print_birthdate_selection ( $date, $formname ) {
+  print date_selection_html ( 'birth', $date, 200,$formname );
 }
 
 
@@ -998,7 +998,7 @@ function print_birthdate_selection ( $date ) {
  *
  * @return string HTML for the selection box
  */
-function date_selection_html ( $prefix, $date, $num_years ) {
+function date_selection_html ( $prefix, $date, $num_years, $formname ) {
   $ret = "";
   if ( strlen ( $date ) != 8 )
     $date = date ( "Ymd" );
@@ -1025,9 +1025,9 @@ function date_selection_html ( $prefix, $date, $num_years ) {
   }
   $ret .= "</select>\n";
   if ( strcmp( $prefix, 'birth' ) ) {
-    $ret .= "<input type=\"button\" onclick=\"selectDate( '" .
-      $prefix . "day','" . $prefix . "month','" . $prefix . "year',$date, event)\" value=\"" .
-      translate("Select") . "...\" />\n";
+    $ret .= " or <input type=\"button\" onclick=\"selectDate( '" .
+      $prefix . "day','" . $prefix . "month','" . $prefix . 
+      "year',$date, event, '$formname')\" value=\"Select date from calendar\" />\n";
   }
 
   return $ret;
@@ -2188,6 +2188,19 @@ function background_css ( $color, $height = '', $percent = '' ) {
 }
 
 
+function has_head_chef( $id ) {
+  $head_chef = "";
+
+  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+    "WHERE cal_id = $id AND cal_type = 'H'";
+  $res = dbi_query( $sql );
+  if ( $row = dbi_fetch_row( $res ) ) {
+    $head_chef = $row[0];
+  }
+
+  return $head_chef;
+}
+
 function is_participating ( $id, $user, $type ) {
   $ret = false;
 
@@ -2242,13 +2255,26 @@ function is_cancelled ( $id ) {
 }
 
 
+function paperwork_done( $id ) {
+  $ret = false;
+  $sql = "SELECT cal_amount FROM webcal_food_expenditures " .
+    "WHERE cal_meal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      if ( $row[0] != 0 ) 
+	$ret = true;
+    }
+  }
+
+  return $ret;
+}
+
 
 /********************************
- * signs people up or removes them from dining or head chef duties
+ * signs people up or removes them from head chef duties
  *********************************/
-function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
+function edit_head_chef_participation ( $id, $action, $user="" ) {
   global $login, $is_meal_coordinator;
-
 
   if ( ($user == "") )
     $user = $login;
@@ -2268,109 +2294,123 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
     return;
   }
 
+  // make sure input is reasonable
+  if ( ($action != 'D') && ($action != 'A') )
+    return false;
+
+  $modified = false;
+  
+  if ( $action == 'A' ) {
+    if ( !is_chef( $id, $user ) ) {
+      $modified = true;
+      $sql = "INSERT INTO webcal_meal_participant " . 
+	"( cal_id, cal_login, cal_type ) " . 
+	"VALUES ( $id, '$user', 'H' )";
+      if ( ! dbi_query ( $sql ) ) 
+	$error = translate("Database error") . ": " . dbi_error ();
+      edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
+      add_subscribed_diners( $id );
+    }
+  }
+
+  else if ( $action == 'D') { // delete
+    if ( is_chef( $id, $user ) ) {
+      $modified = true;
+      $sql = "DELETE FROM webcal_meal_participant " .
+	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = 'H'";
+      if ( !dbi_query( $sql ) ) 
+	$error = translate("Database error") . ": " . dbi_error ();
+    }
+  }
+
+  return $modified;
+}
+
+
+/********************************
+ * signs people up or removes them from dining
+ *********************************/
+function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
+  global $login, $is_meal_coordinator;
+
+
+  if ( ($user == "") )
+    $user = $login;
+
+  $can_edit = false;
+
+  // admin, meal coordinator, chefs, and buddies can add others
+  if ( $user == $login )
+    $can_edit = true;
+  else if ( $is_meal_coordinator )
+    $can_edit = true;
+  else if ( is_signer( $user ) == true ) 
+    $can_edit = true;
+  else if ( is_chef( $id, $login ) ) 
+    $can_edit = true;
+
+  if ( $can_edit == false ) {
+    echo "Not authorized";
+    return;
+  }
+
 
   // make sure input is reasonable
   if ( ($action != 'D') && ($action != 'A') && 
        ($action != 'C') )
     return false;
-  if ( ($type != 'M') && ($type != 'T') && ($type != 'C') && 
-       ($type != 'H') )
+  if ( ($type != 'M') && ($type != 'T') )
     return false;
 
+  $modified = false;
   
-  
-  /////////
-  // check if we should change the status so as not to have duplicates
-  
-  if ( $action == 'D' ) 
-    $can_change = false;
-  else
-    $can_change = true;
-  
-  // find out the current status of the user for this meal
-  $id = mysql_safe( $id, false );
-  $user = mysql_safe( $user, true );
-  $type = mysql_safe( $type, true );
-  $sql = "SELECT cal_type FROM webcal_meal_participant " .
-    "WHERE (cal_id = $id) AND (cal_login = '$user') AND (cal_type = '$type')";
-  $res = dbi_query ( $sql );
-  $exists = false;
-  $other_dining_option_found = false;
-  if ( $res ) {
-    while ( $row = dbi_fetch_row( $res ) ) {
-      $found_type = $row[0];
 
-      if ( $found_type == $type ) $exists = true;
-      if ( ( ($found_type == 'M') && ($type == 'T') ) ||
-	   ( ($found_type == 'T') && ($type == 'M') ) ) $other_dining_option_found = true;
-    }
-  }
-      
-    
-
-  if ( $exists == false ) {
-    if ( $action == 'D' )
-      $can_change = false; // already not participating so no need to delete
-    else if ( $action == 'A' ) {
-      if ( $other_dining_option_found == false )
-	$can_change = true; // can add since there was no previous participation
-    }
-    else  // action == C
-      $can_change = false; // not participating so can't change away from it
-  } else { // exists
-    if ( $action == 'D' ) {
-      if ( $other_dining_option_found == false ) 
-	$can_change = true; // is there so is ok to delete
-    }
-    else if ( $action == 'A' ) 
-      $can_change = false; // already there
-    else { // action == C
-      if ( $other_dining_option_found == false )
-	$can_change = true;
-    }
-  }
-
-
-  ///////
-  // make the change
-  if ( $can_change == true ) {
-
-    if ( $action == 'A' ) {
+  if ( $action == 'A' ) {
+    if ( !is_dining( $id, $user ) && (is_cancelled( $id ) == false) ) {
+      $modified = true;
       $sql = "INSERT INTO webcal_meal_participant " . 
 	"( cal_id, cal_login, cal_type, cal_walkin ) " . 
 	"VALUES ( $id, '$user', '$type', $walkin )";
       if ( ! dbi_query ( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
-      else if ( ($type == 'M') || ($type == 'T') ) {
-	auto_financial_event( $id, 'A', $type, $user, $walkin );
+      else {
+	auto_financial_event( $id, 'A', $type, $user );
+	if ( is_blocked( $id, $user ) ) {
+	  $sql2 = "DELETE FROM webcal_meal_participant " . 
+	    "WHERE cal_login = '$user' AND cal_id = $id AND cal_type = 'B'";
+	  dbi_query( $sql2 );
+	}
       }
-
-      if ( $type == 'H' ) edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
     }
+  }
 
-    else if ( $action == 'D') { // delete
+  else if ( $action == 'D') { // delete
+    if ( is_dining( $id, $user ) ) {
+      $modified = true;
       $sql = "DELETE FROM webcal_meal_participant " .
 	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
       if ( !dbi_query( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
-      else if ( ($type == 'M') || ($type == 'T') ) {
+      else {
 	auto_financial_event( $id, 'D', $type, $user );
       }
     }
+  }
 
-    else { // change between take-home and dine-in
+  else { // change between take-home and dine-in
+    if ( is_dining( $id, $user ) ) {
+      $modified = true;
       if ( $type == 'M' ) $new_type = 'T';
       else $new_type = 'M';
       $sql = "UPDATE webcal_meal_participant " .
 	"SET cal_type = '$new_type' " .
 	"WHERE cal_id = $id AND cal_login = '$user' " .
-	"AND cal_type = '$type'";
+	"AND ( cal_type = 'M' OR cal_type = 'T' )";
       dbi_query( $sql );
     }
-
   }
 
-  return $can_change;
+  return $modified;
 }
 
 
@@ -2436,6 +2476,22 @@ function edit_crew_participation( $id, $action, $user, $job, $olduser = "" ) {
 }
 
 
+/********************************************
+ * adds the subscribed but unblocked diners. Called when head chef is added 
+ ********************************************/
+function add_subscribed_diners( $id ) {
+
+  $all = user_get_users();
+  for ( $i = 0; $i<count( $all ); $i++ ) {
+    $cur_login = mysql_safe( $all[$i]['cal_login'], true );
+    if ( is_subscriber( $id, $cur_login ) && !is_blocked( $id, $cur_login ) ) {
+      edit_participation( $id, 'A', 'M', $cur_login, 0 );
+    }
+  }
+
+}
+
+
 function edit_club_subscription( $club_id, $user, $action ) {
 
   $club_id = mysql_safe( $club_id, false );
@@ -2463,42 +2519,21 @@ function edit_club_subscription( $club_id, $user, $action ) {
     
     
     /// add or remove diner from meals
-    $count = 0;
     $sql = "SELECT cal_id FROM webcal_meal WHERE cal_club_id = '$club_id'";
     $res = dbi_query ( $sql );
     if ( $res ) {
       while ( $row = dbi_fetch_row ( $res ) ) {
 	$cal_id = $row[0];
 	if ( $action == 'A' ) {
-	  $mod = edit_participation ( $cal_id, 'A', 'M', $user );
-	  if ( $mod == true ) $count++;
+	  $mod = edit_participation ( $cal_id, 'A', 'M', $user, 0 );
 	}
 	else {
-	  $mod = edit_participation ( $cal_id, 
-				      'D', 'M', $user );
-	  if ( $mod == true ) $count++;
-	  $mod = edit_participation ( $cal_id, 
-				      'D', 'F', $user );
-	  if ( $mod == true ) $count++;
+	  $mod = edit_participation ( $cal_id, 'D', 'M', $user );
+	  $mod = edit_participation ( $cal_id, 'D', 'F', $user );
 	}
       }
       dbi_free_result( $res );
     }
-    $amount = get_price( $cal_id, $user );
-    $type = "charge";
-    user_load_variables( $user, "temp" );
-    if ( $action == 'D' ) {
-      $type = "credit";
-      $description = $GLOBALS[tempfullname] . 
-	" unsubscribing to club meals";
-    } else {
-      $description = $GLOBALS[tempfullname] . 
-	" subscribing to club meals";
-    }
-    $amount *= $count;
-    add_financial_event( $user, get_billing_group( $user ),
-			 $amount, $type, 
-			 $description, 0, "" );
   }    
 }
 
@@ -2745,15 +2780,17 @@ function display_workeat_log( $startdate, $enddate ) {
 }
 
 
-function is_chef( $id ) {
+function is_chef( $id, $user='' ) {
   global $login;
+
+  if ( $user == "" ) $user = $login;
   
   $ret = false;
 
   $sql = "SELECT cal_login " .
     "FROM webcal_meal_participant " . 
     "WHERE cal_id = $id " .
-    "AND cal_login = '$login' " .
+    "AND cal_login = '$user' " .
     "AND (cal_type = 'H' OR cal_type = 'C')";
   if ( $res = dbi_query( $sql ) ) {
     if ( dbi_fetch_row( $res ) ) {
@@ -2787,6 +2824,27 @@ function is_dining( $id, $username ) {
 }
 
 
+// user blocked self from being automatically subscribed to a single meal
+function is_blocked( $id, $username ) {
+  
+  $ret = false;
+
+  $sql = "SELECT cal_type " .
+    "FROM webcal_meal_participant " . 
+    "WHERE cal_id = $id " .
+    "AND cal_login = '$username' " .
+    "AND cal_type = 'B'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $ret = true;
+    }
+    dbi_free_result( $res );
+  }
+  
+  return $ret;
+}
+
+
 function is_walkin( $id, $username ) {
   $ret = false;
 
@@ -2808,22 +2866,25 @@ function is_walkin( $id, $username ) {
 
 function is_subscriber( $id, $user ) {
 
-  $event_date = date( "Ymd" );
   $subscriber = false;
   $sql = "SELECT cal_suit FROM webcal_meal WHERE cal_id=$id";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      if ( $row[0] == 'heart' ) {
+      $suit = $row[0];
+      if ( ($suit == 'heart') || ($suit == 'diamond') ) {
 	$sql2 = "SELECT cal_date FROM webcal_meal WHERE cal_id=$id";
 	if ( $res2 = dbi_query( $sql2 ) ) {
 	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
 	    $event_date = $row2[0];
+	    $weekday = date( "w", date_to_epoch( $event_date ) );
+
 	    $sql3 = "SELECT cal_login " .
 	      "FROM webcal_subscriptions " .
 	      "WHERE cal_login = '$user' " . 
+	      "AND cal_suit = '$suit' " .
+	      "AND cal_day = $weekday " . 
 	      "AND cal_start <= $event_date " .
-	      "AND cal_end > $event_date " .
-	      "AND cal_suit = 'heart'";
+	      "AND (cal_end > $event_date OR cal_ongoing = 1)";
 	    if ( $res3 = dbi_query( $sql3 ) ) {
 	      if ( dbi_fetch_row( $res3 ) ) {
 		$subscriber = true;
@@ -2843,57 +2904,6 @@ function is_subscriber( $id, $user ) {
 
 
 
-
-
-function subscribe_ongoing_heart( $user, $off_day, $start_date, $end_date ) {
-
-  // enter into subscription table
-  $sql = "INSERT INTO webcal_subscriptions " .
-    "( cal_login, cal_suit, cal_off_day, cal_start, cal_end, cal_ongoing ) " .
-    "VALUES ('$user', 'heart', $off_day, $start_date, $end_date, 1 )";
-  if ( !dbi_query( $sql ) ) $error = "Database error: " . dbi_error ();
-
-
-  $count = 0;
-  /// enter user as in-house diner for all currently entered heart meals 
-  $sql = "SELECT cal_id, cal_date FROM webcal_meal " .
-    "WHERE cal_suit = 'heart' " .
-    "AND cal_date >= $start_date " .
-    "AND cal_date < $end_date";
-  $res = dbi_query ( $sql );
-  $id = 0;
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $w = date ( "w", date_to_epoch( $row[1] ) );
-      $id = $row[0];
-      if ( $w != $off_day ) {
-	$mod = edit_participation ( $id, 'A', 'M', $user );
-	if ( $mod == true ) {
-	  $count++;
-	} else {
-	  give_heart_discount( $id, $user );
-	}
-	
-      }
-      else {
-	$mod = edit_participation ( $id, 'D', 'M', $user );
-	if ( $mod == true ) {
-	  $count--;
-	}
-	$mod = edit_participation ( $id, 'D', 'T', $user );
-	if ( $mod == true ) {
-	  $count--;
-	}
-      }
-    }
-  }
-  else 
-    $error = "Database error: " . dbi_error ();
-  dbi_free_result( $res  );
-  
-}
-
-
 function get_day( $ref_date, $num_days ) {
   $sy = substr ( $ref_date, 0, 4 );
   $sm = substr ( $ref_date, 4, 2 );
@@ -2902,5 +2912,77 @@ function get_day( $ref_date, $num_days ) {
 
   return $newdate;
 }
+
+
+function change_standard_meal_form() {
+?>
+<table><tr>
+<td>&nbsp;&nbsp;&nbsp;</td><td>Day of the week: </td><td> <select name="dayofweek">
+    <option value="0">Sunday</option>
+    <option value="1">Monday</option>
+    <option value="2">Tuesday</option>
+    <option value="3">Wednesday</option>
+    <option value="4">Thursday</option>
+    <option value="5">Friday</option>
+    <option value="6">Saturday</option>
+</select></td></tr>
+<tr><td></td><td>Which week: </td><td><select name="whichweek">
+    <option value="1">First</option>
+    <option value="2">Second</option>
+    <option value="3">Third</option>
+    <option value="4">Fourth</option>
+    <option value="5">Fifth</option>
+</select></td></tr>
+<tr><td></td><td>Suit: </td>
+   <td><select name="suit">
+   <option value="heart">Heart</option>
+   <option value="diamond">Diamond</option>
+   <option value="wild">Wild</option>
+</select></td></tr>
+<tr><td></td><td>Time: </td>
+   <td><input type="text" name="hour" size="2" maxlength="2" />:<input type="text" name="minute" size="2" maxlength="2" />
+     <label><input type="radio" name="ampm" value="am" />am</label>
+     <label><input type="radio" name="ampm" value="pm" checked="checked" />pm</label>
+</td></tr>
+<tr><td></td><td>Base (adult) price: </td>
+  <td>$<input type="text" name="base_dollars" size="2" maxlength="2" />.<input type="text" name="base_cents" size="2" maxlength="2" /></td></tr>
+<tr><td></td><td>Head chef: </td>
+  <td><select name="head_chef">
+      <option value="none" selected="selected">Select head chef</option>
+      <?php $names = user_get_users();
+        foreach ( $names as $name ) {
+	  $username = $name['cal_login'];
+	  $fullname = $name['cal_fullname'];
+	  echo "<option value=\"$username\">$fullname</option>\n";
+	} ?>
+</select></td></tr>
+<tr></tr>
+<tr><td></td><td>Regular/requested crew: </td>
+  <td><table class="bordered_table">
+    <tr><td>Crew job description</td><td>Person</td></tr>
+    <?php
+      for ( $i=0; $i<7; $i++ ) {
+	echo "<td><input type=\"text\" name=\"job$i\" size=\"45\" value=\"\" maxlength=\"80\"/></td>";
+	echo "<td><select name=\"crew$i\">";
+	echo "<option value=\"none\" selected=\"selected\">Select crew member</option>";
+	foreach ( $names as $name ) {
+	  $username = $name['cal_login'];
+	  $fullname = $name['cal_fullname'];
+	  echo "<option value=\"$username\">$fullname</option>\n";
+	} 
+	echo "</select></td></tr>";
+      }?>
+    </table>
+</td></tr>
+<tr><td></td><td>Regular menu: </td>
+  <td><textarea name="menu" rows="5" cols="40"</textarea></td>
+</tr>
+
+</table>
+
+<input type="submit" value="Save meal" />
+<?php
+}
+
 
 ?>

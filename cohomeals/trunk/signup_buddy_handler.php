@@ -65,7 +65,9 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
     } else if ( ($limited == false) || ($ct <= $number) ) {
       $walkin = 0;
       if ( $user_status == "walkin" ) $walkin = 1;
-      if ( $type != 'C' ) {
+      if ( $type == 'H' ) {
+	edit_head_chef_participation( $id, $action, $user );
+      } else if ( $type != 'C' ) {
 	edit_participation( $id, $action, $type, $user, $walkin );
       }
       else {
@@ -78,11 +80,6 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
 	}
 	edit_crew_participation( $id, $action, $user, $job, $placeholder );
       }
-
-      if ( ($type == 'H') && ($action == 'A') ) {
-	edit_participation ( $id, 'A', 'M', $user, 0 );
-      }
-
     }
   }
 }

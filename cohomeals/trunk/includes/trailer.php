@@ -58,8 +58,7 @@ if ( $login != '__public__' && $readonly == 'N' ) {
 
 
 /// adding/subscribing links
-//$subscribe_link[] = "<a href=\"subscribe_diamondBROKEN.php\">Diamond</a>";
-//$subscribe_link[] = "<a href=\"subscribe_heartBROKEN.php\">Heart</a>";
+$subscribe_link[] = "<a href=\"subscribe_heart.php\">Heart/Diamond</a>";
 //$subscribe_link[] = "<a href=\"subscribe_club.php\">Club</a>";
 $url = "<a title=\"Add New Meal\" href=\"edit_entry.php";
 if ( ! empty ( $thisyear ) ) {
@@ -81,6 +80,12 @@ if ( $is_beancounter || $is_meal_coordinator ) {
   $special_link[] = $url;
 }
   
+if ( $is_beancounter || $is_meal_coordinator ) {
+  $url = "<a title=\"Pantry management\" ";
+  $url .= "href=\"pantry_management.php";
+  $url .= "\">Pantry management</a>";
+  $special_link[] = $url;
+}
 
 if ( $login != '__public__' ) {
   $goto_link[] = "<a title=\"Help\" href=\"#\" onclick=\"window.open " .
