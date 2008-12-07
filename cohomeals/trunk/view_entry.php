@@ -501,7 +501,7 @@ switch ( $walkins ) {
 
 <h4>For the head chef</h4>
 
-<p>When your meal is complete, please complete the online summary then submit your receipts and reimbursement form to Xochil.</p>
+<p>When your meal is complete, please complete the online summary then submit your receipts and reimbursement form to Valerie.</p>
 <?php 
 if ( paperwork_done( $id ) ) 
   echo "<p>Online summary for this meal has been completed. Click <a class=\"addbutton\" href=\"display_meal_summary.php?id=$id\">here</a> to view.</p>";
