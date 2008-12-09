@@ -118,7 +118,7 @@ if ( paperwork_done( $id ) ) {
       </table>
 
 
-<p>  *** Remember to submit a reimbursement form to Valerie along with your receipts. Form is below for reference. ***</p>
+<p>  *** Remember to submit a reimbursement form to Valerie (in her CH cubby or in the purple box on her porch) along with your receipts. Form is below for reference. ***</p>
     <table>
       <tr class="d0">
       <td>Reimbursement form:</td>
