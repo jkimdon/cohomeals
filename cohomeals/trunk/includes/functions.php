@@ -2629,7 +2629,7 @@ function get_signees ( $login, $include_self="false" ) {
 
 
 function is_signer( $signee ) {
-  global $is_meal_coordinator, $is_beancounter, $login;
+  global $is_meal_coordinator, $login;
 
   $ret = false;
 
@@ -2637,7 +2637,7 @@ function is_signer( $signee ) {
     $ret = true; 
   }
 
-  if ( $is_meal_coordinator || $is_beancounter ) {
+  if ( $is_meal_coordinator ) {
     $ret = true;
   }
 
