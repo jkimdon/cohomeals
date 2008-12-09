@@ -110,7 +110,7 @@ if ( paperwork_done( $id ) ) {
  	 <tr><td></td><td>Total income</td><td></td><td><?php echo price_to_str( $income );?></td></tr>
          <tr><td><b>Expenses</b>:</td><td></td><td></td><td></td></tr>
          <tr><td></td><td>Shoppers</td><td><?php echo price_to_str($shoppers);?></td><td></td></tr>
-         <tr><td></td><td>Farmer`s market</td><td><?php echo price_to_str($farmer);?></td><td></td></tr>
+         <tr><td></td><td>Farmer`s market cards</td><td><?php echo price_to_str($farmer);?></td><td></td></tr>
          <tr><td></td><td>Flat rate spices</td><td><?php echo price_to_str($flatrate);?></td><td></td></tr>
          <tr><td></td><td>Pantry purchases</td><td><?php echo price_to_str($pantry);?></td><td></td></tr>
          <tr><td></td><td>Total expenses</td><td></td><td><?php echo price_to_str($expenses);?></td></tr>
