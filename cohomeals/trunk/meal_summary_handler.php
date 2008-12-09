@@ -3,6 +3,10 @@ include_once 'includes/init.php';
 
 $id = mysql_safe( getValue( 'meal_id' ), false );
 
+if ( paperwork_done( $id ) ) {
+  echo "Paperwork for this meal has already been completed and cannot be resubmitted. Email Joey if you need to make changes.<br>";
+} else {
+
 
 if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
 
@@ -226,7 +230,7 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
   echo "Not authorized<br>";
 }
 
-
+}
 
 print_header();
 
