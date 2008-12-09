@@ -7,4 +7,5 @@ connect cohoecovillage.org
 # alias cohologin login meals@cohoecovillage.org <password> 
 cohologin
 mirror -R -c -e -v . .
+#mirror -R --dry-run -c -e -v . .
 
