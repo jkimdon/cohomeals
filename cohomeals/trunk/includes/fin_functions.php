@@ -386,7 +386,21 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 }
 
 
+function get_guest_price( $id, $guest_name ) {
+  $cost = 400;
 
+  $sql = "SELECT cal_fee FROM webcal_meal_guest " .
+    "WHERE cal_meal_id = $id AND cal_fullname = '$guest_name'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $fee_category = $row[0];
+
+      $cost = get_adjusted_price( $id, $fee_category, false );
+    }
+  }
+
+  return $cost;
+}
 
 
 function get_refund_price( $id, $user, $past_deadline="notset" ) {

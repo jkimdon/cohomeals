@@ -139,11 +139,98 @@ function insert_meal( $date, $time, $suit, $price, $menu ) {
   $formatted_date = date( "Ymd", $date );
 
   // first make sure the meal isn't already there
-  $sql = "SELECT cal_id FROM webcal_meal " .
-    "WHERE cal_time = $time AND cal_suit = '$suit' AND cal_date = $formatted_date";
+  $sql = "SELECT cal_id, cal_base_price FROM webcal_meal " .
+    "WHERE cal_suit = '$suit' AND cal_date = $formatted_date";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
       $mealid = $row[0];
+      $old_price = $row[1];
+
+      // if there's already a head chef, assume changes have been made and do not change further
+      if ( $head_chef == "" ) {
+
+	// reset time (may be different according to who is head chef this month)
+	$sql2 = "UPDATE webcal_meal SET cal_time = $time WHERE cal_id = $mealid";
+	dbi_query( $sql2 );
+
+
+	// check to see if the price is different (may be according to who is head chef this month)
+	if ( $old_price != $price ) {
+
+	  // check to see if anybody's signed up yet and refund/charge them to bring to current price
+
+
+	  // check members
+	  $sql2 = "SELECT cal_login FROM webcal_meal_participant " . 
+	    "WHERE cal_id = $mealid AND (cal_type = 'M' OR cal_type = 'T') ";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $financial_user = $row2[0];
+	      $billing = get_billing_group( $financial_user );
+	      $refund_price = get_refund_price( $mealid, $financial_user, false );
+	      $description = "base price change: refund";
+	      add_financial_event( $financial_user, $billing, $refund_price, "credit",
+				   $description, $mealid, "" );
+	    }
+	  }
+	  // check guests that haven't already been refunded above by a host dining
+	  $sql2 = "SELECT cal_host, cal_fullname FROM webcal_meal_guest " . 
+	    "WHERE cal_meal_id = $mealid AND (cal_type = 'M' OR cal_type = 'T') ";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $financial_user = $row2[0];
+	      $guest_name = $row2[1];
+	      
+	      $sql3 = "SELECT cal_login FROM webcal_meal_participant " .
+		"WHERE cal_id = $mealid AND (cal_type = 'M' OR cal_type = 'T') ";
+	      if ( $res3 = dbi_query( $sql3 ) ) {
+		if ( !($row3 = dbi_fetch_row( $res3 )) ) { 
+		  // i.e. if they haven't already been refunded above
+		  $billing = get_billing_group( $financial_user );
+		  $refund_price = get_guest_refund_price( $mealid, $financial_user, $guest_name );
+		  $message = "base price change: guest refund $guest_name\n";
+		  add_financial_event( $financial_user, $billing, $refund_price, "credit",
+				       $message, $mealid, "" );
+		}
+	      }
+	    }
+	  }
+	
+	  // change the price
+	  $sql2 = "UPDATE webcal_meal SET cal_base_price = $price WHERE cal_id = $mealid";
+	  dbi_query( $sql2 );
+
+	  // recharge the previously signed-up diners
+	  // members
+	  $sql2 = "SELECT cal_login FROM webcal_meal_participant " . 
+	    "WHERE cal_id = $mealid AND (cal_type = 'M' OR cal_type = 'T') ";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $financial_user = $row2[0];
+	      $billing = get_billing_group( $financial_user );
+	      $charge_price = get_price( $mealid, $financial_user, false );
+	      $description = "base price change: recharge";
+	      add_financial_event( $financial_user, $billing, $charge_price, "charge",
+				   $description, $mealid, "" );
+	    }
+	  }
+	  // guests
+	  $sql2 = "SELECT cal_host, cal_fullname FROM webcal_meal_guest " . 
+	    "WHERE cal_meal_id = $mealid AND (cal_type = 'M' OR cal_type = 'T') ";
+	  if ( $res2 = dbi_query( $sql2 ) ) {
+	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
+	      $financial_user = $row2[0];
+	      $guest_name = $row2[1];
+	      $billing = get_billing_group( $financial_user );
+	      $charge_price = get_guest_price( $mealid, $guest_name );
+	      $message = "base price change: guest recharge $guest_name\n";
+	      add_financial_event( $financial_user, $billing, $charge_price, "charge",
+				   $message, $mealid, "" );
+	    }
+	  }
+	}
+      }
+      
     } 
     else {
 

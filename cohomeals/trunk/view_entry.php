@@ -276,7 +276,7 @@ if ( $max_diners > 0 ) {
 	$guest_name = $row[0];
 	$host = $row[1];
 	$age = $row[2];
-	if ( $age == "C" ) $onsite_children++;
+	if ( $age == "K" ) $onsite_children++;
 	else if ( $age == "F" ) $onsite_free++;
 	else $onsite_adults++; // $age == "A"
 
@@ -365,7 +365,7 @@ if ( $res = dbi_query( $sql ) ) {
     $guest_name = $row[0];
     $host = $row[1];
     $age = $row[2];
-    if ( $age == "C" ) $takehome_children++;
+    if ( $age == "K" ) $takehome_children++;
     else if ( $age == "F" ) $takehome_free++;
     else $takehome_adults++; // $age == "A"
 
