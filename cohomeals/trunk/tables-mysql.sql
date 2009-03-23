@@ -141,7 +141,7 @@ CREATE TABLE webcal_meal_participant (
   cal_walkin CHAR(1) DEFAULT 0,
   /* timestamp when initially signed up */
   cal_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY ( cal_id, cal_login, cal_type )
+  PRIMARY KEY ( cal_id, cal_login, cal_type, cal_notes )
 );
 
 
