@@ -31,7 +31,8 @@ else
 for ( $i=0; $i<count( $signees ); $i++ ) {
   $user = $signees[$i]['cal_login'];
   $partic = is_participating( $id, $user, $type );
-  if ( ( !$partic && ($action == 'A')) ||
+  if ( ( $type == 'C' ) ||  
+       ( !$partic && ($action == 'A')) ||
        ( $partic && ($action == 'D') ) ) {
     echo "<tr>\n";
     if ( $choose_pre_or_walkin ) {
