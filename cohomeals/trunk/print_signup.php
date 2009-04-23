@@ -134,7 +134,6 @@ function PrintLabels( $horiz_offset ) {
   $this->Cell( $horiz_offset );
 
   $this->Cell( 5,$height, "R", 1, 0, 'C', 1 );
-  $this->Cell( 5,$height, "T", 1, 0, 'C', 1 );
   $this->Cell( 8,$height, "Unit", 1, 0, 'C', 1 );
   $this->Cell( 37,$height, "Name", 1, 0, 'C', 1 );
   $this->Cell( 5,$height, "P", 1, 0, 'C', 1 );
@@ -146,9 +145,10 @@ function PrintLegend() {
   $saveX = $this->GetX();
   $saveY = $this->GetY();
 
-  $horiz_offset = 148;
+  $horiz_offset = 70;
   $height = 4;
   $this->SetX( 10 );
+  $this->SetY( 225 ); // same as totals
 
   $total_width = 45;
   $space_width = 8;
@@ -165,13 +165,10 @@ function PrintLegend() {
   $this->Cell( $remaining_width, $height, "(X = regular)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(G = guest)", "RTB",1,'L');
+  $this->Cell( $remaining_width, $height, "(W = walkin)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(W = walkin)", "RTB",1,'L');
-
-  $this->Cell( $horiz_offset );
-  $this->Cell( $total_width, $height, "T = Take-home plate", 1,1,'L');
+  $this->Cell( $remaining_width, $height, "(T = take-home plate)", "RTB",1,'L');
 
   $this->Cell( $horiz_offset );
   $this->Cell( $total_width, $height, "P = Price code", 1,1,'L');
@@ -194,7 +191,7 @@ function PrintLegend() {
 function Building( $label, $horiz_offset ) {
   $this->SetFillColor( 230,230,230 );
   $this->Cell( $horiz_offset );
-  $this->Cell( 60,4, $label, 1, 1, 'C', 1 );
+  $this->Cell( 55,4, $label, 1, 1, 'C', 1 );
 }
 
 
@@ -213,8 +210,13 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     $username = $name['cal_login'];
     $building = $name['cal_building'];
     if ( $building != $prev_building ) {
-      if ( $building == 7 ) {
-	$horiz_offset = 75;
+      if ( $building == 6 ) {
+	$horiz_offset = 65;
+	$this->SetY( $top );
+	$this->PrintLabels( $horiz_offset );
+      }
+      else if ( $building == 10 ) { // friends of coho
+	$horiz_offset = 130;
 	$this->SetY( $top );
 	$this->PrintLabels( $horiz_offset );
       }
@@ -229,19 +231,18 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     // check dining status
     if ( $onsite = is_dining( $id, $username ) ) {
       if ( is_walkin( $id, $username ) )  $dining = "W";
-      else $dining = "X";
+      else {
+	if ( $onsite == "T" ) $dining = "T";
+	else $dining = "X";
+      }
     }
-    else 
+    else
       $dining = "";
-    
-    $takehome = "";
-    if ( $onsite == "T" ) $takehome = "T";
     
     $age = get_fee_category( $name['cal_birthdate'], $event_date );
     
     $this->Cell( $horiz_offset );
     $this->Cell( 5,$height, $dining, 1, 0, 'C', $fill );
-    $this->Cell( 5,$height, $takehome, 1, 0, 'C', $fill );
     $this->Cell( 8,$height, $name['cal_unit'], 1, 0, 'C', $fill );
     $this->Cell( 37,$height, $name['cal_fullname'], 1, 0, 'L', $fill );
     $this->Cell( 5,$height, $age, 1, 0, 'C', $fill );
@@ -261,7 +262,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
       else $label .= "_kid";
       $counts['all']++;
       $counts[$label]++;
-      if ( $takehome == "T" ) $counts['takehome']++;
+      if ( $dining == "T" ) $counts['takehome']++;
     }
     
   }
@@ -271,7 +272,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
 
 function AddGuests( $guests, &$counts ) {
 
-  $horiz_offset = 75;
+  $horiz_offset = 130;
   $height = 4;
   $this->Building( "Guests", $horiz_offset );
   foreach( $guests as $guest ) {
@@ -279,9 +280,10 @@ function AddGuests( $guests, &$counts ) {
     $host_unit = $guest['cal_unit'];
     $age = $guest['cal_fee'];
     $takehome = $guest['takehome'];
+    $dining = "X";
+    if ( $takehome == "T" ) $dining = "T";
     $this->Cell( $horiz_offset );
-    $this->Cell( 5,$height, "G", 1, 0, 'C' );
-    $this->Cell( 5,$height, $takehome, 1, 0, 'C' );
+    $this->Cell( 5,$height, $dining, 1, 0, 'C' );
     $this->Cell( 8,$height, $host_unit, 1, 0, 'C' );
     $this->Cell( 37,$height, $fullname, 1, 0, 'L' );
     $this->Cell( 5,$height, $age, 1, 0, 'C' );
@@ -297,12 +299,11 @@ function AddGuests( $guests, &$counts ) {
 
   // put in slots for walkin guests
   $this->Cell( $horiz_offset );
-  $this->Cell( 60, $height, "Enter host's unit number for guests", 
+  $this->Cell( 55, $height, "Enter host's unit number for guests", 
 	       'RL',1,'C');
   for ( $i=0; $i<5; $i++ ) {
     $this->Cell( $horiz_offset );
     $this->Cell( 5,$height, "", 1, 0, 'C' ); // not pre-signed up
-    $this->Cell( 5,$height, "", 1, 0, 'C' ); // takehome
     $this->Cell( 8,$height, "", 1, 0, 'C' );
     $this->Cell( 37,$height, "", 1, 0, 'L' );
     $this->Cell( 5,$height, "", 1, 0, 'C' );
@@ -319,7 +320,7 @@ function SumTotals( $counts, $id ) {
  $label_width = 30;
  $number_width = 12;
 
- $this->SetY( 225 );
+ $this->SetY( 225 ); // same as legend
 
  $this->SetFillColor( 200,200,200 );
  $this->Cell( $horiz_offset );

@@ -35,8 +35,7 @@ CREATE TABLE webcal_user (
   /* user birthdate (for determining work/eat ratios and meal prices)
      If not entered, assume they are an adult. */
   cal_birthdate INT,
-  /* Unit number at Coho, for example '241', zero if user doesn't live
-     in Coho. */
+  /* Unit number at Coho, for example '241', '3xx' if not live in Coho. */
   cal_unit INT DEFAULT 0,
   PRIMARY KEY ( cal_login )
 );

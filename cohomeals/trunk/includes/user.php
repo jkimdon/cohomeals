@@ -388,7 +388,7 @@ function user_get_users () {
   $ret = array ();
   $temp_ret = array ();
   $ordering = array ();
-  for ( $i=0; $i<10; $i++ ) {
+  for ( $i=0; $i<11; $i++ ) {
     $ordering[$i] = array ();
   }
   if ( $public_access == "Y" )
@@ -413,9 +413,12 @@ function user_get_users () {
 
       /// extract building number
       $unit = $row[7];
-      $temp = (int)($unit / 10);
-      $temp2 = (int)($temp / 10);
-      $building = $temp - 10*$temp2;
+      if ( $unit >= 300 ) $building = 10;
+      else {
+	$temp = (int)($unit / 10);
+	$temp2 = (int)($temp / 10);
+	$building = $temp - 10*$temp2;
+      }
 
       $temp_ret[$count++] = array (
         "cal_login" => $row[0],
@@ -438,18 +441,12 @@ function user_get_users () {
 
   /// re-order by building
   $newcount = 0;
-  for ( $i=1; $i<10; $i++ ) {
+  for ( $i=1; $i<11; $i++ ) {
     sort( $ordering[$i] );
     $b = $ordering[$i];
     foreach ( $b as $key => $value ) {
       $ret[$newcount++] = $temp_ret[$value];
     }
-  }
-
-  /// include friends (i.e. building == 0)
-  $b = $ordering[0];
-  foreach ( $b as $key => $value ) {
-    $ret[$newcount++] = $temp_ret[$value];
   }
 
   return $ret;
