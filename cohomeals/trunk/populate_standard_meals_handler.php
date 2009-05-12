@@ -104,7 +104,8 @@ below work for you.\n\n";
       "Mike (esp last minute help)\n" .
       "Amaris\n" .
       "Dave D\n" .
-      "Marcy\n";
+      "Marcy\n" . 
+      "Kathleen (cleanup -- can call even if she's not dining)\n";
 
     $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 
