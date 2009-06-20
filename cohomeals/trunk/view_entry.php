@@ -801,18 +801,8 @@ function display_crew( $type, $rowcolor ) {
 
   ?>
   <table class="bordered_table">
-     <tr><td>Desired crew description</td><td>Volunteer</td></tr>
+     <tr><td><h3>Crew description</h3></td><td><h3>Volunteer</h3></td></tr>
   <?php 
-
-  /// find out if working
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
-     "WHERE cal_id = $id AND cal_login = '$login' " .
-     "AND (cal_type = 'C' OR cal_type = 'H')";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( dbi_fetch_row( $res ) ) $im_working = true;
-    else $im_working = false;
-    dbi_free_result( $res );
-  }
 
 
   $sql = "SELECT cal_login, cal_notes FROM webcal_meal_participant " .
@@ -830,7 +820,7 @@ function display_crew( $type, $rowcolor ) {
 
       if ( ereg( "^none", $person ) ) {
 	echo "<td> none yet "; 
-	if ( $im_working == false ) add_me_button( 'C', $job );
+	add_me_button( 'C', $job );
 	signup_buddy_button( 'C', $id, $job );
       } else {
 	user_load_variables ( $person, "temp" );
@@ -847,6 +837,26 @@ function display_crew( $type, $rowcolor ) {
   }
   else 
     echo "Database error: " . dbi_error() . "<br />\n";
+
+
+
+  /// put in an optional user-supplied crew description line
+  ?>
+  <tr>
+  <form action="crew_notes_handler.php" method="post">
+  <td><input type="text" name="newCrew" size="25" maxlength="100"/></td>
+     <td> add your own description then click: 
+
+  <?php  // these buttons submit the job description as well as adding the person to the crew
+    ?>
+     <input class="addbutton" type="submit" name="whoadd" value="Add me"/>
+     &nbsp;&nbsp;&nbsp;
+     <input class="addbutton" type="submit" name="whoadd" value="Add buddy"/>
+<?php 
+  echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />";
+  echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />";
+
+  echo "</td></form></tr>";
 
   echo "</table></td></tr>";
 }

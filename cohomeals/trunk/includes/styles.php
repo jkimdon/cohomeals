@@ -578,13 +578,15 @@ abbr {
   padding: 1px;
   padding-left: 3px;
   padding-right: 3px;
-  width: 200px;
   text-align: center;
   background-color: #CCCCCC;
   border-top: 1px solid #EEEEEE;
   border-left: 1px solid #EEEEEE;
   border-bottom: 1px solid #777777;
   border-right: 1px solid #777777;
+}
+.addbutton:hover { 
+  color:blue;
 }
 tr.d0 td {
   background-color: #FFFFFF;
