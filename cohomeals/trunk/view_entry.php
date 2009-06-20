@@ -652,6 +652,7 @@ if ( $show_log ) {
 function add_me_button( $type, $job="" ) {
   global $login, $id;
 
+  $job = mysql_safe( $job );
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -692,6 +693,8 @@ function change_button( $person, $id, $old_type ) {
 
 
 function signup_buddy_button( $type, $id, $job="" ) {
+
+  $job = mysql_safe( $job );
   $olduser = "";
   if ( $type == 'C' ) {
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -820,7 +823,7 @@ function display_crew( $type, $rowcolor ) {
       $person = $row[0];
       $description = $row[1];
       $description = trim( $description );
-      $job = $description;
+      $job = mysql_safe( $description );
       if ( $description == "" ) $description = "???";
 
       echo "<tr><td>$description</td>";
