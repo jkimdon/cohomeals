@@ -852,6 +852,8 @@ function display_crew( $type, $rowcolor ) {
      <input class="addbutton" type="submit" name="whoadd" value="Add me"/>
      &nbsp;&nbsp;&nbsp;
      <input class="addbutton" type="submit" name="whoadd" value="Add buddy"/>
+     &nbsp;&nbsp;&nbsp;
+     <input class="addbutton" type="submit" name="whoadd" value="Just add description"/>
 <?php 
   echo "<input type=\"hidden\" name=\"user\" value=\"$user\" />";
   echo "<input type=\"hidden\" name=\"id\" value=\"$id\" />";
