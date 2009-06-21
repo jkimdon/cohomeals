@@ -10,6 +10,7 @@ $user = getGetValue( 'user' );
 $olduser = getGetValue( 'olduser' );
 $added_dining = false;
 if ( !isset( $user ) ) $user = $login;
+if ( $user == "" ) $user = $login;
 
 if ( (is_signer( $user ) == true ) || (is_chef( $id, $login ) ) ) {
 

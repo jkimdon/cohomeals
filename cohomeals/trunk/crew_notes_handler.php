@@ -6,6 +6,7 @@ $user = mysql_safe( getPostValue( 'user' ), true );
 $notes = mysql_safe( getPostValue( 'newCrew' ), true );
 $whoadd = getPostValue( 'whoadd' );
 if ( !isset( $user ) ) $user = $login;
+if ( $user == "" ) $user = $login;
 
 if ( is_signer( $user ) == true ) {
 
