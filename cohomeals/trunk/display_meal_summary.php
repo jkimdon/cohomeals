@@ -116,8 +116,7 @@ if ( paperwork_done( $id ) ) {
 
     /// 
     $base_price = get_base_price( $id );
-    $adult_equivalent = 0;
-    demographics( $id, "all", $adult_equivalent );
+    $adult_equivalent = get_adult_equivalent( $id );
     $per_person = $expenses / $adult_equivalent;
 
     ////

@@ -2274,12 +2274,11 @@ function paperwork_done( $id ) {
 // status = "all" for all diners
 //        = "pre" for presignup only
 //        = "walkin" for walkins only
-function demographics( $id, $status="all", &$adult_equivalent=NULL ) {
+function demographics( $id, $status="all" ) {
 
   $adults = 0;
   $children = 0;
   $free = 0;
-  $equiv = 0;
   
   // users
   $names = user_get_users();
@@ -2298,12 +2297,10 @@ function demographics( $id, $status="all", &$adult_equivalent=NULL ) {
 	$age = get_fee_category( $id, $username );
 	if ( $age == "K" ) { 
 	  $children++;
-	  $equiv += 0.5;
 	}
 	else if ( $age == "F" ) $free++;
 	else {  // $age == "A"
 	  $adults++;
-	  $equiv++;
 	}
       }
     }
@@ -2328,24 +2325,71 @@ function demographics( $id, $status="all", &$adult_equivalent=NULL ) {
 	$age = $row[1];
 	if ( $age == "K" ) {
 	  $children++;
-	  $equiv += 0.5;
 	}
 	else if ( $age == "F" ) $free++;
 	else { // $age == "A"
 	  $adults++;
-	  $equiv++;
 	}
       }
     }
     dbi_free_result( $res );
   }
 
-  if ( func_num_args() > 2 ) $adult_equivalent = $equiv;
-
   $ret = sprintf( "%d people: %d adults, %d older children, %d younger children", 
 		  $adults + $children + $free, $adults, $children, $free );
   return $ret;
 }
+
+
+
+///////////
+//
+function get_adult_equivalent( $id ) {
+
+  $equiv = 0;
+  
+  // users
+  $names = user_get_users();
+  foreach ( $names as $name ) {
+    $username = $name['cal_login'];
+
+    $dining_status = is_dining( $id, $username );
+    if ( ($dining_status == "M") || ($dining_status == "T") ) {
+
+      $age = get_fee_category( $id, $username );
+      if ( $age == "K" ) { 
+	$equiv += 0.5;
+      }
+      else if ( $age == "A" ) {
+	$equiv++;
+      }
+    }
+
+  }
+
+  // guests
+  $sql = "SELECT cal_fullname, cal_fee " .
+    "FROM webcal_meal_guest " .
+    "WHERE cal_meal_id = $id " . 
+    "AND (cal_type = 'M' OR cal_type = 'T')";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $guest_name = $row[0];
+
+      $age = $row[1];
+      if ( $age == "K" ) {
+	$equiv += 0.5;
+      }
+      else if ( $age == "A" ) {
+	$equiv++;
+      }
+    }
+    dbi_free_result( $res );
+  }
+
+  return $equiv;
+}
+
 
 
 /********************************
