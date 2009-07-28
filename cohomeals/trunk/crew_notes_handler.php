@@ -1,10 +1,10 @@
 <?php
 include_once 'includes/init.php';
 
-$id = mysql_safe( getPostValue( 'id' ), false );
-$user = mysql_safe( getPostValue( 'user' ), true );
-$notes = mysql_safe( getPostValue( 'newCrew' ), true );
-$whoadd = getPostValue( 'whoadd' );
+$id = mysql_safe( getValue( 'id' ), false );
+$user = mysql_safe( getValue( 'user' ), true );
+$notes = mysql_safe( getValue( 'newCrew' ), true );
+$whoadd = getValue( 'whoadd' );
 if ( !isset( $user ) ) $user = $login;
 if ( $user == "" ) $user = $login;
 

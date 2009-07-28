@@ -247,7 +247,7 @@ if ( $max_diners > 0 ) {
 
       // check dining status
       if ( is_dining( $id, $username ) == "M" ) {
-	$age = get_fee_category( $name['cal_birthdate'], $event_date );
+	$age = get_fee_category( $id, $username );
 	if ( $age == "K" ) $onsite_children++;
 	else if ( $age == "F" ) $onsite_free++;
 	else $onsite_adults++; // $age == "A"
@@ -321,7 +321,7 @@ if ( $res ) {
     $pname = $row[0];
     $approved[$num_app++] = $pname;
     user_load_variables( $pname, "temp" );
-    $age = get_fee_category( $GLOBALS[tempbirthdate], $event_date );
+    $age = get_fee_category( $id, $username );
     if ( $age == "K" ) $takehome_children++;
     else if ( $age == "F" ) $takehome_free++;
     else $takehome_adults++; // $age == "A"

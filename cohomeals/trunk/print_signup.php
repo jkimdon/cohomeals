@@ -239,7 +239,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     else
       $dining = "";
     
-    $age = get_fee_category( $name['cal_birthdate'], $event_date );
+    $age = get_fee_category( $id, $username );
     
     $this->Cell( $horiz_offset );
     $this->Cell( 5,$height, $dining, 1, 0, 'C', $fill );

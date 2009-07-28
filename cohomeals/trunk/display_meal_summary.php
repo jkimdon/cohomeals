@@ -3,8 +3,8 @@ include_once 'includes/init.php';
 
 print_header();
 
-$meal_id = 0;
-$meal_id = mysql_safe( getGetValue( 'meal_id' ), false );
+$id = 0;
+$id = mysql_safe( getGetValue( 'id' ), false );
 
 if ( paperwork_done( $id ) ) {
 
@@ -59,12 +59,26 @@ if ( paperwork_done( $id ) ) {
     }
 
 
-    $sql2 = "SELECT cal_total_price FROM webcal_pantry_purchases " .
+    $sql2 = "SELECT cal_total_price, cal_number_units, cal_food_id FROM webcal_pantry_purchases " .
       "WHERE cal_meal_id = $id";
     $pantry = 0;
+    $pantry_description = "";
     if ( $res2 = dbi_query( $sql2 ) ) {
-      while ( $row2 = dbi_fetch_row( $res2 ) ) 
+      while ( $row2 = dbi_fetch_row( $res2 ) ) {
 	$pantry += $row2[0];
+	$amount = $row2[1] / 100;
+	$food_id = $row2[2];
+
+	$sql3 = "SELECT cal_unit, cal_description FROM webcal_pantry_food " .
+	  "WHERE cal_food_id = $food_id";
+	if ( $res3 = dbi_query( $sql3 ) ) {
+	  if ( $row3 = dbi_fetch_row( $res3 ) ) {
+	    $food = $row3[1];
+	    if ( ($food != "flat rate") && ($food != "farmers market") ) 
+	      $pantry_description .= $amount . " " . $row3[0] . "(s) " . $food . ". ";
+	  }
+	}
+      }
     }
     $expenses += $pantry;
     $pantry -= $farmer;
@@ -94,27 +108,36 @@ if ( paperwork_done( $id ) ) {
       }
     }
 
-    $remaining_income = $income - $walkin_income;
+    $presignup_income = $income - $walkin_income;
 
 
     ////
     $difference = $income - $expenses;
 
+    /// 
+    $base_price = get_base_price( $id );
+    $adult_equivalent = 0;
+    demographics( $id, "all", $adult_equivalent );
+    $per_person = $expenses / $adult_equivalent;
 
     ////
     ?>
       <table>
 	 <tr><td><b>Income</b>:</td><td></td><td></td><td></td></tr>
-	 <tr><td></td><td>Regular signups</td><td><?php echo price_to_str($remaining_income);?></td><td></td></tr>
-	 <tr><td></td><td>Walkins</td><td><?php echo price_to_str($walkin_income);?></td><td></td></tr>
+	 <tr><td></td><td>Pre-signup diners</td><td><?php echo price_to_str($presignup_income);?></td>
+             <td>(<?php echo demographics( $id, "pre" );?>)</td></tr>
+	 <tr><td></td><td>Walkins</td><td><?php echo price_to_str($walkin_income);?></td>
+    	     <td>(<?php echo demographics( $id, "walkin" );?>)</td></tr>
  	 <tr><td></td><td>Total income</td><td></td><td><?php echo price_to_str( $income );?></td></tr>
          <tr><td><b>Expenses</b>:</td><td></td><td></td><td></td></tr>
          <tr><td></td><td>Shoppers</td><td><?php echo price_to_str($shoppers);?></td><td></td></tr>
          <tr><td></td><td>Farmer`s market cards</td><td><?php echo price_to_str($farmer);?></td><td></td></tr>
          <tr><td></td><td>Flat rate spices</td><td><?php echo price_to_str($flatrate);?></td><td></td></tr>
-         <tr><td></td><td>Pantry purchases</td><td><?php echo price_to_str($pantry);?></td><td></td></tr>
+         <tr><td></td><td>Pantry purchases</td><td><?php echo price_to_str($pantry);?></td>
+	     <td><?php echo $pantry_description;?></td></tr>
          <tr><td></td><td>Total expenses</td><td></td><td><?php echo price_to_str($expenses);?></td></tr>
 	 <tr><td><b>Difference</b>:</td><td></td><td></td><td><?php echo price_to_str($difference);?></td></tr>
+	 <tr><td><b>Per adult cost</b>:</td><td></td><td><?php echo price_to_str($per_person);?></td><td>(charged <?php echo price_to_str($base_price);?>)</td></tr>
       </table>
 
 

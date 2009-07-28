@@ -4,11 +4,21 @@ include_once 'includes/init.php';
 $id = mysql_safe( getValue( 'meal_id' ), false );
 
 if ( paperwork_done( $id ) ) {
-  echo "Paperwork for this meal has already been completed and cannot be resubmitted. Email Joey if you need to make changes.<br>";
+  $nexturl = "display_meal_summary.php?id=$id";
+  do_redirect( $nexturl );
 } else {
 
 
 if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
+
+  ///////////
+  /// first delete duplicates, assuming they were from previous errors
+  ///   delete in: webcal_food_expenditures and webcal_pantry_purchases
+  dbi_query( "DELETE FROM webcal_food_expenditures WHERE cal_meal_id = $id" );
+  dbi_query( "DELETE FROM webcal_pantry_purchases WHERE cal_meal_id = $id" );
+
+  
+
 
 
   //////////////////////
@@ -60,7 +70,7 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
 
   //////////////////////
   /// enter food expenditures for shoppers into table
-  for ( $i=0; $i<3; $i++ ) {
+  for ( $i=0; $i<4; $i++ ) {
     $key = "shopper$i";
     $shopper = mysql_safe( getValue( $key ), true );
 
@@ -98,12 +108,9 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
 
   //////////////////////
   /// enter farmer's market
-  $farmersDollars = mysql_safe( getValue( 'farmersDollars' ), true );
-  $farmersCents = mysql_safe( getValue( 'farmersCents' ), true );
-  if ( ($farmersDollars != "") && ($farmersCents != "") ) {
+  $farmersmarket = mysql_safe( getValue( 'farmersmarket' ), false );
+  if ( $farmersmarket != "" ) {
 
-    $cents = 100*$farmersDollars + $farmersCents;
-    
     $res = dbi_query( "SELECT MAX( cal_log_id ) FROM webcal_pantry_purchases" );
     if ( $res ) {
       $row = dbi_fetch_row ( $res );
@@ -126,7 +133,7 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
     
     $sql = "INSERT INTO webcal_pantry_purchases " .
       "( cal_log_id, cal_food_id, cal_number_units, cal_total_price, cal_type, cal_meal_id ) " .
-      "VALUES ( $log_id, $food_id, $cents, $cents, 1, $id )";
+      "VALUES ( $log_id, $food_id, $farmersmarket, $farmersmarket, 1, $id )";
     if ( !dbi_query( $sql ) ) {
       $error = "Database entry failed";
     }
@@ -135,22 +142,7 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
 
   //////////////////////
   /// enter flat rate
-  $diners = 0;
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = $id AND (cal_type = 'M' OR cal_type = 'T')";
-  if ( $res = dbi_query( $sql ) ) {
-    while ( $row = dbi_fetch_row( $res ) ) {
-      $diners++;
-    }
-  }
-  $sql = "SELECT cal_fullname FROM webcal_meal_guest " .
-    "WHERE cal_meal_id = $id AND (cal_type = 'M' OR cal_type = 'T')";
-  if ( $res = dbi_query( $sql ) ) {
-    while ( $row = dbi_fetch_row( $res ) ) {
-      $diners++;
-    }
-  }
-  $cents = 10 * $diners;
+  $flatrate = mysql_safe( getValue( 'flatrate' ), true );
 
 
   $sql = "SELECT cal_food_id FROM webcal_pantry_food " .
@@ -176,7 +168,7 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
 
   $sql = "INSERT INTO webcal_pantry_purchases " .
     "( cal_log_id, cal_food_id, cal_number_units, cal_total_price, cal_type, cal_meal_id ) " .
-    "VALUES ( $log_id, $food_id, $cents, $cents, 1, $id )";
+    "VALUES ( $log_id, $food_id, $flatrate, $flatrate, 1, $id )";
   if ( !dbi_query( $sql ) ) {
     $error = "Database entry failed";
   }
@@ -219,9 +211,13 @@ if ( $is_meal_coordinator || $is_beancounter || is_chef( $id, $login ) ) {
   }
 
 
+  if ( !paperwork_done( $id ) ) {
+    echo "ERROR: Meal summary entry failed.";
+  }
+
 
   //////////////////////
-  /// display results: amount spent, income, link to reimbursement form
+  /// display: amount spent, income, link to reimbursement form
   $nexturl = "display_meal_summary.php?id=$id";
   do_redirect( $nexturl );
 
