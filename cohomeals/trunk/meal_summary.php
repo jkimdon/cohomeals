@@ -4,18 +4,21 @@ include_once 'includes/init.php';
 print_header();
 
 $meal_id = 0;
-$meal_id = mysql_safe( getGetValue( 'meal_id' ), false );
+$meal_id = mysql_safe( getValue( 'meal_id' ), false );
 
 
 if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
   if ( paperwork_done( $meal_id ) ) {
     echo "Paperwork for this meal has been completed.<br>";
   } else {
-    ?><form action="meal_summary_handler.php" method="post">
+    ?><form action="confirm_meal_summary.php" method="post">
       <input type="hidden" name="meal_id" value="<?php echo $meal_id;?>"/>
 
     <?php
 
+
+
+    /// title
     $sql = "SELECT cal_date, cal_time, cal_suit FROM webcal_meal " .
       "WHERE cal_id = $meal_id";
     $res = dbi_query( $sql );
@@ -26,6 +29,7 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
       echo "<h1>Meal summary for $suit meal on " . date_to_str( $date, "", true, false, $time ) .
 	" at " . display_time( $time ) . "</h1>";
     }
+
 
 
     ///////////
@@ -54,8 +58,14 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
 	echo "<tr><td></td><td>" .
 	  "<input type=\"checkbox\" name=\"$username\" disabled>$full_name</input></td></tr>";
       } else {
-	echo "<tr><td></td><td>" .
-	  "<input type=\"checkbox\" name=\"$username\">$full_name</input></td></tr>";
+	// if the user is editing the meal summary, walkin might be checked
+	$walkin = getValue( $username );
+	if ( $walkin == true ) 
+	  echo "<tr><td></td><td>" .
+	    "<input type=\"checkbox\" name=\"$username\" checked>$full_name</input></td></tr>";
+	else 
+	  echo "<tr><td></td><td>" .
+	    "<input type=\"checkbox\" name=\"$username\">$full_name</input></td></tr>";
       }
 
     }
@@ -84,24 +94,46 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
       echo "<tr><td width=8%><td>Guest full name</td><td></td><td>Host</td></tr>";
       $count++;
       for ( $i=$count; $i<7; $i++ ) {
+	// if editing, guest may be entered already
+	$key = "newguest$i";
+	if ( $guest_name = mysql_safe( getValue( $key ), true ) ) {
+	  $key = "host$i";
+	  $host = mysql_safe( getValue( $key ), true );
+	  $key = "fee$i";
+	  $fee_class = mysql_safe( getValue( $key ), true );
+	} else {
+	  $host = "none";
+	  $fee_class = "A";
+	}
 	echo "<tr><td></td><td>" .
-	  "<input type=\"text\" name=\"newguest$i\" size=\"30\" value=\"\" maxlength=\"50\"/></td>";
+	  "<input type=\"text\" name=\"newguest$i\" size=\"30\" " .
+	  "value=\"$guest_name\" maxlength=\"50\"/></td>";
 
 	echo "<td><select name=\"fee$i\">";
+	echo "<option value=\"A\" ";
+	if ( $fee_class == "A" ) echo "selected=\"selected\"";
+	echo ">Adult</option>";
+	echo "<option value=\"K\" ";
+	if ( $fee_class == "K" ) echo "selected=\"selected\"";
+	echo ">Age 4-12</option>";
+	echo "<option value=\"F\" ";
+	if ( $fee_class == "F" ) echo "selected=\"selected\"";
+	echo ">Age 0-3</option>";
 	  ?>
-	  <option value="A" selected="selected">Adult</option>
-	  <option value="K">Age 4-12</option>
-	  <option value="F">Age 0-3</option>
         </select></td>
         <?php
 
 	echo "<td><select name=\"host$i\">";
-	echo "<option value=\"none\" selected=\"selected\">Select host</option>";
+	echo "<option value=\"none\" ";
+	if ( $host == 'none' ) echo "selected=\"selected\"";
+	echo ">Select host</option>";
 	$names = user_get_users();
 	foreach ( $names as $name ) {
 	  $username = $name['cal_login'];
 	  $fullname = $name['cal_fullname'];
-	  echo "<option value=\"$username\">$fullname</option>\n";
+	  echo "<option value=\"$username\" ";
+	  if ( $host == $username ) echo "selected=\"selected\"";
+	  echo ">$fullname</option>\n";
 	}
 	echo "</select></td>";
 
@@ -130,20 +162,45 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
     <tr>
     <td></td>
     <?php
-    for ( $i=0; $i<3; $i++ ) {
+    for ( $i=0; $i<4; $i++ ) {
+      // if editing, enter previously entered values
+      $key = "shopper$i";
+      $shopper = mysql_safe( getValue( $key ), true );
+      if ( $shopper != 'none' ) {
+	$key = "vendor$i";
+	$vendor = mysql_safe( getValue( $key ), true );
+	
+	$key = "dollars$i";
+	$dollars = mysql_safe( getValue( $key ), true );
+	
+	$key = "cents$i";
+	$cents = mysql_safe( getValue( $key ), true );
+	
+      } else {
+	$vendor = "";
+	$dollars = "";
+	$cents = "";
+      }
+
+
       echo "<tr><td></td>";
       echo "<td><select name=\"shopper$i\">";
-      echo "<option value=\"none\" selected=\"selected\">Select shopper</option>";
+      if ( $shopper == 'none' ) $selected = "selected=\"selected\"";
+      else $selected = "";
+      echo "<option value=\"none\" $selected>Select shopper</option>";
       $names = user_get_users();
       foreach ( $names as $name ) {
 	$username = $name['cal_login'];
 	$fullname = $name['cal_fullname'];
-	echo "<option value=\"$username\">$fullname</option>\n";
+	if ( $shopper == $username ) $selected = "selected=\"selected\"";
+	else $selected = "";
+
+	echo "<option value=\"$username\" $selected>$fullname</option>\n";
       }
       echo "</select></td>";
-      echo "<td>$<input type=\"text\" name=\"dollars$i\" size=\"2\"/></td>";
-      echo "<td>.<input type=\"text\" name=\"cents$i\" size=\"2\"/></td>";
-      echo "<td><input type=\"text\" name=\"vendor$i\" size=\"15\" maxlength=\"50\"/></td>";
+      echo "<td>$<input type=\"text\" name=\"dollars$i\" size=\"2\" value=\"$dollars\" /></td>";
+      echo "<td>.<input type=\"text\" name=\"cents$i\" size=\"2\" value=\"$cents\" /></td>";
+      echo "<td><input type=\"text\" name=\"vendor$i\" size=\"15\" maxlength=\"50\" value=\"$vendor\" /></td>";
       echo "</tr>";
     }
 
@@ -151,8 +208,19 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
     </table>
     
 
+    <?php // farmers market cards
+    $farmersmarket = mysql_safe( getValue( 'farmersmarket' ), false );
+    $farmersDollars = 0; // integer
+    $farmersCents = 0; // integer
+    if ( ($farmersmarket != "") && ($farmersmarket > 0) ) {
+      $farmersDollars = (integer) ($farmersmarket / 100);
+      $farmersCents = $farmersmarket - ($farmersDollars*100);
+    }
+    ?>
+
     <p>B) How much was spent using the Farmer\'s Market cards?
-       $<input type="text" name="farmersDollars" size="2"/>.<input type="text" name="farmersCents" size="2"/>
+    $<input type="text" name="farmersDollars" size="2" value=<?php echo "\"$farmersDollars\"";?>/>.
+    <input type="text" name="farmersCents" size="2" value=<?php echo "\"$farmersCents\"";?>/>
 
     <p>C) How much of each pantry item did you use? *** Enter in decimal form (NO fractions) ***</p>
     <table>
@@ -175,8 +243,13 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
 	  $prev_category = $category;
 	}
 
+	$key = "amount$food_id";
+	$amount = getValue( $key ) * 100;
+	$amount_safe = mysql_safe( $amount, false ) / 100.00;
+	if ( $amount_safe == 0 ) $amount_safe = "";
+
 	echo "<tr><td></td><td></td><td>$food:" .
-	  "&nbsp; <input type=\"text\" name=\"amount" . $food_id . "\" size=\"5\" maxlength=\"8\"/>&nbsp;" .
+	  "&nbsp; <input type=\"text\" name=\"amount" . $food_id . "\" value=\"$amount_safe\" size=\"5\" maxlength=\"8\"/>&nbsp;" .
 	  $unit . "(s)</td></tr>";
       }
     }
@@ -184,7 +257,7 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
 
 
     ///////////
-    echo "<h3>Step 3: <input type=\"submit\" value=\"Submit\"/></h3>";
+    echo "<h3>Step 3: <input type=\"submit\" value=\"Next page\"/></h3>";
 
 
     echo "</form>";

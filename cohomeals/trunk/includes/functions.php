@@ -2257,15 +2257,93 @@ function is_cancelled ( $id ) {
 
 function paperwork_done( $id ) {
   $ret = false;
+  $amount = 0;
   $sql = "SELECT cal_amount FROM webcal_food_expenditures " .
     "WHERE cal_meal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      if ( $row[0] != 0 ) 
-	$ret = true;
+      $ret = true;
     }
   }
 
+  return $ret;
+}
+
+
+///////////
+// status = "all" for all diners
+//        = "pre" for presignup only
+//        = "walkin" for walkins only
+function demographics( $id, $status="all", &$adult_equivalent=NULL ) {
+
+  $adults = 0;
+  $children = 0;
+  $free = 0;
+  $equiv = 0;
+  
+  // users
+  $names = user_get_users();
+  foreach ( $names as $name ) {
+    $username = $name['cal_login'];
+
+    $dining_status = is_dining( $id, $username );
+    if ( ($dining_status == "M") || ($dining_status == "T") ) {
+
+      $walkin = is_walkin( $id, $username );
+      $counts = 0;
+      if ( ($walkin == true) && ( ($status == "all") || ($status == "walkin") ) ) $counts = 1;
+      else if ( ($walkin == false) && ( ($status == "all") || ($status == "pre") ) ) $counts = 1;
+
+      if ( $counts == 1 ) {
+	$age = get_fee_category( $id, $username );
+	if ( $age == "K" ) { 
+	  $children++;
+	  $equiv += 0.5;
+	}
+	else if ( $age == "F" ) $free++;
+	else {  // $age == "A"
+	  $adults++;
+	  $equiv++;
+	}
+      }
+    }
+
+  }
+
+  // guests
+  $sql = "SELECT cal_fullname, cal_fee " .
+    "FROM webcal_meal_guest " .
+    "WHERE cal_meal_id = $id " . 
+    "AND (cal_type = 'M' OR cal_type = 'T')";
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $guest_name = $row[0];
+
+      $walkin = is_walkin_guest( $id, $guest_name );
+      $counts = 0;
+      if ( ($walkin == true) && ( ($status == "all") || ($status == "walkin") ) ) $counts = 1;
+      else if ( ($walkin == false) && ( ($status == "all") || ($status == "pre") ) ) $counts = 1;
+
+      if ( $counts == 1 ) {
+	$age = $row[1];
+	if ( $age == "K" ) {
+	  $children++;
+	  $equiv += 0.5;
+	}
+	else if ( $age == "F" ) $free++;
+	else { // $age == "A"
+	  $adults++;
+	  $equiv++;
+	}
+      }
+    }
+    dbi_free_result( $res );
+  }
+
+  if ( func_num_args() > 2 ) $adult_equivalent = $equiv;
+
+  $ret = sprintf( "%d people: %d adults, %d older children, %d younger children", 
+		  $adults + $children + $free, $adults, $children, $free );
   return $ret;
 }
 
@@ -2852,6 +2930,26 @@ function is_walkin( $id, $username ) {
     "FROM webcal_meal_participant " .
     "WHERE cal_id = $id " .
     "AND cal_login = '$username'";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      if ( $row[0] == 1 ) 
+	$ret = true;
+    }
+    dbi_free_result( $res );
+  }
+
+  return $ret;
+}
+
+
+function is_walkin_guest( $id, $guest_fullname ) {
+  $ret = false;
+
+  $guest_fullname = mysql_safe( $guest_fullname );
+  $sql = "SELECT cal_walkin " . 
+    "FROM webcal_meal_guest " .
+    "WHERE cal_meal_id = $id " .
+    "AND cal_fullname = '$guest_fullname'";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
       if ( $row[0] == 1 ) 

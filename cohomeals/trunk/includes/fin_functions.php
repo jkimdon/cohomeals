@@ -289,13 +289,23 @@ function give_heart_discount( $id, $user ) {
 }
 
 
-function get_price( $id, $user ) {
+function get_price( $id, $user, $known_walkin=false ) {
+
+  $age = get_fee_category( $id, $user );
+
+  $cost = get_adjusted_price ( $id, $age, $known_walkin, $user );
+  return $cost;
+}
+
+
+
+function get_fee_category( $id, $username ) {
 
   /// establish price category based on age
   $age = "A";
   $sql = "SELECT cal_birthdate " .
     "FROM webcal_user " .
-    "WHERE cal_login = '$user'";
+    "WHERE cal_login = '$username'";
   $birthdate = "";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
@@ -315,15 +325,8 @@ function get_price( $id, $user ) {
     }
   }
 
-  $age = get_fee_category( $birthdate, $event_date );
-
-  $cost = get_adjusted_price ( $id, $age, false, $user );
-  return $cost;
-}
 
 
-
-function get_fee_category( $birthdate, $event_date ) {
 
   $epoch = date_to_epoch( $event_date );
   $free_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-4, 
@@ -342,15 +345,30 @@ function get_fee_category( $birthdate, $event_date ) {
 }
 
 
+function get_base_price( $id ) {
+
+  $base_price = 400;
+  $sql = "SELECT cal_base_price " . 
+    "FROM webcal_meal " .
+    "WHERE cal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $base_price = $row[0];
+    }
+  }
+
+  return $base_price;
+
+}
+
 function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 			     $user="") {
 
   /// get meal details. establish base price, past_deadline
   $base_price = 400;
   $past_deadline = true;
-  $suit = "wild";
   $sql = "SELECT cal_base_price, cal_date, " . 
-    "cal_signup_deadline, cal_suit " .
+    "cal_signup_deadline " .
     "FROM webcal_meal " .
     "WHERE cal_id = $id";
   if ( $res = dbi_query( $sql ) ) {
@@ -358,7 +376,6 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
       $base_price = $row[0];
       $event_date = $row[1];
       $deadline = $row[2];
-      $suit = $row[3];
       $signup_deadline = get_day( $event_date, -1*$deadline );
       if ( $signup_deadline >= date("Ymd") ) $past_deadline = false;
     }
@@ -367,11 +384,11 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 
   /// establish price category based on preregistration or walkin
   $category = "pre";
-  if ( $user != '' ) {
+  if ( $known_walkin == true ) $category = "walkin";
+  else if ( $user != '' ) {
     if ( is_walkin( $id, $user ) == 1 ) $category = "walkin";
   } else {
     if ( $past_deadline == true ) $category = "walkin";
-    else if ( $known_walkin == true ) $category = "walkin";
   }
 
 
@@ -388,9 +405,10 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 
 function get_guest_price( $id, $guest_name ) {
   $cost = 400;
+  $guest = mysql_safe( $guest_name );
 
   $sql = "SELECT cal_fee FROM webcal_meal_guest " .
-    "WHERE cal_meal_id = $id AND cal_fullname = '$guest_name'";
+    "WHERE cal_meal_id = $id AND cal_fullname = '$guest'";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
       $fee_category = $row[0];

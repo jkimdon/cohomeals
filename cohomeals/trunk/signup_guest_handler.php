@@ -25,7 +25,7 @@ if ( $action == 'A' ) {
 
 
   // charge host's account
-  $amount = get_adjusted_price( $id, $fee_class, false, true );
+  $amount = get_adjusted_price( $id, $fee_class, false );
   $billing = get_billing_group( $host );
   $description = "Guest: $guest_name dining";
   add_financial_event( $host, $billing, $amount, "charge",
