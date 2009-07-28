@@ -216,10 +216,10 @@ if ( !paperwork_done( $id ) ) {
     ?>
       <table>
 	 <tr><td><b>Income</b>:</td><td></td><td></td><td></td></tr>
-	 <tr><td></td><td>Pre-signup diners</td>
+	 <tr><td></td><td>Diners signed up before meal summary</td>
  	     <td><?php echo price_to_str($regular_signup_income);?></td>
              <td>(<?php echo demographics($id);?>)</td></tr>
-	 <tr><td></td><td>Walkins</td><td><?php echo price_to_str($walkin_income);?></td><td>
+	 <tr><td></td><td>Walkins signed up during meal summary</td><td><?php echo price_to_str($walkin_income);?></td><td>
 	<?php echo "($walkins_adult adults, $walkins_kid older children, $walkins_free younger children)";?></td></tr>
  	 <tr><td></td><td>Total income</td><td></td><td><?php echo price_to_str( $income );?></td></tr>
          <tr><td><b>Expenses</b>:</td><td></td><td></td><td></td></tr>
