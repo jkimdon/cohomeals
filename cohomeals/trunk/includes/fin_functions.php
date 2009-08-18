@@ -185,7 +185,7 @@ function display_financial_log( $cur_group, $sortbymeal, $ordered_logs ) {
 
 }
 
-function add_financial_event( $user, $billing, $amount, $type, $description, $meal_id, $notes ) {
+function add_financial_event( $diner, $billing, $amount, $type, $description, $meal_id, $notes ) {
 
   $balance = 0;
   $last_balance = 0;
@@ -226,7 +226,7 @@ function add_financial_event( $user, $billing, $amount, $type, $description, $me
     "cal_text ) " . 
     "VALUES (";
   $sql .= $id . ", ";
-  $sql .= "'" . $user . "', ";
+  $sql .= "'" . $diner . "', ";
   $sql .= "'" . $billing . "', ";
   $sql .= "'" . mysql_safe($description,true) . "', ";
   $sql .= $meal_id . ", ";
@@ -421,7 +421,7 @@ function get_guest_price( $id, $guest_name ) {
 }
 
 
-function get_refund_price( $id, $user, $past_deadline="notset" ) {
+function get_refund_price( $id, $userOrGuestname, $past_deadline="notset" ) {
 
   $price = 0;
   $today = date( "Ymd" );
@@ -448,7 +448,7 @@ function get_refund_price( $id, $user, $past_deadline="notset" ) {
     $amount = 0;
     $sql = "SELECT cal_amount " .
       "FROM webcal_financial_log " .
-      "WHERE cal_login = '$user' " . 
+      "WHERE cal_login = '$userOrGuestname' " . 
       "AND cal_meal_id = $id";
     if ( $res = dbi_query( $sql ) ) {
       while ( $row = dbi_fetch_row( $res ) ) {
@@ -466,58 +466,6 @@ function get_refund_price( $id, $user, $past_deadline="notset" ) {
   return $price;
 }
 
-
-function get_guest_refund_price( $id, $host, $guest_name ) {
-
-  $price = 0;
-  $past_deadline = true;
-  $today = date( "Ymd" );
-
-  $sql = "SELECT cal_date, cal_signup_deadline " .
-    "FROM webcal_meal " .
-    "WHERE cal_id = $id";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $event_date = $row[0];
-      $deadline = $row[1];
-      $deadline_date = get_day( $event_date, -1*$deadline );
-      if ( $deadline_date >= $today ) $past_deadline = false;
-    }
-    dbi_free_result( $res );
-  }
-
-
-
-  if ( $past_deadline == false ) {
-    $percentage = get_refund_percentage( $id, $past_deadline );
-
-    $maxT = 0;
-    $amount = 0;
-    $sql = "SELECT cal_amount, cal_timestamp " .
-      "FROM webcal_financial_log " .
-      "WHERE cal_login = '$host' " . 
-      "AND cal_meal_id = $id " .
-      "AND cal_description LIKE '%$guest_name%' " .
-      "AND cal_amount < 0";
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$timestamp = $row[1];
-	if ( $timestamp > $maxT ) {
-	  $maxT = $timestamp;
-	  $amount = $row[0];
-	}
-      }
-      dbi_free_result( $res );
-    }
-	  
-
-    $amount *= $percentage;
-    $amount /= 100;
-    $price = (int)$amount;
-  } // else: leave price == 0.
-
-  return $price;
-}
 
 
 function get_refund_percentage( $id, $past_deadline=false ) {
