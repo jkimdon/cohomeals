@@ -28,7 +28,7 @@ if ( $action == 'A' ) {
   $amount = get_adjusted_price( $id, $fee_class, false );
   $billing = get_billing_group( $host );
   $description = "Guest: $guest_name dining";
-  add_financial_event( $host, $billing, $amount, "charge",
+  add_financial_event( $guest_name, $billing, $amount, "charge",
 		       $description, $id, "" );
 
 } else if ( $action == 'D' ) {
@@ -65,7 +65,7 @@ if ( $action == 'A' ) {
       $error = "deletion error";
     } else {
       // credit the appropriate account
-      $amount = get_guest_refund_price( $id, $host, $guest_name );
+      $amount = get_refund_price( $id, $guest_name );
       $billing = get_billing_group( $host );
       $description = "$guest_name cancelled dining";
       add_financial_event( $host, $billing, $amount, 

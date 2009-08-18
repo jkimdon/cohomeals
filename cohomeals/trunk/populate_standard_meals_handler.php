@@ -188,7 +188,7 @@ function insert_meal( $date, $time, $suit, $price, $menu ) {
 		if ( !($row3 = dbi_fetch_row( $res3 )) ) { 
 		  // i.e. if they haven't already been refunded above
 		  $billing = get_billing_group( $financial_user );
-		  $refund_price = get_guest_refund_price( $mealid, $financial_user, $guest_name );
+		  $refund_price = get_refund_price( $mealid, $guest_name );
 		  $message = "base price change: guest refund $guest_name\n";
 		  add_financial_event( $financial_user, $billing, $refund_price, "credit",
 				       $message, $mealid, "" );

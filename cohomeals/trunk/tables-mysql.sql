@@ -468,7 +468,7 @@ CREATE TABLE webcal_financial_log (
   /* unique id of this log entry */
   cal_log_id INT NOT NULL,
   /* which person is affected */
-  cal_login VARCHAR(25) NOT NULL,
+  cal_login VARCHAR(50) NOT NULL,
   /* which household is affected */
   cal_billing_group VARCHAR(25) NOT NULL,
   /* describe event */
