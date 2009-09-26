@@ -177,10 +177,10 @@ function PrintLegend() {
   $this->Cell( $remaining_width, $height, "(A = adult)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(K = kid 4-12 yrs)", "RTB",1,'L');
+  $this->Cell( $remaining_width, $height, "(K = kid 10-12 yrs)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(F = free <4 yrs)", "RTB",1,'L');
+  $this->Cell( $remaining_width, $height, "(F = free 0-9 yrs)", "RTB",1,'L');
 
 
   $this->SetX( $saveX );
@@ -352,10 +352,10 @@ function SumTotals( $counts, $id ) {
  $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_adult'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Kids (4-12)", 1, 0, 'R' );
+ $this->Cell( $label_width, $height, "Kids (10-12)", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_kid'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Free (<4)", 1, 0, 'R' );
+ $this->Cell( $label_width, $height, "Free (0-9)", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_free'], 1, 1, 'C' );
 
 }
