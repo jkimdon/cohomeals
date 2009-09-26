@@ -115,10 +115,10 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
 	echo ">Adult</option>";
 	echo "<option value=\"K\" ";
 	if ( $fee_class == "K" ) echo "selected=\"selected\"";
-	echo ">Age 4-12</option>";
+	echo ">Age 10-12</option>";
 	echo "<option value=\"F\" ";
 	if ( $fee_class == "F" ) echo "selected=\"selected\"";
-	echo ">Age 0-3</option>";
+	echo ">Age 0-9</option>";
 	  ?>
         </select></td>
         <?php

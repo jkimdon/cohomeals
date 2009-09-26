@@ -329,7 +329,7 @@ function get_fee_category( $id, $username ) {
 
 
   $epoch = date_to_epoch( $event_date );
-  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-4, 
+  $free_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-10, 
 			  date( "m", $epoch ), date( "d", $epoch ) );
   $child_cutoff = sprintf( "%04d%02d%02d", date( "Y", $epoch )-13, 
 			   date( "m", $epoch ), date( "d", $epoch ) );

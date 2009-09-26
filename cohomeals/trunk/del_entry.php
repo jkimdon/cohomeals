@@ -80,7 +80,7 @@ if ( $id > 0 && empty ( $error ) ) {
     $meal_time = date_to_str( $row[0] ) . ", " . display_time ( $row[1] );
 
     $subject = "$meal_time meal canceled ($reason)";
-    $body = "The meal scheduled for $meal_time has been canceled ($reason)";
+    $body = "The meal scheduled for $meal_time has been canceled (due to $reason)";
     load_global_settings();
     $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 

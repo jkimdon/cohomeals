@@ -25,8 +25,8 @@ Enter the full name of your guest:
 Enter their cost class:
 <select name="age">
 <option value="A" selected="selected">Adult</option>
-<option value="K">Age 4-12</option>
-<option value="F">Age 0-3</option>
+<option value="K">Age 10-12</option>
+<option value="F">Age 0-9</option>
 </select>
 </p>
 
