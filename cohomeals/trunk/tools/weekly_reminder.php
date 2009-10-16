@@ -2,6 +2,9 @@
 <?php
 
 
+/// Run as a cron job on Wed morning. It's a weekly reminder to sign up
+// (signup deadline is Friday)
+
 // Load include files.
 // If you have moved this script out of the WebCalendar directory,
 // which you probably should do since it would be better for security

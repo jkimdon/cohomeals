@@ -13,12 +13,11 @@ for f in `cat $TOOLS/mirror.exclude`; do
   rm -rf $f
 done
 
-# include the reminder script, even though it is contained within the tools/
+# include the reminder scripts, even though they are contained within the tools/
 # directory, excluded in mirror.exclude above.
 mkdir -p tools
 svn export http://cohomeals.googlecode.com/svn/cohomeals/trunk/tools/weekly_reminder.php tools/weekly_reminder.php
-#svn export file:///var/svn/coho/cohomeals/trunk/tools/weekly_reminder.php \
-#       tools/weekly_reminder.php
+svn export http://cohomeals.googlecode.com/svn/cohomeals/trunk/tools/crew_reminders.php tools/crew_reminders.php
 
 lftp -f $TOOLS/mirror.lftp
 
