@@ -55,22 +55,25 @@ for ( $i = 0; $i < count ( $meals ); $i++ ) {
   $meal_date = $meals[$i]['cal_date'];
   $meal_time = $meals[$i]['cal_time'];
   $head_chef = has_head_chef( $meal_id );
-  user_load_variables( $head_chef, "head" );
-  $chef_email = $GLOBALS[heademail];
-  $chef_name = $GLOBALS[headfirstname];
 
-  $subject = "Head chef reminder for " . date_to_str( $meal_date, "", true, true, $meal_time );
+  if ( $head_chef != "" ) {
 
-  $body = "Hi " . $chef_name . " (" . $chef_email . "),\n\n";
-  $body .= "This is your friendly automated reminder that you are signed up " .
-    "to be head chef in one week, on " . date_to_str( $meal_date, "", true, true, $meal_time );
-  $body .= ". If you haven't already, please post your menu on the website: " .
-    "https://www.cohoecovillage.org/meals/view_entry.php?id=" . $meal_id . "\n\n";
-  $body .= "Thanks so much for supporting our meal program!\n\n";
-  $body .= "Bon appetit!\n";
-
-  mail( $chef_email, $subject, $body, $extra_hdrs );
-  mail( "jkimdon@gmail.com", $subject, $body, $extra_hdrs ); // debug
+    user_load_variables( $head_chef, "head" );
+    $chef_email = $GLOBALS[heademail];
+    $chef_name = $GLOBALS[headfirstname];
+    
+    $subject = "Head chef reminder for " . date_to_str( $meal_date, "", true, true, $meal_time );
+    
+    $body = "Hi " . $chef_name . " (" . $chef_email . "),\n\n";
+    $body .= "This is your friendly automated reminder that you are signed up " .
+      "to be head chef in one week, on " . date_to_str( $meal_date, "", true, true, $meal_time );
+    $body .= ". If you haven't already, please post your menu on the website: " .
+      "https://www.cohoecovillage.org/meals/view_entry.php?id=" . $meal_id . "\n\n";
+    $body .= "Thanks so much for supporting our meal program!\n\n";
+    $body .= "Bon appetit!\n";
+    
+    mail( $chef_email, $subject, $body, $extra_hdrs );
+  }
  }
 
 
@@ -115,7 +118,6 @@ for ( $i = 0; $i < count ( $meals ); $i++ ) {
 	$body .= "Bon appetit!\n";
 	
 	mail( $worker_email, $subject, $body, $extra_hdrs );
-	mail( "jkimdon@gmail.com", $subject, $body, $extra_hdrs ); // debug
       }
     }
   }
