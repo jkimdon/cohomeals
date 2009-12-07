@@ -52,6 +52,7 @@ $meals = get_entries( $one_week_later );
 
 for ( $i = 0; $i < count ( $meals ); $i++ ) {
   $meal_id = $meals[$i]['cal_id'];
+  if ( is_cancelled( $meal_id ) == true ) continue;
   $meal_date = $meals[$i]['cal_date'];
   $meal_time = $meals[$i]['cal_time'];
   $head_chef = has_head_chef( $meal_id );
@@ -81,6 +82,7 @@ $events = read_events( $one_day_later, $one_day_later );
 $meals = get_entries( $one_day_later );
 for ( $i = 0; $i < count ( $meals ); $i++ ) {
   $meal_id = $meals[$i]['cal_id'];
+  if ( is_cancelled( $meal_id ) == true ) continue;
   $meal_date = $meals[$i]['cal_date'];
   $meal_time = $meals[$i]['cal_time'];
   $head_chef = has_head_chef( $meal_id );
