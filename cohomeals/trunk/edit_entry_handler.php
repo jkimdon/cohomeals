@@ -38,11 +38,14 @@ for ( $i=0; $i<7; $i++ ) {
     $repday[$i] = 1;
 }
 
-$max_jobs=7;
+$max_jobs=100;
 for ( $i=1; $i<$max_jobs; $i++ ) {
   $job[$i] = "";
   $key = "job$i";
-  $job[$i] = mysql_safe( getValue( $key ), true );
+  $value = getValue( $key );
+  if ( isset( $value ) ) {
+    $job[$i] = mysql_safe( $value, true );
+  }
 }
 
 // Make sure this user is really allowed to edit this event.
