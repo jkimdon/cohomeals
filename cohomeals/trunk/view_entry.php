@@ -800,6 +800,9 @@ function display_crew( $type, $rowcolor ) {
   echo "<tr class=\"d" . $rowcolor . "\"><td style=\"vertical-align:top; font-weight:bold;\">Crew:</td><td>";
 
   ?>
+
+  <h4><font color="#DD0000">Please note that you are no longer automatically signed up to dine when signing up to crew/chef. Please be sure to sign up to dine if you want to eat. Thanks!</font></h4>
+
   <table class="bordered_table">
      <tr><td><h3>Crew description</h3></td><td><h3>Volunteer</h3></td></tr>
   <?php 

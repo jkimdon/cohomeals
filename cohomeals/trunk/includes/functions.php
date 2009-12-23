@@ -2430,7 +2430,6 @@ function edit_head_chef_participation ( $id, $action, $user="" ) {
 	"VALUES ( $id, '$user', 'H' )";
       if ( ! dbi_query ( $sql ) ) 
 	$error = translate("Database error") . ": " . dbi_error ();
-      edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
       add_subscribed_diners( $id );
     }
   }
@@ -2590,7 +2589,6 @@ function edit_crew_participation( $id, $action, $user, $job, $olduser = "" ) {
       $sql .= " AND cal_login = '$olduser'";
     if ( dbi_query( $sql ) ) {
       $modified = true;
-      edit_participation( $id, 'A', 'M', $user, 0 ); // automatically sign up to eat
     }
   }
 
@@ -2651,7 +2649,7 @@ function edit_club_subscription( $club_id, $user, $action ) {
 	}
 	else {
 	  $mod = edit_participation ( $cal_id, 'D', 'M', $user );
-	  $mod = edit_participation ( $cal_id, 'D', 'F', $user );
+	  $mod = edit_participation ( $cal_id, 'D', 'T', $user );
 	}
       }
       dbi_free_result( $res );
