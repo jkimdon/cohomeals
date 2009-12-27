@@ -126,7 +126,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend );
       $thiswday = date ( "w", $date );
       print "<td";
       $class = "";
-      if ( date ( "Ymd", $date  ) == date ( "Ymd", $today ) ) {
+      if ( date ( "Ymd", $date  ) == date ( "Ymd" ) ) {
         $class = "today";
       }
       if ( strlen ( $class ) )  {
