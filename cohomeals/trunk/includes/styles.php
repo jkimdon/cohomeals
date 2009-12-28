@@ -51,9 +51,8 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
     (typically used when the table also has cellspacing, thereby
     creating a border effect)
   CELLBG - background-color for normal cells
-    (not weekends, today, or any other types of cells)
+    (not today, or any other types of cells)
   TODAYCELLBG - background-color for cells that make up today's date
-  WEEKENDBG - background-color for cells that make up the weekend
   THFG - text color for table headers
   THBG - background-color for table headers
   POPUP_FG - text color for event popups
@@ -482,16 +481,40 @@ th {
   <?php echo background_css ( $GLOBALS['CELLBG'], 100 ); ?>
   vertical-align: top;
 }
-#month .main td.weekend {
-  <?php echo background_css ( $GLOBALS['WEEKENDBG'], 100 ); ?>
-  border-top: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
-  border-left: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
-}
 #month .main td.today {
-  <?php echo background_css ( $GLOBALS['TODAYCELLBG'], 100 ); ?>
   border-top: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
   border-left: 1px solid <?php echo $GLOBALS['TABLEBG']; ?>;
   vertical-align: top;
+}
+#month .main td.today div {
+  <?php echo background_css ( $GLOBALS['TODAYCELLBG'], 100 ); ?>
+  font-size: 1.3em;
+}
+#month .main td div {
+  font-size: 1.3em;
+}
+#month .main_show_crew {
+  border: 1px solid;
+  width: 15%;
+  background-color: #D9D9F3;
+  clear: both;
+}
+#month .main_show_crew td {
+  border-width: 0px;
+  font-size: 10px;
+  height: 9px;
+  padding: 0px;
+  background-color: #D9D9F3;
+  white-space:nowrap;
+}
+#month .event_info {
+  border: 0px;
+  width: 15%;
+}
+#month .event_info td {
+  border-width: 0px;
+  font-size: 12px;
+  height: 10px;
 }
 #month #prevmonth {
   float: left;
