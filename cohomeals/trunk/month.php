@@ -36,22 +36,16 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
   echo "<br />\n";
   echo $user_fullname;
 ?></span>
-<p>
-<span class="date"><br /><?php
-  echo date_to_str ( sprintf ( "%04d%02d01", $thisyear, $thismonth ),
-    $DATE_FORMAT_MY, false, false );
-?></span>
-</p>
 
 <p>
-<span class="date"><br /><?php
+<span class="title"><br /><?php
   $billing = get_billing_group( $login );
   echo "Your account balance is " . price_to_str( get_balance( $billing ) );
 ?></span>
 </p>
 
 <p>
-<span class="date"><br /><?php
+<span class="title"><br /><?php
   $sql = "SELECT cal_id FROM webcal_meal_participant WHERE cal_type = 'H' AND cal_login = '$login'";
   $first = true;
   $today = date( "Ymd" );
@@ -85,6 +79,14 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
 ?>
 </span></p>
 </div>
+
+<hr>
+<p class="month_name"><?php
+  echo date_to_str ( sprintf ( "%04d%02d01", $thisyear, $thismonth ),
+    $DATE_FORMAT_MY, false, false );
+?>
+</p>
+
 
 <table class="main" style="clear:both;" cellspacing="0" cellpadding="0">
 <tr>
@@ -153,7 +155,7 @@ $next = mktime ( 3, 0, 0, $thismonth + 1, $thisday, $thisyear );
 $prev = mktime ( 3, 0, 0, $thismonth - 1, $thisday, $thisyear );
 ?>
 
-<p align="center">E = you are signed up to eat that meal, W = you are signed up to work</p>
+<p class="printer" align="center">E = you are signed up to eat that meal, W = you are signed up to work</p>
 
 <div id="monthnav">
 
