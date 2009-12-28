@@ -927,20 +927,9 @@ function site_extras_for_popup ( $id ) {
  *
  * @return string The HTML for the event popup
  */
-function build_event_popup ( $popupid, $head_chef, $menu ) {
-  global $login, $popup_fullnames, $popuptemp_fullname;
+function build_event_popup ( $popupid, $menu ) {
+  global $login;
   $ret = "<dl id=\"$popupid\" class=\"popup\">\n";
-
-  if ( empty ( $popup_fullnames ) )
-    $popup_fullnames = array ();
-
-  if ( $head_chef == "None" ) $chef = "None";
-  else {
-    user_load_variables( $head_chef, "chef" );
-    $chef = $GLOBALS[cheffullname];
-  }
-
-  $ret .= "<dt>Head chef:</dt><dd>$chef</dd>";
 
   $ret .= "<dt>Menu:</dt>\n<dd>";
   if ( ! empty ( $GLOBALS['allow_html_description'] ) &&
@@ -1141,11 +1130,38 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $suit, $head_chef,  $menu, 
-		       $need_crew, $deadline ) {
+function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
   global $eventinfo, $PHP_SELF;
   global $login;
   static $key = 0;
+
+
+  $popupid = "eventinfo-$id-$key";
+  $key++;
+
+  $meal_indicator = create_meal_indicator( $id, $date, $time, $suit, $popupid );
+  $crew_display = create_crew_display( $id );
+
+  echo "<table class=\"event_info\">";
+  echo "<tr><td>";
+  echo $meal_indicator;
+  echo "</td></tr>";
+
+
+  echo "<tr><td>";
+  echo $crew_display;
+  echo "</td></tr></table>";  
+  
+
+  for ( $i=0; $i<count($deadline); $i++ )
+    echo "<br>Deadline for " . 
+      date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
+
+  $eventinfo .= build_event_popup ( $popupid, $menu );
+}
+
+
+function create_meal_indicator( $id, $date, $time, $suit, $popupid ) {
 
   $id = mysql_safe( $id, false );
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
@@ -1172,49 +1188,106 @@ function print_entry ( $id, $date, $time, $suit, $head_chef,  $menu,
     dbi_free_result( $res );
   }
 
+  $meal_display = "";
 
-  $popupid = "eventinfo-$id-$key";
-  $key++;
-  echo "<a class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
-  echo "\" onmouseover=\"window.status='" . 
-    "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
 
   $suit_img = $suit;
   $suit_img .= "_20x20.png";
-  echo "<img width=\"20\" border=\"0\"" . 
+  $meal_display .= "<img width=\"20\" border=\"0\"" . 
     "src=\"images/$suit_img\" alt=\"View this entry\" />";
 
+
+  $meal_display .= "<a class=\"$class\" href=\"view_entry.php?id=$id&amp;date=$date";
+  $meal_display .= "\" onmouseover=\"window.status='" . 
+    "'; show(event, '$popupid'); return true;\" onmouseout=\"window.status=''; hide('$popupid'); return true;\">";
 
   $timestr = "";
   $timestr = display_time ( $time );
   $time_short = preg_replace ("/(:00)/", '', $timestr);
-  echo "&nbsp;" . $time_short; //. "&raquo;&nbsp;";
-  //  echo htmlspecialchars ( $suit );
+  $meal_display .= "&nbsp;" . $time_short; 
+  $meal_display .= "</a>\n";
 
-  echo "</a>\n";
-  
   if ( $class == "participating_entry" ) {
-    echo " (";
+    $meal_display .= " (";
     if ( $eating == true )
-      echo "E";
+      $meal_display .= "E";
     if ( $working == true )
-      echo "W";
-    echo ")";
+      $meal_display .= "W";
+    $meal_display .= ")";
+  }
+  
+  return $meal_display;
+}
+
+function create_crew_display( $id ) {
+
+  $crew_display = "";
+  $crew_display .= "<table class=\"main_show_crew\">";
+
+  $head_chef = has_head_chef( $id );
+  if ( $head_chef == "" ) $chef = "<font color=\"#DD0000\">STILL NEEDED</font>";
+  else {
+    user_load_variables( $head_chef, "chef" );
+    $chef = $GLOBALS[cheffirstname];
+  }
+  $crew_display .= "<tr><td>Head:</td><td>" . $chef . "</td></tr>";
+  $label = "Crew:";
+
+  $crew = load_crew( $id );
+  for ( $i=0; $i<count( $crew['name'] ); $i++ ) {
+    $crew_display .= "<tr><td>" . $label . "</td>";
+    $crew_display .= "<td>" . $crew['name'][$i] . " (" . $crew['job'][$i] . ")</td></tr>";
+    $label = "";
   }
 
-  echo "<br />";
-  if ( $need_crew == 'H' ) 
-    echo "(need head chef)";
-  else if ( $need_crew == 'C' ) 
-    echo "(need crew members)";
+  $crew_display .= "</table>";
 
-  echo "<br />";
-  for ( $i=0; $i<count($deadline); $i++ )
-    echo "<br>Deadline for " . 
-      date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
-
-  $eventinfo .= build_event_popup ( $popupid, $head_chef, $menu );
+  return $crew_display;
 }
+
+
+function load_crew( $id ) {
+
+  $crew = array();
+
+  $id = mysql_safe( $id, false );
+  $sql = "SELECT cal_login, cal_notes " . 
+    "FROM webcal_meal_participant " . 
+    "WHERE cal_id = $id AND cal_type = 'C'";
+  $i = 0;
+  if ( $res = dbi_query( $sql ) ) {
+    while ( $row = dbi_fetch_row( $res ) ) {
+      $crew_user = $row[0];
+      $crew_job = $row[1];
+
+      if ( ereg( "^none", $crew_user ) ) {
+	$crew['name'][$i] = "<font color=\"#DD0000\">STILL NEEDED</font>";
+	$name_length = 12;
+      } else {
+	user_load_variables( $crew_user, "temp" );
+	$crew['name'][$i] = $GLOBALS['tempfirstname'];
+	$name_length = strlen( $crew[$i]['name'] );
+      }
+
+      $job_length = strlen( $crew_job );
+      $available_length = 25 - $name_length;
+      if ( $job_length > $available_length ) {
+	$crew['job'][$i] = substr_replace( $crew_job, "...", $available_length, $job_length );
+      } else {
+	$crew['job'][$i] = $crew_job;
+      }
+
+      $i++;
+    }
+    dbi_free_result( $res );
+  }
+
+  // keep the different jobs together
+  array_multisort( $crew['job'], $crew['name'] );
+
+  return $crew;
+}
+
 
 /** 
  * Gets any site-specific fields for an entry that are stored in the database in the webcal_site_extras table.
@@ -1464,22 +1537,15 @@ function get_monday_before ( $year, $month, $day ) {
  * @param string $date Date in YYYYMMDD format
  */
 function print_date_entries ( $date ) {
-  global $readonly, $is_meal_coordinator, $login,
-    $public_access, $public_access_can_add;
+  global $is_meal_coordinator, $login;
   $cnt = 0;
 
   $year = substr ( $date, 0, 4 );
   $month = substr ( $date, 4, 2 );
   $day = substr ( $date, 6, 2 );
   $dateu = mktime ( 3, 0, 0, $month, $day, $year );
-  $can_add = ( $readonly == "N" || $is_meal_coordinator );
-  if ( $public_access == "Y" && $public_access_can_add != "Y" &&
-    $login == "__public__" )
-    $can_add = false;
-  if ( $readonly == 'Y' )
-    $can_add = false;
-  echo "$day";
-  print "<br />\n";
+  $can_add = $is_meal_coordinator;
+  echo "<div>$day</div>";
   
   // get all events for this date and store in $ev
   $ev = get_entries ( $date );
@@ -1504,50 +1570,17 @@ function print_date_entries ( $date ) {
   }
 
 
-  /// check if need crew/head chef
+
   for ( $i = 0; $i < count ( $ev ); $i++ ) {
     $viewid = $ev[$i]['cal_id'];
 
     if ( is_cancelled( $viewid ) == true ) continue;
 
-    $viewname = $ev[$i]['cal_suit'];
-
-    $need_crew = 'N';
-    
-    $sql = "SELECT cal_login " .
-      "FROM webcal_meal_participant " .
-      "WHERE cal_id = $viewid " .
-      "AND cal_type = 'H'";
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) {
-	$head_chef = $row[0];
-      } else {
-	$need_crew = 'H';
-	$head_chef = "None";
-      }
-      dbi_free_result( $res );
-    }
-    if ( $need_crew != 'H' ) {
-      // there is a head chef. now check crew
-
-      $sql2 = "SELECT cal_login " .
-	"FROM webcal_meal_participant " .
-	"WHERE cal_id = $viewid " . 
-	"AND cal_type = 'C'";
-      if ( $res2 = dbi_query( $sql2 ) ) {
-	while ( $row2 = dbi_fetch_row( $res2 ) ) {
-	  if ( ereg( "^none", $row2[0] ) ) 
-	    $need_crew = 'C';
-	}
-	dbi_free_result( $res2 );
-      }
-    }
-
+    $suit = $ev[$i]['cal_suit'];
 
     print_entry ( $viewid,
 		  $date, $ev[$i]['cal_time'],
-		  $viewname, $head_chef, $ev[$i]['cal_menu'], 
-		  $need_crew, $deadline );
+		  $suit, $ev[$i]['cal_menu'], $deadline );
     $cnt++;
   }
   if ( $cnt == 0 ) { // no events but still print deadlines
