@@ -468,6 +468,12 @@ th {
   <?php echo background_css ( $GLOBALS['THBG'], 15 ); ?>
   width: 14%;
 }
+#month .month_name {
+  font-size: 18px;
+  text-align: center;
+  font-weight: bold;
+  border: 1px;
+}
 #year .main td {
   text-align: center;
   padding: 0px 3px;
