@@ -1283,7 +1283,8 @@ function load_crew( $id ) {
   }
 
   // keep the different jobs together
-  array_multisort( $crew['job'], $crew['name'] );
+  if ( count( $crew['job'] ) > 0 ) 
+    array_multisort( $crew['job'], $crew['name'] );
 
   return $crew;
 }
