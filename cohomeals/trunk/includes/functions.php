@@ -1139,7 +1139,7 @@ function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
   $popupid = "eventinfo-$id-$key";
   $key++;
 
-  $meal_indicator = create_meal_indicator( $id, $date, $time, $suit, $popupid );
+  $meal_indicator = create_meal_indicator( $id, $date, $time, $suit, $popupid, $login );
   $crew_display = create_crew_display( $id );
 
   echo "<table class=\"event_info\">";
@@ -1161,9 +1161,10 @@ function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
 }
 
 
-function create_meal_indicator( $id, $date, $time, $suit, $popupid ) {
+function create_meal_indicator( $id, $date, $time, $suit, $popupid, $login ) {
 
   $id = mysql_safe( $id, false );
+  $login = mysql_safe( $login, true );
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND cal_login = '$login' " .
     "AND ( cal_type = 'M' OR cal_type = 'T' )";
