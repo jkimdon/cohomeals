@@ -1130,7 +1130,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
  *
  * @uses build_event_popup
  */
-function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
+function print_entry ( $id, $date, $time, $suit, $menu, $price, $deadline ) {
   global $eventinfo, $PHP_SELF;
   global $login;
   static $key = 0;
@@ -1139,7 +1139,7 @@ function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
   $popupid = "eventinfo-$id-$key";
   $key++;
 
-  $meal_indicator = create_meal_indicator( $id, $date, $time, $suit, $popupid, $login );
+  $meal_indicator = create_meal_indicator( $id, $date, $time, $suit, $price, $popupid, $login );
   $crew_display = create_crew_display( $id );
 
   echo "<table class=\"event_info\">";
@@ -1161,7 +1161,7 @@ function print_entry ( $id, $date, $time, $suit, $menu, $deadline ) {
 }
 
 
-function create_meal_indicator( $id, $date, $time, $suit, $popupid, $login ) {
+function create_meal_indicator( $id, $date, $time, $suit, $price, $popupid, $login ) {
 
   $id = mysql_safe( $id, false );
   $login = mysql_safe( $login, true );
@@ -1206,6 +1206,7 @@ function create_meal_indicator( $id, $date, $time, $suit, $popupid, $login ) {
   $timestr = display_time ( $time );
   $time_short = preg_replace ("/(:00)/", '', $timestr);
   $meal_display .= "&nbsp;" . $time_short; 
+  $meal_display .= "&nbsp; (" . price_to_str( $price ) . ")";
   $meal_display .= "</a>\n";
 
   if ( $class == "participating_entry" ) {
@@ -1401,7 +1402,7 @@ function query_events ( $date_filter ) {
 
   $sql = "SELECT webcal_meal.cal_suit, webcal_meal.cal_notes, "
     . "webcal_meal.cal_date, webcal_meal.cal_time, "
-    . "webcal_meal.cal_id, webcal_meal.cal_menu ";
+    . "webcal_meal.cal_id, webcal_meal.cal_menu, webcal_meal.cal_base_price ";
   $sql .= "FROM webcal_meal WHERE ";
 
   $sql .= $date_filter;
@@ -1426,6 +1427,7 @@ function query_events ( $date_filter ) {
         "cal_time" => $row[3],
         "cal_id"   => $row[4],
         "cal_menu" => $row[5],
+	"cal_base_price" => $row[6],
   "cal_exceptions" => array()
         );
 
@@ -1582,7 +1584,7 @@ function print_date_entries ( $date ) {
 
     print_entry ( $viewid,
 		  $date, $ev[$i]['cal_time'],
-		  $suit, $ev[$i]['cal_menu'], $deadline );
+		  $suit, $ev[$i]['cal_menu'], $ev[$i]['cal_base_price'], $deadline );
     $cnt++;
   }
   if ( $cnt == 0 ) { // no events but still print deadlines
