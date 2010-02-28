@@ -135,12 +135,11 @@ function print_standard_entry( $thiswday, $which_week ) {
 	echo $crew[$i];
 	$i++;
 	$person = $crew[$i];
+	echo " = ";
 	if ( $person != "none" ) {
-	  user_load_variables( $person, "temp" );
-	  echo " = " . $GLOBALS[tempfirstname] . " " . $GLOBALS[templastname];
+	  if ( user_load_variables( $person, "temp" ) == true ) 
+	    echo $GLOBALS[tempfirstname] . " " . $GLOBALS[templastname];
 	}
-	else echo " = ";
-	echo "<br>";
       }
       echo "</td></tr>";
 
