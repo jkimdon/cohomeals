@@ -92,7 +92,11 @@ echo "<p>Signup deadline: " . date_to_str( $signup_deadline );
 $past_deadline = false;
 if ( $signup_deadline < date("Ymd") ) $past_deadline = true;
 $can_signup = !$past_deadline;
-if ( $is_meal_coordinator ) $can_signup = true;
+$can_remove = !$past_deadline;
+if ( $is_meal_coordinator ) {
+  $can_signup = true;
+  $can_remove = true;
+}
 
 if ( $past_deadline == true ) 
   echo "<br>This meal is in <font color=\"#DD0000\">walkin status</font> (i.e. past signup deadline)</p>";
@@ -203,12 +207,20 @@ if ( $res ) {
 // count how many there are in case there's a limit
 if ( $max_diners > 0 ) {
   $max_diner_count = 0;
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
+  $sql = "SELECT count(*) FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND ( cal_type = 'M' OR cal_type = 'T' )";
-  $res = dbi_query( $sql );
-  while ( dbi_fetch_row( $res ) ) 
-    $max_diner_count++;
-  dbi_free_result( $res );
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) )
+      $max_diner_count += $row[0];
+    dbi_free_result( $res );
+  }
+  $sql = "SELECT count(*) FROM webcal_meal_guest " .
+    "WHERE cal_meal_id = $id";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) )
+      $max_diner_count += $row[0];
+    dbi_free_result( $res );
+  }
   if ( $max_diner_count >= $max_diners ) $can_signup = false;
 }
 
@@ -253,7 +265,7 @@ if ( $max_diners > 0 ) {
 	else $onsite_adults++; // $age == "A"
 	echo $name['cal_fullname'];
 	if ( is_signer( $username ) || ($username == $login) ) {
-	  if ( $can_signup == true ) {
+	  if ( $can_remove == true ) {
 	    remove_button( $username, $id, "M" );
 	  }
 	  echo "&nbsp;&nbsp;&nbsp;";
@@ -284,8 +296,10 @@ if ( $max_diners > 0 ) {
 	echo "$guest_name (guest of $tempfirstname $templastname)";
 
 	if ( ($host == $login) || ($is_meal_coordinator) ) {
-	  echo "&nbsp;&nbsp;&nbsp;";
-	  remove_guest_button( $guest_name, "M", $id );
+	  if ( $can_remove == true ) {
+	    echo "&nbsp;&nbsp;&nbsp;";
+	    remove_guest_button( $guest_name, "M", $id );
+	  }
 	  echo "&nbsp;&nbsp;&nbsp;";
 	  change_guest_button( $guest_name, "M", $id );
 	} else
@@ -346,7 +360,7 @@ for ( $i = 0; $i < $num_app; $i++ ) {
   echo $tempfirstname . " " . $templastname;
   $person = $approved[$i];
   if ( is_signer( $person ) || ($person == $login) ) {
-    if ( $can_signup == true ) {
+    if ( $can_remove == true ) {
       remove_button( $person, $id, "T" );
     }
     echo "&nbsp;&nbsp;&nbsp;";
@@ -373,8 +387,10 @@ if ( $res = dbi_query( $sql ) ) {
     echo "$guest_name (guest of $tempfirstname $templastname)";
     
     if ( ($host == $login) || ($is_meal_coordinator) ) {
-      echo "&nbsp;&nbsp;&nbsp;";
-      remove_guest_button( $guest_name, "T", $id );
+      if ( $can_remove == true ) {
+	echo "&nbsp;&nbsp;&nbsp;";
+	remove_guest_button( $guest_name, "T", $id );
+      }
       echo "&nbsp;&nbsp;&nbsp;";
       change_guest_button( $guest_name, "T", $id );
     } else
@@ -397,6 +413,7 @@ $free = $onsite_free + $takehome_free;
 echo $adults + $children + $free . " people: ";
 echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
 echo " (" . price_to_str( get_money_for_meal( $id )) . " income)";
+if ( $max_diner_count > 0 ) echo "&nbsp;&nbsp;<font color=\"#DD0000\">Limited to $max_diners diners</font>";
 ?>
 </td>
 </tr>
@@ -770,7 +787,8 @@ function display_head_chef( $rowcolor ) {
 	$im_working = true;
       }
       if ( (is_signer( $person ) || ($person == $login)) ) {
-	remove_button( $person, $id, 'H' );
+	if ( $can_remove == true ) 
+	  remove_button( $person, $id, 'H' );
       }
       echo "\n";
     }
