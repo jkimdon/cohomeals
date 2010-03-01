@@ -91,7 +91,7 @@ $signup_deadline = get_day( $event_date, -1*$deadline );
 echo "<p>Signup deadline: " . date_to_str( $signup_deadline );
 $past_deadline = false;
 if ( $signup_deadline < date("Ymd") ) $past_deadline = true;
-$can_signup = !$past_deadline;
+$can_signup = !$past_deadline; 
 $can_remove = !$past_deadline;
 if ( $is_meal_coordinator ) {
   $can_signup = true;
@@ -182,7 +182,7 @@ else echo "</p>";
 
 
 <?php 
-display_crew( 'C', $row_num );
+display_crew( 'C', $row_num, $can_remove );
 $row_num = ( $row_num == 1 ) ? 0:1;
 ?>
 
@@ -684,6 +684,7 @@ function add_me_button( $type, $job="" ) {
     }
   }
 
+  echo "&nbsp;&nbsp;&nbsp;";
   echo "<a name=\"participation\" class=\"addbutton\"" .
     "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A&" .
     "olduser=$olduser\">" .
@@ -809,7 +810,7 @@ function display_head_chef( $rowcolor ) {
 
 
 
-function display_crew( $type, $rowcolor ) {
+function display_crew( $type, $rowcolor, $can_remove=true ) {
   global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
@@ -825,39 +826,28 @@ function display_crew( $type, $rowcolor ) {
      <tr><td><h3>Crew description</h3></td><td><h3>Volunteer</h3></td></tr>
   <?php 
 
+  $crew = load_crew( $id, true );
+  for ( $i=0; $i<count( $crew['name'] ); $i++ ) {
+    $person_username = $crew['username'][$i];
+    $person = $crew['name'][$i];
+    $description = $crew['job'][$i];
+    if ( $description == "" ) $description = "???";
 
-  $sql = "SELECT cal_login, cal_notes FROM webcal_meal_participant " .
-    "WHERE cal_id = $id AND cal_type = 'C'";
-  $res = dbi_query ( $sql );
-  if ( $res ) {
-    while ( $row = dbi_fetch_row ( $res ) ) {
-      $person = $row[0];
-      $description = $row[1];
-      $description = trim( $description );
-      $job = mysql_safe( $description );
-      if ( $description == "" ) $description = "???";
+    echo "<tr><td>$description</td>";
+    echo "<td>$person";
 
-      echo "<tr><td>$description</td>";
-
-      if ( ereg( "^none", $person ) ) {
-	echo "<td> none yet "; 
+    if ( ereg( "^none", $person_username ) ) {
 	add_me_button( 'C', $job );
 	signup_buddy_button( 'C', $id, $job );
-      } else {
-	user_load_variables ( $person, "temp" );
-	echo "<td> " . $GLOBALS[tempfirstname] . 
-	" " . $GLOBALS[templastname];
-	if ( (is_signer( $person ) || ($person == $login)) ) {
-	  remove_button( $person, $id, $type );
-	  echo "</td>";
-	}
+    } else {
+      if ( (is_signer( $person_username ) || ($person_username == $login)) ) {
+	if ( $can_remove == true )
+	  remove_button( $person_username, $id, $type );
       }
-
-      echo "</tr>";
     }
+
+    echo "</td></tr>";
   }
-  else 
-    echo "Database error: " . dbi_error() . "<br />\n";
 
 
 

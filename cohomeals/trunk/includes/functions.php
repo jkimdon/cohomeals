@@ -1235,7 +1235,7 @@ function create_crew_display( $id ) {
   $crew_display .= "<tr><td>Head:</td><td>" . $chef . "</td></tr>";
   $label = "Crew:";
 
-  $crew = load_crew( $id );
+  $crew = load_crew( $id, false );
   for ( $i=0; $i<count( $crew['name'] ); $i++ ) {
     $crew_display .= "<tr><td>" . $label . "</td>";
     $crew_display .= "<td>" . $crew['name'][$i] . " (" . $crew['job'][$i] . ")</td></tr>";
@@ -1248,7 +1248,7 @@ function create_crew_display( $id ) {
 }
 
 
-function load_crew( $id ) {
+function load_crew( $id, $use_longnames=true ) {
 
   $crew = array();
 
@@ -1261,6 +1261,7 @@ function load_crew( $id ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $crew_user = $row[0];
       $crew_job = $row[1];
+      $crew['username'][$i] = $crew_user;
 
       if ( ereg( "^none", $crew_user ) ) {
 	$crew['name'][$i] = "<font color=\"#DD0000\">STILL NEEDED</font>";
@@ -1268,11 +1269,16 @@ function load_crew( $id ) {
       } else {
 	user_load_variables( $crew_user, "temp" );
 	$crew['name'][$i] = $GLOBALS['tempfirstname'];
+	if ( $use_longnames == true )
+	  $crew['name'][$i] .= " " . $GLOBALS['templastname'];
 	$name_length = strlen( $crew[$i]['name'] );
       }
 
       $job_length = strlen( $crew_job );
-      $available_length = 25 - $name_length;
+      if ( $use_longnames == false ) {
+	$available_length = 25 - $name_length;
+      } else $available_length = $job_length;
+      
       if ( $job_length > $available_length ) {
 	$crew['job'][$i] = substr_replace( $crew_job, "...", $available_length, $job_length );
       } else {
@@ -1286,7 +1292,7 @@ function load_crew( $id ) {
 
   // keep the different jobs together
   if ( count( $crew['job'] ) > 0 ) 
-    array_multisort( $crew['job'], $crew['name'] );
+    array_multisort( $crew['job'], $crew['name'], $crew['username'] );
 
   return $crew;
 }
