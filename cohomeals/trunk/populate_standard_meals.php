@@ -30,6 +30,8 @@ echo "<h1>Populate regular meals for " .
 
 // We add 2 hours on to the time so that the switch to DST doesn't
 // throw us off.  So, all our dates are 2AM for that day.
+$thisyear = substr( $month_date, 0, 4 );
+$thismonth = substr( $month_date, 4, 2 );
 $wkstart = get_sunday_before ( $thisyear, $thismonth, 1 );
 
 // generate values for first day and last day of month

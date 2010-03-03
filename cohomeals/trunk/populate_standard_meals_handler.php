@@ -13,18 +13,35 @@ if ( $is_meal_coordinator ) {
   $thisyear = substr( $month_date, 0, 4 );
   $thismonth = substr( $month_date, 4, 2 );
 
+  $prevyear = $thisyear;
+  $prevmonth = $thismonth - 01;
+  if ( $prevmonth == 00 ) {
+    $prevyear -= 1;
+    $prevmonth = 12;
+  }
+
+  $community_life_date = get_first_wednesday ( $prevyear, $prevmonth );
+  $cutoff = add_days( $community_life_date, 10 );
+
   if ( $addpeople == 1 ) {
-    $body = "This is the monthly email to check head chef dates for " . 
-      date_to_str( $month_date, "__month__", false ) . ".\n\n";
-    $body .= "To people who aren't regular crew/chefs: Please check to see if any of
-the crew or chef openings below work for you this month. Many head
-chefs feel more at ease if they know ahead of time that they'll have
-enough crew.\n\n";
-    $body .= "To head chefs and regular crew: Please verify whether or not the dates
-below work for you.\n\n";
-    $body .= "- Joey\n\n";
-    $body .= "*************************************\n\n";
-    $body .= date_to_str( $month_date, "__month__", false ) . ":\n\n";
+    $body = "Here is the draft crewing schedule for " . 
+      date_to_str( $month_date, "__month__", false ) . 
+      ". It's up on the website and will soon be posted in the common house. " .
+      "Please make changes on the website.\n\n";
+    $body .= "HEAD CHEFS: Would you be willing to post your menus now, " .
+      "before the add/drop deadline? " .
+      "Since some people want to see the menu before signing up to crew, " .
+      "we hope that posting menus now will involve more people on crews and " .
+      "reduce meal cancellations.\n\n";
+    $body .= "The add/drop deadline is " . date_to_str( date( "Ymd", $cutoff ) ) . 
+      ", i.e. 10 days after the community life meeting. " .
+      "After that day, I will add in new meals for which crews were organized and " .
+      "drop meals that are understaffed.\n\n";
+    $body .= "*** We are requesting head chefs contact their crews before the " .
+      "add/drop deadline to verify that they can indeed crew that day! ****\n\n";
+    $body .= "Here are the " . date_to_str( $month_date, "__month__", false ) . 
+      " crewing suggestions:\n\n\n";
+
   }
 
 
@@ -41,10 +58,8 @@ below work for you.\n\n";
 
 
   $which_week = 1;
-  if ( $addpeople == 1 ) 
-    $body .= "Week $which_week\n";
   $day_count = 0;
-  for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend ); $i += ( 24 * 3600 * 7 ) ) {
+  for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend ); $i = add_days( $i, 7 ) ) {
     for ( $j = 0; $j < 7; $j++ ) { // step through a week starting on Sunday, marked by $i
       $date = $i + ( $j * 24 * 3600 );
       if ( date ( "Ymd", $date ) >= date ( "Ymd", $monthstart ) &&
@@ -52,14 +67,12 @@ below work for you.\n\n";
 	if ( $day_count == 7 ) {
 	  $which_week++;
 	  $day_count = 0;
-	  if ( $addpeople == 1 ) 
-	    $body .= "\n Week $which_week\n";
 	}
 	$thiswday = date ( "w", $date );
 	$day_count++;
 
 
-	// start with any monthly modified version
+	// start with any meal that was modified just for this month
 	$sql = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, " .
 	  "cal_head_chef, cal_regular_crew " . 
 	  "FROM webcal_standard_meals " .
@@ -70,11 +83,11 @@ below work for you.\n\n";
 	    // insert_meal checks to see if there's already a meal then
 	    $mealid = insert_meal( $date, $row[0], $row[1], $row[2], $row[3] ); 
 	    if ( $addpeople == 1 ) {
-	      print_crew( $mealid, $date );
 	      insert_crew( $mealid, $row[4], $row[5] );
+	      print_crew( $mealid, $date );
 	    }
 	  } 
-	  else { // check for a non-modified version
+	  else { // check for a non-modified, standard meal
 	    $sql2 = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, " .
 	      "cal_head_chef, cal_regular_crew " . 
 	      "FROM webcal_standard_meals " .
@@ -86,8 +99,8 @@ below work for you.\n\n";
 		if ( $addpeople == 1 ) {
 		  $head_chef = $row2[4];
 		  $crew = $row2[5];
-		  print_crew( $mealid, $date );
 		  insert_crew( $mealid, $head_chef, $crew );
+		  print_crew( $mealid, $date );
 		}
 	      }
 	    } // else do not add anything for this day of the week and week number
@@ -99,19 +112,11 @@ below work for you.\n\n";
 
 
   if ( $addpeople == 1 ) {
-    $body .= "\n\n crew call list: (head chefs can call these people if they need more help)\n\n";
-    $body .= "Val (esp Saturdays)\n" .
-      "Mike (esp last minute help)\n" .
-      "Amaris\n" .
-      "Dave D\n" .
-      "Marcy\n" . 
-      "Kathleen (cleanup -- can call even if she's not dining)\n";
-
     $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
 
     mail( $GLOBALS['weekly_reminder_from'],
-	  "Monthly head chef allocation", $body, $extra_hdrs );
-    //    echo "email = $body<br>";
+    	  "Monthly head chef allocation", $body, $extra_hdrs );
+    //        echo "email = $body<br>";
 
   }
 
@@ -246,7 +251,10 @@ function insert_meal( $date, $time, $suit, $price, $menu ) {
       }
 
 
-      $deadline = 2 + date( "w", $date );
+      $day_of_week = date( "w", $date );
+      if ( $day_of_week == 1 ) 
+	$deadline = 3;
+      else $deadline = 2;
 
       $sql2 = "INSERT INTO webcal_meal ( cal_id, cal_club_id, " .
 	"cal_date, cal_time, cal_suit, cal_menu, " .
@@ -314,8 +322,9 @@ function insert_crew( $mealid, $head_chef, $crew ) {
 function print_crew( $mealid, $date ) { 
   global $body;
 
-  $body .= weekday_short_name( date( "w", $date ) ) . " - ";
+  $body .= date_to_str( date( "Ymd", $date ), "__mon__ __dd__", false, true ) . ":\n\n";
 
+  $body .= "Head chef: ";
   $head_chef = has_head_chef( $mealid );
   if ( $head_chef != "" ) {
     user_load_variables( $head_chef, "temp" );
@@ -323,51 +332,22 @@ function print_crew( $mealid, $date ) {
   } else {
     $body .= "*** OPEN. any takers? ***";
   }
-
-
-
-  $body .= " - " . date_to_str( date( "Ymd", $date ), "__mon__ __dd__", false, true );
-
-
-
-  $body .= " - menu: ";
-  $menu = "";
-  $sql = "SELECT cal_menu FROM webcal_meal WHERE cal_id = $mealid";
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $menu = $row[0];
-    }
-    dbi_free_result( $res );
-  } 
-  if ( $menu == "" ) $body .= "??";
-  else $body .= $menu;
-
-
-
-
-  $body .= ", crew: ";
-  $crew_openings = 0;
-  $crew_number = 0;
-  $sql = "SELECT cal_login FROM webcal_meal_participant " .
-    "WHERE cal_id = $mealid AND cal_type = 'C'";
-  if ( $res = dbi_query( $sql ) ) {
-    while ( $row = dbi_fetch_row( $res ) ) {
-      $person = $row[0];
-      if ( ereg( 'none.*', $person ) ) {
-	$crew_openings++;
-	$crew_number++;
-      }
-      else {
-	user_load_variables( $person, "temp" );
-	$body .= $GLOBALS[tempfirstname] . ", ";
-	$crew_number++;
-      }
-    }
-  }
-  if ( $crew_openings > 0 ) $body .= $crew_openings . " crew opening(s)";
-  $wday = date( "w", $date );
-  if ( ($crew_number == 0) && ($wday == 6) && ($head_chef != "") ) $body .= "The Saturday Crew Team";
   $body .= "\n";
+
+
+  $crew = load_crew( $mealid, false );
+  for ( $i=0; $i<count( $crew['name'] ); $i++ ) {
+    $job = $crew['job'][$i];
+    $worker = $crew['name'][$i];
+    $worker_login = $crew['username'][$i];
+    if ( ereg( "^none", $worker_login ) ) {
+      $worker = "???";
+    }
+    $body .= $job . ": " . $worker . "\n";
+  }
+
+  $body .= "\n";
+  $body .= "----------------------\n\n";
 
 }
 

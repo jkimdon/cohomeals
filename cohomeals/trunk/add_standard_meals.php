@@ -139,7 +139,10 @@ function print_standard_entry( $thiswday, $which_week ) {
 	if ( $person != "none" ) {
 	  if ( user_load_variables( $person, "temp" ) == true ) 
 	    echo $GLOBALS[tempfirstname] . " " . $GLOBALS[templastname];
+	  else 
+	    echo "invalid username";
 	}
+	echo "<br>";
       }
       echo "</td></tr>";
 

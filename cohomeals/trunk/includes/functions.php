@@ -1540,6 +1540,21 @@ function get_monday_before ( $year, $month, $day ) {
 }
 
 
+function get_first_wednesday ( $year, $month ) {
+  $day = 0;
+  $weekday = 0;
+  while ( $weekday != 3 ) {
+    $day++;
+    $weekday = date ( "w", mktime( 3, 0, 0, $month, $day, $year ) );
+  }
+  
+  return mktime ( 3, 0, 0, $month, $day, $year );
+}
+
+
+function add_days( $orig_date, $add_number ) {
+  return $orig_date + 3600*24*$add_number;
+}
 
 /**
  * Prints all the calendar entries for the specified date.

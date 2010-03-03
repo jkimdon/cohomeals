@@ -146,7 +146,7 @@ function user_load_variables ( $login, $prefix ) {
     $GLOBALS[$prefix . "email"] = "";
     $GLOBALS[$prefix . "birthdate"] = "";
     $GLOBALS[$prefix . "fullname"] = $PUBLIC_ACCESS_FULLNAME;
-    $GLOBALS[$prefix . "password"] = "";
+    $GLOBALS[$prefix . "password"] = "INVALIDa8afbf50e7094f5c23a8af223";
     $GLOBALS[$prefix . "billing_group"] = "";
     return true;
   }
@@ -170,6 +170,10 @@ function user_load_variables ( $login, $prefix ) {
       $GLOBALS[$prefix . "password"] = $row[6];
       $GLOBALS[$prefix . "billing_group"] = $row[7];
       $GLOBALS[$prefix . "unit"] = $row[8];
+    }
+    else { // not found
+      $error = "Invalid username";
+      return false;
     }
     dbi_free_result ( $res );
   } else {
@@ -215,7 +219,7 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   if ( strlen ( $password ) )
     $upassword = "'" . md5($password) . "'";
   else
-    $upassword = "";
+    $upassword = "WARNING1e0400dfbe05c98a841f3f96b";
   if ( strlen ( $billing_group ) )
     $ubilling_group = mysql_safe( $billing_group, true );
   else
