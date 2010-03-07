@@ -22,9 +22,10 @@ function MyHeader() {
   $text = "Key: O = organic, L = local, S = spray-free, D = direct from grower";
   $this->Cell( 50,4, $text, 0,1, 'C' );
 
-  $this->Cell(65);
-  $text = "* = NOT available for purchase by households";
-  $this->Cell( 50,4, $text, 0,1, 'C' );
+  $this->Cell(10);
+  $this->SetFillColor( 255,255,0 );
+  $text = "yellow/orange highlighting = available for purchase by households (otherwise, only available to meal chefs)";
+  $this->Cell( 160,4, $text, 0,1, 'C', 1 );
   
 }
 
@@ -55,17 +56,18 @@ function PrintFoods() {
       }
 
       if ( $color == true ) {
-	$this->SetFillColor( 230,230,230 );
+	if ( $indiv == 1 ) $this->SetFillColor( 255,200,0 );
+	else $this->SetFillColor( 230,230,230 );
 	$color = false;
       } else {
-	$this->SetFillColor( 255,255,255 );
+	if ( $indiv == 1 ) $this->SetFillColor( 255,255,0 );
+	else $this->SetFillColor( 255,255,255 );
 	$color = true;
       }
 
       $this->SetFont('Times','',10);
       $this->Cell(10);
       $text = $desc;
-      if ( $indiv == 0 ) $text .= "*";
       if ( $flags != "" ) $text .= "  (" . $flags . ")";
       $this->Cell( 130,$height, $text, 0,0, 'L', 1 );
 
