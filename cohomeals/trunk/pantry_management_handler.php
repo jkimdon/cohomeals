@@ -23,6 +23,14 @@ if ( $is_meal_coordinator || $is_beancounter ) {
     }
 
     $change = "";
+    $key = "changeDescription$id";
+    $change = mysql_safe( getValue( $key ), true );
+    if ( $change != "" ) {
+      $sql2 = "UPDATE webcal_pantry_food SET cal_description = '$change' WHERE cal_food_id = $id";
+      dbi_query( $sql2 );
+    }
+
+    $change = "";
     $key = "changeDollar$id";
     $change = mysql_safe( getValue( $key ), true );
     if ( $change != "" ) {

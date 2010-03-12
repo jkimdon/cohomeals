@@ -43,8 +43,8 @@ if ( $is_meal_coordinator || $is_beancounter ) {
 
     echo "<tr class=\"n$row_num\">";
     $row_num = ( $row_num == 1 ) ? 0:1;
-    echo "<td>$category &nbsp;(<input type=\"text\" name=\"changeCat$food_id\" size=\"10\" maxlength=\"50\"></input>)</td>";
-    echo "<td>$description</td>";
+    echo "<td>$category &nbsp;(<input type=\"text\" name=\"changeCat$food_id\" size=\"10\" maxlength=\"70\"></input>)</td>";
+    echo "<td>$description &nbsp;(<input type=\"text\" name=\"changeDescription$food_id\" size=\"10\" maxlength=\"70\"></input>)</td>";
     echo "<td>" . price_to_str( $old_price ) . 
       "/$unit &nbsp;($<input type=\"text\" name=\"changeDollar$food_id\" size=\"2\" maxlength=\"2\"/>.<input type=\"text\" name=\"changeCents$food_id\" size=\"2\" maxlength=\"2\"/>/$unit)</td>";
     echo "<td>$flags &nbsp;(<input type=\"text\" name=\"changeFlags$food_id\" size=\"4\" maxlength=\"4\"></input>)</td>";
