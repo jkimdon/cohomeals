@@ -91,16 +91,16 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
 <table class="main" style="clear:both;" cellspacing="0" cellpadding="0">
 <tr>
  <?php if ( $WEEK_START == 0 ) { ?>
-  <th><?php etranslate("Sun")?></th>
+  <th>Sun</th>
  <?php } ?>
- <th><?php etranslate("Mon")?></th>
- <th><?php etranslate("Tue")?></th>
- <th><?php etranslate("Wed")?></th>
- <th><?php etranslate("Thu")?></th>
- <th><?php etranslate("Fri")?></th>
- <th><?php etranslate("Sat")?></th>
+ <th>Mon</th>
+ <th>Tue</th>
+ <th>Wed</th>
+ <th>Thu</th>
+ <th>Fri</th>
+ <th>Sat</th>
  <?php if ( $WEEK_START == 1 ) { ?>
-  <th><?php etranslate("Sun")?></th>
+  <th>Sun</th>
  <?php } ?>
 </tr>
 <?php

@@ -79,7 +79,6 @@ if ( ! $c ) {
 
 load_global_settings ();
 
-include "$includedir/translate.php";
 
 if ( $debug )
   echo "<br />\n";
@@ -109,36 +108,6 @@ for ( $i = 0; $i < count ( $allusers ); $i++ ) {
 }
 
 
-// Get all users language settings.
-$res = dbi_query ( "SELECT cal_login, cal_value FROM webcal_user_pref " .
-  "WHERE cal_setting = 'LANGUAGE'" );
-$languages = array ();
-if ( $res ) {
-  while ( $row = dbi_fetch_row ( $res ) ) {
-    $user = $row[0];
-    $user_lang = $row[1];
-    $languages[$user] = $user_lang;
-    if ( $debug )
-      echo "Language for $user is \"$user_lang\" <br />\n";
-  }
-  dbi_free_result ( $res );
-}
-
-// Get all users timezone settings.
-$res = dbi_query ( "SELECT cal_login, cal_value FROM webcal_user_pref " .
-  "WHERE cal_setting = 'TZ_OFFSET'" );
-$tzoffset = array ();
-if ( $res ) {
-  while ( $row = dbi_fetch_row ( $res ) ) {
-    $user = $row[0];
-    $user_tzoffset = $row[1];
-    $tzoffset[$user] = $user_tzoffset;
-    if ( $debug )
-      echo "TZ OFFSET for $user is \"$user_tzoffset\" <br />\n";
-  }
-  dbi_free_result ( $res );
-}
-
 $startdate = date ( "Ymd" );
 $enddate = date ( "Ymd", time() + ( $DAYS_IN_ADVANCE * 24 * 3600 ) );
 
@@ -160,9 +129,9 @@ function indent ( $str ) {
 // participants in the event.
 function send_reminder ( $id, $event_date ) {
   global $names, $emails, $site_extras, $debug, $only_testing,
-    $server_url, $languages, $tzoffset, $application_name;
+    $server_url, $application_name;
   global $EXTRA_TEXT, $EXTRA_MULTILINETEXT, $EXTRA_URL, $EXTRA_DATE,
-    $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LANGUAGE, $LOG_REMINDER;
+    $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LOG_REMINDER;
   global $allow_external_users, $external_reminders;
 
   // get participants first...
@@ -220,7 +189,7 @@ function send_reminder ( $id, $event_date ) {
   }
 
   // send mail.  we send one user at a time so that we can switch
-  // languages between users if needed.
+  // languages between users if needed. (not needed now that language support is removed.)
   $mailusers = array ();
   $recipients = array ();
   for ( $i = 0; $i < count ( $participants ); $i++ ) {
@@ -242,23 +211,7 @@ function send_reminder ( $id, $event_date ) {
   for ( $j = 0; $j < count ( $mailusers ); $j++ ) {
     $recip = $mailusers[$j];
     $user = $participants[$j];
-    if ( ! empty ( $languages[$user] ) )
-      $userlang = $languages[$user];
-    else
-      $userlang = $LANGUAGE; // system default
-    if ( $userlang == "none" )
-      $userlang = "English-US"; // gotta pick something
-    if ( $debug )
-      echo "Setting language to \"$userlang\" <br />\n";
-    reset_language ( $userlang );
-    // reset timezone setting for current user
-    if ( empty ( $tzoffset[$user] ) )
-      $GLOBALS["TZ_OFFSET"] = 0;
-    else
-      $GLOBALS["TZ_OFFSET"] = $tzoffset[$user];
-
-    $body = translate("This is a reminder for the event detailed below.") .
-      "\n\n";
+    $body = "This is a reminder for the event detailed below.\n\n";
 
     $suit = $row[2];
     $notes = $row[3];
@@ -273,11 +226,11 @@ function send_reminder ( $id, $event_date ) {
     }
 
     $body .= strtoupper ( $suit ) . "\n\n";
-    $body .= translate("Notes") . ":\n";
+    $body .= "Notes:\n";
     $body .= indent ( $notes ) . "\n";
-    $body .= translate("Date") . ": " . date_to_str ( $event_date ) . "\n";
+    $body .= "Date: " . date_to_str ( $event_date ) . "\n";
     if ( $row[1] >= 0 )
-      $body .= translate ("Time") . ": " . display_time ( $row[1] ) . "\n";
+      $body .= "Time: " . display_time ( $row[1] ) . "\n";
 
     // site extra fields
     $extras = get_site_extra_fields ( $id );
@@ -286,14 +239,14 @@ function send_reminder ( $id, $event_date ) {
       $extra_descr = $site_extras[$i][1];
       $extra_type = $site_extras[$i][2];
       if ( $extras[$extra_name]['cal_name'] != "" ) {
-        $body .= translate ( $extra_descr ) . ": ";
+        $body .= $extra_descr . ": ";
         if ( $extra_type == $EXTRA_DATE ) {
           $body .= date_to_str ( $extras[$extra_name]['cal_date'] ) . "\n";
         } else if ( $extra_type == $EXTRA_MULTILINETEXT ) {
           $body .= "\n" . indent ( $extras[$extra_name]['cal_data'] ) . "\n";
         } else if ( $extra_type == $EXTRA_REMINDER ) {
           $body .= ( $extras[$extra_name]['cal_remind'] > 0 ?
-            translate("Yes") : translate("No") ) . "\n";
+		     "Yes" : "No" ) . "\n";
         } else {
           // default method for $EXTRA_URL, $EXTRA_TEXT, etc...
           $body .= $extras[$extra_name]['cal_data'] . "\n";
@@ -301,26 +254,26 @@ function send_reminder ( $id, $event_date ) {
       }
     }
     if ( ! empty ( $disable_participants_field ) &&  ! $disable_participants_field ) {
-      $body .= translate("Participants") . ":\n";
+      $body .= "Participants:\n";
       for ( $i = 0; $i < count ( $participants ); $i++ ) {
         $body .= "  " . $names[$participants[$i]] . "\n";
       }
       for ( $i = 0; $i < count ( $ext_participants ); $i++ ) {
         $body .= "  " . $ext_participants[$i] . " (" .
-          translate("External User") . ")\n";
+          "External User)\n";
       }
     }
   
-    $subject = translate("Reminder") . ": " . $name;
+    $subject = "Reminder: " . $name;
 
     if ( strlen ( $GLOBALS["email_fallback_from"] ) )
       $extra_hdrs = "From: " . $GLOBALS["email_fallback_from"] . "\r\n" .
-        "X-Mailer: " . translate($application_name);
+        "X-Mailer: " . $application_name;
     else
-      $extra_hdrs = "X-Mailer: " . translate($application_name);
+      $extra_hdrs = "X-Mailer: " . $application_name;
   
     if ( $debug )
-      echo "Sending mail to $recip (in $userlang)\n";
+      echo "Sending mail to $recip \n";
     if ( $only_testing ) {
       if ( $debug )
         echo "<hr /><pre>To: $recip\nSubject: $subject\n$extra_hdrs\n\n$body\n\n</pre>\n";

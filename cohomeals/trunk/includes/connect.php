@@ -78,7 +78,7 @@ if ( $pub_acc_enabled && ! empty ( $session_not_found ) ) {
   $is_meal_coordinator =  false;
   $lastname = "";
   $firstname = "";
-  $fullname = "Public Access"; // Will be translated after translation is loaded
+  $fullname = "Public Access";
   $user_email = "";
 } else if ( ! $pub_acc_enabled && $session_not_found && ! $use_http_auth ) {
   do_redirect ( $login_url );
@@ -160,18 +160,12 @@ if ( $readonly == "Y" ) {
   }
 }
 
-// We can't call translate() here because translate.php gets loaded
-// after this include file :-(
-// So, instead of an error message that may be in the wrong language,
-// just redirect to some other page.
+
 if ( $not_auth ) {
-  /*
-  echo "<html>\n<head>\n<title>" . translate($application_name) . " " .
-    translate("Error") .  "</title>\n</head>\n<body>\n";
-  echo "<h2>" . translate ( "Error" ) . "</h2>\n" .
-    translate ( "You are not authorized" );
-  */
-  do_redirect ( "month.php" );
+  echo "<html>\n<head>\n<title>" . $application_name . " " .
+    "Error</title>\n</head>\n<body>\n";
+  echo "<h2>Error</h2>\n" .
+    "You are not authorized";
 }
 
 ?>

@@ -18,7 +18,7 @@ $error = '';
 
 $id = mysql_safe( getValue( 'id' ), false );
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
-  $error = translate ( "Invalid entry id" ) . "."; 
+  $error = "Invalid entry id."; 
 }
 $showones = getValue('showones');
 
@@ -26,8 +26,7 @@ $showones = getValue('showones');
 print_header();
 
 if ( ! empty ( $error ) ) {
-  echo "<h2>" . translate ( "Error" ) .
-    "</h2>\n" . $error;
+  echo "<h2>Error</h2>\n" . $error;
   print_trailer ();
   echo "</body>\n</html>";
   exit;
@@ -42,7 +41,7 @@ $sql = "SELECT cal_date, cal_time, " .
     "FROM webcal_meal WHERE cal_id = $id";
 $res = dbi_query ( $sql );
 if ( ! $res ) {
-  echo translate("Invalid entry id") . ": $id";
+  echo "Invalid entry id: $id";
   exit;
 }
 
@@ -58,9 +57,8 @@ if ( $row ) {
   $notes = $row[7];
   $max_diners = $row[8];
 } else {
-  echo "<h2>" . 
-    translate("Error") . "</h2>" . 
-    translate("Invalid entry id") . ".\n";
+  echo "<h2>Error</h2>" . 
+    "Invalid entry id.\n";
   print_trailer ();
   echo "</body>\n</html>";
   exit;
@@ -69,7 +67,7 @@ if ( $row ) {
 $event_date = $orig_date;
 
 // $subject is used for mailto URLs
-$subject = translate($application_name) . ": " . $suit;
+$subject = $application_name . ": " . $suit;
 // Remove the '"' character since it causes some mailers to barf
 $subject = str_replace ( "\"", "", $subject );
 $subject = htmlspecialchars ( $subject );
@@ -146,7 +144,7 @@ else echo "</p>";
 
 <?php if ( $event_time >= 0 ) { ?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">
- <?php etranslate("Time")?>:</td><td>
+ Time:</td><td>
  <?php
    echo display_time ( $row[1] );
   ?>
@@ -342,7 +340,7 @@ if ( $res ) {
   }
   dbi_free_result ( $res );
 } else {
-  echo translate ("Database error") . ": " . dbi_error() . "<br />\n";
+  echo "Database error: " . dbi_error() . "<br />\n";
 }
 
 if ( $can_signup == true ) {
@@ -582,17 +580,17 @@ display_small_month( $thismonth, $thisyear, true, "nextmonth" );
 if ( $is_meal_coordinator ) {
   echo "<a title=\"Delete meal\" class=\"nav\" " .
     "href=\"del_entry.php?id=$id\" onclick=\"return confirm('" . 
-    translate("Are you sure you want to delete this meal?") . "\\n\\n" . 
-    translate("This will delete this meal for all users.") . "');\">" . 
-    translate("Delete meal") . "</a><br />\n";
+    "Are you sure you want to delete this meal?\\n\\n" . 
+    "This will delete this meal for all users.');\">" . 
+    "Delete meal</a><br />\n";
 }
 
 if ( count ( $allmails ) > 0 ) {
   echo "<a title=\"" . 
-    translate("Email all participants") . "\" class=\"nav\" " .
+    "Email all participants\" class=\"nav\" " .
     "href=\"mailto:" . implode ( ",", $allmails ) .
     "?subject=" . rawurlencode($subject) . "\">" . 
-    translate("Email all participants") . "</a><br />\n";
+    "Email all participants</a><br />\n";
 }
 
 $show_log = false;
@@ -600,27 +598,26 @@ $show_log = false;
 if ( $is_meal_coordinator ) {
   if ( empty ( $log ) ) {
     echo "<a title=\"" . 
-      translate("Show activity log") . "\" class=\"nav\" " .
+      "Show activity log\" class=\"nav\" " .
       "href=\"view_entry.php?id=$id&amp;log=1\">" . 
-      translate("Show activity log") . "</a><br />\n";
+      "Show activity log</a><br />\n";
   } else {
     echo "<a title=\"" . 
-      translate("Hide activity log") . "\" class=\"nav\" " .
+      "Hide activity log\" class=\"nav\" " .
       "href=\"view_entry.php?id=$id\">" . 
-       translate("Hide activity log") . "</a><br />\n";
+       "Hide activity log</a><br />\n";
     $show_log = true;
   }
 }
 
 if ( $show_log ) {
-  echo "<h3>" . translate("Activity Log") . "</h3>\n";
+  echo "<h3>Activity Log</h3>\n";
   echo "<table class=\"embactlog\">\n";
   echo "<tr><th class=\"usr\">\n";
-  echo translate("User") . "</th><th class=\"cal\">\n";
-  echo translate("Calendar") . "</th><th class=\"date\">\n";
-  echo translate("Date") . "/" . 
-   translate("Time") . "</th><th class=\"action\">\n";
-  echo translate("Action") . "\n</th></tr>\n";
+  echo "User</th><th class=\"cal\">\n";
+  echo "Calendar</th><th class=\"date\">\n";
+  echo "Date/" . "Time</th><th class=\"action\">\n";
+  echo "Action\n</th></tr>\n";
 
   $res = dbi_query ( "SELECT cal_login, cal_user_cal, cal_type, " .
     "cal_date, cal_time " .
@@ -634,19 +631,19 @@ if ( $show_log ) {
         date_to_str ( $row[3] ) . "&nbsp;" .
         display_time ( $row[4] ) . "</td><td>\n";
       if ( $row[2] == $LOG_CREATE ) {
-        etranslate("Event created");
+        echo "Event created";
       } else if ( $row[2] == $LOG_APPROVE ) {
-        etranslate("Event approved");
+        echo "Event approved";
       } else if ( $row[2] == $LOG_REJECT ) {
-        etranslate("Event rejected");
+        echo "Event rejected";
       } else if ( $row[2] == $LOG_UPDATE ) {
-        etranslate("Event updated");
+        echo "Event updated";
       } else if ( $row[2] == $LOG_DELETE ) {
-        etranslate("Event deleted");
+        echo "Event deleted";
       } else if ( $row[2] == $LOG_NOTIFICATION ) {
-        etranslate("Notification sent");
+        echo "Notification sent";
       } else if ( $row[2] == $LOG_REMINDER ) {
-        etranslate("Reminder sent");
+        echo "Reminder sent";
       }
       echo "</td></tr>\n";
     }

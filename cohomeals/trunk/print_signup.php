@@ -4,7 +4,7 @@ require('fpdf/fpdf.php');
 
 $id = mysql_safe( getValue( 'id' ), false );
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
-  $error = translate ( "Invalid entry id" ) . "."; 
+  $error = "Invalid entry id."; 
 }
 
 

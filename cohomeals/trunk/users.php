@@ -74,7 +74,7 @@ print_header( $INC );
 	echo $userlist[$i]['cal_fullname'];
 	echo "</a>";
 	if (  $userlist[$i]["cal_is_meal_coordinator"] == 'Y' )
-	  echo "&nbsp;<abbr title=\"" . translate("denotes administrative user") . "\">*</abbr>";
+	  echo "&nbsp;<abbr title=\"denotes administrative user\">*</abbr>";
 	echo "</li>\n";
       }
     }

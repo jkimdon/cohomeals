@@ -43,8 +43,7 @@ if ( ! strstr ( $reqURI, "month.php" ) ) {
 }
 
 $goto_link[] = "<a title=\"Calendar\" " .
-  "href=\"$mycal\">" . 
-translate("Calendar") . "</a>";
+  "href=\"$mycal\">Calendar</a>";
 
 if ( $login != '__public__' && $readonly == 'N' ) {
   $goto_link[] = "<a title=\"User info\" href=\"users.php\">User info</a>";
@@ -96,7 +95,7 @@ if ( $login != '__public__' ) {
 
 echo "<hr>";
 if ( count ( $goto_link ) > 0 ) {
-  ?><span class="prefix"><?php etranslate("Go to")?>:</span> <?php
+  ?><span class="prefix">Go to:</span> <?php
   for ( $i = 0; $i < count ( $goto_link ); $i++ ) {
     if ( $i > 0 )
       echo " | ";
@@ -137,8 +136,8 @@ if ( ! $use_http_auth ) {
   $login_url = "login.php?return_path=$login_return_path";
 
  echo "<span class=\"prefix\"><a title=\"" .
- translate("Logout") . "\" href=\"$login_url\">" . 
- translate("Logout") . "</a>\n";
+ "Logout\" href=\"$login_url\">" . 
+ "Logout</a>\n";
 }
 
 ?>

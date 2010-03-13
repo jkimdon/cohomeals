@@ -6,7 +6,7 @@ $error = "";
 $keywords = mysql_safe( getValue ( "keywords" ), true );
 
 if ( strlen ( $keywords ) == 0 )
-  $error = translate("You must enter one or more search keywords") . ".";
+  $error = "You must enter one or more search keywords.";
 
 $matches = 0;
 
@@ -22,11 +22,11 @@ if ( $readonly == "Y" )
 print_header();
 ?>
 
-<h2><?php etranslate("Search Results")?></h2>
+<h2>Search Results</h2>
 
 <?php
 if ( ! empty ( $error ) ) {
-  echo "<span style=\"font-weight:bold;\">" . translate("Error") . ":</span> $error";
+  echo "<span style=\"font-weight:bold;\">Error:</span> $error";
 } else {
   $ids = array ();
   $words = split ( " ", $keywords );
@@ -80,11 +80,11 @@ if ( $matches > 0 )
   $matches = count ( $ids );
 
 if ( $matches == 1 )
-  echo "<span style=\"font-weight:bold;\">$matches " . translate("match found") . ".</span><br /><br />";
+  echo "<span style=\"font-weight:bold;\">$matches match found.</span><br /><br />";
 else if ( $matches > 0 )
-  echo "<span style=\"font-weight:bold;\">$matches " . translate("matches found") . ".</span><br /><br />";
+  echo "<span style=\"font-weight:bold;\">$matches matches found.</span><br /><br />";
 else
-  echo translate("No matches found") . ".";
+  echo "No matches found.";
 
 // now sort by number of hits
 if ( empty ( $error ) ) {

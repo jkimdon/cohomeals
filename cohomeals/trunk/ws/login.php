@@ -20,7 +20,6 @@ load_global_settings ();
 if ( ! empty ( $last_login ) )
   $login = "";
 
-include "$includedir/translate.php";
 
 // calculate path for cookie
 if ( empty ( $PHP_SELF ) )

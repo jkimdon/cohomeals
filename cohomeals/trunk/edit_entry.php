@@ -125,8 +125,8 @@ print_header ( $INC, '', $BodyX );
 
 <h2>
 <?php 
-  if ( $id ) echo translate("Edit Meal"); 
-  else echo translate("Add Meal"); 
+  if ( $id ) echo "Edit Meal"; 
+  else echo "Add Meal"; 
 ?>
 </h2>
 
@@ -135,7 +135,7 @@ print_header ( $INC, '', $BodyX );
 ?>
 <form action="edit_entry_handler.php" method="post" name="editentryform">
 
-<input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />
+<input type="button" value="Save" onclick="validate_and_submit()" />
      <?php if ( $is_meal_coordinator ) {
      echo " OR <a class=\"addbutton\" href=\"add_standard_meals.php\">Add standard meals</a>";
    } ?>
@@ -201,7 +201,7 @@ print_header ( $INC, '', $BodyX );
   </td></tr>
   <?php } ?>
 
-  <tr><td class="tooltip" title="<?php etooltip("time-help")?>">Time:</td>
+  <tr><td class="tooltip">Time:</td>
       <td colspan="2">
 <?php
 $h12 = $hour;
@@ -226,9 +226,9 @@ if ( $time < 0 )
 <?php
 if ( $TIME_FORMAT == "12" ) {
   echo "<label><input type=\"radio\" name=\"ampm\" value=\"am\" $amsel />&nbsp;" .
-    translate("am") . "</label>\n";
+    "am" . "</label>\n";
   echo "<label><input type=\"radio\" name=\"ampm\" value=\"pm\" $pmsel />&nbsp;" .
-    translate("pm") . "</label>\n";
+    "pm" . "</label>\n";
 }
 
 if ( $id ) {
@@ -362,11 +362,11 @@ $base_cents = $base_price - ($base_dollars * 100);
 <tr><td>
  <script type="text/javascript">
 <!-- <![CDATA[
-  document.writeln ( '<input type="button" value="<?php etranslate("Save")?>" onclick="validate_and_submit()" />' );
+  document.writeln ( '<input type="button" value="Save" onclick="validate_and_submit()" />' );
 //]]> -->
  </script>
  <noscript>
-  <input type="submit" value="<?php etranslate("Save")?>" />
+  <input type="submit" value="Save" />
  </noscript>
 </td></tr>
 </table>
@@ -382,11 +382,11 @@ echo "<input type=\"hidden\" name=\"uses_endday\" value=\"$uses_endday\" />\n";
 </form>
 
 <?php if ( $id > 0 && $is_meal_coordinator ) { ?>
- <a href="del_entry.php?id=<?php echo $id;?>" onclick="return confirm('<?php etranslate("Are you sure you want to delete this entry?")?>');"><?php etranslate("Delete entry")?></a><br />
+ <a href="del_entry.php?id=<?php echo $id;?>" onclick="return confirm('Are you sure you want to delete this entry?');">Delete entry</a><br />
 <?php 
  } //end if clause for delete link
 } else { 
-  echo translate("You are not authorized to edit this entry") . ".";
+  echo "You are not authorized to edit this entry" . ".";
 } //end if ( $can_edit )
 ?>
 

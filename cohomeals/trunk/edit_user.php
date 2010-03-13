@@ -111,23 +111,23 @@ make_text_row( "Unit", $uunit, "uunit" );
 
 <?php if ( empty ( $user ) && ! $use_http_auth && $user_can_update_password ) { ?>
 	<tr><td>
-		<label for="pass1"><?php etranslate("Password")?>:</label></td><td>
+		<label for="pass1">Password:</label></td><td>
 		<input name="upassword1" id="pass1" size="15" value="" type="password" />
 	</td></tr>
 	<tr><td>
-		<label for="pass2"><?php etranslate("Password")?> (<?php etranslate("again")?>):</label></td><td>
+		<label for="pass2">Password (again):</label></td><td>
 		<input name="upassword2" id="pass2" size="15" value="" type="password" />
 	</td></tr>
 <?php }
 if ( $is_meal_coordinator ) { ?>
  <tr><td style="font-weight:bold;">Meal coordinator:</td>
-    <td><label><input type="radio" name="uis_meal_coordinator" value="Y"<?php if ( ! empty ( $uis_meal_coordinator ) && $uis_meal_coordinator == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-		<label><input type="radio" name="uis_meal_coordinator" value="N"<?php if ( empty ( $uis_meal_coordinator ) || $uis_meal_coordinator != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
+    <td><label><input type="radio" name="uis_meal_coordinator" value="Y"<?php if ( ! empty ( $uis_meal_coordinator ) && $uis_meal_coordinator == "Y" ) echo " checked=\"checked\"";?> />&nbsp;Yes</label> 
+		<label><input type="radio" name="uis_meal_coordinator" value="N"<?php if ( empty ( $uis_meal_coordinator ) || $uis_meal_coordinator != "Y" ) echo " checked=\"checked\"";?> />&nbsp;No</label>
 	</td></tr>
 
 	<tr><td style="font-weight:bold;">Bookkeeper:</td><td>
-		<label><input type="radio" name="uis_beancounter" value="Y"<?php if ( ! empty ( $uis_beancounter ) && $uis_beancounter == "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("Yes")?></label> 
-		<label><input type="radio" name="uis_beancounter" value="N"<?php if ( empty ( $uis_beancounter ) || $uis_beancounter != "Y" ) echo " checked=\"checked\"";?> />&nbsp;<?php etranslate("No")?></label>
+		<label><input type="radio" name="uis_beancounter" value="Y"<?php if ( ! empty ( $uis_beancounter ) && $uis_beancounter == "Y" ) echo " checked=\"checked\"";?> />&nbsp;Yes</label> 
+		<label><input type="radio" name="uis_beancounter" value="N"<?php if ( empty ( $uis_beancounter ) || $uis_beancounter != "Y" ) echo " checked=\"checked\"";?> />&nbsp;No</label>
 	</td></tr>
 <?php } //end if ($is_meal_coordinator ) ?>
 	<tr><td colspan="2">
@@ -146,7 +146,7 @@ if ( $is_meal_coordinator ) { ?>
 </td><td>&nbsp;&nbsp;</td>
 <td style="vertical-align:top;">
 
-<h2><?php etranslate("Change Password")?></h2>
+<h2>Change Password</h2>
 <form action="edit_user_handler.php" method="post" name='edituserform'>
 <input type="hidden" name="formtype" value="setpassword" />
 <?php if ( $is_meal_coordinator ) { ?>
@@ -154,11 +154,11 @@ if ( $is_meal_coordinator ) { ?>
 <?php } ?>
 <table style="border-width:0px;">
 	<tr><td>
-		<label for="newpass1"><?php etranslate("New Password")?>:</label></td><td>
+		<label for="newpass1">New Password:</label></td><td>
 		<input name="upassword1" id="newpass1" type="password" size="15" />
 	</td></tr>
 	<tr><td>
-		<label for="newpass2"><?php etranslate("New Password")?> (<?php etranslate("again")?>):</label></td><td>
+		<label for="newpass2">New Password (again):</label></td><td>
 		<input name="upassword2" id="newpass2" type="password" size="15" />
 	</td></tr>
 	<tr>

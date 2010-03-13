@@ -27,7 +27,6 @@
  * - include_once 'includes/connect.php';
  * - {@link load_global_settings()};
  * - {@link load_user_preferences()};
- * - include_once 'includes/translate.php';
  * - include_once 'includes/styles.php';
  *
  * Also, for month.php:
@@ -86,7 +85,6 @@ load_global_settings ();
 if ( empty ( $ovrd ) )
   load_user_preferences ();
 
-include_once 'includes/translate.php';
 
 // error-check some commonly used form variable names
 $id = getValue ( "id", "[0-9]+", true );
@@ -121,12 +119,12 @@ if ($DMW) {
     $u_url = "user=$user&amp;";
     user_load_variables ( $user, "user_" );
     if ( $user == "__public__" )
-      $user_fullname = translate ( $PUBLIC_ACCESS_FULLNAME );
+      $user_fullname = $PUBLIC_ACCESS_FULLNAME;
   } else {
     $u_url = "";
     $user_fullname = $fullname;
     if ( $login == "__public__" )
-      $user_fullname = translate ( $PUBLIC_ACCESS_FULLNAME );
+      $user_fullname = $PUBLIC_ACCESS_FULLNAME;
   }
 
   set_today($date);
@@ -178,40 +176,22 @@ function print_header($includes = '', $HeadX = '', $BodyX = '',
   global $FONTS,$WEEKENDBG,$THFG,$THBG,$PHP_SELF;
   global $TABLECELLFG,$TODAYCELLBG,$TEXTCOLOR;
   global $POPUP_FG,$BGCOLOR;
-  global $LANGUAGE;
   global $CUSTOM_HEADER, $CUSTOM_SCRIPT;
   global $friendly;
   global $bodyid, $self;
-  $lang = '';
-  if ( ! empty ( $LANGUAGE ) )
-    $lang = languageToAbbrev ( $LANGUAGE );
-  if ( empty ( $lang ) )
-    $lang = 'en';
 
- // Start the header & specify the charset
- // The charset is defined in the translation file
- if ( ! empty ( $LANGUAGE ) ) {
-   $charset = translate ( "charset" );
-   if ( $charset != "charset" ) {
-     echo "<?xml version=\"1.0\" encoding=\"$charset\"?>\n" .
-       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " .
-       "\"DTD/xhtml1-transitional.dtd\">\n" .
-       "<html xmlns=\"http://www.w3.org/1999/xhtml\" " .
-       "xml:lang=\"$lang\" lang=\"$lang\">\n" .
-       "<head>\n" .
-       "<meta http-equiv=\"Content-Type\" content=\"text/html; " .
-       "charset=$charset\" />\n";
-     echo "<title>".translate($application_name)."</title>\n";
-   } else {
-     echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" .
-       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " .
-       "\"DTD/xhtml1-transitional.dtd\">\n" .
-       "<html xmlns=\"http://www.w3.org/1999/xhtml\" " .
-       "xml:lang=\"en\" lang=\"en\">\n" .
-       "<head>\n" .
-       "<title>".translate($application_name)."</title>\n";
-   }
- }
+  // Start the header & specify the charset
+  $charset = "iso-8859-1";
+  echo "<?xml version=\"1.0\" encoding=\"$charset\"?>\n" .
+    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " .
+    "\"DTD/xhtml1-transitional.dtd\">\n" .
+    "<html xmlns=\"http://www.w3.org/1999/xhtml\" " .
+    "xml:lang=\"en\" lang=\"en\">\n" .
+    "<head>\n" .
+    "<meta http-equiv=\"Content-Type\" content=\"text/html; " .
+    "charset=$charset\" />\n";
+  echo "<title>" . $application_name . "</title>\n";
+
 
  // Any other includes?
  if ( is_array ( $includes ) ) {

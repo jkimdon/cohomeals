@@ -83,11 +83,10 @@ $login = $username;
 // Load user preferences for DISPLAY_UNAPPROVED
 load_user_preferences ();
 
-include "includes/translate.php";
 
 
 if ( $public_must_be_enabled && $public_access != 'Y' ) {
-  $error = translate ( "You are not authorized" ) . ".";
+  $error = "You are not authorized.";
 }
 
 if ( $allow_user_override ) {
@@ -129,12 +128,9 @@ $endDate = date ( "Ymd", $endTime );
 $events = read_events ( $date, $endDate );
 
 // Print header without custom header and no style sheet
-if ( ! empty ( $LANGUAGE ) ) {
-  $charset = translate ( "charset" );
-  $lang = languageToAbbrev ( ( $LANGUAGE == "Browser-defined" || 
-    $LANGUAGE == "none" )? $lang : $LANGUAGE );
-  if ( $charset != "charset" ) {
-    echo "<?xml version=\"1.0\" encoding=\"$charset\"?>\n" .
+$lang = "en";
+$charset = "iso-8859-1";
+echo "<?xml version=\"1.0\" encoding=\"$charset\"?>\n" .
       "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " .
       "\"DTD/xhtml1-transitional.dtd\">\n" .
       "<html xmlns=\"http://www.w3.org/1999/xhtml\" " .
@@ -142,27 +138,14 @@ if ( ! empty ( $LANGUAGE ) ) {
       "<head>\n" .
       "<meta http-equiv=\"Content-Type\" content=\"text/html; " .
       "charset=$charset\" />\n";
-  } else {
-    echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n" .
-      "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" " .
-      "\"DTD/xhtml1-transitional.dtd\">\n" .
-      "<html xmlns=\"http://www.w3.org/1999/xhtml\" " .
-      "xml:lang=\"en\" lang=\"en\">\n" .
-      "<head>\n";
-  }
-} else {
-  echo "<html>\n";
-  $charset = "iso-8859-1";
-}
-echo "<title>".translate($application_name)."</title>\n";
+echo "<title>" . $application_name . "</title>\n";
  
 ?>
 </head>
 <body>
 <?php
 if ( ! empty ( $error ) ) {
-  echo "<h2>" . translate ( "Error" ) .
-    "</h2>\n" . $error;
+  echo "<h2>Error</h2>\n" . $error;
   echo "\n<br /><br />\n</body></html>";
   exit;
 }
@@ -197,7 +180,7 @@ print "</body>\n</html>";
 
 // Print the details of an upcoming event
 function print_upcoming_event ( $e ) {
-  global $display_link, $link_target, $server_url, $charset;
+  global $display_link, $link_target, $server_url;
 
   if ( $display_link && ! empty ( $server_url ) ) {
     print "<a title=\"" . 
