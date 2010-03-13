@@ -67,8 +67,6 @@ $noSet = array (
   "use_http_auth" => 1,
   "user_inc" => 1,
   "includedir" => 1,
-  "languages" => 1,
-  "browser_languages" => 1,
   "pub_acc_enabled" => 1,
   "user_can_update_password" => 1,
   "admin_can_add_user" => 1,
@@ -334,11 +332,8 @@ function load_global_settings () {
     dbi_free_result ( $res );
   }
 
-  // If app name not set.... default to "Title".  This gets translated
-  // later since this function is typically called before translate.php
-  // is included.
-  // Note: We usually use translate($application_name) instead of
-  // translate("Title").
+  // If app name not set.... default to "Title".  
+  // Note: We usually use $application_name instead of "Title"
   if ( empty ( $GLOBALS["application_name"] ) )
     $GLOBALS["application_name"] = "Title";
 
@@ -363,10 +358,7 @@ function load_global_settings () {
 
   // If no font settings, then set some
   if ( empty ( $GLOBALS["FONTS"] ) ) {
-    if ( $GLOBALS["LANGUAGE"] == "Japanese" )
-      $GLOBALS["FONTS"] = "Osaka, Arial, Helvetica, sans-serif";
-    else
-      $GLOBALS["FONTS"] = "Arial, Helvetica, sans-serif";
+    $GLOBALS["FONTS"] = "Arial, Helvetica, sans-serif";
   }
 }
 
@@ -399,7 +391,7 @@ function get_plugin_list ( $include_disabled=false ) {
     }
     dbi_free_result ( $res );
   } else {
-    echo translate("Database error") . ": " . dbi_error (); exit;
+    echo "Database error: " . dbi_error (); exit;
   }
   if ( count ( $plugins ) == 0 ) {
     $plugins[] = "webcalendar";
@@ -526,31 +518,18 @@ function do_redirect ( $url ) {
  * Sends an HTTP login request to the browser and stops execution.
  */
 function send_http_login () {
-  global $lang_file, $application_name;
+  global $application_name;
 
-  if ( strlen ( $lang_file ) ) {
-    Header ( "WWW-Authenticate: Basic realm=\"" . translate("Title") . "\"");
-    Header ( "HTTP/1.0 401 Unauthorized" );
-    echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html
+  Header ( "WWW-Authenticate: Basic realm=\"Title\"");
+  Header ( "HTTP/1.0 401 Unauthorized" );
+  echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html
     PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
     \"DTD/xhtml1-transitional.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
-<head>\n<title>Unauthorized</title>\n</head>\n<body>\n" .
-      "<h2>" . translate("Title") . "</h2>\n" .
-      translate("You are not authorized") .
-      "\n</body>\n</html>";
-  } else {
-    Header ( "WWW-Authenticate: Basic realm=\"WebCalendar\"");
-    Header ( "HTTP/1.0 401 Unauthorized" );
-    echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!DOCTYPE html
-    PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"
-    \"DTD/xhtml1-transitional.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
-<head>\n<title>Unauthorized</title>\n</head>\n<body>\n" .
-      "<h2>WebCalendar</h2>\n" .
-      "You are not authorized" .
-      "\n</body>\n</html>";
-  }
+    <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">
+    <head>\n<title>Unauthorized</title>\n</head>\n<body>\n" .
+    "<h2>Title</h2>\n" .
+    "You are not authorized" .
+    "\n</body>\n</html>";
   exit;
 }
 
@@ -626,9 +605,8 @@ function send_no_cache_header () {
  *   system settings.
  */
 function load_user_preferences () {
-  global $login, $browser, $prefarray,
+  global $login, $prefarray,
     $allow_color_customization;
-  $lang_found = false;
   $colors = array (
     "BGCOLOR" => 1,
     "H2COLOR" => 1,
@@ -641,8 +619,6 @@ function load_user_preferences () {
     "POPUP_FG" => 1,
   );
 
-  $browser = get_web_browser ();
-  $browser_lang = get_browser_language ();
   $prefarray = array ();
 
   // Note: default values are set in config.php
@@ -663,20 +639,8 @@ function load_user_preferences () {
         $GLOBALS["sys_" . $setting] = $GLOBALS[$setting];
       $GLOBALS[$setting] = $value;
       $prefarray[$setting] = $value;
-      if ( $setting == "LANGUAGE" )
-        $lang_found = true;
     }
     dbi_free_result ( $res );
-  }
-
-  // If user has not set a language preference, then use their browser
-  // settings to figure it out, and save it in the database for future
-  // use (email reminders).
-  if ( ! $lang_found && strlen ( $login ) && $login != "__public__" ) {
-    $LANGUAGE = $browser_lang;
-    dbi_query ( "INSERT INTO webcal_user_pref " .
-      "( cal_login, cal_setting, cal_value ) VALUES " .
-      "( '$login', 'LANGUAGE', '$LANGUAGE' )" );
   }
 
   if ( empty ( $GLOBALS["DATE_FORMAT_MY"] ) )
@@ -721,7 +685,7 @@ function event_get_external_users ( $event_id, $use_mailto=0 ) {
     }
     dbi_free_result ( $res );
   } else {
-    echo translate("Database error") .": " . dbi_error ();
+    echo "Database error: " . dbi_error ();
     echo "<br />\nSQL:<br />\n$sql";
     exit;
   }
@@ -816,36 +780,6 @@ function get_pref_setting ( $user, $setting ) {
   return $ret;
 }
 
-/**
- * Gets browser-specified language preference.
- *
- * @return string Preferred language
- *
- * @ignore
- */
-function get_browser_language () {
-  global $HTTP_ACCEPT_LANGUAGE, $browser_languages;
-  $ret = "";
-  if ( empty ( $HTTP_ACCEPT_LANGUAGE ) &&
-    isset ( $_SERVER["HTTP_ACCEPT_LANGUAGE"] ) )
-    $HTTP_ACCEPT_LANGUAGE = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
-  if (  empty ( $HTTP_ACCEPT_LANGUAGE ) ) {
-    return "none";
-  } else {
-    $langs = explode ( ",", $HTTP_ACCEPT_LANGUAGE );
-    for ( $i = 0; $i < count ( $langs ); $i++ ) {
-     $l = strtolower ( trim ( ereg_replace(';.*', '', $langs[$i] ) ) );
-      $ret .= "\"$l\" ";
-      if ( ! empty ( $browser_languages[$l] ) ) {
-        return $browser_languages[$l];
-      }
-    }
-  }
-  //if ( strlen ( $HTTP_ACCEPT_LANGUAGE ) )
-  //  return "none ($HTTP_ACCEPT_LANGUAGE not supported)";
-  //else
-    return "none";
-}
 
 
 /**
@@ -879,7 +813,7 @@ function site_extras_for_popup ( $id ) {
     $extra_arg1 = $site_extras[$i][3];
     $extra_arg2 = $site_extras[$i][4];
     if ( ! empty ( $extras[$extra_name]['cal_name'] ) ) {
-      $ret .= "<dt>" .  translate ( $site_extras[$i][1] ) . ":</dt>\n<dd>";
+      $ret .= "<dt>" . $site_extras[$i][1] . ":</dt>\n<dd>";
       if ( $extra_type == $EXTRA_DATE ) {
         if ( $extras[$extra_name]['cal_date'] > 0 )
           $ret .= date_to_str ( $extras[$extra_name]['cal_date'] );
@@ -888,9 +822,9 @@ function site_extras_for_popup ( $id ) {
         $ret .= nl2br ( $extras[$extra_name]['cal_data'] );
       } else if ( $extra_type == $EXTRA_REMINDER ) {
         if ( $extras[$extra_name]['cal_remind'] <= 0 )
-          $ret .= translate ( "No" );
+          $ret .= "No";
         else {
-          $ret .= translate ( "Yes" );
+          $ret .= "Yes";
           if ( ( $extra_arg2 & $EXTRA_REMINDER_WITH_DATE ) > 0 ) {
             $ret .= "&nbsp;&nbsp;-&nbsp;&nbsp;";
             $ret .= date_to_str ( $extras[$extra_name]['cal_date'] );
@@ -902,12 +836,12 @@ function site_extras_for_popup ( $id ) {
             $h = (int) ( $minutes / 60 );
             $minutes -= ( $h * 60 );
             if ( $d > 0 )
-              $ret .= $d . "&nbsp;" . translate("days") . "&nbsp;";
+              $ret .= $d . "&nbsp;" . "days" . "&nbsp;";
             if ( $h > 0 )
-              $ret .= $h . "&nbsp;" . translate("hours") . "&nbsp;";
+              $ret .= $h . "&nbsp;" . "hours" . "&nbsp;";
             if ( $minutes > 0 )
-              $ret .= $minutes . "&nbsp;" . translate("minutes");
-            $ret .= "&nbsp;" . translate("before event" );
+              $ret .= $minutes . "&nbsp;" . "minutes";
+            $ret .= "&nbsp;" . "before event";
           }
         }
       } else {
@@ -1715,7 +1649,7 @@ function display_time ( $time, $ignore_offset=0 ) {
   while ( $hour > 23 )
     $hour -= 24;
   if ( $GLOBALS["TIME_FORMAT"] == "12" ) {
-    $ampm = ( $hour >= 12 ) ? translate("pm") : translate("am");
+    $ampm = ( $hour >= 12 ) ? "pm" : "am";
     $hour %= 12;
     if ( $hour == 0 )
       $hour = 12;
@@ -1739,18 +1673,18 @@ function display_time ( $time, $ignore_offset=0 ) {
  */
 function month_name ( $m ) {
   switch ( $m ) {
-    case 0: return translate("January");
-    case 1: return translate("February");
-    case 2: return translate("March");
-    case 3: return translate("April");
-    case 4: return translate("May_"); // needs to be different than "May"
-    case 5: return translate("June");
-    case 6: return translate("July");
-    case 7: return translate("August");
-    case 8: return translate("September");
-    case 9: return translate("October");
-    case 10: return translate("November");
-    case 11: return translate("December");
+    case 0: return "January";
+    case 1: return "February";
+    case 2: return "March";
+    case 3: return "April";
+    case 4: return "May_"; // needs to be different than "May"
+    case 5: return "June";
+    case 6: return "July";
+    case 7: return "August";
+    case 8: return "September";
+    case 9: return "October";
+    case 10: return "November";
+    case 11: return "December";
   }
   return "unknown-month($m)";
 }
@@ -1768,18 +1702,18 @@ function month_name ( $m ) {
  */
 function month_short_name ( $m ) {
   switch ( $m ) {
-    case 0: return translate("Jan");
-    case 1: return translate("Feb");
-    case 2: return translate("Mar");
-    case 3: return translate("Apr");
-    case 4: return translate("May");
-    case 5: return translate("Jun");
-    case 6: return translate("Jul");
-    case 7: return translate("Aug");
-    case 8: return translate("Sep");
-    case 9: return translate("Oct");
-    case 10: return translate("Nov");
-    case 11: return translate("Dec");
+    case 0: return "Jan";
+    case 1: return "Feb";
+    case 2: return "Mar";
+    case 3: return "Apr";
+    case 4: return "May";
+    case 5: return "Jun";
+    case 6: return "Jul";
+    case 7: return "Aug";
+    case 8: return "Sep";
+    case 9: return "Oct";
+    case 10: return "Nov";
+    case 11: return "Dec";
   }
   return "unknown-month($m)";
 }
@@ -1797,13 +1731,13 @@ function month_short_name ( $m ) {
  */
 function weekday_name ( $w ) {
   switch ( $w ) {
-    case 0: return translate("Sunday");
-    case 1: return translate("Monday");
-    case 2: return translate("Tuesday");
-    case 3: return translate("Wednesday");
-    case 4: return translate("Thursday");
-    case 5: return translate("Friday");
-    case 6: return translate("Saturday");
+    case 0: return "Sunday";
+    case 1: return "Monday";
+    case 2: return "Tuesday";
+    case 3: return "Wednesday";
+    case 4: return "Thursday";
+    case 5: return "Friday";
+    case 6: return "Saturday";
   }
   return "unknown-weekday($w)";
 }
@@ -1819,13 +1753,13 @@ function weekday_name ( $w ) {
  */
 function weekday_short_name ( $w ) {
   switch ( $w ) {
-    case 0: return translate("Sun");
-    case 1: return translate("Mon");
-    case 2: return translate("Tue");
-    case 3: return translate("Wed");
-    case 4: return translate("Thu");
-    case 5: return translate("Fri");
-    case 6: return translate("Sat");
+    case 0: return "Sun";
+    case 1: return "Mon";
+    case 2: return "Tue";
+    case 3: return "Wed";
+    case 4: return "Thu";
+    case 5: return "Fri";
+    case 6: return "Sat";
   }
   return "unknown-weekday($w)";
 }
@@ -2188,21 +2122,6 @@ function clean_whitespace($data) {
   return preg_replace("/\s/", '', $data);
 }
 
-/**
- * Converts language names to their abbreviation.
- *
- * @param string $name Name of the language (such as "French")
- *
- * @return string The abbreviation ("fr" for "French")
- */
-function languageToAbbrev ( $name ) {
-  global $browser_languages;
-  foreach ( $browser_languages as $abbrev => $langname ) {
-    if ( $langname == $name )
-      return $abbrev;
-  }
-  return false;
-}
 
 /**
  * Creates the CSS for using gradient.php, if the appropriate GD functions are
@@ -2487,7 +2406,7 @@ function edit_head_chef_participation ( $id, $action, $user="" ) {
 	"( cal_id, cal_login, cal_type ) " . 
 	"VALUES ( $id, '$user', 'H' )";
       if ( ! dbi_query ( $sql ) ) 
-	$error = translate("Database error") . ": " . dbi_error ();
+	$error = "Database error: " . dbi_error ();
       add_subscribed_diners( $id );
     }
   }
@@ -2498,7 +2417,7 @@ function edit_head_chef_participation ( $id, $action, $user="" ) {
       $sql = "DELETE FROM webcal_meal_participant " .
 	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = 'H'";
       if ( !dbi_query( $sql ) ) 
-	$error = translate("Database error") . ": " . dbi_error ();
+	$error = "Database error: " . dbi_error ();
     }
   }
 
@@ -2551,7 +2470,7 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
 	"( cal_id, cal_login, cal_type, cal_walkin ) " . 
 	"VALUES ( $id, '$user', '$type', $walkin )";
       if ( ! dbi_query ( $sql ) ) 
-	$error = translate("Database error") . ": " . dbi_error ();
+	$error = "Database error: " . dbi_error ();
       else {
 	auto_financial_event( $id, 'A', $type, $user );
 	if ( is_blocked( $id, $user ) ) {
@@ -2569,7 +2488,7 @@ function edit_participation ( $id, $action, $type='M', $user="", $walkin=0 ) {
       $sql = "DELETE FROM webcal_meal_participant " .
 	"WHERE cal_id = $id AND cal_login = '$user' AND cal_type = '$type'";
       if ( !dbi_query( $sql ) ) 
-	$error = translate("Database error") . ": " . dbi_error ();
+	$error = "Database error: " . dbi_error ();
       else {
 	auto_financial_event( $id, 'D', $type, $user );
       }

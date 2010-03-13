@@ -53,7 +53,6 @@ load_global_settings ();
 load_user_preferences ();
 include "$includedir/site_extras.php";
 
-include "$includedir/translate.php";
 
 $debug = false; // set to true to print debug info...
 
@@ -66,7 +65,7 @@ echo "<reminders>\n";
 // If login is public user, make sure public can view others...
 if ( $login == "__public__" && $login != $user ) {
   if ( $public_access_others != 'Y' ) {
-    echo "<error>" . translate("Not authorized") . "</error>\n";
+    echo "<error>Not authorized</error>\n";
     echo "</reminders>\n";
     exit;
   }
@@ -110,7 +109,7 @@ function list_reminder ( $id, $event_date, $remind_time ) {
   global $site_extras, $debug,
     $server_url, $application_name;
   global $EXTRA_TEXT, $EXTRA_MULTILINETEXT, $EXTRA_URL, $EXTRA_DATE,
-    $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LANGUAGE, $LOG_REMINDER;
+    $EXTRA_EMAIL, $EXTRA_USER, $EXTRA_REMINDER, $LOG_REMINDER;
 
   // get participants first...
 
@@ -199,7 +198,7 @@ function list_reminder ( $id, $event_date, $remind_time ) {
     $extra_descr = $site_extras[$i][1];
     $extra_type = $site_extras[$i][2];
     if ( $extras[$extra_name]['cal_name'] != "" ) {
-      $tag = preg_replace ( "/[^A-Za-z0-9]+/", "", translate ( $extra_descr ) );
+      $tag = preg_replace ( "/[^A-Za-z0-9]+/", "", $extra_descr );
       $tag = strtolower ( $tag );
       $tagname = str_replace ( '"', '', $extra_name );
       echo "    <siteExtra>\n";
@@ -215,7 +214,7 @@ function list_reminder ( $id, $event_date, $remind_time ) {
         echo escapeXml ( $extras[$extra_name]['cal_data'] );
       } else if ( $extra_type == $EXTRA_REMINDER ) {
         echo ( $extras[$extra_name]['cal_remind'] > 0 ?
-          translate("Yes") : translate("No") );
+          "Yes" : "No" );
       } else {
         // default method for $EXTRA_URL, $EXTRA_TEXT, etc...
         echo escapeXml ( $extras[$extra_name]['cal_data'] );

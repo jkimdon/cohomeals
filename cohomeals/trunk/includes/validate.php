@@ -23,8 +23,6 @@ function doDbSanityCheck () {
     } else {
       // Error accessing table.
       // User has wrong db name or has not created tables.
-      // Note: cannot translate this since we have not included
-      // translate.php yet.
       dbi_free_result ( $res );
       die_miserable_death (
         "Error finding WebCalendar tables in database '$db_database' " .
@@ -36,7 +34,6 @@ function doDbSanityCheck () {
   } else {
     // Error accessing table.
     // User has wrong db name or has not created tables.
-    // Note: cannot translate this since we have not included translate.php yet.
     die_miserable_death (
       "Error finding WebCalendar tables in database '$db_database' " .
       "using db login '$db_login' on db server '$db_host'.<br/><br/>\n" .

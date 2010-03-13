@@ -274,7 +274,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
     }
     
     if ( ! dbi_query ( $sql ) ) {
-      $error = translate("Database error") . ": " . dbi_error ();
+      $error = "Database error: " . dbi_error ();
       echo "Error = $error<br>";
     }
 
@@ -308,7 +308,7 @@ function add_or_edit_entry( $newevent, $id, $club_id, $suit,
 	  }
 
 	  if ( ! dbi_query ( $sql3 ) ) {
-	    $error = translate("Database error") . ": " . dbi_error ();
+	    $error = "Database error: " . dbi_error ();
 	    echo "Error = $error<br>";
 	  }
 	}

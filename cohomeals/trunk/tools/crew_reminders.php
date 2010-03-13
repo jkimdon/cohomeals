@@ -27,7 +27,6 @@ include "$includedir/$user_inc";
 include "$includedir/site_extras.php";
 
 load_global_settings();
-include "$includedir/translate.php";
 
 // Establish a database connection.
 $c = dbi_connect ( $db_host, $db_login, $db_password, $db_database );

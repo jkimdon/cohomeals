@@ -15,22 +15,22 @@ function valid_form ( form ) {
   var colorErr = false;
   <?php if ( $allow_color_customization ) { ?>
   if ( ! valid_color ( form.pref_BGCOLOR.value ) )
-    err += "<?php etranslate("Invalid color for document background")?>.\n";
+    err += "Invalid color for document background.\n";
   if ( ! valid_color ( form.pref_H2COLOR.value ) )
-    err += "<?php etranslate("Invalid color for document title")?>.\n";
+    err += "Invalid color for document title.\n";
   if ( ! valid_color ( form.pref_CELLBG.value ) )
-    err += "<?php etranslate("Invalid color for table cell background")?>.\n";
+    err += "Invalid color for table cell background.\n";
   if ( ! valid_color ( form.pref_TODAYCELLBG.value ) )
-    err += "<?php etranslate("Invalid color for table cell background for today")?>.\n";
+    err += "Invalid color for table cell background for today.\n";
   <?php } ?>
   if ( err.length > 0 )
     colorErr = true;
   if ( ! validWorkHours ( form ) ) {
-    err += "<?php etranslate("Invalid work hours"); ?>.\n";
+    err += "Invalid work hours.\n";
     err += form.pref_WORK_DAY_START_HOUR.value + " > " + form.pref_WORK_DAY_END_HOUR.value + "\n";
   }
   if ( colorErr ) {
-    alert ( "Error:\n\n" + err + "\n\n<?php etranslate("Color format should be '#RRGGBB'")?>" );
+    alert ( "Error:\n\n" + err + "\n\nColor format should be '#RRGGBB'" );
     return false;
   } else if ( err.length > 0 ) {
     alert ( "Error:\n\n" + err );

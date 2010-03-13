@@ -8,26 +8,25 @@ if ( $is_meal_coordinator == "Y" ) {
 }
 	print_header($INC);
 ?>
-<h2><?php 
-	etranslate("Search"); 
-?></h2>
+<h2>Search 
+</h2>
 
 <form action="search_handler.php" method="post" name="searchformentry" style="margin-left:13px;">
 
-<label for="keywordsadv"><?php etranslate("Keywords")?>:&nbsp;</label>
+<label for="keywordsadv">Keywords:&nbsp;</label>
 <input type="text" name="keywords" id="keywordsadv" size="30" />&nbsp;
-<input type="submit" value="<?php etranslate("Search")?>" /><br />
+<input type="submit" value="Search" /><br />
 <?php 
 	if ( ($login == "__public__" && $public_access_others != "Y") || (! $is_meal_coordinator) ) {
 		echo "</form>";
 	} else {
 		echo "<div id=\"advlink\"><a title=\"" . 
-			translate("Advanced Search") . "\" href=\"javascript:show('adv'); hide('advlink');\">" . 
-			translate("Advanced Search") . "</a></div>";
+			"Advanced Search" . "\" href=\"javascript:show('adv'); hide('advlink');\">" . 
+			"Advanced Search" . "</a></div>";
 ?>
 <table id="adv" style="display:none;">
 <tr><td style="vertical-align:top; text-align:right; font-weight:bold; width:60px;">
-	<?php etranslate("Users"); ?>:&nbsp;</td><td>
+	Users:&nbsp;</td><td>
 <?php
   $users = user_get_users ();
   $size = 0;

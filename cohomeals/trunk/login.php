@@ -25,26 +25,12 @@ if ( $remember_last_login == "Y" && empty ( $login ) ) {
 }
 
 
-include "includes/translate.php";
-
 // see if a return path was set
 if ( ! empty ( $return_path ) ) {
   $return_path = clean_whitespace ( $return_path );
   $url = $return_path;
 } else {
   $url = "index.php";
-}
-
-$lang = '';
-if ( ! empty ( $LANGUAGE ) &&  $LANGUAGE != "Browser-defined" && $LANGUAGE != "none" ) {
-  $lang = languageToAbbrev ( $LANGUAGE );
-} else {
-  $lang_long = get_browser_language ();
-  $lang = languageToAbbrev ( $lang_long );
-}
-
-if ( empty ( $lang ) ) {
-  $lang = 'en';
 }
 
 $login = getPostValue ( 'login' );
@@ -110,7 +96,7 @@ load_user_preferences ();
     } else {
       // Invalid login
       if ( empty ( $error ) || ! $showLoginFailureReason ) {
-        $error = translate("Invalid login" );
+        $error = "Invalid login";
       }
     }
   } else {
@@ -127,20 +113,20 @@ load_user_preferences ();
     SetCookie ( "webcalendar_session", "", 0, substr($cookie_path, 0, -1)  );
   }
 }
-$charset = ( ! empty ( $LANGUAGE )?translate("charset"): "iso-8859-1" );
+$charset = "iso-8859-1";
 echo "<?xml version=\"1.0\" encoding=\"$charset\"?>" . "\n";
 ?>
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo $lang; ?>" lang="<?php echo $lang; ?>">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo $charset; ?>" />
-<title><?php etranslate($application_name)?></title>
+<title><?php echo $application_name;?></title>
 <script type="text/javascript">
 // error check login/password
 function valid_form ( form ) {
   if ( form.login.value.length == 0 || form.password.value.length == 0 ) {
-    alert ( "<?php etranslate("You must enter a login and password")?>." );
+    alert ( "You must enter a login and password." );
     return false;
   }
   return true;
@@ -169,10 +155,9 @@ function myOnLoad() {
 <body onload="myOnLoad();">
 
 <h2><?php 
-// If Application Name is set to Title then get translation
-// If not, use the Admin defined Application Name
+// If Application Name is not set to Title then use the Admin defined Application Name
 if ( ! empty ( $application_name ) &&  $application_name =="Title") {
-  etranslate($application_name);
+  echo $application_name;
 } else {
   echo htmlspecialchars ( $application_name );
 }  
@@ -181,7 +166,7 @@ if ( ! empty ( $application_name ) &&  $application_name =="Title") {
 <?php
 if ( ! empty ( $error ) ) {
   print "<span style=\"color:#FF0000; font-weight:bold;\">" . 
-    translate("Error") . ": $error</span><br />\n";
+    "Error" . ": $error</span><br />\n";
 } else {
   print "<br />\n";
 }
@@ -198,13 +183,13 @@ if ( ! empty ( $return_path ) ) {
 <table cellpadding="10" align="center">
 <tr><td rowspan="2">
  <img src="login.gif" alt="Login" /></td><td align="right">
- <label for="user"><?php etranslate("Username")?>:</label></td><td>
+ <label for="user">Username:</label></td><td>
  <input name="login" id="user" size="15" maxlength="25" 
    value="<?php if ( ! empty ( $last_login ) ) echo $last_login;?>" 
    tabindex="1" />
 </td></tr>
 <tr><td style="text-align:right;">
- <label for="password"><?php etranslate("Password")?>:</label></td><td>
+ <label for="password">Password:</label></td><td>
  <input name="password" id="password" type="password" size="15" 
    maxlength="30" tabindex="2" />
 </td></tr>
@@ -212,10 +197,10 @@ if ( ! empty ( $return_path ) ) {
  <input type="checkbox" name="remember" id="remember" tabindex="3" 
    value="yes" <?php if ( ! empty ( $remember ) && $remember == "yes" ) {
      echo "checked=\"checked\""; }?> /><label for="remember">&nbsp;
-   <?php etranslate("Save login via cookies so I don't have to login next time")?></label>
+   Save login via cookies so I don't have to login next time</label>
 </td></tr>
 <tr><td colspan="4" style="text-align:center;">
- <input type="submit" value="<?php etranslate("Login")?>" tabindex="4" />
+ <input type="submit" value="Login" tabindex="4" />
 </td></tr>
 </table>
 </form>
@@ -223,11 +208,11 @@ if ( ! empty ( $return_path ) ) {
 <?php if ( ! empty ( $public_access ) && $public_access == "Y" ) { ?>
  <br /><br />
  <a class="nav" href="index.php">
-   <?php etranslate("Access public calendar")?></a><br />
+   Access public calendar</a><br />
 <?php } ?>
 
 <br /><br /><br />
-<span class="cookies"><?php etranslate("cookies-note")?></span><br />
+<span class="cookies">cookies-note</span><br />
 <hr />
 <br /><br />
 <a href="<?php echo $PROGRAM_URL ?>" id="programname"><?php echo $PROGRAM_NAME?></a>

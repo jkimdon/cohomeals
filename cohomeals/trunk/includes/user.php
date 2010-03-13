@@ -45,8 +45,7 @@ function user_valid_login ( $login, $password ) {
       if ( $row[0] == $login )
         $ret = true; // found login/password
       else
-	$error = translate ("Invalid login") . ": " .
-	  translate("incorrect password");
+	$error = "Invalid login: incorrect password";
     } else {
       // fixme: this is a temporary hard-coded way for me to check out peoples' bugs
       $sql3 = "SELECT cal_login FROM webcal_user " .
@@ -58,11 +57,11 @@ function user_valid_login ( $login, $password ) {
 	  $ret = true;
 	} else {
 	  $ret = false;
-	  $error = translate ( "Invalid login" );
+	  $error = "Invalid login";
 	}
 	dbi_free_result( $res3 );
       } else {
-	$error = translate ("Invalid login");
+	$error = "Invalid login";
 	// Could be no such user or bad password
 	// Check if user exists, so we can tell.
 	$res2 = dbi_query ( "SELECT cal_login FROM webcal_user " .
@@ -71,12 +70,10 @@ function user_valid_login ( $login, $password ) {
 	  $row = dbi_fetch_row ( $res2 );
 	  if ( $row && ! empty ( $row[0] ) ) {
 	    // got a valid username, but wrong password
-	    $error = translate ("Invalid login") . ": " .
-	      translate("incorrect password" );
+	    $error = "Invalid login: incorrect password";
 	  } else {
 	    // No such user.
-	    $error = translate ("Invalid login") . ": " .
-	      translate("no such user" );
+	    $error = "Invalid login: no such user";
 	  }
 	  dbi_free_result ( $res2 );
 	}
@@ -84,7 +81,7 @@ function user_valid_login ( $login, $password ) {
     }
     dbi_free_result ( $res );
   } else {
-    $error = translate("Database error") . ": " . dbi_error();
+    $error = "Database error: " . dbi_error();
   }
 
   return $ret;
@@ -114,15 +111,12 @@ function user_valid_crypt ( $login, $crypt_password ) {
       if ( ($row[0] == $login) && (crypt($row[1], $salt) == $crypt_password) )
         $ret = true; // found login/password
       else
-        //$error = translate ("Invalid login");
         $error = "Invalid login";
     } else {
-      //$error = translate ("Invalid login");
       $error = "Invalid login";
     }
     dbi_free_result ( $res );
   } else {
-    //$error = translate("Database error") . ": " . dbi_error();
     $error = "Database error: " . dbi_error();
   }
 
@@ -177,7 +171,7 @@ function user_load_variables ( $login, $prefix ) {
     }
     dbi_free_result ( $res );
   } else {
-    $error = translate ("Database error") . ": " . dbi_error ();
+    $error = "Database error: " . dbi_error ();
     return false;
   }
   return true;
@@ -199,7 +193,7 @@ function user_add_user ( $user, $password, $firstname, $lastname,
   global $error;
 
   if ( $user == "__public__" ) {
-    $error = translate ("Invalid user login");
+    $error = "Invalid user login";
     return false;
   }
   $user = mysql_safe( $user, true );
@@ -245,7 +239,7 @@ function user_add_user ( $user, $password, $firstname, $lastname,
     "'$meal_coordinator', '$beancounter', $upassword, '$uemail', " . 
     "'$ubilling_group', '$ubirthdate', $uunit )";
   if ( ! dbi_query ( $sql ) ) {
-    $error = translate ("Database error") . ": " . dbi_error ();
+    $error = "Database error: " . dbi_error ();
     return false;
   }
   return true;
@@ -268,7 +262,7 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
 
   $user = mysql_safe( $user, true );
   if ( $user == "__public__" ) {
-    $error = translate ("Invalid user login");
+    $error = "Invalid user login";
     return false;
   }
   if ( strlen ( $email ) )
@@ -310,7 +304,7 @@ function user_update_user ( $user, $firstname, $lastname, $birthdate,
     "cal_is_beancounter = '$beancounter' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
-    $error = translate ("Database error") . ": " . dbi_error ();
+    $error = "Database error: " . dbi_error ();
     return false;
   }
   return true;
@@ -327,7 +321,7 @@ function user_update_user_password ( $user, $password ) {
   $sql = "UPDATE webcal_user SET cal_passwd = '".md5($password)."' " .
     "WHERE cal_login = '$user'";
   if ( ! dbi_query ( $sql ) ) {
-    $error = translate ("Database error") . ": " . dbi_error ();
+    $error = "Database error: " . dbi_error ();
     return false;
   }
   return true;

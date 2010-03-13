@@ -15,8 +15,6 @@
  * From then on, users must know this password to make any changes
  * to the settings in settings.php./
  *
- * TODO:
- * Add translations to this page.
  */
 include_once '../includes/php-dbi.php';
 
@@ -201,7 +199,6 @@ if ( ! empty ( $action ) && $action == "dbtest" ) {
     echo "</body></html>\n";
   } else { // Not valid user
     echo "You are not authorized.";
-    // etranslate ( "You are not authorized" );  
   }
   exit;
 }
@@ -213,7 +210,6 @@ if ( ! empty ( $action ) && $action == "phpinfo" ) {
     phpinfo();
   } else {
     echo "You are not authorized.";
-    // etranslate ( "You are not authorized" );
   }
   exit;
 }

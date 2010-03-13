@@ -29,10 +29,6 @@ if ( ! empty ( $PHP_SELF ) && preg_match ( "/\/includes\//", $PHP_SELF ) ) {
  *	  EXTRA_SELECTION_LIST - allows a custom selection list.  Can use
  *	    this to specify a list of possible locations, etc.
  *	
- * Comments:
- *	If you want to fully support using languages other than what
- *	you define below, you will need to add the 2nd field of the arrays
- *	below to the translation files.
  *	
  * WARNING:
  *	If you want to use reminders, you will need to do some
@@ -145,14 +141,7 @@ $EXTRA_REMINDER_DEFAULT_YES =	0x0004;
 // END EXAMPLES
 
 // Define your stuff here...
-// Below translate calls are here so they get picked up by check_translation.pl.
-// They are never executed in PHP.
-// Make sure you add translations in the translations file for anything
-// you need to translate to another language.
-// Use tools/check_translation.pl to verify you have all your translations.
 //
-// Kludge for picking up translations:
-//    translate("Send Reminder")
 $site_extras = array (
   array (
     "Reminder",          // unique name of this extra field (used in db)
