@@ -663,29 +663,14 @@ if ( $show_log ) {
 
 <?php
 
-function add_me_button( $type, $job="" ) {
+function add_me_button( $type, $olduser="" ) {
   global $login, $id;
-
-  $job = mysql_safe( $job );
-  $olduser = "";
-  if ( $type == 'C' ) {
-    $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_type = 'C' " .
-      "AND cal_login LIKE 'none%'";
-    if ( $job != "" ) 
-      $sql .= " AND cal_notes = '$job'";
-    
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) 
-	$olduser = $row[0];
-    }
-  }
 
   echo "&nbsp;&nbsp;&nbsp;";
   echo "<a name=\"participation\" class=\"addbutton\"" .
-    "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A&" .
-    "olduser=$olduser\">" .
-  "Add me</a>";
+    "href=\"edit_participation_handler.php?user=$login&id=$id&type=$type&action=A";
+  if ( $olduser != "" ) echo "&olduser=$olduser"; 
+  echo "\">Add me</a>";
   echo "&nbsp;&nbsp;&nbsp;";
 }
 
@@ -707,24 +692,10 @@ function change_button( $person, $id, $old_type ) {
 }
 
 
-function signup_buddy_button( $type, $id, $job="" ) {
+function signup_buddy_button( $type, $id, $olduser="" ) {
 
-  $job = mysql_safe( $job );
-  $olduser = "";
-  if ( $type == 'C' ) {
-    $sql = "SELECT cal_login FROM webcal_meal_participant " .
-      "WHERE cal_id = $id AND cal_type = 'C' " .
-      "AND cal_login LIKE 'none%'";
-    if ( $job != "" ) 
-      $sql .= " AND cal_notes = '$job'";
-
-    if ( $res = dbi_query( $sql ) ) {
-      if ( $row = dbi_fetch_row( $res ) ) 
-	$olduser = $row[0];
-    }
-  }
-
-  $nexturl = "signup_buddy.php?id=$id&type=$type&action=A&olduser=$olduser"; 
+  $nexturl = "signup_buddy.php?id=$id&type=$type&action=A";
+  if ( $olduser != "" ) $nexturl .= "&olduser=$olduser";
   echo "<a href class=\"addbutton\" " .
     "onclick=\"window.open('$nexturl', 'Buddies', " .
     "'width=300,height=300,resizable=yes,scrollbars=yes');\">" .
@@ -834,8 +805,8 @@ function display_crew( $type, $rowcolor, $can_remove=true ) {
     echo "<td>$person";
 
     if ( ereg( "^none", $person_username ) ) {
-	add_me_button( 'C', $job );
-	signup_buddy_button( 'C', $id, $job );
+       add_me_button( 'C', $person_username );
+       signup_buddy_button( 'C', $id, $person_username );
     } else {
       if ( (is_signer( $person_username ) || ($person_username == $login)) ) {
 	if ( $can_remove == true )
