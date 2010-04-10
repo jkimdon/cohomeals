@@ -3,10 +3,10 @@
 \header {
   title = "Home in CoHo"
   composer = "Rob Dietz"
+  tagline = ""
 }
 
 Chords = \chordmode {
-  \transpose g a {
   \partial 2 r2
     g1 g d d
     g g d d
@@ -15,21 +15,16 @@ Chords = \chordmode {
     g g d d 
     c d g r1
 }
-}
  
 \score{
 
   << 
 
-  \tempo 2 = 80
-
   \new ChordNames {
     \set chordChanges = ##t
     \Chords
   }
-  \transpose g a {
   \relative c'' {
-    \time 2/2
     \key g \major
 
     \once \override TextScript #'extra-offset = #'(-9.0 . 2.0 )
@@ -46,7 +41,6 @@ Chords = \chordmode {
     b'2 g2 r4 b8 b c4 b a2 d, r1
 
     e2 e fis fis g1 r1 r2 \bar ":|"
-  }
   }
   \addlyrics {
     \set stanza = "1."
@@ -65,6 +59,13 @@ Chords = \chordmode {
     Flow on down to come back a -- gain
     Like the rain soak -- in' in
     we're here in the end Co -- Ho
+  }
+  \addlyrics {
+    \set stanza = "3."
+    Years pass by and we work as one
+    Join our hands to a com -- mon end
+    Here with joy in our hearts
+    bring life to a dream Co -- Ho
   }
 
   >>
