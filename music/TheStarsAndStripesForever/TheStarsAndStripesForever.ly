@@ -1,4 +1,4 @@
-\version "2.6.0"
+\version "2.12.0"
 \include "english.ly"
 \header {
  title="The Stars and Stripes Forever."
@@ -17,15 +17,15 @@
  lastupdated = "2005/October/30"
 
  footer = "Mutopia-2005/11/09-626"
- copyright = \markup { \override #'(box-padding . 1.0) \override #'(baseline-skip . 2.7) \box \center-align { \small \line { Sheet music from \with-url #"http://www.MutopiaProject.org" \line { \teeny www. \hspace #-1.0 MutopiaProject \hspace #-1.0 \teeny .org \hspace #0.5 }  \hspace #0.5 \italic Free to download, with the \italic freedom to distribute, modify and perform. } \line { \small \line { Typeset using \with-url #"http://www.LilyPond.org" \line { \teeny www. \hspace #-1.0 LilyPond \hspace #-1.0 \teeny .org } by \maintainer \hspace #-1.0 . \hspace #0.5 Reference: \footer } } \line { \teeny \line { This sheet music has been placed in the public domain by the typesetter, for details see: \hspace #-0.5 \with-url #"http://creativecommons.org/licenses/publicdomain" http://creativecommons.org/licenses/publicdomain } } } }
+ copyright = \markup { \override #'(box-padding . 1.0) \override #'(baseline-skip . 2.7) \box \center-column { \small \line { Sheet music from \with-url #"http://www.MutopiaProject.org" \line { \teeny www. \hspace #-1.0 MutopiaProject \hspace #-1.0 \teeny .org \hspace #0.5 }  \hspace #0.5 \italic Free to download, with the \italic freedom to distribute, modify and perform. } \line { \small \line { Typeset using \with-url #"http://www.LilyPond.org" \line { \teeny www. \hspace #-1.0 LilyPond \hspace #-1.0 \teeny .org } by \maintainer \hspace #-1.0 . \hspace #0.5 Reference: \footer } } \line { \teeny \line { This sheet music has been placed in the public domain by the typesetter, for details see: \hspace #-0.5 \with-url #"http://creativecommons.org/licenses/publicdomain" http://creativecommons.org/licenses/publicdomain } } } }
 
 }
 
 \paper {
-	raggedlastbottom=##f
-%	hsize = 8.5\in
-%	vsize = 11\in
-	betweensystempadding = #0
+	ragged-last-bottom=##f
+%	paper-width = 8.5\in
+%	paper-height = 11\in
+	between-system-padding = #0
 }
 
      upper = \relative c'' {
@@ -407,12 +407,12 @@
        >>
        \layout {
          \context {
-           \type "Engraver_group_engraver"
+           \type "Engraver_group"
            \name Dynamics
            \alias Voice % So that \cresc works, for example.
            \consists "Output_property_engraver"
      
-           minimumVerticalExtent = #'(-1 . 1)
+           \override VerticalAxisGroup #'minimum-Y-extent = #'(-1 . 1)
            pedalSustainStrings = #'("Ped." "*Ped." "*")
            pedalUnaCordaStrings = #'("una corda" "" "tre corde")
      
@@ -446,7 +446,7 @@
        >>
        \midi { \tempo 4=240
          \context {
-           \type "Performer_group_performer"
+           \type "Performer_group"
            \name Dynamics
            \consists "Piano_pedal_performer"
          }
