@@ -16,5 +16,12 @@ all: $(subst .abc,.ps,$(wildcard *.abc)) $(subst .ly,.pdf,$(wildcard *.ly))
 	timidity -Ow $*.midi
 	lame $*.wav $*.mp3
 
+%.pdf: %.lytex
+	lilypond-book $*.lytex
+	latex $*.tex
+	dvips -Ppdf $*.dvi
+	ps2pdf $*.ps
+
 clean:
-	-rm *.ps *.pdf *.midi *.mp3 *.wav
+	-rm *.ps *.pdf *.midi *.mp3 *.wav *.aux *.dvi *.log *.dep *.tex
+
