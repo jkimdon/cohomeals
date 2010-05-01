@@ -422,6 +422,7 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
      \score {
 	\unfoldRepeats
        \context PianoStaff <<
+         \tempo 4=240
          \context Staff=upper << \upper \dynamics >>
          \context Staff=lower << \lower \dynamics >>
          \context Dynamics=pedal \pedal
