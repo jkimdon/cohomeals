@@ -52,17 +52,14 @@
       { ef } { ef2 ef:7 }
 }
 
-\repeat volta 2
 {
 af1 | r | r | r | r | r | ef:7 | r | r | r | r | r | af | df | ef | r |
 af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
-}
-\alternative {
-      { af1 } { af1 }
+       af1 
 }
 \repeat volta 2
 {
- r1 | r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  
+ af1 | r1 | r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  
  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  
 af1 | r | r | r | r | r | ef:7 | r | r | r | r | r | af | df | ef | r |
 af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
@@ -124,12 +121,12 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 		ef4\) r bf'4.^^( af8)
 	}
 	{
-		ef4 r ef'2
+		ef4 r ef2
 	}
 }
 \bar "||"
 	\key af \major
-	ef2 df4( c) | c2 b4( c) | c1~ | c2 b4^>( c)
+	ef'2 df4( c) | c2 b4( c) | c1~ | c2 b4^>( c)
 
 
 	c2 b4^>( c) | ef2 c4.^>( ef8) | df1^( | bf2) bf | bf \stemUp a4^>_( bf) |
@@ -139,18 +136,17 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 	df2 c4( bf) | c ef2.^^ | f f4^( | bf,1)~ | bf2 ef | ef df4( c) | c2 b4( c)
 
 
-	c1~ | c2 b4^>( c) | c2 b4( c) | df4^( c bf4. g'8) | bf,1^( | af2) af | af g4^> af
+	c1~ | c2 b4^>( c) | c2 b4( c) | df4^( c bf4. g8) | bf1^( | af2) af | af g4^> af
 
 
-	cf2^( bf4 af) | af'1~ | af4 af,^( bf c | ef8) r af,4^( bf c | ef8) r ef,4^( f c' | bf1)^( af4) r r2
+	cf2^( bf4 af) | af'1~ | af4 af,^( bf c | ef8) r af,4^( bf c | ef8) r ef,4^( f c' | bf1)^( af4) r \ottava #-1  af,8^. af^. af^. af^.
 
 
 \repeat volta 2
 {
-	r1 | r2 f'4^^ e^^ | r2 f4^^ g^^ | e2 r | r1
+	af8( g) g^. g^. g( f) f^. f^. | f4^. e^. \ottava #0 f''4^^ e^^ | \ottava #-1 f,,4^. e^. \ottava #0 f''4^^ g^^ | e2 c,8^. c^. c^. c^. | c( bf) bf^. bf^. bf( af) af^. af^.
 
-
-	r2 af4^^ g^^ | r2 af4^^ bf^^ | g2
+	af4^^ g^^ af''4^^ g^^ | af,,^^ g^^ af''4^^ bf^^ | g2
 	ef,8[^( g bf df] | ff4.^^) ff8^. ff4^. ff^. | ff^. ef^. d^. df^.
 
 
@@ -185,7 +181,7 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 
 
 	af'1~ | af4 af,( bf c | ef8) r af,4( bf c |
-	ef8) r ef,4^( f c | \phrasingSlurUp bf1)\(
+	ef8) r ef,4^( f c' | \phrasingSlurUp bf1)\(
 }
 \alternative
 {
