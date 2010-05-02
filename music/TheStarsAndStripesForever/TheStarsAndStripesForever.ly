@@ -60,12 +60,12 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 \repeat volta 2
 {
 r1 | r1 | r2 bf:m |  c1 |  r1 |  r |  r2 df |  c1 |  r |  r |  r |  r |  r |  
- r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  r |  
+ r |  r |  r |  df:m |  ef:7 |  df:m |  ef:7 |  r |  r |  r |  r |  
 af1 | r | r | r | r | r | ef:7 | r | r | r | r | r | af | df | ef | r |
 af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 }
 \alternative {
-      { f1 } { f1 }
+      { af1 } { af1 }
 }
 
      } }
