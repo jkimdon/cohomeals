@@ -29,15 +29,17 @@
 	between-system-padding = #0
 }
 
-     theChords = \new ChordNames { \chordmode {
+     theChords = \new ChordNames { 
+	\set chordChanges = ##t
+	\chordmode {
        r1 | r | cf | bf
 
 
 \repeat volta 2
 {
 	ef2 g:m/d | c:m f:7m/c | bf/d f/c | bf1 |
-        ef | r2 g:/d | c1:m | g |
-        ef1 | r | bf | r | ef | r | f:7 
+        ef | ef2 g:/d | c1:m | g |
+        ef1 | ef | bf | bf | ef | ef | f:7 
 }
 \alternative {
       { bf } { bf }
@@ -45,24 +47,24 @@
 
 \repeat volta 2
 {
-   ef1  | bf | r | ef | af | f:/a | ef:/bf | bf | ef | bf |
-    r | ef2 ef:7 | af af:m | ef1:/bf | bf:7
+   ef1  | bf | bf| ef | af | f:/a | ef:/bf | bf | ef | bf |
+    bf | ef2 ef:7 | af af:m | ef1:/bf | bf:7
 } 
 \alternative {
       { ef } { ef2 ef:7 }
 }
 
 {
-af1 | r | r | r | r | r | ef:7 | r | r | r | r | r | af | df | ef | r |
-af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
+af1 | af | af | af | af | af | ef:7 | ef:7 | ef:7 | ef:7 | ef:7 | ef:7 | af | df | ef | ef |
+af | af | af | af | c:7/e| c:7/e | f:m | f:m | ff | ff | af:/ef | af:/ef | af:/ef | af:/ef |  ef:7
        af1 
 }
 \repeat volta 2
 {
 r1 | r1 | r2 bf:m |  c1 |  r1 |  r |  r2 df |  c1 |  r |  r |  r |  r |  r |  
  r |  r |  r |  df:m |  ef:7 |  df:m |  ef:7 |  r |  r |  r |  r |  
-af1 | r | r | r | r | r | ef:7 | r | r | r | r | r | af | df | ef | r |
-af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
+af1 | af | af | af | af | af | ef:7 | ef:7 | ef:7 | ef:7 | ef:7 | ef:7 | af | df | ef | ef |
+af | af | af | af | c:7/e| c:7/e | f:m | f:m | ff | ff | af:/ef | af:/ef | af:/ef | af:/ef |  ef:7
 }
 \alternative {
       { af1 } { af1 }
@@ -408,7 +410,7 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
            \override DynamicText #'extra-offset = #'(0 . 2.5)
            \override Hairpin #'extra-offset = #'(0 . 2.5)
      
-           \consists "Skip_event_swallow_translator"
+         %  \consists "Skip_event_swallow_translator"
      
            \consists "Axis_group_engraver"
          }
@@ -423,8 +425,9 @@ af | r | r | r | c:7/e| r | f:m | r | ff | r | af:/ef | r | r | r |  ef:7
 	\unfoldRepeats
        \context PianoStaff <<
          \tempo 4=240
+       \theChords
          \context Staff=upper << \upper \dynamics >>
-         \context Staff=lower << \lower \dynamics >>
+       %  \context Staff=lower << \lower \dynamics >>
          \context Dynamics=pedal \pedal
        >>
        \midi { 
