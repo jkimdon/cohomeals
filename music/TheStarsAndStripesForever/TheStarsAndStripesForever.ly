@@ -378,6 +378,12 @@ af | af | af | af | c:7/e| c:7/e | f:m | f:m | ff | ff | af:/ef | af:/ef | af:/e
 
 	s1*7
      }
+
+ticktock = \drummode {
+	\repeat unfold 212 {
+		snare 2 lowoodblock
+		}
+	} 
      
      pedal = {
      }
@@ -429,6 +435,7 @@ af | af | af | af | c:7/e| c:7/e | f:m | f:m | ff | ff | af:/ef | af:/ef | af:/e
          \context Staff=upper << \upper \dynamics >>
        %  \context Staff=lower << \lower \dynamics >>
          \context Dynamics=pedal \pedal
+	 \new DrumVoice = "ticktock" { \ticktock } 
        >>
        \midi { 
          \context {
