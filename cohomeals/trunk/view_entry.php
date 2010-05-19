@@ -173,7 +173,7 @@ else echo "</p>";
 
 
 <?php 
-  display_head_chef( $row_num );
+display_head_chef( $row_num, $can_remove );
   $row_num = ( $row_num == 1 ) ? 0:1; 
 ?>
 
@@ -734,7 +734,7 @@ function change_guest_button( $guest_name, $old_type, $id ) {
 
 
 
-function display_head_chef( $rowcolor ) {
+function display_head_chef( $rowcolor, $can_remove=false ) {
   global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
@@ -778,7 +778,7 @@ function display_head_chef( $rowcolor ) {
 
 
 
-function display_crew( $type, $rowcolor, $can_remove=true ) {
+function display_crew( $type, $rowcolor, $can_remove=false ) {
   global $login;
 
   $id = mysql_safe( $GLOBALS['id'], false );
