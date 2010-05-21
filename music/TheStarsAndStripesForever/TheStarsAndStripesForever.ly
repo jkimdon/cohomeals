@@ -188,10 +188,10 @@ af | af | af | af | c:7/e| c:7/e | f:m | f:m | ff | ff | af:/ef | af:/ef | af:/e
 \alternative
 {
 	{
-		af4\) r r2
+		af4\) r \ottava #-1  af,8^. af^. af^. af^.
 	}
 	{
-		af4 r af^> r
+		\ottava #0 af'4 r af^> r
 	}
 }
 \bar "|."
