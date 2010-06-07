@@ -1040,7 +1040,7 @@ function display_small_month ( $thismonth, $thisyear, $showyear,
 	  echo "<a href=\"view_entry.php?id=$meal_id\">";
 	} else 
 	  echo "<a/>";
-	echo date ( "j", $date ) . "<br>" .
+	echo date ( "j", $date ) . "<br/>" .
 	  "<img width=\"15\" border=\"0\" src=\"images/$suit\" /></a></td>\n";
       } else {
 	echo "<td class=\"empty\">&nbsp;</td>\n";
@@ -1088,7 +1088,7 @@ function print_entry ( $id, $date, $time, $suit, $menu, $price, $deadline ) {
   
 
   for ( $i=0; $i<count($deadline); $i++ )
-    echo "<br>Deadline for " . 
+    echo "<br/>Deadline for " . 
       date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
 
   $eventinfo .= build_event_popup ( $popupid, $menu );
@@ -1543,9 +1543,9 @@ function print_date_entries ( $date ) {
     $cnt++;
   }
   if ( $cnt == 0 ) { // no events but still print deadlines
-    echo "&nbsp;<br><br>"; 
+    echo "&nbsp;<br/><br/>"; 
     for ( $i=0; $i<count($deadline); $i++ )
-      echo "<br>Deadline for " . 
+      echo "<br/>Deadline for " . 
 	date_to_str( $deadline[$i], "__month__ __dd__", false, true, "" );
   }
 
@@ -2163,6 +2163,22 @@ function background_css ( $color, $height = '', $percent = '' ) {
 
   return $ret;
 }
+
+
+
+
+function time_to_hour_minute( $time, &$hour, &$minute ) {
+  $hour = floor($time / 10000);
+  $minute = ( $time / 100 ) % 100;
+}
+
+
+
+function price_to_dollars_cents( $price, &$dollars, &$cents ) {
+  $dollars = (int)($price / 100);
+  $cents = $price - ($dollars * 100);
+}
+
 
 
 function has_head_chef( $id ) {
@@ -2862,12 +2878,12 @@ function display_workeat_log( $startdate, $enddate ) {
 
     //// display summary
     echo "<p><h3>Total summary</h3> (all dates, not just those above):</p><p>";
-    echo "Meals worked = $work<br>" .
-      "Meals eaten = $eat<br>";
+    echo "Meals worked = $work<br/>" .
+      "Meals eaten = $eat<br/>";
     if ( ($eat == 0) || ($work == 0) ) 
-      echo "Ratio work/eat = $work : $eat <br>";
+      echo "Ratio work/eat = $work : $eat <br/>";
     else 
-      echo "Ratio work/eat = " . $work/$eat . "<br>";
+      echo "Ratio work/eat = " . $work/$eat . "<br/>";
     echo "</p>";
 
 
@@ -3031,73 +3047,150 @@ function get_day( $ref_date, $num_days ) {
 }
 
 
-function change_standard_meal_form() {
+function change_standard_meal_form( $referring_page, $temp_change, 
+				    $change_which_day='', $change_which_week='' ) {
+
+  $crew = array();
+  if ( $change_which_week != '' ) {
+    $sql = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, cal_head_chef, cal_regular_crew " .
+      "FROM webcal_standard_meals " . 
+      "WHERE cal_day_of_week = $change_which_day AND cal_which_week = $change_which_week " .
+      "AND cal_temp_change = 0";
+    $res = dbi_query( $sql );
+    if ( $res ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$time = $row[0];
+	time_to_hour_minute( $time, $hour, $minute );
+	if ( $hour > 12 ) {
+	  $ampm = 'pm';
+	  $hour -= 12;
+	} else {
+	  $ampm = 'am';
+	}
+	$suit = $row[1];
+	$base_price = $row[2];
+	price_to_dollars_cents( $base_price, $base_dollars, $base_cents );
+	$menu = $row[3];
+	$head_chef = $row[4];
+	$jobs_and_crew = explode( "&", $row[5] );
+	$j=0;
+	for ( $i=0; $i<count($jobs_and_crew); $i++ ) {
+	  $job[$j] = $jobs_and_crew[$i++];
+	  $crew[$j] = $jobs_and_crew[$i];
+	  $j++;
+	}
+      }
+    }
+
+  } else {
+    $hour = '';
+    $minute = '';
+    $ampm = 'pm';
+    $suit = '';
+    $base_dollars = '';
+    $base_cents = '';
+    $menu = '';
+    $head_chef = 'none';
+    for ( $i=0; $i<7; $i++ ) {
+      $job[$i] = '';
+      $crew[$i] = 'none';
+    }
+  }
+
 ?>
+
+
+<form action="<?php echo $referring_page;?>" method="get" name="choosingChange">
+
+<input type="hidden" name="month" value="<?php echo $temp_change;?>" />
+
 <table><tr>
 <td>&nbsp;&nbsp;&nbsp;</td><td>Day of the week: </td><td> <select name="dayofweek">
-    <option value="0">Sunday</option>
-    <option value="1">Monday</option>
-    <option value="2">Tuesday</option>
-    <option value="3">Wednesday</option>
-    <option value="4">Thursday</option>
-    <option value="5">Friday</option>
-    <option value="6">Saturday</option>
+    <option value="0" <?php if ($change_which_day == 0) echo "selected=\"selected\"";?>>Sunday</option>
+    <option value="1" <?php if ($change_which_day == 1) echo "selected=\"selected\"";?>>Monday</option>
+    <option value="2" <?php if ($change_which_day == 2) echo "selected=\"selected\"";?>>Tuesday</option>
+    <option value="3" <?php if ($change_which_day == 3) echo "selected=\"selected\"";?>>Wednesday</option>
+    <option value="4" <?php if ($change_which_day == 4) echo "selected=\"selected\"";?>>Thursday</option>
+    <option value="5" <?php if ($change_which_day == 5) echo "selected=\"selected\"";?>>Friday</option>
+    <option value="6" <?php if ($change_which_day == 6) echo "selected=\"selected\"";?>>Saturday</option>
 </select></td></tr>
 <tr><td></td><td>Which week: </td><td><select name="whichweek">
-    <option value="1">First</option>
-    <option value="2">Second</option>
-    <option value="3">Third</option>
-    <option value="4">Fourth</option>
-    <option value="5">Fifth</option>
-</select></td></tr>
+    <option value="1" <?php if ($change_which_week == 1) echo "selected=\"selected\"";?>>First</option>
+    <option value="2" <?php if ($change_which_week == 2) echo "selected=\"selected\"";?>>Second</option>
+    <option value="3" <?php if ($change_which_week == 3) echo "selected=\"selected\"";?>>Third</option>
+    <option value="4" <?php if ($change_which_week == 4) echo "selected=\"selected\"";?>>Fourth</option>
+    <option value="5" <?php if ($change_which_week == 5) echo "selected=\"selected\"";?>>Fifth</option>
+</select>
+&nbsp;
+<input type="submit" value="Fill in values below to edit" />
+</td></tr>
+</table>
+</form>
+
+<form action="change_standard_meals_handler.php" method="post" name="changingStandardMeal">
+
+<input type="hidden" name="temp_change" value="<?php echo $temp_change;?>" />
+<input type="hidden" name="dayofweek" value="<?php echo $change_which_day;?>" />
+<input type="hidden" name="whichweek" value="<?php echo $change_which_week;?>" />
+
+<table>
 <tr><td></td><td>Suit: </td>
    <td><select name="suit">
-   <option value="heart">Heart</option>
-   <option value="diamond">Diamond</option>
-   <option value="wild">Wild</option>
+   <option value="heart" <?php if ($suit == "heart") echo "selected=\"selected\"";?>>Heart</option>
+   <option value="diamond" <?php if ($suit == "diamond") echo "selected=\"selected\"";?>>Diamond</option>
+   <option value="wild" <?php if ($suit == "wild") echo "selected=\"selected\"";?>>Wild</option>
 </select></td></tr>
 <tr><td></td><td>Time: </td>
-   <td><input type="text" name="hour" size="2" maxlength="2" />:<input type="text" name="minute" size="2" maxlength="2" />
-     <label><input type="radio" name="ampm" value="am" />am</label>
-     <label><input type="radio" name="ampm" value="pm" checked="checked" />pm</label>
+    <td><input type="text" name="hour" size="2" maxlength="2" <?php if ($hour != '') echo "value=\"$hour\"";?> />:<input type="text" name="minute" size="2" maxlength="2" <?php if ($minute != '') echo "value=\"$minute\"";?> />
+     <label><input type="radio" name="ampm" value="am" <?php if ($ampm == "am") echo "checked=\"checked\"";?>/>am</label>
+     <label><input type="radio" name="ampm" value="pm" <?php if ($ampm != "am") echo "checked=\"checked\"";?>/>pm</label>
 </td></tr>
 <tr><td></td><td>Base (adult) price: </td>
-  <td>$<input type="text" name="base_dollars" size="2" maxlength="2" />.<input type="text" name="base_cents" size="2" maxlength="2" /></td></tr>
+  <td>$<input type="text" name="base_dollars" size="2" maxlength="2" <?php if ($base_dollars != '') echo "value=\"$base_dollars\"";?>/>.<input type="text" name="base_cents" size="2" maxlength="2" <?php if ($base_cents != '') echo "value=\"$base_cents\"";?>/></td></tr>
 <tr><td></td><td>Head chef: </td>
   <td><select name="head_chef">
-      <option value="none" selected="selected">Select head chef</option>
+      <option value="none" <?php if ($head_chef == "none") echo "selected=\"selected\"";?>>Select head chef</option>
       <?php $names = user_get_users();
         foreach ( $names as $name ) {
 	  $username = $name['cal_login'];
 	  $fullname = $name['cal_fullname'];
-	  echo "<option value=\"$username\">$fullname</option>\n";
+	  echo "<option value=\"$username\"";
+	  if ($head_chef == "$username") echo "selected=\"selected\"";
+	  echo ">$fullname</option>\n";
 	} ?>
 </select></td></tr>
-<tr></tr>
 <tr><td></td><td>Regular/requested crew: </td>
   <td><table class="bordered_table">
     <tr><td>Crew job description</td><td>Person</td></tr>
     <?php
       for ( $i=0; $i<7; $i++ ) {
-	echo "<td><input type=\"text\" name=\"job$i\" size=\"45\" value=\"\" maxlength=\"80\"/></td>";
+	echo "<tr><td><input type=\"text\" name=\"job$i\" size=\"45\" ";
+	if ( $job[$i] != '' ) echo "value=\"" . $job[$i] . "\" ";
+	echo "maxlength=\"80\"/></td>";
 	echo "<td><select name=\"crew$i\">";
-	echo "<option value=\"none\" selected=\"selected\">Select crew member</option>";
+	echo "<option value=\"none\" ";
+	if ( ($crew[$i] == '') || ($crew[$i] == 'none') ) echo "selected=\"selected\"";
+	echo ">Select crew member</option>";
 	foreach ( $names as $name ) {
 	  $username = $name['cal_login'];
 	  $fullname = $name['cal_fullname'];
-	  echo "<option value=\"$username\">$fullname</option>\n";
+	  echo "<option value=\"$username\"";
+	  if ( $crew[$i] == "$username" ) echo "selected=\"selected\"";
+	  echo ">$fullname</option>\n";
 	} 
-	echo "</select></td></tr>";
+	echo "</select></td></tr>\n";
       }?>
     </table>
 </td></tr>
 <tr><td></td><td>Regular menu: </td>
-  <td><textarea name="menu" rows="5" cols="40"</textarea></td>
+    <td><textarea name="menu" rows="5" cols="40" <?php if ($menu != '') echo "value=\"$menu\"";?>></textarea></td>
 </tr>
 
 </table>
 
 <input type="submit" value="Save meal" />
+</form>
+
 <?php
 }
 

@@ -5,6 +5,9 @@ print_header();
 
 if ( $is_meal_coordinator ) {
 
+  $change_which_day = mysql_safe( getValue( "dayofweek" ), false );
+  $change_which_week = mysql_safe( getValue( "whichweek" ), false );
+
 ?>
 
 <h1>Manage regular meals for a month</h1>
@@ -33,7 +36,7 @@ Manage meals for
 <input type="submit" value="Go" />
 </form>
 
-<hr>
+<hr/>
 <h3>Regular meals</h3>
 
 <p>Make regular changes here. (Make one-month changes using the above link)</p>
@@ -47,7 +50,7 @@ Manage meals for
 
 <table class="bordered_table">
 <?php for ( $w=1; $w<6; $w++ ) {
-   echo "<tr><td><b>Week $w</td><td></td><td></td></tr>";
+   echo "<tr><td><b>Week $w</b></td><td></td><td></td></tr>\n";
    for ( $d=0; $d<7; $d++ ) {
      print_standard_entry( $d, $w );
    }
@@ -56,22 +59,14 @@ Manage meals for
 
 
 
-
-
-
-<?php /////////// form for adding or changing standard meals /////////// 
+<p/>
+<i>Add new or change meal</i><br/>
+<?php 
+    if( $change_which_week == '' ) 
+      change_standard_meal_form( "add_standard_meals.php", 0 );
+    else 
+      change_standard_meal_form( "add_standard_meals.php", 0, $change_which_day, $change_which_week );
 ?>
-
-<p></p><p></p>
-<i>Add new or change meal</i><br>
-<form action="change_standard_meals_handler.php" method="post">
-
-<input type="hidden" name="temp_change" value="0" />
-
-<?php change_standard_meal_form(); ?>
-
-</form>
-
 
 
 
@@ -98,7 +93,7 @@ function print_standard_entry( $thiswday, $which_week ) {
     "ORDER BY cal_time";
   if ( $res = dbi_query( $sql ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
-      echo "<tr><td></td><td>" . weekday_short_name ( $thiswday ) . "</td>";
+      echo "<tr><td></td><td>" . weekday_short_name ( $thiswday ) . "</td>\n";
       echo "<td>";
 
       $time = $row[0];
@@ -118,18 +113,18 @@ function print_standard_entry( $thiswday, $which_week ) {
       $time_short = preg_replace ("/(:00)/", '', $timestr);
       echo "&nbsp;" . $time_short;
       
-      echo "&nbsp;" . price_to_str( $price ) . "<br>";
+      echo "&nbsp;" . price_to_str( $price ) . "<br/>";
 
       echo "<b>chef:</b> ";
       if ( $head_chef != "none" ) {
 	user_load_variables( $head_chef, "temp" );
 	echo ": " . $GLOBALS[tempfirstname] . " " . $GLOBALS[templastname];
       }
-      echo "<br>";
+      echo "<br/>";
 
-      echo "<b>menu:</b> " . $menu . "<br>";
+      echo "<b>menu:</b> " . $menu . "<br/>";
 
-      echo "<b>crew:</b> <br>";
+      echo "<b>crew:</b> <br/>";
       for ( $i=0; $i<count($crew); $i++ ) {
 	if ( $crew[$i] == "" ) break;
 	echo $crew[$i];
@@ -142,9 +137,9 @@ function print_standard_entry( $thiswday, $which_week ) {
 	  else 
 	    echo "invalid username";
 	}
-	echo "<br>";
+	echo "<br/>";
       }
-      echo "</td></tr>";
+      echo "</td>\n</tr>\n";
 
     }
   }

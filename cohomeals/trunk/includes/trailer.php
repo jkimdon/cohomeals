@@ -93,7 +93,7 @@ if ( $login != '__public__' ) {
     "onmouseover=\"window.status='Help'\">Help</a>";
 }
 
-echo "<hr>";
+echo "<hr/>";
 if ( count ( $goto_link ) > 0 ) {
   ?><span class="prefix">Go to:</span> <?php
   for ( $i = 0; $i < count ( $goto_link ); $i++ ) {
@@ -137,7 +137,7 @@ if ( ! $use_http_auth ) {
 
  echo "<span class=\"prefix\"><a title=\"" .
  "Logout\" href=\"$login_url\">" . 
- "Logout</a>\n";
+ "Logout</a></span>\n";
 }
 
 ?>

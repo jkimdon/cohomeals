@@ -8,6 +8,10 @@ if ( $is_meal_coordinator ) {
 $month_date = 0;
 $month_date = mysql_safe( getValue( "month" ), true );
 
+$change_which_day = mysql_safe( getValue( "dayofweek" ), false );
+$change_which_week = mysql_safe( getValue( "whichweek" ), false );
+
+
 echo "<h1>Populate regular meals for " .
   date_to_str ( $month_date, $DATE_FORMAT_MY, false ) . 
   "</h1>";
@@ -94,20 +98,14 @@ OR
 ?>
 
 <i>Add new or change meal</i><br>
-<form action="change_standard_meals_handler.php" method="post">
-
-<input type="hidden" name="temp_change" value="<?php echo $month_date;?>" />
-
-<?php change_standard_meal_form(); ?>
-
-</form>
-
+<?php 
+    if( $change_which_week == '' ) 
+      change_standard_meal_form( "populate_standard_meals.php", $month_date );
+    else 
+      change_standard_meal_form( "populate_standard_meals.php", $month_date, 
+				 $change_which_day, $change_which_week );
 
 
-
-
-
-<?php
 
 } else echo "Not authorized";
 
@@ -119,7 +117,6 @@ print_trailer ();
 
 <?php 
 function print_standard_entries( $date, $thiswday, $which_week ) {
-  global $month_date;
 
   $day = substr( $date, 6, 2 );
   echo "$day<br />\n";
@@ -127,11 +124,11 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
   // find out if there's a temporary change for this month
   $temp_change = 0;
   $sql = "SELECT cal_temp_change FROM webcal_standard_meals " .
-    "WHERE cal_day_of_week = '$thiswday' AND cal_which_week = $which_week " .
-    "AND cal_temp_change = $month_date";
+    "WHERE cal_day_of_week = $thiswday AND cal_which_week = $which_week " .
+    "AND cal_temp_change = $date";
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      $temp_change = $month_date;
+      $temp_change = $date;
     }
   }
 

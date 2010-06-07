@@ -66,8 +66,7 @@ if ( ! empty ( $id ) && $id > 0 ) {
     $month = ( $cal_date / 100 ) % 100;
     $day = $cal_date % 100;
     $time = $row[1];
-    $hour = floor($time / 10000);
-    $minute = ( $time / 100 ) % 100;
+    time_to_hour_minute( $time, $hour, $minute );
     $suit = $row[2];
     $menu = $row[3];
     $walkins = $row[4];
@@ -301,8 +300,7 @@ if ( $id ) {
 
 
 <?php 
-$base_dollars = (int)($base_price / 100);
-$base_cents = $base_price - ($base_dollars * 100);
+price_to_dollars_cents( $base_price, $base_dollars, $base_cents );
 ?>
 <tr><td class="tooltip">Base price:</td>
 <td colspan="2">

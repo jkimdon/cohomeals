@@ -69,7 +69,7 @@ if ( $is_meal_coordinator ) {
   else 
     $nexturl = "populate_standard_meals.php?month=$temp_change";
 
- do_redirect( $nexturl );
+  do_redirect( $nexturl );
 
  } else {
   echo "Not authorized<br>";
