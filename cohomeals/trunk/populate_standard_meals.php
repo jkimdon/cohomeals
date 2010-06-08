@@ -123,15 +123,17 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
 
   // find out if there's a temporary change for this month
   $temp_change = 0;
+  $month_regex = substr( $date, 0, 6 );
+  $month_regex .= "%";
   $sql = "SELECT cal_temp_change FROM webcal_standard_meals " .
     "WHERE cal_day_of_week = $thiswday AND cal_which_week = $which_week " .
-    "AND cal_temp_change = $date";
+    "AND cal_temp_change LIKE '$month_regex'";
+
   if ( $res = dbi_query( $sql ) ) {
     if ( $row = dbi_fetch_row( $res ) ) {
-      $temp_change = $date;
+      $temp_change = $row[0];
     }
   }
-
 
   // get meals for this weekday for this week
   $sql = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, cal_head_chef, cal_regular_crew " .
