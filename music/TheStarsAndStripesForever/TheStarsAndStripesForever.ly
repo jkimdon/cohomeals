@@ -425,6 +425,11 @@ ticktock = \drummode {
            \accepts Dynamics
            %\override VerticalAlignment #'forced-distance = #6
          }
+	\context { 
+		\Score
+		\remove "Bar_number_engraver"
+	}
+	
        }
      }
      \score {
