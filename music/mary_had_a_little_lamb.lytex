@@ -1,5 +1,6 @@
 \documentclass[]{article}
 \usepackage{graphicx} 
+\pagestyle{empty}
 
 \begin{document}
 
@@ -14,7 +15,7 @@
 }
 
 wordsdefault = \lyricmode {
-	E D C D E E E D D D E G G  E D C D E E E E D D E D C   
+	Ma -- ry had a lit -- tle lamb, lit -- tle lamb, lit -- tle lamb, Ma -- ry had a lit -- tle lamb whose fleece was white as snow
 }
 
 voicedefault =  {
