@@ -8,9 +8,6 @@ if ( $is_meal_coordinator ) {
 $month_date = 0;
 $month_date = mysql_safe( getValue( "month" ), true );
 
-$change_which_day = mysql_safe( getValue( "dayofweek" ), false );
-$change_which_week = mysql_safe( getValue( "whichweek" ), false );
-
 
 echo "<h1>Populate regular meals for " .
   date_to_str ( $month_date, $DATE_FORMAT_MY, false ) . 
@@ -56,7 +53,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend ); $i += ( 24
 	$which_week++;
 	$day_count = 0;
       }
-      $thiswday = date ( "w", $date );
+      $day_of_week = date ( "w", $date );
       print "<td";
       $class = "";
       if ( date ( "Ymd", $date  ) == date ( "Ymd", $today ) ) {
@@ -66,7 +63,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend ); $i += ( 24
       echo " class=\"$class\"";
       }
       echo ">";
-      print_standard_entries ( date( "Ymd", $date ), $thiswday, $which_week );
+      print_standard_entries ( date( "Ymd", $date ), $day_of_week, $which_week );
       print "</td>\n";
       $day_count++;
     } else {
@@ -81,6 +78,7 @@ for ( $i = $wkstart; date ( "Ymd", $i ) <= date ( "Ymd", $monthend ); $i += ( 24
 
 
 <?php /////////// do the populations ///////////
+
 ?>
 
 <hr>
@@ -94,18 +92,7 @@ OR
 
 
 
-<?php /////////// form for making one-month changes /////////// 
-?>
-
-<i>Add new or change meal</i><br>
 <?php 
-    if( $change_which_week == '' ) 
-      change_standard_meal_form( "populate_standard_meals.php", $month_date );
-    else 
-      change_standard_meal_form( "populate_standard_meals.php", $month_date, 
-				 $change_which_day, $change_which_week );
-
-
 
 } else echo "Not authorized";
 
@@ -116,7 +103,8 @@ print_trailer ();
 
 
 <?php 
-function print_standard_entries( $date, $thiswday, $which_week ) {
+
+function print_standard_entries( $date, $day_of_week, $which_week ) {
 
   $day = substr( $date, 6, 2 );
   echo "$day<br />\n";
@@ -126,7 +114,7 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
   $month_regex = substr( $date, 0, 6 );
   $month_regex .= "%";
   $sql = "SELECT cal_temp_change FROM webcal_standard_meals " .
-    "WHERE cal_day_of_week = $thiswday AND cal_which_week = $which_week " .
+    "WHERE cal_day_of_week = $day_of_week AND cal_which_week = $which_week " .
     "AND cal_temp_change LIKE '$month_regex'";
 
   if ( $res = dbi_query( $sql ) ) {
@@ -136,11 +124,13 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
   }
 
   // get meals for this weekday for this week
-  $sql = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, cal_head_chef, cal_regular_crew " .
+  $sql = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, cal_head_chef, " .
+    "cal_regular_crew, cal_rotation_order " .
     "FROM webcal_standard_meals " .
-    "WHERE cal_day_of_week = '$thiswday' AND cal_which_week = $which_week " .
-    "AND cal_temp_change = $temp_change " .
-    "ORDER BY cal_time";
+    "WHERE cal_day_of_week = '$day_of_week' AND cal_which_week = $which_week ";
+  if ( $temp_change == 0 ) $sql .= "AND cal_temp_change = 0 AND cal_is_next = 1 ";
+  else $sql .= "AND cal_temp_change = $temp_change ";
+  $sql .= "ORDER BY cal_time";
   if ( $res = dbi_query( $sql ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $time = $row[0];
@@ -149,6 +139,7 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
       $menu = $row[3];
       $head_chef = $row[4];
       $crew = explode( "&", $row[5] );
+      $rotation_order = $row[6];
     
       $suit_img = $suit;
       $suit_img .= "_20x20.png";
@@ -186,10 +177,22 @@ function print_standard_entries( $date, $thiswday, $which_week ) {
 	echo "<br>";
       }
 
+      print_change_button( $day_of_week, $which_week, $rotation_order, $temp_change, $date );
+
 
     }
   }
 
+}
+
+
+function print_change_button( $day_of_week, $which_week, $rotation_order, $temp_change, $date ) {
+
+  $nexturl = "change_standard_meal_popup.php?day_of_week=$day_of_week&which_week=$which_week&rotation_order=$rotation_order&prev_temp_change=$temp_change&new_temp_change=$date";
+  echo "<a href class=\"addbutton\" " .
+    "onclick=\"window.open('$nexturl', 'Change standard meal', " .
+    "'width=700,height=600,resizable=yes,scrollbars=yes');\">" .
+    "Edit meal</a>&nbsp;&nbsp;&nbsp;";
 }
 
 ?>
