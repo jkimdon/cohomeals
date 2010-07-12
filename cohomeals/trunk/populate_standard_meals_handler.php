@@ -86,13 +86,14 @@ if ( $is_meal_coordinator ) {
 	      insert_crew( $mealid, $row[4], $row[5] );
 	      print_crew( $mealid, $date );
 	    }
-	  } 
+	  }
 	  else { // check for a non-modified, standard meal
 	    $sql2 = "SELECT cal_time, cal_suit, cal_base_price, cal_menu, " .
 	      "cal_head_chef, cal_regular_crew " . 
 	      "FROM webcal_standard_meals " .
 	      "WHERE cal_temp_change = 0 AND cal_day_of_week = $thiswday " .
-	      "AND cal_which_week = $which_week";
+	      "AND cal_which_week = $which_week " .
+	      "AND cal_is_next = 1";
 	    if ( $res2 = dbi_query( $sql2 ) ) {
 	      if ( $row2 = dbi_fetch_row( $res2 ) ) {
 		$mealid = insert_meal( $date, $row2[0], $row2[1], $row2[2], $row2[3] );
@@ -105,8 +106,9 @@ if ( $is_meal_coordinator ) {
 	      }
 	    } // else do not add anything for this day of the week and week number
 	  }
+	  rotate_standard_meal( $thiswday, $which_week );
 	}
-      }
+      } // end fill in a meal for a date
     }
   }
 
@@ -348,6 +350,42 @@ function print_crew( $mealid, $date ) {
 
   $body .= "\n";
   $body .= "----------------------\n\n";
+
+}
+
+
+function rotate_standard_meal( $day_of_week, $which_week ) {
+
+  $sql = "SELECT MAX( cal_rotation_order ) FROM webcal_standard_meals " .
+    "WHERE cal_day_of_week = $day_of_week AND cal_which_week = $which_week " .
+    "AND cal_temp_change = 0";
+  $row = dbi_fetch_row( dbi_query( $sql ) );
+  $max_rotation_order = $row[0];
+
+  $just_went = 1;
+  $sql = "SELECT cal_rotation_order FROM webcal_standard_meals " .
+    "WHERE cal_is_next = 1 " .
+    "AND cal_day_of_week = $day_of_week AND cal_which_week = $which_week " .
+    "AND cal_temp_change = 0";
+  if ( $res = dbi_query( $sql ) ) {
+    if ( $row = dbi_fetch_row( $res ) ) {
+      $just_went = $row[0];
+    }
+  }
+
+
+  $new_is_next = $just_went + 1;
+  if ( $new_is_next > $max_rotation_order ) $new_is_next = 1;
+  
+  $sql = "UPDATE webcal_standard_meals SET cal_is_next = 0 " .
+    "WHERE cal_day_of_week = $day_of_week AND cal_which_week = $which_week " .
+    "AND cal_temp_change = 0";
+  dbi_query( $sql );
+
+  $sql = "UPDATE webcal_standard_meals SET cal_is_next = 1 " .
+    "WHERE cal_day_of_week = $day_of_week AND cal_which_week = $which_week " .
+    "AND cal_temp_change = 0 AND cal_rotation_order = $new_is_next";
+  dbi_query( $sql );
 
 }
 

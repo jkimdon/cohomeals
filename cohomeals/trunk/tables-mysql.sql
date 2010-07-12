@@ -96,6 +96,10 @@ CREATE TABLE webcal_standard_meals (
   cal_day_of_week INT NOT NULL,
   /* which week in the month, e.g. first, fifth */
   cal_which_week INT NOT NULL,
+  /* if there are meals that rotate months, we note their rotation order here */
+  cal_rotation_order INT DEFAULT 0,
+  /* if there are meals that rotate months, we note if this is the next one to be assigned */
+  cal_is_next CHAR(1) DEFAULT 1,
   /* if this is only for one month (i.e. not regular), indicate which month */
   cal_temp_change INT DEFAULT 0,
   /* standard time */
@@ -110,7 +114,7 @@ CREATE TABLE webcal_standard_meals (
   cal_head_chef VARCHAR(25) NOT NULL,
   /* regular crew slots: job, login, job, login, ... */
   cal_regular_crew VARCHAR(1000),
-  PRIMARY KEY ( cal_day_of_week, cal_which_week, cal_time, cal_temp_change )
+  PRIMARY KEY ( cal_day_of_week, cal_which_week, cal_time, cal_temp_change, cal_rotation_order )
 );
 
 
