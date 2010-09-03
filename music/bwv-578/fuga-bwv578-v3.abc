@@ -23,10 +23,12 @@ Q:1/4=69
 % %MIDI program 4 58
 %
 %%measurenb	0
+%%topmargin 2.0cm
 K:Gm
 V:3
 %%MIDI program 58
-Z11|z8
+Z10|
+{_E2 A4 E2} z16 {D2 G4 D }| {CB,CD} z8 {CAGA}
 G,4D4|B,6A,2 G,2B,2A,2G,2|^F,2A,2D,4G,2D,2A,2D,2|
 B,2A,G, A,2D,2 G,2D,G, A,2D,A,|B,2A,G, A,D,DC B,A,G,B, A,G,^F,A,|G,D,G,A, B,CD=E FEDF ED^CE|
 D2A,2D2=E2 FGFG PG3F/G/|AGAB AGF=E FAGA ^CAGA|DAGA ^CAGA FDCD GDCD|
