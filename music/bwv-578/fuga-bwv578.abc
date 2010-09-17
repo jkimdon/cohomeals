@@ -27,9 +27,11 @@ Q:1/4=69
 %%staffsep	65pt
 %%sysstaffsep	35pt
 %%measurenb	0
+%%topmargin 2.0cm
 K:Gm
 V:1
-%%MIDI program 1
+%%MIDI program 40
+%%MIDI control 7 60
 G4d4B6A2|G2B2A2G2 ^F2A2D4|G2D2A2D2 B2AG A2D2|G2DG A2DA B2AG ADdc|
 BAGB AG^FA GDGA Bcd=e|=f=edf ed^ce d2A2d2e2|fgfg Pg3f/g/ agab
 agf=e|faga ^caga daga caga|fd^cd gdcd adcd gdcd|
@@ -57,7 +59,8 @@ GBAG dADc BdcB =fc=Fe|dfed gdGf
 g4^f4g4 z4|z2 d2g2a2 baga ^fgfg|ag^f=e dcBA Bdcd ^Fdcd|
 Gdcd ^Fdcd BGFG cGFG|dG^FG cGFG B2g2A2^f2|Hg16|]
 V:2
-%%MIDI program 2
+%%MIDI program 21
+%%MIDI control 7 60
 z16|z16|z16|z16|
 z16|D4A4F6=E2|D2F2=E2D2 ^C2E2
 A,4|D2A,2=E2A,2 F2ED E2A,2|D2A,D =E2A,E F2ED EA,AG|
@@ -85,7 +88,8 @@ G2G2=E2A2-|A_edc BdAd G_ag=f gfed|e8d8|
 c8BdcB ABGA|BcBc d_edc B2d2c2B2|A4 z2 D2 D8-|
 D16-|D8-D2E2 E2D2|HD16|]
 V:3
-%%MIDI program 3
+%%MIDI program 42
+%%MIDI control 7 60
 z16|z16|z16|z16|
 z16|z16|z8z4
 z4|z16|z16|
@@ -113,7 +117,8 @@ C4^C4|D4=E2^F2G4=A2B2|cG=F_E cAFA BFED BGEG|
 AEDC A^FDF G,B,DG ^FG=EF|G6^F2G4A2D2|D4 z2 ^F,2 G,2 z2 C2 z2|
 B,2 z2 C2 z2 B,2 z2 A,2 z2|G,2 z2 A,2 z2 G,2B,2C2A,2|H=B,16|]
 V:4
-%%MIDI program 4
+%%MIDI program 21
+%%MIDI control 7 60
 z16|z16|z16|z16|
 z16|z16|z8z4
 z4|z16|z16|
