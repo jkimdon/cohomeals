@@ -24,11 +24,13 @@ Q:1/4=69
 %
 %%staves 	2 | 4
 %%measurenb	0
+%%topmargin 2.0cm
+%%scale	  0.7
 K:Gm
 V:2
 %%MIDI program 58
-z16|z16|z16|z16|
-z16|D4A4F6=E2|D2F2=E2D2 ^C2E2
+Z3|
+z16{G2DG A2DA B2AG ADdc} |z16{ BAGB AG^FA GDGA Bcd=e} |D4A4F6=E2|D2F2=E2D2 ^C2E2
 A,4|D2A,2=E2A,2 F2ED E2A,2|D2A,D =E2A,E F2ED EA,AG|
 F=EDF ED^CE DA,DE FGA=B|c_Bcd cBAc BABc BAGB|A2G2^F2D2
 G4 z4|z2 D2G2A2 BcBc Pc3B/c/|dcd_e dcBA D2 z2 C2 z2|
@@ -55,11 +57,8 @@ c8BdcB ABGA|BcBc d_edc B2d2c2B2|A4 z2 D2 D8-|
 D16-|D8-D2E2 E2D2|HD16|]
 V:4
 %%MIDI program 58
-z16|z16|z16|z16|
-z16|z16|z8z4
-z4|z16|z16|
-z16|z16|z8
-z8|z16|z16|
+Z3|z16|z16|z16|z16|z16|z16|
+z16|z16|z16|z16|z16|
 z16|z16|z8 D,4A,4|
 F,6=E,2 D,2F,2E,2D,2|^C,2=E,2A,,4D,2A,,2E,2A,,2|F,2=E,D, E,2A,,2 D,2A,,D, E,2A,,E,|
 F,2=E,D, E,2A,,2 D,2G,,2A,,4|D,,4 z4 z8|z16|
@@ -75,9 +74,7 @@ B,,2F,,2C,2F,,2 D,2C,B,, C,2F,,2|B,,2F,,B,, C,2F,,C, D,2C,B,, C,2F,,2|D,2E,2F,2F
 C,4 z4 F,,4 z4|B,,4 z4 E,,4 z4|_A,,4 z4 D,,4G,,4|
 C,,4 z4 F,,4 z4|G,,16|C,,2G,,2C,2D,2E,4F,4|
 G,4-G,G,F,G, E,G,F,G, =B,,G,F,G,|C,G,F,G, =B,,G,F,G, E,C=B,C F,CB,C|G,C=B,C G,=B,A,B, C,2E,2F,2G,2|
-C,4 z4 z8|z8
-z8|z16|z16|
-z16|z8
-z8|z16|z16|
+C,4 z4 z8|z16|z16|z16|
+z16|z16|z16|z16|
 z8G,4D4|B,6A,2 G,2B,2A,2G,2|^F,2A,2D,4G,2D,2A,2D,2|
 B,2A,G, A,2D,2 G,2D,G, A,2D,A,|B,2A,G, A,2D,2 G,2E,2C,2D,2|HG,,16|]
