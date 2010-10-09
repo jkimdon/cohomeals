@@ -238,10 +238,6 @@ if ( $max_diners > 0 ) {
     echo "<br>";
 
 
-    $onsite_adults = 0;
-    $onsite_children = 0;
-    $onsite_free = 0;
-
     $names = user_get_users();
     $prev_building = 0;
     foreach ( $names as $name ) {
@@ -257,10 +253,6 @@ if ( $max_diners > 0 ) {
 
       // check dining status
       if ( is_dining( $id, $username ) == "M" ) {
-	$age = get_fee_category( $id, $username );
-	if ( $age == "K" ) $onsite_children++;
-	else if ( $age == "F" ) $onsite_free++;
-	else $onsite_adults++; // $age == "A"
 	echo $name['cal_fullname'];
 	if ( is_signer( $username ) || ($username == $login) ) {
 	  if ( $can_remove == true ) {
@@ -277,7 +269,7 @@ if ( $max_diners > 0 ) {
 
     // show guests
     echo "<b>Guests</b><br>";
-    $sql = "SELECT cal_fullname, cal_host, cal_fee " .
+    $sql = "SELECT cal_fullname, cal_host " .
        "FROM webcal_meal_guest " .
        "WHERE cal_meal_id = $id " . 
        "AND cal_type = 'M'";
@@ -285,10 +277,6 @@ if ( $max_diners > 0 ) {
       while ( $row = dbi_fetch_row( $res ) ) {
 	$guest_name = $row[0];
 	$host = $row[1];
-	$age = $row[2];
-	if ( $age == "K" ) $onsite_children++;
-	else if ( $age == "F" ) $onsite_free++;
-	else $onsite_adults++; // $age == "A"
 
 	user_load_variables( $host, "temp" );
 	echo "$guest_name (guest of $tempfirstname $templastname)";
@@ -325,18 +313,11 @@ $sql = "SELECT cal_login FROM webcal_meal_participant " .
 $res = dbi_query ( $sql );
 $first = 1;
 $num_app = 0;
-$takehome_adults = 0;
-$takehome_children = 0;
-$takehome_free = 0;
 if ( $res ) {
   while ( $row = dbi_fetch_row ( $res ) ) {
     $pname = $row[0];
     $approved[$num_app++] = $pname;
     user_load_variables( $pname, "temp" );
-    $age = get_fee_category( $id, $username );
-    if ( $age == "K" ) $takehome_children++;
-    else if ( $age == "F" ) $takehome_free++;
-    else $takehome_adults++; // $age == "A"
   }
   dbi_free_result ( $res );
 } else {
@@ -368,7 +349,7 @@ for ( $i = 0; $i < $num_app; $i++ ) {
 }
 
 //// show guests
-$sql = "SELECT cal_fullname, cal_host, cal_fee " .
+$sql = "SELECT cal_fullname, cal_host " .
 "FROM webcal_meal_guest " .
 "WHERE cal_meal_id = $id " . 
 "AND cal_type = 'T'";
@@ -376,10 +357,6 @@ if ( $res = dbi_query( $sql ) ) {
   while ( $row = dbi_fetch_row( $res ) ) {
     $guest_name = $row[0];
     $host = $row[1];
-    $age = $row[2];
-    if ( $age == "K" ) $takehome_children++;
-    else if ( $age == "F" ) $takehome_free++;
-    else $takehome_adults++; // $age == "A"
 
     user_load_variables( $host, "temp" );
     echo "$guest_name (guest of $tempfirstname $templastname)";
@@ -405,11 +382,7 @@ if ( $res = dbi_query( $sql ) ) {
 
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Total diners:</td>
 <td><?php 
-$adults = $onsite_adults + $takehome_adults;
-$children = $onsite_children + $takehome_children;
-$free = $onsite_free + $takehome_free;
-echo $adults + $children + $free . " people: ";
-echo $adults . " adults, " . $children . " older children, " . $free . " younger children";
+echo demographics( $id );
 echo " (" . price_to_str( get_money_for_meal( $id )) . " income)";
 if ( $max_diner_count > 0 ) echo "&nbsp;&nbsp;<font color=\"#DD0000\">Limited to $max_diners diners</font>";
 ?>
