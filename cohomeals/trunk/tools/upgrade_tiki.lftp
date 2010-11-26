@@ -1,0 +1,11 @@
+# a bug somewhere makes tls fail 
+set ftp:ssl-allow no
+connect cohoecovillage.org
+# create an alias in ~/.lftprc so this script can login to the
+# ftp server, for example:
+# alias cohotikilogin login tiki@cohoecovillage.org <password> 
+cohotikilogin
+mirror -R -c -e -v . .
+#mirror -R --dry-run -c -e -v . .
+
+
