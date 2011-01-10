@@ -56,6 +56,7 @@
 #(set-global-staff-size 18)
 
 global= {
+	\key g \minor
 	\set Staff.midiInstrument = "recorder"
 	\time 2/1
 	\skip 1*16
@@ -65,7 +66,6 @@ global= {
 }
 
 cantus=\relative c'' {
-	\key g \minor
  	\set autoBeaming = ##f
 
 	d2 d4 d4 es1|
@@ -115,7 +115,6 @@ cantusWords=\lyricmode{
 	
 
 altus=\relative c''{
-	\key g \minor
  	\set autoBeaming = ##f
 	bes2 bes4 bes g1 |
 	d2 d4 e fis( g2) fis4 |
@@ -164,7 +163,6 @@ altusWords=\lyricmode {
 }
 
 tenor=\relative c' {
-	\key g \minor
  	\set autoBeaming = ##f
 
 	f2 g4  f8[ bes,] bes1 |
@@ -209,25 +207,22 @@ tenorWords=\lyricmode{
 
 
 bassus=\relative c' {
-	\key f \minor
-	\transpose d c {
  	\set autoBeaming = ##f
 
-	bes2 g4 bes es1 |
+	bes2 g4 bes es,1 |
 	g2 d d d4 d |
 	g,2 r4 d'4 g f bes bes, |
 	c d es4. es8 d4 g2 fis4 |
 	g bes a4. a8 g2 r4 g4 |
 	f d g2 f bes,2 |
-	r1 r4 f c c| 
+	r1 r4 f' c c| 
 	d2. d4 g,2 r2 
 	\repeat volta 2 {
-		r1 r2 f2 |
+		r1 r2 f'2 |
 		d4 g4.( f8) es4 
 		d4 d  f  f| c c es es 
 		bes bes  d  d |g es d d }
 	\alternative{ {g2 r2} {g1}
-	}
 	}
 }
 
@@ -254,7 +249,6 @@ bassusWords=\lyricmode{
 
 
 FullScore =  \context ChoirStaff <<
-  \transpose c d << 
 		\context Staff ="cantus" <<
 			{\clef "G2"\global}
 			\context Voice = "cantus" \cantus
@@ -266,7 +260,7 @@ FullScore =  \context ChoirStaff <<
 		>>
 		\lyricsto "altus" \context Lyrics = "altus" \altusWords
 		\context Staff ="tenor" <<
-			 {\clef "G2"\global}
+			 {\clef "G2_8"\global}
 			 \context Voice = "tenor" \tenor
 		>>
 		\lyricsto "tenor" \context Lyrics = "tenor" \tenorWords
@@ -277,7 +271,6 @@ FullScore =  \context ChoirStaff <<
 		\lyricsto "bass" \context Lyrics = "bass" \bassusWords
      >>
 
- >>
 %{ 
 % Original clefs, etc.
 
