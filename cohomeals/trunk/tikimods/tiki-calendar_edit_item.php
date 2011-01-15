@@ -461,6 +461,7 @@ if (!empty($calendar['eventstatus'])) {
     $calitem['status'] = $calendar['eventstatus'];
 }
 
+if ( isset( $calendar['calendarId'] ) )$calID = $calendar['calendarId'];
 if ($calendar['customlocations'] == 'y') {
 	$listlocs = $calendarlib->list_locations($calID);
 } else {
@@ -488,6 +489,23 @@ if ($calendar["customlanguages"] == 'y') {
 	$languages = array();
 }
 $smarty->assign('listlanguages', $languages);
+
+if ($calendar["customparticipants"] == 'y') {
+        $listusers_prelim = $userlib->get_users_light();
+	$listusers = array();
+	$i=0;
+	$listusers[$i]['username'] = $user;
+	$listusers[$i]['realname'] = $tikilib->get_user_preference($user, 'realName', '');
+	$i++;
+	foreach( $listusers_prelim as $key_username => $value_realname ) {
+	  $listusers[$i]['username'] = $key_username;
+	  $listusers[$i]['realname'] = $value_realname;
+	  $i++;
+	}
+} else {
+        $listusers = array();
+}
+$smarty->assign('listusers', $listusers);
 
 $smarty->assign('listpriorities',array('0','1','2','3','4','5','6','7','8','9'));
 $smarty->assign('listprioritycolors',array('fff','fdd','fcc','fbb','faa','f99','e88','d77','c66','b66','a66'));
