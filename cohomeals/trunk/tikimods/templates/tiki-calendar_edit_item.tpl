@@ -75,7 +75,7 @@
 </tr>
 
 <tr>
-<td>{tr}Title{/tr}</td>
+<td>{tr}Title (or guest name if guest room reservation){/tr}</td>
 <td>
 {if $edit}
 	<input type="text" name="save[name]" value="{$calitem.name|escape}" size="32" style="width:90%;"/>
@@ -253,7 +253,7 @@
 	</td>
 </tr>
 <tr>
-<td>{tr}Start{/tr}</td>
+<td>{tr}Start (or check-in time){/tr}</td>
 <td>
 {if $edit}
 	<table cellpadding="0" cellspacing="0" border="0">
@@ -325,7 +325,7 @@
 </td>
 </tr>
 <tr>
-	<td>{tr}End{/tr}</td><td>
+<td>{tr}End (or check-out time){/tr}</td><td>
 	{if $edit}
 		<input type="hidden" name="save[end_or_duration]" value="end" id="end_or_duration" />
 		<div id="end_date" style="display:block"> {* the display:block inline style used here is needed to make toggle() function work properly *}
@@ -474,15 +474,11 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 <td>{tr}Classification{/tr}</td>
 <td>
 {if $edit}
-{if count($listcats)}
 <select name="save[categoryId]">
-<option value=""></option>
 {foreach item=it from=$listcats}
 <option value="{$it.categoryId}"{if $calitem.categoryId eq $it.categoryId} selected="selected"{/if}>{$it.name|escape}</option>
 {/foreach}
 </select>
-{tr}or new{/tr} {/if}
-<input type="text" name="save[newcat]" value="" />
 {else}
 <span class="category">{$calitem.categoryName|escape}</span>
 {/if}
@@ -492,27 +488,13 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 <td>{tr}Location{/tr}</td>
 <td>
 {if $edit}
-{if count($listlocs)}
 <select name="save[locationId]">
-<option value=""></option>
 {foreach item=it from=$listlocs}
 <option value="{$it.locationId}"{if $calitem.locationId eq $it.locationId} selected="selected"{/if}>{$it.name|escape}</option>
 {/foreach}
 </select>
-{tr}or new{/tr} {/if}
-<input type="text" name="save[newloc]" value="" />
 {else}
 <span class="location">{$calitem.locationName|escape}</span>
-{/if}
-</td>
-</tr>
-<tr>
-<td>{tr}URL{/tr}</td>
-<td>
-{if $edit}
-<input type="text" name="save[url]" value="{$calitem.url}" size="32" style="width:90%;" />
-{else}
-<a class="url" href="{$calitem.url}">{$calitem.url|escape}</a>
 {/if}
 </td>
 </tr>
@@ -555,90 +537,34 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 {/if}
 
 <tr style="display:{if $calendar.customparticipants eq 'y'}tablerow{else}none{/if};" id="calorg">
-<td>{tr}Organized by{/tr}</td>
+<td>{tr}Contact/Host:{/tr}</td>
 <td>
 {if $edit}
-	{if $preview or $changeCal}
-		<input type="text" name="save[organizers]" value="{$calitem.organizers|escape}" style="width:90%;" />
-	{else}
-		<input type="text" name="save[organizers]" value="{foreach item=org from=$calitem.organizers name=organizers}{if $org neq ''}{$org|escape}{if !$smarty.foreach.organizers.last},{/if}{/if}{/foreach}" style="width:90%;" />
-	{/if}
-{else}
-{foreach item=org from=$calitem.organizers}
-{$org|userlink}<br />
+<select name="save[organizers]">
+{foreach item=it from=$listusers}
+<option value="{$it.username}"{if $calitem.organizers[0] eq $it.username} selected="selected"{/if}>{$it.realname|escape}</option>
 {/foreach}
-{/if}
-</td>
-</tr>
-
-<tr style="display:{if $calendar.customparticipants eq 'y'}tablerow{else}none{/if};" id="calpart">
-<td>{tr}Participants{/tr}
-{if $edit}
-<a href="#" onclick="flip('calparthelp');">{icon _id='help'}</a>
-{/if}
-</td>
-<td>
-{if $edit}
-	{if $preview or $changeCal}
-		<input type="text" name="save[participants]" value="{$calitem.participants}" style="width:90%;" />
-	{else}
-		<input type="text" name="save[participants]" value="{foreach item=ppl from=$calitem.participants name=participants}{if $ppl.name neq ''}{if $ppl.role}{$ppl.role}:{/if}{$ppl.name}{if !$smarty.foreach.participants.last},{/if}{/if}{/foreach}" style="width:90%;" />
-	{/if}
+</select>
 {else}
-{foreach item=ppl from=$calitem.participants}
-{$ppl.name|userlink} {if $listroles[$ppl.role]}({$listroles[$ppl.role]}){/if}<br />
-{if $ppl.name eq $user}{assign var='in_particip' value='y'}{/if}
-{/foreach}
-{if $tiki_p_calendar_add_my_particip eq 'y'}
-	{if $in_particip eq 'y'}
-		{button _text="{tr}Withdraw me from the list of participants{/tr}" href="?del_me=y&viewcalitemId=$id"}
-	{else}
-		{button _text="{tr}Add me to the list of participants{/tr}" href="?add_me=y&viewcalitemId=$id"}
-	{/if}
-{/if}
-{if $tiki_p_calendar_add_guest_particip eq 'y'}
-	<form action="tiki-calendar_edit_item.php" method="post">
-	<input type ="hidden" name="viewcalitemId" value="{$id}" />
-	<input type="text" name="guests" />{help desc="{tr}Format{/tr}: {tr}Participant names separated by comma{/tr}" url='calendar'}
-	<input type="submit" name="add_guest" value="Add guests" />
-	</form>
-{/if}
+<span class="organizers">{$calitem.organizers_realname|escape}</span>
 {/if}
 </td>
 </tr>
 
 
 
-
-<tr><td colspan="2">
-{if $edit}
-<div style="display:{if $calendar.customparticipants eq 'y' and (isset($cookie.show_calparthelp) and $cookie.show_calparthelp eq 'y')}block{else}none{/if};" id="calparthelp">
-{tr}Roles{/tr}<br />
-0: {tr}chair{/tr} ({tr}default role{/tr})<br />
-1: {tr}required participant{/tr}<br />
-2: {tr}optional participant{/tr}<br />
-3: {tr}non participant{/tr}<br />
-<br />
-{tr}Give participant list separated by commas. Roles have to be given in a prefix separated by a column like in:{/tr}
-<tt>{tr}role:login_or_email,login_or_email{/tr}</tt>
-<br />
-{tr}If no role is provided, default role will be "Chair participant".{/tr}
-{/if}
-</div>
-
-</td></tr>
 
 
 </table>
 
 {if $edit}
 <table class="normal">
-<tr><td><input type="submit" name="preview" value="{tr}Preview{/tr}" /></td></tr>
+{* <tr><td><input type="submit" name="preview" value="{tr}Preview{/tr}" /></td></tr> *}
 {if $recurrence.id gt 0}
 <tr><td>
 	<input type="radio" id="id_affectEvt" name="affect" value="event" checked="checked"/><label for="id_affectEvt">{tr}Update this event only{/tr}</label><br />
-	<input type="radio" id="id_affectMan" name="affect" value="manually"/><label for="id_affectMan">{tr}Update every unchanged events of this recurrence rule{/tr}</label><br />
-	<input type="radio" id="id_affectAll" name="affect" value="all"/><label for="id_affectAll">{tr}Update every events of this recurrence rule{/tr}</label>
+	<input type="radio" id="id_affectMan" name="affect" value="manually"/><label for="id_affectMan">{tr}Update every unchanged events of this recurrence rule (broken){/tr}</label><br />
+	<input type="radio" id="id_affectAll" name="affect" value="all"/><label for="id_affectAll">{tr}Update every events of this recurrence rule (broken){/tr}</label>
 </td></tr>
 {/if}
 {if !$user and $prefs.feature_antibot eq 'y'}
