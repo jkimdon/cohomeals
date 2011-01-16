@@ -1,6 +1,6 @@
 {strip}
 {title admpage="calendar"}{tr}Calendar Item{/tr}{/title}
-
+(Please note that common house events may require an event form or a cemetery parking permit. Contact Jude.)
 <div class="navbar">
 {if $tiki_p_view_calendar eq 'y'}
 	{button href="tiki-calendar.php" _text="{tr}View Calendars{/tr}"}
