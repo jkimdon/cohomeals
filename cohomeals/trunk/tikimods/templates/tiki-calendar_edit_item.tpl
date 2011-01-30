@@ -325,7 +325,7 @@
 </td>
 </tr>
 <tr>
-<td>{tr}End (or check-out time){/tr}</td><td>
+<td>{tr}End (or check-out time) -- if unknown, select same time as Start Time{/tr}</td><td>
 	{if $edit}
 		<input type="hidden" name="save[end_or_duration]" value="end" id="end_or_duration" />
 		<div id="end_date" style="display:block"> {* the display:block inline style used here is needed to make toggle() function work properly *}
@@ -415,7 +415,7 @@
 <td>{tr}Description{/tr}
 </td><td>
 {if $edit}
-  {toolbars area_id="save[description]"}
+{*  {toolbars area_id="save[description]"} (Broken) *}
   <textarea id='editwiki' class="wikiedit" cols="{$cols}" rows="{$rows}" name="save[description]" style="width:98%">{$calitem.description|escape}</textarea>
   <input type="hidden" name="rows" value="{$rows}"/>
   <input type="hidden" name="cols" value="{$cols}"/>
@@ -493,6 +493,8 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 <option value="{$it.locationId}"{if $calitem.locationId eq $it.locationId} selected="selected"{/if}>{$it.name|escape}</option>
 {/foreach}
 </select>
+{tr} or new {/tr}
+<input type="text" name="save[newloc]" value="" />
 {else}
 <span class="location">{$calitem.locationName|escape}</span>
 {/if}
@@ -540,11 +542,15 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 <td>{tr}Contact/Host:{/tr}</td>
 <td>
 {if $edit}
+{assign var='editorg' value=$calitem.organizers[0]}
 <select name="save[organizers]">
 {foreach item=it from=$listusers}
 <option value="{$it.username}"{if $calitem.organizers[0] eq $it.username} selected="selected"{/if}>{$it.realname|escape}</option>
+  {if $calitem.organizers[0] eq $it.username}{assign var='editorg' value=''}{/if}
 {/foreach}
 </select>
+or enter name and phone or email:
+<input type="text" name="save[guestContact]" value="{$editorg}" />
 {else}
 <span class="organizers">{$calitem.organizers_realname|escape}</span>
 {/if}

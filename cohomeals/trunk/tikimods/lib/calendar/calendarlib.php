@@ -363,7 +363,7 @@ class CalendarLib extends TikiLib
 
 		$res["participants"] = $ppl;
 		$res["organizers"] = $org;
-		$res["organizers_realname"] = $tikilib->get_user_preference($org[0], 'realName', '');
+		$res["organizers_realname"] = $tikilib->get_user_preference($org[0], 'realName', $org[0]);
 		
 		$res['date_start'] = (int)$res['start'];
 		$res['date_end'] = (int)$res['end'];
@@ -415,7 +415,10 @@ class CalendarLib extends TikiLib
 
 		if ($caldata['customparticipants'] == 'y') {
 			$roles = array();
-			if ($data["organizers"]) {
+			if (trim($data["guestContact"])) {
+			  $roles[ROLE_ORGANIZER][] = trim($data["guestContact"]);
+			}
+			else if ($data["organizers"]) {
 				$orgs = explode(',', $data["organizers"]);
 				foreach ($orgs as $o) {
 					if (trim($o)) {
