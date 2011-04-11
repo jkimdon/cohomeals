@@ -29,7 +29,7 @@
   {if ($cellend - $cellstart < 86400)}
 	{$cellstart|tiki_date_format:"%I:%M %p"} &ndash; {$cellend|tiki_date_format:"%I:%M %p"}
   {else}
-	{$cellstart|tiki_date_format:"%e %B (%H:%M)"} &ndash; {$cellend|tiki_date_format:"%e %B (%H:%M)"}
+	{$cellstart|tiki_date_format:"%e %B (%I:%M %p)"} &ndash; {$cellend|tiki_date_format:"%e %B (%I:%M %p)"}
   {/if}
 {/if}
 </strong>
