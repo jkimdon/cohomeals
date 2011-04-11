@@ -35,7 +35,11 @@
 </strong>
 <br />
 {/if}
-<a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{if $cellid eq '-1'}
+  <a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{else}
+  <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{/if}
 {if $show_description eq 'y'}<div class="box-data">{$celldescription|truncate:250:'...'}</div><br />{/if}
 {if $show_participants eq 'y' and $cellorganizers}
 <span class="box-title">{tr}Organized by:{/tr}</span> {$cellorganizers}<br />

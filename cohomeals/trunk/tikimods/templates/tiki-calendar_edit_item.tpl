@@ -11,7 +11,14 @@
 {if $tiki_p_add_events eq 'y' and $id }
 	{button href="tiki-calendar_edit_item.php" _text="{tr}New event{/tr}"}
 {/if}
-{if $id}
+{if $id eq '-1'}
+	{if $edit}
+		{button href="tiki-calendar_edit_item.php?viewrecurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}View event{/tr}"}
+	{elseif $tiki_p_change_events eq 'y'}
+		{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}Edit/Delete this event only{/tr}"}
+		{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=0" _text="{tr}Edit/Delete all unchanged events in this recurrence{/tr}"}
+	{/if}
+{elseif $id}
 	{if $edit}
 		{button href="tiki-calendar_edit_item.php?viewcalitemId=$id" _text="{tr}View event{/tr}"}
 	{elseif $tiki_p_change_events eq 'y'}
@@ -91,6 +98,13 @@
 	{if $recurrence.id gt 0}
 	<input type="hidden" name="recurrent" value="1"/>
 		{tr}This event depends on a recurrence rule{/tr}
+            {if $edit} 
+              {if $affect eq 'all'}
+                <input type="hidden" name="affect" value="all"/>
+	      {else}
+                <input type="hidden" name="affect" value="event"/>
+	      {/if}
+            {/if}
 	{else}
 <input type="checkbox" id="id_recurrent" name="recurrent" value="1" onclick="toggle('recurrenceRules');toggle('startdate');toggle('enddate');"{if $calitem.recurrenceId gt 0 or $recurrent eq 1}checked="checked"{/if}/><label for="id_recurrent">{tr}This event depends on a recurrence rule{/tr}</label>
 	{/if}
@@ -153,7 +167,7 @@
 		<input type="radio" id="id_recurrenceTypeMW" name="recurrenceType" value="monthlyByWeekday" {if $recurrence.monthlyByWeekday}checked="checked"{/if}/><label for="id_recurrenceTypeMW">{tr}On a monthly basis based on the day of the week{/tr}</label><br />
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 {/if}
-{if $recurrence.id eq 0}
+{if $recurrence.id eq 0 or ($recurrence.monthlyByWeekday and $affect neq 'event' and $calitem.calitemId le 0)}
 			  {tr}Each{/tr}&nbsp;
                           <select name="monthlyWeekNumber">
 				<option value="0" {if $recurrence.monthlyWeekNumber eq '0'}selected="selected"{/if}>{tr}First{/tr}</option>
@@ -214,7 +228,9 @@
 	<input type="hidden" name="nbRecurrences" value="{$recurrence.nbRecurrences}"/>
 	<input type="hidden" name="endPeriod" value="{$recurrence.endPeriod}"/>
 	{tr}Starting on{/tr} {$recurrence.startPeriod|tiki_long_date},&nbsp;
-	{if $recurrence.endPeriod gt 0}{tr}ending by{/tr} {$recurrence.endPeriod|tiki_long_date}{else}{tr}ending after{/tr} {$recurrence.nbRecurrences} {tr}events{/tr}{/if}.
+	{if $recurrence.endPeriod gt 0}{tr}ending by{/tr} {$recurrence.endPeriod|tiki_long_date}
+        {elseif $recurrence.nbRecurrences gt 0}{tr}ending after{/tr} {$recurrence.nbRecurrences} {tr}events{/tr}
+        {/if}.
 {else}
 		{tr}Start period{/tr} :
 		{if $prefs.feature_jscalendar eq 'y' and $prefs.javascript_enabled eq 'y'}
@@ -223,14 +239,16 @@
 			{html_select_date prefix="startPeriod_" time=$recurrence.startPeriod field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
 		{/if}
 		<br /><hr style="width:75%"/>
-		<input type="radio" id="id_endTypeNb" name="endType" value="nb" {if $recurrence.nbRecurrences or $calitem.calitemId eq 0}checked="checked"{/if}/>&nbsp;<label for="id_endTypeNb">{tr}End after{/tr}</label>
-		<input type="text" name="nbRecurrences" size="3" style="text-align:right" value="{if $recurrence.nbRecurrences gt 0}{$recurrence.nbRecurrences}{else}{if $calitem.calitemId eq 0}1{/if}{/if}"/>{tr}occurrences{/tr}<br />
+		{*		<input type="radio" id="id_endTypeNb" name="endType" value="nb" {if $recurrence.nbRecurrences or $calitem.calitemId eq 0}checked="checked"{/if}/>&nbsp;<label for="id_endTypeNb">{tr}End after{/tr}</label>
+																												       <input type="text" name="nbRecurrences" size="3" style="text-align:right" value="{if $recurrence.nbRecurrences gt 0}{$recurrence.nbRecurrences}{else}{if $calitem.calitemId eq 0}1{/if}{/if}"/>{tr}occurrences{/tr}<br />*}
 		<input type="radio" id="id_endTypeDt" name="endType" value="dt" {if $recurrence.endPeriod gt 0}checked="checked"{/if}/>&nbsp;<label for="id_endTypeDt">{tr}End before{/tr}</label>
 		{if $prefs.feature_jscalendar eq 'y' and $prefs.javascript_enabled eq 'y'}
 			{jscalendar id="endPeriod" date=$recurrence.endPeriod fieldname="endPeriod" align="Bc" showtime='n'}
 		{else}
 			{html_select_date prefix="endPeriod_" time=$recurrence.endPeriod field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
 		{/if}
+		<br />
+		<input type="radio" id="id_endTypeDtNe" name="endType" value="dtneverending" {if $recurrence.endPeriod eq 0 or $calitem.calitemId eq 0}checked="checked"{/if}/>&nbsp;<label for="id_endTypeDtNe">{tr}Never ending{/tr}</label>
 {/if}
 		<br />&nbsp;
 	  </div>
@@ -258,26 +276,20 @@
 {if $edit}
 	<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-			{if $prefs.feature_jscalendar neq 'y' or $prefs.javascript_enabled neq 'y'}
-				<a href="#" onclick="document.f.Time_Hour.selectedIndex=(document.f.Time_Hour.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a>
-			{/if}
-			</td>
+			{if $affect neq 'all'}
 			<td rowspan="2" style="border:0;padding-top:2px;vertical-align:middle"><div style="display:block" id="startdate">
 			{if $prefs.feature_jscalendar eq 'y' and $prefs.javascript_enabled eq 'y'}
 				{jscalendar id="start" date=$calitem.start fieldname="save[date_start]" align="Bc" showtime='n'}
 			{else}
 				{html_select_date prefix="start_date_" time=$calitem.start field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
 			{/if}
+		        <input type="hidden" name="original_start" value="{$calitem.start}" id="start" />
 			</div></td>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-				<span id="starttimehourplus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.start_Hour.selectedIndex=(document.f.start_Hour.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a></span>
-			</td>
+			{else}
+		        <input type="hidden" name="save[start]" value="{$calitem.start}" id="start" />
+			{/if}
 			<td rowspan="2" style="border:0;vertical-align:middle" class="html_select_time">
 				<span id="starttime" style="display: {if $calitem.allday} none {else} inline {/if}">{html_select_time prefix="start_" display_seconds=false time=$calitem.start minute_interval=$prefs.calendar_timespan hour_minmax=$hour_minmax}</span>
-			</td>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-				<span id="starttimeminplus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.start_Minute.selectedIndex=(document.f.start_Minute.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a></span>
 			</td>
 			<td style="border:0;padding-top:2px;vertical-align:middle;" rowspan="2">
 				<label for="alldayid">
@@ -301,19 +313,6 @@
 					   value="true" {if $calitem.allday} checked="checked" {/if} /> {tr}All day{/tr}</label>
 			</td>
 		</tr>
-		<tr>
-			<td style="border:0;vertical-align:middle">
-			{if $prefs.feature_jscalendar neq 'y' or $prefs.javascript_enabled neq 'y'}
-				<a href="#" onclick="document.f.Time_Hour.selectedIndex=(document.f.Time_Hour.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a>
-			{/if}
-			</td>
-			<td style="border:0;vertical-align:middle">
-				<span id="starttimehourminus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.start_Hour.selectedIndex=(document.f.start_Hour.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a>
-			</td>
-			<td style="border:0;vertical-align:middle">
-				<span id="starttimeminminus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.start_Minute.selectedIndex=(document.f.start_Minute.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a>
-			</td>
-		</tr>
 	</table>
 {else}
     {if $calitem.allday}
@@ -331,11 +330,7 @@
 		<div id="end_date" style="display:block"> {* the display:block inline style used here is needed to make toggle() function work properly *}
 		<table cellpadding="0" cellspacing="0" border="0">
 		<tr>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-			{if $prefs.feature_jscalendar neq 'y' or $prefs.javascript_enabled neq 'y'}
-				<span id="endtimehourplus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.Time_Hour.selectedIndex=(document.f.Time_Hour.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a></span>
-			{/if}
-			</td>
+		        {if $affect neq 'all'}
 			<td rowspan="2" style="border:0;vertical-align:middle"><div style="display:block" id="enddate">
 			{if $prefs.feature_jscalendar eq 'y' and $prefs.javascript_enabled eq 'y'}
 				{jscalendar id="end" date=$calitem.end fieldname="save[date_end]" align="Bc" showtime='n'}
@@ -343,32 +338,14 @@
 				{html_select_date prefix="end_date_" time=$calitem.end field_order=$prefs.display_field_order  start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
 			{/if}
 			</div></td>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-				<span id="endtimehourplus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.end_Hour.selectedIndex=(document.f.end_Hour.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a></span>
-			</td>
+			{/if}
 			<td rowspan="2" style="border:0;vertical-align:middle" class="html_select_time">
 				<span id="endtime" style="display: {if $calitem.allday} none {else} inline {/if}">{html_select_time prefix="end_" display_seconds=false time=$calitem.end minute_interval=$prefs.calendar_timespan hour_minmax=$hour_minmax}</span>
 			</td>
-			<td style="border:0;padding-top:2px;vertical-align:middle">
-				<span id="endtimeminplus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.end_Minute.selectedIndex=(document.f.end_Minute.selectedIndex+1);">{icon _id='plus_small' align='left' width='11' height='8'}</a></span>
-			</td>
-			<td rowspan="2" style="border:0;padding-top:2px;vertical-align:middle">
+				  {*			<td rowspan="2" style="border:0;padding-top:2px;vertical-align:middle">
 				<span id="duration" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.getElementById('end_or_duration').value='duration';flip('end_duration');flip('end_date');return false;">{tr}Duration{/tr}</a></span>
-			</td>
+																																	      </td>*}
 		</tr>
-		<tr>
-		<td style="border:0;vertical-align:middle">
-		{if $prefs.feature_jscalendar neq 'y' or $prefs.javascript_enabled neq 'y'}
-			<a href="#" onclick="document.f.Time_Hour.selectedIndex=(document.f.Time_Hour.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a>
-		{/if}
-		</td>
-		<td style="border:0;vertical-align:middle">
-			<span id="endtimehourminus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.end_Hour.selectedIndex=(document.f.end_Hour.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a></span>
-		</td>
-		<td style="border:0;vertical-align:middle">
-			<span id="endtimeminminus" style="display: {if $calitem.allday} none {else} inline {/if}"><a href="#" onclick="document.f.end_Minute.selectedIndex=(document.f.end_Minute.selectedIndex-1);">{icon _id='minus_small' align='left' width='11' height='8'}</a></span>
-		</td>
-	</tr>
 </table>
 </div>
 
@@ -566,18 +543,15 @@ or enter name and phone or email:
 {if $edit}
 <table class="normal">
 {* <tr><td><input type="submit" name="preview" value="{tr}Preview{/tr}" /></td></tr> *}
-{if $recurrence.id gt 0}
-<tr><td>
-	<input type="radio" id="id_affectEvt" name="affect" value="event" checked="checked"/><label for="id_affectEvt">{tr}Update this event only{/tr}</label><br />
-	<input type="radio" id="id_affectMan" name="affect" value="manually"/><label for="id_affectMan">{tr}Update every unchanged events of this recurrence rule (broken){/tr}</label><br />
-	<input type="radio" id="id_affectAll" name="affect" value="all"/><label for="id_affectAll">{tr}Update every events of this recurrence rule (broken){/tr}</label>
-</td></tr>
-{/if}
 {if !$user and $prefs.feature_antibot eq 'y'}
 	{include file='antibot.tpl'}
 {/if}
+{if $affect eq 'event'}
+<tr><td><input type="submit" name="act" value="{tr}Save this event only{/tr}" />
+{else}
 <tr><td><input type="submit" name="act" value="{tr}Save{/tr}" />
-{if $id}&nbsp;<input type="submit" onclick='document.location="tiki-calendar_edit_item.php?calitemId={$id}&amp;delete=y";return false;' value="{tr}Delete event{/tr}"/>{/if}
+{/if}
+{if $id gt 0}&nbsp;<input type="submit" onclick='document.location="tiki-calendar_edit_item.php?calitemId={$id}&amp;delete=y";return false;' value="{tr}Delete event{/tr}"/>{/if}
 {if $recurrence.id}&nbsp;<input type="submit" onclick='document.location="tiki-calendar_edit_item.php?recurrenceId={$recurrence.id}&amp;delete=y";return false;' value="{tr}Delete Recurrent events{/tr}"/>{/if}
 &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" onclick='document.location="{$referer|escape:'html'}";return false;' value="{tr}Cancel{/tr}"/>
 </td></tr>
