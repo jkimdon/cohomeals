@@ -669,6 +669,27 @@ class CalendarLib extends TikiLib
 		return $calitemId;
 	}
 
+	function determine_location($calendarId, $inputLocId, $inputNewloc) {
+	        $locationId = 0;
+
+	        $caldata = $this->get_calendar($calendarId);
+
+		if ($caldata['customlocations'] == 'y') {
+			if (trim($inputNewloc)) {
+			        $bindvars=array((int)$calendarId,trim($inputNewloc));
+			        $oldId = $this->getOne("select `callocId` from `tiki_calendar_locations` where `calendarId`=? and `name`=?",$bindvars);
+				if ($oldId>0) {
+				  $locationId = $oldId;
+				} else {
+				  $query = "insert into `tiki_calendar_locations` (`calendarId`,`name`) values (?,?)";
+				  $this->query($query,$bindvars);
+				  $locationId = $this->getOne("select `callocId` from `tiki_calendar_locations` where `calendarId`=? and `name`=?",$bindvars);
+				}
+			} else $locationId = $inputLocId;
+		}
+		return $locationId;
+	}
+
 	function watch($calitemId, $data) {
 		global $tikilib, $smarty, $prefs;
 		if ($nots = $tikilib->get_event_watches('calendar_changed', $data['calendarId'])) {
