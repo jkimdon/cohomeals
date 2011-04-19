@@ -690,6 +690,30 @@ class CalendarLib extends TikiLib
 		return $locationId;
 	}
 
+	function coho_set_organizer($calendarId, $recurrenceId, $hostUsername, $manuallyEnteredHost) {
+	  	$caldata = $this->get_calendar($calendarId);
+
+	        if ($caldata['customparticipants'] == 'y') {
+		        $host = '';
+			if (trim($manuallyEnteredHost)) {
+			  $host = trim($manuallyEnteredHost);
+			}
+			else if ($hostUsername) {
+			  $host = trim($hostUsername);
+			}
+
+
+			if ($recurrenceId) {
+			  $query = "delete from `tiki_calendar_roles` where `recurrenceId`=?";
+			  $this->query($query,array((int)$recurrenceId));
+			}
+			
+			$bindvars = array($recurrenceId,$host,(string)ROLE_ORGANIZER);
+			$query = "insert into `tiki_calendar_roles` (`recurrenceId`,`username`,`role`) values (?,?,?)";
+			$this->query($query,$bindvars);
+		}
+	}
+
 	function watch($calitemId, $data) {
 		global $tikilib, $smarty, $prefs;
 		if ($nots = $tikilib->get_event_watches('calendar_changed', $data['calendarId'])) {

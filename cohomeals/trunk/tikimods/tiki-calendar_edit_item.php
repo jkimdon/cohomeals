@@ -289,6 +289,7 @@ if (isset($_POST['act'])) {
 				}
 				$calRecurrence->setUser($save['user']);
 				$calRecurrence->save($_POST['affect'] == 'all');
+				$calendarlib->coho_set_organizer($save['calendarId'],$calRecurrence->getId(),$save['organizers'],$save['guestContact']);
 					// Save the ip at the log for the addition of new calendar items when done by anonymous users
 					if (empty($user) && empty($save['calitemId']) && $caladd["$newcalid"]['tiki_p_add_events']) { 
 						$logslib->add_log('calendar','Recurrent calendar item starting on '.$startPeriod.' added to calendar '.$save['calendarId']);

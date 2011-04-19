@@ -101,15 +101,11 @@ class CalRecurrence extends TikiLib
 	 * in the event)
 	 */
 	public function save($updateManuallyChangedEvents = false) {
-	  syslog(LOG_EMERG,"attempting to save\n");
 		if (!$this->isValid())
 			return false;
-		syslog(LOG_EMERG,"was valid.\n");
-		$debug = "saving with id = " . $this->getId() . ", affect = " . $updateManuallyChangedEvents . "\n";
-		syslog(LOG_EMERG,$debug);
+		//		syslog(LOG_EMERG,"was valid.\n");
 		if ($this->getId() > 0)
 			return $this->update($updateManuallyChangedEvents);
-		syslog(LOG_EMERG,"should be creating\n");
 		return $this->create();
 	}
 
@@ -137,20 +133,14 @@ class CalRecurrence extends TikiLib
 		  || ($this->isYearly() && (is_null($this->getDateOfYear()) || $this->getDateOfYear() > 1231 || $this->getDateOfYear() < 0101 || $this->getDateOfYear() == ''))
 		   )
 			return false;
-		syslog(LOG_EMERG,"checking start/end periods\n");
-		$debug = " start period = " . $this->getStartPeriod() . "\n";
-		syslog(LOG_EMERG,$debug);
 		// recurrence start should be defined
 		if ( is_null($this->getStartPeriod()) || ($this->getStartPeriod() == '') || ($this->getStartPeriod() == 0) )
 		  return false;
-		$debug = " end period = " . $this->getEndPeriod() . "\n";
-		syslog(LOG_EMERG,$debug);
 		// recurrence end should be defined
 		if (   (is_null($this->getNbRecurrences()) || ($this->getNbRecurrences() == '') || ($this->getNbRecurrences() == 0))
 		       && (($this->getEndPeriod() < $this->getStartPeriod()) && $this->getEndPeriod != 0) )
 			return false;
 		//
-		syslog(LOG_EMERG,"checking NlId\n");
 		if (is_null($this->getNlId()))
 			return false;
 		// should inform the language
@@ -177,7 +167,6 @@ class CalRecurrence extends TikiLib
 	}
 
 	private function create() {
-	  syslog(LOG_EMERG,"attempting to create\n");
 		$query = "INSERT INTO tiki_calendar_recurrence (calendarId, start, end, allday, locationId, categoryId, nlId, priority, status, url, lang, name, description, "
 			   . "weekly, weekday, monthly, dayOfMonth, monthlyByWeekday, monthlyWeekday, monthlyWeekNumber, yearly, dateOfYear, nbRecurrences, startPeriod, endPeriod, user, created, lastModif) "
 			   . "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
