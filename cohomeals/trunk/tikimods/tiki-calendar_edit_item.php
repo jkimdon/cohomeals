@@ -227,7 +227,8 @@ if (isset($_POST['act'])) {
 				$calRecurrence->setStart($_POST['start_Hour'] . str_pad($_POST['start_Minute'],2,'0',STR_PAD_LEFT));
 				$calRecurrence->setEnd($_POST['end_Hour'] . str_pad($_POST['end_Minute'],2,'0',STR_PAD_LEFT));
 				$calRecurrence->setAllday($save['allday'] == 1);
-				$calRecurrence->setLocationId($save['locationId']);
+				$locationId = $calendarlib->determine_location($save['calendarId'],$save['locationId'],$save['newloc']);
+				$calRecurrence->setLocationId($locationId);
 				$calRecurrence->setCategoryId($save['categoryId']);
 				$calRecurrence->setNlId(0); //TODO : What id nlId ?
 				$calRecurrence->setPriority($save['priority']);

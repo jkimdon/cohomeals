@@ -212,11 +212,9 @@ class CalRecurrence extends TikiLib
 						$now,
 						$now
 					 );
-		$debug = "creating query = " . $query . ", vars: " . $bindvars[0] . ", " . $bindvars[1] . ", " . $bindvars[2] . ", " . $bindvars[22] . ", " . $bindvars[23] . ", " . $bindvars[24] . "\n";
-		syslog(LOG_EMERG,$debug);
 		$result = $this->query($query,$bindvars);
-		$debug = "query result = " . $result . "\n";
-		syslog(LOG_EMERG,$debug);
+
+
 		if ($result) {
 			$this->setId($this->GetOne("SELECT `recurrenceId` FROM `tiki_calendar_recurrence` WHERE `created`=?",array($now)));
 			if ($this->getId() > 0) {
