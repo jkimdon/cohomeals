@@ -155,8 +155,16 @@ if (isset($_REQUEST['act']) || isset($_REQUEST['preview']) || isset($_REQUEST['c
 		if (!empty($_REQUEST['start_Meridian']) && $_REQUEST['start_Meridian'] == 'pm') {
 			$_REQUEST['start_Hour'] += 12;
 		}
-		if (!isset($save['start'])) {
-		$save['start'] = TikiLib::make_time(
+		if (isset($save['start'])) {
+		    $itemdate = TikiLib::date_format2('Y/m/d',$save['start']);
+		    $itemdate = explode("/",$itemdate);
+		    $save['start'] = TikiLib::make_time(
+							$_REQUEST['start_Hour'],
+							$_REQUEST['start_Minute'],
+							0,
+							$itemdate[1],$itemdate[2],$itemdate[0]);
+		} else {
+		  $save['start'] = TikiLib::make_time(
 			$_REQUEST['start_Hour'],
 			$_REQUEST['start_Minute'],
 			0,
@@ -213,19 +221,20 @@ if (isset($_POST['act'])) {
 			}
 		}
 		
-		if (array_key_exists('recurrent',$_POST) && ($_POST['recurrent'] == 1) && $_POST['affect']!='event') {
+		if (array_key_exists('recurrent',$_REQUEST) && ($_REQUEST['recurrent'] == 1) && $_REQUEST['affect']!='event') {
 			$impossibleDates = false;
-			if ($_POST['end_Hour'] < $_POST['start_Hour']) {
+			if ($_REQUEST['end_Hour'] < $_REQUEST['start_Hour']) {
 				$impossibleDates = true;
-			} elseif (($_POST['end_Hour'] == $_POST['start_Hour']) && ($_POST['end_Minute'] < $_POST['start_Minute'])) {
+			} elseif (($_REQUEST['end_Hour'] == $_REQUEST['start_Hour']) && ($_REQUEST['end_Minute'] < $_REQUEST['start_Minute'])) {
 				$impossibleDates = true;
 			} else
 				$impossibleDates = false;
 			if (!$impossibleDates) {
-				$calRecurrence = new CalRecurrence($_POST['recurrenceId'] ? $_POST['recurrenceId'] : -1);
+				$calRecurrence = new CalRecurrence($_REQUEST['recurrenceId'] ? $_REQUEST['recurrenceId'] : -1);
 				$calRecurrence->setCalendarId($save['calendarId']);
-				$calRecurrence->setStart($_POST['start_Hour'] . str_pad($_POST['start_Minute'],2,'0',STR_PAD_LEFT));
-				$calRecurrence->setEnd($_POST['end_Hour'] . str_pad($_POST['end_Minute'],2,'0',STR_PAD_LEFT));
+
+				$calRecurrence->setStart($_REQUEST['start_Hour'] . str_pad($_REQUEST['start_Minute'],2,'0',STR_PAD_LEFT));
+				$calRecurrence->setEnd($_REQUEST['end_Hour'] . str_pad($_REQUEST['end_Minute'],2,'0',STR_PAD_LEFT));
 				$calRecurrence->setAllday($save['allday'] == 1);
 				$locationId = $calendarlib->determine_location($save['calendarId'],$save['locationId'],$save['newloc']);
 				$calRecurrence->setLocationId($locationId);
@@ -237,10 +246,10 @@ if (isset($_POST['act'])) {
 				$calRecurrence->setLang(strLen($save['lang']) > 0 ? $save['lang'] : 'en');
 				$calRecurrence->setName($save['name']);
 				$calRecurrence->setDescription($save['description']);
-				switch($_POST['recurrenceType']) {
+				switch($_REQUEST['recurrenceType']) {
 					case "weekly":
 						$calRecurrence->setWeekly(true);
-						$calRecurrence->setWeekday($_POST['weekday']);
+						$calRecurrence->setWeekday($_REQUEST['weekday']);
 						$calRecurrence->setMonthly(false);
 						$calRecurrence->setMonthlyByWeekday(false);
 						$calRecurrence->setYearly(false);
@@ -248,7 +257,7 @@ if (isset($_POST['act'])) {
 					case "monthly":
 						$calRecurrence->setWeekly(false);
 						$calRecurrence->setMonthly(true);
-						$calRecurrence->setDayOfMonth($_POST['dayOfMonth']);
+						$calRecurrence->setDayOfMonth($_REQUEST['dayOfMonth']);
 						$calRecurrence->setMonthlyByWeekday(false);
 						$calRecurrence->setYearly(false);
 						break;
@@ -256,8 +265,8 @@ if (isset($_POST['act'])) {
 						$calRecurrence->setWeekly(false);
 						$calRecurrence->setMonthly(false);
 						$calRecurrence->setMonthlyByWeekday(true);
-						$calRecurrence->setMonthlyWeekday($_POST['monthlyWeekday']);
-						$calRecurrence->setMonthlyWeekNumber($_POST['monthlyWeekNumber']);
+						$calRecurrence->setMonthlyWeekday($_REQUEST['monthlyWeekday']);
+						$calRecurrence->setMonthlyWeekNumber($_REQUEST['monthlyWeekNumber']);
 						$calRecurrence->setYearly(false);
 						break;
 					case "yearly":
@@ -265,7 +274,7 @@ if (isset($_POST['act'])) {
 						$calRecurrence->setMonthly(false);
 						$calRecurrence->setMonthlyByWeekday(false);
 						$calRecurrence->setYearly(true);
-						$calRecurrence->setDateOfYear(str_pad($_POST['dateOfYear_month'],2,'0',STR_PAD_LEFT) . str_pad($_POST['dateOfYear_day'],2,'0',STR_PAD_LEFT));
+						$calRecurrence->setDateOfYear(str_pad($_REQUEST['dateOfYear_month'],2,'0',STR_PAD_LEFT) . str_pad($_REQUEST['dateOfYear_day'],2,'0',STR_PAD_LEFT));
 						break;
 				}
 				$startPeriod = TikiLib::make_time(0,0,0,
@@ -273,22 +282,22 @@ if (isset($_POST['act'])) {
 								  $_REQUEST['startPeriod_Day'],
 								  $_REQUEST['startPeriod_Year']);
 				$calRecurrence->setStartPeriod($startPeriod);
-				if ($_POST['endType'] == "dt") {
+				if ($_REQUEST['endType'] == "dt") {
 				        $startPeriod = TikiLib::make_time(0,0,0,
 									  $_REQUEST['endPeriod_Month'],
 									  $_REQUEST['endPeriod_Day'],
 									  $_REQUEST['endPeriod_Year']);
 					$calRecurrence->setEndPeriod($endPeriod);
 				}
-				elseif ($_POST['endType'] == "dtneverending") {
+				elseif ($_REQUEST['endType'] == "dtneverending") {
 				        $endPeriod = 0;
 					$calRecurrence->setEndPeriod($endPeriod);
 				}
 				else {
-					$calRecurrence->setNbRecurrences($_POST['nbRecurrences']);
+					$calRecurrence->setNbRecurrences($_REQUEST['nbRecurrences']);
 				}
 				$calRecurrence->setUser($save['user']);
-				$calRecurrence->save($_POST['affect'] == 'all');
+				$calRecurrence->save($_REQUEST['affect'] == 'all');
 				$calendarlib->coho_set_organizer($save['calendarId'],$calRecurrence->getId(),$save['organizers'],$save['guestContact']);
 					// Save the ip at the log for the addition of new calendar items when done by anonymous users
 					if (empty($user) && empty($save['calitemId']) && $caladd["$newcalid"]['tiki_p_add_events']) { 
@@ -302,8 +311,8 @@ if (isset($_POST['act'])) {
 			}
 		} else {
 			if (!$impossibleDates) {
-				if (array_key_exists('recurrenceId',$_POST)) {
-					$save['recurrenceId'] = $_POST['recurrenceId'];
+				if (array_key_exists('recurrenceId',$_REQUEST)) {
+					$save['recurrenceId'] = $_REQUEST['recurrenceId'];
 					$save['changed'] = true;
 					if ($save['calitemId'] == -1) {
 					  $save['recurrence_override'] = $calendarlib->coho_unix_daystart($_REQUEST['original_start']);
@@ -407,22 +416,22 @@ if (isset($_REQUEST["delete"]) and ($_REQUEST["delete"]) and isset($_REQUEST["ca
 	$calitem = $save;
 
 	$recurrence = array(
-		'weekly' => isset($_POST['recurrenceType']) && $_POST['recurrenceType'] = 'weekly',
-		'weekday' => isset($_POST['weekday']) ? $_POST['weekday'] : '',
-		'monthly' => isset($_POST['recurrenceType']) && $_POST['recurrenceType'] = 'monthly',
-		'dayOfMonth' => isset($_POST['dayOfMonth']) ? $_POST['dayOfMonth'] : '',
-		'monthlyByWeekday' => isset($_POST['recurrenceType']) && $_POST['recurrenceType'] = 'monthlyByWeekday',
-		'monthlyWeekday' => isset($_POST['monthlyWeekday']) ? $_POST['monthlyWeekday'] : '',
-		'monthlyWeekNumber' => isset($_POST['monthlyWeekNumber']) ? $_POST['monthlyWeekNumber'] : '',
-		'yearly' => isset($_POST['recurrenceType']) && $_POST['recurrenceType'] = 'yearly',
-		'dateOfYear_day' => isset($_POST['dateOfYear_day']) ? $_POST['dateOfYear_day'] : '',
-		'dateOfYear_month' => isset($_POST['dateOfYear_month']) ? $_POST['dateOfYear_month'] : '',
+		'weekly' => isset($_REQUEST['recurrenceType']) && $_REQUEST['recurrenceType'] = 'weekly',
+		'weekday' => isset($_REQUEST['weekday']) ? $_REQUEST['weekday'] : '',
+		'monthly' => isset($_REQUEST['recurrenceType']) && $_REQUEST['recurrenceType'] = 'monthly',
+		'dayOfMonth' => isset($_REQUEST['dayOfMonth']) ? $_REQUEST['dayOfMonth'] : '',
+		'monthlyByWeekday' => isset($_REQUEST['recurrenceType']) && $_REQUEST['recurrenceType'] = 'monthlyByWeekday',
+		'monthlyWeekday' => isset($_REQUEST['monthlyWeekday']) ? $_REQUEST['monthlyWeekday'] : '',
+		'monthlyWeekNumber' => isset($_REQUEST['monthlyWeekNumber']) ? $_REQUEST['monthlyWeekNumber'] : '',
+		'yearly' => isset($_REQUEST['recurrenceType']) && $_REQUEST['recurrenceType'] = 'yearly',
+		'dateOfYear_day' => isset($_REQUEST['dateOfYear_day']) ? $_REQUEST['dateOfYear_day'] : '',
+		'dateOfYear_month' => isset($_REQUEST['dateOfYear_month']) ? $_REQUEST['dateOfYear_month'] : '',
 		'startPeriod' => isset($startPeriod) ? $startPeriod : '',
-		'nbRecurrences' => isset($_POST['nbRecurrences']) ? $_POST['nbRecurrences'] : '',
+		'nbRecurrences' => isset($_REQUEST['nbRecurrences']) ? $_REQUEST['nbRecurrences'] : '',
 		'endPeriod' => isset($endPeriod) ? $endPeriod : ''
 	);	
-	if ( isset($_POST['recurrent']) && $_POST['recurrent'] == 1 ) {
-		$smarty->assign('recurrent', $_POST['recurrent']);
+	if ( isset($_REQUEST['recurrent']) && $_REQUEST['recurrent'] == 1 ) {
+		$smarty->assign('recurrent', $_REQUEST['recurrent']);
 	}
 	$smarty->assign_by_ref('recurrence', $recurrence);
 	
