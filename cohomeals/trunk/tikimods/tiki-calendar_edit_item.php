@@ -540,9 +540,6 @@ if ($calendar["customparticipants"] == 'y') {
         $listusers_prelim = $userlib->get_users_light();
 	$listusers = array();
 	$i=0;
-	$listusers[$i]['username'] = $user;
-	$listusers[$i]['realname'] = $tikilib->get_user_preference($user, 'realName', '');
-	$i++;
 	foreach( $listusers_prelim as $key_username => $value_realname ) {
 	  $listusers[$i]['username'] = $key_username;
 	  $listusers[$i]['realname'] = $value_realname;

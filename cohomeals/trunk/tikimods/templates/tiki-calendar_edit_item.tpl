@@ -467,7 +467,7 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 {if $edit}
 <select name="save[locationId]">
 {foreach item=it from=$listlocs}
-<option value="{$it.locationId}"{if $calitem.locationId eq $it.locationId} selected="selected"{/if}>{$it.name|escape}</option>
+<option value="{$it.locationId}"{if $calitem.locationId eq $it.locationId} selected="selected"{elseif $it.locationId eq "1"} selected="selected"{/if}>{$it.name|escape}</option>
 {/foreach}
 </select>
 {tr} or new {/tr}
@@ -522,7 +522,7 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 {assign var='editorg' value=$calitem.organizers[0]}
 <select name="save[organizers]">
 {foreach item=it from=$listusers}
-<option value="{$it.username}"{if $calitem.organizers[0] eq $it.username} selected="selected"{/if}>{$it.realname|escape}</option>
+<option value="{$it.username}"{if $calitem.organizers[0] eq $it.username} selected="selected"{elseif $it.username eq $user} selected="selected"{/if}>{$it.realname|escape}</option>
   {if $calitem.organizers[0] eq $it.username}{assign var='editorg' value=''}{/if}
 {/foreach}
 </select>
