@@ -323,37 +323,59 @@ class CalendarLib extends TikiLib
 		  $expectedDates = $recurrenceEntry->coho_getUnchangedDates((int)$tstart,(int)$tstop);
 		  /// NOTE: only one-day events are treated here
 
-		  foreach ($expectedDates as $unchangedDate) { // unix timestamp of beginning of day
-		    // check to see if individual items have been overridden
-		    $override_query = "select `calitemId` as `calitemId` " .
-		      "from `tiki_calendar_items` where `recurrenceId` = ? " .
-		      "and `calendarId` = ? and `recurrence_override` = ? ";
-		    $override_bindvars = array();
-		    $override_bindvars[] = $row["recurrenceId"];
-		    $override_bindvars[] = $row["calendarId"];
-		    $override_bindvars[] = $unchangedDate;
+		  // query for overrides
+		  $override_query = "select `recurrence_override` as `recurrence_override` " .
+		    "from `tiki_calendar_items` where `recurrenceId` = ? " .
+		    "and `calendarId` = ? ";
+		  $override_query .= "and (`recurrence_override` >= ? and `recurrence_override` <= ?) " .
+		    "order by `recurrence_override` ASC";
+		  $override_bindvars = array();
+		  $override_bindvars[] = $row["recurrenceId"];
+		  $override_bindvars[] = $row["calendarId"];
+		  $override_bindvars[] = (int)$tstart;
+		  $override_bindvars[] = (int)$tstop;
 
-		    $override_result = $this->query($override_query, $override_bindvars, 1);
-		    if (!$override_result->fetchRow()) { // no overriding event so we can render it unchanged
-		      // simulate the result of a get_item of an actual event
-		      $event = $this->get_coho_unchanged_recurrence_item($row["recurrenceId"],$unchangedDate);
+		  $override_result = $this->query($override_query, $override_bindvars);
+		  $override_date = $override_result->fetchRow();
+		  
+		  // simulate the result of a get_item of an actual event
+		  $event = $this->get_coho_unchanged_recurrence_item($row["recurrenceId"],$expectedDates[0]);
+		  $event["starttime"] = TikiLib::date_format('%H%M',$event["start"]);
+		  $event["endtime"] = TikiLib::date_format('%H%M',$event["end"]);
+
+		  $render = false;
+		  foreach ($expectedDates as $unchangedDate) { // unix timestamp of beginning of day
+		    if (!$override_date) {
+		      $render = true;
+		    } else {
+		      $debug = "override_date = " . $override_date['recurrence_override'] . "\n";
+
+		      if ($override_date['recurrence_override'] != $unchangedDate) {
+			// no overriding event so we can render it unchanged
+			$render = true;
+		      } else {
+			$render = false;
+		      }
+		    }
+
+		    if ($render) { // rendering unchanged
+
+		      // all items in the unchanged recurring event are the same except the date
+		      $event["start"] = $this->coho_get_unix($event["starttime"],$unchangedDate);
+		      $event["end"] = $this->coho_get_unix($event["endtime"],$unchangedDate);
+
 		      $head = TikiLib::date_format($prefs['short_time_format'], $event["start"]). " - " . TikiLib::date_format($prefs['short_time_format'], $event["end"]);
 
-		      // start/end have already been changed to unix timestampes, but we need 
-		      // user times of day for the recurrence table
-		      $starttime = TikiLib::date_format('%H%M',$event["start"]);
-		      $endtime = TikiLib::date_format('%H%M',$event["end"]);
-		      
 		      $eventArray["$unchangedDate"][] = array(
 			  "result" => $event,
 			  "calitemId" => $event["calitemId"],
 			  "calname" => $event["calname"],
-			  "time" => $starttime, /* user time */
-			  "end" => $endtime, /* user time */
+			  "time" => $event["starttime"], /* user time */
+			  "end" => $event["endtime"], /* user time */
 			  "type" => $event["status"],
 			  "web" => $event["url"],
-			  "startTimeStamp" => $event["start"],
-			  "endTimeStamp" => $event["end"],
+			  "startTimeStamp" => $event["start"], /* unix time */
+			  "endTimeStamp" => $event["end"], /* unix time */
 			  "nl" => $event["nlId"],
 			  "prio" => $event["priority"],
 			  "location" => $event["locationName"],
@@ -366,10 +388,11 @@ class CalendarLib extends TikiLib
 			  "calendarId" => $event['calendarId'],
 			  "status" => $event['status']
 		       );
-		    }						       
 
+		      // and go to next override date
+		      $override_date = $override_result->fetchRow();
+		    }
 		  }
-
 		}
 	}		  
 
