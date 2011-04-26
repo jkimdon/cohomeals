@@ -42,7 +42,7 @@
 {/if}
 {if $show_description eq 'y'}<div class="box-data">{$celldescription|truncate:250:'...'}</div><br />{/if}
 {if $show_participants eq 'y' and $cellorganizers}
-<span class="box-title">{tr}Organized by:{/tr}</span> {$cellorganizers}<br />
+<span class="box-title">{tr}Contact/Host:{/tr}</span> {$cellorganizers}<br />
 <br />
 {/if}
 {if $infocals.$cellcalendarId.custompriorities eq 'y' and $cellprio}<span class='box-title'>{tr}Priority:{/tr}</span> {$cellprio}<br />{/if}
