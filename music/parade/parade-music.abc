@@ -33,10 +33,10 @@ z3 FGA|"Gm" B3 A3|DGG G2 F| G3- G2 D|:DGG G2 A|B2 A B2 G|"Bb"F3- F2D|F3- F2D|"Gm
 d2 d dcB|"F"c2 c c2 A|"Gm"B2 B BAG|"Dm"A2 A ABc|"Gm"d3 c3 |B3 A3|DGG G2 F|[1 G3- G2 D:|][2 G3- G3|]
 V:2
 K:Fmaj clef=bass
-z|:F, z| C, z|F, z| C, z|F, z| C, z|C, B,,|C, z|C, z|G, z| F,, z|
+z|:F,, z| C, z|F,, z| C, z|F,, z| C, z|C, B,,|C, z|C, z|G,, z| F,, z|
 C, z|G,, z|D, z|C, B,,| C, z|F,, z| C, z| F,, z| C, z|D, z| D, ^F,| G, F,|
-C, z| F,, z|C, z|C, z |G, z|B,, F,|C, G,| F, C,| F,, z:| F,,2||
-Z8[|:F, z|C, z|F, z|F, C,|F, z|B,, z |C, z|F,, z|
+C, z| F,, z|C, z|C, z |G, z|B,, D,|E, C,| F,, A,,| F,, z:| F,,2||
+Z8[|:F, z|C, z|F, z|F, C,|F, z|B,, z |C, z|F,, C,|
 B,, z|F,, z|F,, z|C, z|B,, z|F,, z|F,, C,|F,,2 :|
 M:6/8
 L:1/8
