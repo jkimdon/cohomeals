@@ -340,16 +340,12 @@ class CalendarLib extends TikiLib
 		  
 		  // simulate the result of a get_item of an actual event
 		  $event = $this->get_coho_unchanged_recurrence_item($row["recurrenceId"],$expectedDates[0]);
-		  $event["starttime"] = TikiLib::date_format('%H%M',$event["start"]);
-		  $event["endtime"] = TikiLib::date_format('%H%M',$event["end"]);
 
 		  $render = false;
 		  foreach ($expectedDates as $unchangedDate) { // unix timestamp of beginning of day
 		    if (!$override_date) {
 		      $render = true;
 		    } else {
-		      $debug = "override_date = " . $override_date['recurrence_override'] . "\n";
-
 		      if ($override_date['recurrence_override'] != $unchangedDate) {
 			// no overriding event so we can render it unchanged
 			$render = true;
@@ -361,8 +357,16 @@ class CalendarLib extends TikiLib
 		    if ($render) { // rendering unchanged
 
 		      // all items in the unchanged recurring event are the same except the date
-		      $event["start"] = $this->coho_get_unix($event["starttime"],$unchangedDate);
-		      $event["end"] = $this->coho_get_unix($event["endtime"],$unchangedDate);
+		      $tmp = str_pad($event["start_time"],4,"0",STR_PAD_LEFT);
+		      $itemhour = substr($tmp,0,2);
+		      $itemminute = substr($tmp,-2);
+		      $time_addition = $itemhour*3600 + $itemminute*60;
+		      $eventstartTS = $unchangedDate + $time_addition;
+		      $event["start"] = $eventstartTS;
+		      $event["date_start"] = (int)$eventstartTS;
+		      $eventendTS = $eventstartTS + $event["duration"];
+		      $event["end"] = $eventendTS;
+		      $event["date_end"] = (int)$eventendTS;
 
 		      $head = TikiLib::date_format($prefs['short_time_format'], $event["start"]). " - " . TikiLib::date_format($prefs['short_time_format'], $event["end"]);
 
@@ -370,12 +374,12 @@ class CalendarLib extends TikiLib
 			  "result" => $event,
 			  "calitemId" => $event["calitemId"],
 			  "calname" => $event["calname"],
-			  "time" => $event["starttime"], /* user time */
-			  "end" => $event["endtime"], /* user time */
+			  "time" => $event["start_time"], /* user time */
+			  "end" => $event["end_time"], /* user time */
 			  "type" => $event["status"],
 			  "web" => $event["url"],
-			  "startTimeStamp" => $event["start"], /* unix time */
-			  "endTimeStamp" => $event["end"], /* unix time */
+			  "startTimeStamp" => $eventstartTS, /* unix time */
+			  "endTimeStamp" => $eventendTS, /* unix time */
 			  "nl" => $event["nlId"],
 			  "prio" => $event["priority"],
 			  "location" => $event["locationName"],
@@ -431,15 +435,15 @@ class CalendarLib extends TikiLib
 		$res["organizers"] = $org;
 		$res["organizers_realname"] = $tikilib->get_user_preference($org[0], 'realName', $org[0]);
 
+		$res["start_time"] = $res["start"];
+		$res["end_time"] = $res["end"];
+
 		// start/end needs to be translated into unix time
-		$itemstart = $this->coho_get_unix($res["start"],$dayinunix);
-		$itemend = $this->coho_get_unix($res["end"],$dayinunix);
-		$res['start'] = $itemstart;
-		$res['end'] = $itemend;
-		
+		$res["start"] = $this->coho_get_unix($res["start"],$dayinunix);
+		$res["end"] = $this->coho_get_unix($res["end"],$dayinunix);
 		$res['date_start'] = (int)$res['start'];
 		$res['date_end'] = (int)$res['end'];
-		
+
 		$res['duration'] = $res['end'] - $res['start'];
 		$res['parsed'] = $this->parse_data($res['description']);
 		$res['parsedName'] = $this->parse_data($res['name']);
