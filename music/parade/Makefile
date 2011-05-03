@@ -12,8 +12,11 @@ all: score.pdf melody-bflat.pdf bass.pdf
 score.abc: header.abc melody.notes bass.notes
 	(cat header.abc; echo "V: melody"; cat melody.notes; echo "V: bass"; cat  bass.notes) > score.abc
 
-parade-music.midi: parade-music.abc
-	abc2midi parade-music.abc -o parade-music.midi
+midi-input.abc: score.abc
+	cat score.abc | sed -s 's/".\{1,2\}"//g' > midi-input.abc
+	
+score.midi: midi-input.abc
+	abc2midi midi-input.abc -o score.midi
 
 %.pdf: %.ps
 	ps2pdf $*.ps
