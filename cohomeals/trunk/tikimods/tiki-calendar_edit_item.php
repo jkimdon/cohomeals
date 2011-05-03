@@ -152,8 +152,13 @@ if (isset($_REQUEST['act']) || isset($_REQUEST['preview']) || isset($_REQUEST['c
 			$save['duration'] = max(0, $save['end'] - $save['start']);
 		}
 	} else {
-		if (!empty($_REQUEST['start_Meridian']) && $_REQUEST['start_Meridian'] == 'pm') {
-			$_REQUEST['start_Hour'] += 12;
+	        if (!empty($_REQUEST['start_Meridian'])) {
+		  if ( ($_REQUEST['start_Meridian'] == 'pm') && ($_REQUEST['start_Hour'] != 12) ) {
+		    $_REQUEST['start_Hour'] += 12;
+		  }
+		  elseif ( ($_REQUEST['start_Meridian'] == 'am') && ($_REQUEST['start_Hour'] == 12) ) {
+		    $_REQUEST['start_Hour'] = 0;
+		  }
 		}
 		if (isset($save['start'])) {
 		    $itemdate = TikiLib::date_format2('Y/m/d',$save['start']);
@@ -177,8 +182,13 @@ if (isset($_REQUEST['act']) || isset($_REQUEST['preview']) || isset($_REQUEST['c
 			$save['duration'] = max(0, $_REQUEST['duration_Hour']*60*60 + $_REQUEST['duration_Minute']*60);
 			$save['end'] = $save['start'] + $save['duration'];
 		} else {
-			if (!empty($_REQUEST['end_Meridian']) && $_REQUEST['end_Meridian'] == 'pm') {
-				$_REQUEST['end_Hour'] += 12;
+		        if (!empty($_REQUEST['end_Meridian'])) {
+			  if ( ($_REQUEST['end_Meridian'] == 'pm') && ($_REQUEST['end_Hour'] != 12) ) {
+			    $_REQUEST['end_Hour'] += 12;
+			  }
+			  elseif ( ($_REQUEST['end_Meridian'] == 'am') && ($_REQUEST['end_Hour'] == 12) ) {
+			    $_REQUEST['end_Hour'] = 0;
+			  }
 			}
 			$save['end'] = TikiLib::make_time(
 				$_REQUEST['end_Hour'],
