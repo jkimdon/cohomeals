@@ -205,8 +205,9 @@ if (isset($_REQUEST['act']) || isset($_REQUEST['preview']) || isset($_REQUEST['c
 
 $impossibleDates = false;
 if (isset($save['start']) && isset($save['end'])) {
-	if (($save['end'] - $save['start']) < 0)
-		$impossibleDates = true;
+  if (($save['end'] - $save['start']) < 0) {
+    $save['end'] = $save['start'];
+  }
 }
 
 if (isset($_POST['act'])) {
@@ -234,9 +235,10 @@ if (isset($_POST['act'])) {
 		if (array_key_exists('recurrent',$_REQUEST) && ($_REQUEST['recurrent'] == 1) && $_REQUEST['affect']!='event') {
 			$impossibleDates = false;
 			if ($_REQUEST['end_Hour'] < $_REQUEST['start_Hour']) {
-				$impossibleDates = true;
+			  $_REQUEST['end_Hour'] = $_REQUEST['start_Hour'];
+			  $_REQUEST['end_Minute'] = $_REQUEST['start_Minute'];
 			} elseif (($_REQUEST['end_Hour'] == $_REQUEST['start_Hour']) && ($_REQUEST['end_Minute'] < $_REQUEST['start_Minute'])) {
-				$impossibleDates = true;
+			  $_REQUEST['end_Minute'] = $_REQUEST['start_Minute'];
 			} else
 				$impossibleDates = false;
 			if (!$impossibleDates) {
