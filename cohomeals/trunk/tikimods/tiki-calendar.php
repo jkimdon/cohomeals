@@ -327,7 +327,7 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 			$tmp = array();
 			foreach($toBeIndexed as $index=>$anEvent) {
 				// first place the events that started before the day.
-				if (array_key_exists($anEvent['calitemId'],$registeredIndexes))
+			        if (array_key_exists($anEvent['calitemId'],$registeredIndexes))
 					$cell[$i][$w]['items'][$registeredIndexes[$anEvent['calitemId']]] = $anEvent;
 				else
 					$tmp[] = $anEvent;
@@ -362,8 +362,12 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 		$registeredIndexes = array();
 		if (is_array($cell[$i][$w]) && array_key_exists('items',$cell[$i][$w])) {
 			foreach($cell[$i][$w]['items'] as $cpt=>$anEvent) {
-				if ($cell[$i][$w]['day'] + 86400 - $anEvent['result']['end'] < 0)	// event ends after the current day
+			  if ($cell[$i][$w]['day'] + 86400 - $anEvent['result']['end'] < 0) {	// event ends after the current day
 					$registeredIndexes[$anEvent['calitemId']] = $cpt;
+					$cell[$i][$w]['items'][$cpt]['notEndOfMultipleDayEvent'] = true;
+			  } elseif ($anEvent['result']['start'] >= $cell[$i][$w]['day']) {
+					$cell[$i][$w]['items'][$cpt]['notEndOfMultipleDayEvent'] = true;
+			  }
 			}
 		}
 	}
