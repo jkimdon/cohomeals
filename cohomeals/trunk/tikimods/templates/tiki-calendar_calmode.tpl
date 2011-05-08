@@ -48,6 +48,9 @@
 	{assign var=over value=$cell[w][d].items[item].over}
 	{assign var=calendarId value=$cell[w][d].items[item].calendarId}
 		<tr valign="top">
+
+{if ($calendarId neq '2') or ($cell[w][d].items[item].notEndOfMultipleDayEvent eq true)} {* hardcoded. 2 is the guest room *}
+
 {if is_array($cell[w][d].items[item])}
 			<td class="Cal{$cell[w][d].items[item].type} calId{$cell[w][d].items[item].calendarId}" style="padding:0px;height:14px;background-color:#{$infocals.$calendarId.custombgcolor};border-color:#{$infocals.$calendarId.customfgcolor};opacity:{if $cell[w][d].items[item].status eq '0'}0.6{else}0.8{/if};filter:Alpha(opacity={if $cell[w][d].items[item].status eq '0'}60{else}80{/if});text-align:left;border-width:1px {if $cell[w][d].items[item].endTimeStamp <= ($cell[w][d].day + 86400)}1{else}0{/if}px 1px {if $cell[w][d].items[item].startTimeStamp >= $cell[w][d].day}1{else}0{/if}px;cursor:pointer"
 			{if $prefs.calendar_sticky_popup eq 'y'}
@@ -80,6 +83,7 @@
 		  </td>
 {else}
 		 <td style="padding:0px;height:14px;border-style:solid;border-color: white; border-width:1px;width:100%;font-size:10px">&nbsp;</td>
+{/if}
 {/if}
 		</tr>
 {if $smarty.section.item.last}
