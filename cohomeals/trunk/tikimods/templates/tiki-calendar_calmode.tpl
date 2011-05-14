@@ -59,7 +59,7 @@
 				{popup vauto=true hauto=true sticky=false fullhtml="1" text=$over|escape:"javascript"|escape:"html"}
 			{/if}>
 			{if $myurl eq "tiki-action_calendar.php" or ( $cell[w][d].items[item].startTimeStamp >= $cell[w][d].day or ($cell[w][d].items[item].startTimeStamp <= $cell[w][d].day and $cell[w][d].items[item].endTimeStamp >= $cell[w][d].day) or $smarty.section.d.index eq '0' or $cell[w][d].firstDay)}
-		<a style="padding:1px 3px;{if $cell[w][d].items[item].status eq '2'}text-decoration:line-through;{/if}"
+		<a style="padding:1px 3px;{if $cell[w][d].items[item].status eq '2'}text-decoration:line-through;{/if}color:#{$infocals.$calendarId.customfgcolor};"
 			{if $myurl eq "tiki-action_calendar.php"}
 				{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="{$cell[w][d].items[item].url}"{/if}
 			{elseif $prefs.calendar_sticky_popup neq 'y'}
