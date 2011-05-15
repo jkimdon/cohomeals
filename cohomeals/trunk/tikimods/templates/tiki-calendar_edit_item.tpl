@@ -520,9 +520,14 @@ onchange="this.style.bacgroundColor='#'+this.selectedIndex.value;">
 <td>
 {if $edit}
 {assign var='editorg' value=$calitem.organizers[0]}
+{if $calitem.organizers[0] eq ''} 
+{assign var='org_selected' value=$user}
+{else}
+{assign var='org_selected' value=$calitem.organizers[0]}
+{/if}
 <select name="save[organizers]">
 {foreach item=it from=$listusers}
-<option value="{$it.username}"{if $calitem.organizers[0] eq $it.username} selected="selected"{elseif $it.username eq $user} selected="selected"{/if}>{$it.realname|escape}</option>
+<option value="{$it.username}"{if $it.username eq $org_selected} selected="selected" {/if}>{$it.realname|escape}</option>
   {if $calitem.organizers[0] eq $it.username}{assign var='editorg' value=''}{/if}
 {/foreach}
 </select>
