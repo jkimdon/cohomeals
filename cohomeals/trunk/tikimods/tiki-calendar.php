@@ -291,13 +291,7 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 				if (array_key_exists("recurrenceId",$le)) 
 				  $smarty->assign('cellrecurrenceId', $le["recurrenceId"]);
 
-				$organizers = $le['result']['organizers'];
-				$cellorganizers = '';
-				foreach ( $organizers as $org ) {
-					if ( $org == '' ) continue;
-					if ( $cellorganizers != '' ) $cellorganizers .= ', ';
-					$cellorganizers .= smarty_modifier_userlink(trim($org), 'link', 'not_set', '', 0, 'n');
-				}
+				$cellorganizers = $le['result']['organizers_realname'];
 				$smarty->assign('cellorganizers', $cellorganizers);
 
 				$cellparticipants = '';
