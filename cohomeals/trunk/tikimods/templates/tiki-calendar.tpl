@@ -139,7 +139,7 @@
 
 	{include file='tiki-calendar_nav.tpl'}
 	{if $viewlist eq 'list'}
-		{include file='tiki-calendar_listmode.tpl''}
+		{include file='tiki-calendar_listmode.tpl''}{*' comment to get syntax highlighting correct *}
 	{elseif $viewmode eq 'day'}
 		{include file='tiki-calendar_daymode.tpl'}
 	{elseif $viewmode eq 'week'}
@@ -147,5 +147,13 @@
 	{else}
 		{include file='tiki-calendar_calmode.tpl'}
 	{/if}
+{if $tiki_p_admin_calendar eq 'y'}
 <p>&nbsp;</p>
+<form action="tiki-calendar_weeklyEmail.php" method="post" name="f" id="weeklyEmail">
+Prepare weekly calendar email for the week starting: 
+   {html_select_date prefix="weekly_email_start_" time=$today field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
+&nbsp;
+<input type="submit" name="act" value="{tr}Go{/tr}" />
+</form>
+{/if}
 </div>
