@@ -1,4 +1,6 @@
-all: score.pdf melody-bflat.pdf bass.pdf
+all: score.pdf treble2-bflat.pdf melody-bflat.pdf bass.pdf score.midi
+	xpdf score.pdf &
+	timidity score.midi
 
 %.ps: %.abc
 	abcm2ps +Q -O = $*.abc
@@ -9,8 +11,8 @@ all: score.pdf melody-bflat.pdf bass.pdf
 %-bflat.abc: %.abc
 	abc2abc $*.abc -t 2  > $*-bflat.abc
 
-score.abc: header.abc melody.notes bass.notes
-	(cat header.abc; echo "V: melody"; cat melody.notes; echo "V: bass"; cat  bass.notes) > score.abc
+score.abc: header.abc melody.notes treble2.notes bass.notes
+	(cat header.abc; echo "V: melody"; cat melody.notes; echo "V: treble2"; cat treble2.notes; echo "V: bass"; cat  bass.notes) > score.abc
 
 midi-input.abc: score.abc
 	cat score.abc | sed -s 's/".\{1,2\}"//g' > midi-input.abc
@@ -26,5 +28,5 @@ score.midi: midi-input.abc
 	lame $*.wav $*.mp3
 
 clean:
-	-rm *.ps *.pdf *.midi *.mp3 *.wav parade-music-bflat.abc
+	-rm *.ps *.pdf *.midi *.mp3 *.wav parade-music-bflat.abc score.abc midi-input.abc
 
