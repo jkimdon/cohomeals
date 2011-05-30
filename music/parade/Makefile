@@ -15,7 +15,7 @@ score.abc: header.abc melody.notes treble2.notes bass.notes
 	(cat header.abc; echo "V: melody"; cat melody.notes; echo "V: treble2"; cat treble2.notes; echo "V: bass"; cat  bass.notes) > score.abc
 
 midi-input.abc: score.abc
-	cat score.abc | sed -s 's/".\{1,2\}"//g' > midi-input.abc
+	cat score.abc | sed -e 's/".\{1,2\}"//g' > midi-input.abc
 	
 score.midi: midi-input.abc
 	abc2midi midi-input.abc -o score.midi
