@@ -14,9 +14,11 @@ $startM = $_REQUEST['weekly_email_start_Month'];
 $startD = $_REQUEST['weekly_email_start_Day'];
 $startY = $_REQUEST['weekly_email_start_Year'];
 $start_date = TikiLib::make_time(0,0,0, $startM, $startD, $startY);
-$end_date = TikiLib::make_time(0,0,0, $startM, $startD+6, $startY);
+$end_date = TikiLib::make_time(0,0,0, $startM, $startD+7, $startY);
+$subject_end_date = TikiLib::make_time(0,0,0, $startM, $startD+6, $startY);
 $smarty->assign('start_date', $start_date);
 $smarty->assign('end_date', $end_date);
+$smarty->assign('subject_end_date', $subject_end_date);
 
 $printDay = array();
 for ( $i = 0; $i < 7; $i++ ) {
@@ -106,17 +108,7 @@ for ( $i=0; $i < 7; $i++ ) {
 	$visitor = $le['name'];
 	$host = "???";
 	if (isset($le['result']['organizers'])) {
-	  foreach ($le['result']['organizers'] as $onehost) {
-	    if ($onehost != '') {
-	      if ($host == "???") 
-		$host = $onehost;
-	      else $host .= ", " . $onehost;
-	    }
-	    else
-	      $host .= "???";
-	  }
-	} else {
-	  $host .= "???";
+	  $host = $le['result']['organizers_realname'];
 	}
 	
 	$event_info['visitor'] = $visitor;
@@ -202,8 +194,9 @@ $mail_data = $smarty->fetch("mail/weekly_calendar_email.tpl");
 $mail->setHtml($mail_data, strip_tags($mail_data));
 $mail->buildMessage();
 $mail->send(array($prefs['weekly_calendar_to_email']));
+//$smarty->display("mail/weekly_calendar_subject.tpl");
 //$smarty->display("mail/weekly_calendar_email.tpl");
 
-
+header('Location: tiki-calendar.php?todate=' . $start_date);
 
 ?>

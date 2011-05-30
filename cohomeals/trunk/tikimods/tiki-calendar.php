@@ -209,7 +209,8 @@ $yloop = TikiLib::date_format("%Y", $viewstart);
 $curtikidate = new TikiDate();
 $display_tz = $tikilib->get_display_timezone();
 if ( $display_tz == '' ) $display_tz = 'UTC';
-$curtikidate->setTZbyID($display_tz);
+//$curtikidate->setTZbyID($display_tz);
+$curtikidate->setTZbyID('PST'); // debug
 $curtikidate->setLocalTime($dloop,$mloop,$yloop,0,0,0,0);
 
 $smarty->assign('display_tz', $display_tz);
