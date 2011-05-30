@@ -27,9 +27,9 @@
 	{$cellstart|tiki_short_date} ({tr}All day{/tr})
 {else}
   {if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. Hardcoded.*}
-	{$cellstart|tiki_date_format:"%I:%M %p"} &ndash; {$cellend|tiki_date_format:"%I:%M %p"}
+	{$cellstart|tiki_date_format:"%l:%M %p"} &ndash; {$cellend|tiki_date_format:"%l:%M %p"}
   {else}
-	{$cellstart|tiki_date_format:"%e %B (%I:%M %p)"} &ndash; {$cellend|tiki_date_format:"%e %B (%I:%M %p)"}
+	{$cellstart|tiki_date_format:"%e %B (%l:%M %p)"} &ndash; {$cellend|tiki_date_format:"%e %B (%l:%M %p)"}
   {/if}
 {/if}
 </strong>
