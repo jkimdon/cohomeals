@@ -1,4 +1,4 @@
-all: score.pdf treble2-bflat.pdf melody-bflat.pdf bass.pdf score.midi
+all: score.pdf melody.pdf treble2.pdf treble2-bflat.pdf melody-bflat.pdf bass.pdf score.midi
 	xpdf score.pdf &
 	timidity score.midi
 
