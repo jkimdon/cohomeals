@@ -49,13 +49,23 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
   $sql = "SELECT cal_id FROM webcal_meal_participant WHERE cal_type = 'H' AND cal_login = '$login'";
   $first = true;
   $today = date( "Ymd" );
+  $three_months_ago_month = substr ( $today, 4, 2 ) - 3;
+  if ( $three_months_ago_month > 9 ) {
+    $three_months_ago_year = substr( $today, 0, 4 ) - 1;
+  }
+  else {
+    $three_months_ago_year = substr( $today, 0, 4 );
+    $three_months_ago_month = sprintf( "%s%s", "0", $three_months_ago_month );
+  }
+  $three_months_ago = sprintf( "%s%s%s", $three_months_ago_year, $three_months_ago_month, "00" );
+
   if ( $res = dbi_query( $sql ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $meal_id = $row[0];
 
       if ( (paperwork_done( $meal_id ) == false) && (is_cancelled( $meal_id ) == false) ) {
 	$sql2 = "SELECT cal_date, cal_time, cal_suit FROM webcal_meal WHERE cal_id = $meal_id " . 
-	  "AND cal_date >= 20080704 AND cal_date <= $today";
+	  "AND cal_date >= $three_months_ago AND cal_date <= $today";
 	if ( $res2 = dbi_query( $sql2 ) ) {
 	  if ( $row2 = dbi_fetch_row( $res2 ) ) {
 	    $day = $row2[0];
