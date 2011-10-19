@@ -119,7 +119,7 @@ for ( $d = $eat_cutoff_start ;  $d < $work_cutoff_end ; $d = $d + 24 * 3600 ) {
   }
 }
 
-$extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
+$extra_hdrs = "From: " . $GLOBALS['email_from'] . "\r\n";
 
 mail( $GLOBALS['weekly_reminder_to'],
       "Weekly meal signup reminder", $body, $extra_hdrs );

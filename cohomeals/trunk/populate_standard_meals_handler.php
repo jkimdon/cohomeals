@@ -114,9 +114,9 @@ if ( $is_meal_coordinator ) {
 
 
   if ( $addpeople == 1 ) {
-    $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
+    $extra_hdrs = "From: " . $GLOBALS['email_from'] . "\r\n";
 
-    mail( $GLOBALS['weekly_reminder_from'],
+    mail( $GLOBALS['email_from'],
     	  "Monthly head chef allocation", $body, $extra_hdrs );
     //        echo "email = $body<br>";
 

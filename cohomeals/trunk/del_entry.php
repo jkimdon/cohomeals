@@ -82,12 +82,12 @@ if ( $id > 0 && empty ( $error ) ) {
     $subject = "$meal_time meal canceled ($reason)";
     $body = "The meal scheduled for $meal_time has been canceled (due to $reason)";
     load_global_settings();
-    $extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
+    $extra_hdrs = "From: " . $GLOBALS['email_from'] . "\r\n";
 
     $sendmail = false;
     $sendmail = getValue( "sendmail" );
     if ( $sendmail == true ) 
-      mail( $GLOBALS['weekly_reminder_to'], $subject, $body, $extra_hdrs );
+      mail( $GLOBALS['deleted_meal_notification_to'], $subject, $body, $extra_hdrs );
   }
 }
 

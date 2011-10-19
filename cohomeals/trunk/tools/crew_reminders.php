@@ -39,7 +39,7 @@ load_global_settings ();
 
 
 
-$extra_hdrs = "From: " . $GLOBALS['weekly_reminder_from'] . "\r\n";
+$extra_hdrs = "From: " . $GLOBALS['email_from'] . "\r\n";
 
 /// Find all meals one week from today (head chef reminder) 
 /// or one day from today (crew reminder)
