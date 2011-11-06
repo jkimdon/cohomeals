@@ -1,4 +1,9 @@
 <span style="font-family:Arial;">
+
+<span style="font-size: 1.5em;">
+<p>Here is the weekly list of items from the calendar found at: <a href="https://www.cohoecovillage.org/tiki">https://www.cohoecovillage.org/tiki</a></p>
+</span>
+
 {section name=d loop=$printDay}
 
 <span style="font-size:2em;color:#3366ff;">{$printDay[d].day|tiki_date_format:"%A, %b %e"}</span><br />
