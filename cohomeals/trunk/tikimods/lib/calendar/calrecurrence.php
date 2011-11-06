@@ -586,9 +586,11 @@ class CalRecurrence extends TikiLib
 				if ($firstEventDate < 0)
 					$firstEventDate += 7;
 				$currDate = TikiLib::make_time(0,0,0,$start[1],$start[2] + $firstEventDate,$start[0]);
+				$i=1;
 				while ($currDate < $endperiod) {
-					$dates[] = $currDate;
-					$currDate += weekInSeconds;
+				  $dates[] = $currDate;
+				  $currDate = TikiLib::make_time(0,0,0,$start[1],$start[2] + $firstEventDate + ($i * 7),$start[0]);				  
+				  $i++;
 				}
 			} elseif ($this->isMonthly()) {
 				$firstIsNextMonth = ($this->getDayOfMonth() < $start[2]);
