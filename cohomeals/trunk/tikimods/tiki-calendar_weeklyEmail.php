@@ -45,10 +45,11 @@ for ( $i=0; $i < 7; $i++ ) {
 
 
 
-/// events/activities/meetings are id 3, meal program is id 1
+/// events/activities are id 8, meetings are id 3, meal program is id 1
 $calids = array();
 $calids[0] = 3;
 $calids[1] = 1;
+$calids[2] = 8;
 $listevents = $calendarlib->list_items($calids, $user, $start_date, $end_date, 0, -1);
 $calendarlib->add_coho_recurrence_items($listevents, $calids, $user, $start_date, $end_date, 0, -1);
 for ( $i=0; $i < 7; $i++ ) {
@@ -198,5 +199,6 @@ $mail->send(array($prefs['weekly_calendar_to_email']));
 //$smarty->display("mail/weekly_calendar_email.tpl");
 
 header('Location: tiki-calendar.php?todate=' . $start_date);
+exit;
 
 ?>
