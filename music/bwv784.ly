@@ -43,13 +43,13 @@ voiceone =  \relative c' {
    r16  e'[ g e]  c[ e a, c]  dis[ c a c] fis, r r8 |             % bar 16
    r16  d'[ f d]  b[ d gis, b]  d[ b gis b] e, r r8 |             % bar 17
    r16  e[ a c]  b[ e, b' d]  c8[ a gis e] |                      % bar 18
-   a16[ c e c]  a[ c fis, a]  c[ a fis a]  dis[ c b a] |        % bar 19
-   gis[ b d b]  gis[ b d, f]  gis[ f d f]  b[ f e d] |          % bar 20
-   c'[ e a e]  c[ e a, c]  dis[ c a c]  fis,[ c' b a] |            % bar 21
+   a16[ c e c]  a[ c fis, a]  c[ a fis a]  dis,[ c' b a] |        % bar 19
+   gis[ b d b]  gis[ b d f]  gis[ f d f]  b[ f e d] |          % bar 20
+   c[ e a e]  c[ e a, c]  dis[ c a c]  fis,[ c' b a] |            % bar 21
    gis8[ b gis e] r16  e[ a c]  b[ e, b' d]  |                   % bar 22
    c[ a c e]  d[ b d f]  e[ c e g]  f[ e d c] |                   % bar 23
-   b[ c d e]  f[ d gis d]  b[ d c a']  f[ d b d] |              % bar 24
-   gis[ b c a]  e[ a b gis]  a[ e c e] a,4^\fermata \bar "|."    % bar 25
+   b[ c d e]  f[ d gis d]  b'[ d, c a']  f[ d b d] |              % bar 24
+   gis,[ b c a]  e[ a b gis]  a[ e c e] a4^\fermata \bar "|."    % bar 25
 }
 
 voicetwo =  \relative c {
@@ -58,9 +58,9 @@ voicetwo =  \relative c {
    \key c \major
    a'8 a4 gis8  a16[ e a c]  b[ e, b' d] |                        % bar 1
    c8[ a gis e]  a16[ e a c]  b[ e, b' d] |                       % bar 2
-   c8[ a c a]  d16[ a f a]  d,[ f a c,] |                         % bar 3
-   b8[ d g b] ~  b16[ g e g]  c,[ e g b,] |                       % bar 4
-   a'8[ c,]  d16[ f b, d]  g8[ b,]  c16[ e a c,] |                  % bar 5
+   c8[ a c a]  d16[ a f a]  d,[ f a c] |                         % bar 3
+   b8[ d, g b] ~  b16[ g e g]  c,[ e g b] |                       % bar 4
+   a8[ c,]  d16[ f b d,]  g8[ b]  c,16[ e a c,] |                  % bar 5
    f8[ d]  g16[ g f g]  c,[ g' c e]  d[ g, d' f] |              % bar 6
    e8[ c b g]  c16[ g c e]  d[ g, d' f] |                         % bar 7
    e8[ c] r4 r16  g'[ e g]  c,[ e g, b] |                         % bar 8
@@ -68,28 +68,28 @@ voicetwo =  \relative c {
    g8[ b d fis]  e16[ g c, e]  g,[ c e, g] |                      % bar 10
    fis8[ a b dis] r16  e[ c e]  a,[ c e g] |                      % bar 11
    fis[ d b d]  g,[ b d fis]  e[ c a c]  fis,[ a c8] ~ |          % bar 12
-   c16[ b c a]  b8[ b,]  e16[ e' b g]  e[ b g' b,] |                % bar 13
-   e8[ e g bes] cis,8 r r16  g''[ f e] |                        % bar 14
-   d8[ d, f aes] b, r r16  f''[ e d] |                            % bar 15
-   c8[ c, e fis] a r r16  e'[ dis cis] |                        % bar 16
+   c16[ b c a]  b8[ b]  e,16[ e' b g]  e[ b' g b] |                % bar 13
+   e,8[ e g bes] cis,8 r r16  g''[ f e] |                        % bar 14
+   d8[ d, f aes] b r r16  f'[ e d] |                            % bar 15
+   c8[ c e, fis] a r r16  e'[ dis cis] |                        % bar 16
    b8[ b, d f] gis r r16  d'[ c b] |                            % bar 17
    c8[ a gis e]  a16[ e a c]  b[ e, b' d] |                       % bar 18
    c[ e a e]  c[ e a, c]  fis,[ a c a]  fis[ a dis, fis] |        % bar 19
-   e8[ gis b gis]  e[ b gis' e] |                                  % bar 20
+   e8[ gis b gis]  e[ b' gis e] |                                  % bar 20
    a[ c, e c]  a'[ c,] dis r |                                      % bar 21
    r16  b'[ gis e]  d[ b' gis d]  c8[ e gis e] |               % bar 22
-   a[ fis b, gis']  c,[ a' d, bes'] |                           % bar 23
-   gis[ f d b]  gis'[ a d, e] |                                    % bar 24
+   a[ fis b gis]  c,[ a' d, bes'] |                           % bar 23
+   gis[ f d b']  gis[ a d, e] |                                    % bar 24
    f[ dis e e'] a,2^\fermata \bar "|."                            % bar 25
 }
 
 \score {
    \context GrandStaff <<
     \context Staff = "one" <<
-      \transpose a e \voiceone
+      \transpose a d \voiceone
     >>
     \context Staff = "two" <<
-      \transpose a e \voicetwo
+      \transpose a d \voicetwo
     >>
   >>
 
