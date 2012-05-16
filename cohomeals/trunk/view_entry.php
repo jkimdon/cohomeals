@@ -420,10 +420,12 @@ switch ( $walkins ) {
 ?>
 <tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:<p>
 <?php if ( $showones == 0 ) { ?>
-    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=1">Show level 1</a></p></td>
+    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=1">Show level 1</a></p>
 <?php } else { ?>
-    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=0">Hide level 1</a></p></td>
+    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=0">Hide level 1</a></p>
 <?php } ?>
+<p>Click for:<br> <a class="addbutton" href="refs/CoHoMealPlanRecommendedFoodGuidelines.pdf">food guidelines</a></p>
+</td>
 <td>
  <table>
   <tr><td>Food</td><td>Names (level)</td></tr>
