@@ -434,7 +434,7 @@ switch ( $walkins ) {
    <p><font color="#DD0000">Peanuts are banned from the common house due to severe allergies</font></p>
     <tr><td><b>Food</b></td><td><b>Names</b> (highlighted names have mouse-over details)</td></tr>
    <tr><td colspan="2"><hr></td></tr>
-   <tr><td colspan="2"><b>Most requested:</b></td></tr>
+   <tr><td colspan="2"><b>Common restrictions:</b></td></tr>
    
    <?php
 
@@ -469,7 +469,7 @@ switch ( $walkins ) {
 
 
 
-echo "<tr><td colspan=\"2\"><b>Requested by fewer people, but still important:</b>"; // end td, tr below
+echo "<tr><td colspan=\"2\"><b>Other restrictions:</b>"; // end td, tr below
 
 
 $sql = "SELECT cal_food, cal_login, cal_comments FROM webcal_food_prefs ";
@@ -497,8 +497,8 @@ if ( $res = dbi_query( $sql ) ) {
 	    if ( $first == true ) $first = false;
 	    else echo ", ";
 	    print_food_pref_person( $food_pref_login, $row[2] );
+	    $prev_food = $food;
 	}
-	$prev_food = $food;
     }
     echo "</td></tr>";
     
