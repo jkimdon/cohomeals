@@ -15,9 +15,9 @@ done
 
 # include the reminder scripts, even though they are contained within the tools/
 # directory, excluded in mirror.exclude above.
-#mkdir -p tools
+mkdir -p tools
 #svn export http://cohomeals.googlecode.com/svn/cohomeals/trunk/tools/weekly_reminder.php tools/weekly_reminder.php
-#svn export http://cohomeals.googlecode.com/svn/cohomeals/trunk/tools/crew_reminders.php tools/crew_reminders.php
+svn export http://cohomeals.googlecode.com/svn/cohomeals/trunk/tools/crew_reminders.php tools/crew_reminders.php
 
 lftp -f $TOOLS/mirror.lftp
 

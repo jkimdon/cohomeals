@@ -20,7 +20,6 @@ $id = mysql_safe( getValue( 'id' ), false );
 if ( empty ( $id ) || $id <= 0 || ! is_numeric ( $id ) ) {
   $error = "Invalid entry id."; 
 }
-$showones = getValue('showones');
 
 
 print_header();
@@ -417,61 +416,97 @@ switch ( $walkins ) {
 
 
 <?php ///////////////// food restrictions   
+
+
+  /// alphabetized list of the rest of the restrictions
+
+
+
+
+
 ?>
-<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:<p>
-<?php if ( $showones == 0 ) { ?>
-    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=1">Show level 1</a></p>
-<?php } else { ?>
-    <a class="addbutton" href="view_entry.php?id=<?php echo $id;?>&date=<?php echo $event_date;?>&showones=0">Hide level 1</a></p>
-<?php } ?>
-<p>Click for:<br> <a class="addbutton" href="refs/CoHoMealPlanRecommendedFoodGuidelines.pdf">food guidelines</a></p>
+<tr class="d<?php echo $row_num;?>"><td style="vertical-align:top; font-weight:bold;">Food restrictions:
+<p>These restrictions<br>do not include items<br>in the Sustenance<br><a href="refs/CoHoMealPlanRecommendedFoodGuidelines.pdf">Food Guidelines</a></p>
+<p>Only restrictions<br>for current diners<br>are listed here. Click<br>for restrictions for <a href="food_restrictions.php">all people</a></p>
 </td>
 <td>
  <table>
-  <tr><td>Food</td><td>Names (level)</td></tr>
+   <p><font color="#DD0000">Peanuts are banned from the common house due to severe allergies</font></p>
+    <tr><td><b>Food</b></td><td><b>Names</b> (highlighted names have mouse-over comments)</td></tr>
+   <tr><td colspan="2"><hr></td></tr>
+   <tr><td colspan="2"><b>Most requested:</b></td></tr>
+   
+   <?php
 
-  <?php
-  $sql = "SELECT DISTINCT cal_food FROM webcal_food_prefs";
-  if ( $res = dbi_query( $sql ) ) {
+ $listed_first[0] = "dairy";
+ $listed_first[1] = "gluten/wheat";
+ $listed_first[2] = "spicy";
+ $listed_first[3] = "bell peppers";
+ $number_of_listed_first = 4;
+
+
+ for ( $i=0; $i <=$number_of_listed_first; $i++ ) {
+     $food = $listed_first[$i];
+     $sql = "SELECT cal_food, cal_login, cal_comments FROM webcal_food_prefs " .
+	 "WHERE cal_food LIKE '$food' " .
+	 "ORDER BY cal_food";
+     if ( $res = dbi_query( $sql ) ) {
+	 echo "<tr><td>" . $food . "</td><td>";
+
+	 $first = true;
+	 while ( $row = dbi_fetch_row( $res ) ) {
+	     $food_pref_login = $row[1];
+	     if ( is_dining( $id, $food_pref_login ) ) {
+		 if ( $first == true ) $first = false;
+		 else echo ", ";
+		 print_food_pref_person( $food_pref_login, $row[2] );
+	     }
+	 }
+	 echo "</td></tr>";
+     }
+     dbi_free_result( $res );
+ }
+
+
+
+echo "<tr><td colspan=\"2\"><b>Requested by fewer people, but still important:</b>"; // end td, tr below
+
+
+$sql = "SELECT cal_food, cal_login, cal_comments FROM webcal_food_prefs ";
+$sql .= "WHERE ";
+for ( $i=0; $i<$number_of_listed_first; $i++ ) {
+    $sql .= "cal_food NOT LIKE '$listed_first[$i]' ";
+    if ( $i < $number_of_listed_first-1 ) $sql .= "AND "; 
+}
+$sql .= "ORDER BY cal_food";
+
+if ( $res = dbi_query( $sql ) ) {
+    $prev_food = "";
+
     while ( $row = dbi_fetch_row( $res ) ) {
-      $food = $row[0];
-      $first = true;
-      $sql2 = "SELECT cal_login, cal_level " .
-	"FROM webcal_food_prefs " .
-	"WHERE cal_food = '$food'";
-      if ( $res2 = dbi_query( $sql2 ) ) {
-	while ( $row2 = dbi_fetch_row( $res2 ) ) {
-	  $user = $row2[0];
-	  $level = $row2[1];
-	  if ( ($level != 1) || ($showones == 1) ) {
+	$food = $row[0];
+	$food_pref_login = $row[1];
+	$comments = $row[2];
+	if ( is_dining( $id, $food_pref_login ) ) {
 
-	    $sql3 = "SELECT cal_login " .
-	      "FROM webcal_meal_participant " .
-	      "WHERE cal_login = '$user' " .
-	      "AND cal_id = $id " . 
-	      "AND (cal_type = 'M' " .
-	      "OR cal_type = 'T')";
-	    if ( $res3 = dbi_query( $sql3 ) ) {
-	      if ( dbi_fetch_row( $res3 ) ) {
-		if ( $first == true ) {
-		  echo "<tr><td>$food</td><td>";
-		  $first = false;
-		} else echo ", ";
-		user_load_variables( $user, "temp" );
-		echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
-	      }
-	      dbi_free_result( $res3 );
-	    }
-	  }
+	    if ( $food != $prev_food ) {
+		echo "</td></tr><tr><td>" . $food . "</td><td>";
+		$first = true;
+	    } 
+		
+	    if ( $first == true ) $first = false;
+	    else echo ", ";
+	    print_food_pref_person( $food_pref_login, $row[2] );
 	}
-	dbi_free_result( $res2 );
-      }
-      echo "</td></tr>\n";
+	$prev_food = $food;
     }
+    echo "</td></tr>";
+    
     dbi_free_result( $res );
-  }
-  ?>
-  </table>
+}
+
+?>
+</table>
 
 </td>
 </tr>
@@ -816,4 +851,6 @@ function display_crew( $type, $rowcolor, $can_remove=false ) {
 
   echo "</table></td></tr>";
 }
+
+
 ?>
