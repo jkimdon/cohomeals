@@ -166,66 +166,72 @@ print_header( $INC );
 
     Your personal food restrictions are as follows. Contact the meal coordinator to update them.
     <p><table>
-    <tr class="d1"><td>Food</td><td>Reason</td><td>Request level</td></tr>
-    <tr><td><hr></td><td><hr></td><td><hr></td></tr>
+    <tr class="d1"><td>Food</td><td>Comments</td></tr>
+    <tr><td colspan="2"><hr></td></tr>
 
-    <?php
+  <?php 
+
     $row_num = 0;
-    $prefs = array();
-    $prefs = user_get_food_prefs( $login );
-    
-    for ( $i=0; $i<count( $prefs ); $i++ ) {
-      $pref = $prefs[$i];
-      echo "<tr class=\"d$row_num\"><td>" . $pref['food'] . "</td>" .
-	"<td>" . $pref['reason'] . "</td>" . 
-	"<td>" . $pref['level'] . " </td></tr>\n";
-      $row_num = ( $row_num == 1 ) ? 0:1;
-    }
-    ?>
+
+    $sql = "SELECT cal_food, cal_comments " .
+     "FROM webcal_food_prefs " .
+     "WHERE cal_login = '$login' " . 
+     "ORDER BY cal_food";
+
+    if ( $res = dbi_query( $sql ) ) {
+      $prev_food = "";
+      $row_num = 0;
+      
+      while ( $row = dbi_fetch_row( $res ) ) {
+	$food = $row[0];
+	$comments = $row[1];
+	echo "<tr class=\"d$row_num\"><td>" . $food . "</td>";
+	$row_num = ( $row_num == 1 ) ? 0:1;
+	echo "<td>" . $comments . "</td></tr>";
+      }
+      
+      echo "</td></tr>";
+      
+      dbi_free_result( $res );
+    } else echo "</td></tr>";
+?>
     
     </table></p>
 
-    <?php if ( $is_meal_coordinator ) {
-      echo "<p><h4>Everyone's preferences</h4></p><table>\n";
-      $row_num = 0;
-      $sql = "SELECT DISTINCT cal_food FROM webcal_food_prefs";
-      if ( $res = dbi_query( $sql ) ) {
-	while ( $row = dbi_fetch_row( $res ) ) {
-	  $food = $row[0];
-	  $first = true;
-	  $sql2 = "SELECT cal_login, cal_level " .
-	    "FROM webcal_food_prefs " .
-	    "WHERE cal_food = '$food'";
-	  if ( $res2 = dbi_query( $sql2 ) ) {
-	    while ( $row2 = dbi_fetch_row( $res2 ) ) {
-	      $user = $row2[0];
-	      $level = $row2[1];
+    <?php 
+     if ( $is_meal_coordinator ) {
+	 echo "<p><h4>Everyone's preferences</h4> (highlighted names have mouse-over comments)</p><table>\n";
 
-	      if ( $first == true ) {
-		echo "<tr class=\"d$row_num\"><td>$food:</td><td>";
-		$first = false;
-	      } else echo ", ";
-	      user_load_variables( $user, "temp" );
-	      echo $GLOBALS['tempfullname'] . "(" . $level . ") ";
-	    }
-	    dbi_free_result( $res2 );
-	  }
-	  $row_num = ( $row_num == 1 ) ? 0:1;
-	  echo "</td></tr>\n";
-	}
-      }
-      dbi_free_result( $res );
-      echo "</table>\n";
-    }?>
+	 $sql = "SELECT cal_food, cal_login, cal_comments FROM webcal_food_prefs ";
+	 $sql .= "ORDER BY cal_food";
+	 
+	 if ( $res = dbi_query( $sql ) ) {
+	     $prev_food = "";
+	     $row_num = 0;
+	     
+	     while ( $row = dbi_fetch_row( $res ) ) {
+		 $food = $row[0];
+		 $food_pref_login = $row[1];
+		 $comments = $row[2];
+		 if ( $food != $prev_food ) {
+		     echo "</td></tr><tr class=\"d$row_num\"><td>" . $food . "</td><td>";
+		     $first = true;
+		     $row_num = ( $row_num == 1 ) ? 0:1;
+		 } 
+		 
+		 if ( $first == true ) $first = false;
+		 else echo ", ";
+		 print_food_pref_person( $food_pref_login, $row[2] );
+		 $prev_food = $food;
+	     }
 
+	     echo "</td></tr>";
+	     
+	     dbi_free_result( $res );
+	 }
+	 echo "</table>\n";
+     }?>
 
-    <p>Reminder:<br>
-    <b>Request level 1:</b> No request for Meal Crew:  I will take one or more steps, such as--eat the rest of the meal, or pick this ingredient out of a dish, or sometimes eat some of this food, or bring my own alternative food.<br>
-    <b>Request level 2:</b> Request some changes to menu that would increase Meal Crew's time/complexity <10%, such as serving item as a side dish so I can skip it, making simple variations of the same dish and leaving this food out of one version (like soup with either milk or soy milk), or serving alternative item purchased from store (like corn tortillas in addition to flour tortillas for burrito bar).<br>
-    <b>Request level 3:</b> Request more changes to menu that would increase Meal Crew's time/complexity >10%, such as serving precooked portions of an alternative dish, or cooking a separate alternative dish, or using unfamiliar ingredients or procedures.
-   </p>
-    
- 
   </div>
 
 

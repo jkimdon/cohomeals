@@ -614,6 +614,8 @@ abbr {
   border-bottom: 1px solid #777777;
   border-right: 1px solid #777777;
 }
+.addbutton:link{color:black;}
+.addbutton:visited{color:black;}
 .addbutton:hover { 
   color:blue;
 }
@@ -633,5 +635,19 @@ tr.n0 td {
 tr.n1 td {
   background-color: #EEEEEE;
 }
+
+span.dropt {border-bottom: thin dotted; background: #ffeedd;}
+span.dropt:hover {text-decoration: none; background: #ffffff; z-index: 6; }
+span.dropt span {position: absolute; left: -9999px;
+  margin: 20px 0 0 0px; padding: 3px 3px 3px 3px;
+  border-style:solid; border-color:black; border-width:1px; z-index: 6;}
+span.dropt:hover span {left: 2%; background: #ffffff;} 
+span.dropt span {position: absolute; left: -9999px;
+  margin: 4px 0 0 0px; padding: 3px 3px 3px 3px; 
+  border-style:solid; border-color:black; border-width:1px;}
+span.dropt:hover span {margin: 20px 0 0 170px; background: #ffffff; z-index:6;}
+a:link {color:blue;}      /* unvisited link */
+a:visited {color:blue;}  /* visited link */
+a:active {color:blue;}  /* selected link */ 
 -->
 </style>

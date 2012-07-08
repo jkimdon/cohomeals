@@ -451,25 +451,4 @@ function user_get_users () {
 }
 
 
-
-function user_get_food_prefs( $user ) {
-
-  $ret = array();
-  $count = 0;
-
-  $sql = "SELECT cal_food, cal_level, cal_reason " .
-    "FROM webcal_food_prefs " .
-    "WHERE cal_login = '$user'";
-  if ( $res = dbi_query( $sql ) ) {
-    while ( $row = dbi_fetch_row( $res ) ) {
-      $ret[$count++] = array ( "food" => $row[0], 
-			       "level" => $row[1],
-			       "reason" => $row[2] );
-    }
-    dbi_free_result( $res );
-  }
-
-  return $ret;
-}
-
 ?>

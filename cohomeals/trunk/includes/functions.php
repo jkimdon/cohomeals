@@ -3047,5 +3047,17 @@ function get_day( $ref_date, $num_days ) {
 }
 
 
+function print_food_pref_person( $user, $comments ) {
+    user_load_variables( $user, "temp" );
+    if ( $comments != NULL ) {
+	echo "<span class=\"dropt\">" . $GLOBALS['tempfullname'];
+	echo "<span>" . $comments . "</span>";
+	echo "</span>";
+    } else {
+	echo $GLOBALS['tempfullname'];
+    }
+}
+
+
 
 ?>
