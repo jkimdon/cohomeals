@@ -200,7 +200,7 @@ print_header( $INC );
 
     <?php 
      if ( $is_meal_coordinator ) {
-	 echo "<p><h4>Everyone's preferences</h4> (highlighted names have mouse-over comments)</p><table>\n";
+	 echo "<p><h4>Everyone's preferences</h4> (highlighted names have mouse-over details)</p><table>\n";
 
 	 $sql = "SELECT cal_food, cal_login, cal_comments FROM webcal_food_prefs ";
 	 $sql .= "ORDER BY cal_food";

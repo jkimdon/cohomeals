@@ -432,14 +432,14 @@ switch ( $walkins ) {
 <td>
  <table>
    <p><font color="#DD0000">Peanuts are banned from the common house due to severe allergies</font></p>
-    <tr><td><b>Food</b></td><td><b>Names</b> (highlighted names have mouse-over comments)</td></tr>
+    <tr><td><b>Food</b></td><td><b>Names</b> (highlighted names have mouse-over details)</td></tr>
    <tr><td colspan="2"><hr></td></tr>
    <tr><td colspan="2"><b>Most requested:</b></td></tr>
    
    <?php
 
  $listed_first[0] = "dairy";
- $listed_first[1] = "gluten/wheat";
+ $listed_first[1] = "wheat/gluten";
  $listed_first[2] = "spicy";
  $listed_first[3] = "bell peppers";
  $number_of_listed_first = 4;
