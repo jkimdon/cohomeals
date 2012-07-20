@@ -34,6 +34,8 @@ print_header( $INC );
 <!-- TABS -->
 <div id="tabs">
 
+  <span class="tabbak" id="tab_foodpref"><a href="#tabfoodpref" onclick="return showTab('foodpref')">Food restrictions</a></span>
+
   <span class="tabfor" id="tab_users"><a href="#tabusers" onclick="return showTab('users')">
   <?php if ($is_meal_coordinator) {
     echo "Users";
@@ -43,8 +45,6 @@ print_header( $INC );
   </a></span>
 
   <span class="tabbak" id="tab_buddies"><a href="#tabbuddies" onclick="return showTab('buddies')">Buddies</a></span>
-
-  <span class="tabbak" id="tab_foodpref"><a href="#tabfoodpref" onclick="return showTab('foodpref')">Food restrictions</a></span>
 
 </div>
 
@@ -164,10 +164,13 @@ print_header( $INC );
   <a name="tabfoodpref"></a>
   <div id="tabscontent_foodpref">
 
-    Your personal food restrictions are as follows. Contact the meal coordinator to update them.
+  <p>Your personal food restrictions are as follows. Adapt as needed, though please limit yourself to restrictions rather than preferences since it can be a lot of work for chefs to accommodate food needs for many people.</p>
+
+  <p> Please include details in the comments section such as suggested alternatives, if small amounts are ok, or anything else that might be useful for a chef who is trying to accommodate your needs.</p>
+
     <p><table>
-    <tr class="d1"><td>Food</td><td>Comments</td></tr>
-    <tr><td colspan="2"><hr></td></tr>
+    <tr class="d1"><td>Food</td><td></td><td>Comments</td><td></td></tr>
+    <tr><td colspan="4"><hr></td></tr>
 
   <?php 
 
@@ -182,12 +185,23 @@ print_header( $INC );
       $prev_food = "";
       $row_num = 0;
       
+      $i = 0;
       while ( $row = dbi_fetch_row( $res ) ) {
 	$food = $row[0];
 	$comments = $row[1];
 	echo "<tr class=\"d$row_num\"><td>" . $food . "</td>";
+	echo "<td><a name=\"removefood\" class=\"addbutton\"" . 
+	  "href=\"edit_food_restrictions_handler.php?action=remove&food=" . $food .
+	  "\">Remove</a></td>";
 	$row_num = ( $row_num == 1 ) ? 0:1;
-	echo "<td>" . $comments . "</td></tr>";
+	$comment_frame = "editcommentiframe" . $i;
+	$i++;
+	echo "<td>" . $comments . 
+	  "<iframe name=\"$comment_frame\" id=\"$comment_frame\" style=\"display:none;\"></iframe>" . "</td>";
+	$nexturl = "food_comments.php?food=$food";
+	echo "<td><a href=\"$nexturl\" class=\"addbutton\" target=\"$comment_frame\" onclick=\"javascript:show('$comment_frame');\">" .
+	  "Edit</a></td>";
+	echo "</tr>";
       }
       
       echo "</td></tr>";
@@ -197,6 +211,32 @@ print_header( $INC );
 ?>
     
     </table></p>
+
+    <p>
+    <form action="edit_food_restrictions_handler.php" method="post">
+    <input type="hidden" name="action" value="add" />
+      
+    <b>Add another food:</b>&nbsp; <select name="food">
+      <?php
+      $sql = "SELECT DISTINCT cal_food FROM webcal_food_prefs ORDER BY cal_food";
+
+      if ( $res = dbi_query( $sql ) ) {
+	while ( $row = dbi_fetch_row( $res ) ) {
+	  $food_name = $row[0];
+	  echo "<option value=\"" . $food_name . "\">" . $food_name . "</option>";
+	}
+      }
+      ?>
+    <input type="submit" class="addbutton" value="Submit" />
+    </form>
+    </p>
+
+
+
+    <p>If you need to add a food not on the list, please contact Dave Demaree</p>
+
+    <hr>
+
 
     <?php 
      if ( $is_meal_coordinator ) {
@@ -238,7 +278,7 @@ print_header( $INC );
 </div>
 
 <script language="JavaScript" type="text/javascript">
-showTab('users');
+showTab('foodpref');
 </script>
 
 
