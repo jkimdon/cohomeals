@@ -1,0 +1,10 @@
+debug
+# a bug somewhere makes tls fail 
+set ftp:ssl-allow no
+connect cohoecovillage.org
+# create an alias in ~/.lftprc so this script can login to the
+# ftp server, for example:
+# alias cohologin login meals@cohoecovillage.org <password> 
+cohodocumentslogin
+mirror -c -v Teams/CommonHouse/ documents/Teams/CommonHouse
+
