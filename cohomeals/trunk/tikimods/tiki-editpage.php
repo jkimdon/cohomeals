@@ -419,8 +419,8 @@ if (isset($_FILES['userfile1']) && is_uploaded_file($_FILES['userfile1']['tmp_na
 				$contribution_needed = false;
 			}
 			if (isset($_REQUEST['save']) && $prefs['feature_categories'] === 'y' && $prefs['feature_wiki_mandatory_category'] >=0 && (empty($_REQUEST['cat_categories']) || count($_REQUEST['cat_categories']) <= 0)) {
-				$category_needed = true;
-				$smarty->assign('category_needed', 'y');
+			  $category_needed = false; //true;
+			  $smarty->assign('category_needed', 'n'); //y');
 			} else {
 				$category_needed = false;
 			}
@@ -923,8 +923,8 @@ if (isset($_REQUEST['save']) && $prefs['feature_contribution'] === 'y' && $prefs
 	$contribution_needed = false;
 }
 if (isset($_REQUEST['save']) && $prefs['feature_categories'] === 'y' && $prefs['feature_wiki_mandatory_category'] >=0 && (empty($_REQUEST['cat_categories']) || count($_REQUEST['cat_categories']) <= 0)) {
-	$category_needed = true;
-	$smarty->assign('category_needed', 'y');
+  $category_needed = false; //true;
+  $smarty->assign('category_needed', 'n');//y');
 } else {
 	$category_needed = false;
 }
