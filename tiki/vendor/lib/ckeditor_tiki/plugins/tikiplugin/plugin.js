@@ -1,8 +1,8 @@
-/* (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+/* (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
  * 
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
- * $Id: plugin.js 30358 2010-10-27 16:33:12Z jonnybradley $
+ * $Id: plugin.js 41843 2012-06-07 14:41:17Z jonnybradley $
  *
  * Tiki plugin integration plugin.
  * 
@@ -34,8 +34,13 @@
 						r = sel.getRanges();
 						data = r[0].startContainer;
 					}
+					if (!$(data.$).hasClass("tiki_plugin")) {
+						// problem here - wrong element sent in?
+						debugger;		// intentionally left in to catch occasional IE edge cases
+						return;
+					}
 					var args = {};
-					var str = $('<div/>').html(unescape(data.getAttribute("args"))).text();	// decode html entities
+					var str = $('<div/>').html(data.getAttribute("args")).text();	// decode html entities
 					var pairs = str.split("&");
 					for (var i = 0; i < pairs.length; i++) {
 						if (pairs[i].indexOf("=") > -1) {
@@ -67,7 +72,7 @@
 						label : 'Tiki Plugin',
 						command : 'tikiplugin',
 						group : 'tiki',
-						icon : CKEDITOR.config._TikiRoot + 'pics/icons/plugin_edit.png'
+						icon : CKEDITOR.config._TikiRoot + 'img/icons/plugin_edit.png'
 					}
 				});
 			}
@@ -115,11 +120,12 @@
 				});
 			}
 			if (jqueryTiki.autosave) {	// pref check
-				this.ckToHtml = editor.dataProcessor.toHtml;		// reference to original ckeditor dataProcessor
+				if (typeof editor.plugins["tikiwiki"] === "undefined") {	// also defined in tikiwiki plugin
+					this.ckToHtml = editor.dataProcessor.toHtml;		// reference to original ckeditor dataProcessor
+					editor.dataProcessor.toHtml			= function ( data, fixForBody ) { return asplugin.toHtmlFormat( editor, data, fixForBody ); };
+				}
 				this.ckToData = editor.dataProcessor.toDataFormat;
-			
 				editor.dataProcessor.toDataFormat 	= function ( html, fixForBody ) { return asplugin.toHTMLSource( editor, html, fixForBody ); };
-				editor.dataProcessor.toHtml			= function ( data, fixForBody ) { return asplugin.toHtmlFormat( editor, data, fixForBody ); };
 			}
 		},			// end of init()
 		
@@ -158,7 +164,7 @@
 				element.writeHtml( writer );
 				html = writer.getHtml();
 				
-				element.attributes._cke_realelement = encodeURIComponent( html );
+				element.attributes._cke_realelement = tiki_encodeURIComponent( html );
 				element.attributes._cke_real_node_type = tag;
 				
 				element.attributes._cke_real_element_type = tag;
@@ -200,12 +206,19 @@
 			var output = html;
 			
 			output = this.ckToData.call( editor.dataProcessor, output, fixForBody );
-			
+
+			if (typeof editor.plugins["tikiwiki"] === "undefined") {
+				output = output.replace(/<pre class=["']tiki_plugin["']>([\s\S]*?)<\/pre>/ig, "$1");
+			}
 			output = output.replace(/<!--{cke_protected}{C}%3C!%2D%2D%20end%20tiki_plugin%20%2D%2D%3E-->/ig, "<!-- end tiki_plugin -->");
 			// replace visual plugins with syntax
 			output = output.replace( protectTikiPluginsRegexp, function() {
 				if (arguments.length > 0) {
-					return $("<span />").html(arguments[1]).text();	// decode html entities
+					var plugCode = $("<span />").html(arguments[1]).text();
+					if (typeof editor.plugins["tikiwiki"] !== "undefined") {	// also defined in tikiwiki plugin
+						plugCode = plugCode.replace(/\n/g, "<br />");
+					}
+					return plugCode;	// decode html entities
 				} else {
 					alert("ckeditor: error parsing to html source");
 					return "";
@@ -223,6 +236,8 @@
 			var output = "";
 			var asplugin = this;
 			var orig_data = $("#editwiki").val();	// just in case
+			var isHtml = $("#allowhtml:checked").length || $("#allowhtml[type=hidden]").val();
+
 			ajaxLoadingShow( "cke_contents_" + editor.name);
 			$("#ajaxLoading").show();		// FIXME safari/chrome refuse to show until ajax finished
 			jQuery.ajax({
@@ -230,15 +245,21 @@
 				url: CKEDITOR.config.ajaxAutoSaveTargetUrl,
 				type: "POST",
 				data: {
-					script: editor.config.autoSaveSelf,
+					referer: editor.config.autoSaveSelf,
 					editor_id: editor.name,
-					data: encodeURIComponent(data),
-					command: "toHtmlFormat"
+					data: tiki_encodeURIComponent(data),
+					command: "toHtmlFormat",
+					allowhtml: isHtml
 				},
 				// good callback
 				success: function(data) {
 					ajaxLoadingHide();
-					output = unescape(jQuery(data).find('data').text());
+					try {
+					    output = tiki_decodeURIComponent(jQuery(data).find('data').text());
+					} catch (err) {
+					    // Maybe it used escape to encode it? Try unescape
+					    output = unescape(jQuery(data).find('data').text());
+					}
 					output = asplugin.ckToHtml.call(editor.dataProcessor, output, fixForBody);
 					if (output.indexOf("</body>") === -1) {
 						output += "</body>"; 	// workaround for cke 3.4 / tiki 6.0 FIXME
@@ -249,7 +270,6 @@
 					ajaxLoadingHide();
 					output = orig_data;	//"ajax error";
 					alert(tr("AJAX Error") + "\n" + tr("It may not be possible to edit this page reliably in WYSIWYG mode in this browser.") + "\n\n" + error.message);
-					debugger;	// TODO JB to remove before 6.0 b1, hopefully the alert too
 				}
 			});
 			return output;

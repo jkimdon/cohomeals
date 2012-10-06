@@ -1,4 +1,4 @@
-{* $Id: tiki-map_frame.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: tiki-map_frame.tpl 40035 2012-03-04 21:22:53Z gezzzan $ *}
 
 <script src="lib/x/x_core.js"></script>
 <script src="lib/x/x_event.js"></script>
@@ -14,7 +14,6 @@
 		      	<input type="image" id="map" src="{$image_url}" 
 			{if $xsize != ""}width="{$xsize}"{/if} 
 			{if $ysize != ""}height="{$ysize}"{/if} 
-		  border="0"
 		  alt="{tr}click on the map to zoom or pan, do not drag{/tr}" 
 		  title="{tr}click on the map to zoom or pan, do not drag{/tr}" />
 		  </td></tr>
@@ -25,9 +24,9 @@
 			<img id="imgzoom2" src="img/icons/zoom-2.gif" onclick="zoomin(0)" alt="-x2" title="{tr}Zoom out x2{/tr}" />
 			{/if}
 			{if $zoom eq 0}
-			<img id="imgzoom3" src="pics/icons/shape_square_edit.png" onclick="zoomin(1)" alt="Q" title="{tr}Query{/tr}" border="1" />
+			<img id="imgzoom3" src="img/icons/shape_square_edit.png" onclick="zoomin(1)" alt="Q" title="{tr}Query{/tr}" border="1" />
 			{else}
-			<img id="imgzoom3" src="pics/icons/shape_square_edit.png" onclick="zoomin(1)" alt="Q" title="{tr}Query{/tr}" />
+			<img id="imgzoom3" src="img/icons/shape_square_edit.png" onclick="zoomin(1)" alt="Q" title="{tr}Query{/tr}" />
 			{/if}
 			{if $zoom eq 1}
 			<img id="imgzoom4" src="img/icons/move.gif" onclick="zoomin(2)" alt="P" title="{tr}Pan{/tr}" border="1" />

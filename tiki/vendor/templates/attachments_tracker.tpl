@@ -1,6 +1,6 @@
-{* $Id: attachments_tracker.tpl 28822 2010-09-01 05:12:35Z pkdille $ *}
+{* $Id: attachments_tracker.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {strip}
-{if $tiki_p_attach_trackers eq 'y'}
+{if $print_page ne 'y' and $tiki_p_attach_trackers eq 'y'}
 	<h2>{tr}Attach a file to this item{/tr}</h2>
 	<form enctype="multipart/form-data" action="tiki-view_tracker_item.php" method="post">
 		<input type="hidden" name="trackerId" value="{$trackerId|escape}" />
@@ -9,7 +9,7 @@
 		<table class="formcolor">
 			<tr>
 				<td>{tr}Upload file{/tr}</td>
-				<td>{if $attach_file}{tr}Edit{/tr}: {/if}<input type="hidden" name="MAX_FILE_SIZE" value="1000000000" /><input name="userfile1" type="file"  />{if $attach_file}<br />{$attach_file|escape}{/if}</td>
+				<td>{if $attach_file}{tr}Edit:{/tr} {/if}<input type="hidden" name="MAX_FILE_SIZE" value="1000000000" /><input name="userfile1" type="file"  />{if $attach_file}<br />{$attach_file|escape}{/if}</td>
 			</tr>
 			<tr>
 				<td>{tr}Comment{/tr}</td>

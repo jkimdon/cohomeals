@@ -1,4 +1,4 @@
-{* $Id: tiki-show_help.tpl 28400 2010-08-09 13:21:49Z jonnybradley $ *}
+{* $Id: tiki-show_help.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div class="help" id="tikihelp">
 	<div class="help_sections" id="help_sections" style="display:none">
 		<ul>

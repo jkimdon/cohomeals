@@ -1,40 +1,37 @@
 <?php 
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-interactive_trans.php 29088 2010-09-09 22:33:55Z sampaioprimo $
+// $Id: tiki-interactive_trans.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
-require_once('lib/language/Language.php');
-if ($prefs['lang_use_db'] != 'y') {
-	$smarty->assign('msg', tra("This feature is disabled").": lang_use_db");
-	$smarty->assign('error', 'y');
-	$smarty->display("tiki-interactive_trans.tpl");
-	die;
-}
+require_once('lib/language/LanguageTranslations.php');
 
-if ($tiki_p_edit_languages != 'y') {
-	$smarty->assign('errortype', 401);
-	$smarty->assign('msg', tra("Permission denied to use this feature"));
-	$smarty->assign('error', 'y');
-	$smarty->display("tiki-interactive_trans.tpl");
-	die;
-}
+$access->check_feature('lang_use_db');
+$access->check_permission('tiki_p_edit_languages');
 
-$language = new Language;
-
-// Called by the JQuery ajax request. No response expected.
-if( isset( $_REQUEST['source'], $_REQUEST['trans'] ) && count($_REQUEST['source']) == count($_REQUEST['trans']) ) {
-	$lang = $prefs['language'];
-	if( empty( $lang ) ) {
-		$lang = $prefs['site_language'];
+// start interactive translation session
+if (!empty($_REQUEST['interactive_translation_mode'])) {
+	$_SESSION['interactive_translation_mode'] = $_REQUEST['interactive_translation_mode'];	
+	if ($_REQUEST['interactive_translation_mode'] == 'off') {
+		$cachelib->empty_cache('templates_c');
 	}
 
-	foreach( $_REQUEST['trans'] as $k => $translation ) {
+	header('Location: ' . $_SESSION['last_mid_php']);
+	exit;
+}
+
+/* Called by the JQuery ajax request. No response expected.
+ * Save strings translated using interactive translation to database.
+ */ 
+if ( isset( $_REQUEST['source'], $_REQUEST['trans'] ) && count($_REQUEST['source']) == count($_REQUEST['trans']) ) {
+	$translations = new LanguageTranslations;
+	
+	foreach ( $_REQUEST['trans'] as $k => $translation ) {
 		$source = $_REQUEST['source'][$k];
 
-		$language->updateTrans( $source, $translation );
+		$translations->updateTrans($source, $translation);
 	}
 
 	exit;

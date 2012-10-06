@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-take_survey.php 28414 2010-08-09 18:54:57Z jonnybradley $
+// $Id: tiki-take_survey.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'surveys';
 require_once ('tiki-setup.php');
@@ -22,7 +22,7 @@ if (!isset($_REQUEST["surveyId"])) {
 	$smarty->display("error.tpl");
 	die;
 }
-$tikilib->get_perm_object( $_REQUEST["surveyId"], 'survey' );
+$tikilib->get_perm_object($_REQUEST["surveyId"], 'survey');
 
 $smarty->assign('surveyId', $_REQUEST["surveyId"]);
 $survey_info = $srvlib->get_survey($_REQUEST["surveyId"]);

@@ -1,4 +1,4 @@
-{* $Id: tiki-sqllog.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: tiki-sqllog.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {title admpage="general"}{tr}Log SQL{/tr}{/title}
 
 {if $prefs.log_sql ne 'y'}
@@ -21,11 +21,11 @@
 	<tr>
 	{foreach from=$logs item=log}
 		<tr>
-			<td>{$log.created|escape}</td>
-			<td>{$log.sql1|escape}</td>
-			<td>{$log.params|escape}</td>
-			<td>{$log.tracer|escape}</td>
-			<td>{$log.timer|escape}</td>
+			<td class="text">{$log.created|escape}</td>
+			<td class="text">{$log.sql1|escape}</td>
+			<td class="text">{$log.params|escape}</td>
+			<td class="text">{$log.tracer|escape}</td>
+			<td class="date">{$log.timer|escape}</td>
 		</tr>
 	{/foreach}
 </table>

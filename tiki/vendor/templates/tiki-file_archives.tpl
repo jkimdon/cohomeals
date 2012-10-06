@@ -1,7 +1,7 @@
-{* $Id: tiki-file_archives.tpl 28636 2010-08-20 18:12:54Z sampaioprimo $ *}
+{* $Id: tiki-file_archives.tpl 34309 2011-05-09 06:01:00Z chealer $ *}
 
 {title}
-  {tr}File Archive{/tr}: {if empty($file_info.name)}{$file_info.filename|escape}{else}{$file_info.name}{/if}
+  {tr}File Archive:{/tr} {if empty($file_info.name)}{$file_info.filename}{else}{$file_info.name}{/if}
 {/title}
 
 <div class="navbar">

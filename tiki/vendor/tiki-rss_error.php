@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-rss_error.php 25081 2010-02-11 17:00:23Z changi67 $
+// $Id: tiki-rss_error.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 $feed = tra("Error Message");
-$title = tra("Tiki RSS Feed Error Message: $errmsg");
+$title = tr("Tiki RSS Feed Error Message: %0", $errmsg);
 $desc = $errmsg;
 $id = "errorMessage";
 $titleId = "title";

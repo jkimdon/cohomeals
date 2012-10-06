@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_trackerstat.tpl 22678 2009-10-27 18:13:11Z sylvieg $ *}
+{* $Id: wikiplugin_trackerstat.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <table class="normal wikiplugin_trackerstat">
 {cycle values="even,odd" print=false}
 {section name=istat loop=$stats}

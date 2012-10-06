@@ -1,4 +1,4 @@
-{* $Id: comment-body.tpl 30118 2010-10-19 12:50:18Z chibaguy $ *}
+{* $Id: comment-body.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div class="clearfix content">
 
 	<div class="clearfix author">
@@ -62,7 +62,7 @@
 	</div>
 
 {if $thread_style != 'commentStyle_headers'}
-<div class="clearfix postbody-content">
+<div class="postbody-content">
 	{$comment.parsed}
 	{* <span class="signature"><!-- SIGNATURE --></span> *}
 </div>

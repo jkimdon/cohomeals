@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-webmail_contacts.php 26602 2010-04-13 12:05:22Z jonnybradley $
+// $Id: tiki-webmail_contacts.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/webmail/webmaillib.php');
 include_once ('lib/webmail/contactlib.php');
 
-$access->check_feature( 'feature_webmail' );
+$access->check_feature('feature_webmail');
 
 $smarty->assign('element', $_REQUEST["element"]);
 

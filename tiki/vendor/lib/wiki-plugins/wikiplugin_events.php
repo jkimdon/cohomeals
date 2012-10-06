@@ -1,72 +1,88 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_events.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_events.php 42277 2012-07-08 20:01:23Z jonnybradley $
 
-// Includes rss feed output in a wiki page
-// Usage:
-// {RSS(id=>feedId,max=>3,date=>1,author=>1,desc=>1)}{RSS}
-//
-
-function wikiplugin_events_help() {
-	return tra("~np~{~/np~EVENTS(calendarid=1|2,maxdays=365,max=-1,datetime=1,desc=1)}{EVENTS} Insert rss feed output into a wikipage");
-}
-
-function wikiplugin_events_info() {
+function wikiplugin_events_info()
+{
 	return array(
 		'name' => tra('Events'),
 		'documentation' => 'PluginEvents',
-		'description' => tra('Includes the list of events from a calendar in the page.'),
+		'description' => tra('Display upcoming events from calendars'),
 		'prefs' => array( 'feature_calendar', 'wikiplugin_events' ),
+		'icon' => 'img/icons/calendar_view_day.png',
+		'tags' => array( 'basic' ),	
 		'params' => array(
 			'calendarid' => array(
 				'required' => true,
-				'name' => tra('Calendars filter'),
-				'description' => tra('Numeric'),
+				'name' => tra('Calendar IDs'),
+				'description' => tra('ID numbers for the site calendars whose events are to be displayed, separated by vertical bars (|)'),
+				'default' => '',
 			),
 			'maxdays' => array(
 				'required' => false,
-				'name' => tra('Maximum days'),
-				'description' => tra('Numeric'),
+				'name' => tra('Maximum Days'),
+				'description' => tra('Events occurring within this number of days in the future from today will be included in the list (unless limited by other parameter settings). Default is 365 days.'),
+				'filter' => 'digits',
+				'default' => 365,
 			),
 			'max' => array(
 				'required' => false,
-				'name' => tra('Maximum Rows'),
-				'description' => tra('Numeric'),
+				'name' => tra('Maximum Events'),
+				'description' => tra('Maximum number of events to display. Default is 10. Set to 0 to display all (unless limited by other parameter settings)'),
+				'default' => 10,
+				'filter' => 'digits',
 			),
 			'datetime' => array(
 				'required' => false,
-				'name' => tra('Datetime'),
-				'description' => tra('0|1'),
+				'name' => tra('Show Time'),
+				'description' => tra('Show the time along with the date (shown by default)'),
+				'default' => 1,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
 			),
 			'desc' => array(
 				'required' => false,
-				'name' => tra('Desc'),
-				'description' => tra('0|1'),
+				'name' => tra('Show Description'),
+				'description' => tra('Show the description of the event (shown by default)'),
+				'default' => 1,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
 			),
 		),
 	);
 }
 
-function wikiplugin_events($data,$params) {
-	global $calendarlib;
-	global $userlib;
-	global $tikilib;
-	global $tiki_p_admin;
-	global $tiki_p_view_calendar, $smarty;
+function wikiplugin_events($data,$params)
+{
+	global $calendarlib, $userlib, $tikilib, $tiki_p_admin, $tiki_p_view_calendar, $smarty, $user;
 
 	if (!isset($calendarlib)) {
 		include_once ('lib/calendar/calendarlib.php');
 	}
 
-	extract($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 
-	if (!isset($maxdays)) {$maxdays=365;}
-	if (!isset($max)) { $max=10; }
-	if (!isset($datetime)) { $datetime=1; }
-	if (!isset($desc)) { $desc=1; }
+	if (!isset($maxdays)) {
+		$maxdays=365;
+	}
+	if (!isset($max)) {
+		$max=10;
+	}
+	if (!isset($datetime)) { 
+		$datetime=1;
+	}
+	if (!isset($desc)) {
+		$desc=1;
+	}
 	
 
 	$rawcals = $calendarlib->list_calendars();
@@ -84,7 +100,7 @@ function wikiplugin_events($data,$params) {
 				$canView = 'n';
 			}
 		} else {
-			if ($userlib->object_has_one_permission($cal_id,'calendar')) {
+			if ($userlib->object_has_one_permission($cal_id, 'calendar')) {
 				if ($userlib->object_has_permission($user, $cal_id, 'calendar', 'tiki_p_view_calendar')) {
 					$canView = 'y';
 				} else {
@@ -103,11 +119,9 @@ function wikiplugin_events($data,$params) {
 	}
 
 	if (isset($calendarid)) {
-		$calIds=explode("|",$calendarid);
+		$calIds=explode("|", $calendarid);
 	}
-	$events = $calendarlib->upcoming_events($max,
-		array_intersect($calIds, $viewable),
-		$maxdays);
+	$events = $calendarlib->upcoming_events($max, array_intersect($calIds, $viewable), $maxdays);
  
 	$smarty->assign_by_ref('datetime', $datetime);
 	$smarty->assign_by_ref('desc', $desc);
@@ -118,14 +132,14 @@ function wikiplugin_events($data,$params) {
 	if (count($events)<$max) $max = count($events);
 
 	$repl .= '<table class="normal">';
-	$repl .= '<tr class="heading"><td colspan="2">'.tra("Upcoming events").'</td></tr>';
+	$repl .= '<tr class="heading"><td colspan="2">'.tra("Upcoming Events").'</td></tr>';
 	for ($j = 0; $j < $max; $j++) {
-	  if ($datetime!=1) {
-			$eventStart=str_replace(" ","&nbsp;",strftime($tikilib->get_short_date_format(),$events[$j]["start"]));
-			$eventEnd=str_replace(" ","&nbsp;",strftime($tikilib->get_short_date_format(),$events[$j]["end"]));	  
-	  } else {
-			$eventStart=str_replace(" ","&nbsp;",strftime($tikilib->get_short_datetime_format(),$events[$j]["start"]));
-			$eventEnd=str_replace(" ","&nbsp;",strftime($tikilib->get_short_datetime_format(),$events[$j]["end"]));
+		if ($datetime!=1) {
+			$eventStart=str_replace(" ", "&nbsp;", strftime($tikilib->get_short_date_format(), $events[$j]["start"]));
+			$eventEnd=str_replace(" ", "&nbsp;", strftime($tikilib->get_short_date_format(), $events[$j]["end"]));	  
+		} else {
+			$eventStart=str_replace(" ", "&nbsp;", strftime($tikilib->get_short_datetime_format(), $events[$j]["start"]));
+			$eventEnd=str_replace(" ", "&nbsp;", strftime($tikilib->get_short_datetime_format(), $events[$j]["end"]));
 		}
 		if ($j%2) {
 			$style="odd";

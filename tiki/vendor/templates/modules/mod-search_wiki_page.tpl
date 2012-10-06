@@ -1,11 +1,11 @@
-{* $Id: mod-search_wiki_page.tpl 29180 2010-09-13 19:02:14Z ricks99 $ *}
+{* $Id: mod-search_wiki_page.tpl 36755 2011-09-01 02:54:50Z chealer $ *}
 
-{tikimodule error=$module_params.error title=$tpl_module_title name="search_wiki_page_new" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
+{tikimodule error=$module_params.error title=$tpl_module_title name="search_wiki_page" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {jq}$(".pagename").tiki("autocomplete", "pagename");{/jq}
   <form class="forms" method="post" action="tiki-listpages.php">
     <input type="hidden" name="lang" value=""/>
-    <input name="find" size="14" type="text" accesskey="s" class="pagename"{if isset($find)} value="{$find}"{/if} />
-    {tr}Exact&nbsp;match{/tr}<input type="checkbox" name="exact_match" {if !isset($exact_match) or $exact_match ne 'n'}checked="checked"{/if}/>
+    <input name="find" size="14" type="text" accesskey="s" class="pagename"{if isset($find)} value="{$find|escape}"{/if} />
+    <label><span style="white-space: nowrap">{tr}Exact match{/tr}</span><input type="checkbox" name="exact_match"{if $exact eq 'y'} checked="checked"{/if}/></label>
     <input type="submit" class="wikiaction" name="search" value="{tr}Go{/tr}"/> 
   </form>
 {/tikimodule}

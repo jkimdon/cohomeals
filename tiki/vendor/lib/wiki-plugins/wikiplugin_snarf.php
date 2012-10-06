@@ -1,86 +1,121 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_snarf.php 30535 2010-11-05 13:14:59Z sylvieg $
+// $Id: wikiplugin_snarf.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-/* Tiki-Wiki plugin SNARF
- * 
- * This plugin replaces itself with the body (HTML) text at the URL given in the url argument.
- *
- */
-
-
-function wikiplugin_snarf_help() {
-    return tra("The SNARF plugin replaces itself with the HTML body of a URL.  Arbitrary regex replacement can be done on this content using regex and regexres, the latter being used as the second argument to preg_replace.").":<br />~np~{SNARF(url=>http://www.lojban.org,regex=>;.*<!-- Content -->(.*)<!-- /Content -->.*;, regexres=>$1)}".tra("This data is put in a CODE caption.")."{SNARF}~/np~";
-}
-
-function wikiplugin_snarf_info() {
+function wikiplugin_snarf_info()
+{
 	return array(
 		'name' => tra('Snarf'),
 		'documentation' => 'PluginSnarf',
-		'description' => tra('Include the content of a remote HTTP page. Regular expression selecting the content portion to include must be specified.'),
+		'description' => tra('Display the contents of another web page'),
 		'prefs' => array( 'wikiplugin_snarf' ),
 		'validate' => 'all',
+		'icon' => 'img/icons/page_copy.png',
 		'params' => array(
 			'url' => array(
 				'required' => true,
 				'name' => tra('URL'),
 				'description' => tra('Full URL to the page to include.'),
+				'filter' => 'url',
+				'default' => '',
 			),
 			'regex' => array(
 				'required' => false,
-				'name' => tra('Regular Expression'),
-				'description' => tra('PCRE compliant regular expression'),
+				'name' => tra('Regular Expression Pattern'),
+				'description' => tra('PCRE-compliant regular expression pattern to find the parts you want changed'),
+				'default' => '',
+				'filter' => 'striptags'
 			),
 			'regexres' => array(
 				'required' => false,
-				'name' => tra('Regular Expression Part'),
-				'description' => tra('ex: $1'),
+				'name' => tra('Regular Expression Replacement'),
+				'description' => tra('PCRE-compliant regular expression replacement syntax showing what the content should be changed to'),
+				'default' => '',
+				'filter' => 'striptags'
 			),
 			'wrap' => array(
 				'required' => false,
 				'name' => tra('Word Wrap'),
-				'description' => tra('0|1, Enable word wrapping on the code to avoid breaking the layout.'),
+				'description' => tra('Enable/disable word wrapping of snippets of code (enabled by default)'),
+				'default' => 1,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
+				'filter' => 'int',
 			),
 			'colors' => array(
 				'required' => false,
 				'name' => tra('Colors'),
-				'description' => tra('Syntax highlighting to use. May not be used with line numbers. Available: php, html, sql, javascript, css, java, c, doxygen, delphi, ...'),
+				'description' => tra('Syntax highlighting to use for code snippets. Available: php, html, sql, javascript, css, java, c, doxygen, delphi, ...'),
+				'default' => NULL,
+				'filter' => 'striptags'
 			),
 			'ln' => array(
 				'required' => false,
-				'name' => tra('Line numbers'),
-				'description' => tra('0|1, may not be used with colors.'),
+				'name' => tra('Line Numbers'),
+				'description' => tra('Set to 1 (Yes) to add line numbers to code snippets (not shown by default)'),
+				'default' => NULL,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
+				'filter' => 'int'
 			),
 			'wiki' => array(
 				'required' => false,
-				'name' => tra('Wiki syntax'),
-				'description' => tra('0|1, parse wiki syntax within the code snippet.'),
+				'name' => tra('Wiki Syntax'),
+				'description' => tra('Parse wiki syntax within the code snippet (not parsed by default).'),
+				'default' => 0,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
+				'filter' => 'int',
 			),
 			'rtl' => array(
 				'required' => false,
-				'name' => tra('Right to left'),
-				'description' => tra('0|1, switch the text display from left to right to right to left'),
+				'name' => tra('Right to Left'),
+				'description' => tra('Switch the text display from left to right to right to left'),
+				'default' => NULL,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
+				'filter' => 'int'
 			),
 			'ishtml' => array(
 				'required' => false,
-				'name' => tra('Content is HTML'),
-				'description' => tra('0|1, display the content as is instead of escaping HTML special chars'),
-				'default' => 0,
+				'name' => tra('HTML Content'),
+				'description' => tra('Set to 1 (Yes) to display the content as is instead of escaping HTML special chars (not set by default).'),
+				'default' => NULL,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 1), 
+					array('text' => tra('No'), 'value' => 0)
+				),
+				'filter' => 'int'
 			),
 			'cache' => array(
 				'required' => false,
-				'name' => tra('Cache the url'),
-				'description' => tra('Cache time in minutes (0 for no cache, -1 for site preference'),
-				'default' => -1,
+				'name' => tra('Cache Url'),
+				'description' => tra('Cache time in minutes. Default is to use site preference, Set to 0 for no cache.'),
+				'default' => '',
+				'filter' => 'int'
 			),
 			'ajax' => array(
 				'required' => false,
-				'name' => tra('Text to click on to fetch the url via ajax'),
-				'description' => tra('Label'),
-				'default' => -1,
+				'name' => tra('Label'),
+				'description' => tra('Text to click on to fetch the url via ajax'),
+				'default' => '',
+				'filter' => 'striptags'
 			),
 		),
 	);
@@ -105,9 +140,9 @@ function wikiplugin_snarf($data, $params)
 				continue;
 			}
 			if (!empty($params['href'])) {
-				$params['href'] .= '&';
+				$params['href'] .= '&amp;';
 			}
-			$params['href'] .= $key.'='.$value;
+			$params['href'] .= $key.'='.urlencode($value);
 		}
 		$smarty->assign('snarfParams', $params);
 		return $smarty->fetch('wiki-plugins/wikiplugin_snarf.tpl');
@@ -134,8 +169,13 @@ function wikiplugin_snarf($data, $params)
 	}
 
 	// If the user specified a more specialized regex
-	if ( isset($params['regex']) && isset($params['regexres']) && preg_match('/^(.)(.)+\1[^e]*$/', $params['regex']) ) {
-		$snarf = preg_replace( $params['regex'], $params['regexres'], $snarf );
+	if (isset($params['regex']) && isset($params['regexres'])) { 
+		// fixes http://dev.tiki.org/item4059
+		$params['regex'] = str_replace("\0", "", $params['regex']);
+		
+		if (preg_match('/^(.)(.)+\1[^e]*$/', $params['regex'])) {
+			$snarf = preg_replace($params['regex'], $params['regexres'], $snarf);
+		}
 	}
 
 	if ( $data == '' ) $data = NULL;

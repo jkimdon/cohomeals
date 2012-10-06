@@ -1,15 +1,14 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-remind_password.php 26871 2010-05-03 20:09:21Z sylvieg $
+// $Id: tiki-remind_password.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 $access->check_feature('forgotPass');
 $smarty->assign('showmsg', 'n');
 $smarty->assign('showfrm', 'y');
-$smarty->assign('headtitle', tra('I forgot my password'));
 $isvalid = false;
 if (isset($_REQUEST["user"])) {
 	// this is a 'new password activation':
@@ -65,7 +64,7 @@ if (isset($_REQUEST["remind"])) {
 		$languageEmail = $tikilib->get_user_preference($name, "language", $prefs['site_language']);
 		// Now check if the user should be notified by email
 		$foo = parse_url($_SERVER["REQUEST_URI"]);
-		$machine = $tikilib->httpPrefix( true ) . dirname($foo["path"]);
+		$machine = $tikilib->httpPrefix(true) . dirname($foo["path"]);
 		$machine = preg_replace("!/$!", "", $machine); // just incase
 		$smarty->assign('mail_machine', $machine);
 		$smarty->assign('mail_site', $_SERVER["SERVER_NAME"]);
@@ -76,11 +75,11 @@ if (isset($_REQUEST["remind"])) {
 		$smarty->assign('mail_ip', $tikilib->get_ip_address());
 		$mail_data = sprintf($smarty->fetchLang($languageEmail, 'mail/password_reminder_subject.tpl'), $_SERVER["SERVER_NAME"]);
 		$mail = new TikiMail($name);
-		$mail->setSubject(sprintf($mail_data, $_SERVER["SERVER_NAME"]));
-		$mail->setText($smarty->fetchLang($languageEmail, 'mail/password_reminder.tpl'));
+		$mail->setSubject($mail_data);
+		$mail->setText(stripslashes($smarty->fetchLang($languageEmail, 'mail/password_reminder.tpl')));
 
 		// grab remote IP through forwarded-for header when served by cache
-		$mail->setHeader( 'X-Password-Reset-From', $tikilib->get_ip_address() );
+		$mail->setHeader('X-Password-Reset-From', $tikilib->get_ip_address());
 
 		if (!$mail->send(array($_REQUEST['email']))) {
 			$smarty->assign('msg', tra("The mail can't be sent. Contact the administrator"));

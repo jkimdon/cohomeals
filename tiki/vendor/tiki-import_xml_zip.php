@@ -1,15 +1,16 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-import_xml_zip.php 26626 2010-04-14 16:42:47Z sylvieg $
+// $Id: tiki-import_xml_zip.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'wiki page';
 require_once('tiki-setup.php');
 
 $access->check_feature('feature_wiki');
 $access->check_permission('tiki_p_admin');
+@ini_set('max_execution_time', 0); //will not work in safe_mode is on
 
 if (isset($_REQUEST['import'])) {
 	check_ticket('import_xml_zip');

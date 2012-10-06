@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admingroups.php 30162 2010-10-21 02:14:15Z chealer $
+// $Id: tiki-admingroups.php 42505 2012-08-01 10:02:13Z jonnybradley $
 
 require_once ('tiki-setup.php');
 
@@ -11,10 +11,13 @@ $access->check_permission('tiki_p_admin');
 
 $auto_query_args = array('group');
 
-if (!isset($cookietab)) { $cookietab = '1'; }
+if (!isset($cookietab)) {
+	$cookietab = '1';
+}
 list($trackers, $ag_utracker, $ag_ufield, $ag_gtracker, $ag_gfield, $ag_rufields) = array(array() ,	0, 0, 0, 0, '');
 if (isset($prefs['groupTracker']) and $prefs['groupTracker'] == 'y') {
-	$trackerlist = $tikilib->list_trackers(0, -1, 'name_asc', '');
+	$trklib = TikiLib::lib('trk');
+	$trackerlist = $trklib->list_trackers(0, -1, 'name_asc', '');
 	$trackers = $trackerlist['list'];
 	if (isset($_REQUEST["groupstracker"]) and isset($trackers[$_REQUEST["groupstracker"]])) {
 		$ag_gtracker = $_REQUEST["groupstracker"];
@@ -24,7 +27,8 @@ if (isset($prefs['groupTracker']) and $prefs['groupTracker'] == 'y') {
 	}
 }
 if (isset($prefs['userTracker']) and $prefs['userTracker'] == 'y') {
-	if (!isset($trackerlist)) $trackerlist = $tikilib->list_trackers(0, -1, 'name_asc', '');
+	$trklib = TikiLib::lib('trk');
+	if (!isset($trackerlist)) $trackerlist = $trklib->list_trackers(0, -1, 'name_asc', '');
 	$trackers = $trackerlist['list'];
 	if (isset($_REQUEST["userstracker"]) and isset($trackers[$_REQUEST["userstracker"]])) {
 		$ag_utracker = $_REQUEST["userstracker"];
@@ -37,6 +41,18 @@ if (isset($prefs['userTracker']) and $prefs['userTracker'] == 'y') {
 	}
 }
 $smarty->assign('trackers', $trackers);
+
+if ($prefs['feature_user_watches'] == 'y') {
+	if (!empty($user)) {
+		$tikilib = TikiLib::lib('tiki');
+		if ( isset($_REQUEST['watch'] ) ) {
+			$tikilib->add_user_watch($user, 'user_joins_group', $_REQUEST['watch'], 'group');
+		} else if ( isset($_REQUEST['unwatch'] ) ) {
+			$tikilib->remove_user_watch($user, 'user_joins_group', $_REQUEST['unwatch'], 'group');
+		}
+	}
+}
+
 $ag_home = '';
 $ag_defcat = 0;
 $ag_theme = '';
@@ -45,7 +61,7 @@ if (!empty($_REQUEST["defcat"])) $ag_defcat = $_REQUEST["defcat"];
 if (isset($_REQUEST["theme"])) $ag_theme = $_REQUEST["theme"];
 // Process the form to add a group
 if (isset($_REQUEST["newgroup"])) {
-	check_ticket('admin-groups');
+	$access->check_authenticity(tra('Are you sure you want to create a new group?'));
 	if (!empty($_REQUEST['name'])) $_REQUEST['name'] = trim($_REQUEST['name']);
 	if (empty($_REQUEST['name'])) {
 		$smarty->assign('msg', tra("Group name can not be empty"));
@@ -60,9 +76,9 @@ if (isset($_REQUEST["newgroup"])) {
 	} else {
 		$_REQUEST['userChoice'] = (isset($_REQUEST['userChoice']) && $_REQUEST['userChoice'] == 'on') ? 'y' : '';
 		if (empty($_REQUEST['expireAfter'])) $_REQUEST['expireAfter'] = 0;
-		$userlib->add_group($_REQUEST['name'], $_REQUEST['desc'], $ag_home, $ag_utracker, $ag_gtracker, '', $_REQUEST['userChoice'], $ag_defcat, $ag_theme, 0, 0, 'n', $_REQUEST['expireAfter'], $_REQUEST['emailPattern']);
+		$userlib->add_group($_REQUEST['name'], $_REQUEST['desc'], $ag_home, $ag_utracker, $ag_gtracker, '', $_REQUEST['userChoice'], $ag_defcat, $ag_theme, 0, 0, 'n', $_REQUEST['expireAfter'], $_REQUEST['emailPattern'], $_REQUEST['anniversary'], $_REQUEST['prorateInterval']);
 		if (isset($_REQUEST["include_groups"])) {
-			foreach($_REQUEST["include_groups"] as $include) {
+			foreach ($_REQUEST["include_groups"] as $include) {
 				if ($_REQUEST["name"] != $include) {
 					$userlib->group_inclusion($_REQUEST["name"], $include);
 				}
@@ -73,6 +89,7 @@ if (isset($_REQUEST["newgroup"])) {
 	$logslib->add_log('admingroups', 'created group ' . $_REQUEST["group"]);
 }
 if (isset($_REQUEST['adduser'])) {
+	$access->check_authenticity(tra('Are you sure you want to add this user?'));
 	$user = $_REQUEST['user'];
 	$group = $_REQUEST['group'];
 	if ($user && $group) {
@@ -82,6 +99,27 @@ if (isset($_REQUEST['adduser'])) {
 	}
 	$cookietab = "3";
 }
+
+// banning
+
+if (isset($_REQUEST['banuser'])) {
+	$auser = $_REQUEST['user'];
+	$agroup = $_REQUEST['group'];
+	$access->check_authenticity(tr('Are you sure you want to ban the user "%0" from the group "%1"?', $auser, $agroup));
+	$userlib->ban_user_from_group($auser, $agroup);
+	$logslib->add_log('admingroups', "banned $auser from $agroup");
+	$cookietab = "3";
+}
+
+if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'unbanuser') {
+	$auser = $_REQUEST['user'];
+	$agroup = $_REQUEST['group'];
+	$access->check_authenticity(tr('Are you sure you want to unban the user "%0" from the group "%1"?', $auser, $agroup));
+	$userlib->unban_user_from_group($auser, $agroup);
+	$logslib->add_log('admingroups', "unbanned $auser from $agroup");
+	$cookietab = "3";
+}
+
 // modification
 if (isset($_REQUEST["save"]) and isset($_REQUEST["olgroup"]) and !empty($_REQUEST["name"])) {
 	check_ticket('admin-groups');
@@ -96,10 +134,10 @@ if (isset($_REQUEST["save"]) and isset($_REQUEST["olgroup"]) and !empty($_REQUES
 		$_REQUEST['userChoice'] = '';
 	}
 	if (empty($_REQUEST['expireAfter'])) $_REQUEST['expireAfter'] = 0;
-	$userlib->change_group($_REQUEST['olgroup'], $_REQUEST['name'], $_REQUEST['desc'], $ag_home, $ag_utracker, $ag_gtracker, $ag_ufield, $ag_gfield, $ag_rufields, $_REQUEST['userChoice'], $ag_defcat, $ag_theme, 'n', $_REQUEST['expireAfter'], $_REQUEST['emailPattern']);
+	$userlib->change_group($_REQUEST['olgroup'], $_REQUEST['name'], $_REQUEST['desc'], $ag_home, $ag_utracker, $ag_gtracker, $ag_ufield, $ag_gfield, $ag_rufields, $_REQUEST['userChoice'], $ag_defcat, $ag_theme, 'n', $_REQUEST['expireAfter'], $_REQUEST['emailPattern'], $_REQUEST['anniversary'], $_REQUEST['prorateInterval']);
 	$userlib->remove_all_inclusions($_REQUEST["name"]);
 	if (isset($_REQUEST["include_groups"]) and is_array($_REQUEST["include_groups"])) {
-		foreach($_REQUEST["include_groups"] as $include) {
+		foreach ($_REQUEST["include_groups"] as $include) {
 			if ($include && $_REQUEST["name"] != $include) {
 				$userlib->group_inclusion($_REQUEST["name"], $include);
 			}
@@ -107,14 +145,24 @@ if (isset($_REQUEST["save"]) and isset($_REQUEST["olgroup"]) and !empty($_REQUES
 	}
 	$_REQUEST["group"] = $_REQUEST["name"];
 	$logslib->add_log('admingroups', 'modified group ' . $_REQUEST["olgroup"] . ' to ' . $_REQUEST["group"]);
+	$cookietab = 1;
 }
 // Process a form to remove a group
 if (isset($_REQUEST["action"])) {
 	if ($_REQUEST["action"] == 'delete') {
-		$access->check_authenticity(tra('Remove group: ') . htmlspecialchars($_REQUEST['group']));
+		$access->check_authenticity(tra('Remove group: ') . $_REQUEST['group']);
 		$userlib->remove_group($_REQUEST["group"]);
 		$logslib->add_log('admingroups', 'removed group ' . $_REQUEST["group"]);
 		unset($_REQUEST['group']);
+	}
+}
+if (!empty($_REQUEST['submit_mult']) && !empty($_REQUEST['checked'])) {
+	$access->check_authenticity(tra('Are you sure you want to delete these groups?'));
+	foreach ($_REQUEST['checked'] as $delete) {
+		if ($delete != 'Admins' && $delete != 'Anonymous' && $delete != 'Registered') {
+			$userlib->remove_group($delete);
+			$logslib->add_log('admingroups', 'removed group ' . $delete);
+		}
 	}
 }
 if (isset($_REQUEST['clean'])) {
@@ -124,12 +172,12 @@ if (isset($_REQUEST['clean'])) {
 	$cachelib->invalidate('grouplist');
 	$cachelib->invalidate('groupIdlist');
 }
-if (!isset($_REQUEST["numrows"])) {
+if (!isset($_REQUEST['maxRecords'])) {
 	$numrows = $maxRecords;
 } else {
-	$numrows = $_REQUEST["numrows"];
+	$numrows = $_REQUEST['maxRecords'];
 }
-$smarty->assign_by_ref('numrows', $numrows);
+$smarty->assign_by_ref('maxRecords', $numrows);
 if (!isset($_REQUEST["sort_mode"])) {
 	$sort_mode = 'groupName_asc';
 } else {
@@ -156,7 +204,11 @@ if (isset($_REQUEST["find"])) {
 $smarty->assign('find', $find);
 $users = $userlib->get_groups($offset, $numrows, $sort_mode, $find, $initial);
 $inc = array();
-list($groupname, $groupdesc, $grouphome, $userstrackerid, $usersfieldid, $grouptrackerid, $groupfieldid, $defcatfieldid, $themefieldid, $groupperms, $trackerinfo, $memberslist, $userChoice, $groupdefcat, $grouptheme, $expireAfter, $emailPattern) = array('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+list(	$groupname, $groupdesc, $grouphome, $userstrackerid, $usersfieldid, $grouptrackerid,
+		$groupfieldid, $defcatfieldid, $themefieldid, $groupperms, $trackerinfo, $memberslist,
+		$userChoice, $groupdefcat, $grouptheme, $expireAfter, $emailPattern, $anniversary, $prorateInterval) =
+		array('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+
 if (!empty($_REQUEST["group"])) {
 	$re = $userlib->get_group_info($_REQUEST["group"]);
 	if (isset($re["groupName"])) $groupname = $re["groupName"];
@@ -166,6 +218,8 @@ if (!empty($_REQUEST["group"])) {
 	if (isset($re["groupTheme"])) $grouptheme = $re["groupTheme"];
 	if (isset($re['userChoice'])) $userChoice = $re['userChoice'];
 	if (isset($re['expireAfter'])) $expireAfter = $re['expireAfter'];
+	if (isset($re['anniversary'])) $anniversary = $re['anniversary'];
+	if (isset($re['prorateInterval'])) $prorateInterval = $re['prorateInterval'];
 	if ($prefs['userTracker'] == 'y') {
 		if (isset($re["usersTrackerId"]) and $re["usersTrackerId"]) {
 			include_once ('lib/trackers/trackerlib.php');
@@ -200,7 +254,7 @@ if (!empty($_REQUEST["group"])) {
 	//$allgroups = $userlib->list_all_groups();
 	$allgroups = $userlib->list_can_include_groups($re["groupName"]);
 	$rs = $userlib->get_included_groups($_REQUEST['group'], false);
-	foreach($allgroups as $rr) {
+	foreach ($allgroups as $rr) {
 		$inc["$rr"] = "n";
 		if (in_array($rr, $rs)) {
 			$inc["$rr"] = "y";
@@ -219,13 +273,20 @@ if (!empty($_REQUEST["group"])) {
 	}
 	$smarty->assign('membersCount', $userlib->count_users($_REQUEST['group']));
 	$smarty->assign('membersOffset', $_REQUEST['membersOffset']);
-	if ($cookietab == '1') $cookietab = "2";
+	if (!empty($user)) {
+		 $re['isWatching'] = TikiLib::lib('tiki')->user_watches($user, 'user_joins_group', $groupname, 'group') > 0;
+	} else {
+		 $re['isWatching'] = false;
+	}
+	if ($cookietab == '1' && !isset($_REQUEST["save"])) $cookietab = "2";
 } else {
 	$allgroups = $userlib->list_all_groups();
-	foreach($allgroups as $rr) {
+	foreach ($allgroups as $rr) {
 		$inc["$rr"] = "n";
 	}
-	if (!isset($cookietab)) { $cookietab = '1'; }
+	if (!isset($cookietab)) {
+		$cookietab = '1';
+	}
 	$_REQUEST["group"] = 0;
 }
 if (isset($_REQUEST['add'])) {
@@ -294,7 +355,7 @@ if (!empty($_REQUEST['group']) && isset($_REQUEST['import'])) {
 if ($prefs['feature_categories'] == 'y') {
 	global $categlib;
 	include_once ('lib/categories/categlib.php');
-	$categories = $categlib->get_all_categories_respect_perms($user, 'view_category');
+	$categories = $categlib->getCategories();
 	$smarty->assign_by_ref('categories', $categories);
 }
 
@@ -304,7 +365,24 @@ if (isset($_REQUEST['group'])) {
 $av_themes = $tikilib->list_styles();
 $smarty->assign_by_ref('av_themes', $av_themes);
 $smarty->assign('memberslist', $memberslist);
-$smarty->assign('userslist', $userlib->list_all_users());
+
+$bannedlist = $userlib->get_group_banned_users($_REQUEST['group']);
+$smarty->assign('bannedlist', $bannedlist);
+
+$userslist=$userlib->list_all_users();
+if (!empty($memberslist)) {
+	foreach ($memberslist as $key => $values) {
+		if ( in_array($values["login"], $userslist) ) {
+			unset($userslist[array_search($values["login"], $userslist, true)]);
+		}
+	}
+	foreach ($bannedlist as $key => $value) {
+		if ( in_array($value, $userslist) ) {
+			unset($userslist[array_search($value, $userslist, true)]);
+		}
+	}
+}
+$smarty->assign('userslist', $userslist);
 $smarty->assign('inc', $inc);
 $smarty->assign('group', $_REQUEST["group"]);
 $smarty->assign('groupname', $groupname);
@@ -328,7 +406,8 @@ $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 $smarty->assign('mid', 'tiki-admingroups.tpl');
 $smarty->display("tiki.tpl");
 
-function indirectly_inherited_groups($direct_groups) {
+function indirectly_inherited_groups($direct_groups)
+{
 	global $userlib;
 	$indirect_groups = array();
 	foreach ($direct_groups as $a_direct_group => $does_inherit) {
@@ -337,7 +416,7 @@ function indirectly_inherited_groups($direct_groups) {
  			foreach ($some_indirect_groups as $an_indirect_group) {
  				$indirect_groups[] = $an_indirect_group;
  			}
- 		}
- 	}
+		}
+	}
  	return $indirect_groups;
 }

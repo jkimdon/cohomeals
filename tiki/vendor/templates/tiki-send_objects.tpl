@@ -1,4 +1,4 @@
-{* $Id: tiki-send_objects.tpl 28919 2010-09-03 20:24:19Z pkdille $ *}
+{* $Id: tiki-send_objects.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="Communication+Center"}{tr}Send objects{/tr}{/title}
 

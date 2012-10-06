@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_notifications.tpl 28865 2010-09-02 20:36:52Z changi67 $ *}
+{* $Id: tiki-admin_notifications.tpl 40272 2012-03-20 19:12:21Z chealer $ *}
 {title help="Mail+Notifications"}{tr}Mail notifications{/tr}{/title}
 
 {if empty($prefs.sender_email)}
@@ -29,19 +29,38 @@
 			</td>
 		</tr> 
 		<tr>
+			<td><label for="destination">{tr}Destination:{/tr}</label></td>
+			<td>
+				<select id="destination" name="destination">
+					<option value="login" selected="selected">{tr}User{/tr}</option>
+					<option value="email">{tr}Email{/tr}</option>
+				</select>
+				{jq}
+				$("select[name='destination']").change(function () {
+					$("#loginrow").hide();
+					$("#emailrow").hide();
+					$("input[name='login']").attr("disabled","disabled");
+					$("input[name='email']").attr("disabled","disabled");
+					$("#" + $("select[name='destination']").val() + "row").show();
+					$("input[name='" + $("select[name='destination']").val() + "']").focus();
+					$("input[name='" + $("select[name='destination']").val() + "']").removeAttr("disabled");
+				}
+				);
+				{/jq}
+			</td>
+		</tr>
+		<tr id="loginrow">
 			<td><label for="flogin">{tr}User:{/tr}</label></td>
 			<td>
 				<input type="text" id="flogin" name="login" />
-				{jq}$("#flogin").tiki("autocomplete", "username"){/jq}
+				{autocomplete element='#flogin' type='username'}
+				<a href="#" onclick="javascript:document.getElementById('flogin').value='{$user}'" class="link">{tr}Myself{/tr}</a>
 			</td>
 		</tr>
-		<tr>
+		<tr id="emailrow" style="display:none">
 			<td><label for="femail">{tr}Email:{/tr}</label></td>        
 			<td>
 				<input type="text" id='femail' name="email" />
-				{if $admin_mail neq ''}
-					<a href="#" onclick="javascript:document.getElementById('femail').value='{$admin_mail}';document.getElementById('flogin').value='admin'" class="link">{tr}Preload Admin Account{/tr}</a>
-				{/if}
 			</td>
 		</tr> 
 		<tr>
@@ -72,25 +91,25 @@
 		{cycle print=false values="even,odd"}
 		{section name=user loop=$channels}
 			<tr class="{cycle}">
-				<td>
+				<td class="checkbox">
 					<input type="checkbox" name="checked[]" value="{$channels[user].watchtype}{$channels[user].watchId|escape}" {if $smarty.request.checked and in_array($channels[user].watchId,$smarty.request.checked)}checked="checked"{/if} />
 				</td>
-				<td>{$channels[user].event}</td>
-				<td>
+				<td class="text">{$channels[user].event}</td>
+				<td class="text">
 					{if $channels[user].url}
 						<a href="{$channels[user].url}" title="{$channels[user].title|escape}">{$channels[user].object|escape}</a>
 					{else}
 						{$channels[user].object|escape}
 					{/if}
 					</td>
-				<td>
+				<td class="email">
 					{if $channels[user].watchtype eq 'user'}
 						{$channels[user].email}
 					{else}
 						<em>{tr}Multiple{/tr}</em>
 					{/if}
 				</td>
-				<td>
+				<td class="text">
 					{if $channels[user].watchtype eq 'group'}
 						{icon _id='group'}
 					{else}
@@ -98,16 +117,18 @@
 					{/if}
 					{$channels[user].user|escape}
 				</td>
-				<td><a class="link" href="{$smarty.server.PHP_SELF}?{query removeevent=$channels[user].watchId removetype=$channels[user].watchtype}">{icon _id='cross' alt="{tr}Remove{/tr}"}</a></td>
+				<td class="action">
+					<a class="link" href="{$smarty.server.PHP_SELF}?{query removeevent=$channels[user].watchId removetype=$channels[user].watchtype}">{icon _id='cross' alt="{tr}Remove{/tr}"}</a>
+				</td>
 			</tr>
 		{sectionelse}
-			<tr class="odd"><td colspan="6"><b>{tr}No records found.{/tr}</b></td></tr>
+         {norecords _colspan=6}
 		{/section}
 	</table>
 	{if $channels}
 		<br />
 		{tr}Perform action with checked:{/tr}
-		<input type="image" name="delsel" src='pics/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" />
+		<input type="image" name="delsel" src='img/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" />
 	{/if}
 </form>
 
@@ -118,7 +139,7 @@
 	<table class="normal">
 		{section name=ix loop=$trackers}
 			<tr class="{cycle}">
-				<td><a href="tiki-admin_trackers.php?trackerId={$trackers[ix].trackerId}">{$trackers[ix].value|escape}</a></td>
+				<td><a href="tiki-list_trackers.php?trackerId={$trackers[ix].trackerId}">{$trackers[ix].value|escape}</a></td>
 			</tr>
 		{/section}
 	</table>

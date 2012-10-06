@@ -1,41 +1,40 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_kaltura.php 29766 2010-10-04 01:01:37Z jonnybradley $
+// $Id: wikiplugin_kaltura.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-function wikiplugin_kaltura_help() {
-        return tra("Displays a KALTURA video on the wiki page").":<br />~np~{KALTURA(id=\"entry_id_of_video\")}{KALTURA}~/np~";
-}
-
-function wikiplugin_kaltura_info() {
+function wikiplugin_kaltura_info()
+{
 	return array(
-		'name' => tra('Kaltura video'),
+		'name' => tra('Kaltura Video'),
 		'documentation' => 'PluginKaltura',
-		'description' => tra('Displays a KALTURA video on the wiki page'),
-		'prefs' => array('wikiplugin_kaltura'),
+		'description' => tra('Display a video created through the Kaltura feature'),
+		'prefs' => array('wikiplugin_kaltura', 'feature_kaltura'),
 		'extraparams' => true,
+		'icon' => 'img/icons/film_edit.png',
 		'params' => array(
 			'id' => array(
 				'required' => true,
-				'name' => tra('Kaltura Entry Id'),
-				'description' => tra('Kaltura Entry Id'),
+				'name' => tra('Kaltura Entry ID'),
+				'description' => tra('Kaltura entry ID of the video to be displayed'),
 			),
 		),
 	);
 }
 
-function wikiplugin_kaltura($data, $params) {
+function wikiplugin_kaltura($data, $params)
+{
 	global $prefs;
-     extract ($params, EXTR_SKIP);
+	extract($params, EXTR_SKIP);
      
-     $code ='<object name="kaltura_player" id="kaltura_player" type="application/x-shockwave-flash" allowScriptAccess="always" allowNetworking="all" allowFullScreen="true" height="365" width="400" data="'.$prefs['kServiceUrl'].'index.php/kwidget/wid/'.$prefs['kdpWidget'].'/uiconf_id/'.$prefs['kdpUIConf'].'/entry_id/'.$id.'">
+     $code ='<object name="kaltura_player" id="kaltura_player" type="application/x-shockwave-flash" allowScriptAccess="always" allowNetworking="all" allowFullScreen="true" height="365" width="400" data="'.$prefs['kServiceUrl'].'index.php/kwidget/wid/'.$prefs['kdpWidget'].'/uiconf_id/'.$prefs['kdpUIConf'].'/entry_id/'.urlencode($id).'">
 			 <param name="allowScriptAccess" value="always" />
 			 <param name="allowNetworking" value="all" />
 			 <param name="allowFullScreen" value="true" />
-			 <param name="movie" value="'.$prefs['kServiceUrl'].'index.php/kwidget/wid/'.$prefs['kdpWidget'].'/uiconf_id/'.$prefs['kdpUIConf'].'/entry_id/'.$id.'"/>
-			 <param name="flashVars" value="entry_id='.$id.'"/>
+			 <param name="movie" value="'.$prefs['kServiceUrl'].'index.php/kwidget/wid/'.$prefs['kdpWidget'].'/uiconf_id/'.$prefs['kdpUIConf'].'/entry_id/'.urlencode($id).'"/>
+			 <param name="flashVars" value="entry_id='.htmlspecialchars($id).'"/>
 			 <param name="wmode" value="opaque"/>
 			 </object>';
      return '~np~'.$code.'~/np~';

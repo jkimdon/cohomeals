@@ -1,3 +1,4 @@
+{* $Id: tiki-invite.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {title url="tiki-invite.php"}{tr}Invitation{/tr}{/title}
 
 <div class="navbar">

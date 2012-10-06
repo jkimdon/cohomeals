@@ -1,35 +1,33 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_myspace.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_myspace.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-// Wiki plugin to display a SWF myspace playlist in a wiki page  
-
-function wikiplugin_myspace_help() {
-        return tra("Displays a MySpace Flash mp3 playlist in the wiki page").":<br />~np~{MYSPACE(page=>myspace_page)}{MYSPACE}~/np~";
-}
-
-function wikiplugin_myspace_info() {
+function wikiplugin_myspace_info()
+{
 	return array(
 		'name' => tra('MySpace'),
-		'documentation' => 'PluginMySpace',			
-		'description' => tra("Displays a MySpace Flash mp3 playlist in the wiki page"),
+		'documentation' => 'PluginMySpace',
+		'description' => tra('Display a MySpace Flash mp3 playlist'),
 		'prefs' => array( 'wikiplugin_myspace' ),
+		'icon' => 'img/icons/myspace.png',
 		'params' => array(
 			'page' => array(
 				'required' => true,
 				'name' => tra('MySpace Page'),
-				'description' => 'MySpace page name.',
-			),
-		),
+				'description' => tra('MySpace page name.'),
+				'default' => '',
+			)
+		)
 	);
 }
 
-function wikiplugin_myspace($data, $params) {
+function wikiplugin_myspace($data, $params)
+{
 	
-	extract ($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 
 	if (!isset($page)) {
 		return "error page parameter requested";

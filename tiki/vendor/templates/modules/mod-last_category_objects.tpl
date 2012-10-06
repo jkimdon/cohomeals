@@ -1,6 +1,6 @@
-{* $Id: mod-last_category_objects.tpl 21945 2009-10-02 04:29:00Z chealer $ *}
+{* $Id: mod-last_category_objects.tpl 35175 2011-07-02 11:37:38Z gta74 $ *}
 {if $mod_can_view}
-{*if !isset($tpl_module_title)}{assign var=tpl_module_title value="{tr}Last{/tr} {tr}$type{/tr}"}{/if*}
+{*if !isset($tpl_module_title)}{assign var=tpl_module_title value="{tr}Last{/tr} $type"}{/if*}
 {tikimodule error=$module_params.error title=$tpl_module_title name="last_category_objects" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {section name=ix loop=$last}
 <div><a class="linkmodule" href="{$last[ix].href|escape}" title="{$last[ix].type|escape}">

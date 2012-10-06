@@ -1,4 +1,4 @@
-{* $Id: comments_button.tpl 28190 2010-07-29 12:55:12Z sylvieg $ *}
+{* $Id: comments_button.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if $comments_cant gt 0}
 	{assign var=thisbuttonclass value='highlight'}
 {else}

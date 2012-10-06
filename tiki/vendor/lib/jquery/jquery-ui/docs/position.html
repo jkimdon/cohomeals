@@ -8,8 +8,9 @@
   <div id="overview">
     <h2 class="top-header">Overview</h2>
     <div id="overview-main">
-        <p>Utility script for absolutely positioning any widget relative to the window, document, a particular element, or the cursor/mouse.</p>
-<p>Do not need ui.core.js or effects.core.js.</p>
+        <p>Utility script for positioning any widget relative to the window, document, a particular element, or the cursor/mouse.</p>
+<p><em>Note: jQuery UI does not support positioning hidden elements.</em></p>
+<p>Does not need ui.core.js or effects.core.js.</p>
     </div>
     <div id="overview-dependencies">
         <h3>Dependencies</h3>
@@ -56,7 +57,7 @@ $(document).mousemove(function(ev){
 &lt;html&gt;
 &lt;head&gt;
   &lt;link href=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;/&gt;
-  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js&quot;&gt;&lt;/script&gt;
   &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js&quot;&gt;&lt;/script&gt;
   &lt;style type=&quot;text/css&quot;&gt;
 #targetElement { width:240px;height:200px;background-color:#999;margin:30px auto; }
@@ -124,6 +125,9 @@ $(document).mousemove(function(ev){
       <dt class="option-type-label">Type:</dt>
         <dd class="option-type">String</dd>
       
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">"center"</dd>
+      
     </dl>
   </div>
   <div class="option-description">
@@ -139,6 +143,9 @@ $(document).mousemove(function(ev){
       <dt class="option-type-label">Type:</dt>
         <dd class="option-type">String</dd>
       
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">"center"</dd>
+      
     </dl>
   </div>
   <div class="option-description">
@@ -152,12 +159,15 @@ $(document).mousemove(function(ev){
     <h3 class="option-name"><a href="#option-of">of</a></h3>
     <dl>
       <dt class="option-type-label">Type:</dt>
-        <dd class="option-type">Selector</dd>
+        <dd class="option-type">Selector, Element, jQuery, Event</dd>
+      
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">null</dd>
       
     </dl>
   </div>
   <div class="option-description">
-    <p>Element to position against. You can use a browser event object contains pageX and pageY values. Example: "#top-menu"</p>
+    <p>Element to position against. If you provide a selector, the first matching element will be used. If you provide a jQuery object, the first element will be used. If you provide an event object, the pageX and pageY properties will be used. Example: "#top-menu"</p>
   </div>
 </li>
 
@@ -168,6 +178,9 @@ $(document).mousemove(function(ev){
     <dl>
       <dt class="option-type-label">Type:</dt>
         <dd class="option-type">String</dd>
+      
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">null</dd>
       
     </dl>
   </div>
@@ -184,12 +197,15 @@ $(document).mousemove(function(ev){
       <dt class="option-type-label">Type:</dt>
         <dd class="option-type">String</dd>
       
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">"flip"</dd>
+      
     </dl>
   </div>
   <div class="option-description">
     <p>When the positioned element overflows the window in some direction, move it to an alternative position. Similar to my and at, this accepts a single value or a pair for horizontal/vertical, eg. "flip", "fit", "fit flip", "fit none".
 </p>
-<ul><li> <b>flip</b>: to the opposite side and the collision detection is run again to see if it will fit. If it won't fit in either position, the center option should be used as a fall back.
+<ul><li> <b>flip</b>: to the opposite side and the collision detection is run again to see if it will fit. Whichever side allows more of the element to be visible will be used.
 </li><li> <b>fit</b>: so the element keeps in the desired direction, but is re-positioned so it fits.
 </li><li> <b>none</b>: not do collision detection.
 </li></ul>
@@ -205,6 +221,9 @@ $(document).mousemove(function(ev){
       <dt class="option-type-label">Type:</dt>
         <dd class="option-type">Function</dd>
       
+      <dt class="option-default-label">Default:</dt>
+        <dd class="option-default">null</dd>
+      
     </dl>
   </div>
   <div class="option-description">
@@ -217,10 +236,10 @@ $(document).mousemove(function(ev){
 </div>
 
 </p><!-- 
-Pre-expand include size: 7094 bytes
-Post-expand include size: 10335 bytes
-Template argument size: 7101 bytes
+Pre-expand include size: 7611 bytes
+Post-expand include size: 12349 bytes
+Template argument size: 8111 bytes
 Maximum: 2097152 bytes
 -->
 
-<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3784-1!1!0!!en!2 and timestamp 20100909204144 -->
+<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3784-1!1!0!!en!2 and timestamp 20120605125203 -->

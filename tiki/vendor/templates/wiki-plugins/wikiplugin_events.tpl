@@ -1,6 +1,6 @@
-{* $Id: wikiplugin_events.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: wikiplugin_events.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <table class="normal">
-<tr><th colspan="2">{tr}Upcoming events{/tr}</th></tr>
+<tr><th colspan="2">{tr}Upcoming Events{/tr}</th></tr>
 {cycle values="odd,even" print=false}
 {foreach from=$events item=event}
 	<tr class="{cycle advance=false}">

@@ -1,4 +1,4 @@
-{* $Id: mod-tikitests.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: mod-tikitests.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if $tiki_p_admin_tikitests eq 'y' or  $tiki_p_play_tikitests eq 'y' or $tiki_p_edit_tikitests eq 'y'}
 {if !isset($tpl_module_title)}

@@ -1,27 +1,28 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Pdo.php 28738 2010-08-27 17:18:06Z sampaioprimo $
-
-require_once 'lib/core/TikiDb.php';
+// $Id: Pdo.php 40201 2012-03-15 20:18:52Z changi67 $
 
 class TikiDb_Pdo_Result
 {
 	var $result;
 	var $numrows;
 
-	function __construct ($result) {
+	function __construct ($result)
+	{
 		$this->result = &$result;
-		$this->numrows = count ($this->result);
+		$this->numrows = count($this->result);
 	}
 
-	function fetchRow() {
+	function fetchRow()
+	{
 		return is_array($this->result) ? array_shift($this->result) : 0;
 	}
 
-	function numRows() {
+	function numRows()
+	{
 		return $this->numrows;
 	}
 }
@@ -37,7 +38,7 @@ class TikiDb_Pdo extends TikiDb
 		}
 
 		$this->db=$db;
-		$this->setServerType( $db->getAttribute(PDO::ATTR_DRIVER_NAME) );
+		$this->setServerType($db->getAttribute(PDO::ATTR_DRIVER_NAME));
 	} // }}}
 
 	function qstr( $str ) // {{{
@@ -45,7 +46,7 @@ class TikiDb_Pdo extends TikiDb
 		return $this->db->quote($str);
 	} // }}}
 
-	private function _query( $query, $values = null, $numrows = -1, $offset = -1 ) // {{{
+	private function _query($query, $values = null, $numrows = -1, $offset = -1) // {{{
 	{
 		global $num_queries;
 		$num_queries++;
@@ -56,53 +57,54 @@ class TikiDb_Pdo extends TikiDb
 			$query = $this->getQuery();
 		}
 
-		$this->convertQueryTablePrefixes( $query );
+		$this->convertQueryTablePrefixes($query);
 
-		if( $offset != -1 && $numrows != -1 )
+		if ( $offset != -1 && $numrows != -1 )
 			$query .= " LIMIT $numrows OFFSET $offset";
-		elseif( $numrows != -1 )
+		elseif ( $numrows != -1 )
 			$query .= " LIMIT $numrows";
 
 		$starttime=$this->startTimer();
 
 		$result = false;
-		if ( @ $pq = $this->db->prepare($query) ) {
-
-			if ($values and !is_array($values)) {
-				$values = array($values);
+		if ($values) {
+			if ( @ $pq = $this->db->prepare($query) ) {
+				if (!is_array($values)) {
+					$values = array($values);
+				}
+				$result = $pq->execute($values);
 			}
-			if ($values) {
-				$result = $pq->execute( $values );
-			} else {
-				$result = $pq->execute();
-			}
+		} else {
+			$result = $this->db->query($query);
 		}
 
 		$this->stopTimer($starttime);
 
-		if ( ! $result ) {
-			if ( ! $pq ) {
+		if ( $result === false) {
+			if ( !$values || ! $pq) { // Query preparation or query failed 
 				$tmp = $this->db->errorInfo();
-			} else {
+			} else { // Prepared query failed to execute
 				$tmp = $pq->errorInfo();
 				$pq->closeCursor();
 			}
-			$this->setErrorMessage( $tmp[2] );
+			$this->setErrorMessage($tmp[2]);
 			return false;
 		} else {
-			$this->setErrorMessage( "" );
-			if( $pq->columnCount() ) {
-				return $pq->fetchAll(PDO::FETCH_ASSOC);
+			$this->setErrorMessage("");
+			if (($values && !$pq->columnCount()) || (!$values && !$result->columnCount())) {
+				return array(); // Return empty result set for statements of manipulation
+			} elseif ( !$values) {
+				return $result->fetchAll(PDO::FETCH_ASSOC);
 			} else {
-				return array();
+				return $pq->fetchAll(PDO::FETCH_ASSOC);
 			}
 		}
 	} // }}}
 
 	function fetchAll($query = null, $values = null, $numrows = -1, $offset = -1, $reporterrors = true ) // {{{
 	{
-		$result = $this->_query($query,$values, $numrows, $offset);
-		if (! is_array( $result ) ) {
+		$result = $this->_query($query, $values, $numrows, $offset);
+		if (! is_array($result) ) {
 			if ($reporterrors) {
 				$this->handleQueryError($query, $values, $result);
 			}
@@ -113,7 +115,7 @@ class TikiDb_Pdo extends TikiDb
 
 	function query($query = null, $values = null, $numrows = -1, $offset = -1, $reporterrors = true ) // {{{
 	{
-		$result = $this->_query($query,$values, $numrows, $offset);
+		$result = $this->_query($query, $values, $numrows, $offset);
 		if ( $result === false ) {
 			if ($reporterrors) {
 				$this->handleQueryError($query, $values, $result);

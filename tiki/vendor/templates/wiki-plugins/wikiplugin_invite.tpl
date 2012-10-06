@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_invite.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: wikiplugin_invite.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if $errors}
 	{remarksbox type="feedback"}
 		{foreach from=$errors item=error}

@@ -1,60 +1,54 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_catorphans.php 26359 2010-03-29 02:59:57Z lindonb $
+// $Id: wikiplugin_catorphans.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-/*
- * Tikiwiki CATORPHANS plugin.
- * 
- * Syntax:
- * 
- * {CATORPHANS(
- *			objects=>wiki		#types of objects to display; defaults to 'wiki'
- *         )}
- * {CATORPHANS}
- * 
- * Currently only displays wiki pages; very much a work in progress
- */
-function wikiplugin_catorphans_help() {
-	return tra("Display Tiki objects that have not been categorized").":<br />~np~{CATORPHANS(objects=>wiki|article|blog|faq|fgal|forum|igal|newsletter|poll|quizz|survey|tracker)}{CATORPHANS}~/np~";
-}
-
-function wikiplugin_catorphans_info() {
+function wikiplugin_catorphans_info()
+{
 	return array(
 		'name' => tra('Category Orphans'),
 		'documentation' => 'PluginCatOrphans',
-		'description' => tra('Display Tiki objects that have not been categorized'),
+		'description' => tra('List objects that are not categorized'),
 		'prefs' => array( 'feature_categories', 'wikiplugin_catorphans' ),
+		'icon' => 'img/icons/sitemap_color.png',
 		'params' => array(
 			'objects' => array(
 				'required' => false,
-				'name' => tra('Objects'),
-				'description' => tra('wiki|article|blog|faq|fgal|forum<br />|igal|newsletter|poll|quizz<br />|survey|tracker'),
+				'name' => tra('Object'),
+				'description' => tra('Currently, only works with wiki pages (set to wiki (Wiki Pages) by default)'),
+				'default' => 'wiki',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Wiki Pages'), 'value' => 'wiki'),
+				) 
 			),
 			'max' => array(
 				'required' => false,
-				'name' => tra('max'),
-				'description' => tra('Maximum number of items').' '.tra('-1 for unlimited'),
+				'name' => tra('Max'),
+				'description' => tra('Maximum number of items. Use -1 for unlimited. Default is the site admin setting for maximum records.'),
+				'default' => '$prefs[\'maxRecords\']'
 			),
 			'offset' => array(
 				'required' => false,
 				'name' => tra('Result Offset'),
-				'description' => tra('Result number at which the listing should start.'),
+				'description' => tra('Result number at which the listing should start (default is no offset)'),
+				'default' => 0
 			),
 		),
 	);
 }
 
-function wikiplugin_catorphans($data, $params) {
+function wikiplugin_catorphans($data, $params)
+{
 	global $dbTiki, $smarty, $tikilib, $prefs, $access;
 	$access->check_feature('feature_categories');
 	global $categlib; require_once ('lib/categories/categlib.php');
 
 	$default = array('offset'=>0, 'max'=>$prefs['maxRecords'], 'objects'=>'wiki');
 	$params = array_merge($default, $params);
-	extract ($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 
 	// array for converting long type names (as in database) to short names (as used in plugin)
 	$typetokens = array(

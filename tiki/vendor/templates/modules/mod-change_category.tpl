@@ -1,6 +1,6 @@
-{* $Id: mod-change_category.tpl 28804 2010-08-31 14:05:01Z xavidp $ *}
+{* $Id: mod-change_category.tpl 37703 2011-09-26 19:23:48Z chealer $ *}
 
-{if isset($page) and $showmodule}
+{if $showmodule}
 	{tikimodule error=$module_params.error title=$tpl_module_title name="change_category" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 		{if !empty($module_params.imgUrlNotIn) and !empty($module_params.imgUrlIn)}
 			{foreach key=k item=i from=$modcatlist}{* Smarty hack to access $modcatlist's first key. This should only access one element. *}
@@ -21,7 +21,11 @@
 					{if $i.incat eq 'y'}
 						<tr>
 							<td class="{cycle advance=false}">
-								{if isset($module_params.path) and $module_params.path eq 'n'}{$i.name|escape}{else}{$i.categpath|escape}{/if}
+								{if isset($module_params.path) and $module_params.path eq 'n'}
+									{$i.name|escape}
+								{else}
+									{$i.relativePathString|escape}
+								{/if}
 							</td>
 							{if !isset($module_params.del) or $module_params.del eq 'y'}
 								<td class="{cycle}">
@@ -34,7 +38,7 @@
 			</table>
 		{/if}
 
-		{if $detailed eq 'n' or ($add eq 'y' and $remainCateg)}
+		{if $detailed eq 'n' or ($add eq 'y' and not $isInAllManagedCategories)}
 			<div align="center">
 				<form method="post" target="_self">
 					<input type="hidden" name="page" value="{$page|escape}" />
@@ -53,7 +57,11 @@
 						{if $detailed eq 'n' or $i.incat ne 'y'}
 							{if ($add eq 'y' or $i.incat eq 'y')}
 								<option value="{$k}"{if $multiple eq 'y' and $i.incat eq 'y'} selected="selected"{/if}>
-									{if isset($module_params.path) and $module_params.path eq 'n'}{$i.name|escape}{else}{$i.categpath|escape}{/if}
+									{if !empty($module_params.path) and $module_params.path eq 'n'}
+										{$i.name|escape}
+									{else}
+										{$i.relativePathString|escape}
+									{/if}
 								</option>
 							{/if}
 						{/if}

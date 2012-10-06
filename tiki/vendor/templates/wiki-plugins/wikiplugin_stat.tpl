@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_stat.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: wikiplugin_stat.tpl 35178 2011-07-02 11:44:28Z gta74 $ *}
 {tabset name='stat' toggle='n'}
 	{foreach from=$stat key=when item=typeStat}
 		{capture name='tabtitle'}
@@ -15,7 +15,7 @@
 			 <ul>
 			{foreach from=$typeStat key=type item=list}
 				{foreach from=$list key=what item=nb} 
-					<li>{tr}{$what}{/tr}: {$nb}</li>
+					<li>{$what}: {$nb}</li>
 				{/foreach}
 			{/foreach}
 			</ul>

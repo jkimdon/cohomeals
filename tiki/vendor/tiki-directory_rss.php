@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-directory_rss.php 27959 2010-07-13 18:39:08Z sampaioprimo $
+// $Id: tiki-directory_rss.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 require_once ('lib/tikilib.php');
@@ -14,7 +14,7 @@ if ($prefs['feed_directories'] != 'y') {
 	require_once ('tiki-rss_error.php');
 }
 if ($prefs['feature_directory'] != 'y') {
-	$errmsg = tra("This feature is disabled") . ": feature_directory";
+	$errmsg = tr("This feature is disabled: %0", 'feature_directory');
 	require_once ('tiki-rss_error.php');
 }
 if ($tiki_p_view_directory != 'y') {
@@ -32,7 +32,7 @@ $output = $rsslib->get_from_cache($uniqueid);
 if ($output["data"] == "EMPTY") {
 	$title = tra("Tiki RSS feed for directory sites");
 	$rc = $dirlib->dir_get_category($_REQUEST["parent"]);
-	$desc = tra("Last sites of directory " . $rc["name"] . " .");
+	$desc = tr("Last sites of directory %0.", $rc["name"]);
 	$id = "siteId";
 	$titleId = "name";
 	$descId = "description";

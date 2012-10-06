@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-survey_stats_survey.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-survey_stats_survey.php 41474 2012-05-16 10:49:49Z jonnybradley $
 
 $section = 'surveys';
 require_once ('tiki-setup.php');
@@ -24,7 +24,7 @@ $smarty->assign('surveyId', $_REQUEST["surveyId"]);
 $survey_info = $srvlib->get_survey($_REQUEST["surveyId"]);
 $smarty->assign('survey_info', $survey_info);
 if (isset($_REQUEST["clear"]) && $tiki_p_admin_surveys == 'y') {
-	$access->check_authenticity();
+	$access->check_authenticity(tra('Are you sure you want to clear all statistics and data for this survey?'));
 	$srvlib->clear_survey_stats($_REQUEST["clear"]);
 }
 if (!isset($_REQUEST["sort_mode"])) {

@@ -1,1 +1,1 @@
-{* $Id: credits.tpl 26146 2010-03-16 17:23:31Z jonnybradley $ *}{tr}Theme{/tr}: {$prefs.style|replace:'.css':''|replace:'None':''|ucwords}{if $prefs.style_option} - {$prefs.style_option|replace:'.css':''|replace:'None':''|ucwords}{/if}
+{* $Id: credits.tpl 33949 2011-04-14 05:13:23Z chealer $ *}{tr}Theme:{/tr} {$prefs.style|replace:'.css':''|replace:'None':''|ucwords}{if $prefs.style_option} - {$prefs.style_option|replace:'.css':''|replace:'None':''|ucwords}{/if}

@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_subscribenewsletter.tpl 30585 2010-11-09 12:28:47Z xavidp $ *}
+{* $Id: wikiplugin_subscribenewsletter.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if $wpSubscribe eq 'y'}
 	{if empty($subscribeThanks)}
 		{tr}Subscription confirmed!{/tr}

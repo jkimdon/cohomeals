@@ -1,4 +1,4 @@
-{* $Id: tiki-information.tpl 24029 2009-12-24 15:05:00Z marclaporte $ *}
+{* $Id: tiki-information.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div id="tiki-center">
 <br />
 <div class="cbox">
@@ -18,7 +18,7 @@
 
 	<p>
 
-	{if $show_history_back_link eq 'y' }
+	{if $show_history_back_link eq 'y'}
 		<a href="javascript:history.back()" class="linkmenu">{tr}Go back{/tr}</a><br /><br />
 	{/if}
 	 &nbsp;<a href="{$prefs.tikiIndex}" class="linkmenu">{tr}Return to home page{/tr}</a>

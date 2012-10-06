@@ -1,4 +1,4 @@
-{* $Id: tiki-articles-js.tpl 24849 2010-02-04 19:24:53Z jonnybradley $ *}
+{* $Id: tiki-articles-js.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {jq notonready=true}
 	var articleTypes = new Array();
 {{foreach from=$types key=type item=properties}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: contribution.php 25072 2010-02-11 15:18:57Z changi67 $
+// $Id: contribution.php 39467 2012-01-12 19:47:28Z changi67 $
 
 // the script uses the var $_REQUEST['contributions'] = the list of selected contributions to preselect the contributions
 //						$contributionItemId = the commentId if the object exists and you want to preselect  the comment contribuions
@@ -11,15 +11,8 @@
 
 // param: $contributionItemId: id of the comment if in coment/forum
 
-if (strpos($_SERVER['SCRIPT_NAME'],basename(__FILE__)) !== FALSE) {
-  //smarty is not there - we need setup
-  require_once('tiki-setup.php');
-  $smarty->assign('msg',tra('This script cannot be called directly'));
-  $smarty->display('error.tpl');
-  die;
-}
-
-require_once('tiki-setup.php'); 
+require_once('tiki-setup.php');
+$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 global $prefs;
 
 if ($prefs['feature_contribution'] == 'y') {

@@ -1,36 +1,40 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_invite.php 30390 2010-10-28 13:59:46Z sylvieg $
+// $Id: wikiplugin_invite.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-function wikiplugin_invite_info() {
+function wikiplugin_invite_info()
+{
 	return array(
-		'name' => tra( 'Invite' ),
-		'description' => tra( 'Invite an email in groups.' ),
+		'name' => tra('Invite'),
+		'documentation' => 'PluginInvite',
+		'description' => tra('Invite a user to join your groups'),
 		'prefs' => array( 'wikiplugin_invite' ),
 		'body' => tra('Confirmation message after posting form'),
+		'icon' => 'img/icons/group.png',
 		'params' => array(
 			'including' => array(
 				'required' => false,
-				'name' => tra('Including group'),
-				'description' => tra('Group'),
+				'name' => tra('Including Group'),
+				'description' => tra('Will list only the groups that include this group'),
 			),
 			'defaultgroup' => array(
 				'required' => false,
-				'name' => tra('Default group'),
-				'description' => tra('Group'),
+				'name' => tra('Default Group'),
+				'description' => tra('Dropdown list will show this group by default'),
 			),
 			'itemId' => array(
 				'required' => false,
-				'name' => tra('Default group'),
-				'description' => tra('Group from the item group selector / creator field'),
+				'name' => tra('Item ID'),
+				'description' => tra('Dropdown list will show the group related to this item ID (in group selector or creator field) by default'),
 			),
 		)
 	);
 }
-function wikiplugin_invite( $data, $params) {
+function wikiplugin_invite( $data, $params)
+{
 	global $prefs, $tikilib, $userlib, $user, $smarty, $tiki_p_invite_to_my_groups;
 
 	if ($tiki_p_invite_to_my_groups != 'y') {
@@ -84,7 +88,7 @@ function wikiplugin_invite( $data, $params) {
 			include_once ('lib/webmail/tikimaillib.php');
 			$mail = new TikiMail();
 			$machine = parse_url($_SERVER['REQUEST_URI']);
-			$machine = $tikilib->httpPrefix( true ).dirname($machine['path']);
+			$machine = $tikilib->httpPrefix(true).dirname($machine['path']);
 			$smarty->assign_by_ref('machine', $machine);
 			$subject = sprintf($smarty->fetch('mail/mail_invite_subject.tpl'), $_SERVER['SERVER_NAME']);
 			$mail->setSubject($subject);

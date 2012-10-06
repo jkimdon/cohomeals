@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-newsletters.php 27748 2010-06-23 03:01:50Z sampaioprimo $
+// $Id: tiki-newsletters.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'newsletters';
 require_once ('tiki-setup.php');
@@ -47,7 +47,7 @@ $smarty->assign('nlId', $_REQUEST["nlId"]);
 $smarty->assign('subscribe', 'n');
 $smarty->assign('subscribed', 'n');
 $foo = parse_url($_SERVER["REQUEST_URI"]);
-$smarty->assign('url_subscribe', $tikilib->httpPrefix( true ) . $foo["path"]);
+$smarty->assign('url_subscribe', $tikilib->httpPrefix(true) . $foo["path"]);
 if (isset($_REQUEST["nlId"])) {
 	$tikilib->get_perm_object($_REQUEST["nlId"], 'newsletter');
 }
@@ -71,7 +71,7 @@ if ($tiki_p_subscribe_newsletters == 'y') {
 		}
 		// Save the ip at the log for email subscriptions from anonymous
 		if (empty($user)) { 
-			$logslib->add_log('newsletter','subscribed email '.$_REQUEST["email"].' to newsletter '.$_REQUEST["nlId"]);
+			$logslib->add_log('newsletter', 'subscribed email '.$_REQUEST["email"].' to newsletter '.$_REQUEST["nlId"]);
 			$smarty->assign('subscribed', 'y'); // will receive en email
 		}
 		// Now subscribe the email address to the newsletter

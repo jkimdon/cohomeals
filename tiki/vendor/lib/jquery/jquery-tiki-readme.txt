@@ -2,6 +2,172 @@
 JQuery/Tiki readme
 -------------------------
 
+7 june 2012
+
+	jquery-ui 1.8.18 to 1.8.21 (last 1.8 apparently)
+
+1 June 2012
+
+	jquery-ui-selectmenu to latest "dev" from github (somehow now is v 1.3.0pre)
+
+
+28 April 2012
+
+Update:
+	jquery.mobile 1.1.0-rc.2 to 1.1.0
+
+6 April 2012
+
+Update:
+	jquery.mobile 1.1.0-rc.1 to 1.1.0-rc.2
+
+
+1 April 2012
+
+New:
+	code.photoswipe 3.0.4 - image lib for jquery.mobile
+
+28 mar 2012
+
+Update:
+	jquery 1.6.4 to 1.7.2 (added $headerlib->jquery_version and kept filenames with version as supplied)
+	jqury-ui 1.8.15 to 1.8.18 (again, version string left in filenames and added $headerlib->jqueryui_version)
+	jquery.mobile 1.0.1 to 1.1.0-rc.1 (left files as originally named and added $headerlib->jquerymobile_version)
+		jquery.mobile 1.1.0-rc.1 to 1.1.0-git (latest version from git as 1.1.0-rc.1 appears not to be compatible with jquery 1.7.2)
+
+	plugins:
+		jquery-ui-timepicker-addon.js to 0.9.9
+		jquery.ui.selectmenu.js to latest github
+		jquery.json-2.3.js from jquery.json-2.2.js
+		jquery.infinitecarousel3.js 2.0.2 to 3.0.2
+		jquery.colorbox.js 1.3.13 to 1.3.19
+		jquery.cluetip.js 1.0.7 to 1.2.5 (quite major - several fixes required)
+		reflection-jquery 1.02 to 1.1
+
+23 feb 2012
+
+New:
+	jquery.ui.nestedSortable.js v1.4 (add-on to jquery-ui.sortable)
+		from https://github.com/mjsarfatti/nestedSortable/tree/develop
+
+6 feb 2012
+
+Update:
+	jquery.mobile 1.0 to 1.0.1
+
+jonnybradley 2 January 2012
+
+Update:
+	jquery.validate from 1.8.1 to 1.9.0 (and removed demo, unused libs and tests)
+
+jonnybradley 2 January 2012
+
+Update:
+	jquery.js & jquery.min.js 1.6.2 to 1.6.4
+	jquery-ui-selectmenu to latest "dev" version 1.9
+
+jonnybradley 8 December 2011
+
+Update:
+	jquery-ui-selectmenu to latest "dev" version 1.9 (version.txt is out of date)
+
+jonnybradley 17 November 2011
+
+Updates:
+	jquery.mobile 1.0rc2 to 1.0 (at last!)
+
+jonnybradley 20 October 2011
+
+Updates:
+	jquery.mobile 1.0rc1 to 1.0rc2
+
+jonnybradley 14 October 2011
+
+Update:
+	jquery-ui-selectmenu to latest "dev" version from http://github.com/fnagel/jquery-ui/zipball/selectmenu
+
+jonnybradley 30 September 2011
+
+Updates:
+	jquery.mobile 1.0b3 to 1.0rc1 (version removed from filenames)
+
+jonnybradley 13 September 2011
+
+Update:
+	jquery-ui-selectmenu v 1.1.0 to the "dev" version (i.e. whatever "trunk" is in git)
+
+jonnybradley 12 September 2011
+
+Add:
+	jquery-ui-selectmenu v 1.1.0 from git repo https://github.com/fnagel/jquery-ui/zipball/selectmenu_v1.1.0
+						all non specific selectmenu files, demo and tests removed
+
+Updates:
+	jquery.mobile 1.0b2 to 1.0b3 (version removed from filenames)
+
+jonnybradley 4 September 2011
+
+Add:
+	jquery-ui-timepicker-addon.js 0.9.6
+
+jonnybradley 11 August 2011
+
+Updates:
+	jquery.js 1.6.1 to 1.6.2
+	jquery.mobile 1.0b1 to 1.0b2 (version "-1.0b2" removed from filenames)
+	jquery-ui 1.8.11 to 1.8.15
+
+jonnybradley 24 June 2011
+
+Updates: (for Tiki 7.1+)
+	jquery.js 1.5.1 to 1.6.1
+	jquery.mobile 1.0a4.1 to 1.0b1 (version "-1.0b1" removed from filenames)
+
+jonnybradley 14 April 2011
+
+Update
+	jquery.mobile.js 1.0a3 to 1.0a4.1 (version "-1.0a4.1" removed c again)
+
+jonnybradley 23 March 2011
+
+Updates:
+	jquery.js 1.5.0 to 1.5.1
+	jquery-ui 1.8.9 to 1.8.11
+	tablesorter 2.0.3 to 2.0.5b
+
+jonnybradley 10 Feb 2011
+
+New:
+	jquery.mobile.js 1.0a3 (version "-1.0a3" removed from filenames)
+
+Update:
+	jquery.js 1.4.3 to 1.5.0
+	jquery-ui 1.8.5 to 1.8.9 (trivial change to base.css not replicated in all themes)
+		including external/bgiframe-2.1.1.js to bgiframe-2.1.2.js)
+
+jonnybrabley 6 feb 2011
+
+New:
+	pxem.jQuery.js (converts pixels to em and back)
+
+jonnybradley 31 jan 2011
+
+Modification:
+	Added trailing semicolon to colorpicker/js/colorpicker.js (last update 2009 but author informed)
+
+jonnybradley 22 jan 2011
+
+New:
+	jquery.color.js - (v0.6)
+
+jonnybradley 20 jan 2011
+
+New:
+	colorpicker - (not versioned sadly but MIT licensed)
+
+jonnybradley 16 nov 2010 (for 6.1)
+	jquery.js - 1.4.3 to 1.4.4
+
 jonnybradley 27 oct 2010 (still for 6.0)
 	colorbox - 1.3.12 to 1.3.13
 
@@ -15,6 +181,7 @@ Update:
 	jquery.infinitecarousel2.js 2.0.0 to 2.0.2
 	jquery.js 1.4.2 to 1.4.3
 	jquery-ui 1.8 to 1.8.5 (N.B. all old files from previous releases removed, some from 1.7.x)
+
 
 jonnybradley 7 august 2010
 

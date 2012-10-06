@@ -1,31 +1,33 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-search_box.php 26808 2010-04-28 12:30:41Z jonnybradley $
+// $Id: mod-func-search_box.php 40397 2012-03-26 04:16:07Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_search_box_info() {
+function module_search_box_info()
+{
 	return array(
-		'name' => tra('Search box'),
-		'description' => tra('Small search form (for wiki, articles, blogs, etc.)'),
+		'name' => tra('Search Box'),
+		'description' => tra('Small search form for wiki, articles, blogs, etc.') . ' ' . tra('Deprecated - use the Search module instead.'),
 		'prefs' => array(), // feature_search_fulltext does not depend on feature_search
 		'params' => array(
 			'tiki' => array(
 				'name' => tra('Tiki'),
-				'description' => tra('If set to "y", the search performed is a "Tiki search".') . " " . tra('Default:') . ' "n"' . tra(' (full text search)')
+				'description' => tr('If set to "y", the search performed is a "Tiki search". Default: "n" (full text search)')
 			)
 		)
 	);
 }
 
-function module_search_box( $mod_reference, $module_params ) {
+function module_search_box($mod_reference, $module_params)
+{
 	global $smarty, $prefs;
 
 	// Hack to deal with the two search types. If the requested search type is disabled but the other one is enabled, use it as a fallback.
@@ -39,5 +41,5 @@ function module_search_box( $mod_reference, $module_params ) {
 	elseif ($prefs['feature_search_fulltext'] == 'n' && $type == 'fulltext')
 		$type = 'tiki';
 
-	$smarty->assign('type', $type) ;
+	$smarty->assign('type', $type);
 }

@@ -1,33 +1,34 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_modif_events.php 26808 2010-04-28 12:30:41Z jonnybradley $
+// $Id: mod-func-last_modif_events.php 40381 2012-03-26 03:23:35Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_last_modif_events_info() {
+function module_last_modif_events_info()
+{
 	return array(
-		'name' => tra('Last modified events'),
-		'description' => tra('Displays the specified number of calendar events, starting from the most recently modified.'),
+		'name' => tra('Last-Modified Events'),
+		'description' => tra('Display the specified number of calendar events, starting from the most recently modified.'),
 		'prefs' => array("feature_calendar"),
 		'params' => array(
 			'calendarId' => array(
-				'name' => tra('Calendar identifier'),
+				'name' => tra('Calendar Identifier'),
 				'description' => tra('If set to a calendar identifier, restricts the events to those in the identified calendar.') . " " . tra('Example value: 13.') . " " . tra('Not set by default.')
 			),
 			'maxlen' => array(
-				'name' => tra('Maximum length'),
+				'name' => tra('Maximum Length'),
 				'description' => tra('Maximum number of characters in event names allowed before truncating.'),
 				'filter' => 'int'
 			),
 			'nodate' => array(
-				'name' => tra("Don't show date"),
+				'name' => tra('Hide Date'),
 				'description' => tra('If set to "y", it will hide date.'),
 			)
 		),
@@ -35,7 +36,8 @@ function module_last_modif_events_info() {
 	);
 }
 
-function module_last_modif_events( $mod_reference, $module_params ) {
+function module_last_modif_events($mod_reference, $module_params)
+{
 	global $smarty;
 	global $calendarlib; include_once ('lib/calendar/calendarlib.php');
 	

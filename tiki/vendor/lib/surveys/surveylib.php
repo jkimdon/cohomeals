@@ -1,25 +1,66 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: surveylib.php 29375 2010-09-19 20:44:17Z Jyhem $
+// $Id: surveylib.php 41474 2012-05-16 10:49:49Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 class SurveyLib extends TikiLib
 {
+	function list_surveys($offset, $maxRecords, $sort_mode, $find)
+	{
+		if ($find) {
+			$findesc = '%' . $find . '%';
+			$mid = " where (`name` like ? or `description` like ?)";
+			$bindvars=array($findesc, $findesc);
+		} else {
+			$mid = '';
+			$bindvars=array();
+		}
+
+		$query = "select `surveyId` from `tiki_surveys` $mid";
+		$result = $this->fetchAll($query, $bindvars);
+		$res = $ret = $retids = array();
+		$n = 0;
+
+		//FIXME Perm:filter ?
+		foreach ( $result as $res ) {
+			$objperm = $this->get_perm_object($res['surveyId'], 'survey', '', false);
+			if ( $objperm['tiki_p_take_survey'] ) {
+				if ( ($maxRecords == -1) || (($n >= $offset) && ($n < ($offset + $maxRecords))) ) {
+					$retids[] = $res['surveyId'];
+				}
+				$n++;
+			}
+		}
+		if ( $n > 0 ) {
+			$query = 'select * from `tiki_surveys` where `surveyId` in (' . implode(',', $retids) . ') order by ' . $this->convertSortMode($sort_mode);
+			$result = $this->fetchAll($query);
+			foreach ( $result as $res ) {
+				$res["questions"] = $this->getOne('select count(*) from `tiki_survey_questions` where `surveyId`=?', array( (int) $res['surveyId']));
+				$ret[] = $res;
+			}
+		} 
+		
+		$retval = array();
+		$retval["data"] = $ret;
+		$retval["cant"] = $n;
+		return $retval;
+	}
+	
 	function add_survey_hit($surveyId)
 	{
 		global $prefs, $user;
 
 		if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
 			$query = "update `tiki_surveys` set `taken`=`taken`+1, `lastTaken`=? where `surveyId`=?";
-			$result = $this->query($query, array((int)$this->now, (int)$surveyId));
+			$this->query($query, array((int)$this->now, (int)$surveyId));
 		}
 	}
 
@@ -52,22 +93,31 @@ class SurveyLib extends TikiLib
 	function clear_survey_stats($surveyId)
 	{
 		$query = "update `tiki_surveys` set `taken`=0 where `surveyId`=?";
-		$result = $this->query($query, array((int)$surveyId));
+		$this->query($query, array((int)$surveyId));
 		$query = "select * from `tiki_survey_questions` where `surveyId`=?";
 		$result = $this->query($query, array((int)$surveyId));
 
-		// Remove all the options for each question
+		// Remove all the options for each question for text, wiki and fgal types
 		while ($res = $result->fetchRow(DB_FETCHMODE_ASSOC)) {
-			$questionId = $res["questionId"];
-			$query2 = "update `tiki_survey_question_options` set `votes`=0 where `questionId`=?";
-			$result2 = $this->query($query2, array((int)$questionId));
+			$questionId = $res['questionId'];
+
+			$query = "SELECT `type` FROM `tiki_survey_questions` WHERE `questionId` = ?";
+			$type = $this->getOne($query, array((int) $questionId));
+
+			if (in_array($type, array('t', 'g', 'x'))) {	// same table used for options and responses (nice)
+				$query2 = "DELETE FROM `tiki_survey_question_options` WHERE `questionId`=?";
+			} else {
+				$query2 = "update `tiki_survey_question_options` set `votes`=0 where `questionId`=?";
+			}
+
+			$this->query($query2, array((int)$questionId));
 		}
 
 		$query = "update `tiki_survey_questions` set `average`=0, `value`=0, `votes`=0 where `surveyId`=?";
-		$result = $this->query($query, array((int)$surveyId));
+		$this->query($query, array((int)$surveyId));
 
 		$query = 'delete from `tiki_user_votings` where `id`=?';
-		$result = $this->query($query, array('survey'.(int)$surveyId));
+		$this->query($query, array('survey'.(int)$surveyId));
 	}
 
 	function replace_survey($surveyId, $name, $description, $status)
@@ -88,7 +138,8 @@ class SurveyLib extends TikiLib
 	function replace_survey_question($questionId, $question, $type
 		, $surveyId, $position, $options, $mandatory = 'n'
 		, $min_answers = 0, $max_answers = 0
-	) {
+	)
+	{
 		if ($mandatory != 'y')
 			$mandatory = 'n';
 		$min_answers = (int)$min_answers;
@@ -119,8 +170,8 @@ class SurveyLib extends TikiLib
 		$result = $this->query($query, array((int)$questionId));
 		$ret = array();
 
-		// Reset question options only if not a 'text' or 'filegal choice', because their options are dynamically generated
-		if ( ! in_array($type, array('t', 'g')) ) {
+		// Reset question options only if not a 'text', 'wiki' or 'filegal choice', because their options are dynamically generated
+		if ( ! in_array($type, array('t', 'g', 'x')) ) {
 			while ($res = $result->fetchRow()) {
 				if (! in_array($res["qoption"], $options)) {
 					$query2 = "delete from `tiki_survey_question_options` where `questionId`=? and `optionId`=?";
@@ -175,6 +226,7 @@ class SurveyLib extends TikiLib
 	function list_survey_questions($surveyId, $offset, $maxRecords, $sort_mode, $find)
 	{
 		global $tikilib;
+		$filegallib = TikiLib::lib('filegal');
 		$bindvars = array((int) $surveyId);
 		if ($find) {
 			$findesc = '%' . $find . '%';
@@ -226,6 +278,7 @@ class SurveyLib extends TikiLib
 			}
 
 			$ids = array();
+			include_once('lib/smarty_tiki/modifier.escape.php');
 			while ($res2 = $result2->fetchRow()) {
 
 				if ($total_votes) {
@@ -239,6 +292,8 @@ class SurveyLib extends TikiLib
 				$res2["width"] = $average * 2;
 				if ($res['type'] == 'x') {
 					$res2['qoption'] = $tikilib->parse_data($res2['qoption']);
+				} else {
+					$res2['qoption'] = smarty_modifier_escape($res2['qoption']);
 				}
 				
 				// when question with multiple options
@@ -254,7 +309,7 @@ class SurveyLib extends TikiLib
 		
 			// For a multiple choice from a file gallery, show all files in the stats results, even if there was no vote for those files
 			if ($res['type'] == 'g' && $res['options'] > 0) {
-				$files = $this->get_files(0, -1, '', '', $options[0], false, false, false, true, false, false, false, false, '', false, false);
+				$files = $filegallib->get_files(0, -1, '', '', $options[0], false, false, false, true, false, false, false, false, '', false, false);
 				foreach ($files['data'] as $f) {
 					if ( ! isset($ids[$f['id']]) ) {
 						$ret2[] = array(

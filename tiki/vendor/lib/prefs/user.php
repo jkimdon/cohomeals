@@ -1,23 +1,23 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user.php 29318 2010-09-16 19:59:21Z nkoth $
+// $Id: user.php 42341 2012-07-11 11:31:30Z marclaporte $
 
-function prefs_user_list() {
+function prefs_user_list($partial = false)
+{
 	
 	global $prefs;
 	
-	$catree = array();
+	$catree = array('-1' => tra('None'));
 
-	if ($prefs['feature_categories'] == 'y') {
+	if (! $partial && $prefs['feature_categories'] == 'y') {
 		global $categlib;
 
 		include_once ('lib/categories/categlib.php');
-		$all_categs = $categlib->get_all_categories();
+		$all_categs = $categlib->getCategories(NULL, true, false);
 
-		$catree['-1'] = tra('None');
 		$catree['0'] = tra('All');
 
 		foreach ($all_categs as $categ) {
@@ -31,22 +31,25 @@ function prefs_user_list() {
 			'description' => tra('Show user\'s real name instead of login (when possible)'),
 			'help' => 'User+Preferences',
 			'type' => 'flag',
+			'default' => 'n',
 		),
 		'user_tracker_infos' => array(
 			'name' => tra('Display UserTracker information on the user information page'),
 			'description' => tra('Display UserTracker information on the user information page'),
 			'help' => 'User+Tracker',
-			'hint' => tra('Use the format: trackerId, fieldId1, fieldId2, ...'),
+			'hint' => tra('Input the user tracker ID then field IDs to be shown, all separated by commas. Example: 1,1,2,3,4 (user tracker ID 1 followed by field IDs 1-4)'),
 			'type' => 'text',
 			'size' => '50',
 			'dependencies' => array(
 				'userTracker',
 			),
+			'default' => '',
 		),
 		'user_assigned_modules' => array(
 			'name' => tra('Users can configure modules'),
 			'help' => 'Users+Configure+Modules',
 			'type' => 'flag',
+			'default' => 'n',
 		),	
 		'user_flip_modules' => array(
 			'name' => tra('Users can shade modules'),
@@ -58,11 +61,13 @@ function prefs_user_list() {
 				'module' => tra('Module decides'),
 				'n' => tra('Never'),
 			),
+			'default' => 'module',
 		),
 		'user_store_file_gallery_picture' => array(
 			'name' => tra('Store full-size copy of avatar in file gallery'),
 			'help' => 'User+Preferences',
 			'type' => 'flag',
+			'default' => 'n',
 		),
 		'user_picture_gallery_id' => array(
 			'name' => tra('File gallery to store full-size copy of avatar in'),
@@ -71,6 +76,17 @@ function prefs_user_list() {
 			'type' => 'text',
 			'filter' => 'digits',
 			'size' => '3',
+			'default' => 0,
+		),
+		'user_default_picture_id' => array(
+			'name' => tra('File ID of default avatar image'),
+			'deacription' => tra('File ID of image to use in file gallery as the avatar if user has no avatar image in file galleries'), 
+			'help' => 'User+Preferences',
+			'type' => 'text',
+			'filter' => 'digits',
+			'size' => '5',
+			'default' => 0,
+			'dependencies' => array('user_store_file_gallery_picture'),
 		),
 		'user_who_viewed_my_stuff' => array(
 			'name' => tra('Display who viewed my stuff on the user information page'),
@@ -79,6 +95,7 @@ function prefs_user_list() {
 			'dependencies' => array(
 				'feature_actionlog',
 			),
+			'default' => 'n',
 		),
 		'user_who_viewed_my_stuff_days' => array(
 			'name' => tra('Number of days to consider who viewed my stuff'),
@@ -86,6 +103,7 @@ function prefs_user_list() {
 			'type' => 'text',
 			'filter' => 'digit',
 			'size' => '4',
+			'default' => 90,
 		),
 		'user_who_viewed_my_stuff_show_others' => array(
 			'name' => tra('Show to others who viewed my stuff on the user information page'),
@@ -94,11 +112,13 @@ function prefs_user_list() {
 			'dependencies' => array(
 				'user_who_viewed_my_stuff',
 			),
+			'default' => 'n',
 		),
 		'user_list_order' => array(
 			'name' => tra('Sort Order'),
 			'type' => 'list',
-			'options' => UserListOrder(),
+			'options' => $partial ? array() : UserListOrder(),
+			'default' => 'score_desc',
 		),
 		'user_selector_threshold' => array(
 			'name' => tra('Maximum number of users to show in drop down lists'),
@@ -109,12 +129,13 @@ function prefs_user_list() {
 		),
 		'user_register_prettytracker' => array(
 			'name' => tra('Use pretty trackers for registration form'),
-			'help' => 'Pretty+Trackers',
+			'help' => 'User+Tracker',
 			'description' => tra('Use pretty trackers for registration form'),
 			'type' => 'flag',
 			'dependencies' => array(
 				'userTracker',
 			),
+			'default' => 'n',
 		),
 		'user_register_prettytracker_tpl' => array(
 			'name' => tra('Registration pretty tracker template'),
@@ -123,6 +144,37 @@ function prefs_user_list() {
 			'size' => '20',
 			'dependencies' => array(
 				'user_register_pretty_tracker',
+			),
+			'default' => '',
+		),
+		'user_register_prettytracker_output' => array(
+			'name' => tra('Output the registration results'),
+			'help' => 'User+Tracker',
+			'description' => tra('Use a wiki page as template to output the registration results to'),
+			'type' => 'flag',
+			'default' => 'n',
+			'dependencies' => array(
+				'userTracker',
+			),
+		),
+		'user_register_prettytracker_outputwiki' => array(
+			'name' => tra('Output registration pretty tracker template'),
+			'description' => tra('Wiki page only'),
+			'type' => 'text',
+			'size' => '20',
+			'default' => '',
+			'dependencies' => array(
+				'user_register_prettytracker_output',
+			),
+		),
+		'user_register_prettytracker_outputtowiki' => array(
+			'name' => tra('Page name fieldId'),
+			'description' => tra('User trackers field id whose value is used as output page name'),
+			'type' => 'text',
+			'size' => '20',
+			'default' => '',
+			'dependencies' => array(
+				'user_register_prettytracker_output',
 			),
 		),
 		'user_trackersync_trackers' => array(
@@ -133,6 +185,7 @@ function prefs_user_list() {
 			'dependencies' => array(
 				'userTracker',
 			),
+			'default' => '',
 		),
 		'user_trackersync_realname' => array(
 			'name' => tra('Tracker field IDs to sync Real Name pref from'),
@@ -143,17 +196,17 @@ function prefs_user_list() {
 				'userTracker',
 				'user_trackersync_trackers',
 			),
+			'default' => '',
 		),
 		'user_trackersync_geo' => array(
-			'name' => tra('Synchronize long/lat/zoom to google maps field'),
-			'description' => tra('Synchronize user geolocation prefs to main google maps field'),
+			'name' => tra('Synchronize long/lat/zoom to location field'),
+			'description' => tra('Synchronize user geolocation prefs to main location field'),
 			'type' => 'flag',
 			'dependencies' => array(
 				'userTracker',
 				'user_trackersync_trackers',
-				'feature_ajax',
-				'feature_gmap',
 			),
+			'default' => 'n',
 		),
 		'user_trackersync_groups' => array(
 			'name' => tra('Synchronize categories of user tracker item to user groups'),
@@ -164,6 +217,7 @@ function prefs_user_list() {
 				'user_trackersync_trackers',
 				'feature_categories',
 			),
+			'default' => 'n',
 		),
 		'user_trackersync_parentgroup' => array(
 			'name' => tra('Put user in group only if categorized within'),
@@ -175,6 +229,16 @@ function prefs_user_list() {
 				'user_trackersync_groups',
 				'feature_categories',
 			),
+			'default' => -1,
+		),
+		'user_trackersync_lang' => array(
+			'name' => tra('Change user system language when changing user tracker item language'),
+			'type' => 'flag',
+			'dependencies' => array(
+				'userTracker',
+				'user_trackersync_trackers',
+			),
+			'default' => 'n',
 		),
 		'user_selector_threshold' => array(
 			'name' => tra('Maximum number of users to show in drop down lists'),
@@ -182,18 +246,33 @@ function prefs_user_list() {
 			'type' => 'text',
 			'size' => '5',
 			'dependencies' => array('feature_jquery_autocomplete'),
+			'default' => 50,
 		),
 		'user_selector_realnames_tracker' => array(
 			'name' => tra('Show user\'s real name instead of login in autocomplete selector in trackers feature'),
 			'description' => tra('Use user\'s real name instead of login in autocomplete selector in trackers feature'),
 			'type' => 'flag',
 			'dependencies' => array('feature_jquery_autocomplete', 'user_show_realnames', 'feature_trackers'),
+			'default' => 'n',
 		),
 		'user_selector_realnames_messu' => array(
 			'name' => tra('Show user\'s real name instead of login in autocomplete selector in messaging feature'),
 			'description' => tra('Use user\'s real name instead of login in autocomplete selector in messaging feature'),
 			'type' => 'flag',
 			'dependencies' => array('feature_jquery_autocomplete', 'user_show_realnames', 'feature_messages'),
+			'default' => 'n',
+		),
+		'user_favorites' => array(
+			'name' => tra('User Favorites'),
+			'description' => tra('Allows for users to flag content as their favorite.'),
+			'type' => 'flag',
+			'default' => 'n',
+		),
+		'user_must_choose_group' => array(
+			'name' => tra('Users must choose a group at registration'),
+			'description' => tra('Users cannot register without choosing one of the groups defined above.'),
+			'type' => 'flag',
+			'default' => 'n',
 		),
 	);
 }

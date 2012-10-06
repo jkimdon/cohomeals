@@ -1,4 +1,4 @@
-{* $Id: tiki-pick_avatar.tpl 28842 2010-09-01 19:23:29Z changi67 $ *}
+{* $Id: tiki-pick_avatar.tpl 42367 2012-07-12 20:52:55Z changi67 $ *}
 
 {title}
   {if $user ne $userwatch}
@@ -18,9 +18,15 @@
 	</div>
 {/if}
 <h2>{if $user eq $userwatch}{tr}Your current avatar{/tr}{else}{tr}Avatar{/tr}{/if}</h2>
-{if $avatar}{$avatar}
-{if $user_picture_id}
-{wikiplugin _name="img" thumb="y" fileId="$user_picture_id"}{/wikiplugin}
+{if $avatar}
+<div>
+{if isset($user_picture_id)}{tr}Thumbnail{/tr}<br />{/if}
+{$avatar}
+</div>
+{if isset($user_picture_id)}
+<div>{tr}Full size{/tr}<br />
+<img src="tiki-download_file.php?fileId={$user_picture_id|escape}&amp;display=y"/>
+</div>
 {/if}
 {else}{tr}no avatar{/tr}{/if}
 {if sizeof($avatars) eq 0 and $avatar}

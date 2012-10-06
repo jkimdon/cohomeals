@@ -1,4 +1,4 @@
-{* $Id: mod-adsense.tpl 20933 2009-08-18 00:45:17Z chealer $ *}
+{* $Id: mod-adsense.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div style="text-align: center">
 {if $client}
 {capture name=disparam}

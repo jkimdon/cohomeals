@@ -1,4 +1,4 @@
-{* $Id: tiki-import_xml_zip.tpl 28804 2010-08-31 14:05:01Z xavidp $ *}
+{* $Id: tiki-import_xml_zip.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title}{tr}XML Zip Import{/tr}{/title}
 

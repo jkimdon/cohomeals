@@ -1,4 +1,4 @@
-/* $Id: element.css 30238 2010-10-23 04:31:14Z chibaguy $
+/* $Id: element.css 39251 2011-12-21 18:46:40Z jonnybradley $
 	Jqui theme (jqui.css), Element theme option (element.css)
 	for Tiki Wiki CMS/Groupware.
 	Thanks to garkpit for the random name.
@@ -61,12 +61,3 @@ input[type="submit"]:hover,
 	background-color: #ea6;
 }
     
-#tiki-top {
-	padding: 0 .3em 0;
-	margin: 0.6em 0.9em 0.6em;
-}
-
-#tiki-top .cssmenu_horiz {
-    line-height: 0;
-}
-

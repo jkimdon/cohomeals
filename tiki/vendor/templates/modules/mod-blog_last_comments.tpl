@@ -1,4 +1,4 @@
-{* $Id: mod-blog_last_comments.tpl 29905 2010-10-08 17:06:10Z Jyhem $ *}
+{* $Id: mod-blog_last_comments.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="blog_last_comments" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {modules_list list=$comments nonums=$nonums}

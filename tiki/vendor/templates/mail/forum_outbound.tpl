@@ -1,4 +1,4 @@
-{* $Id: forum_outbound.tpl 27884 2010-07-07 14:13:40Z nkoth $ *}
+{* $Id: forum_outbound.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {$title}
 
 {tr}Author:{/tr} {$author|username}
