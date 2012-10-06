@@ -7680,7 +7680,7 @@ class TikiLib extends TikiDb_Bridge
 		return TikiLib::date_format($format, $timestamp, $_user, $input_format, false);
 	}
 
-	static function date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true) {
+	static function old_date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true) {
 		global $tikidate, $tikilib;
 		if ( ! $timestamp ) {
 			$timestamp = time();
@@ -7703,7 +7703,7 @@ class TikiLib extends TikiDb_Bridge
 		return $tikidate->format($format, $is_strftime_format);
 	}
 
-	function make_time($hour,$minute,$second,$month,$day,$year) {
+	function old_make_time($hour,$minute,$second,$month,$day,$year) {
 		global $tikidate, $tikilib, $prefs;
 		if (!is_object($tikidate)) {
 			require_once('lib/tikidate.php');
@@ -7712,6 +7712,37 @@ class TikiLib extends TikiDb_Bridge
 		$display_tz = $tikilib->get_display_timezone();
 		if ( $display_tz == '' ) $display_tz = 'UTC';
 		$tikidate->setTZbyID($display_tz);
+
+		$tikidate->setLocalTime($day,$month,$year,$hour,$minute,$second,0);
+		return $tikidate->getTime();
+	}
+
+	static function date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true) {
+		global $tikidate, $tikilib;
+		if ( ! $timestamp ) {
+			$timestamp = time();
+		}
+
+		try {
+			$tikidate->setDate($timestamp, $input_format);
+		} catch (Exception $e) {
+			return $e->getMessage();
+		}
+
+		$tikidate->setTZbyID('PST'); /// DEBUG HACK!! 
+		return $tikidate->format($format, $is_strftime_format);
+	}
+
+	function make_time($hour,$minute,$second,$month,$day,$year) {
+		global $tikidate, $tikilib, $prefs;
+		if (!is_object($tikidate)) {
+			require_once('lib/tikidate.php');
+			$tikidate = new TikiDate();
+			$display_tz = $tikilib->get_display_timezone();
+			if ( $display_tz == '' ) $display_tz = 'UTC';
+		}
+		$tikidate->setTZbyID('PST'); /// DEBUG HACK!! 
+ 
 		$tikidate->setLocalTime($day,$month,$year,$hour,$minute,$second,0);
 		return $tikidate->getTime();
 	}

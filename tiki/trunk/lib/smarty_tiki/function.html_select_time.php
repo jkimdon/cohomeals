@@ -43,7 +43,7 @@ function smarty_function_html_select_time($params, &$smarty)
 	$display_minutes    = true;
 	$display_seconds    = true;
 	$display_meridian   = true;
-	$use_24_hours       = true;
+	$use_24_hours       = false;
 	$minute_interval    = 1;
 	$second_interval    = 1;
 	$hour_minmax        = '0-23';
@@ -179,7 +179,7 @@ function smarty_function_html_select_time($params, &$smarty)
 		
 	    $html_result .= smarty_function_html_options(array('output'          => array('AM', 'PM'),
                                                            'values'          => array('am', 'pm'),
-                                                           'selected'      => strtolower(strftime('%p', $time)),
+ 						        'selected'      => TikiLib::date_format('%p', $time),
                                                            'print_result' => false),
                                                      $smarty);
 		$html_result .= "</select>\n";
