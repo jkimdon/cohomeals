@@ -26,20 +26,23 @@
 {if $allday}
 	{$cellstart|tiki_short_date} ({tr}All day{/tr})
 {else}
-  {if ($cellend - $cellstart < 86400)}
-	{$cellstart|tiki_date_format:"%H:%M"} &ndash; {$cellend|tiki_date_format:"%H:%M"}
+  {if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. Hardcoded.*}
+	{$cellstart|tiki_date_format:"%l:%M %p"} &ndash; {$cellend|tiki_date_format:"%l:%M %p"}
   {else}
-	{$cellstart|tiki_date_format:"%e %B (%H:%M)"} &ndash; {$cellend|tiki_date_format:"%e %B (%H:%M)"}
+	{$cellstart|tiki_date_format:"%e %B (%l:%M %p)"} &ndash; {$cellend|tiki_date_format:"%e %B (%l:%M %p)"}
   {/if}
 {/if}
 </strong>
 <br />
 {/if}
-<a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{if $cellid eq '-1'}
+  <a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{else}
+  <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+{/if}
 {if $show_description eq 'y'}<div class="box-data">{$celldescription|truncate:250:'...'}</div><br />{/if}
-{if $show_participants eq 'y' and $cellparticipants}
-<span class="box-title">{tr}Organized by:{/tr}</span> {$cellorganizers}<br />
-<span class="box-title">{tr}Participants:{/tr}</span> {$cellparticipants}<br />
+{if $show_participants eq 'y' and $cellorganizers}
+<span class="box-title">{tr}Contact/Host:{/tr}</span> {$cellorganizers}<br />
 <br />
 {/if}
 {if $infocals.$cellcalendarId.custompriorities eq 'y' and $cellprio}<span class='box-title'>{tr}Priority:{/tr}</span> {$cellprio}<br />{/if}

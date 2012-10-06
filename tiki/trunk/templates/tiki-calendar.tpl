@@ -33,16 +33,16 @@
 			{button href="tiki-calendar_edit_item.php" _text="{tr}Add Event{/tr}"}
 		{/if}
 
-		{if $tiki_p_admin_calendar eq 'y'}
+{* temporarily disabled until sure recurrence shows up in exporting		{if $tiki_p_admin_calendar eq 'y'}
 			{button href="#" _onclick="toggle('exportcal');return false;" _text="{tr}Export Calendars{/tr}" _title="{tr}Click to export calendars{/tr}"}
-		{/if}
+			{/if}*}
 
 		{if $viewlist eq 'list'}
 			{capture name=href}?viewlist=table{if $smarty.request.todate}&amp;todate={$smarty.request.todate}{/if}{/capture}
 			{button href="`$smarty.capture.href`" _text="{tr}Calendar View{/tr}"}
 		{else}
-			{capture name=href}?viewlist=list{if $smarty.request.todate}&amp;todate={$smarty.request.todate}{/if}{/capture}
-			{button href="`$smarty.capture.href`" _text="{tr}List View{/tr}"}
+{* temporarily disabled until recurrence rendering works in list view			{capture name=href}?viewlist=list{if $smarty.request.todate}&amp;todate={$smarty.request.todate}{/if}{/capture}
+  {button href="`$smarty.capture.href`" _text="{tr}List View{/tr}"} *}
 		{/if}
 
 		{if count($listcals) >= 1}
@@ -139,7 +139,7 @@
 
 	{include file='tiki-calendar_nav.tpl'}
 	{if $viewlist eq 'list'}
-		{include file='tiki-calendar_listmode.tpl''}
+		{include file='tiki-calendar_listmode.tpl''}{*' comment to get syntax highlighting correct *}
 	{elseif $viewmode eq 'day'}
 		{include file='tiki-calendar_daymode.tpl'}
 	{elseif $viewmode eq 'week'}
@@ -147,5 +147,13 @@
 	{else}
 		{include file='tiki-calendar_calmode.tpl'}
 	{/if}
+{if $tiki_p_admin_calendar eq 'y'}
 <p>&nbsp;</p>
+<form action="tiki-calendar_weeklyEmail.php" method="post" name="f" id="weeklyEmail">
+Prepare weekly calendar email for the week starting: 
+   {html_select_date prefix="weekly_email_start_" time=$today field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
+&nbsp;
+<input type="submit" name="act" value="{tr}Go{/tr}" />
+</form>
+{/if}
 </div>

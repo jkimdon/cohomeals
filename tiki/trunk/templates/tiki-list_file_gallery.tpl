@@ -171,20 +171,8 @@
 {elseif $dup_mode eq 'y'}
 	{include file='duplicate_file_gallery.tpl'}
 {else}
-	{include file='find.tpl' find_show_num_rows = 'y' find_show_categories_multi='y' find_durations=$find_durations find_show_sub='y'}
 
-	{if $prefs.fgal_search_in_content eq 'y' and $galleryId > 0}
-		<div class="findtable">
-			<form id="search-form" class="forms" method="get" action="tiki-search{if $prefs.feature_forum_local_tiki_search eq 'y'}index{else}results{/if}.php">
-				<input type="hidden" name="where" value="files" />
-				<input type="hidden" name="galleryId" value="{$galleryId}" />
-				<label>{tr}Search in content{/tr}
-					<input name="highlight" size="30" type="text" />
-				</label>
-				<input type="submit" class="wikiaction" name="search" value="{tr}Go{/tr}"/>
-			</form>
-		</div>
-	{/if}
+<p>Use the "Find" box (above right) to search file names and within text, doc, and rtf files (as well as within wiki pages). Note that you can search for partial words, for example "agen" instead of "agenda".</p>
 
 	{if $prefs.fgal_quota_show eq 'y' && $gal_info.quota}
 		<div style="float:right">
