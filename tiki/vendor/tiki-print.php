@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-print.php 25081 2010-02-11 17:00:23Z changi67 $
+// $Id: tiki-print.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section_class="tiki_wiki_page print";
 require_once ('tiki-setup.php');
 include_once ('lib/wiki/wikilib.php');
 
-$access->check_feature( array('feature_wiki', 'feature_wiki_print') );
+$access->check_feature(array('feature_wiki', 'feature_wiki_print'));
 
 // Create the HomePage if it doesn't exist
 if (!$tikilib->page_exists($prefs['wikiHomePage'])) {
@@ -29,6 +29,8 @@ if (!($info = $tikilib->get_page_info($page))) {
 	$smarty->display('error.tpl');
 	die;
 }
+$smarty->assign('page_id', $info['page_id']);
+
 // Now check permissions to access this page
 $tikilib->get_perm_object($page, 'wiki page', $info);
 $access->check_permission('tiki_p_view');
@@ -77,11 +79,19 @@ $smarty->assign('mid', 'tiki-show_page.tpl');
 $smarty->assign('display', isset($_REQUEST['display']) ? $_REQUEST['display'] : '');
 // Allow PDF export by installing a Mod that define an appropriate function
 if (isset($_REQUEST['display']) && $_REQUEST['display'] == 'pdf') {
-	// Method using 'mozilla2ps' mod
-	if (file_exists('lib/mozilla2ps/mod_urltopdf.php')) {
-		include_once ('lib/mozilla2ps/mod_urltopdf.php');
-		mod_urltopdf();
-	}
+	require_once 'lib/pdflib.php';
+	$generator = new PdfGenerator();
+	$pdf = $generator->getPdf('tiki-print.php', array('page' => $page));
+
+	header('Cache-Control: private, must-revalidate');
+	header('Pragma: private');
+	header("Content-Description: File Transfer");
+	header('Content-disposition: attachment; filename="'. $page. '.pdf"');
+	header("Content-Type: application/pdf");
+	header("Content-Transfer-Encoding: binary");
+	header('Content-Length: '. strlen($pdf));
+	echo $pdf;
+
 } else {
 	$smarty->display('tiki-print.tpl');
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mimeextensions.php 26196 2010-03-18 14:08:55Z sylvieg $
+// $Id: mimeextensions.php 41321 2012-05-04 09:33:53Z arildb $
 
 $mimeextensions=Array(
 "application/andrew-inset" => "ez",
@@ -41,6 +41,7 @@ $mimeextensions=Array(
 "application/vnd.ms-powerpoint" => "pot",
 "application/vnd.ms-powerpoint" => "pps",
 "application/vnd.ms-powerpoint" => "ppt",
+"application/vnd.openxmlformats-officedocument.wordprocessingml.template" => "dotx",
 "application/vnd.stardivision.calc" => "sdc",
 "application/vnd.stardivision.draw" => "sda",
 "application/vnd.stardivision.impress" => "sdd",
@@ -312,6 +313,7 @@ $mimeextensions=Array(
 "video/vnd.mpegurl" => "mxu",
 "video/x-dv" => "dif",
 "video/x-dv" => "dv",
+"video/x-flv" => "flv",
 "video/x-la-asf" => "lsf",
 "video/x-la-asf" => "lsx",
 "video/x-mng" => "mng",

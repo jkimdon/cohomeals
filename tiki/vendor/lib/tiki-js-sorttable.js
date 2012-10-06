@@ -1,5 +1,5 @@
 /**
- * $Id $
+ * $Id: tiki-js-sorttable.js 40035 2012-03-04 21:22:53Z gezzzan $
  * Moved from tiki-js.js for Tiki 3.0 to make way for JQuery version
  */
 
@@ -84,11 +84,11 @@ function ts_resortTable(lnk) {
     newRows.sort(sortfn);
 
     if (span.getAttribute("sortdir") == 'down') {
-        ARROW = '&nbsp;&nbsp;<img src="pics/icons/resultset_up.png" border="0" width="16" height="16" />';
+        ARROW = '&nbsp;&nbsp;<img src="img/icons/resultset_up.png" width="16" height="16" />';
         newRows.reverse();
         span.setAttribute('sortdir','up');
     } else {
-        ARROW = '&nbsp;&nbsp;<img src="pics/icons/resultset_down.png" border="0" width="16" height="16" />';
+        ARROW = '&nbsp;&nbsp;<img src="img/icons/resultset_down.png" width="16" height="16" />';
         span.setAttribute('sortdir','down');
     }
 

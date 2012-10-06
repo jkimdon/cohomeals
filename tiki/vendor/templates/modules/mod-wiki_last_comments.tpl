@@ -1,4 +1,4 @@
-{* $Id: mod-wiki_last_comments.tpl 26273 2010-03-23 12:02:11Z sylvieg $ *}
+{* $Id: mod-wiki_last_comments.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if ($type eq 'wiki page' and $prefs.feature_wiki eq 'y')
 	or ($type eq 'article' and $prefs.feature_articles eq 'y')}

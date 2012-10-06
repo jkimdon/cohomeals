@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-tracker_view_history.php 28986 2010-09-06 21:45:34Z pkdille $
+// $Id: tiki-tracker_view_history.php 41316 2012-05-03 23:33:22Z jonnybradley $
 
 $section = 'trackers';
 require_once ('tiki-setup.php');
@@ -19,7 +19,7 @@ if (!empty($_REQUEST['itemId'])) {
 	$perms = Perms::get(array('type'=>'tracker', 'object'=> $item_info['trackerId']));
 	if (!$perms->view_trackers) {
 		$smarty->assign('errortype', 401);
-		$smarty->assign('msg', tra('Permission denied. You cannot view this page.'));
+		$smarty->assign('msg', tra('You do not have permission to view this page.'));
 		$smarty->display('error.tpl');
 		die;
 	}
@@ -45,5 +45,14 @@ if (!empty($_REQUEST['itemId'])) {
 	$smarty->assign_by_ref('item_info', $item_info);
 	$smarty->assign_by_ref('field_option', $field_option);
 }
+
+$tiki_actionlog_conf = TikiDb::get()->table('tiki_actionlog_conf');
+$logging = $tiki_actionlog_conf->fetchCount(array(
+	'objectType' => 'trackeritem',
+	'action' =>  $tiki_actionlog_conf->in(array('Created','Updated')),
+	'status' =>  $tiki_actionlog_conf->in(array('y','v')),
+));
+$smarty->assign('logging', $logging);
+
 $smarty->assign('mid', 'tiki-tracker_view_history.tpl');
 $smarty->display('tiki.tpl');

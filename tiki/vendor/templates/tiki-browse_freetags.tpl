@@ -1,10 +1,10 @@
-{* $Id: tiki-browse_freetags.tpl 29842 2010-10-06 21:47:06Z nyloth $ *}
+{* $Id: tiki-browse_freetags.tpl 34636 2011-05-26 21:01:32Z luciash $ *}
 
 {title admpage=freetags}{tr}Browse related tags{/tr}{/title}
 
 {if $prefs.feature_morcego eq 'y' and $prefs.freetags_feature_3d eq 'y'}
 	<div class="morcego_embedded">
-		<h2>{tr}Network of Tags related to{/tr}: <span id="currentTag1">{$tag}</span></h2>
+		<h2>{tr}Network of Tags related to:{/tr} <span id="currentTag1">{$tag}</span></h2>
 		<applet codebase="./lib/wiki3d" archive="morcego-0.6.0.jar" code="br.arca.morcego.Morcego" width="{$prefs.freetags_3d_width}" height="{$prefs.freetags_3d_height}">
 			<param name="serverUrl" value="{$base_url}tiki-freetag3d_xmlrpc.php">
 			<param name="startNode" value="{$tag}">
@@ -28,7 +28,7 @@
 			<param name="eletrostaticConstant" value="{$prefs.freetags_3d_eletrostatic_constant|default:"1000f"}">
 			<param name="springSize" value="{$prefs.freetags_3d_spring_size|default:"100"}">
 			<param name="nodeMass" value="{$prefs.freetags_3d_node_mass|default:"5"}">
-			<param name="nodeCharge" value="{$freetags_3d_node_charde|default:"1"}">
+			<param name="nodeCharge" value="{$prefs.freetags_3d_node_charge|default:"1"}">
 		</applet>
 	</div>
 {/if}
@@ -37,7 +37,7 @@
 	<div class="freetagskeywords">
 		<b>{tr}Tags{/tr}</b> 
 		<input type="text" id="tagBox" name="tag" size="25" value="{$tagString|escape}" />
-		{button _onclick="clearTags();" _text="{tr}Clear{/tr}"}
+		{button _onclick="clearTags(); return false;" _text="{tr}Clear{/tr}"}
 		<input type="submit" value="{tr}Go{/tr}" />
 		<br />
 		<input type="hidden" name="sort_mode" value="{$sort_mode|escape}" />
@@ -87,7 +87,7 @@
 
 	{assign var=cpt value=0} 
 	{capture name="browse"}
-		{tr}Browse in{/tr}:
+		{tr}Browse in:{/tr}
 
 		{if $type eq $objectType}
 			{assign var=thisclass value='highlight'}
@@ -121,7 +121,7 @@
 				
 					{assign var=thistype value=$objectType|escape:'url'}
 					{capture name="fl"}{tr}{$feature_label}{/tr}{/capture}
-					{button _text="`$smarty.capture.fl`" _class=$thisclass href="tiki-browse_freetags.php?tag=$tagString$thisbroaden&amp;type=$thistype"}
+					{button _text=$smarty.capture.fl _class=$thisclass href="tiki-browse_freetags.php?tag=$tagString$thisbroaden&amp;type=$thistype"}
 					{assign var=cpt value=$cpt+1}
 				{/if}
 
@@ -147,7 +147,7 @@
 
 					{assign var=thistype value=$objectType|escape:'url'}
 					{capture name="fl"}{tr}{$feature_label}{/tr}{/capture}
-					{button _text="`$smarty.capture.fl`" _class=$thisclass href="tiki-browse_freetags.php?tag=$tagString$thisbroaden&amp;type=$thistype"}
+					{button _text=$smarty.capture.fl _class=$thisclass href="tiki-browse_freetags.php?tag=$tagString$thisbroaden&amp;type=$thistype"}
 					{assign var=cpt value=$cpt+1}
 				{/if}
 			{/foreach}

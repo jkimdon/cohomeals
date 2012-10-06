@@ -1,16 +1,18 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: faq.php 25210 2010-02-14 20:52:22Z changi67 $
+// $Id: faq.php 39469 2012-01-12 21:13:48Z changi67 $
 
-function prefs_faq_list() {
+function prefs_faq_list()
+{
 	return array(
 		'faq_comments_per_page' => array(
 			'name' => tra('Default number of comments per page'),
 			'type' => 'text',
 			'size' => '5',
+			'default' => 10,
 		),
 		'faq_comments_default_ordering' => array(
 			'name' => tra('Comments default ordering'),
@@ -20,6 +22,7 @@ function prefs_faq_list() {
 				'commentDate_asc' => tra('Oldest first'),
 				'points_desc' => tra('Points'),
 			),
+			'default' => 'points_desc',
 		),
 		'faq_prefix' => array(
 			'name' => tra('Question and Answer prefix on Answers'),
@@ -29,6 +32,7 @@ function prefs_faq_list() {
 				'QA' => tra('Q and A'),
 				'question_id' => tra('Question ID'),
 			),
+			'default' => 'QA',
 		),
 	);
 }

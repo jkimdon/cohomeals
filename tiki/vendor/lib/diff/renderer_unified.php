@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_unified.php 25256 2010-02-16 13:02:18Z changi67 $
+// $Id: renderer_unified.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -28,7 +28,8 @@ class Text_Diff_Renderer_unified extends Tiki_Text_Diff_Renderer
         $this->_trailing_context_lines = $context_lines;
         $this->_table = Array();
     }
-    function _endDiff() {
+    function _endDiff()
+    {		
         return $this->_table;
     }
 

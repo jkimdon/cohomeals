@@ -22,8 +22,8 @@
 			{cycle values="odd,even" print=false}
 			{section name=changes loop=$listpages}
 			  <tr class="{cycle}">
-			    <td>{$listpages[changes].contentId}</td>
-			    <td>
+			    <td class="id">{$listpages[changes].contentId}</td>
+			    <td class="text">
 			      {if $listpages[changes].contentLabel neq ''}
 			         <b>{$listpages[changes].contentLabel}</b>
 			      {/if}
@@ -31,27 +31,23 @@
 			        <div class="subcomment">{$listpages[changes].description}</div>
 			      {/if}
 			    </td>
-			    <td>{$listpages[changes].data|escape:'html'|nl2br}</td>
-			    <td>{$listpages[changes].actual|tiki_short_datetime}</td>
-			    <td>{$listpages[changes].next|tiki_short_datetime}</td>
-			    <td>{$listpages[changes].future}</td>
-			    <td>
-			      {self_link _class='link' _icon='page_edit' edit=$listpages[changes].contentId}{tr}Edit{/tr}{/self_link}
+			    <td class="text">{$listpages[changes].data|escape:'html'|nl2br}</td>
+			    <td class="date">{$listpages[changes].actual|tiki_short_datetime}</td>
+			    <td class="date">{$listpages[changes].next|tiki_short_datetime}</td>
+			    <td class="text">{$listpages[changes].future}</td>
+			    <td class="action">
+			      {self_link _class='link' _icon='page_edit' edit=$listpages[changes].contentId cookietab=2}{tr}Edit{/tr}{/self_link}
 			      <a class="link" href="tiki-edit_programmed_content.php?contentId={$listpages[changes].contentId}" title="{tr}Program{/tr}">{icon _id=wrench alt="{tr}Program{/tr}"}</a>
 			      {self_link _class='link' _icon='cross' _template='confirm.tpl' remove=$listpages[changes].contentId}{tr}Remove{/tr}{/self_link}
 			    </td>
 			  </tr>
 			{sectionelse}
-			  <tr>
-			    <td colspan="7" class="odd">
-		   	   <b>{tr}No records found{/tr}</b>
-			    </td>
-			  </tr>
+				{norecords _colspan=7}
 			{/section}
 		</table>
 		{pagination_links cant=$cant step=$prefs.maxRecords offset=$offset}{/pagination_links}
 	{/tab}
-	{tab name="Create/Edit content block"}
+	{tab name="{tr}Create/Edit content block{/tr}"}
 		<h2>
 		{if $contentId}
 		  {tr}Edit content block{/tr}
@@ -68,13 +64,13 @@
 		  <input type="hidden" name="contentId" value="{$contentId|escape}" />
 		  <table class="formcolor">
 		    <tr>
-		      <td>{tr}Label{/tr}:</td>
+		      <td>{tr}Label:{/tr}</td>
 		      <td>
 		        <input type="text" name="contentLabel" style="width:40%" value="{$contentLabel|escape}" />
 		      </td>
 		    </tr>
 		    <tr>
-		      <td>{tr}Description{/tr}:</td>
+		      <td>{tr}Description:{/tr}</td>
 		      <td>
 		        <textarea rows="5" cols="40" name="description" style="width:95%">{$description|escape}</textarea>
 		      </td>

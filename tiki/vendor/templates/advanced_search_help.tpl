@@ -1,4 +1,4 @@
-{* $Id: advanced_search_help.tpl 29082 2010-09-09 21:07:50Z sylvieg $ *}
+{* $Id: advanced_search_help.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {strip}
 
 <h3>{tr}Non Advanced Search or Natural Search{/tr}</h3>

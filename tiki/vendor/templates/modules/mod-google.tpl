@@ -1,4 +1,4 @@
-{* $Id: mod-google.tpl 20987 2009-08-19 22:15:12Z chealer $ *}
+{* $Id: mod-google.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="google" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 <form method="get" action="http://www.google.com/search" target="Google" style="margin-bottom:2px;">

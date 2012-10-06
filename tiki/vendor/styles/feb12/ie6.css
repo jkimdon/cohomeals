@@ -1,4 +1,4 @@
-/* $Id: ie6.css 25197 2010-02-13 22:45:59Z pkdille $
+/* $Id: ie6.css 33537 2011-03-18 22:40:55Z pkdille $
 	Feb12 theme selectors for IE6.
 */
 #header-top {
@@ -16,12 +16,12 @@ input[type=submit]:hover {
 	cursor: pointer;
 }
 
-span.button a,
-span.button a:visited {
+.button a,
+.button a:visited {
 	background: url(feb12/header.jpg) repeat-x 0 -2px;
 }
 
-span.button a:hover {
+.button a:hover {
 	color: #F5F5F5;
 	background: url(feb12/header.jpg) repeat-x 0 100%;
 }
@@ -46,16 +46,6 @@ span.button a:hover {
 	font-size: 1em;
 }
 
-.horbaritem a,
-.horbaritem a:link,
-.horbaritem a:visited {
-	font-size: 1.3em;
-}
-
-.mdksubmenu {
-	margin-top: 0;
-}
-
 .box-data table {
 	width: 95%;
 }
@@ -70,11 +60,11 @@ span.button a:hover {
 	height: 1%;
 }
 
-div#tikihelp {
+#tikihelp {
 	position: absolute;
 }
 
-div.box {
+.box {
 	width: 200px;
 }
 
@@ -83,12 +73,9 @@ h3.box-title {
 }
 
 .moduleflip {
+	display: block;
 	position: static;
 	float: right;
-}
-
-.moduleflip {
-	display: block;
 }
 
 img.flipmodimage {
@@ -116,6 +103,6 @@ td {
 	font-size: 1em;
 }
 
-table.galtable {
+.galtable {
 	width: 97%;
 }

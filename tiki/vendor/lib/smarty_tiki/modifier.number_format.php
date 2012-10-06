@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.number_format.php 28331 2010-08-06 05:12:16Z pkdille $
+// $Id: modifier.number_format.php 39469 2012-01-12 21:13:48Z changi67 $
 
 /**
  * Smarty plugin
@@ -26,20 +26,28 @@
  * @param thousands: thousands separator
  * @return number
  */
-function smarty_modifier_number_format($number, $decimals, $dec_point = null, $thousands = null) {
+function smarty_modifier_number_format($number, $decimals = 2, $dec_point = '.', $thousands = ',')
+{
 	$dec_point = separator($dec_point);
 	$thousands = separator($thousands);
 	return number_format($number, $decimals, $dec_point, $thousands);
 }
 
-function separator($sep) {
+function separator($sep)
+{
 	switch ($sep) {
 		case 'c':
+		case ',':
 			$sep = ',';
-			break;
+						break;
+		case 'd':
+		case '.':
+			$sep = '.';
+						break;
 		case 's':
+		case ' ':
 			$sep = ' ';
-			break;
+						break;
 	}
 	return $sep;
 }

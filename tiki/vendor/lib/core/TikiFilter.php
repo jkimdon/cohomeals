@@ -1,11 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiFilter.php 28738 2010-08-27 17:18:06Z sampaioprimo $
-
-require_once 'Zend/Filter/Interface.php';
+// $Id: TikiFilter.php 39469 2012-01-12 21:13:48Z changi67 $
 
 class TikiFilter
 {
@@ -18,23 +16,19 @@ class TikiFilter
 	 */
 	public static function get( $filter )
 	{
-		if( $filter instanceof Zend_Filter_Interface ) {
+		if ( $filter instanceof Zend_Filter_Interface ) {
 			return $filter;
 		}
 
 		switch( $filter )
 		{
 		case 'alpha':
-			require_once 'Zend/Filter/Alpha.php';
 			return new Zend_Filter_Alpha;
 		case 'alnum':
-			require_once 'Zend/Filter/Alnum.php';
 			return new Zend_Filter_Alnum;
 		case 'digits':
-			require_once 'Zend/Filter/Digits.php';
 			return new Zend_Filter_Digits;
 		case 'int':
-			require_once 'Zend/Filter/Int.php';
 			return new Zend_Filter_Int;
 		case 'username':
 		case 'groupname':
@@ -49,33 +43,25 @@ class TikiFilter
 		case 'datetime':
 			// Use striptags
 		case 'striptags':
-			require_once 'Zend/Filter/StripTags.php';
 			return new Zend_Filter_StripTags;
 		case 'word':
-			require_once 'TikiFilter/Word.php';
 			return new TikiFilter_Word;
 		case 'xss':
-			require_once 'TikiFilter/PreventXss.php';
 			return new TikiFilter_PreventXss;
 		case 'purifier':
-			require_once 'TikiFilter/HtmlPurifier.php';
-			return new TikiFilter_HtmlPurifier( 'temp/cache' );
+			return new TikiFilter_HtmlPurifier('temp/cache');
 		case 'wikicontent':
 		case 'rawhtml_unsafe':
-			require_once 'TikiFilter/RawUnsafe.php';
+		case 'none':
 			return new TikiFilter_RawUnsafe;
 		case 'lang':
-			require_once 'Zend/Filter/PregReplace.php';
-			return new Zend_Filter_PregReplace( '/^.*([a-z]{2})(\-[a-z]{2}).*$/', '$1$2' );
+			return new Zend_Filter_PregReplace('/^.*([a-z]{2})(\-[a-z]{2}).*$/', '$1$2');
 		case 'imgsize':
-			require_once 'Zend/Filter/PregReplace.php';
-			return new Zend_Filter_PregReplace( '/^.*(\d+)\s*(%?).*$/', '$1$2' );
+			return new Zend_Filter_PregReplace('/^.*(\d+)\s*(%?).*$/', '$1$2');
 		case 'attribute_type':
-			require_once 'TikiFilter/AttributeType.php';
 			return new TikiFilter_AttributeType;
 		default:
-			trigger_error( 'Filter not found: ' . $filter, E_USER_WARNING );
-			require_once 'TikiFilter/PreventXss.php';
+			trigger_error('Filter not found: ' . $filter, E_USER_WARNING);
 			return new TikiFilter_PreventXss;
 		}
 	}

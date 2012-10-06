@@ -1,6 +1,4 @@
-{* $Id: error_simple.tpl 29932 2010-10-10 18:32:17Z chealer $ *}<!DOCTYPE html 
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{* $Id: error_simple.tpl 33949 2011-04-14 05:13:23Z chealer $ *}<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}" lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
@@ -12,7 +10,7 @@
 		{/if}
 		<div id="tiki-mid">
 			<div class="cbox">
-				<div class="cbox-title">{icon _id=exclamation alt="{tr}Error{/tr}" style=vertical-align:middle"}{tr}Error{/tr}</div>
+				<div class="cbox-title">{icon _id=exclamation alt="{tr}Error{/tr}" style="vertical-align:middle"}{tr}Error{/tr}</div>
 				<div class="cbox-data">
 					{$msg}<br /><br />
 					<a href="javascript:window.close()" class="linkmenu">{tr}Close Window{/tr}</a><br /><br />

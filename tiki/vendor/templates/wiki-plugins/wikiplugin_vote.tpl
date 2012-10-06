@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_vote.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: wikiplugin_vote.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {strip}
 <span style="display:inline;{if $float}float:{$float}{/if}" class="poll">
 

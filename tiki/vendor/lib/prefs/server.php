@@ -1,36 +1,36 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: server.php 27952 2010-07-13 11:41:47Z jonnybradley $
+// $Id: server.php 40803 2012-04-07 14:25:49Z Jyhem $
 
-function prefs_server_list() {
-	global $prefs, $tikilib;
-	
+function prefs_server_list($partial = false)
+{
+
 	// Skipping the getTimeZoneList() from tikidate which just emulates the pear date format
 	// Generating it is extremely costly in terms of memory.
-	if( class_exists( 'DateTimeZone' ) ) {
+	if ( class_exists('DateTimeZone') ) {
 		$timezones = DateTimeZone::listIdentifiers();
 	} elseif ( class_exists('DateTime')) {
-		$timezones = array_keys( DateTime::getTimeZoneList() );
+		$timezones = array_keys(DateTime::getTimeZoneList());
 	} else {
 		$timezones = TikiDate::getTimeZoneList();
 		$timezones = array_keys($timezones);
 	}
 
-	sort( $timezones );
+	sort($timezones);
 
-	if ($prefs['server_timezone'] == 'GMT' && !in_array('GMT', $timezones) && in_array('UTC', $timezones)) {
-		$tikilib->set_preference( 'server_timezone', 'UTC' );
-	}
+	global $tikidate;
 	
 	return array(
 		'server_timezone' => array(
-			'name' => tra('Timezone'),
+			'name' => tra('Time zone'),
 			'description' => tra('Indicates the default time zone to use for the server.'),
 			'type' => 'list',
-			'options' => array_combine( $timezones, $timezones ),
+			'options' => array_combine($timezones, $timezones),
+			'default' => isset($tikidate) ? $tikidate->getTimezoneId() : 'UTC',
+			'tags' => array('basic'),
 		),
 	);
 }

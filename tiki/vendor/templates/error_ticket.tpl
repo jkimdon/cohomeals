@@ -1,6 +1,4 @@
-{* $Id: error_ticket.tpl 29932 2010-10-10 18:32:17Z chealer $ *}<!DOCTYPE html 
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{* $Id: error_ticket.tpl 33949 2011-04-14 05:13:23Z chealer $ *}<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}" lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
@@ -13,11 +11,6 @@
 {/if}
 
 <div id="tiki-main">
-  {if $prefs.feature_top_bar eq 'y'}
-  <div id="tiki-top">
-    {include file='tiki-top_bar.tpl'}
-  </div>
-  {/if}
   <div id="tiki-mid">
     <table border="0" cellpadding="0" cellspacing="0" id="tikimidtbl">
     <tr>
@@ -31,7 +24,7 @@
       <td id="centercolumn"><div id="tiki-center">
       <br />
         <div class="cbox">
-        <div class="cbox-title">{icon _id=exclamation alt="{tr}Error{/tr}" style=vertical-align:middle"} {$errortitle|default:"{tr}Error{/tr}"}
+        <div class="cbox-title">{icon _id=exclamation alt="{tr}Error{/tr}" style="vertical-align:middle"} {$errortitle|default:"{tr}Error{/tr}"}
         </div>
         <div class="cbox-data">
         <br />{$msg}
@@ -56,11 +49,6 @@
     </tr>
     </table>
   </div>
-  {if $prefs.feature_bot_bar eq 'y'}
-  <div id="tiki-bot">
-    {include file='tiki-bot_bar.tpl'}
-  </div>
-  {/if}
 </div>
 {if $prefs.feature_bidi eq 'y'}
 </td></tr></table>

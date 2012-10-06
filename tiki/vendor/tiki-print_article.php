@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-print_article.php 28990 2010-09-07 02:21:04Z pascalstjean $
+// $Id: tiki-print_article.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'cms';
 require_once ('tiki-setup.php');
@@ -57,7 +57,7 @@ if (isset($_REQUEST["articleId"])) {
 	$smarty->assign('edit_data', 'y');
 	$body = $article_data["body"];
 	$heading = $article_data["heading"];
-	$smarty->assign('parsed_body', $tikilib->parse_data($body));
+	$smarty->assign('parsed_body', $tikilib->parse_data($body, array('is_html' => $prefs['article_body_is_html'] === 'y')));
 	$smarty->assign('parsed_heading', $tikilib->parse_data($heading));
 }
 ask_ticket('print-article');

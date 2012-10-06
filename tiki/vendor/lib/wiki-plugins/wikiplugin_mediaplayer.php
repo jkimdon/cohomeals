@@ -1,30 +1,34 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_mediaplayer.php 29013 2010-09-07 23:12:10Z robertplummer $
+// $Id: wikiplugin_mediaplayer.php 40030 2012-03-04 12:55:30Z gezzzan $
 
-function wikiplugin_mediaplayer_help() {
-	return tra('Inline Flash mp3 and flv Player.')."<br />~np~{MEDIAPLAYER(mp3=\"url_to_mp3\", flv=\"url_to_flv\",style=normal) /}"; 
-}
-function wikiplugin_mediaplayer_info() {
+function wikiplugin_mediaplayer_info()
+{
 	return array(
-		'name' => tra('Mediaplayer'),
+		'name' => tra('Media Player'),
 		'documentation' => 'PluginMediaplayer',
-		'description' => 'Simple mp3 or flv Player',
+		'description' => tra('Add a media player to a page'),
 		'extraparams' =>true,
 		'prefs' => array( 'wikiplugin_mediaplayer' ),
+		'icon' => 'img/icons/mime/avi.png',
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'fullscreen' => array(
 				'required' => false,
 				'name' => tra('Allow Fullscreen'),
-				'description' => tra('Allow fullscreen mode.').' true|false',
+				'description' => tra('Allow fullscreen mode.').tra(' true|false'),
 				'filter' => 'alpha',
 				'options' => array(
 					array(
+						'text' => '',
+						'value' => '',
+					),
+					array(
 						'text' => tra('Yes'),
-						'value' => 'true'
+						'value' => 'true',
 					),
 					array(
 						'text' => tra('No'),
@@ -36,7 +40,7 @@ function wikiplugin_mediaplayer_info() {
 				'required' => false,
 				'name'=> tra('MP3 URL'),
 				'description' => tra('Complete URL to the mp3 to include.'),
-				'filter' => 'url'
+				'filter' => 'url',
 			),
 			'flv' => array(
 				'required' => false,
@@ -47,8 +51,9 @@ function wikiplugin_mediaplayer_info() {
 			'src' => array(
 				'required' => false,
 				'name'=> tra('URL'),
-				'description' => tra('Complete URL to the media to include.'). ' asx, asf, avi, flv, mov, mpg, mpeg, mp4, qt, ra, smil, swf, wmv, 3g2, 3gp,aif, aac, au, gsm, mid, midi, mov, mp3, m4a, snd, ra, ram, rm, wav, wma, bmp, html, pdf, psd, qif, qtif, qti, tif, tiff, xaml',
-				'filter' => 'url'
+				'description' => tra('Complete URL to the media to include.'). ' asx, asf, avi, mov, mpg, mpeg, mp4, qt, ra, smil, swf, wmv, 3g2, 3gp, aif, aac, au, gsm, mid, midi, mov, m4a, snd, ra, ram, rm, wav, wma, bmp, html, pdf, psd, qif, qtif, qti, tif, tiff, xaml',
+				'filter' => 'url',
+				'default' => '',
 			),
 			'style' => array(
 				'required' => false,
@@ -57,43 +62,51 @@ function wikiplugin_mediaplayer_info() {
 				'filter' => 'alpha',
 				'options' => array(
 					array(
-						'text' => 'mini', 'value' => 'mini'
+						'text' => '', 'value' => ''
 					),
 					array(
-						'text' => 'normal', 'value' => 'normal'
+						'text' => 'Mini', 'value' => 'mini'
 					),
 					array(
-						'text' => 'maxi', 'value' => 'maxi'
+						'text' => 'Normal', 'value' => 'normal'
 					),
 					array(
-						'text' => 'multi', 'value' => 'multi'
+						'text' => 'Maxi', 'value' => 'maxi'
+					),
+					array(
+						'text' => 'Multi', 'value' => 'multi'
 					)
 				)
 			),
 			'wmode' => array(
 				'required' => false,
 				'name' => tra('Flash Window Mode'),
-				'description' => tra('Sets the Window Mode property of the Flash movie for transparency, layering, and positioning in the browser. Default value: ').'transparent',
+				'description' => tra('Sets the Window Mode property of the Flash movie. Transparent lets what\'s behind the movie show through and allows the movie to be covered Opaque hides what\'s behind the movie and Window plays the movie in its own window. Default value: ').'transparent',
 				'filter' => 'alpha',
 				'options' => array(
 					array(
-						'text' => 'transparent'.tra(' - show background through and allow to be covered'),
-						'value' => 'transparent'
+						'text' => '',
+						'value' => '',
 					),
 					array(
-						'text' => 'opaque'.tra(' - hide everything behind'),
-						'value' => 'opaque'
+						'text' => tra('Transparent'),
+						'value' => 'transparent',
 					),
 					array(
-						'text' => 'window'.tra(' - play movie in its own rectangular window on a web page'),
-						'value' => 'window'
+						'text' => tra('Opaque'),
+						'value' => 'opaque',
+					),
+					array(
+						'text' => tra('Window'),
+						'value' => 'window',
 					)
 				)
 			),
 		),
 	);
 }
-function wikiplugin_mediaplayer($data, $params) {
+function wikiplugin_mediaplayer($data, $params)
+{
 	global $prefs, $access;
 	static $iMEDIAPLAYER = 0;
 	$id = 'mediaplayer'.++$iMEDIAPLAYER;
@@ -121,11 +134,11 @@ function wikiplugin_mediaplayer($data, $params) {
 		'height' => 240,
 	);
 	if (!empty($params['flv'])) {
-		$params = array_merge($defaults_flv, $params );
+		$params = array_merge($defaults_flv, $params);
 	} elseif (!empty($params['mp3'])) {
-		$params = array_merge($defaults_mp3, $params );
+		$params = array_merge($defaults_mp3, $params);
 	} else {
-		$params = array_merge($defaults, $params );
+		$params = array_merge($defaults, $params);
 	}
 	if (!empty($params['src'])) {
 		global $headerlib; include_once('lib/headerlib.php');
@@ -168,7 +181,9 @@ function wikiplugin_mediaplayer($data, $params) {
 	if (empty($params['flv']) && !empty($params['mp3'])) 
 		$code .= 'mp3='.$params['mp3'];
 	
-	unset($params['width']); unset($params['height']); unset($params['where']); unset($params['player']);unset($params['mp3']); unset($params['style']); unset($params['fullscreen']); unset($params['wmode']);
+	// Disabled due to MSIE issue still experienced with version 9: http://flv-player.net/help/#faq2
+	//unset($params['width']); unset($params['height']);
+	unset($params['where']); unset($params['player']);unset($params['mp3']); unset($params['style']); unset($params['fullscreen']); unset($params['wmode']);
 	
 	foreach ($params as $key=>$value) {
 		$code .= '&amp;'.$key.'='.$value;

@@ -1,4 +1,4 @@
-{* $Id: mod-featured_links.tpl 26273 2010-03-23 12:02:11Z sylvieg $ *}
+{* $Id: mod-featured_links.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if $prefs.feature_featuredLinks eq 'y'}
 	{tikimodule error=$module_params.error title=$tpl_module_title name="featured_links" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}

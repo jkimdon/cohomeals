@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -87,7 +86,7 @@
 					</ol>
 				</div>
 			{else}
-				<h1>{tr}An error occured while performing the request.{/tr}</h1>
+				<h1>{tr}An error occurred while performing the request.{/tr}</h1>
 				<div class="wikitext" style="border: solid 1px #ccc; margin: 1em auto; padding: 1em; text-align: left; width: 90%;">
 					<p>Things to check:</p>
 					<ol class="fancylist">
@@ -104,8 +103,8 @@
 
 {* Can be restored when we'll have a new http://branding.tiki.org/Badge
 			<p align="center">
-				<a target="_blank" href="http://www.tiki.org" title="Tiki Wiki CMS Groupware">
-				<img src="img/tiki/tikibutton2.png" alt="Tiki Wiki CMS Groupware" border="0" height="31" width="80"/>
+				<a target="_blank" href="http://tiki.org" title="Tiki Wiki CMS Groupware">
+				<img src="img/tiki/tikibutton2.png" alt="Tiki Wiki CMS Groupware" height="31" width="80"/>
 				</a>
 			</p>
 *}

@@ -1,5 +1,5 @@
 {strip}
-{* $Id: wikiplugin_trackerprefill.tpl 28491 2010-08-13 20:43:50Z minger0 $ *}
+{* $Id: wikiplugin_trackerprefill.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <form action="tiki-index.php?page={$params.page|escape:url}{$params.urlparams}" method="post">
 	{capture name=prefills}
 	{foreach from=$prefills item=field name=foo}

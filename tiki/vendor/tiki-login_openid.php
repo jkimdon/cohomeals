@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-login_openid.php 30572 2010-11-08 12:35:41Z sampaioprimo $
+// $Id: tiki-login_openid.php 40118 2012-03-10 21:34:48Z changi67 $
 
 // As a side note beyond the standard heading. Most of the code in this file was taken
 // directly from the OpenID library example files. The code was modified to suit the
@@ -95,7 +95,7 @@ function displayRegisatrationForms($data, $messages) // {{{
 	$listgroups = $userlib->get_groups(0, -1, 'groupName_asc', '', '', 'n');
 	$nbChoiceGroups = 0;
 	$mandatoryChoiceGroups = true;
-	foreach($listgroups['data'] as $gr) {
+	foreach ($listgroups['data'] as $gr) {
 		if ($gr['registrationChoice'] == 'y') {
 			++$nbChoiceGroups;
 			$theChoiceGroup = $gr['groupName'];
@@ -124,14 +124,16 @@ function displaySelectionList($data, $messages) // {{{
 	$smarty->display('tiki.tpl');
 	exit;
 } // }}}
-function displayError($message) { // {{{
+function displayError($message)
+{ // {{{
 	global $smarty;
 	$smarty->assign('msg', tra("Failure:") . " " . $message);
 	$smarty->assign('errortype', 'login');
 	$smarty->display("error.tpl");
 	die;
 } // }}}
-function getStore() { // {{{
+function getStore()
+{ // {{{
 	$store_path = "temp/openid_consumer";
 	if (!file_exists($store_path) && !mkdir($store_path)) {
 		print "Could not create the FileStore directory '$store_path'. " . " Please check the effective permissions.";
@@ -139,7 +141,8 @@ function getStore() { // {{{
 	}
 	return new Auth_OpenID_FileStore($store_path);
 } // }}}
-function getConsumer() { // {{{
+function getConsumer()
+{ // {{{
 	
 	/**
 	 * Create a consumer object using the store object created
@@ -148,7 +151,8 @@ function getConsumer() { // {{{
 	$store = getStore();
 	return new Auth_OpenID_Consumer($store);
 } // }}}
-function getOpenIDURL() { // {{{
+function getOpenIDURL()
+{ // {{{
 	// Render a default page if we got a submission without an openid
 	// value.
 	if (empty($_GET['openid_url'])) {
@@ -156,37 +160,42 @@ function getOpenIDURL() { // {{{
 	}
 	return $_GET['openid_url'];
 } // }}}
-function getScheme() { // {{{
+function getScheme()
+{ // {{{
 	$scheme = 'http';
 	if (isset($_SERVER['HTTPS']) and $_SERVER['HTTPS'] == 'on') {
 		$scheme.= 's';
 	}
 	return $scheme;
 } // }}}
-function getReturnTo() { // {{{
-	$path = str_replace('\\','/',dirname($_SERVER['PHP_SELF']));
+function getReturnTo()
+{ // {{{
+	$path = str_replace('\\', '/', dirname($_SERVER['PHP_SELF']));
 	$string = sprintf("%s://%s:%s%s/tiki-login_openid.php?action=return", getScheme(), $_SERVER['SERVER_NAME'], $_SERVER['SERVER_PORT'], $path == '/' ? '' : $path);
 	if (isset($_GET['action']) && $_GET['action'] == 'force') $string.= '&force=true';
 	return $string;
 } // }}}
-function getTrustRoot() { // {{{
-	return sprintf("%s://%s:%s%s", getScheme(), $_SERVER['SERVER_NAME'], $_SERVER['SERVER_PORT'], str_replace('\\','/',dirname($_SERVER['PHP_SELF'])));
+function getTrustRoot()
+{ // {{{
+	return sprintf("%s://%s:%s%s", getScheme(), $_SERVER['SERVER_NAME'], $_SERVER['SERVER_PORT'], str_replace('\\', '/', dirname($_SERVER['PHP_SELF'])));
 } // }}}
-function runAuth() { // {{{
+function runAuth()
+{ // {{{
 	setupFromAddress();
 	$openid = getOpenIDURL();
 	$consumer = getConsumer();
 	// Begin the OpenID authentication process.
 	$auth_request = $consumer->begin($openid);
-	// No auth request means we can't begin OpenID.
+	// No auth request means we can't begin OpenID. Usually this is because the OpenID is invalid. Sometimes this is because the OpenID server's certificate isn't trusted.
 	if (!$auth_request) {
-		displayError(tra("Authentication error; not a valid OpenID."));
+		displayError(tra("Authentication error; probably not a valid OpenID."));
 	}
 	$sreg_request = Auth_OpenID_SRegRequest::build(
-	// Required
-	array(),
-	// Optional
-	array('nickname', 'email'));
+					// Required
+					array(),
+					// Optional
+					array('nickname', 'email')
+	);
 	if ($sreg_request) {
 		$auth_request->addExtension($sreg_request);
 	}
@@ -218,7 +227,8 @@ function runAuth() { // {{{
 		}
 	}
 } // }}}
-function runFinish() { // {{{
+function runFinish()
+{ // {{{
 	global $smarty;
 	$consumer = getConsumer();
 	// Complete the authentication process using the server's
@@ -252,9 +262,8 @@ function runFinish() { // {{{
 			if (count($list) == 1) {
 				// Login the user
 				loginUser($list[0]);
-			} else
+			} else {
 			// Else Multiple account
-			{
 				// Display user selection list
 				displaySelectionList($list);
 			}

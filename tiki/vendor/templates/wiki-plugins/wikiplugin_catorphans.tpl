@@ -1,4 +1,4 @@
- {* $Id: wikiplugin_catorphans.tpl 28368 2010-08-07 15:28:06Z jonnybradley $ *}
+ {* $Id: wikiplugin_catorphans.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {foreach from=$pages item=pg}
 		 <a href="{$pg.pageName|sefurl}">{$pg.pageName|escape}</a><br />

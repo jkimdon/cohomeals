@@ -1,4 +1,4 @@
-{* $Id: mod-directory_last_sites.tpl 27202 2010-05-16 19:43:06Z ricks99 $ *}
+{* $Id: mod-directory_last_sites.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="directory_last_sites" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {modules_list list=$modLastdirSites nonums=$nonums}

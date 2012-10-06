@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_programmed_content.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-edit_programmed_content.php 40234 2012-03-17 19:17:41Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/dcs/dcslib.php');
@@ -34,19 +34,32 @@ if (isset($_REQUEST["remove"])) {
 
 $smarty->assign('data', '');
 $smarty->assign('publishDate', $tikilib->now);
+//Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
+include_once ('lib/userprefs/userprefslib.php');
+$smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
+
 $smarty->assign('actual', '');
 
 if (isset($_REQUEST["save"])) {
 	check_ticket('edit-programmed-content');
 
-	if( $_REQUEST['content_type'] == 'page' ) {
+	if ( $_REQUEST['content_type'] == 'page' ) {
 		$content = 'page:' . $_REQUEST['page_name'];
 	} else {
 		$content = $_REQUEST['data'];
 	}
 
-	$publishDate = TikiLib::make_time($_REQUEST["Time_Hour"], $_REQUEST["Time_Minute"],
-																   0, $_REQUEST["Date_Month"], $_REQUEST["Date_Day"], $_REQUEST["Date_Year"]);
+	if (!empty($_REQUEST['Time_Meridian'])) {
+		$_REQUEST['Time_Hour'] = date('H', strtotime($_REQUEST['Time_Hour'] . ':00 ' . $_REQUEST['Time_Meridian']));
+	}
+	$publishDate = TikiLib::make_time(
+					$_REQUEST["Time_Hour"], 
+					$_REQUEST["Time_Minute"],
+					0, 
+					$_REQUEST["Date_Month"], 
+					$_REQUEST["Date_Day"], 
+					$_REQUEST["Date_Year"]
+	);
 
 	$id = $dcslib->replace_programmed_content($_REQUEST["pId"], $_REQUEST["contentId"], $publishDate, $content, $_REQUEST['content_type']);
 	$smarty->assign('data', $_REQUEST["data"]);

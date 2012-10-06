@@ -1,4 +1,4 @@
-{* $Id: mod-calendar_new.tpl 28831 2010-09-01 13:08:26Z sylvieg $ *}
+{* $Id: mod-calendar_new.tpl 40035 2012-03-04 21:22:53Z gezzzan $ *}
 {if $show_calendar_module eq 'y'}
 {tikimodule error=$module_params.error title=$tpl_module_title name=$name flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {if $viewlist eq 'list'}
@@ -31,11 +31,11 @@
 					{assign var=month_today value=$smarty.now|tiki_date_format:"%m"}
 
 					{if $cell[w][d].focus}
-						{cycle values="calodd,caleven" print=false}
+						{cycle values="odd,even" print=false}
 					{else}
-						{cycle values="caldark" print=false}
+						{cycle values="notoddoreven" print=false}
 					{/if}
-					<td class="{cycle advance=false}{if $date eq $today} calfocuson{/if}{if isset($cell[w][d].items[0]) and ($cell[w][d].items[0].modifiable eq "y" 
+					<td class="{cycle advance=false}{if $date eq $today} highlight{/if}{if isset($cell[w][d].items[0]) and ($cell[w][d].items[0].modifiable eq "y" 
 								|| $cell[w][d].items[0].visible eq 'y')} focus{/if}" width="14%" style="text-align:center; font-size:0.8em;">
 
 						{if isset($cell[w][d].over)}
@@ -44,17 +44,22 @@
 							{assign var=over value=$cell[w][d].items[0].over}{else}{assign var=over value=""}
 						{/if}
 						{if isset($cell[w][d].items[0]) and ($cell[w][d].items[0].modifiable eq "y" || $cell[w][d].items[0].visible eq 'y')}
-							<a style="text-decoration: underline; font-weight: bold" href="{$myurl}?todate={$date}&amp;viewmode={$viewmodelink}" 
-							{if $sticky_popup eq 'y' or ($prefs.calendar_sticky_popup eq "y" and $cell[w][d].items[0].calitemId)}
+							{if empty($calendar_popup) or $calendar_popup eq "y"}
+								<a href="{$myurl}?todate={$date}&amp;viewmode={$viewmodelink}" 
+								{if $sticky_popup eq 'y' or ($prefs.calendar_sticky_popup eq "y" and $cell[w][d].items[0].calitemId)}
 									{popup sticky=true fullhtml="1" text=$over|escape:"javascript"|escape:"html"}
 								{else}
 									{popup fullhtml="1" text=$over|escape:"javascript"|escape:"html"}
 								{/if}
 								>
 								{$day_cursor}
-							</a>
+								</a>
+							{else}
+								{$day_cursor}
+								{$over}
+							{/if}
 						{elseif $linkall eq 'y'}
-							<a style="text-decoration: underline; font-weight: bold" href="{$myurl}?todate={$cell[w][d].day}&amp;viewmode={$viewmodelink}">{$day_cursor}</a>
+							<a href="{$myurl}?todate={$cell[w][d].day}&amp;viewmode={$viewmodelink}">{$day_cursor}</a>
 						{else}
 							{$day_cursor}
 						{/if}
@@ -66,7 +71,7 @@
 	</table>
 {/if}
 {if $tiki_p_add_events eq 'y' && (empty($module_params.showaction) || $module_params.showaction ne 'n')}
-	<p><a href="tiki-calendar_edit_item.php"><img src="pics/icons/add.png" alt="" /> {tr}Add event{/tr}</a></p>
+	<p><a href="tiki-calendar_edit_item.php"><img src="img/icons/add.png" alt="" /> {tr}Add event{/tr}</a></p>
 {/if}
 {/tikimodule}
 {/if}

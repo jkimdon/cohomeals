@@ -1,18 +1,20 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: categorypath.php 25210 2010-02-14 20:52:22Z changi67 $
+// $Id: categorypath.php 39903 2012-02-22 06:28:03Z marclaporte $
 
-function prefs_categorypath_list() {
+function prefs_categorypath_list()
+{
 	return array(
-
-	'categorypath_excluded' => array(
-			'name' => tra('Exclude these categories'),
-			'hint' => tra('Separate category IDs with a comma (,)'),
+		'categorypath_excluded' => array(
+			'name' => tra('Exclude these category IDs'),
+			'description' => tra('Category path won\'t appear for these category IDs.'),
+			'separator' => ',',
 			'type' => 'text',
 			'size' => '15',
-			),
-		);
+			'default' => array(''), //empty string needed to keep preference from setting unexpectedly
+		),
+	);
 }

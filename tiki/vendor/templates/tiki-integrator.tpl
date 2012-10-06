@@ -1,4 +1,4 @@
-{* $Id: tiki-integrator.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: tiki-integrator.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 <div class="integrated-page">
   {$data}

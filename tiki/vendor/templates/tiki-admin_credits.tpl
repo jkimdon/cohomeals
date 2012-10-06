@@ -1,10 +1,11 @@
+{* $Id: tiki-admin_credits.tpl 35047 2011-06-25 09:21:44Z gta74 $ *}
 {if isset($msg)}{$msg|escape}{/if}
 
 {title help="Credits"}{tr}Manage Credits{/tr}{/title}
 
 <form method="get" action="tiki-admin_credits.php">
 	<p>
-		{tr}Username{/tr}:
+		{tr}Username:{/tr}
 		<input type="text" name="userfilter" value="{$userfilter|escape}"/>
 		<input type="submit" value="{tr}Search{/tr}"/>
 	</p>
@@ -34,7 +35,7 @@
 		</tr>
 		{/foreach}
 		<tr>
-			<td><strong>New</strong></td>
+			<td><strong>{tr}New{/tr}</strong></td>
 			<td>
 				<select name="credit_type">
 					{foreach key=id item=data from=$credit_types}
@@ -168,7 +169,7 @@
 		</tr>
 		{/foreach}
 		<tr>
-			<td><strong>New</strong></td>
+			<td><strong>{tr}New{/tr}</strong></td>
 			<td><input type="text" name="new_credit_type" value="" size="8"/></td>
 			<td><input type="text" name="display_text" value="" size="8"/></td>
 			<td><input type="text" name="unit_text" value="" size="8"/></td>

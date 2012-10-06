@@ -1,5 +1,5 @@
-{* $Id: tiki-mods_admin.tpl 28929 2010-09-04 05:36:49Z pkdille $ *}
-{title help="mods"}{tr}Tikiwiki Mods Configuration{/tr}{/title}
+{* $Id: tiki-mods_admin.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+{title help="mods"}{tr}Tiki Mods Configuration{/tr}{/title}
 
 <div class="navbar">
 	{button href="tiki-mods.php" _text="{tr}Mods Install/uninstall{/tr}"}

@@ -1,6 +1,6 @@
-{* $Id: mod-user_tasks_public.tpl 22071 2009-10-07 07:46:55Z chealer $ *}
+{* $Id: mod-user_tasks_public.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if isset($public_tasks)}
-{if !isset($tpl_module_title)}{assign var=tpl_module_title value="<a href='tiki-user_tasks.php'>{tr}Public tasks{/tr}</a>"}{/if}
+{if !isset($tpl_module_title)}{assign var=tpl_module_title value="<a href='tiki-user_tasks.php'>{tr}Public Tasks{/tr}</a>"}{/if}
 {tikimodule error=$module_params.error title=$tpl_module_title name="user_tasks_public" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 <table class="normal">
 <tr><td width="100%">

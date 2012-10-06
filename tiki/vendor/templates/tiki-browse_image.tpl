@@ -1,7 +1,4 @@
-{* $Id: tiki-browse_image.tpl 29932 2010-10-10 18:32:17Z chealer $ *}
-{if $popup}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{* $Id: tiki-browse_image.tpl 40005 2012-03-02 23:36:41Z gezzzan $ *}{if $popup}<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -12,14 +9,14 @@
 <div id="{$rootid}browse_image">
 {else}
 
-  {title}{tr}Browsing Image:{/tr}&nbsp;{$name}{/title}
+	{title}{tr}Browsing Image:{/tr} {$name}{/title}
 <div id="{$rootid}browse_image">
-  <div class="navbar">
+	<div class="navbar">
 		{button href="tiki-browse_gallery.php?galleryId=$galleryId&amp;offset=$offset" _text="{tr}Return to Gallery{/tr}"}
-    {if $tiki_p_admin_galleries eq 'y' or ($user and $user eq $owner)}
+		{if $tiki_p_admin_galleries eq 'y' or ($user and $user eq $owner)}
 			{button href="tiki-edit_image.php?galleryId=$galleryId&amp;edit=$imageId&amp;sort_mode=$sort_mode" _text="{tr}Edit Image{/tr}"}
-    {/if}
-  </div>
+		{/if}
+	</div>
 {/if}
 
 {capture name=buttons}
@@ -62,7 +59,7 @@
 
 {* --- launch slideshow --- *}
 	{if $listImgId}
-	  <a href="javascript:thepix.toggle('start')">{html_image file='img/icons2/cycle_next.gif' border='none' alt="{tr}Slideshow Forward{/tr}" title="{tr}Slideshow Forward{/tr}"}</a>
+	  <a href="javascript:thepix.toggle('start')">{html_image file='img/icons/cycle_next.gif' border='none' alt="{tr}Slideshow Forward{/tr}" title="{tr}Slideshow Forward{/tr}"}</a>
 	{/if}
 
 {* --- last image --- *}
@@ -74,7 +71,7 @@
   <div class="slideshow" style="display: none;" align="center">
 
 {* --- stop --- *}
-	<a href="javascript:thepix.toggle('stop')">{html_image file='img/icons2/admin_delete.gif' border='none' alt="{tr}Stop{/tr}" title="{tr}Stop{/tr}"}</a>
+	<a href="javascript:thepix.toggle('stop')">{html_image file='img/icons/admin_delete.gif' border='none' alt="{tr}Stop{/tr}" title="{tr}Stop{/tr}"}</a>
 {* --- toggle cyclic --- *}
 	<a href="javascript:thepix.toggle('toTheEnd')">{html_image file='img/icons/ico_redo.gif' border='none' alt="{tr}Cyclic{/tr}" title="{tr}Cyclic{/tr}"}</a>
 {* --- toggle back/forward --- *}
@@ -83,7 +80,7 @@
 {/capture}
 {$smarty.capture.buttons}
 
-<div class="showimage" {if ($popup) }style="height: 400px"{/if}>
+<div class="showimage">
 {if $scaleinfo.clickscale >= 0}
   <a href="{$url_base}{$imageId}&amp;scalesize={$scaleinfo.clickscale}" title="{tr}Click to zoom{/tr}">
 {/if}
@@ -100,21 +97,21 @@
 {if $popup eq ""}
 	<br /><br />
 	<table class="normal noslideshow">
-		<tr><td class="odd">{tr}Image Name{/tr}:</td><td class="odd">{$name}</td></tr>
-		<tr><td class="even">{tr}Created{/tr}:</td><td class="even">{$created|tiki_long_datetime}</td></tr>
-		<tr><td class="odd">{tr}Image size{/tr}:</td><td class="odd">{$xsize}x{$ysize}</td></tr>
-		<tr><td class="even">{tr}Image Scale{/tr}:</td><td class="even">{if $resultscale}{$xsize_scaled}x{$ysize_scaled}{else}{tr}Original Size{/tr}{/if}</td></tr>
-		<tr><td class="odd">{tr}Hits{/tr}:</td><td class="odd">{$hits}</td></tr>
-		<tr><td class="even">{tr}Description{/tr}:</td><td class="even">{$description}</td></tr>
+		<tr><td class="odd">{tr}Image Name:{/tr}</td><td class="odd">{$name}</td></tr>
+		<tr><td class="even">{tr}Created:{/tr}</td><td class="even">{$created|tiki_long_datetime}</td></tr>
+		<tr><td class="odd">{tr}Image size:{/tr}</td><td class="odd">{$xsize}x{$ysize}</td></tr>
+		<tr><td class="even">{tr}Image Scale:{/tr}</td><td class="even">{if $resultscale}{$xsize_scaled}x{$ysize_scaled}{else}{tr}Original Size{/tr}{/if}</td></tr>
+		<tr><td class="odd">{tr}Hits:{/tr}</td><td class="odd">{$hits}</td></tr>
+		<tr><td class="even">{tr}Description:{/tr}</td><td class="even">{$description}</td></tr>
 		{if $prefs.feature_maps eq 'y' and $gal_info.geographic eq 'y'}
-	  		<tr><td class="odd">{tr}Latitude (WGS84/decimal degrees){/tr}:</td><td class="odd">{$lat|escape}</td></tr>
-	  		<tr><td class="even">{tr}Longitude (WGS84/decimal degrees){/tr}:</td><td class="even">{$lon|escape}</td></tr>
+	  		<tr><td class="odd">{tr}Latitude (WGS84/decimal degrees):{/tr}</td><td class="odd">{$lat|escape}</td></tr>
+	  		<tr><td class="even">{tr}Longitude (WGS84/decimal degrees):{/tr}</td><td class="even">{$lon|escape}</td></tr>
 	  	{/if}
-		<tr><td class="odd">{tr}Author{/tr}:</td><td class="odd">{$image_user|userlink}</td></tr>
+		<tr><td class="odd">{tr}Author:{/tr}</td><td class="odd">{$image_user|userlink}</td></tr>
 		{if $tiki_p_admin_galleries eq 'y' or ($user and $user eq $owner)}
 		<tr>
 			<td class="even">
-				{tr}Move image{/tr}:
+				{tr}Move image:{/tr}
 			</td>
 			<td class="odd">
 				<form action="tiki-browse_image.php" method="post">
@@ -138,7 +135,7 @@
 	<table class="normal noslideshow" style="font-size:small">
 		<tr>
 			<td class="even" style="border-bottom:0px" colspan="2">
-				{tr}Include the image in a tiki page using the following syntax{/tr}:
+				{tr}Include the image in a tiki page using the following syntax:{/tr}
 			</td>
 		</tr>
 		<tr>
@@ -158,7 +155,7 @@
 		</tr>
 		<tr>
 			<td class="even" style="border-bottom:0px" colspan="2">
-				{tr}To include the image in an HTML page{/tr}:
+				{tr}To include the image in an HTML page:{/tr}
 		    </td>
 		</tr>
 		<tr>
@@ -178,7 +175,7 @@
 		</tr>
 		<tr>
 		  	<td class="even" style="border-bottom:0px" colspan="2">
-		    	{tr}To link to this page from another tiki page{/tr}:
+		    	{tr}To link to this page from another tiki page:{/tr}
 		    </td>
 		</tr>
 		<tr>

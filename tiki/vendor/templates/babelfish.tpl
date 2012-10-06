@@ -1,4 +1,4 @@
-{* $Id: babelfish.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: babelfish.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if $prefs.feature_babelfish eq 'y' and $prefs.feature_babelfish_logo eq 'y'}
 

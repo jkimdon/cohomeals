@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: images.php 25252 2010-02-16 12:25:14Z changi67 $
+// $Id: images.php 39469 2012-01-12 21:13:48Z changi67 $
 
 /* Select the right library for images manipulation
  * We handle gd and imagemagick 1.x and 2.x

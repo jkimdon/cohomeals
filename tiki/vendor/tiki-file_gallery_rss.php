@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-file_gallery_rss.php 27976 2010-07-14 05:47:14Z sampaioprimo $
+// $Id: tiki-file_gallery_rss.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 require_once ('lib/tikilib.php');
@@ -28,7 +28,7 @@ foreach ($_REQUEST['galleryId'] as $fgalId) {
 	}
 }
 if (empty($galleryIds)) {
-	$errmsg=tra("Permission denied. You cannot view this section");
+	$errmsg=tra("You do not have permission to view this section");
 	require_once ('tiki-rss_error.php');
 }
 
@@ -37,8 +37,10 @@ $uniqueid = "$feed.id=".md5(implode('_', $galleryIds));
 $output = $rsslib->get_from_cache($uniqueid);
 
 if ($output["data"]=="EMPTY") {
+	$filegallib = TikiLib::lib('filegal');
+
 	if (count($galleryIds) == 1) {
-		$tmp = $tikilib->get_file_gallery($galleryIds[0]);
+		$tmp = $filegallib->get_file_gallery($galleryIds[0]);
 		$title = $prefs['feed_file_gallery_title'];
 		$title .= $tmp['name'];
 		$desc = $prefs['feed_file_gallery_desc'];
@@ -63,7 +65,7 @@ if ($output["data"]=="EMPTY") {
 		$readrepl = "tiki-download_file.php?$id=%s";
 	}
 
-	$changes = $tikilib->get_files( 0, $prefs['feed_file_gallery_max'], $dateId.'_desc', '', $galleryIds);
+	$changes = $filegallib->get_files(0, $prefs['feed_file_gallery_max'], $dateId.'_desc', '', $galleryIds);
 	$output = $rsslib->generate_feed($feed, $uniqueid, '', $changes, $readrepl, '', $id, $title, $titleId, $desc, $descId, $dateId, $authorId);
 }
 header("Content-type: ".$output["content-type"]);

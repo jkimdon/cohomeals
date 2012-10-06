@@ -1,22 +1,6 @@
-<?php 
+<?php
 
 
-
-
-
-
-
-
-
-
-
-
-
-$lang=Array(
+$lang = array(
 "test" => "test",
-"inuktitut" => "??????",
-
-
-
-
-"###end###"=>"###end###");
+);

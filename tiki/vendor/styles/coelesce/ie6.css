@@ -1,4 +1,4 @@
-/* $Id: ie6.css 25197 2010-02-13 22:45:59Z pkdille $
+/* $Id: ie6.css 33537 2011-03-18 22:40:55Z pkdille $
 	Coelesce theme selectors for IE6.
 */
 
@@ -14,12 +14,12 @@ h1 {
 	font-size: .9em;
 }
 
-span.button a {
+.button a {
 	background: #f5f5f5;
 }
 
-span.button a:link,
-span.button a:visited {
+.button a:link,
+.button a:visited {
 	text-decoration: none;
 	border: 0;
 	padding: 0 4px;
@@ -60,11 +60,11 @@ span.button a:visited {
 	height: 1%;
 }
 
-div#tikihelp {
+#tikihelp {
 	position: absolute;
 }
 
-div.box {
+.box {
 	width: 205px !important;
 }
 
@@ -73,19 +73,16 @@ h3.box-title {
 }
 
 .moduleflip {
+	display: block;
 	position: static;
 	float: right;
-}
-
-.moduleflip {
-	display: block;
 }
 
 img.flipmodimage {
 	border: none;
 }
 
-#col2 div.cssmenubox .box-data {
+#col2 .cssmenubox .box-data {
 	padding-right: 0 !important;
 }
 
@@ -96,8 +93,8 @@ img.flipmodimage {
 }
 
 
-table.normal, 
-table.admin {
+.normal, 
+.admin {
 	width: 97%;
 }
 
@@ -106,7 +103,7 @@ td {
 }
 
 th,
-table.normal td.heading {
+.normal td.heading {
 	height: 32px;
 }
 
@@ -123,7 +120,7 @@ table.normal td.heading {
 	display: inline;
 }
 
-div.articletitle h2 {
+.articletitle h2 {
 	height: 26px;
 }
 
@@ -135,7 +132,7 @@ div.articletitle h2 {
 	font-size: 11px;
 }
 
-table.galtable {
+.galtable {
 	width: 97%;
 }
 

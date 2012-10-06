@@ -1,4 +1,4 @@
-{* $Id: mod-since_last_visit.tpl 26160 2010-03-17 11:13:36Z sylvieg $ *}
+{* $Id: mod-since_last_visit.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if $user}
 {tikimodule error=$module_params.error title=$tpl_module_title name="since_last_visit" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}

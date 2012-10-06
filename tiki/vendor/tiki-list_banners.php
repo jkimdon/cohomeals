@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_banners.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-list_banners.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/banners/bannerlib.php');
@@ -15,7 +15,7 @@ $access->check_feature('feature_banners');
 if (isset($_REQUEST["remove"])) {
 	if ($tiki_p_admin_banners != 'y') {
 		$smarty->assign('errortype', 401);
-		$smarty->assign('msg', tra("Permission denied you cannot remove banners"));
+		$smarty->assign('msg', tra("You do not have permission to remove banners"));
 		$smarty->display("error.tpl");
 		die;
 	}
@@ -57,6 +57,5 @@ $listpages = $bannerlib->list_banners($offset, $maxRecords, $sort_mode, $find, $
 $smarty->assign_by_ref('cant_pages', $listpages["cant"]);
 $smarty->assign_by_ref('listpages', $listpages["data"]);
 ask_ticket('list-banners');
-// Display the template
 $smarty->assign('mid', 'tiki-list_banners.tpl');
 $smarty->display("tiki.tpl");

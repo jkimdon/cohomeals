@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: received_article_image.php 25079 2010-02-11 16:21:41Z changi67 $
+// $Id: received_article_image.php 39467 2012-01-12 19:47:28Z changi67 $
 
 // application to display an image from the database with 
 // option to resize the image dynamically creating a thumbnail on the fly.
@@ -18,5 +18,5 @@ include_once ('lib/commcenter/commlib.php');
 $data = $commlib->get_received_article($_REQUEST["id"]);
 $type = $data["image_type"];
 $data = $data["image_data"];
-header ("Content-type: $type");
+header("Content-type: $type");
 echo $data;

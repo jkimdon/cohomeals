@@ -1,26 +1,28 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-whats_related.php 26808 2010-04-28 12:30:41Z jonnybradley $
+// $Id: mod-func-whats_related.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_whats_related_info() {
+function module_whats_related_info()
+{
 	return array(
-		'name' => tra('What is related'),
+		'name' => tra('Related Items'),
 		'description' => tra('Lists objects which share a category with the viewed object.'),
-		'prefs' => array(),
+		'prefs' => array('feature_categories'),
 		'params' => array()
 	);
 }
 
-function module_whats_related( $mod_reference, $module_params ) {
+function module_whats_related($mod_reference, $module_params)
+{
 	global $smarty;
 	global $categlib; require_once ('lib/categories/categlib.php');
 	

@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_subscribegroup.tpl 25765 2010-02-27 18:34:19Z sylvieg $ *}
+{* $Id: wikiplugin_subscribegroup.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {strip}
 <form method="post">
 <input type="hidden" name="group" value="{$subscribeGroup|escape}" />

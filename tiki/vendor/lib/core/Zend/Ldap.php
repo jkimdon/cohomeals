@@ -15,15 +15,15 @@
  *
  * @category   Zend
  * @package    Zend_Ldap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ldap.php 22997 2010-09-22 17:04:28Z sgehrig $
+ * @version    $Id: Ldap.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 /**
  * @category   Zend
  * @package    Zend_Ldap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Ldap
@@ -922,8 +922,8 @@ class Zend_Ldap
      * @param  array                                  $attributes
      * @param  string|null                            $sort
      * @param  string|null                            $collectionClass
-     * @param  integer                            	  $sizelimit
-     * @param  integer                            	  $timelimit
+     * @param  integer                                  $sizelimit
+     * @param  integer                                  $timelimit
      * @return Zend_Ldap_Collection
      * @throws Zend_Ldap_Exception
      */
@@ -986,7 +986,7 @@ class Zend_Ldap
             require_once 'Zend/Ldap/Exception.php';
             throw new Zend_Ldap_Exception($this, 'searching: ' . $filter);
         }
-        if (!is_null($sort) && is_string($sort)) {
+        if ($sort !== null && is_string($sort)) {
             $isSorted = @ldap_sort($this->getResource(), $search, $sort);
             if($isSorted === false) {
                 /**
@@ -1008,8 +1008,8 @@ class Zend_Ldap
     /**
      * Extension point for collection creation
      *
-     * @param  Zend_Ldap_Collection_Iterator_Default	$iterator
-     * @param  string|null								$collectionClass
+     * @param  Zend_Ldap_Collection_Iterator_Default    $iterator
+     * @param  string|null                                $collectionClass
      * @return Zend_Ldap_Collection
      * @throws Zend_Ldap_Exception
      */
@@ -1107,8 +1107,8 @@ class Zend_Ldap
      * @param  array                                  $attributes
      * @param  string|null                            $sort
      * @param  boolean                                $reverseSort
-     * @param  integer                            	  $sizelimit
-     * @param  integer                            	  $timelimit
+     * @param  integer                                  $sizelimit
+     * @param  integer                                  $timelimit
      * @return array
      * @throws Zend_Ldap_Exception
      */
@@ -1167,7 +1167,7 @@ class Zend_Ldap
         foreach ($entry as $key => $value) {
             if (is_array($value)) {
                 foreach ($value as $i => $v) {
-                    if (is_null($v)) unset($value[$i]);
+                    if ($v === null) unset($value[$i]);
                     else if (!is_scalar($v)) {
                         throw new InvalidArgumentException('Only scalar values allowed in LDAP data');
                     } else {
@@ -1181,7 +1181,7 @@ class Zend_Ldap
                 }
                 $entry[$key] = array_values($value);
             } else {
-                if (is_null($value)) $entry[$key] = array();
+                if ($value === null) $entry[$key] = array();
                 else if (!is_scalar($value)) {
                     throw new InvalidArgumentException('Only scalar values allowed in LDAP data');
                 } else {

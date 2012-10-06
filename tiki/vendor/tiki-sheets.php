@@ -1,33 +1,43 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-sheets.php 29121 2010-09-10 20:19:17Z sylvieg $
+// $Id: tiki-sheets.php 41674 2012-05-31 19:01:09Z changi67 $
 
-$section = 'sheet';
 require_once ('tiki-setup.php');
-require_once ('lib/sheet/grid.php');
+
+$sheetlib = TikiLib::lib("sheet");
 
 $access->check_feature('feature_sheet');
 
 $auto_query_args = array('sheetId');
 
+$cookietab = 2;
 if (!isset($_REQUEST["sheetId"])) {
+	$cookietab = 1;
 	$_REQUEST["sheetId"] = 0;
 	$info = array();
 	$smarty->assign('headtitle', tra('Spreadsheets'));
 } else {
-	$cookietab = 2;
+	if (isset($_REQUEST['edit_mode']) && $_REQUEST['edit_mode'] == 1) {
+		$cookietab = 2;	
+	}
 	$info = $sheetlib->get_sheet_info($_REQUEST["sheetId"]);
-	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_view_sheet')) $tiki_p_view_sheet = 'y';
-	else $tiki_p_view_sheet = 'n';
+	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_view_sheet')) 
+		$tiki_p_view_sheet = 'y';
+	else 
+		$tiki_p_view_sheet = 'n';
 	$smarty->assign('tiki_p_view_sheet', $tiki_p_view_sheet);
-	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || ($user && $user == $info['author']) || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_edit_sheet')) $tiki_p_edit_sheet = 'y';
-	else $tiki_p_edit_sheet = 'n';
+	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || ($user && $user == $info['author']) || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_edit_sheet')) 
+		$tiki_p_edit_sheet = 'y';
+	else 
+		$tiki_p_edit_sheet = 'n';
 	$smarty->assign('tiki_p_edit_sheet', $tiki_p_edit_sheet);
-	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || ($user && $user == $info['author']) || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_view_sheet_history')) $tiki_p_view_sheet_history = 'y';
-	else $tiki_p_view_sheet_history = 'n';
+	if ($tiki_p_admin == 'y' || $tiki_p_admin_sheet == 'y' || ($user && $user == $info['author']) || $tikilib->user_has_perm_on_object($user, $_REQUEST['sheetId'], 'sheet', 'tiki_p_view_sheet_history')) 
+		$tiki_p_view_sheet_history = 'y';
+	else 
+		$tiki_p_view_sheet_history = 'n';
 	$smarty->assign('tiki_p_view_sheet_history', $tiki_p_view_sheet_history);
 	$smarty->assign('headtitle', tra('Spreadsheet - ') . $info['title']);
 }
@@ -72,8 +82,7 @@ if (isset($_REQUEST["edit_mode"]) && $_REQUEST["edit_mode"]) {
 	}
 }
 $cat_type = 'sheet';
-$cat_objid = $_REQUEST['sheetId'];
-include_once ('categorize_list.php');
+
 // Process the insertion or modification of a sheet here
 if (isset($_REQUEST["edit"])) {
 	$access->check_permission('tiki_p_edit_sheet');
@@ -91,9 +100,13 @@ if (isset($_REQUEST["edit"])) {
 		$_REQUEST['parseValues'] = 'n';
 	}
 	$smarty->assign_by_ref('parseValues', $_REQUEST['parseValues']);
-	$gid = $sheetlib->replace_sheet($_REQUEST["sheetId"], $_REQUEST["title"], $_REQUEST["description"], $_REQUEST['creator'], $_REQUEST['parentSheetId']);
-	$sheetlib->replace_layout($gid, $_REQUEST["className"], $_REQUEST["headerRow"], $_REQUEST["footerRow"], $_REQUEST['parseValues']);
-	$cat_type = 'sheet';
+	$gid = $sheetlib->replace_sheet(
+		$_REQUEST["sheetId"],
+		$_REQUEST["title"],
+		$_REQUEST["description"],
+		isset($_REQUEST['creator']) ? $_REQUEST['creator'] : $user,
+		$_REQUEST['parentSheetId']
+	);
 	$cat_objid = $gid;
 	$cat_desc = substr($_REQUEST["description"], 0, 200);
 	$cat_name = $_REQUEST["title"];
@@ -103,9 +116,13 @@ if (isset($_REQUEST["edit"])) {
 }
 if (isset($_REQUEST["removesheet"])) {
 	$access->check_permission('tiki_p_edit_sheet');
-	$access->check_authenticity();
+	$access->check_authenticity(tra("Are you sure you want to delete this spreadsheet?"));
 	$sheetlib->remove_sheet($_REQUEST["sheetId"]);
+	header("Location: tiki-sheets.php");
 }
+$cat_objid = $_REQUEST['sheetId'];
+include_once ('categorize_list.php');
+
 if (!isset($_REQUEST["sort_mode"])) {
 	$sort_mode = 'title_asc';
 } else {
@@ -125,6 +142,7 @@ $smarty->assign_by_ref('offset', $offset);
 $sheets = $sheetlib->list_sheets($offset, $maxRecords, $sort_mode, $find);
 $smarty->assign_by_ref('cant_pages', $sheets["cant"]);
 $smarty->assign_by_ref('sheets', $sheets["data"]);
+
 include_once ('tiki-section_options.php');
 ask_ticket('sheet');
 // Display the template

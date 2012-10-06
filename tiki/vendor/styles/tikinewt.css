@@ -10,7 +10,8 @@
 			others follow Layout) *****/
 body {
 	background: #e9ecef;
-	font: 76%/1.6 Corbel, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, sans-serif;
+	font-family: 76% Corbel, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, sans-serif;
+	line-height: 1.6;
 	color: #000;
 }
 
@@ -19,6 +20,12 @@ body {
 #tiki-main {
 	margin: 0;
 	font-size: 1em;
+}
+
+/* Enable header and footer content to widen when middle has wide content. */ 
+body.fixed_width .fixedwidth .fixedwidth {
+	width: 100%;
+	padding: 0;
 }
 
 #middle {
@@ -33,11 +40,6 @@ body {
 
 #c1c2	#wrapper #col1 > .content {
 	background: #fff;
-}
-
-.fullscreen #col1 {
-	margin-left: 30px !important;
-	margin-right: 30px !important;
 }
 
 #c1c2 #wrapper #col1 #tiki-center {
@@ -109,6 +111,7 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0;
 	margin-bottom: 3px;
 	color: #234956;
+	line-height: 1.1;
 }
 
 h1 {
@@ -172,40 +175,13 @@ input,
 textarea,
 select {
 	color: #112233;
-	margin: 1px;
-	font: 100% Verdana, Helvetica, Geneva, Arial, sans-serif;
+	font-family: Verdana, Helvetica, Geneva, Arial, sans-serif;
 }
 
-button,
-input,
-select {
-	vertical-align: middle;
-}
-
-button,
-input {
-	margin-right: 1px;
-	padding: 1px;
-}
 
 input[type=checkbox],
 input[type=radio] {
 	border: 0;
-}
-
-button,
-input[type=submit],
-.button input {
-	border: 1px solid #46596f;
-	background: #c7d0d9;
-	font-weight: bold;
-}
-
-button:hover,
-input[type=submit]:hover,
-.button input:hover {
-	background: #ffffff;
-	cursor: pointer;
 }
 
 #page-bar table, #page-bar td, #page-bar tr {
@@ -238,14 +214,8 @@ input[type=submit],
 	text-decoration: none;
 	white-space: nowrap;
 	cursor: pointer;
-	display: inline;
-	outline: none;
-	font: bold .95em/2em Verdana, Helvetica, Geneva, Arial, sans-serif;
-}
-
-.button a,
-.button a:visited {
-	padding: 1px 4px;
+	font-family: Verdana, Helvetica, Geneva, Arial, sans-serif;
+	font-weight: bold;
 }
 	
 .button a:hover,
@@ -255,6 +225,18 @@ input[type=submit]:hover,
 .button input:hover,
 .calbuttonbox a:hover {
 	background: #dca;
+	padding: 0 4px;
+	margin-right: 1px;
+	font-family: Verdana, Helvetica, Geneva, Arial, sans-serif;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+/* Needed for Opera (11) */
+input[type="reset"],
+input[type="submit"],
+input[type="reset"]:hover,
+input[type="submit"]:hover {
 	padding: 0 4px;
 }
 
@@ -269,35 +251,37 @@ label {
 }
 
 /***** Site Header & Identity *****/
-#header {
+.header {
 	background: #e9ecef;
 }
 
-#header a,
-#header a:visited {
+.header a,
+.header a:visited {
 	text-decoration: none;
 }
 
-#header-top {
-	position: relative;
+#top_modules {
 	min-height: 50px;
 	padding-top: 2px;
 }
 
-	
-#header-top[id] {
-	height: auto;
-	min-height: 50px;
+#top_modules .module.secondary_site_menu {
+	position: absolute;
+	top: 0;
+	right: 40px;
 }
 
-#siteheader {
-	text-align: left;
-	background: transparent;
-	padding-bottom: 0;
-	margin: 0;
+#top_modules .box-logo {
+	float: left;
+	margin: 10px;
 }
 
-#sitetitles {
+#top_modules #sitetitles {
+	margin-left: 20px;
+	line-height: normal;
+	margin-top: 10%;
+	margin-bottom: 10%;
+	padding-left: 15px;
 	font-weight: bold;
 }
 
@@ -309,24 +293,7 @@ label {
 	font-size: 1.2em;
 }
 
-#sioptions {
-	margin: 8px;
-}
-
-#sitelogo {
-	margin: auto;
-	overflow: hidden;
-}
-
-#sitead.floatright {
-	padding-right: 100px;
-}
-
-#sitead.floatleft {
-	padding-left: 100px;
-}
-
-#siteloginbar {
+#top_modules .box-login_box {
 	text-align: right;
 	position: absolute;
 	bottom: 3px;
@@ -334,25 +301,29 @@ label {
 	font-size: 90%;
 }
 
-#siteloginbar.logged-in {
+.siteloginbar.logged-in {
 	bottom: 3px;
 }
 
-#siteloginbar div {
+.siteloginbar div {
 	text-align: right;
 }
 
-#siteloginbar_popup {
+.siteloginbar_popup {
 	bottom: 4px;
 }
 
-#siteloginbar_popup li.login_link {
+.siteloginbar_popup .tabmark {
+	float: left;
+}
+
+.siteloginbar_popup li.login_link {
 	border: 1px solid #8cacbb;
 	padding: 0;
 }
 
-#siteloginbar_popup .cssmenu_horiz li ul {
-	margin-top: -4px;
+.siteloginbar_popup .cssmenu_horiz li ul {
+	margin-top: 5px;
 }
 
 #tiki-top {
@@ -368,10 +339,11 @@ label {
 	text-decoration: none;
 }
 
-#sitesearchbar {
+#topbar_modules .box-search {
 	font-size: .95em;
 	text-align: right;
 	float: right;
+	margin-right: 20px;
 }
 
 /****** Menus, Links ******/
@@ -441,81 +413,6 @@ a > .sf-sub-indicator {
 .cssmenu_horiz.sf-shadow ul li,
 .cssmenu_vert.sf-shadow ul li {
 	background-color: #fff; 
-}
-
-/** PHP Layers Menus **/
-.horbar {
-	margin-left: 0;
-	text-align: left;
-	color: #6D809F;
-}
-
-	
-.horbaritem {
-	padding: 2px 6px;
-	border-right: 1px solid #8cacbb;
-}
-
-.mdkverbar {
-	margin: 0;
-}
-
-.mdksubframe {
-	position: relative;
-	display: block;
-	border: 1px solid #000;
-	background: #fff;
-}
-
-.mdkitem {
-	border-top: 1px solid #dedede;
-}
-
-.mdkitem a,
-.mdkitem a:visited {
-	padding: 2px 5px;
-	text-decoration: none;
-	font-size: 10px;
-}
-
-.mdkitem a:hover {
-	background: #e9ecef;
-}
-
-.mdkitem a:active {
-	color: #993300;
-}
-
-a.phplm:link,
-a.phplm,
-a.phplm:hover,
-a.phplm:visited,
-.phplmnormal a,
-.phplmnormal a:hover,
-.phplmnormal a:visited {
-	color: #000;
-	font-size: .9em;
-	font-weight: normal;
-}
-
-a.phplm:hover,
-.phplmnormal a:hover {
-	background: transparent;
-	text-decoration: underline;
-}
-
-.treemenudiv {
-	background: #fff;
-}
-
-#col2 .treemenudiv {
-	font-size: 1em;
-}
-
-#col2 a.phplm:hover {
-	background: #ddd;
-	color: #224466;
-	text-decoration: none;
 }
 
 .separator, .separatorline {
@@ -607,8 +504,7 @@ a.flip:hover {
 .share {
 	font-size: 80%;
 	text-align: right;
-	margin-right: 1em;
-	margin: 3px 1em -1px 3px;
+	margin: 3px 3px -1px 3px;
 }
 
 .tellafriend a,
@@ -717,11 +613,6 @@ img.flipmodimage {
 	font-size: .95em;
 }
 
-.module {
-	font-size: .95em;
-	color: #fff;
-}
-
 .linkmodule,
 .linkmodule:visited {
 	font-size: .95em;
@@ -786,29 +677,22 @@ img.flipmodimage {
 	text-align: left;
 }
 
-.rbox-data {
-	padding: 2px;
-}
-
-.rbox-title,
-.warning .rbox-title {
+.rbox-title {
 	font-size: .95em;
 	line-height: 1em;
 	font-weight: bold;
-	background: #eeee99;
-	border: 1px solid #000;
-	border-bottom: none;
 }
 
 .rbox-data, 
-.warning .rbox-data {
+.warning .rbox-data,
+.warning .rbox-title {
 	background: #eeee99;
 	border: 1px solid #000;
 }
 
 .rbox-title span {
 	vertical-align: middle;
-	}
+}
 
 .note .rbox-title {
 	background: #ccccdd;
@@ -832,6 +716,16 @@ img.flipmodimage {
 .rbox-data.tip {
 	background: #ecefec;
 	border: 1px solid #ccddcc;
+}
+
+.rbox-title,
+.comment .rbox-title,
+.error .rbox-title,
+.errors .rbox-title,
+.note .rbox-title,
+.warning .rbox-title {
+	border-bottom: none;
+	margin-bottom: -.55em;
 }
 
 /***** Tables, Tabs *****/
@@ -911,7 +805,7 @@ form.admin legend.heading {
 	background: transparent;
 	border: none;
 	line-height: 1em;
-	padding-right: 0 5px;
+	padding-right: 5px;
 }
 
 form.admin legend.heading a {
@@ -1033,68 +927,67 @@ td.third {
 }
 
 /** Tabs **/
-.tab1 form {
-	display: inline;
-}
+.tabactive,
+.tabinactive,
+[class].tabactive,
+[class].tabinactive {top: 0 !important}
 
 .tabs {
-	border-bottom: solid 1px #225566 !important;
-	margin: 10px 1px 0 0 !important;
-	padding: 0 !important;
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+	position:relative;
+	padding: .2em .2em 0;
+	margin:0 0.2em 0 0;
+	border: none;
+}
+
+.tabs span {
+	display: block;
+	float: left;
 }
 
 .tabmark {
-	display: inline;
-	font-size: .95em;
-	background: #ddd;
-	border: 1px solid #666;
-	margin: 0;
-	margin-right: 5px;
-	padding: 2px 0;
+	list-style-image: none;
+	float: left;
+	border: solid 1px #aaa;
+	border-bottom: none !important;
+	margin: 0 .2em 0 0;
 }
 
-.tabmark a {
-	border-bottom: 0;
+.tabmark a,
+.tabmark a:visited {
+	padding: 0.5em 1em;
 	color: #666;
 	font-weight: bold;
-	padding: 1px 5px;
 }
 
 .tabmark a:active {
-	background: #fff;
-	color: #ff0000;
+	color: #f00;
 }
 
 .tabmark a:hover {
 	color: #000;
-	background: #ccc;
+	text-decoration: none;
 }
 
 .tabactive {
-	border: solid 1px #225566 !important;
-	border-bottom: none !important;
-	border-top-width: 2px !important;
-	position: relative;
-	top: -1px;
-}
-
-[class].tabactive {
-	top: 2px;
-}
-
-.tabactive a {
+	border: solid 1px #225566;
+	border-bottom-width: 0;
 	background: #eee;
 }
 
-.tabinactive {
-	border: solid 1px #666 !important;
-	border-bottom: none !important;
-	position: relative !important;
-	top: -2px !important;
+.tabmark:hover {
+	background: #ccc;
 }
 
-[class].tabinactive {
-	top: 1px !important;
+.tabactive:hover {
+	background: #eee;
+}
+
+.tabactive a:hover {
+	color: #666;
+	text-decoration: none;
 }
 
 .tabcontent {
@@ -1103,7 +996,6 @@ td.third {
 	border-top: none !important;
 	padding: 6px 2px 2px 2px;
 	background: #eee;
-	text-align: center;
 	margin-top: 0 !important;
 }
 
@@ -1206,11 +1098,10 @@ h1.pagetitle strong {
 	width: auto;
 }
 
-body.wikitext {
-	margin: 10px !important;
+body.cke_show_borders {
 	background: #f3f6f9;
 }
-
+/*
 body.wikitext a {
 	color: #225566 !important;
 	font-weight: bold;
@@ -1219,7 +1110,7 @@ body.wikitext a {
 body.wikitext a:hover {
 	color: #224466 !important;
 	background: #fffff1;
-}
+}*/
 
 .wikitext .img {
 	overflow: auto;
@@ -1249,7 +1140,7 @@ textarea.wikiedit {
 	font-size: 1.1em;
 }
 
-p.editdate {
+.editdate {
 	color: #223344;
 	font-size: 1em;
 	padding: 0 10px;
@@ -1270,12 +1161,9 @@ img.externallink {
 	border-top: 1px solid #8cacbb;
 	border-bottom: 1px solid #8cacbb;
 	color: #000;
+	background: #eee;
 	padding: 2px 0;
-	margin-bottom: 2px;
-}
-
-.tocnavlink {
-	color: #000;
+	margin-bottom: 16px;
 }
 
 .toc {
@@ -1285,23 +1173,14 @@ img.externallink {
 }
 
 .toc li {
-	background: url(../img/icons2/corner-dots.gif) no-repeat;
+	background: url(../img/icons/corner-dots.gif) no-repeat;
 	margin-top: 3px;
 	padding-left: 16px;
-}
-
-.tocnav {
-	background: #eee;
-	margin-bottom: 16px;
 }
 
 .tocnav a {
 	font-size: .95em;
 	color: #424242;
-}
-
-.fancytoclevel {
-	list-style-image: url(../img/icons/footprint.gif);
 }
 
 li.toclevel {
@@ -1539,35 +1418,36 @@ span.posthead small {
 	font-weight: normal;
 }
 
+.blog_r {
+	border-left: 1px solid #8cacbb;
+	float: right;
+	width: 80%;
+}
+
+.blog_l {
+	text-align: center;
+	float: left;
+	width: 19%;
+}
+
 body.tiki_blogs .post {
 	margin-bottom: 20px;
 }
 
 body.tiki_blogs .post .postbody {
-	border: 1px solid #AEAEAE;
-	border-bottom: 1px solid #AEAEAE;
-	color: black;
-	padding: 10px;
-}
-
-body.tiki_blogs .post .postbody {
 	background: #f9fcff;
 	border: 1px solid #8cacbb;
+	border-bottom: 1px solid #AEAEAE;
 	color: #000;
 	padding: 0;
 	margin: 5px 0;
 }
 
-.postbody-title {
-	background: none;
-	border: 0;
-}
-
 body.tiki_blogs .postbody-title {
 	float: none;
-	width: 100%;
 	background: none;
 	border: 0;
+	border-bottom: 1px solid #8cacbb;
 }
 
 body.tiki_blogs .postfooter {
@@ -1576,8 +1456,19 @@ body.tiki_blogs .postfooter {
 	margin-top: 4px;
 }
 
-body.tiki_blogs .postfooter .actions {
+.tiki_blogs .author_actions,
+.tiki_blogs .actions {
+	display: inline;
+	margin: 10px 0 0 6px;
 	float: left;
+}
+
+.tiki_blogs .actions {
+	padding-top: 3px;
+}
+
+.tiki_blogs .status {
+	padding: 0 6px;
 }
 
 /***** Forums *****/
@@ -1593,6 +1484,7 @@ body.tiki_blogs .postfooter .actions {
 	display: block;
 	clear: both;
 	background: #e0eaf4;
+	border: 0;
 	border-bottom: 1px solid #8cacbb;
 	padding-bottom: 4px;
 }
@@ -1623,8 +1515,7 @@ body.tiki_blogs .postfooter .actions {
 	width: 100% !important;
 }
 
-.tiki_blogs .post .author_info,
-.post .author {
+.tiki_forums .post .author {
 	float: left;
 	text-align: left;
 	vertical-align: top;
@@ -1644,22 +1535,16 @@ body.tiki_blogs .postfooter .actions {
 	font-style: italic;
 }
 
-.post .author_info {
-	display: block;
-	padding: 0 2px 2px 2px;
-	margin-left: 5px;
-}
-
-.commentstyle_headers .author_info {
+.tiki_forums .commentstyle_headers .author_info {
 	float: left;
 }
 
-.post .postbody-title .actions {
+.tiki_forums .post .postbody-title .actions {
 	float: right;
 	font-size: 1em;
 }
 
-.postbody-content {
+.tiki_forums .postbody-content {
 	float: right;
 	width: 73%;
 	min-width: 73%;
@@ -1671,16 +1556,16 @@ body.tiki_blogs .postfooter .actions {
 	border-top: 1px dotted #d9d9d9;
 }
 
-.post .postfooter .status {
+.tiki_forums .post .postfooter .status {
 	font-size: 10px;
 }
 
-.post .postfooter {
+.tiki_forums .post .postfooter {
 	float: right;
 	text-align: right;
 }
 
-.post .inner > .postfooter {
+.tiki_forums .post .inner > .postfooter {
 	clear: both;
 }
 
@@ -1865,15 +1750,7 @@ a.namealias {
 
 /***** Trackers (etc.) *****/
 .statuson {
-	border: 1px inset #666;
-	vertical-align: middle;
-	background: #bbaa99;
-}
-
-.statusoff {
-	padding: 1px;
-	margin: 2px;
-	vertical-align: middle;
+	border: 1px solid #8cacbb;
 }
 
 /***** Categories, Tags *****/
@@ -2024,13 +1901,10 @@ ul.catitems li {
 
 /*****  Polls  *****/
 .pollresults {
+	width: 100%;
 	margin-top: 5px;
 	font-size: 1.2em;
 	padding: 0 5px;
-}
-
-.pollresults {
-	width: 100%;
 }
 
 .pollr {

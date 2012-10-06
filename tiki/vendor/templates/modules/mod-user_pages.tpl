@@ -1,4 +1,4 @@
-{* $Id: mod-user_pages.tpl 26273 2010-03-23 12:02:11Z sylvieg $ *}
+{* $Id: mod-user_pages.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if isset($modUserPages)}
 {tikimodule error=$module_params.error title=$tpl_module_title name="user_pages" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}

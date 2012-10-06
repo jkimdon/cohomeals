@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_character_inline.php 25256 2010-02-16 13:02:18Z changi67 $
+// $Id: renderer_character_inline.php 40234 2012-03-17 19:17:41Z changi67 $
 
 /**
  * "Inline" character diff renderer.
@@ -49,29 +49,29 @@ class Text_Diff_Renderer_character_inline extends Tiki_Text_Diff_Renderer
 
     function _getChange($lines)
     {
-	return str_replace("<br />", "↵<br />", join ("", $lines));
+	return str_replace("<br />", "↵<br />", join("", $lines));
     }
 
     function _lines($type, $lines, $prefix = '')
     {
-    	if ($type == 'context') {
-		$this->diff .= join ("", $lines);
-    	} elseif ($type == 'added' || $type == 'change-added') {
-		$t = $this->_getChange($lines);
+		if ($type == 'context') {
+			$this->diff .= join("", $lines);
+		} elseif ($type == 'added' || $type == 'change-added') {
+			$t = $this->_getChange($lines);
 	        if (!empty($t))
 	            $this->diff .= "<span class='diffadded'>$t</span>";
-    	} elseif ($type == 'deleted' || $type == 'change-deleted') {
-		$t = $this->_getChange($lines);
+		} elseif ($type == 'deleted' || $type == 'change-deleted') {
+			$t = $this->_getChange($lines);
 	        if (!empty($t))
 	            $this->diff .= "<span class='diffinldel'>$t</span>";
-	} elseif ($type == 'changed') {
-		$t = $this->_getChange($lines[0]);
-		if (!empty($t))
-			$this->diff .= "<span class='diffinldel'>$t</span>";
-		$t = $this->_getChange($lines[1]);
-		if (!empty($t))
-			$this->diff .= "<span class='diffadded'>$t</span>";
-	}
+		} elseif ($type == 'changed') {
+			$t = $this->_getChange($lines[0]);
+			if (!empty($t))
+				$this->diff .= "<span class='diffinldel'>$t</span>";
+			$t = $this->_getChange($lines[1]);
+			if (!empty($t))
+				$this->diff .= "<span class='diffadded'>$t</span>";
+		}
     }
 
     function _context($lines)

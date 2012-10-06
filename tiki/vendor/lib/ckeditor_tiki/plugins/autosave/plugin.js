@@ -1,8 +1,8 @@
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: plugin.js 29390 2010-09-20 15:28:53Z jonnybradley $
+// $Id: plugin.js 41363 2012-05-05 16:08:57Z jonnybradley $
 
 CKEDITOR.plugins.add( 'autosave',
 {
@@ -66,6 +66,7 @@ CKEDITOR.plugins.add( 'autosave',
 	},	// end init
 
 	doAjaxSave: function (editor) {
+		editor.updateElement();			// workaround for a bug in Firefox where the textarea doesn't get updated properly
 		var data = editor.getData();
 		if (this.ajaxAutoSaveIsDirty && data != "ajax error") {
 			this.changeIcon("loadingSmall.gif");
@@ -73,7 +74,7 @@ CKEDITOR.plugins.add( 'autosave',
 			var asplugin = this;
 			jQuery.ajax({
 				url: CKEDITOR.config.ajaxAutoSaveTargetUrl,
-				data: 'script=' + editor.config.autoSaveSelf + '&editor_id=' + editor.name + '&data=' + encodeURIComponent(data),
+				data: 'command=auto_save&referer=' + editor.config.autoSaveSelf + '&editor_id=' + editor.name + '&data=' + tiki_encodeURIComponent(data),
 				type: "POST",
 				// good callback
 				success: function(data) {

@@ -1,4 +1,4 @@
-{* $Id: tiki-search_stats.tpl 29081 2010-09-09 20:56:56Z changi67 $ *}
+{* $Id: tiki-search_stats.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="SearchStats"}{tr}Search stats{/tr}{/title}
 
@@ -23,8 +23,8 @@
 {cycle values="odd,even" print=false}
 {section name=user loop=$channels}
   <tr class="{cycle}">
-    <td>{$channels[user].term}</td>
-    <td>{$channels[user].hits}</td>
+    <td class="text">{$channels[user].term}</td>
+    <td class="integer">{$channels[user].hits}</td>
   </tr>
 {/section}
 </table>

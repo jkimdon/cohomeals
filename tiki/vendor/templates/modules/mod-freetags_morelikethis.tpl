@@ -1,4 +1,4 @@
-{* based on $Id: mod-freetags_morelikethis.tpl 27983 2010-07-14 12:59:08Z sylvieg $ *}
+{* based on $Id: mod-freetags_morelikethis.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if isset($modMoreLikeThis) && count($modMoreLikeThis) gt 0}
   {tikimodule error=$module_params.error title=$tpl_module_title name="freetags_morelikethis" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}

@@ -1,12 +1,12 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mimetypes.php 25252 2010-02-16 12:25:14Z changi67 $
+// $Id: mimetypes.php 42542 2012-08-06 18:48:41Z lphuberdeau $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
@@ -19,7 +19,8 @@ if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
 // done
 // echo ");" >> mimetypes.php.new
 //
-static $mimetypes = array(
+global $mimetypes;
+$mimetypes = array(
 	"323" => "text/h323",
 	"3gp" => "video/3gpp",
 	"7z" => "application/x-7z-compressed",
@@ -137,6 +138,7 @@ static $mimetypes = array(
 	"fig" => "application/x-xfig",
 	"flac" => "application/x-flac",
 	"fli" => "video/fli",
+	"flv" => "video/x-flv",
 	"fm" => "application/x-maker",
 	"frame" => "application/x-maker",
 	"frm" => "application/x-maker",
@@ -474,4 +476,15 @@ static $mimetypes = array(
 	"xyz" => "chemical/x-xyz",
 	"zip" => "application/zip",
 	"zmt" => "chemical/x-mopac-input",
+
+	"xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	"xltx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+	"potx" => "application/vnd.openxmlformats-officedocument.presentationml.template",
+	"ppsx" => "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+	"pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+	"sldx" => "application/vnd.openxmlformats-officedocument.presentationml.slide",
+	"docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	"dotx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+	"xlam" => "application/vnd.ms-excel.addin.macroEnabled.12",
+	"xlsb" => "application/vnd.ms-excel.sheet.binary.macroEnabled.12",
 );

@@ -1,16 +1,23 @@
-// $Id: tiki-jquery.js 30573 2010-11-08 15:22:16Z robertplummer $
-// JavaScript glue for jQuery (1.3.2 - 1.4.3) in TikiWiki (3.0+)
+// $Id: tiki-jquery.js 42361 2012-07-12 17:01:07Z jonnybradley $
+// JavaScript glue for jQuery in Tiki
 //
 // Tiki 6 - $ is now initialised in jquery.js
 // but let's keep $jq available too for legacy custom code
 
-var $jq = $;
+var $jq = $,
+$window = $(window)
+$document = $(document);
+
+// Escape a string for use as a jQuery selector value, for example an id or a class
+function escapeJquery(str) {
+	return str.replace(/([\!"#\$%&'\(\)\*\+,\.\/:;\?@\[\\\]\^`\{\|\}\~=>])/g, "\\$1");
+}
 
 // Check / Uncheck all Checkboxes - overriden from tiki-js.js
 function switchCheckboxes (tform, elements_name, state) {
-  // checkboxes need to have the same name elements_name
-  // e.g. <input type="checkbox" name="my_ename[]">, will arrive as Array in php.
-	$(tform).contents().find('input[name="' + elements_name + '"]:visible').attr('checked', state).change();
+	// checkboxes need to have the same name elements_name
+	// e.g. <input type="checkbox" name="my_ename[]">, will arrive as Array in php.
+	$(tform).contents().find('input[name="' + escapeJquery(elements_name) + '"]:visible').attr('checked', state).change();
 }
 
 
@@ -25,9 +32,13 @@ function show(foo, f, section) {
 	} else if ($("#" + foo).hasClass("tabcontent")) {		// different anim prefs for tabs
 		showJQ("#" + foo, jqueryTiki.effect_tabs, jqueryTiki.effect_tabs_speed, jqueryTiki.effect_tabs_direction);
 	} else {
-		showJQ("#" + foo, jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+		if ($.browser.webkit && !jqueryTiki.effect && $("#role_main #" + foo).length) {	// safari/chrome does strange things with default amination in central column
+			showJQ("#" + foo, "slide", jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+		} else {
+			showJQ("#" + foo, jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+		}
 	}
-	if (f) { setCookie(foo, "o", section); }
+	if (f) {setCookie(foo, "o", section);}
 }
 
 function hide(foo, f, section) {
@@ -59,11 +70,11 @@ function flip(foo, style) {
 	} else {
 		if ($("#" + foo).css("display") === "none") {
 			setSessionVar('show_' + escape(foo), 'y');
-			showJQ("#" + foo, jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+			show(foo);
 		}
 		else {
 			setSessionVar('show_' + escape(foo), 'n');
-			hideJQ("#" + foo, jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+			hide(foo);
 		}
 	}
 }
@@ -77,7 +88,7 @@ function showJQ(selector, effect, speed, dir) {
 	} else if (effect == 'slide') {
 		// With jquery 1.4.2 (and less) and IE7, the function slidedown is buggy
 		// See: http://dev.jquery.com/ticket/3120
-		if ($.browser.msie && parseInt($.browser.version) == 7)	{
+		if ($.browser.msie && parseInt($.browser.version, 10) == 7)	{
 			$(selector).show(speed);
 		} else {
 			$(selector).slideDown(speed);
@@ -85,7 +96,7 @@ function showJQ(selector, effect, speed, dir) {
 	} else if (effect === 'fade') {
 		$(selector).fadeIn(speed);
 	} else if (effect.match(/(.*)_ui$/).length > 1) {
-		$(selector).show(effect.match(/(.*)_ui$/)[1], {direction: dir }, speed);
+		$(selector).show(effect.match(/(.*)_ui$/)[1], {direction: dir}, speed);
 	} else {
 		$(selector).show();
 	}
@@ -101,7 +112,7 @@ function hideJQ(selector, effect, speed, dir) {
 	} else if (effect === 'fade') {
 		$(selector).fadeOut(speed);
 	} else if (effect.match(/(.*)_ui$/).length > 1) {
-		$(selector).hide(effect.match(/(.*)_ui$/)[1], {direction: dir }, speed);
+		$(selector).hide(effect.match(/(.*)_ui$/)[1], {direction: dir}, speed);
 	} else {
 		$(selector).hide();
 	}
@@ -110,13 +121,13 @@ function hideJQ(selector, effect, speed, dir) {
 // override overlib
 function convertOverlib(element, tip, params) {	// process modified overlib event fn to cluetip from {popup} smarty func
 	
-	if (element.processed || typeof $(element).cluetip != "function") { return false; }
-	if (typeof params == "undefined") { params = []; }
+	if ($(element).data('processed') || typeof $(element).cluetip != "function") {return false;}
+	if (typeof params == "undefined") {params = [];}
 	
 	var options = {};
 	options.clickThrough = true;
 	for (var param = 0; param < params.length; param++) {
-		var val = "";
+		var val = "", pam;
 		var i = params[param].indexOf("=");
 		if (i > -1) {
 			var arr = params[param].split("=", 2);
@@ -172,21 +183,24 @@ function convertOverlib(element, tip, params) {	// process modified overlib even
 			.insertBefore("#main")
 			.html(tip);
 		
-		if ($el.width() > $(window).width()) {
-			$el.width($(window).width() * 0.8);
+		if ($el.width() > $window.width()) {
+			$el.width($window.width() * 0.8);
 		}
-		options.width = $el.width();
-		$(document.body).remove($el[0]);
+		options.width = $el.width() + 26;	// add space for css padding
+		$el.remove();
 		
 		element.tipWidth = options.width;
 	}
 	
-	prefix = "|";
+	var prefix = "|";
 	$(element).attr('title', prefix + tip);
-	
-	element.processed = true;
-	
-	//options.sticky = true; //useful for css work
+
+	if (options.activation !== 'click') {
+		options.hoverIntent = {sensitivity: 3, interval: 50, timeout: 0};
+	}
+	$(element).data('processed', true);	
+
+//options.sticky = true; //useful for css work
 	$(element).cluetip(options);
 
 	if (options.activation === 'click') {
@@ -194,7 +208,7 @@ function convertOverlib(element, tip, params) {	// process modified overlib even
 	} else {
 		$(element).trigger('mouseover');
 	}
-	setTimeout(function () { $("#cluetip").show(); }, 200);	// IE doesn't necessarily display
+	setTimeout(function () {$("#cluetip").show();}, 200);	// IE doesn't necessarily display
 	$(element).attr("title", "");	// remove temporary title attribute to avoid built in browser tips
 	return false;
 }
@@ -203,7 +217,7 @@ function nd() {
 	$("#cluetip").hide();
 }
 
-// ajax loading fns moved from tiki-ajax.js as not only used with xajax
+// ajax loading indicator
 
 function ajaxLoadingShow(destName) {
 	var $dest, $loading, pos, x, y, w, h;
@@ -213,7 +227,7 @@ function ajaxLoadingShow(destName) {
 	} else {
 		$dest = $(destName);
 	}
-	if ($dest.length === 0) {
+	if ($dest.length === 0 || $dest.parents(":hidden").length > 0) {
 		return;
 	}
 	$loading = $('#ajaxLoading');
@@ -221,13 +235,13 @@ function ajaxLoadingShow(destName) {
 	// find area of destination element
 	pos = $dest.offset();
 	// clip to page
-	if (pos.left + $dest.width() > $(window).width()) {
-		w = $(window).width() - pos.left;
+	if (pos.left + $dest.width() > $window.width()) {
+		w = $window.width() - pos.left;
 	} else {
 		w = $dest.width();
 	}
-	if (pos.top + $dest.height() > $(window).height()) {
-		h = $(window).height() - pos.top;
+	if (pos.top + $dest.height() > $window.height()) {
+		h = $window.height() - pos.top;
 	} else {
 		h = $dest.height();
 	}
@@ -255,26 +269,63 @@ function ajaxLoadingHide() {
 }
 
 
-$(document).ready( function() { // JQuery's DOM is ready event - before onload
+function checkDuplicateRows( button, columnSelector, rowSelector ) {
+	if (typeof columnSelector === 'undefined') {
+		columnSelector = "td";
+	}
+	if (typeof rowSelector === 'undefined') {
+		rowSelector = "table:first tr:not(:first)";
+	}
+	var $rows = $(button).parents(rowSelector);
+	$rows.each(function( ix, el ){
+		if ($("input:checked", el).length === 0) {
+			var $el = $(el);
+			var line = $el.find(columnSelector).text();
+			$rows.each(function( ix, el ){
+				if ($el[0] !== el && $("input:checked", el).length === 0) {
+					if (line === $(el).find(columnSelector).text()) {
+						$(":checkbox:first", el).attr("checked", true);
+					}
+				}
+			});
+		}
+	});
+}
+
+function setUpClueTips() {
+	var ctOptions = {splitTitle: '|', cluezIndex: 2000, width: 'auto', fx: {open: 'fadeIn', openSpeed: 'fast'},
+		clickThrough: true, hoverIntent: {sensitivity: 3, interval: 100, timeout: 0}};
+
+	$.cluetip.setup = {insertionType: 'insertBefore', insertionElement: '#main'};
 	
+	$('.tips[title!=""]').cluetip($.extend(ctOptions, {}));
+	$('.titletips[title!=""]').cluetip($.extend(ctOptions, {}));
+	$('.tikihelp[title!=""]').cluetip($.extend(ctOptions, {splitTitle: ':'})); // , width: '150px'
+	
+	// unused?
+	$('.stickytips').cluetip($.extend(ctOptions, {showTitle: false, sticky: false, local: true, hideLocal: true, activation: 'click', cluetipClass: 'fullhtml'}));
+	
+	// repeats for "tiki" buttons as you cannot set the class and title on the same element with that function (it seems?)
+	//$('span.button.tips a').cluetip({splitTitle: '|', showTitle: false, width: '150px', cluezIndex: 400, fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true});
+	//$('span.button.titletips a').cluetip({splitTitle: '|', cluezIndex: 400, fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true});
+	// TODO after 5.0 - these need changes in the {button} Smarty fn
+}
+
+$(function() { // JQuery's DOM is ready event - before onload
+	if (!window.jqueryTiki) window.jqueryTiki = {};
+
 	// tooltip functions and setup
 	if (jqueryTiki.tooltips) {	// apply "cluetips" to all .tips class anchors
 		
-		var ctOptions = { splitTitle: '|', cluezIndex: 400, width: 'auto', fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true };
-		$.cluetip.setup( { insertionType: 'insertBefore', insertionElement: '#main' } );
-		
-		$('.tips[title!=""]').cluetip($.extend( ctOptions, {}));
-		$('.titletips[title!=""]').cluetip($.extend( ctOptions, {}));
-		$('.tikihelp[title!=""]').cluetip($.extend( ctOptions, {splitTitle: ':' }));	// , width: '150px'
-		$('.stickytips').cluetip($.extend( ctOptions, { showTitle: false, sticky: false, local: true, hideLocal: true, activation: 'click', cluetipClass: 'fullhtml'}));
-		
-		// repeats for "tiki" buttons as you cannot set the class and title on the same element with that function (it seems?)
-		//$('span.button.tips a').cluetip({splitTitle: '|', showTitle: false, width: '150px', cluezIndex: 400, fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true});
-		//$('span.button.titletips a').cluetip({splitTitle: '|', cluezIndex: 400, fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true});
-		// TODO after 5.0 - these need changes in the {button} Smarty fn
+		setUpClueTips();
 		
 	}	// end cluetip setup
 	
+	// Reflections
+	if (jqueryTiki.replection) {
+		$("img.reflect").reflect({});
+	}
+
 	// superfish setup (CSS menu effects)
 	if (jqueryTiki.superfish) {
 		$('ul.cssmenu_horiz').supersubs({ 
@@ -291,11 +342,17 @@ $(document).ready( function() { // JQuery's DOM is ready event - before onload
 		});
 		$('ul.cssmenu_horiz').superfish({
 			animation: {opacity:'show', height:'show'},	// fade-in and slide-down animation
-			speed: 'fast'								// faster animation speed
+			speed: 'fast',								// faster animation speed
+			onShow: function(){
+				$(this).moveToWithinWindow();
+			}
 		});
 		$('ul.cssmenu_vert').superfish({
 			animation: {opacity:'show', height:'show'},	// fade-in and slide-down animation
-			speed: 'fast'								// faster animation speed
+			speed: 'fast',								// faster animation speed
+			onShow: function(){
+				$(this).moveToWithinWindow();
+			}
 		});
 	}
 	
@@ -394,7 +451,7 @@ $(document).ready( function() { // JQuery's DOM is ready event - before onload
 		});
 		
 		/* Shadowbox params compatibility extracted using regexp functions */
-		
+		var re, ret;
 		// rel containg title param overrides title attribute of the link (shadowbox compatible)
 		$("#col1 a[rel*='box'][rel*='title=']").colorbox({
 			title: function () {
@@ -422,7 +479,7 @@ $(document).ready( function() { // JQuery's DOM is ready event - before onload
 		
 		// links generated by the {COLORBOX} plugin
 		if (jqueryTiki.colorbox) {
-			$("a[rel^='shadowbox[colorbox']").each(function () { $(this).attr('savedTitle', $(this).attr('title')); });
+			$("a[rel^='shadowbox[colorbox']").each(function () {$(this).attr('savedTitle', $(this).attr('title'));});
 			if (jqueryTiki.tooltips) {
 				$("a[rel^='shadowbox[colorbox']").cluetip({
 					splitTitle: '<br />', 
@@ -440,149 +497,75 @@ $(document).ready( function() { // JQuery's DOM is ready event - before onload
 		}
 		
 	}	// end if (jqueryTiki.colorbox)
-	
-	if (jqueryTiki.sheet) {
-		
-		// override saveSheet on jQuery.sheet for tiki specific export
-		$.sheet.saveSheet = function( redirect ) {
-			$( $.sheet.instance ).each( function( i ){
-				if (typeof redirect === 'undefined') { redirect = false; }
-				// not set to 0 by default in case AJAX has caused a spurious one to appear
-	
-				this.evt.cellEditDone();
-				
-				var s = $.sheet.get_sheet_json(this);
-				
-				s = "s=" + $.toJSON(s)	// convert to JSON
-					.replace(/\+/g,"%2B")	// replace +'s with 0x2B hex value
-					.replace(/\&/g,"%26");	// and replace &'s with 0x26
-				
-				var setDirty = this.setDirty;
-				$.ajax({
-					url: this.s.urlSave,
-					type: "POST",
-					data: s,
-					//contentType: "application/json; charset=utf-8",
-					dataType: 'html',
-					beforeSend: function() { window.showFeedback("Saving", 10000); }, 
-					success: function(data) {
-						setDirty(false);
-						window.showFeedback(data, 2000, redirect);
-					}
-				});
-			});
-		};
-		
-		$.sheet.get_sheet_json = function(sheetInstance) {	// diverged from jQuery.sheet 1.1 / Tiki 6
-			var sheetClone = sheetInstance.sheetDecorateRemove(true);
-			var documents = []; //documents
-			
-			$(sheetClone).each(function() {
-				var document = {}; //document
-				document.metadata = {};
-				document.data = {};
-				
-				//This preserves the width for postback, very important for styles
-				//<DO_NOT_REMOVE>
-				var table = $(this);
-				var trFirst = table.find('tr:first');
-				table.find('col').each(function(i){
-					//because css isn't always set correctly, we need to check the width attribute as well
-					//we also sanitize width string here
-					var w = parseInt((jQuery(this).css('width') + '').replace('px',''));
-					var w2 = parseInt((jQuery(this).attr('width') + '').replace('px',''));
-					
-					w = (w > w2 ? w : w2);
-					
-					trFirst.find('td').eq(i)
-						.css('width', w + 'px')
-						.attr('width', w);
-				});
-				//</DO_NOT_REMOVE>
-				
-				var trs = table.find('tr');
-				var rowCount = trs.length;
-				var colCount = 0;
-				var col_widths = '';
-				
-				trs.each(function(i) {
-					var tr = $(this);
-					var tds = tr.find('td');
-					colCount = tds.length;
-					
-					document.data['r' + i] = {};
-					
-					var h = tr.css('height');
-					document.data['r' + i].height = (h ? h : tr.attr('height'));
-					
-					tds.each(function(j) {
-						var td = jQuery(this);
-						var colSpan = td.attr('colspan');
-						colSpan = (colSpan > 1 ? colSpan : null);
 
-						document.data['r' + i]['c' + j] = {
-							value: td.html(),
-							formula: td.attr('formula'),
-							stl: td.attr('style'),
-							colspan: colSpan,
-							cl: td.attr('class')
-						};
-						
-						var sp = td.attr('colSpan');
-						if (sp > 1) {
-							doc.data['r' + i]['c' + j].width = sp;
-						}
-						sp = td.attr('rowSpan');	// TODO in .sheet
-						if (sp > 1) {
-							doc.data['r' + i]['c' + j].height = sp;
-						}
-					});
-				});
-					
-				var id = table.attr('rel');
-				id = id ? id.match(/sheetId(\d+)/) : null;
-				id = id && id.length > 0 ? id[1] : 0;
+	$.applySelectMenus = function() {
+		return $('body').applySelectMenus();
+	};
 
-				document.metadata = {
-					"columns": parseInt(colCount, 10), //length is 1 based, index is 0 based
-					"rows": parseInt(rowCount, 10), //length is 1 based, index is 0 based
-					"title": table.attr('title'),
-					"col_widths": {},
-					"sheetId": id
-				};
-				
-				table.find('colgroup').children().each(function(i) {
-					document.metadata.col_widths['c' + i] = ($(this).attr('width') + '').replace('px', '');
+	$.fn.applySelectMenus = function () {
+		if (jqueryTiki.selectmenu) {
+			var $smenus, hidden = [];
+
+			if (jqueryTiki.selectmenuAll) {
+				// make all selects into ui selectmenus depending on $prefs['jquery_ui_selectmenu_all']
+				$smenus = $("select:not([multiple])");
+			} else {
+				// or just selectmenu class
+				$smenus = $("select.selectmenu:not([multiple])");
+			}
+			if ($smenus.length) {
+				$smenus.each(function () {
+					$.merge(hidden, $(this).parents(":hidden:last"));
 				});
-				
-				documents.push(document); //append to documents
-			});
-			return documents;
-		};	
-	}	// end sheet
-	
-	// moved from tiki-list_file_gallery.tpl in tiki 6
-	checkClose = function() {
-		if (!$("#keepOpenCbx").attr("checked")) {
-			window.close();
-		} else {
-			window.blur();
+				hidden = $.unique($(hidden));
+				hidden.show();
+				$smenus.tiki("selectmenu");
+				hidden.hide();
+			}
 		}
 	};
-	$(document).ready( function() {
+
+	if (jqueryTiki.selectmenu) {
+		$.applySelectMenus();
+	}
+	
+	$( function() {
 		$("#keepOpenCbx").click(function() {
 			if (this.checked) {
 				setCookie("fgalKeepOpen", "1");
 			} else {
 				setCookie("fgalKeepOpen", "");
 			}
-		}).attr("checked", getCookie("fgalKeepOpen") ? "checked" : "");
+		})
+		var keepopen = getCookie("fgalKeepOpen");
+		if (keepopen) {
+			$("#keepOpenCbx").attr("checked", "checked");
+		} else {
+			$("#keepOpenCbx").removeAttr("checked");
+		}
 	});
 	// end fgal fns
 
 
-	
-});		// end $(document).ready
+	$.paginationHelper();	
+});		// end $document.ready
+
+//For ajax/custom search
+$document.bind('pageSearchReady', function() {
+	$.paginationHelper();
+});
+
+// moved from tiki-list_file_gallery.tpl in tiki 6
+function checkClose() {
+	if (!$("#keepOpenCbx").attr("checked")) {
+		window.close();
+	} else {
+		window.blur();
+		if (window.opener) {
+			window.opener.focus();
+		}
+	}
+};
 
 
 /* Autocomplete assistants */
@@ -603,11 +586,15 @@ function parseAutoJSON(data) {
 /// TODO refactor for 4.n
 
 /* wikiplugin editor */
-function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent, edit_icon){
+function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent, edit_icon, selectedMod){
     if (!$.ui) {
 		alert("dev notice: no jq.ui here?");
         return popup_plugin_form(area_id, type, index, pageName, pluginArgs, bodyContent, edit_icon); // ??
     }
+	if ($("#" + area_id).length && $("#" + area_id)[0].createTextRange) {	// save selection for IE
+		storeTASelection(area_id);
+	}
+
     var container = $('<div class="plugin"></div>');
 
     if (!index) {
@@ -662,7 +649,7 @@ function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent
 			} else { // not (this) plugin
 				if (type == 'mouseover') { // For MOUSEOVER, we want the selected text as label instead of body
 					bodyContent = '';
-					var pluginArgs = new Object();
+					pluginArgs = {};
 					pluginArgs['label'] = sel;
 				} else {
 					bodyContent = sel;
@@ -673,33 +660,46 @@ function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent
 			replaceText = false;
 		}
     }
+    var form = build_plugin_form(type, index, pageName, pluginArgs, bodyContent, selectedMod);
     
-    var form = build_plugin_form(type, index, pageName, pluginArgs, bodyContent);
-    $(form).find('tr input[type=submit]').remove();
+    //with PluginModule, if the user selects another module while the edit form is open
+    //replace the form with a new one with fields to match the parameters for the module selected
+	$(form).find('tr select[name="params[module]"]').change(function() {
+		var npluginArgs = $.parseJSON($(form).find('input[name="args"][type="hidden"]').val());
+		//this is the newly selected module
+		var selectedMod = $(form).find('tr select[name="params[module]"]').val();
+		$('div.plugin input[name="type"][value="' + type + '"]').parent().parent().remove();
+		popupPluginForm(area_id, type, index, pageName, npluginArgs, bodyContent, edit_icon, selectedMod);
+	});
+    var $form = $(form).find('tr input[type=submit]').remove();
     
     container.append(form);
     document.body.appendChild(container[0]);
 	
+    handlePluginFieldsHierarchy(type);
+
 	var pfc = container.find('table tr').length;	// number of rows (plugin form contents)
 	var t = container.find('textarea:visible').length;
-	if (t) { pfc += t * 3; }
-	if (pfc > 9) { pfc = 9; }
-	if (pfc < 2) { pfc = 2; }
+	if (t) {pfc += t * 3;}
+	if (pfc > 9) {pfc = 9;}
+	if (pfc < 2) {pfc = 2;}
 	pfc = pfc / 10;			// factor to scale dialog height
 	
 	var btns = {};
-	var closeText = "Close";
+	var closeText = tr("Close");
 	btns[closeText] = function() {
 		$(this).dialog("close");
 	};
 	
-	btns[replaceText ? "Replace" : edit_icon ? "Submit" : "Insert"] = function() {
+	btns[replaceText ? tr("Replace") : edit_icon ? tr("Submit") : tr("Insert")] = function() {
         var meta = tiki_plugins[type];
         var params = [];
         var edit = edit_icon;
+        // whether empty required params exist or not
+        var emptyRequiredParam = false;
         
         for (var i = 0; i < form.elements.length; i++) {
-            element = form.elements[i].name;
+            var element = form.elements[i].name;
             
             var matches = element.match(/params\[(.*)\]/);
             
@@ -711,12 +711,41 @@ function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent
             
             var val = form.elements[i].value;
             
+            // check if fields that are required and visible are not empty
+			if (meta.params[param]) {
+				if (meta.params[param].required) {
+					if (val === '' && $(form.elements[i]).is(':visible')) {
+						$(form.elements[i]).css('border-color', 'red');
+						if ($(form.elements[i]).next('.required_param').length === 0) {
+							$(form.elements[i]).after('<div class="required_param" style="font-size: x-small; color: red;">(required)</div>');
+						}
+						emptyRequiredParam = true;
+					}
+					else {
+						// remove required feedback if present
+						$(form.elements[i]).css('border-color', '');
+						$(form.elements[i]).next('.required_param').remove();
+					}
+				}
+			}
+			
             if (val !== '') {
                 params.push(param + '="' + val + '"');
             }
         }
-        
-        var blob = '{' + type.toUpperCase() + '(' + params.join(',') + ')}' + (typeof form.content !== 'undefined' ? form.content.value : '') + '{' + type.toUpperCase() + '}';
+
+        if (emptyRequiredParam) {
+        	return false;
+        }
+       
+		var blob, pluginContentTextarea = $("[name=content]", form), pluginContentTextareaEditor = syntaxHighlighter.get(pluginContentTextarea);
+		var cont = (pluginContentTextareaEditor ? pluginContentTextareaEditor.getValue() : pluginContentTextarea.val());
+		
+		if (cont.length > 0) {
+			blob = '{' + type.toUpperCase() + '(' + params.join(' ') + ')}' + cont + '{' + type.toUpperCase() + '}';
+		} else {
+			blob = '{' + type.toLowerCase() + ' ' + params.join(' ') + '}';
+		}
         
         if (edit) {
             container.children('form').submit();
@@ -739,8 +768,8 @@ function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent
 		// IE throws errors destroying a non-existant dialog
 	}
 	container.dialog({
-		width: $(window).width() * 0.6,
-		height: $(window).height() * pfc,
+		width: $window.width() * 0.6,
+		height: $window.height() * pfc,
 		zIndex: 10000,
 		title: heading.text(),
 		autoOpen: false,
@@ -748,247 +777,159 @@ function popupPluginForm(area_id, type, index, pageName, pluginArgs, bodyContent
 			$('div.plugin input[name="type"][value="' + type + '"]').parent().parent().remove();		
 
 			var ta = $('#' + area_id);
-			if (ta) { ta.focus(); }
+			if (ta) {ta.focus();}
 		}
 	}).dialog('option', 'buttons', btns).dialog("open");
-   
+	
+	
+	//This allows users to create plugin snippets for any plugin using the jQuery event 'plugin_#type#_ready' for document
+	$document
+		.trigger({
+			type: 'plugin_' + type + '_ready',
+			container: container,
+			arguments: arguments,
+			btns: btns
+		})
+		.trigger({
+			type: 'plugin_ready',
+			container: container,
+			arguments: arguments,
+			btns: btns,
+			type: type
+		});
+}
+
+/*
+ * Hides all children fields in a wiki-plugin form and
+ * add javascript events to display them when the appropriate
+ * values are selected in the parent fields. 
+ */
+function handlePluginFieldsHierarchy(type) {
+	var pluginParams = tiki_plugins[type]['params'];
+	
+	var parents = {};
+	
+	$.each(pluginParams, function(paramName, paramValues) {
+		if (paramValues.parent) {
+			var $parent = $('[name$="params[' + paramValues.parent.name + ']"]', '.wikiplugin_edit');
+			
+			$('.wikiplugin_edit').find('#param_' + paramName).addClass('parent_' + paramValues.parent.name + '_' + paramValues.parent.value);
+			
+			if ($parent.val() != paramValues.parent.value) {
+				$('.wikiplugin_edit').find('#param_' + paramName).hide();
+			}
+			
+			if (!parents[paramValues.parent.name]) {
+				parents[paramValues.parent.name] = {};
+				parents[paramValues.parent.name]['children'] = [];
+				parents[paramValues.parent.name]['parentElement'] = $parent;
+			}
+			
+			parents[paramValues.parent.name]['children'].push(paramName);
+		}
+	});
+	
+	$.each(parents, function(parentName, parent) {
+		parent.parentElement.change(function() {
+			$.each(parent.children, function() {
+				$('.wikiplugin_edit #param_' + this).hide();
+			});
+			$('.wikiplugin_edit .parent_' + parentName + '_' + this.value).show();
+		});
+	}); 
 }
 
 /*
  * JS only textarea fullscreen function (for Tiki 5+)
  */
 
-var fullScreenState = [];
-
-$(document).ready(function() {	// if in translation-diff-mode go fullscreen automatically
-	if ($("#diff_outer").length && !$(".wikipreview").length) {	// but not if previewing (TODO better)
+$(function() {	// if in translation-diff-mode go fullscreen automatically
+	if ($("#diff_outer").length && !$.trim($(".wikipreview .wikitext").html()).length) {	// but not if previewing (TODO better)
 		toggleFullScreen("editwiki");
 	}
 });
 
 function toggleFullScreen(area_id) {
-	var $ta = $("#" + area_id);
-	var $diff = $("#diff_outer"), $edit_form, $edit_form_innards;	// vars for translation diff elements if present
+	var textarea = $("#" + area_id);
+	
+	//codemirror interation and preservation
+	var textareaEditor = syntaxHighlighter.get(textarea);
+	if (textareaEditor) {
+		syntaxHighlighter.fullscreen(textarea);
+		return;
+	}
 
-	if (fullScreenState[area_id]) {	// leave full screen - fullScreenState[area_id] contains info about previous page DOM state when fullscreen
-		if ($diff.length) {
-			$("#fs_grippy_" + area_id).remove();
-			$diff.css("float", fullScreenState[area_id]["diff"]["float"]).width(fullScreenState[area_id]["diff"]["width"]).height(fullScreenState[area_id]["diff"]["height"]);
-			$("#diff_history").height(fullScreenState[area_id]["diff_history"]["height"])
-								.width(fullScreenState[area_id]["diff_history"]["width"]);
-			for(var i = 0; i < fullScreenState[area_id]["edit_form_innards"].length; i++) {
-				$(fullScreenState[area_id]["edit_form_innards"][i]["el"])
-						.css("left", fullScreenState[area_id]["edit_form_innards"][i]["left"])
-						.width(fullScreenState[area_id]["edit_form_innards"][i]["width"])
-						.height(fullScreenState[area_id]["edit_form_innards"][i]["height"]);
-			}	
-			$edit_form = $(fullScreenState[area_id]["edit_form"]["el"]);	// hmmm?
-			$edit_form.css("position", fullScreenState[area_id]["edit_form"]["position"])
-						.css("left", fullScreenState[area_id]["edit_form"]["left"])
-						.width(fullScreenState[area_id]["edit_form"]["width"]).height(fullScreenState[area_id]["edit_form"]["height"]);
-		}
-		$ta.css("float", fullScreenState[area_id]["ta"]["float"]).width(fullScreenState[area_id]["ta"]["width"]).height(fullScreenState[area_id]["ta"]["height"]);
-		$ta.resizable({minWidth: fullScreenState[area_id]["resizable"]["minWidth"], minHeight: fullScreenState[area_id]["resizable"]["minHeight"]});
-		
-		for(i = 0; i < fullScreenState[area_id]["hidden"].length; i++) {
-			fullScreenState[area_id]["hidden"][i].show();
-		}
-		
-		for (i = 0; i < fullScreenState[area_id]["changed"].length; i++) {
-			var $el = $(fullScreenState[area_id]["changed"][i]["el"]);
-			$el.css("margin-left", fullScreenState[area_id]["changed"][i]["margin-left"])
-				.css("margin-right", fullScreenState[area_id]["changed"][i]["margin-right"])
-				.css("margin-top", fullScreenState[area_id]["changed"][i]["margin-top"])
-				.css("margin-bottom", fullScreenState[area_id]["changed"][i]["margin-bottom"])
-				.css("padding-left", fullScreenState[area_id]["changed"][i]["padding-left"])
-				.css("padding-right", fullScreenState[area_id]["changed"][i]["padding-right"])
-				.css("padding-top", fullScreenState[area_id]["changed"][i]["padding-top"])
-				.css("padding-bottom", fullScreenState[area_id]["changed"][i]["padding-bottom"])
-				.width(fullScreenState[area_id]["changed"][i]["width"])
-				.height(fullScreenState[area_id]["changed"][i]["height"]);
-		}
-		
-		$(".fs_clones").remove();
-		$(document.documentElement).css("overflow","auto");
-		
-		fullScreenState[area_id] = false;
-		
-	} else {		// go full screen
-		$(window).scrollTop(0);
-		$(document.documentElement).css("overflow","hidden");
-		
-		fullScreenState[area_id] = [];
-		fullScreenState[area_id]["hidden"] = [];
-		fullScreenState[area_id]["changed"] = [];
-		fullScreenState[area_id]["resizable"] = [];
-		fullScreenState[area_id]["resizable"]["minWidth"] = $ta.resizable("option", "minWidth");
-		fullScreenState[area_id]["resizable"]["minHeight"] = $ta.resizable("option", "minHeight");
-		
-		$ta.resizable("destroy");
-		var h = $(window).height();
-		var w = $(window).width();
-		
-		if ($diff.length) {	// translation diff there so split the screen down the middle (for now)
-			w = Math.floor(w / 2) - 5;
-		}
-		
-		// store & hide anything not in col1 
-		fullScreenState[area_id]["hidden"].push($("#header, #col2, #col3, #footer"));
-		$("#header, #col2, #col3, #footer").hide();
-		
-		// store & reset margins, padding and size for all the textarea parents, and hide siblings
-		$ta.parents().each(function() {
-			fullScreenState[area_id]["hidden"].push($(this).siblings(":visible:not('#diff_outer, .translation_message')"));
-			var ob = [];
-			ob["el"] = this;
-			ob["margin-left"] = $(this).css("margin-left");	// this is for IE - it fails using margin or padding as a single setting
-			ob["margin-right"] = $(this).css("margin-right");
-			ob["margin-top"] = $(this).css("margin-top");
-			ob["margin-bottom"] = $(this).css("margin-bottom");
-			ob["padding-left"] = $(this).css("padding-left");
-			ob["padding-right"] = $(this).css("padding-right");
-			ob["padding-top"] = $(this).css("padding-top");
-			ob["padding-bottom"] = $(this).css("padding-bottom");
-			ob["width"] = $(this).css("width");
-			ob["height"] = $(this).css("height");
-			fullScreenState[area_id]["changed"].push(ob);
-		});
-		$ta.parents().each(function() {
-			$(this).siblings(":visible:not('#diff_outer, .translation_message')").hide();
-			$(this).css("margin", 0).css("padding", 0).width(w).height(h);
-		});
-		
-		// store & resize translation diff divs etc
-		if ($diff.length) {
-			fullScreenState[area_id]["diff"] = [];
-			fullScreenState[area_id]["diff"]["width"] = $diff.width();
-			fullScreenState[area_id]["diff"]["height"] = $diff.height();
-			fullScreenState[area_id]["diff"]["float"] = $diff.css("float");
-			fullScreenState[area_id]["diff_history"] = [];
-			fullScreenState[area_id]["diff_history"]["height"] = $("#diff_history").height();
-			fullScreenState[area_id]["diff_history"]["width"] = $("#diff_history").width();
-			$edit_form = $diff.next();
-			$edit_form_innards = $edit_form.find("#edit-zone, table.normal, textarea, fieldset");
-			fullScreenState[area_id]["edit_form"] = [];
-			fullScreenState[area_id]["edit_form"]["el"] = $edit_form[0];	// store this element for easy access later
-			fullScreenState[area_id]["edit_form"]["height"] = $edit_form.height();
-			fullScreenState[area_id]["edit_form"]["width"] = $edit_form.width();
-			fullScreenState[area_id]["edit_form"]["left"] = $edit_form.css("left") !== 'auto' ? $edit_form.css("left") : 0;
-			fullScreenState[area_id]["edit_form"]["position"] = $edit_form.css("position");
-			fullScreenState[area_id]["edit_form_innards"] = [];
-			$edit_form_innards.each(function() {
-				var ob = [];
-				ob["el"] = this;
-				ob["width"] = $(this).css("width");
-				ob["height"] = $(this).css("height");
-				ob["left"] = $(this).css("left");
-				fullScreenState[area_id]["edit_form_innards"].push(ob);
-			});
-			
-			$diff.parents().each(function() {			// shares some parents with the textarea
-				$(this).width($(window).width());	// so make room for both
-			});
-		}
-		
-		// resize the actual textarea
-		fullScreenState[area_id]["ta"] = [];
-		fullScreenState[area_id]["ta"]["width"] = $ta.width();
-		fullScreenState[area_id]["ta"]["height"] = $ta.height();
-		fullScreenState[area_id]["ta"]["float"] = $ta.css("float");
-		
-		var b = 0;
-		if ($ta.css("border-left-width")) {
-		b = $ta.css("border-left-width").replace("px","");
-		}
-		
-		$ta.width(w - b * 2).height($ta.parent().height() - $(".textarea-toolbar").height() - $(".translation_message").height() - 60 - b * 2);
-		
-		// add grippy resize bar to translation diff page
-		if ($diff.length) {
-			var grippy_width = 10;
-			$diff.width(w).height(h).css("float", "left").next().css("float", "right");
-			var vh = $("#diff_versions").css("overflow", "auto").height() + 18;
-			if (vh > h * 0.15) {
-				vh = h * 0.15;
+	$('.TextArea-fullscreen').add(textarea).css('height', '');
+
+	//removes wiki command buttons (save, cancel, preview) from fullscreen view
+	$('.TextArea-fullscreen .wikiaction').remove();
+
+	var textareaParent = textarea.parent().parent().toggleClass('TextArea-fullscreen');
+	$('body').toggleClass('noScroll');
+	$('.tabs,.rbox-title').toggle();
+
+	if (textareaParent.hasClass('TextArea-fullscreen')) {
+		var win = $window
+			.data('cm-resize', true),
+			screen = $('.TextArea-fullscreen'),
+			toolbar = $('#editwiki_toolbar');
+
+		win.resize(function() {
+			if (win.data('cm-resize') && screen) {
+				screen.css('height', win.height() + 'px');
+
+				textarea
+					.css('height', ((win.height() - toolbar.height()) - 30) + 'px');
 			}
-			$("#diff_versions").height(vh);
-			$("#diff_history").height(h - vh).width(w).css("left", w + grippy_width);
-			$edit_form.css("position","absolute").css("left", w + grippy_width).width(w - grippy_width);
-			
-			$grippy = $("<div id='fs_grippy_" + area_id +"' />").css({"background-image": "url(pics/icons/shading.png)",
-											"background-repeat": "repeat-y",
-											"background-position": -3,
-											"position": "absolute",
-											"left": w + "px",
-											"top": 0,
-											"cursor": "col-resize"})
-									.width(grippy_width).height(h).draggable({ axis: 'x', drag: function(event, ui) {
-										$diff.find("div,table").width(ui.offset.left - grippy_width);
-										$edit_form.css("left", ui.offset.left + grippy_width).find("#edit-zone, table.normal, textarea, fieldset")
-												.width($(window).width() - ui.offset.left);
-									} });
-			$diff.after($grippy);
-			
-		}
-		
-		// copy and add the action buttons (preview, save etc)
-		if ($("div.top_actions").length) {
-			$ta.parent().append($("div.top_actions > .wikiaction").clone(true).addClass("fs_clones"));
-		} else {
-			$ta.parent().append($("#editpageform td > .wikiaction").clone(true).addClass("fs_clones"));
-		}
+		})
+			.resize();
 
-		// show action buttons and reapply cluetip options
-		if (jqueryTiki.tooltips) {
-			$(".fs_clones").cluetip({splitTitle: '|', showTitle: false, width: '150px', cluezIndex: 400, fx: {open: 'fadeIn', openSpeed: 'fast'}, clickThrough: true}).show();
-		} else {
-			$(".fs_clones").show();
-		}
-
+		//adds wiki command buttons (save, cancel, preview) from fullscreen view
+		$('#role_main input.wikiaction').clone().appendTo('.TextArea-fullscreen');
+	} else {
+		$window.removeData('cm-resize');
 	}
 }
 
 /* Simple tiki plugin for jQuery
  * Helpers for autocomplete and sheet
  */
+var xhrCache = {}, lastXhr;	// for jq-ui autocomplete
 
 $.fn.tiki = function(func, type, options) {
-	var opts;
+	var opts = {}, opt;
 	switch (func) {
 		case "autocomplete":
 			if (jqueryTiki.autocomplete) {
-				if (typeof type !== 'undefined') { // func and type given
-					options = options || {};		// some default options for autocompletes in tiki
-					opts = {extraParams: {"httpaccept": "text/javascript"},
-								dataType: "json",
-								parse: parseAutoJSON,
-								formatItem: function(row) { return row; },
-								selectFirst: false,
-								max: 15
-							};
-					for(opt in options) {
-						opts[opt] = options[opt];
-					}
+				if (typeof type === 'undefined') { // func and type given
+					// setup error - alert here?
+					return null;
 				}
-				var data = "";
+				options = options || {};
+				var requestData = {};
+
+				var url = "";
 				switch (type) {
 					case "pagename":
-						data = "tiki-listpages.php?listonly";
+						url = "tiki-listpages.php?listonly";
 						break;
 					case "groupname":
-						data = "tiki-ajax_services.php?listonly=groups";
+						url = "tiki-ajax_services.php?listonly=groups";
 						break;
 					case "username":
-						data = "tiki-ajax_services.php?listonly=users";
+						url = "tiki-ajax_services.php?listonly=users";
+						break;
+					case "usersandcontacts":
+						url = "tiki-ajax_services.php?listonly=usersandcontacts";
 						break;
 					case "userrealname":
-						data = "tiki-ajax_services.php?listonly=userrealnames";
+						url = "tiki-ajax_services.php?listonly=userrealnames";
 						break;
 					case "tag":
-						data = "tiki-ajax_services.php?listonly=tags&separator=+";
+						url = "tiki-ajax_services.php?listonly=tags&separator=+";
 						break;
 					case "icon":
-						data = "tiki-ajax_services.php?listonly=icons&max=" + opts.max;
+						url = "tiki-ajax_services.php?listonly=icons&max=" + (opts.max ? opts.max: 10);
 						opts.formatItem = function(data, i, n, value) {
 							var ps = value.lastIndexOf("/");
 							var pd = value.lastIndexOf(".");
@@ -998,112 +939,117 @@ $.fn.tiki = function(func, type, options) {
 							return value;
 						};
 						break;
-				}
-		 		return this.each(function() {
-					$(this).autocomplete(data, opts).click( function () {
-						$(".ac_results").hide();	// hide the drop down if input clicked on again
-					});
-		
-				});
-			}
-			break;
-
-		case "sheet":
-			if (jqueryTiki.sheet) {
-				options = options || {};	// some default options for sheets in tiki
-				
-				//ensure that sheet instance exists, otherwise problems getting current instance number;
-				var I = 0;
-				if ( $.sheet.instance ) {
-					I = $.sheet.instance.length; //we use length here because we haven't yet created sheet, it will append 1 to this number thus making this the effective instance number
-				} else {
-					$.sheet.instance = [];
-				}				
-				
-				var inlineMenu =  $("#sheetTools").html();
-				inlineMenu = jQuery(
-							(inlineMenu ? inlineMenu : "").replace(/sheetInstance/g, "jQuery.sheet.instance[" + I + "]")
-				);
-				
-				inlineMenu.find('.qt-picker').attr('instance', I);
-				
-				opts = $.extend({
-							urlMenu: 		"lib/jquery_tiki/jquery.sheet/menu.html",	/* not working currently due to missing menu plugin */
-							urlGet: "",
-							buildSheet: true,
-							autoFiller: true,
-							inlineMenu: inlineMenu,
-							colMargin: 20, //beefed up colMargin because the default size was too small for font
-							height: $(window).height() * 0.8
-				}, options);
-				
-		 		return this.each(function() {
-					var sh;
-		 			if (jqueryTiki.ui) {
-						if ($(this).attr('style') && $(this).attr('style').toLowerCase().indexOf('height') > -1) {
-							$(this).height($(this).find("table:first").height() + 6); //a little extra padding?
-						} else {
-							$(this).height($(this).height() + 0);
+					case 'trackername':
+						url = "tiki-ajax_services.php?listonly=trackername";
+						break;
+					case 'trackervalue':
+						if (typeof options.fieldId === "undefined") {
+							// error
+							return null;
 						}
-		 				sh = $(this).sheet(opts);
-		 				if (typeof ajaxLoadingShow === 'function') {
-		 					ajaxLoadingHide();
-		 				}
-		 			} else {
-		 				sh = $(this).sheet(opts);
-		 			}
+						$.extend( requestData, options );
+						options = {};
+						url = "list-tracker_field_values_ajax.php";
+						break;
+				}
+				$.extend( opts, {		//  default options for autocompletes in tiki
+					minLength: 2,
+					source: function( request, response ) {
+						if (options.tiki_replace_term) {
+							request.term = options.tiki_replace_term.apply(null, [request.term]);
+						}
+						var cacheKey = "ac." + type + "." + request.term;
+						if ( cacheKey in xhrCache ) {
+							response( xhrCache[ cacheKey ] );
+							return;
+						}
+						request.q = request.term;
+						$.extend( request, requestData );
+						lastXhr = $.getJSON( url, request, function( data, status, xhr ) {
+							xhrCache[ cacheKey ] = data;
+							if ( xhr === lastXhr ) {
+								response( data );
+							}
+						});
+					}
+				});
+				$.extend(opts, options);
+
+		 		return this.each(function() {
+					$(this).autocomplete(opts).blur( function() {$(this).removeClass( "ui-autocomplete-loading" );});
+//					.click( function () {
+//						$(".ac_results").hide();	// hide the drop down if input clicked on again
+//					});
 				});
 			}
 			break;
-		case "s5":
-			if (jqueryTiki.jqs5) {
-				$(this).s5($.extend({
-					menu: function() {
-						return (
-							'<a href="#" onclick="jQuery.s5.go(\'first\'); return false;" title="First"><img src="lib/jquery/jquery.s5/images/resultset_first.png" alt="First" /></a> ' + 
-							'<a href="#" onclick="jQuery.s5.go(\'prev\'); return false;" title="Prev"><img src="lib/jquery/jquery.s5/images/resultset_previous.png" alt="Prev" /></a> ' + 
-							'<a href="#" onclick="jQuery.s5.go(\'next\'); return false;" title="Next"><img src="lib/jquery/jquery.s5/images/resultset_next.png" alt="Next" /></a> ' + 
-							'<a href="#" onclick="jQuery.s5.go(\'last\'); return false;" title="Last"><img src="lib/jquery/jquery.s5/images/resultset_last.png" alt="Last" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.toggleRegularView(); return false;" title="Toggle Regular View"><img src="lib/jquery/jquery.s5/images/application_view_list.png " alt="Toggle Regular View" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.listSlideTitles(); return false;" title="Jump To Slide" class="listSlideTitlesAnchor"><img src="lib/jquery/jquery.s5/images/layers.png" alt="Jump To Slide" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.autoPlay(true); return false;" title="Play"><img src="lib/jquery/jquery.s5/images/control_play_blue.png" alt="Play" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.s.pause = true; return false;" title="Pause"><img src="lib/jquery/jquery.s5/images/control_pause_blue.png" alt="Pause" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.s.pause = true; go(\'first\'); return false;" title="Stop"><img src="lib/jquery/jquery.s5/images/control_stop_blue.png" alt="Stop" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.getNote(); return false;" title="Notes"><img src="lib/jquery/jquery.s5/images/note.png" alt="Notes" /></a> ' +
-							'<a href="#" onclick="jQuery.s5.toggleLoop(); return false;" title="Toggle Loop"><img src="lib/jquery/jquery.s5/images/arrow_rotate_clockwise.png" alt="Toggle Loop" /></a>'
-						);
-					},
-					slideDuration: 10000 //10 seconds
-				},options));
-			}
 		case "carousel":
 			if (jqueryTiki.carousel) {
 				opts = {
-						imagePath: "lib/jquery/infinitecarousel/images/"
+						imagePath: "lib/jquery/infinitecarousel/images/",
+						autoPilot: true
 					};
-				for(opt in options) {
-					opts[opt] = options[opt];
-				}
+				$.extend(opts, options);
 		 		return this.each(function() {
-					$(this).infiniteCarousel(opts);			
+					$(this).infiniteCarousel(opts);
 				});
 			}
 			break;
 		case "datepicker":
+		case "datetimepicker":
 			if (jqueryTiki.ui) {
-				opts = {
-						showOn: "both",
-						buttonImage: "pics/icons/calendar.png",
-						buttonImageOnly: true,
-						dateFormat: "yy-mm-dd",
-						showButtonPanel: true
-					};
-				for(opt in options) {
-					opts[opt] = options[opt];
+				switch (type) {
+					case "jscalendar":	// replacements for jscalendar
+										// timestamp result goes in the options.altField
+						if (typeof options.altField === "undefined") {
+							alert("jQuery.ui datepicker jscalendar replacement setup error: options.altField not set for " + $(this).attr("id"));
+							debugger;
+						}
+						opts = {
+							showOn: "both",
+							buttonImage: "img/icons/calendar.png",
+							buttonImageOnly: true,
+							dateFormat: "yy-mm-dd",
+							showButtonPanel: true,
+							altFormat: "@",
+							onClose: function(dateText, inst) {
+								$.datepicker._updateAlternate(inst);	// make sure the hidden field is up to date
+								var timestamp = parseInt($(inst.settings.altField).val() / 1000, 10);
+								if (!timestamp) {
+									$.datepicker._setDateFromField(inst);	// seems to need reminding when starting empty
+									$.datepicker._updateAlternate(inst);
+									timestamp = parseInt($(inst.settings.altField).val() / 1000, 10);
+								}
+								if (timestamp && inst.settings && inst.settings.timepicker) {	// if it's a datetimepicker add on the time
+									var time = inst.settings.timepicker.hour * 3600 +
+											   inst.settings.timepicker.minute * 60 +
+											   inst.settings.timepicker.second;
+									timestamp += time;
+								}
+								$(inst.settings.altField).val(timestamp ? timestamp : "");
+							}
+						};
+						break;
+					default:
+						opts = {
+							showOn: "both",
+							buttonImage: "img/icons/calendar.png",
+							buttonImageOnly: true,
+							dateFormat: "yy-mm-dd",
+							showButtonPanel: true
+						};
+						break;
 				}
-		 		return this.each(function() {
-					$(this).datepicker(opts);			
-				});
+				$.extend(opts, options);
+				if (func === "datetimepicker") {
+					return this.each(function() {
+							$(this).datetimepicker(opts);
+						});
+				} else {
+					return this.each(function() {
+						$(this).datepicker(opts);
+					});
+				}
 			}
 			break;
 		case "accordion":
@@ -1117,14 +1063,25 @@ $.fn.tiki = function(func, type, options) {
 //							setCookie(ui, ui.options.active, "accordion");
 //						}
 					};
-				for(opt in options) {
-					opts[opt] = options[opt];
-				}
+				$.extend(opts, options);
 		 		return this.each(function() {
 					$(this).accordion(opts);			
 				});
 			}
-	}
+			break;
+		case "selectmenu":
+			if (jqueryTiki.selectmenu) {
+				opts = {
+						style: 'dropdown',
+						wrapperElement: "<span />"
+					};
+				$.extend(opts, options);
+		 		return this.each(function() {
+					$(this).selectmenu(opts);
+				});
+			}
+			break;
+	}	// end switch(func)
 };
 
 /******************************
@@ -1139,7 +1096,7 @@ var dialogDiv;
 function displayDialog( ignored, list, area_id ) {
 	var i, item, el, obj, tit = "";
 
-	$is_cked =  $('#cke_contents_' + area_id).length !== 0;
+	var $is_cked =  $('#cke_contents_' + area_id).length !== 0;
 
 	if (!dialogDiv) {
 		dialogDiv = document.createElement('div');
@@ -1168,11 +1125,13 @@ function displayDialog( ignored, list, area_id ) {
 	if ( typeof CKEDITOR !== "undefined" && CKEDITOR.env.ie ) {
 		var editor = CKEDITOR.instances[area_id];
 		var selection = editor.getSelection();
-		if (selection) { selection.lock(); }
+		if (selection) {selection.lock();}
+	} else if ($("#" + area_id)[0].createTextRange) {	// save selection for IE
+		storeTASelection(area_id);
 	}
 	
 	if (!obj) { obj = {}; }
-	if (!obj.width) { obj.width = 210; }
+	if (!obj.width) {obj.width = 210;}
 	obj.bgiframe = true;
 	obj.autoOpen = false;
 	obj.zIndex = 10000;
@@ -1189,87 +1148,107 @@ function displayDialog( ignored, list, area_id ) {
 }
 
 window.pickerData = [];
-var pickerDiv;
+var pickerDiv = {};
 
 function displayPicker( closeTo, list, area_id, isSheet, styleType ) {
-	if (pickerDiv) {
-		$('div.toolbars-picker').remove();	// simple toggle
-		pickerDiv = false;
-		return;
-	}
-	textarea = $('#' +  area_id);
+	$('div.toolbars-picker').remove();	// simple toggle
+	var $closeTo = $(closeTo);
 	
-	pickerDiv = document.createElement('div');
-	document.body.appendChild( pickerDiv );
+	if ($closeTo.hasClass('toolbars-picker-open')) {
+		$('.toolbars-picker-open').removeClass('toolbars-picker-open');
+		return false;
+	}
+	
+	$closeTo.addClass('toolbars-picker-open');
+	var textarea = $('#' +  area_id);
+	
+	var coord = $closeTo.offset();
+	coord.bottom = coord.top + $closeTo.height();
+	
+	pickerDiv = $('<div class="toolbars-picker ' + list + '" />')
+		.css('left', coord.left + 'px')
+		.css('top', (coord.bottom + 8) + 'px')
+		.appendTo('body');
 
-	var coord = $(closeTo).offset();
-	coord.bottom = coord.top + $(closeTo).height();
-
-	pickerDiv.className = 'toolbars-picker';
-	pickerDiv.style.left = coord.left + 'px';
-	pickerDiv.style.top = (coord.bottom + 8) + 'px';
-
-	var prepareLink = function( link, ins, disp ) {
-		if (!link) { return; }
+	var prepareLink = function(ins, disp ) {
+		disp = $(disp);
 		
-		link.innerHTML = disp.replace('\/', '/');
-		link.href = 'javascript:void(0)';
+		var link = $( '<a href="#" />' ).append(disp);
+			
+		if (disp.attr('reset') && isSheet) {
+			var bgColor = $('div.tiki_sheet:first').css(styleType);
+			var color = $('div.tiki_sheet:first').css(styleType == 'color' ? 'background-color' : 'color');
+			disp
+				.css('background-color', bgColor)
+				.css('color', color);
+			
+			link
+				.addClass('toolbars-picker-reset');
+		}
 		
 		if ( isSheet ) {
-			link.onclick = function() {
-				var o = $(link);
-				var I = $(closeTo).attr('instance');
-				I = parseInt( I ? I : 0 );
-				$.sheet.instance[ I ].cellChangeStyle(styleType, o.children().first().css('background-color'));
-				
-				$('div.toolbars-picker').remove();
-				pickerDiv = false;
-				
-				return false;
-			};
+			link
+				.click(function() {
+					var I = $(closeTo).attr('instance');
+					I = parseInt( I ? I : 0, 10 );
+					
+					if (disp.attr('reset')) {
+						$.sheet.instance[I].cellChangeStyle(styleType, '');
+					} else {
+						$.sheet.instance[I].cellChangeStyle(styleType, disp.css('background-color'));
+					}
+					
+					$closeTo.click();
+					return false;
+				});
 		} else {
-			link.onclick = function() {
-				insertAt( area_id, ins );
-		
-				textarea = $('#' +  area_id);	
+			link.click(function() {				
+				insertAt(area_id, ins);
+				
+				var textarea = $('#' + area_id);
 				// quick fix for Firefox 3.5 losing selection on changes to popup
 				if (typeof textarea.selectionStart != 'undefined') {
 					var tempSelectionStart = textarea.selectionStart;
-					var tempSelectionEnd = textarea.selectionEnd;	
+					var tempSelectionEnd = textarea.selectionEnd;
 				}
-	
-				$('div.toolbars-picker').remove();
-				pickerDiv = false;
-	
+				
+				$closeTo.click();
+				
 				// quick fix for Firefox 3.5 losing selection on changes to popup
-	        	if (typeof textarea.selectionStart != 'undefined' && textarea.selectionStart != tempSelectionStart) {
-	                textarea.selectionStart = tempSelectionStart;
-	     		}
+				if (typeof textarea.selectionStart != 'undefined' && textarea.selectionStart != tempSelectionStart) {
+					textarea.selectionStart = tempSelectionStart;
+				}
 				if (typeof textarea.selectionEnd != 'undefined' && textarea.selectionEnd != tempSelectionEnd) {
-	            	textarea.selectionEnd = tempSelectionEnd;
-	       		}
-	
+					textarea.selectionEnd = tempSelectionEnd;
+				}
+				
 				return false;
-			};
+			});
 		}
+		return link;
 	};
-
+	var chr, $a;
 	for( var i in window.pickerData[list] ) {
-		var chr = window.pickerData[list][i];
-		var link = document.createElement( 'a' );
-
-		//pickerDiv.appendChild( document.createTextNode(' ') );
-		prepareLink( link, i, chr );
-		pickerDiv.appendChild( link );
+		chr = window.pickerData[list][i];
+		if (list === "specialchar") {
+			chr = $("<span>" + chr + "</span>");
+		}
+		$a = prepareLink( i, chr );
+		if ($a.length) {
+			pickerDiv.append($a);
+		}
 	}
+	
+	return false;
 }
 
 
 function dialogSelectElement( area_id, elementStart, elementEnd ) {
-	if ($('#cke_contents_' + area_id).length !== 0) { return; }	// TODO for ckeditor
+	if ($('#cke_contents_' + area_id).length !== 0) {return;}	// TODO for ckeditor
 	
 	var $textarea = $('#' + area_id);
-	var val = $textarea.val();
+	var textareaEditor = syntaxHighlighter.get($textarea);
+	var val = ( textareaEditor ? textareaEditor.getValue() : $textarea.val() );
 	var pairs = [], pos = 0, s = 0, e = 0;
 	
 	while (s > -1 && e > -1) {	// positions of start/end markers
@@ -1283,8 +1262,9 @@ function dialogSelectElement( area_id, elementStart, elementEnd ) {
 		}
 	}
 	
-	$textarea[0].focus();
-	var selection = $textarea.selection();
+	(textareaEditor ? textareaEditor : $textarea[0]).focus();
+	
+	var selection = ( textareaEditor ? syntaxHighlighter.selection(textareaEditor, true) : $textarea.selection() );
 
 	s = selection.start;
 	e = selection.end;
@@ -1411,6 +1391,8 @@ function dialogTableOpen(area_id, dialog) {
 
 	dialogSelectElement( area_id, '||', '||' ) ;
 
+	dialog = $(dialog);
+
 	var s = getTASelection($('#' + area_id)[0]);
 	var m = /\|\|([\s\S]*?)\|\|/mg.exec(s);
 	var vals = [], rows = 3, cols = 3, c, r, i, j;
@@ -1472,48 +1454,54 @@ function dialogTableOpen(area_id, dialog) {
 			} else {
 				v = "   "; //row " + r + ",col " + c + "";
 			}
-			var el = $("<input type=\"text\" id=\"tbTableR" + r + "C" + c + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" value=\"" + v + "\" style=\"width:" + (90 / cols) + "%\" />");
-			$(dialog).append(el);
+			var el = $("<input type=\"text\" id=\"tbTableR" + r + "C" + c + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" style=\"width:" + (90 / cols) + "%\" />")
+				.val($.trim(v))
+				.appendTo(dialog);
 		}
 		if (r == 1) {
-			el = $("<img src=\"pics/icons/add.png\" />");
-			$(dialog).append(el);
-			el.click(function() {
-				$(dialog).attr("cols", $(dialog).attr("cols") + 1);
-				for (r = 1; r <= $(dialog).attr("rows"); r++) {
-					v = "   ";
-					var el = $("<input type=\"text\" id=\"tbTableR" + r + "C" + $(dialog).attr("cols") + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" value=\"" + v + "\" style=\"width:" + (90 / $(dialog).attr("cols")) + "%\" />");
-					$("#tbTableR" + r + "C" + ($(dialog).attr("cols") - 1)).after(el);
-				}
-				$(dialog).find("input").width(90 / $(dialog).attr("cols") + "%");
-			});
+			el = $("<img src=\"img/icons/add.png\" />")
+				.click(function() {
+					dialog.data("cols", dialog.data("cols") + 1);
+					for (r = 1; r <= dialog.data("rows"); r++) {
+						v = "";
+						var el = $("<input type=\"text\" id=\"tbTableR" + r + "C" + dialog.data("cols") + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" style=\"width:" + (90 / dialog.data("cols")) + "%\" />")
+							.val(v);
+						$("#tbTableR" + r + "C" + (dialog.data("cols") - 1)).after(el);
+					}
+					dialog.find("input").width(90 / dialog.data("cols") + "%");
+				})
+				.appendTo(dialog);
 		}
-		$(dialog).append($("<br />"));
+		dialog.append("<br />");
 	}
-	el = $("<img src=\"pics/icons/add.png\" />");
-	$(dialog).append(el);
-	el.click(function() {
-		$(dialog).attr("rows", $(dialog).attr("rows") + 1);
-		for (c = 1; c <= $(dialog).attr("cols"); c++) {
-			v = "   ";
-			var el = $("<input type=\"text\" id=\"tbTableR" + $(dialog).attr("rows") + "C" + c + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" value=\"" + v + "\" style=\"width:" + (90 / $(dialog).attr("cols")) + "%\" />");
-			$(this).before(el);
-		}
-		$(this).before("<br />");
-		$(dialog).dialog("option", "height", ($(dialog).attr("rows") + 1) * 1.2 * $("#tbTableR1C1").height() + 130);
-	});
+	el = $("<img src=\"img/icons/add.png\" />")
+		.click(function() {
+			dialog.data("rows", dialog.data("rows") + 1);
+			for (c = 1; c <= dialog.data("cols"); c++) {
+				v = "";
+				var el = $("<input type=\"text\" id=\"tbTableR" + dialog.data("rows") + "C" + c + "\" class=\"ui-widget-content ui-corner-all\" size=\"10\" value=\"" + v + "\" style=\"width:" + (90 / dialog.data("cols")) + "%\" />")
+					.insertBefore(this);
+			}
+			$(this).before("<br />");
+			dialog.dialog("option", "height", (dialog.data("rows") + 1) * 1.2 * $("#tbTableR1C1").height() + 130);
+		})
+		.appendTo(dialog);
 	
-	dialog.rows = rows;
-	dialog.cols = cols;
-	$(dialog).dialog("option", "width", (cols + 1) * 120 + 50);
-	$(dialog).dialog("option", "position", "center");
+	dialog
+			.data('rows', rows)
+			.data('cols', cols)
+			.dialog("option", "width", (cols + 1) * 120 + 50)
+			.dialog("option", "position", "center");
+
 	$("#tbTableR1C1").focus();
 }
 
 function dialogTableInsert(area_id, dialog) {
 	var s = "||", rows, cols, c, r, rows2 = 1, cols2 = 1;
-	rows = dialog.rows ? dialog.rows : 3;
-	cols = dialog.cols ? dialog.cols : 3;
+	dialog = $(dialog);
+
+	rows = dialog.data('rows') || 3;
+	cols = dialog.data('cols') || 3;
 	for (r = 1; r <= rows; r++) {
 		for (c = 1; c <= cols; c++) {
 			if ($.trim($("#tbTableR" + r + "C" + c).val())) {
@@ -1528,9 +1516,10 @@ function dialogTableInsert(area_id, dialog) {
 	}
 	for (r = 1; r <= rows2; r++) {
 		for (c = 1; c <= cols2; c++) {
-			s += $("#tbTableR" + r + "C" + c).val();
+			var tableData = $("#tbTableR" + r + "C" + c).val();
+			s += tableData;
 			if (c < cols2) {
-				s += "|";
+				s += (tableData ? '|' : ' | ');
 			}
 		}
 		if (r < rows2) {
@@ -1552,32 +1541,40 @@ function dialogFindOpen(area_id) {
 }
 
 function dialogFindFind( area_id ) {
+	var ta = $('#' + area_id);
+	var findInput = $("#tbFindSearch").removeClass("ui-state-error");
 	
-	var s, opt, ta, str, re, p = 0, m;
-	s = $("#tbFindSearch").removeClass("ui-state-error").val();
-	opt = "";
-	if ($("#tbFindCase").attr("checked")) {
-		opt += "i";
+	var $textareaEditor = syntaxHighlighter.get(ta); //codemirror functionality
+	if ($textareaEditor) {
+		syntaxHighlighter.find($textareaEditor, findInput.val());
 	}
-	ta = $('#' + area_id);
-	str = ta.val();
-	re = new RegExp(s,opt);
-	p = getCaretPos(ta[0]);
-	if (p && p < str.length) {
-		m = re.exec(str.substring(p));
-	} else {
-		p = 0;
+	else { //standard functionality
+		var s, opt, str, re, p = 0, m;
+		s = findInput.val();
+		opt = "";
+		if ($("#tbFindCase").attr("checked")) {
+			opt += "i";
+		}
+		str = ta.val();
+		re = new RegExp(s, opt);
+		p = getCaretPos(ta[0]);
+		if (p && p < str.length) {
+			m = re.exec(str.substring(p));
+		}
+		else {
+			p = 0;
+		}
+		if (!m) {
+			m = re.exec(str);
+			p = 0;
+		}
+		if (m) {
+			setSelectionRange(ta[0], m.index + p, m.index + s.length + p);
+		}
+		else {
+			findInput.addClass("ui-state-error");
+		}
 	}
-	if (!m) {
-		m = re.exec(str);
-		p = 0;
-	}
-	if (m) {
-		setSelectionRange(ta[0], m.index + p, m.index + s.length + p);
-	} else {
-		$("#tbFindSearch").addClass("ui-state-error");
-	}
-
 }
 
 // Replace
@@ -1590,8 +1587,8 @@ function dialogReplaceOpen(area_id) {
 }
 
 function dialogReplaceReplace( area_id ) {
-	
-	var s = $("#tbReplaceSearch").val();
+	var findInput = $("#tbReplaceSearch").removeClass("ui-state-error");
+	var s = findInput.val();
 	var r = $("#tbReplaceReplace").val();
 	var opt = "";
 	if ($("#tbReplaceAll").attr("checked")) {
@@ -1600,9 +1597,17 @@ function dialogReplaceReplace( area_id ) {
 	if ($("#tbReplaceCase").attr("checked")) {
 		opt += "i";
 	}
-	var str = $('#' + area_id).val();
+	var ta = $('#' + area_id);
+	var str = ta.val();
 	var re = new RegExp(s,opt);
-	$('#' + area_id).val(str.replace(re,r));
+	
+	var textareaEditor = syntaxHighlighter.get(ta); //codemirror functionality
+	if (textareaEditor) {
+		syntaxHighlighter.replace(textareaEditor, s, r);
+	}
+	else { //standard functionality
+		ta.val(str.replace(re, r));
+	}
 
 }
 
@@ -1618,9 +1623,8 @@ function dialogReplaceReplace( area_id ) {
 		return this.each(function(){
 			var comment = this;
 			var text = $('dt:contains("note")', comment).next('dd').text();
-			var title = $('.postbody-title', comment).clone();
-			var author = $('.author', comment).clone();
-			var body = $('.postbody-content', comment).clone();
+			var title = $('h6:first', comment).clone();
+			var body = $('.body:first', comment).clone();
 			body.find('dt:contains("note")').closest('dl').remove();
 
 			if( text.length > 0 ) {
@@ -1639,7 +1643,7 @@ function dialogReplaceReplace( area_id ) {
 							} );
 						}
 
-						child.append( title.append(author) )
+						child.append( title )
 							.append( $('<dd/>').append(body) );
 					} );
 			}
@@ -1649,29 +1653,40 @@ function dialogReplaceReplace( area_id ) {
 	/**
 	 * Convert a zone to a note editor by attaching handlers on mouse events.
 	 */
-	$.fn.noteeditor = function (textarea, link) {
+	$.fn.noteeditor = function (editlink, link) {
 		var hiddenParents = null;
 		var annote = $(link)
 			.click( function( e ) {
 				e.preventDefault();
+
+				var $block = $('<div/>');
 				var annotation = $(this).attr('annotation');
 				$(this).fadeOut(100);
-				$("form.comments").hide();
-				$(textarea).parent().find(".comment-info").remove();
-				var msg = "";
-				if (annotation.length < 20) {
-					msg = tr("The text you have selected is quite short. Select a longer piece to ensure the note is associated with the correct text.") + "<br />";
-				}
-				msg = "<p class='description comment-info'>" + msg + tr("Tip: Leave the first line as it is, starting with \";note:\". This is required") + "</p>";
-				$(textarea).parent().append($(msg));
-				
-				hiddenParents = $(textarea).parents(":hidden");
-				$(textarea).parents().fadeIn(100);
-				$(textarea).val(';note:' + annotation + "\n\n").focus().scroll();
-				if (typeof $(textarea).selection == 'function') {	// only there if autocomplete enabled
-					var len = $(textarea).val().length;
-					$(textarea).selection(len, len);
-				}
+
+				$block.load(editlink.attr('href'), function () {
+					var msg = "";
+					if (annotation.length < 20) {
+						msg = tr("The text you have selected is quite short. Select a longer piece to ensure the note is associated with the correct text.") + "<br />";
+					}
+
+					msg = "<p class='description comment-info'>" + msg + tr("Tip: Leave the first line as it is, starting with \";note:\". This is required") + "</p>";
+					$block.prepend($(msg));
+					$('textarea', this)
+						.val(';note:' + annotation + "\n\n").focus();
+
+					$('form', this).submit(function () {
+						$.post($(this).attr('action'), $(this).serialize(), function () {
+							$block.dialog('destroy');
+						});
+						return false;
+					});
+
+					$block.dialog({
+						modal: true,
+						width: 500,
+						height: 400
+					});
+				});
 			} )
 			.appendTo(document.body);
 
@@ -1684,10 +1699,10 @@ function dialogReplaceReplace( area_id ) {
 				}
 
 				if( range ) {
-					var string = $.trim( range.toString() );
+					var str = $.trim( range.toString() );
 
-					if( string.length && -1 === string.indexOf( "\n" ) ) {
-						annote.attr('annotation', string);
+					if( str.length && -1 === str.indexOf( "\n" ) ) {
+						annote.attr('annotation', str);
 						annote.fadeIn(100).position( {
 							of: e,
 							at: 'bottom left',
@@ -1708,7 +1723,762 @@ function dialogReplaceReplace( area_id ) {
 					}
 				}
 			});
-		};
+	};
+
+	$.fn.browse_tree = function () {
+		this.each(function () {
+			$('.treenode:not(.done)', this)
+				.addClass('done')
+				.each(function () {
+					if (getCookie($('ul:first', this).attr('data-id'), $('ul:first', this).attr('data-prefix')) !== 'o') {
+						$('ul:first', this).css('display', 'none');
+					}
+					if ($('ul:first', this).length) {
+						var dir = $('ul:first', this).css('display') === 'block' ? 's' : 'e';
+						$(this).prepend('<span class="flipper ui-icon ui-icon-triangle-1-' + dir + '" style="float: left;"/>');
+					} else {
+						$(this).prepend('<span style="float:left;width:16px;height:16px;"/>');
+					}
+				});
+
+			$('.flipper:not(.done)')
+				.addClass('done')
+				.css('cursor', 'pointer')
+				.click(function () {
+					var body = $(this).parent().find('ul:first');
+					if ('block' === body.css('display')) {
+						$(this).removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+						body.hide('fast');
+						setCookie(body.data("id"), "", body.data("prefix"));
+					} else {
+						$(this).removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+						body.show('fast');
+						setCookie(body.data("id"), "o", body.data("prefix"));
+					}
+				});
+		});
+
+		return this;
+	};
+
+	var fancy_filter_create_token = function(value, label) {
+		var close, token;
+
+		close = $('<span class="ui-icon ui-icon-close"/>')
+			.click(function () {
+				var ed = $(this).parent().parent();
+				$(this).parent().remove();
+				ed.change();
+				return false;
+			});
+
+		token = $('<span class="token"/>')
+			.attr('data-value', value)
+			.text(label)
+			.attr('contenteditable', false)
+			.disableSelection()
+			.append(close);
+
+		return token[0];
+	};
+
+	var fancy_filter_build_init = function(editable, str, options) {
+		if (str === '') {
+			str = '&nbsp;';
+		}
+
+		editable.html(str.replace(/(\d+)/g, '<span>$1</span>'));
+
+		if (options && options.map) {
+			editable.find('span').each(function () {
+				var val = $(this).text();
+				$(this).replaceWith(fancy_filter_create_token(val, options.map[val] ? options.map[val] : val));
+			});
+		}
+	};
+
+	$jq.fn.fancy_filter = function (operation, options) {
+		this.each(function () {
+			switch (operation) {
+			case 'init':
+				var editable = $('<div class="fancyfilter"/>'), input = this;
+
+				if (editable[0].contentEditable !== null) {
+					fancy_filter_build_init(editable, $(this).val(), options);
+					editable.attr('contenteditable', true);
+					$(this).after(editable).hide();
+				}
+
+				editable
+					.keyup(function() {
+						$(this).change();
+						$(this).mouseup();
+					})
+					.change(function () {
+						$(input).val($('<span/>')
+							.html(editable.html())
+							.find('span').each(function() {
+								$(this).replaceWith(' ' + $(this).attr('data-value') + ' ');
+							})
+							.end().text().replace(/\s+/g, ' '));
+					})
+					.mouseup(function () {
+						input.lastRange = window.getSelection().getRangeAt(0);
+					});
+
+				break;
+			case 'add':
+				var node = fancy_filter_create_token(options.token, options.label);
+				if (this.lastRange) {
+					this.lastRange.deleteContents();
+					this.lastRange.insertNode(node);
+					this.lastRange.insertNode(document.createTextNode(options.join));
+				} else {
+					$(this).next().append(options.join).append(node);
+				}
+				$(this).next().change();
+				break;
+			}
+		});
+
+		return this;
+	};
+
+	$.fn.drawGraph = function () {
+		this.each(function () {
+			var $this = $(this);
+			var width = $this.width();
+			var height = Math.ceil( width * 9 / 16 );
+			var nodes = $this.data('graph-nodes');
+			var edges = $this.data('graph-edges');
+
+			var g = new Graph;
+			$.each(nodes, function (k, i) {
+				g.addNode(i);
+			});
+			$.each(edges, function (k, i) {
+				var style = { directed: true };
+				if( i.preserve ) {
+					style.color = 'red';
+				}
+				g.addEdge( i.from, i.to, style );
+			});
+
+			var layouter = new Graph.Layout.Spring(g);
+			layouter.layout();
+			
+			var renderer = new Graph.Renderer.Raphael($this.attr('id'), g, width, height );
+			renderer.draw();
+		});
+
+		return this;
+	};
+
+	/**
+	 * Handle textarea and input text selections
+	 * Code from:
+	 *
+	 * jQuery Autocomplete plugin 1.1
+	 * Copyright (c) 2009 Jörn Zaefferer
+	 *
+	 * Dual licensed under the MIT and GPL licenses:
+	 *   http://www.opensource.org/licenses/mit-license.php
+	 *   http://www.gnu.org/licenses/gpl.html
+	 *
+	 * Now deprecated and replaced in Tiki 7 by jquery-ui autocomplete
+	 */
+	$.fn.selection = function(start, end) {
+		if (start !== undefined) {
+			if (end === undefined) {
+				end = start;
+			}
+			return this.each(function() {
+				if( this.createTextRange ){
+					var selRange = this.createTextRange();
+					if (start == end) {
+						selRange.move("character", start);
+						selRange.select();
+					} else {
+						selRange.collapse(true);
+						selRange.moveStart("character", start);
+						selRange.moveEnd("character", end - start);	// moveEnd is relative
+						selRange.select();
+					}
+				} else if( this.setSelectionRange ){
+					this.setSelectionRange(start, end);
+				} else if( this.selectionStart ){
+					this.selectionStart = start;
+					this.selectionEnd = end;
+				}
+			});
+		}
+		var field = this[0];
+		if ( field.createTextRange ) {
+			// from http://the-stickman.com/web-development/javascript/finding-selection-cursor-position-in-a-textarea-in-internet-explorer/
+			// The current selection
+			var range = document.selection.createRange();
+			// We'll use this as a 'dummy'
+			var stored_range = range.duplicate();
+			// Select all text
+			stored_range.moveToElementText( field );
+			// Now move 'dummy' end point to end point of original range
+			stored_range.setEndPoint( 'EndToEnd', range );
+			// Now we can calculate start and end points
+			var selectionStart = stored_range.text.length - range.text.length;
+			var selectionEnd = selectionStart + range.text.length;
+			return {
+				start: selectionStart,
+				end: selectionEnd
+			}
+		
+		} else if( field.selectionStart !== undefined ){
+			return {
+				start: field.selectionStart,
+				end: field.selectionEnd
+			}
+		}
+	};
+
+	$.fn.comment_toggle = function () {
+		this.each(function () {
+			var $target = $(this.hash);
+			$target.hide();
+
+			$(this).click(function () {
+				if ($target.is(':visible')) {
+					$target.hide(function () {
+						$(this).empty();
+					});
+				} else {
+					$target.comment_load($(this).attr('href'));
+				}
+
+				return false;
+			});
+		});
+
+		return this;
+	};
+
+	$.fn.comment_load = function (url) {
+		$('#top .note-list').remove();
+
+		this.each(function () {
+			var comment_container = this;
+			$(this).load(url, function (response, status) {
+				$(this).show();
+				$('.comment.inline dt:contains("note")', this)
+					.closest('.comment')
+					.addnotes( $('#top') );
+
+				$('#top').noteeditor($('.comment-form:last a', comment_container), '#note-editor-comment');
+
+				$('.comment-form a', this).click(function () {
+					$(this).parent().empty().removeClass('button').load($(this).attr('href'), function () {
+						var form = $('form', this).submit(function () {
+							var errors;
+							$.post(form.attr('action'), $(this).serialize(), function (data, st) {
+								if (data.threadId) {
+									$(comment_container).empty().comment_load(url);
+								} else {
+									errors = $('ol.errors', form).empty();
+									if (! errors.length) {
+										$(':submit', form).after(errors = $('<ol class="errors"/>'));
+									}
+									
+									$.each(data.errors, function (k, v) {
+										errors.append($('<li/>').text(v));
+									});
+								}
+							}, 'json');
+							return false;
+						});
+
+						//allow syntax highlighting
+						if ($.fn.flexibleSyntaxHighlighter) {
+							console.log(form.find('textarea.wikiedit'));
+							form.find('textarea.wikiedit').flexibleSyntaxHighlighter();
+						}
+					});
+					return false;
+				});
+
+				$('.button.comment-form.autoshow a').click(); // allow autoshowing of comment forms through autoshow css class 
+
+				$('.confirm-prompt', this).requireConfirm({
+					success: function (data) { 
+						if (data.status === 'DONE') {
+							$(comment_container).empty().comment_load(url);
+						}
+					}
+				});
+			});
+		});
+
+		return this;
+	};
+
+	$.fn.input_csv = function (operation, separator, value) {
+		this.each(function () {
+			var values = $(this).val().split(separator);
+			if (values[0] === '') {
+				values.shift();
+			}
+
+			if (operation === 'add') {
+				values.push(value);
+			} else if (operation === 'delete') {
+				value = String(value);
+				while (-1 !== $.inArray(value, values)) {
+					values.splice($.inArray(value, values), 1);
+				}
+			}
+
+			$(this).val(values.join(separator));
+		});
+
+		return this;
+	};
+
+	$.service = function (controller, action, query) {
+		var append = '';
+
+		if (query) {
+			append = '?' + $.map(query, function (v, k) {
+				return k + '=' + escape(v);
+			}).join('&');
+		}
+
+		if (action) {
+			return 'tiki-' + controller + '-' + action + append;
+		} else {
+			return 'tiki-' + controller + append;
+		}
+	};
+
+	$.fn.serviceDialog = function (options) {
+		this.each(function () {
+			var $dialog = $('<div/>'), origin = this, buttons = {};
+			$(this).append($dialog).data('serviceDialog', $dialog);
+
+			buttons[tr('OK')] = function () {
+				$dialog.find('form:visible').submit();
+			};
+			buttons[tr('Cancel')] = function () {
+				$dialog
+					.dialog('close')
+					.dialog('destroy');
+			};
+
+			$dialog.dialog({
+				title: options.title,
+				minWidth: 500,
+				height: (options.fullscreen ? $window.height() - 20 : 600),
+				width: (options.fullscreen ? $window.width() - 20 : null),
+				close: function () {
+					if (options.close) {
+						options.close.apply([], this);
+					}
+					$(this).dialog('destroy');
+				},
+				buttons: buttons,
+				modal: options.modal,
+				zIndex: options.zIndex
+			});
+
+			$dialog.loadService(options.data, $.extend(options, {origin: origin}));
+		});
+
+		return this;
+	};
+	$.fn.loadService =  function (data, options) {
+		var $dialog = this, controller = options.controller, action = options.action, url;
+
+		if (data && data.controller) {
+			controller = data.controller;
+		}
+
+		if (data && data.action) {
+			action = data.action;
+		}
+
+		if (options.origin && $(options.origin).is('a')) {
+			url = $(options.origin).attr('href');
+		} else {
+			url = $.service(controller, action);
+		}
+
+		$dialog.load(url, data, function (data) {
+			$dialog.find('form .submit').hide();
+
+			$dialog.find('form:not(.no-ajax)').submit(function (e) {
+				var form = this, act;
+				act = $(form).attr('action');
+	
+				if (! act) {
+					act = url;
+				}
+
+				$.ajax(act, {
+					type: 'POST',
+					dataType: 'json',
+					data: $(form).serialize(),
+					success: function (data) {
+						data = (data ? data : {});
+						
+						if (data.FORWARD) {
+							$dialog.loadService(data.FORWARD, options);
+						} else {
+							$dialog.dialog('destroy');
+						}
+
+						if (options.success) {
+							options.success.apply(options.origin, [data]);
+						}
+					},
+					error: function (jqxhr) {
+						$(form.name).showError(jqxhr);
+					}
+				});
+
+				return false;
+			});
+
+			if (options.load) {
+				options.load.apply($dialog[0], [data]);
+			}
+
+			$('.confirm-prompt', this).requireConfirm({
+				success: function (data) {
+					if (data.FORWARD) {
+						$dialog.loadService(data.FORWARD, options);
+					} else {
+						$dialog.loadService(options.data, options);
+					}
+				}
+			});
+		});
+	};
+
+	$.fn.requireConfirm = function (options) {
+		this.click(function (e) {
+			e.preventDefault();
+			var message = options.message, link = this;
+
+			if (! message) {
+				message = $(this).data('confirm');
+			}
+
+			if (confirm (message)) {
+				$.ajax($(this).attr('href'), {
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						'confirm': 1
+					},
+					success: function (data) {
+						options.success.apply(link, [data]);
+					},
+					error: function (jqxhr) {
+						$(link).closest('form').showError(jqxhr);
+					}
+				});
+			}
+			return false;
+		});
+
+		return this;
+	};
+
+	$.fn.showError = function (message) {
+		if (message.responseText) {
+			var data = $.parseJSON(message.responseText);
+			message = data.message;
+		}
+		this.each(function () {
+			var validate = $(this).closest('form').validate(), errors = {}, field;
+
+			if (validate) {
+				if (! $(this).attr('name')) {
+					$(this).attr('name', $(this).attr('id'));
+				}
+
+				field = $(this).attr('name');
+
+				var parts;
+				if (parts = message.match(/^<!--field\[([^\]]+)\]-->(.*)$/)) {
+					field = parts[1];
+					message = parts[2];
+				}
+				
+				errors[field] = message;
+				validate.showErrors(errors);
+
+				setTimeout(function () {
+					$('#error_report li').filter(function () {
+						return $(this).text() === message;
+					}).remove();
+
+					if ($('#error_report ul').is(':empty')) {
+						$('#error_report').empty();
+					}
+				}, 100);
+			}
+		});
+
+		return this;
+	};
+
+	$.fn.clearError = function () {
+		this.each(function () {
+			$(this).closest('form').find('label.error[for="' + $(this).attr('name') + '"]').remove();
+		});
+
+		return this;
+	};
+
+	$.fn.object_selector = function (filter, threshold) {
+		var input = this;
+		this.each(function () {
+			var $spinner = $(this).parent().modal(" ");
+			$.getJSON('tiki-searchindex.php', {
+				filter: filter
+			}, function (data) {
+				var $select = $('<select/>'), $autocomplete = $('<input type="text"/>');
+				$(input).wrap('<div class="object_selector"/>');
+				$(input).hide();
+				$select.append('<option/>');
+				$.each(data, function (key, value) {
+					$select.append($('<option/>').attr('value', value.object_type + ':' + value.object_id).text(value.title));
+				});
+
+				$(input).after($select);
+				$select.change(function () {
+					$(input).data('label', $select.find('option:selected').text());
+					$(input).val($select.val()).change();
+				});
+
+				if (jqueryTiki.selectmenu) {
+					var $hidden = $select.parents("fieldset:hidden:last").show();
+					$select.css("font-size", $.browser.webkit ? "1.4em" : "1.1em")	// not sure why webkit is so different, it just is :(
+						.attr("id", input.attr("id") + "_sel")						// bug in selectmenu when no id
+						.tiki("selectmenu");
+					$hidden.hide();
+				}
+				$spinner.modal();
+
+				if ($select.children().length > threshold) {
+					var filterField = $('<input type="text"/>').width(120).css('marginRight', '1em');
+
+					$(input).after(filterField);
+					filterField.wrap('<label/>').before(tr('Search:')+ ' ');
+
+					filterField.keypress(function (e) {
+						var field = this;
+
+						if (e.which === 0 || e.which === 13) {
+							return false;
+						}
+
+						if (this.searching) {
+							clearTimeout(this.searching);
+							this.searching = null;
+						}
+
+						if (this.ajax) {
+							this.ajax.abort();
+							this.ajax = null;
+							$spinner.modal();
+						}
+
+						if (jqueryTiki.selectmenu) {
+							$select.selectmenu('open');
+							$(field).focus();
+						}
+
+						this.searching = setTimeout(function () {
+							var loaded = $(field).val();
+							if (!loaded || loaded === " ") {	// let them get the whole list back?
+								loaded = "*";
+							}
+							if ((loaded === "*" || loaded.length >= 3) && loaded !== $select.data('loaded')) {
+								$spinner = $(field).parent().modal(" ");
+								field.ajax = $.getJSON('tiki-searchindex.php', {
+									filter: $.extend(filter, {autocomplete: loaded})
+								}, function (data) {
+									$select.empty();
+									$select.data('loaded', loaded);
+									$select.append('<option/>');
+									$.each(data, function (key, value) {
+										$select.append($('<option/>').attr('value', value.object_type + ':' + value.object_id).text(value.title));
+									});
+									if (jqueryTiki.selectmenu) {
+										$select.tiki("selectmenu");
+										$select.selectmenu('open');
+										$(field).focus();
+									}
+									$spinner.modal();
+								});
+							}
+						}, 500);
+					});
+				}
+			});
+		});
+
+		return this;
+	};
+
+	$.fn.sortList = function () {
+		var list = $(this), items = list.children('li').get();
+
+		items.sort(function(a, b) {
+			var compA = $(a).text().toUpperCase();
+			var compB = $(b).text().toUpperCase();
+			return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
+		})
+
+		$.each(items, function(idx, itm) {
+			list.append(itm);
+		});
+	};
+	$.localStorage = {
+		store: function (key, value) {
+			if (window.localStorage) {
+				window.localStorage[key] = $.toJSON(favoriteList);
+			}
+		},
+		load: function (key, callback, fetch) {
+			if (window.localStorage && window.localStorage[key]) {
+				callback($.parseJSON(window.localStorage[key]));
+			} else {
+				fetch(function (data) {
+					window.localStorage[key] = $.toJSON(data);
+					callback(data);
+				});
+			}
+		}
+	};
+
+	var favoriteList = [];
+	$.fn.favoriteToggle = function () {
+		this.find('a')
+			.each(function () {
+				var type, obj, isFavorite, link = this;
+				type = $(this).queryParam('type');
+				obj = $(this).queryParam('object');
+				
+
+				function isFavorite() {
+					var ret = false;
+					$.each(favoriteList, function (k, v) {
+						if (v === type + ':' + obj) {
+							ret = true;
+							return false;
+						}
+					});
+
+					return ret;
+				}
+
+				$(this).empty();
+				$(this).append(tr('Favorite'));
+				$(this).prepend($('<img style="vertical-align: top; margin-right: .2em;" />').attr('src', isFavorite() ? 'img/icons/star.png' : 'img/icons/star_grey.png'));
+				// Toggle class of closest surrounding div for css customization
+				if (isFavorite()) {
+					$(this).closest('div').addClass( 'favorite_selected' );
+					$(this).closest('div').removeClass( 'favorite_unselected' ); 
+				} else {
+					$(this).closest('div').addClass( 'favorite_unselected' );
+					$(this).closest('div').removeClass( 'favorite_selected' );	
+				}
+				$(this)
+					.filter(':not(".register")')
+					.addClass('register')
+					.click(function () {
+						$.getJSON($(this).attr('href'), {
+							target: isFavorite() ? 0 : 1
+						}, function (data) {
+							favoriteList = data.list;
+							$.localStorage.store('favorites', favoriteList);
+
+							$(link).parent().favoriteToggle();
+						});
+						return false;
+					});
+			});
+
+		return this;
+	};
+
+	$.fn.queryParam = function (name) {
+		name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+		var results = regex.exec(this[0].href);
+
+		if(results == null) {
+			return "";
+		} else {
+			return decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+	};
+
+	$(function () {
+		var list = $('.favorite-toggle');
+
+		if (list.length > 0) {
+			$.localStorage.load(
+				'favorites',
+				function (data) {
+					favoriteList = data;
+					list
+						.favoriteToggle()
+						.removeClass('favorite-toggle');
+				}, 
+				function (recv) {
+					$.getJSON($.service('favorite', 'list'), recv);
+				}
+			);
+		}
+	});
+
+	$.ajaxSetup({
+		complete: function () {
+			$('.favorite-toggle')
+				.favoriteToggle()
+				.removeClass('favorite-toggle');
+		}
+	});
+
+	/**
+	 * Show a loading spinner on top of a button (or whatever)
+	 *
+	 * @param empty or jq object $spinner		if empty, spinner is added and returned and element "disabled"
+	 * 											if spinner then spinner is removed and element returned to normal
+	 *
+	 * @return jq object $spinner being shown or null when removing
+	 */
+
+	$.fn.showBusy = function( $spinner ) {
+		if (!$spinner) {
+			var pos = $(this).position();
+			$spinner = $("<img src='img/spinner.gif' alt='" + tr("Wait") + "' class='ajax-spinner' />").
+					css({
+						"position": "absolute",
+						"top": pos.top + ($(this).height() / 2),
+						"left": pos.left + ($(this).width() / 2) - 8
+					}).data("target", this);
+			$(this).parent().find(".ajax-spinner").remove();
+			$(this).parent().append($spinner);
+			$(this).attr("disabled", true).css("opacity", 0.5);
+			return $spinner;
+		} else {
+			$($spinner.data("target")).attr("disabled", false).css("opacity", 1);
+			$spinner.remove();
+			return null;
+		}
+	}
+
 })($jq);
 
 // Prevent memory leaks in IE
@@ -1739,3 +2509,621 @@ if ( window.attachEvent && !window.addEventListener ) {
 		}
 	});
 }
+
+$.modal = function(msg) {
+	return $('body').modal(msg, {
+		isEverything: true
+	});
+};
+
+//Makes modal over window or object so ajax can load and user can't prevent action
+$.fn.modal = function(msg, s) {
+	var obj = $(this);
+	var lastModal = obj.attr('lastModal');
+	
+	if (!lastModal) {
+		lastModal = Math.floor(Math.random() * 1000);
+		obj.attr('lastModal', lastModal);
+	}
+
+	var mid = obj.height() / 2 + obj.offset().top;
+	if (mid > $window.height()) {
+		mid = ($window.height() - obj.offset().top) / 2 + obj.offset().top;
+	}
+	s = $.extend({
+		isEverything: false,
+		top: 	obj.offset().top,
+		left: 	obj.offset().left,
+		height: obj.height(), //we try to get height here
+		width: 	obj.width(),
+		middle: (mid),
+		center: (obj.width() / 2 + obj.offset().left)
+	}, s);
+	
+	var modal = $('body').find('#modal_' + lastModal);
+	var spinner = $('<img src="img/spinner.gif" />');
+	
+	if (!msg) {
+		modal
+			.fadeOut(function() {
+				$(this).remove();
+			});
+		obj.removeAttr('lastModal');
+		return;
+	}
+	
+	if (modal.length) {
+		modal
+			.find('.dialog')
+			.html(spinner)
+			.append(msg);
+		return;
+	}
+	
+	modal = $('<div>' + 
+		    '<div class="dialog"></div>' +
+		    '<div class="mask"></div>' +
+		'</div>')
+		.addClass('boxes')
+		.attr('id', 'modal_' + lastModal)
+		.prependTo('body');
+	
+	var size = {};
+	
+	if (s.isEverything) { //if the modal includes the whole page
+		s = $.extend(s, {
+			top: 	0,
+			left:	0,
+			height: $document.height(),
+			width: 	$window.width(),
+			middle: $window.height() / 2,
+			center: $window.width() / 2
+		});
+	}
+	 
+	//Set height and width to mask to fill up the whole screen or the single element
+	modal.find('.mask')
+		.css('width', 	s.width + 'px')
+		.css('height', 	s.height + 'px')
+		.css('top', 	s.top + 'px')
+		.css('left', 	s.left + 'px')
+		.css('position', 'absolute')
+		.fadeTo(1,0.01)
+		.fadeTo(1000,0.8);
+	
+	var dialog = modal.find('.dialog');
+	dialog
+		.append(spinner)
+		.append(msg)
+		.css('top',  (s.middle - dialog.height() / 2) + 'px')
+		.css('left', (s.center - dialog.width() / 2) + 'px')
+		.css('position', 'absolute');
+
+	if (s.isEverything) {
+		dialog
+			.css('top', (s.middle - dialog.height() / 2) + 'px')
+			.css('left', (s.center - dialog.width() / 2) + 'px')
+			.css('position', 'fixed');
+	}
+	
+	return obj;
+};
+
+//makes the width of an input change to the value
+$.fn.valWidth = function() {
+	var me = $(this);
+	return me.ready(function() {
+		var h = me.height();
+		if (!h) {
+			h = me.offsetParent().css("font-size");
+			if (h) {
+				h = parseInt(h.replace("px", ""));
+			}
+		}
+		me.keyup(function() {
+			var width = me.val().length * h;
+
+			me
+				.stop()
+				.animate({
+					width: (width > h ? width : h)
+				}, 200);
+		})
+		.keyup();
+	});
+};
+
+//For making pagination have the ability to enter page/offset number and go
+$.paginationHelper = function() {
+	$('.pagenums').each(function() {
+		var me = $(this);
+		var step = me.find('input.pagenumstep');
+		var endOffset = (me.find('input.pagenumend').val() - 1) * step.data('step');
+		var url = step.data('url');
+		var offset_jsvar = step.data('offset_jsvar');
+		
+		me.find('span.pagenumstep').replaceWith(
+			$('<input type="text" style="font-size: inherit; " />')
+				.val(step.val())
+				.change(function() {
+					var newOffset = step.data('step') * ($(this).val() - 1);
+					
+					if (newOffset >= 0) {
+						//make sure the offset isn't too high
+						newOffset = (newOffset > endOffset ? endOffset : newOffset);
+						
+						//THis is for custom/ajax search handling
+						window[offset_jsvar] = newOffset;
+						if (step[0]) {
+							if (step.attr('onclick')) {
+								step[0].onclick();
+								return;
+							}
+						}
+						
+						//if the above behavior isn't there, we update location
+						document.location = url + "offset=" + newOffset;
+					}
+				})
+				.keyup(function(e) {
+					switch(e.which) {
+						case 13: $(this).blur();
+					}
+				})
+				.valWidth()
+		);
+	});
+};
+
+//a sudo "onvisible" event
+$.fn.visible = function(fn, isOne) {
+	if (fn) {
+		$(this).each(function() {
+			var me = $(this);
+			if (isOne) {
+				me.one('visible', fn);
+			} else {
+				me.bind('visible', fn);
+			}
+			
+			function visibilityHelper() {
+				if (!me.is(':visible')) {
+					setTimeout(visibilityHelper, 500);
+				} else {
+					me.trigger('visible');
+				}
+			}
+			
+			visibilityHelper();
+		});
+	} else {
+		$(this).trigger('visible');
+	}
+	
+	return this;
+};
+
+$.download = function(url, data, method){
+	//url and data options required
+	if( url && data ){ 
+		//data can be string of parameters or array/object
+		data = typeof data == 'string' ? data : jQuery.param(data);
+		//split params into form inputs
+		var inputs = '';
+		jQuery.each(data.split('&'), function(){ 
+			var pair = this.split('=');
+			inputs+='<input type="hidden" name="'+ pair[0] +'" value="'+ pair[1] +'" />'; 
+		});
+		//send request
+		jQuery('<form action="'+ url +'" method="'+ (method||'post') +'">'+inputs+'</form>')
+		.appendTo('body').submit().remove();
+	};
+};
+
+$.uiIcon = function(type) {
+	return $('<div style="width: 1.4em; height: 1.4em; margin: .2em; display: inline-block; cursor: pointer;">' +
+		'<span class="ui-icon ui-icon-' + type + '">&nbsp;</span>' + 
+	'</div>')
+	.hover(function(){
+		$(this).addClass('ui-state-highlight');
+	}, function() {
+		$(this).removeClass('ui-state-highlight');
+	});
+};
+
+$.uiIconButton = function(type) {
+	return $.uiIcon(type).addClass('ui-state-default ui-corner-all');
+};
+
+$.rangySupported = function(fn) {
+	if (window.rangy) {
+		rangy.init();
+		var cssClassApplierModule = rangy.modules.CssClassApplier;
+		return fn();
+	}
+};
+
+$.fn.rangy = function(fn) {
+	var me = $(this);
+	$.rangySupported(function() {
+		$document.mouseup(function(e) {
+			if (me.data('rangyBusy')) return;
+			
+			var selection = rangy.getSelection();
+			var html = selection.toHtml();
+			var text = selection.toString();
+			
+			if (text.length > 3 && rangy.isUnique(me[0], text)) {
+					if (fn)
+						if ($.isFunction(fn))
+							fn({
+								text: text,
+								x: e.pageX,
+								y: e.pageY
+							});
+			}
+		});
+	});
+	return this;
+};
+
+$.fn.rangyRestore = function(phrase, fn) {
+	var me = $(this);
+	$.rangySupported(function() {
+		phrase = rangy.setPhrase(me[0], phrase);
+		
+		if (fn)
+			if ($.isFunction(fn))
+				fn(phrase);
+	});
+	return this;
+};
+
+$.fn.rangyRestoreSelection = function(phrase, fn) {
+	var me = $(this);
+	$.rangySupported(function() {
+		phrase = rangy.setPhraseSelection(me[0], phrase);
+		
+		if (fn)
+			if ($.isFunction(fn))
+				fn(phrase);
+	});
+	return this;
+};
+
+$.fn.ajaxEditDraw = function(options) {
+	var me = $(this).attr('href', 'tiki-ajax_services.php');
+
+	//defaults
+	options = $.extend({
+		saved: function() {},
+		closed: function() {}
+	}, options);
+
+	$.modal(tr('Loading editor'));
+
+	me.serviceDialog({
+		title: me.attr('title'),
+		data: {
+			controller: 'draw',
+			action: 'edit',
+			fileId: me.data('fileid'),
+			galleryId: me.data('galleryid'),
+			raw: true
+		},
+		modal: true,
+		zIndex: 9999,
+		fullscreen: true,
+		load: function (data) {
+			//prevent from happeneing over and over again
+			if (me.data('drawLoaded')) return false;
+			
+			me.data('drawLoaded', true);
+
+			me.drawing = $('#tiki_draw')
+				.loadDraw({
+					fileId: me.data('fileid'),
+					galleryId: me.data('galleryid'),
+					name: me.data('name'),
+					data: $('#fileData').val()
+				})
+				.bind('savedDraw', function(e, o) {
+					me.data('drawLoaded', false);
+					me.drawing.parent().dialog('destroy');
+					me.drawing.remove();
+
+					//update the image that did exist in the page with the new one that now exists
+					var img = $('.pluginImg' + me.data('fileid')).show();
+					var w = img.width(), h = img.height();
+
+					if (img.hasClass('regImage')) {
+						var replacement = $('<div />')
+							.attr('class', img.attr('class'))
+							.attr('style', img.attr('style'))
+							.attr('id', img.attr('id'))
+							.insertAfter(img);
+
+						img.remove();
+						img = replacement;
+					}
+
+					$('<div class=\"svgImage\" />')
+						.load('tiki-download_file.php?fileId=' + o.fileId + '&display', function() {
+
+							$(this)
+								.css('position', 'absolute')
+								.fadeTo(0, 0.01)
+								.prependTo('body')
+								.find('img,svg')
+								.scaleImg({
+									width: w,
+									height: h
+								});
+
+							img.html($(this).html());
+
+							$(this).remove();
+						});
+
+					if (!options.saved) return;
+
+					options.saved(o.fileId);
+				})
+				.submit(function() {
+					me.drawing.saveDraw();
+					return false;
+				})
+				.bind('loadedDraw', function() {
+					//kill the padding around the dialog so it looks like svg-edit is one single box
+					me.drawing
+						.parent()
+						.css('padding', '0px');
+
+					var serviceDialog = me.data('serviceDialog');
+					if (serviceDialog) {
+						var drawFrame = $('#svgedit');
+						serviceDialog
+							.bind('dialogresize', function() {
+								drawFrame.height(serviceDialog.height() - 4);
+							})
+							.trigger('dialogresize');
+					}
+
+					$.modal();
+				});
+
+			me.drawing.find('#drawMenu').remove();
+		},
+		close: function() {
+			if (me.data('drawLoaded')) {
+				me.data('drawLoaded', false);
+				me.drawing.remove();
+
+				if (!options.closed) return;
+				options.closed(me);
+			}
+		}
+	});
+	
+	return false;
+};
+
+$.notify = function(msg, settings) {
+	settings = $.extend({
+		speed: 10000
+	},settings);
+	
+	var notify = $('#notify');
+	
+	if (!notify.length) {
+		notify = $('<div id="notify" />')
+			.css('top', '5px')
+			.css('right', '5px')
+			.css('position', 'fixed')
+			.css('z-index', 9999999)
+			.css('padding', '5px')
+			.width($window.width() / 5)
+			.prependTo('body');
+	}
+	
+	var note = $('<div class="notify ui-state-error ui-corner-all ui-widget ui-widget-content" />')
+		.append(msg)
+		.css('padding', '5px')
+		.css('margin', '5px')
+		.mousedown(function() {
+			return false;
+		})
+		.hover(function() {
+			$(this)
+				.stop()
+				.fadeTo(500, 0.3)
+		}, function() {
+			$(this)
+				.stop()
+				.fadeTo(500, 1)
+		})
+		.prependTo(notify);
+	
+	setTimeout(function() {
+		note
+			.fadeOut()
+			.slideUp();
+		
+		//added outside of fadeOut to ensure removal 
+		setTimeout(function() {
+			note.remove();
+		}, 1000);
+		
+	}, settings.speed);
+};
+
+/**
+*   Close (user) sidebar column(s) if no modules are displayed.
+*   Modules can be hidden at runtime. So, check after the page/DOM model is loaded.
+*/
+$(function () {
+
+    // Do final client side adjustment of the sidebars
+    /////////////////////////////////////////
+    var maincol = 'col1';
+
+    // Hide left side panel, if no modules are displayed
+    var left_mods = document.getElementById('left_modules');
+    if (left_mods != null) {
+        if (isEmptyText(left_mods.innerHTML)) {
+            var col = document.getElementById('col2');
+            if (col != null) {
+                col.style.display = "none"
+            }
+            document.getElementById(maincol).style.marginLeft = '0';
+
+            var toggle = document.getElementById("showhide_left_column")
+            if (toggle != null) {
+                toggle.style.display = "none";
+            }
+        }
+    }
+
+    // Hide right side panel, if no modules are displayed
+    var right_mods = document.getElementById('right_modules');
+    if (right_mods != null) {
+
+        //        alert("right_mods.innerHTML=" + right_mods.innerHTML);
+        //alert("right_mods.innerText=" + right_mods.innerText);
+
+        if (isEmptyText(right_mods.innerHTML)) {
+            var col = document.getElementById('col3');
+            if (col != null) {
+                col.style.display = "none"
+            }
+            document.getElementById(maincol).style.marginRight = '0';
+
+            var toggle = document.getElementById("showhide_right_column")
+            if (toggle != null) {
+                toggle.style.display = "none";
+            }
+        }
+    }
+
+    // FF does not support obj.innerText. So, analyze innerHTML, which all browsers seem to support
+    function isEmptyText(html) {
+
+        // Strip HTML tags
+        /////////////////////////
+        var strInputCode = html;
+
+        // Replace coded-< with <, and coded-> with >
+        strInputCode = strInputCode.replace(/&(lt|gt);/g, function (strMatch, p1) {
+            return (p1 == "lt") ? "<" : ">";
+        });
+        // Strip tags
+        var strTagStrippedText = strInputCode.replace(/<\/?[^>]+(>|$)/g, "");
+
+        // Trim whitespace
+        var text = strTagStrippedText.replace(/^\s+|\s+$/g, "");
+
+        return text == null || text.length == 0;
+    }
+});
+
+$.trackerForm = function (trackerId, itemId, remove) {
+	if (itemId && !remove) {
+		return $('<form id="editItemForm" method="get" action="tiki-view_tracker_item.php" enctype="multipart/form-data" novalidate="novalidate" />')
+			.append('<input type="hidden" name="trackerId" value="' + trackerId + '" />')
+			.append('<input type="hidden" name="itemId" value="' + itemId + '" />')
+			.append('<input type="hidden" name="save" value="Save" />');
+	} else if (!remove) {
+		return $('<form id="newItemForm" method="get" action="tiki-view_tracker.php" enctype="multipart/form-data" novalidate="novalidate" />')
+			.append('<input type="hidden" name="trackerId" value="' + trackerId + '" />')
+			.append('<input type="hidden" name="save" value="Save" />')
+			.append('<input type="hidden" name="viewitem" value="new" />');
+	} else {
+		return $('<form id="deleteItemForm" method="get" action="tiki-view_tracker.php" enctype="multipart/form-data" novalidate="novalidate" />')
+			.append('<input type="hidden" name="trackerId" value="' + trackerId + '" />')
+			.append('<input type="hidden" name="remove" value="' + itemId + '" />')
+			.append('<input type="hidden" name="force" value="y" />');
+	}
+};
+
+// try and reposition the menu ul within the browser window
+$.fn.moveToWithinWindow = function() {
+	var $el = $(this);
+	h = $el.height(),
+	w = $el.width(),
+	o = $el.offset(),
+	po = $el.parent().offset(),
+	st = $window.scrollTop(),
+	sl = $window.scrollLeft(),
+	wh = $window.height(),
+	ww = $window.width();
+
+	if (w + o.left > sl + ww) {
+		$el.animate({'left': sl + ww - w - po.left}, 'fast');
+	}
+	if (h + o.top > st + wh) {
+		$el.animate({'top': st + wh - (h > wh ? wh : h) - po.top}, 'fast');
+	} else if (o.top < st) {
+		$el.animate({'top': st - po.top}, 'fast');
+	}
+};
+
+$.fn.scaleImg = function (max) {
+	$(this).each(function() {
+		//Here we want to make sure that the displayed contents is the right size
+		var img = $(this),
+		actual = {
+			height: img.height(),
+			width: img.width()
+		},
+		original = $(this).clone(),
+		parent = img.parent();
+
+		var winner = '';
+
+		if (actual.height > max.height) {
+			winner = 'height';
+		} else if (actual.width > max.width) {
+			winner = 'width';
+		}
+
+		//if there is no winner, there is no need to resize
+		if (winner) {
+			//we resize both images and svg, we check svg first
+			var g = img.find('g');
+			if (g.length) {
+				img
+					.attr('preserveAspectRatio', 'xMinYMin meet');
+
+				parent
+					.css('overflow', 'hidden')
+					.width(max.width)
+					.height(max.height);
+
+				g.attr('transform', 'scale( ' + (100 / (actual[winner] / max[winner]) * 0.01)  + ' )');
+			} else {
+				//now we resize regular images
+				if (actual.height > actual.width) {
+					var h = max.height;
+					var w = Math.ceil(actual.width / actual.height * max.height);
+				} else {
+					var w = max.width;
+					var h = Math.ceil(actual.height / actual.width * max.width);
+				}
+				img.css({ height: h, width: w });
+			}
+
+			img
+				.css('cursor', "url(img/icons/zoom.gif),auto")
+				.click(function () {
+					$('<div/>').append(original).dialog({
+						modal: true,
+						width: Math.min($(window).width(), actual.width + 20),
+						height: Math.min($(window).height(), actual.height + 50)
+					});
+					return false;
+				});
+		}
+	});
+
+	return this;
+};

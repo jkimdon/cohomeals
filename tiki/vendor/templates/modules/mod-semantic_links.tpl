@@ -1,4 +1,4 @@
-{* $Id: mod-semantic_links.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: mod-semantic_links.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if $show_semantic_links_module}
 {if !isset($tpl_module_title)}{assign var=tpl_module_title value="{tr}Page Relations{/tr}"}{/if}

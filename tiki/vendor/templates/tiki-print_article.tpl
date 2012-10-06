@@ -1,6 +1,4 @@
-{* $Id: tiki-print_article.tpl 30229 2010-10-22 19:53:16Z luciash $ *}{if $prefs.feature_custom_doctype eq 'y' and !empty($prefs.feature_custom_doctype_content)}{$prefs.feature_custom_doctype_content}{else}<!DOCTYPE html 
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">{/if}
+{* $Id: tiki-print_article.tpl 39835 2012-02-14 10:26:42Z gezzzan $ *}<!DOCTYPE html>
 <html id="print" xmlns="http://www.w3.org/1999/xhtml" xml:lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}" lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
 {include file='header.tpl'}
@@ -10,7 +8,7 @@
 		<div id="tiki-clean">
 			<div class="articletitle">
 				<h2>{$title|escape}</h2>
-				<span class="titleb">{tr}By:{/tr} {$authorName|escape} {$publishDate|tiki_short_datetime:'On:'} ({$reads} {tr}Reads{/tr})</span>
+				<span class="titleb">{tr}Author:{/tr} {$authorName|escape} {$publishDate|tiki_short_datetime:'Published At:'} ({$reads} {tr}Reads{/tr})</span>
 			</div>
 	
 			<div class="articleheading">
@@ -37,7 +35,7 @@
 				{$parsed_body}
 {else}
 				<div class="error simplebox">
-					{tr}Permission denied. You do not have permission to read complete articles.{/tr}
+					{tr}You do not have permission to read complete articles.{/tr}
 				</div>
 {/if}
 			</div>

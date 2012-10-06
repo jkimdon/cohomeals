@@ -1,4 +1,4 @@
-{* based on $Id: mod-freetags_current.tpl 23249 2009-11-13 17:58:52Z lphuberdeau $ *}
+{* based on $Id: mod-freetags_current.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {if isset($modFreetagsCurrent) && count($modFreetagsCurrent) gt 0}
   {tikimodule error=$module_params.error title=$tpl_module_title name="freetags_current" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}

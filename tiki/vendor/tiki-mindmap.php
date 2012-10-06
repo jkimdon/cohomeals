@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-mindmap.php 25812 2010-03-02 08:33:08Z marclaporte $
+// $Id: tiki-mindmap.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once 'tiki-setup.php';
 require_once 'lib/wiki/wikilib.php';
@@ -19,7 +19,8 @@ if (isset($_REQUEST['export'])) { // {{{
 	$dom = new DOMDocument;
 	$dom->appendChild($root = $dom->createElement('map'));
 	$root->setAttribute('version', '0.8.0');
-	function create_node($dom, $text, $link = true) {
+	function create_node($dom, $text, $link = true)
+	{
 		global $wikilib;
 		$node = $dom->createElement('node');
 		$node->setAttribute('TEXT', $text);
@@ -30,11 +31,12 @@ if (isset($_REQUEST['export'])) { // {{{
 		}
 		return $node;
 	}
-	function populate_node($node, $pageName, $remainingLevels = 3, $pages = array()) {
+	function populate_node($node, $pageName, $remainingLevels = 3, $pages = array())
+	{
 		global $wikilib, $tikilib, $user;
 		$child = $wikilib->wiki_get_neighbours($pageName);
 		$child = array_diff($child, $pages);
-		foreach($child as $page) {
+		foreach ($child as $page) {
 			if (!$tikilib->user_has_perm_on_object($user, $page, 'wiki page', 'tiki_p_view')) continue;
 			$node->appendChild($new = create_node($node->ownerDocument, $page));
 			if ($remainingLevels != 0) populate_node($new, $page, $remainingLevels - 1, array_merge($pages, array($page, $pageName)));

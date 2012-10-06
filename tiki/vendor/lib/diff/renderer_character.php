@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_character.php 28186 2010-07-28 19:31:36Z jonnybradley $
+// $Id: renderer_character.php 40234 2012-03-17 19:17:41Z changi67 $
 
 /**
  * "Side-by-Side" diff renderer.
@@ -47,28 +47,28 @@ class Text_Diff_Renderer_character extends Tiki_Text_Diff_Renderer
     {
     }
 
-    function _lines($type, $lines, $prefix = '')
-    {
-    	if ($type == 'context') {
+	function _lines($type, $lines, $prefix = '')
+	{
+		if ($type == 'context') {
 	        foreach ($lines as $line) {
 			$this->orig .= htmlspecialchars($line);
 			$this->final .= htmlspecialchars($line);
 	        }
-    	} elseif ($type == 'added' || $type == 'change-added') {
-	        $l = "";
-	        foreach ($lines as $line) {
-			$l .= htmlspecialchars($line);
-		 }
-	        if (!empty($l))
-	            $this->final .= '<ins class="diffchar inserted" style="color: blue; text-decoration: none"><strong>'.$l."</strong></ins>";
-    	} elseif ($type == 'deleted' || $type == 'change-deleted') {
-	        $l = "";
-	        foreach ($lines as $line)
-			$l .= htmlspecialchars($line);
-	        if (!empty($l))
-	            $this->orig .= '<del class="diffchar deleted" style="color: red; text-decoration: none"><strong>'.$l."</strong></del>";
-      }
-    }
+		} elseif ($type == 'added' || $type == 'change-added') {
+	   	$l = "";
+			foreach ($lines as $line) {
+				$l .= htmlspecialchars($line);
+			}
+			if (!empty($l))
+				$this->final .= '<ins class="diffchar inserted" style="color: blue; text-decoration: none"><strong>'.$l."</strong></ins>";
+		} elseif ($type == 'deleted' || $type == 'change-deleted') {
+			$l = "";
+			foreach ($lines as $line)
+				$l .= htmlspecialchars($line);
+			if (!empty($l))
+				$this->orig .= '<del class="diffchar deleted" style="color: red; text-decoration: none"><strong>'.$l."</strong></del>";
+		}
+	}
 
     function _context($lines)
     {

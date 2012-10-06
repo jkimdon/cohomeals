@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_faq.php 27748 2010-06-23 03:01:50Z sampaioprimo $
+// $Id: tiki-view_faq.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'faqs';
 require_once ('tiki-setup.php');
@@ -23,8 +23,7 @@ if (!isset($_REQUEST["faqId"])) {
 	die;
 }
 
-$smarty->assign('headtitle', tra('FAQs'));
-$tikilib->get_perm_object( $_REQUEST['faqId'], 'faq' );
+$tikilib->get_perm_object($_REQUEST['faqId'], 'faq');
 
 $access->check_permission('tiki_p_view_faqs');
 
@@ -69,16 +68,6 @@ if (isset($_REQUEST["sugg"])) {
 $suggested = $faqlib->list_suggested_questions(0, -1, 'created_desc', '', $_REQUEST["faqId"]);
 $smarty->assign_by_ref('suggested', $suggested["data"]);
 $smarty->assign('suggested_cant', count($suggested["data"]));
-if ($prefs['feature_faq_comments'] == 'y') {
-	$comments_per_page = $prefs['faq_comments_per_page'];
-	$thread_sort_mode = $prefs['faq_comments_default_ordering'];
-	$comments_vars = array(
-		'faqId'
-	);
-	$comments_prefix_var = 'faq:';
-	$comments_object_var = 'faqId';
-	include_once ("comments.php");
-}
 include_once ('tiki-section_options.php');
 if ($prefs['feature_theme_control'] == 'y') {
 	$cat_type = 'faq';
