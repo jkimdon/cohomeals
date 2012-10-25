@@ -42,6 +42,7 @@
         <h3>Dependencies</h3>
         <ul>
 <li>UI Core</li>
+<li>UI Widget</li>
 <li>UI Effects Core (Optional - only for non-default animations)</li>
 </ul>
     </div>
@@ -60,7 +61,7 @@ A simple jQuery UI Accordion.<br />
 &lt;html&gt;
 &lt;head&gt;
   &lt;link href=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;/&gt;
-  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js&quot;&gt;&lt;/script&gt;
   &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js&quot;&gt;&lt;/script&gt;
   
   &lt;script&gt;
@@ -223,7 +224,7 @@ $( ".selector" ).accordion( "option", "active", 2 );</code></pre>
         <dd class="option-type">Boolean, String</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'slide'</dd>
+        <dd class="option-default">"slide"</dd>
       
     </dl>
   </div>
@@ -391,7 +392,7 @@ $( ".selector" ).accordion( "option", "collapsible", true );</code></pre>
         <dd class="option-type">String</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'click'</dd>
+        <dd class="option-default">"click"</dd>
       
     </dl>
   </div>
@@ -475,7 +476,7 @@ $( ".selector" ).accordion( "option", "fillSpace", true );</code></pre>
         <dd class="option-type">Selector, jQuery</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'&gt; li &gt;&nbsp;:first-child,&gt;&nbsp;:not(li):even'</dd>
+        <dd class="option-default">"&gt; li &gt;&nbsp;:first-child,&gt;&nbsp;:not(li):even"</dd>
       
     </dl>
   </div>
@@ -517,12 +518,12 @@ $( ".selector" ).accordion( "option", "header", 'h3' );</code></pre>
         <dd class="option-type">Object</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">{ 'header': 'ui-icon-triangle-1-e', 'headerSelected': 'ui-icon-triangle-1-s' }</dd>
+        <dd class="option-default">{ &quot;header&quot;: &quot;ui-icon-triangle-1-e&quot;, &quot;headerSelected&quot;: &quot;ui-icon-triangle-1-s&quot; }</dd>
       
     </dl>
   </div>
   <div class="option-description">
-    <p>Icons to use for headers. Icons may be specified for 'header' and 'headerSelected', and we recommend using the icons native to the jQuery UI CSS Framework manipulated by <a href="http://www.themeroller.com" class="external text" title="http://www.themeroller.com">jQuery UI ThemeRoller</a></p>
+    <p>Icons to use for headers. Icons may be specified for 'header' and 'headerSelected', and we recommend using the icons native to the jQuery UI CSS Framework manipulated by <a href="http://www.themeroller.com" class="external text" title="http://www.themeroller.com">jQuery UI ThemeRoller</a>. Set to false to have no icons displayed.</p>
   </div>
   <div class="option-examples">
     <h4>Code examples</h4>
@@ -532,7 +533,7 @@ $( ".selector" ).accordion( "option", "header", 'h3' );</code></pre>
   Initialize a accordion with the <code>icons</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).accordion({ icons: { 'header': 'ui-icon-plus', 'headerSelected': 'ui-icon-minus' } });</code></pre>
+<pre><code>$( ".selector" ).accordion({ icons: { &quot;header&quot;: &quot;ui-icon-plus&quot;, &quot;headerSelected&quot;: &quot;ui-icon-minus&quot; } });</code></pre>
 </dd>
 
     
@@ -543,7 +544,7 @@ $( ".selector" ).accordion( "option", "header", 'h3' );</code></pre>
 <pre><code>//getter
 var icons = $( ".selector" ).accordion( "option", "icons" );
 //setter
-$( ".selector" ).accordion( "option", "icons", { 'header': 'ui-icon-plus', 'headerSelected': 'ui-icon-minus' } );</code></pre>
+$( ".selector" ).accordion( "option", "icons", { &quot;header&quot;: &quot;ui-icon-plus&quot;, &quot;headerSelected&quot;: &quot;ui-icon-minus&quot; } );</code></pre>
 </dd>
 
     </dl>
@@ -640,6 +641,45 @@ $( ".selector" ).accordion( "option", "navigationFilter", function(){ ... } );</
     <h2 class="top-header">Events</h2>
     <ul class="events-list">
       
+<li class="event" id="event-create">
+  <div class="event-header">
+    <h3 class="event-name"><a href="#event-create">create</a></h3>
+    <dl>
+      <dt class="event-type-label">Type:</dt>
+        <dd class="event-type">accordioncreate</dd>
+    </dl>
+  </div>
+  <div class="event-description">
+    <p>This event is triggered when accordion is created.</p>
+  </div>
+  <div class="event-examples">
+    <h4>Code examples</h4>
+    <dl class="event-examples-list">
+    
+<dt>
+  Supply a callback function to handle the <code>create</code> event as an init option.
+</dt>
+<dd>
+<pre><code>$( &quot;.selector&quot; ).accordion({
+   create: function(event, ui) { ... }
+});</code></pre>
+</dd>
+
+    
+<dt>
+  Bind to the <code>create</code> event by type: <code>accordioncreate</code>.
+</dt>
+<dd>
+<pre><code>$( &quot;.selector&quot; ).bind( &quot;accordioncreate&quot;, function(event, ui) {
+  ...
+});</code></pre>
+</dd>
+
+    </dl>
+  </div>
+</li>
+
+
 <li class="event" id="event-change">
   <div class="event-header">
     <h3 class="event-name"><a href="#event-change">change</a></h3>
@@ -968,10 +1008,10 @@ $( ".selector" ).accordion( "option", "navigationFilter", function(){ ... } );</
 </div>
 
 </p><!-- 
-Pre-expand include size: 36551 bytes
-Post-expand include size: 61985 bytes
-Template argument size: 35253 bytes
+Pre-expand include size: 38072 bytes
+Post-expand include size: 64821 bytes
+Template argument size: 35925 bytes
 Maximum: 2097152 bytes
 -->
 
-<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3773-1!1!0!!en!2 and timestamp 20100910151506 -->
+<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3773-1!1!0!!en!2 and timestamp 20120605125030 -->

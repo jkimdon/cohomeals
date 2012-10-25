@@ -1,4 +1,4 @@
-{* $Id: contribution.tpl 28841 2010-09-01 18:55:49Z pkdille $ *}
+{* $Id: contribution.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if $prefs.feature_contribution eq 'y'}
 	{if count($contributions) gt 0}
 		<tr>

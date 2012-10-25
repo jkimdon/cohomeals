@@ -7,14 +7,12 @@
 .button a:visited {
 	text-decoration: none;
 	border: 0;
-	padding: 0 4px
+	padding: 0 4px;
 }
 
 #header-top {
 	height: 1%;
 }
-
-#sitetitle {}
 
 #siteloginbar_popup {
 	width: 300px;
@@ -70,9 +68,6 @@ img.flipmodimage {
 
 .box-data ul {
 	margin-left: 1em;
-}
-
-.box-data ul {
 	padding-left: .5em;
 }
 
@@ -114,9 +109,6 @@ img.flipmodimage {
 	margin-top: 2.4ex;
 }
 
-.wikiactions .icons,
-.wikiactions form {/*display: inline*/}
-
 /* IE6 doesn't do position fixed, override with absolute */
 .plugin-form-float {
 	position: absolute;
@@ -129,6 +121,11 @@ img.flipmodimage {
 
 .galtable {
 	width: 97%;
+}
+
+/* For IE 6/7 (trigger hasLayout) */
+.clearfix {
+    zoom: 1;
 }
 
 /* End of file */

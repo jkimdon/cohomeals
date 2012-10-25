@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: maplib.php 27335 2010-05-26 14:49:17Z sept_7 $
+// $Id: maplib.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -11,10 +11,15 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   exit;
 }
 
+/**
+ * MapLib 
+ * 
+ */
 class MapLib
 {
 
-	function listMaps($mappath) {
+	function listMaps($mappath)
+	{
 		if (!isset($mappath) or !$mappath or !is_dir($mappath)) {
 			return ('');
 		}
@@ -27,33 +32,34 @@ class MapLib
 			}
 		}
 
-		closedir ($h);
-
-		sort ($files);
+		closedir($h);
+		sort($files);
 		
 		return ($files);
-
 	}
 	
-	function listMapsWithRev($mappath) {
+	function listMapsWithRev($mappath)
+	{
 		if (!isset($mappath) or !$mappath or !is_dir($mappath)) {
 			return ("");
 		}
 	
 	  $files = array();
-    $h = opendir($mappath);
+		$h = opendir($mappath);
 
-    while (($file = readdir($h)) !== false) {
-      if (preg_match('/\.map/i', $file)) {
-          $files[] = $file;
-      }
-    }
-    closedir ($h);
-    sort ($files);
+		while (($file = readdir($h)) !== false) {
+			if (preg_match('/\.map/i', $file)) {
+				$files[] = $file;
+			}
+		}
+
+		closedir($h);
+		sort($files);
 		return ($files);
 	}
 	
-	function listKaMaps($mappath) {
+	function listKaMaps($mappath)
+	{
 		$files = $this->listMaps($mappath);
 		$kamaps = array();
 		foreach ($files as $mapfile) {
@@ -62,19 +68,19 @@ class MapLib
 				$key = trim($pagedata[$i]);
 				if (strncasecmp($key, "WEB", 3) == 0) {
 					//looking for METADATA before the END
-					while(strncasecmp($key, "END", 3) != 0) {
+					while (strncasecmp($key, "END", 3) != 0) {
 						$i++;					
 						$key = trim($pagedata[$i]);					
 						if (strncasecmp($key, "METADATA", 8) == 0) {
-							while(strncasecmp($key, "END", 3) != 0) {
+							while (strncasecmp($key, "END", 3) != 0) {
 								$i++;					
 								$key = trim($pagedata[$i]);
 								if (strncasecmp($key, "KAMAP", 5) == 0) {
 									$key = preg_replace('/#.*$/', '', $key);
-									list($name,$value) = explode('"', $key);
+									list($name, $value) = explode('"', $key);
 									$scale = explode(",", $value);
 									$title = $scale[0];
-									$scale = array_slice($scale,1);
+									$scale = array_slice($scale, 1);
 									$kmap = array();
 									$kmap["title"] = $title;
 									$kmap["path"] = $mappath . $mapfile;

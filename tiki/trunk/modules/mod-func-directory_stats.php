@@ -1,26 +1,29 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-directory_stats.php 26808 2010-04-28 12:30:41Z jonnybradley $
+// $Id: mod-func-directory_stats.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_directory_stats_info() {
+function module_directory_stats_info()
+{
 	return array(
-		'name' => tra('Directory statistics'),
+		'name' => tra('Directory Statistics'),
 		'description' => tra('Displays statistics about the directory, including the number of sites validated and to validate, the number of categories, of searches and of visited links.'),
-		'prefs' => array( 'feature_directory' ),
+		'prefs' => array('feature_directory'),
+		'documentation' => 'Module directory_stats',
 		'params' => array()
 	);
 }
 
-function module_directory_stats( $mod_reference, $module_params ) {
+function module_directory_stats($mod_reference, $module_params)
+{
 	global $prefs, $tikilib, $smarty;
 	
 	$ranking = $tikilib->dir_stats();

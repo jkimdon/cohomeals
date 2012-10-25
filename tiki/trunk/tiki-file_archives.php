@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-file_archives.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-file_archives.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'file_galleries';
 require_once ('tiki-setup.php');
@@ -17,13 +17,13 @@ if (empty($_REQUEST['fileId']) || !($fileInfo = $filegallib->get_file_info($_REQ
 	die;
 }
 
-$gal_info = $tikilib->get_file_gallery($fileInfo['galleryId']);
+$gal_info = $filegallib->get_file_gallery($fileInfo['galleryId']);
 
 $tikilib->get_perm_object($fileInfo['galleryId'], 'file gallery', $gal_info, true);
 
 if (!($tiki_p_admin_file_galleries == 'y' || $tiki_p_view_file_gallery == 'y')) {
 	$smarty->assign('errortype', 401);
-	$smarty->assign('msg', tra("Permission denied you cannot edit this file"));
+	$smarty->assign('msg', tra("You do not have permission to edit this file"));
 	$smarty->display("error.tpl");
 	die;
 }
@@ -39,7 +39,7 @@ if (!empty($_REQUEST['remove'])) {
 	}		
 	if (!($tiki_p_admin_file_galleries == 'y' || ($user && ($user == $gal_info['user'] || $user == $removeInfo['user'])))) {
 		$smarty->assign('errortype', 401);
-		$smarty->assign('msg', tra("Permission denied you cannot remove files from this gallery"));
+		$smarty->assign('msg', tra("You do not have permission to remove files from this gallery"));
 		$smarty->display("error.tpl");
 		die;
 	}

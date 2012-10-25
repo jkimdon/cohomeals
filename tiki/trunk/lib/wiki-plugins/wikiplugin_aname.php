@@ -1,48 +1,28 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_aname.php 27335 2010-05-26 14:49:17Z sept_7 $
+// $Id: wikiplugin_aname.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-/*
- * Tiki ANAME plugin.
- *
- * DESCRIPTION: Creates an anchor in a wiki page. Use in conjunction with the ALINK plugin, which specifies a link to the anchor.
- * 
- * INSTALLATION: Just put this file into your Tikiwiki site's lib/wiki-plugins folder.
- * 
- * USAGE SYNTAX:
- * 
- * 	{ANAME()}
- *	anchorname		the name of the anchor. Use this as the aname=> parameter in the ALINK plugin!
- *	{ANAME}
- *
- * EXAMPLE:  {ANAME()}anchorname{ANAME}
- * 
-  */
-
-
-function wikiplugin_aname_help() {
-        return tra("Creates an anchor in a wiki page. Use in conjunction with the ALINK plugin, which specifies a link to the anchor").":<br />~np~{ANAME()}anchorname{ANAME}~/np~";
-}
-
-function wikiplugin_aname_info() {
+function wikiplugin_aname_info()
+{
 	return array(
 		'name' => tra('Anchor Name'),
 		'documentation' => 'PluginAname',
-		'description' => tra('Inserts an anchor in the wiki page. Anchors can be linked to using the ALINK plugin.'),
+		'description' => tra('Create an anchor that can be linked to'),
 		'prefs' => array('wikiplugin_aname'),
 		'body' => tra('The name of the anchor.'),
+		'tags' => array( 'basic' ),		
 		'params' => array(),
-		'icon' => 'pics/icons/anchor.png',
+		'icon' => 'img/icons/anchor.png',
 	);
 }
 
 function wikiplugin_aname($data, $params)
 {
-        global $tikilib;
-        extract ($params, EXTR_SKIP);
+   global $tikilib;
+   extract($params, EXTR_SKIP);
         
     // the following replace is necessary to maintain compliance with XHTML 1.0 Transitional
 	// and the same behavior as tikilib.php and ALINK. This will change when the world arrives at XHTML 1.0 Strict.

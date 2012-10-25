@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-upload_image.php 27927 2010-07-10 13:49:37Z jonnybradley $
+// $Id: tiki-upload_image.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'galleries';
 require_once ('tiki-setup.php');
@@ -14,7 +14,7 @@ $access->check_feature('feature_galleries');
 
 if ($tiki_p_upload_images != 'y' and !$tikilib->user_has_perm_on_object($user, $_REQUEST["galleryId"], "image gallery", "tiki_p_upload_images")) {
 	$smarty->assign('errortype', 401);
-	$smarty->assign('msg', tra("Permission denied you cannot upload images"));
+	$smarty->assign('msg', tra("You do not have permission to upload images"));
 	$smarty->display("error.tpl");
 	die;
 }
@@ -44,7 +44,7 @@ if (isset($_REQUEST["upload"])) {
 	// Check the user to be admin or owner or the gallery is public
 	if ($tiki_p_admin_galleries != 'y' && (!$user || $user != $gal_info["user"]) && $gal_info["public"] != 'y') {
 		$smarty->assign('errortype', 401);
-		$smarty->assign('msg', tra("Permission denied you can upload images but not to this gallery"));
+		$smarty->assign('msg', tra("You have permission to upload images but not to this gallery"));
 		$smarty->display("error.tpl");
 		die;
 	}
@@ -123,7 +123,7 @@ if (isset($_REQUEST["upload"])) {
 				if (!move_uploaded_file($file_tmp_name, $tmp_dest)) {
 					if ($tiki_p_admin == 'y') {
 						$smarty->assign('msg', tra('Errors detected').'. '.tra('Check that these paths exist and are writable by the web server').': '.$file_tmp_name.' '.$tmp_dest);
-					}	else	{
+					} else {
 						$smarty->assign('msg', tra('Errors detected'));
 					}
 					$smarty->assign('errortype', 'no_redirect_login');

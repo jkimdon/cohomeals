@@ -1,21 +1,18 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_information.php 29234 2010-09-14 21:22:05Z nkoth $
+// $Id: tiki-user_information.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
-if ($prefs['ajax_xajax'] == "y") {
-	require_once ('lib/ajax/ajaxlib.php');
-}
 include_once ('lib/messu/messulib.php');
 include_once ('lib/userprefs/scrambleEmail.php');
 include_once ('lib/registration/registrationlib.php');
 include_once ('lib/trackers/trackerlib.php');
 if (isset($_REQUEST['userId'])) {
 	$userwatch = $tikilib->get_user_login($_REQUEST['userId']);
-	if ($userwatch === NULL) {
+	if ($userwatch === false) {
 		$smarty->assign('errortype', 'no_redirect_login');
 		$smarty->assign('msg', tra("Unknown user"));
 		$smarty->display("error.tpl");
@@ -63,8 +60,7 @@ if ($user) {
 			$smarty->display("tiki.tpl");
 			die;
 		}
-		$sent = $messulib->post_message($userwatch, $user, $_REQUEST['to'], '', $_REQUEST['subject'], $_REQUEST['body'], $_REQUEST['priority'], '',
-								isset($_REQUEST['replytome']) ? 'y' : '', isset($_REQUEST['bccme']) ? 'y' : '');
+		$sent = $messulib->post_message($userwatch, $user, $_REQUEST['to'], '', $_REQUEST['subject'], $_REQUEST['body'], $_REQUEST['priority'], '', isset($_REQUEST['replytome']) ? 'y' : '', isset($_REQUEST['bccme']) ? 'y' : '');
 		if ($sent) {
 			$message = tra('Message sent to') . ':' . $userlib->clean_user($userwatch) . '<br />';
 		} else {
@@ -108,7 +104,7 @@ $smarty->assign('user_information', $user_information);
 $userinfo = $userlib->get_user_info($userwatch);
 $email_isPublic = $tikilib->get_user_preference($userwatch, 'email is public', 'n');
 if ($email_isPublic != 'n') {
-	$userinfo['email'] = scrambleEmail($userinfo['email'], $email_isPublic);
+	$smarty->assign('scrambledEmail', scrambleEmail($userinfo['email'], $email_isPublic));
 }
 $smarty->assign_by_ref('userinfo', $userinfo);
 $smarty->assign_by_ref('email_isPublic', $email_isPublic);
@@ -131,7 +127,8 @@ if ($prefs['feature_display_my_to_others'] == 'y') {
 		$smarty->assign_by_ref('user_galleries', $user_galleries);
 	}
 	if ($prefs['feature_trackers'] == 'y') {
-		$user_items = $tikilib->get_user_items($userwatch);
+		$trklib = TikiLib::lib('trk');
+		$user_items = $trklib->get_user_items($userwatch);
 		$smarty->assign_by_ref('user_items', $user_items);
 	}
 	if ($prefs['feature_articles'] == 'y') {
@@ -188,23 +185,13 @@ if ($prefs['user_tracker_infos']) {
 	$userTrackerId = $trackerinfo[0];
 	array_shift($trackerinfo);
 	$fields = $trklib->list_tracker_fields($userTrackerId, 0, -1, 'position_asc', '', true, array('fieldId' => $trackerinfo));
-	foreach($fields['data'] as $field) {
+	foreach ($fields['data'] as $field) {
 		$lll[$field['fieldId']] = $field;
 	}
 	$items = $trklib->list_items($userTrackerId, 0, 1, '', $lll, $trklib->get_field_id_from_type($userTrackerId, 'u', '1%'), '', '', '', $userwatch);
 	$smarty->assign_by_ref('userItem', $items['data'][0]);
 }
 ask_ticket('user-information');
-if ($prefs['ajax_xajax'] == "y") {
-	function user_information_ajax() {
-		global $ajaxlib, $xajax;
-		$ajaxlib->registerTemplate("tiki-user_information.tpl");
-		$ajaxlib->registerTemplate("tiki-my_tiki.tpl");
-		$ajaxlib->registerFunction("loadComponent");
-		$ajaxlib->processRequests();
-	}
-	user_information_ajax();
-}
 // Get full user picture if it is set
 if ($prefs["user_store_file_gallery_picture"] == 'y') {
 	require_once ('lib/userprefs/userprefslib.php');

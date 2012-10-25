@@ -1,4 +1,4 @@
-{title url="tiki-admin_poll_options.php?pollId=$pollId"}{tr}Admin Polls:{/tr} {$menu_info.title|escape}{/title}
+{title url="tiki-admin_poll_options.php?pollId=$pollId"}{tr}Admin Polls:{/tr} {$menu_info.title}{/title}
 
 <div class="navbar">
 	{button href="tiki-admin_polls.php" _text="{tr}List polls{/tr}"}
@@ -52,18 +52,16 @@
 		{cycle values="even,odd" print=false}
 		{section name=user loop=$channels}
 			<tr class="{cycle}">
-				<td>{$channels[user].position}</td>
-				<td>{$channels[user].title|escape}</td>
-				<td>{$channels[user].votes}</td>
-				<td>
-					<a class="link" href="tiki-admin_poll_options.php?pollId={$pollId}&amp;remove={$channels[user].optionId}" title="{tr}Delete{/tr}">{icon _id=cross alt="{tr}Delete{/tr}"}</a>
+				<td class="id">{$channels[user].position}</td>
+				<td class="text">{$channels[user].title|escape}</td>
+				<td class="integer">{$channels[user].votes}</td>
+				<td class="action">
 					<a class="link" href="tiki-admin_poll_options.php?pollId={$pollId}&amp;optionId={$channels[user].optionId}" title="{tr}Edit{/tr}">{icon _id=page_edit}</a>
+					<a class="link" href="tiki-admin_poll_options.php?pollId={$pollId}&amp;remove={$channels[user].optionId}" title="{tr}Delete{/tr}">{icon _id=cross alt="{tr}Delete{/tr}"}</a>
 				</td>
 			</tr>
 		{sectionelse}
-			<tr>
-				<td class="odd" colspan="4">{tr}No records found.{/tr}</td>
-			</tr>
+	         {norecords _colspan=4}
 		{/section}
 	</table>
 </div>

@@ -1,17 +1,18 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-search.php 26888 2010-05-04 17:16:23Z jonnybradley $
+// $Id: mod-func-search.php 40124 2012-03-11 18:21:25Z pkdille $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
+	header('location: index.php');
+	exit;
 }
 
-function module_search_info() {
+function module_search_info()
+{
 	return array(
 		'name' => tra('Search'),
 		'description' => tra('Multi-purpose search module (go or edit page by name and/or search site)'),
@@ -19,14 +20,14 @@ function module_search_info() {
 		'params' => array(
 			'legacy_mode' => array(
 				'name' => tra('Legacy Mode'),
-				'description' => tra('Setting to emulate previous behaviour.') . ' ' . tra('Default:') . ' ""' . tra(' ("search"=search_box, "page"=search_wiki_page, "quick"=quick_edit)')
+				'description' => tra('Setting to emulate previous behaviour.') . ' ' . tra('Default:') . ' ""' . ' ("search"=search_box, "page"=search_wiki_page, "quick"=quick_edit)'
 			),
 			'tiki_search' => array(
 				'name' => tra('Tiki'),
 				'description' => tra('If set to "y" the search performed is a "Tiki search".') . ' ' . tra('Default:') . ' "n"' . tra(' (full text search)')
 			),
 			'show_object_filter' => array(
-				'name' => tra('Show Search Filter'),
+				'name' => tra('Show Object Type Filter'),
 				'description' => tra('If set to "y" shows a dropdown of sections to search.') . ' ' . tra('Default:') . ' "n"' . tra(' (no object filter)')
 			),
 			'use_autocomplete' => array(
@@ -63,36 +64,38 @@ function module_search_info() {
 			),
 			// initially from quick-edit
 			'search_action' => array(
-				'name' => 'Search Form Action',
-				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . " " . tra('Default:') . ' tiki-searchresults.php or tiki-searchindex.php (for Tiki search)'
+				'name' => tra('Search Form Action'),
+				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . tra(' tiki-searchresults.php or tiki-searchindex.php (for Tiki search)'),
 			),
 			'search_submit' => array(
 				'name' => tra('Edit Submit Label'),
-				'description' => tra('The label on the button to submit the form.') . " " . tra('Default:') . ' ' . tra('Search')
+				'description' => tra('The label on the button to submit the form.') . ' ' . tra('Default:') . ' ' . tra('Search'),
 			),
 			'go_action' => array(
-				'name' => 'Go Form Action',
-				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . " " . tra('Default:') . ' tiki-editpage.php'
+				'name' => tra('Go Form Action'),
+				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . ' tiki-editpage.php'
 			),
 			'go_submit' => array(
 				'name' => tra('Edit Submit Label'),
-				'description' => tra('The label on the button to submit the form.') . " " . tra('Default:') . ' ' . tra('Go')
+				'description' => tra('The label on the button to submit the form.') . ' ' . tra('Default:') . ' ' . tra('Go')
 			),
 			'edit_action' => array(
-				'name' => 'Edit Form Action',
-				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . " " . tra('Default:') . ' tiki-editpage.php'
+				'name' => tra('Edit Form Action'),
+				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . ' tiki-editpage.php'
 			),
 			'edit_submit' => array(
 				'name' => tra('Edit Submit Label'),
-				'description' => tra('The label on the button to submit the form.') . " " . tra('Default:') . ' ' . tra('Edit')
+				'description' => tra('The label on the button to submit the form.') . ' ' . tra('Default:') . ' ' . tra('Edit')
 			),
 			'input_size' => array(
-				'name' => 'Input size',
-				'description' => tra('Size attribute (horizontal, in characters) of the text input field.') . ' ' . tra('Default:') . ' 14'
+				'name' => tra('Input field width'),
+				'description' => tra('Width of the text input field (in characters).') . ' ' . tra('Example value:') . ' 15.' .' ' . tra('Default:') . tra(' 0 (leave automatic width)'),
+				'filter' => 'int'
 			),
 			'select_size' => array(
-				'name' => 'Select size',
-				'description' => tra('Size of the Search Filter dropdown list.') . " " . tra('Default:') . " 10"
+				'name' => tra('Select size'),
+				'description' => tra('Size of the Search Filter dropdown list.') . ' ' . tra('Default:') . ' 10',
+				'filter' => 'int'
 			),
 			'search_heading' => array(
 				'name' => tra('Heading'),
@@ -100,40 +103,47 @@ function module_search_info() {
 			),
 			'templateId' => array(
 				'name' => tra('Edit Template identifier'),
-				'description' => tra('If set to a template identifier, the specified template is used for creating new Wiki pages.') . " " . tra('Not set by default.')
+				'description' => tra('If set to a template identifier, the specified template is used for creating new Wiki pages.') . ' ' . tra('Not set by default.')
 			),
 			'categId' => array(
 				'name' => tra('Category identifier'),
-				'description' => tra('If set to a category identifier, pages created through the module are automatically categorized in the specified category.') . " " . tra('Not set by default.')
+				'description' => tra('If set to a category identifier, pages created through the module are automatically categorized in the specified category.') . ' ' . tra('Not set by default.')
 			),
-			
-			
+			'compact' => array(
+				'name' => tra('Compact mode'),
+				'description' => tra('Makes the three buttons only appear on mouse-over.') . ' ' . tra('Default:') . ' "n"'
+			),
+
 		)
 	);
 }
 
-function module_search( $mod_reference, & $module_params ) {	// modifies $module_params so uses & reference
+function module_search($mod_reference, $smod_params) 	// modifies $smod_params so uses & reference
+{
 	global $smarty, $prefs;
 	static $search_mod_usage_counter = 0;
 	$smarty->assign('search_mod_usage_counter', ++$search_mod_usage_counter);
 
 	$smarty->assign('module_error', '');
-	
+	$smarty->assign_by_ref('smod_params', $smod_params);
+
 	// Deal with the two search types (sigh). If the requested search type is disabled but the other one is enabled, use it as a fallback.
-	$module_params['tiki_search'] = isset($module_params['tiki_search']) && $module_params['tiki_search'] == 'y';
-	
+	$smod_params['tiki_search'] = isset($smod_params['tiki_search']) && $smod_params['tiki_search'] == 'y';
+
 	if ($prefs['feature_search'] == 'n' && $prefs['feature_search_fulltext'] == 'n') {
-		$module_params['tiki_search'] = 'none';
+		$smod_params['tiki_search'] = 'none';
 		$smarty->assign('module_error', tra('Search is disabled.'));
 		return;
-	} else if ($prefs['feature_search'] == 'n' && $module_params['tiki_search'] == 'y') {
-		$module_params['tiki_search'] = 'n';
-	} else if ($prefs['feature_search_fulltext'] == 'n' && $module_params['tiki_search'] != 'y') {
-		$module_params['tiki_search'] = 'y';
+	} else if ($prefs['feature_search'] == 'n' && $smod_params['tiki_search'] == 'y') {
+		$smod_params['tiki_search'] = 'n';
+	} else if ($prefs['feature_search_fulltext'] == 'n' && $smod_params['tiki_search'] != 'y') {
+		$smod_params['tiki_search'] = 'y';
 	}
-	
-	if (isset($module_params['go_action']) && $module_params['go_action'] == 'ti') { unset($module_params['go_action']); }	// temporary fix for 5.0 in case params were truncated in the db
-	
+
+	if (isset($smod_params['go_action']) && $smod_params['go_action'] == 'ti') {	// temporary fix for 5.0 in case params were truncated in the db
+		unset($smod_params['go_action']);
+	}
+
 	// set up other param defaults
 	$defaults = array(
 		'legacy_mode' => '',
@@ -146,103 +156,113 @@ function module_search( $mod_reference, & $module_params ) {	// modifies $module
 		'show_go_button' => 'y',
 		'show_edit_button' => 'y',
 		'default_button' => 'search',
-		'input_size' => 14,
+		'input_size' => 0,
 		'select_size' => 10,
-		'search_action' => $module_params['tiki_search'] ? 'tiki-searchindex.php' : 'tiki-searchresults.php',
-		'search_submit' => tra("Search"),
+		'search_action' => $smod_params['tiki_search'] ? 'tiki-searchindex.php' : 'tiki-searchresults.php',
+		'search_submit' => tra('Search'),
 		'go_action' => 'tiki-listpages.php',
-		'go_submit' => tra("Go"),
+		'go_submit' => tra('Titles'),
 		'edit_action' => 'tiki-editpage.php',
-		'edit_submit' => tra("Edit"),
+		'edit_submit' => tra('Edit'),
 		'default_button' => 'search',
 		'search_heading' => '',
 		'templateId' => '',
 		'categId' => '',
+		'compact' => 'n',
+		'title' => tra('Search'),
 	);
-	
-	$module_params = array_merge($defaults, $module_params);
-	
-	if ($module_params['tiki_search'] == 'y') {
-		$module_params['advanced_search'] = 'n';
-		$module_params['advanced_search_option'] = 'n';
-		$module_params['advanced_search_help']   = 'n';
-	}
-	
-	switch ($module_params['legacy_mode']) {
-		case 'quick':		// params from old quick_edit module
-			$module_params['show_search_button']   = 'n';
-			$module_params['show_go_button']   = 'n';
-			$module_params['show_edit_button']   = 'y';
-			$module_params['edit_submit'] = isset($module_params['submit']) ? $module_params['submit'] : tra("Create/Edit");
-			$module_params['default_button'] = 'edit';
-			$module_params['edit_action'] = isset($module_params['action']) ? $module_params['action'] : 'tiki-editpage.php';
-			$module_params['input_size'] = isset($module_params['size']) ? $module_params['size'] : 15;
-			$module_params['search_heading'] = isset($module_params['mod_quickedit_heading']) ? $module_params['mod_quickedit_heading'] : $module_params['search_heading'];
-			$module_params['title']   = tra('Quick Edit a Wiki Page');
-			break;
-		case 'search':		// params from old search_box module
-			$module_params['tiki_search'] = isset($module_params['tiki']) ? $module_params['tiki'] : 'n';
-			$module_params['show_search_button']   = 'y';
-			$module_params['show_go_button']   = 'n';
-			$module_params['show_edit_button']   = 'n';
-			$module_params['advanced_search']   = 'y';
-			$module_params['advanced_search_option']   = 'y';
-			$module_params['advanced_search_help']   = 'y';
-			$module_params['search_submit'] = tra("Go");
-			$module_params['default_button'] = 'search';
-			$module_params['show_object_filter'] = $prefs['feature_search_show_object_filter'];
-			break;
-		case 'page':		// params from old search_wiki_page module
-			$module_params['show_search_button']   = 'n';
-			$module_params['show_go_button']   = 'y';
-			$module_params['show_edit_button']   = 'n';
-			$module_params['go_submit'] = tra("Go");
-			$module_params['default_button'] = 'go';
-			$module_params['title']   = tra('Search Wiki Page');
-			break;
-			
-		case '':
-		default:
-			break;
-	}
-	
-	switch ($module_params['default_button']) {
-		case 'edit':
-			$module_params['default_action'] = $module_params['edit_action'];
-			break;
-		case 'go':
-			$module_params['default_action'] = $module_params['go_action'];
-			break;
-		case 'search':
-		default:
-			$module_params['default_action'] = $module_params['search_action'];
-			break;
+
+	$smod_params = array_merge($defaults, $smod_params);
+
+	if ($smod_params['tiki_search'] == 'y') {
+		$smod_params['advanced_search'] = 'n';
+		$smod_params['advanced_search_option'] = 'n';
+		$smod_params['advanced_search_help'] = 'n';
 	}
 
-	if (($module_params['show_search_button'] == 'y' || $module_params['default_action'] == $module_params['search_action'])
-			&& $module_params['show_edit_button'] == 'n' && $module_params['show_go_button'] == 'n') {
-		$module_params['use_autocomplete'] = 'n';
+	switch ($smod_params['legacy_mode']) {
+		case 'quick':		// params from old quick_edit module
+			$smod_params['show_search_button'] = 'n';
+			$smod_params['show_go_button'] = 'n';
+			$smod_params['show_edit_button'] = 'y';
+			$smod_params['edit_submit'] = isset($smod_params['submit']) ? $smod_params['submit'] : tra("Create/Edit");
+			$smod_params['default_button'] = 'edit';
+			$smod_params['edit_action'] = isset($smod_params['action']) ? $smod_params['action'] : 'tiki-editpage.php';
+			$smod_params['input_size'] = isset($smod_params['size']) ? $smod_params['size'] : 15;
+			$smod_params['search_heading'] = isset($smod_params['mod_quickedit_heading']) ? $smod_params['mod_quickedit_heading'] : $smod_params['search_heading'];
+			$smod_params['title'] = tra('Quick Edit a Wiki Page');
+						break;
+
+		case 'search':		// params from old search_box module
+			$smod_params['tiki_search'] = isset($smod_params['tiki']) ? $smod_params['tiki'] : 'n';
+			$smod_params['show_search_button'] = 'y';
+			$smod_params['show_go_button'] = 'n';
+			$smod_params['show_edit_button'] = 'n';
+			$smod_params['advanced_search'] = 'y';
+			$smod_params['advanced_search_option'] = 'y';
+			$smod_params['advanced_search_help'] = 'y';
+			$smod_params['search_submit'] = tra('Go');
+			$smod_params['default_button'] = 'search';
+			$smod_params['show_object_filter'] = $prefs['feature_search_show_object_filter'];
+						break;
+
+		case 'page':		// params from old search_wiki_page module
+			$smod_params['show_search_button'] = 'n';
+			$smod_params['show_go_button'] = 'y';
+			$smod_params['show_edit_button'] = 'n';
+			$smod_params['go_submit'] = tra('Go');
+			$smod_params['default_button'] = 'go';
+			$smod_params['title'] = tra('Search for Wiki Page');
+						break;
+
+		case '':
+		default:
+						break;
 	}
-	
+
+	switch ($smod_params['default_button']) {
+		case 'edit':
+			$smod_params['default_action'] = $smod_params['edit_action'];
+						break;
+
+		case 'go':
+			$smod_params['default_action'] = $smod_params['go_action'];
+						break;
+
+		case 'search':
+		default:
+			$smod_params['default_action'] = $smod_params['search_action'];
+						break;
+	}
+
+	if (($smod_params['show_search_button'] == 'y' || $smod_params['default_action'] == $smod_params['search_action'])
+			&& $smod_params['show_edit_button'] == 'n' && $smod_params['show_go_button'] == 'n') {
+		$smod_params['use_autocomplete'] = 'n';
+	}
+
 	if (!empty($_REQUEST['highlight'])) {
-		$module_params['input_value'] = $_REQUEST['highlight'];
+		$smod_params['input_value'] = $_REQUEST['highlight'];
 	} else if (!empty($_REQUEST['words'])) {
-		$module_params['input_value'] = $_REQUEST['words'];
+		$smod_params['input_value'] = $_REQUEST['words'];
 	} else if (!empty($_REQUEST['find'])) {
-		$module_params['input_value'] = $_REQUEST['find'];
+		$smod_params['input_value'] = $_REQUEST['find'];
+	} else if (!empty($_REQUEST['filter']['content'])) {
+		$smod_params['input_value'] = $_REQUEST['filter']['content'];
 	} else {
-		$module_params['input_value'] = '';
+		$smod_params['input_value'] = '';
 	}
 	if (!empty($_REQUEST['where'])) {
-		$module_params['where'] = $_REQUEST['where'];
+		$smod_params['where'] = $_REQUEST['where'];
+	} else if (!empty($_REQUEST['filter']['type'])) {
+		$smod_params['where'] = $_REQUEST['filter']['type'];
 	} else {
-		$module_params['where'] = '';
+		$smod_params['where'] = '';
 	}
 	if (!empty($_REQUEST['boolean_last'])) {
 		if (!empty($_REQUEST['boolean'])) {
-			$module_params['advanced_search'] = 'y';
+			$smod_params['advanced_search'] = 'y';
 		} else {
-			$module_params['advanced_search'] = 'n';
+			$smod_params['advanced_search'] = 'n';
 		}
 	}
 }

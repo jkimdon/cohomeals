@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-directory_validate_sites.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-directory_validate_sites.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/directory/dirlib.php');
@@ -11,7 +11,7 @@ $access->check_feature('feature_directory');
 $access->check_permission('tiki_p_validate_links');
 if (isset($_REQUEST["validate"]) && isset($_REQUEST['sites'])) {
 	check_ticket('dir-validate');
-	foreach(array_keys($_REQUEST["sites"]) as $siteId) {
+	foreach (array_keys($_REQUEST["sites"]) as $siteId) {
 		$dirlib->dir_validate_site($siteId);
 	}
 }
@@ -21,7 +21,7 @@ if (isset($_REQUEST["remove"])) {
 }
 if (isset($_REQUEST["del"]) && isset($_REQUEST['sites'])) {
 	check_ticket('dir-validate');
-	foreach(array_keys($_REQUEST["sites"]) as $siteId) {
+	foreach (array_keys($_REQUEST["sites"]) as $siteId) {
 		$dirlib->dir_remove_site($siteId);
 	}
 }

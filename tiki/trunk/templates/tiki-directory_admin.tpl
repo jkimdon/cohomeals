@@ -1,4 +1,4 @@
-{* $Id: tiki-directory_admin.tpl 19624 2009-06-16 16:03:00Z changi67 $ *}
+{* $Id: tiki-directory_admin.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="Directory" admpage="directory"}{tr}Directory Administration{/tr}{/title}
 

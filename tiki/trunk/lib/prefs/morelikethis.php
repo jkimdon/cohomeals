@@ -1,11 +1,12 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: morelikethis.php 25210 2010-02-14 20:52:22Z changi67 $
+// $Id: morelikethis.php 39469 2012-01-12 21:13:48Z changi67 $
 
-function prefs_morelikethis_list() {
+function prefs_morelikethis_list()
+{
 	return array(
 
 		// Used in templates/tiki-admin-include-freetags.tpl
@@ -16,9 +17,10 @@ function prefs_morelikethis_list() {
 				'basic' => tra('Basic'),
 				'weighted' => tra('Weighted'),
 			),
+			'default' => 'basic',
 		),
 		'morelikethis_basic_mincommon' => array(
-			'name' => tra('Minimum amount of tags in common'),
+			'name' => tra('Minimum number of tags in common'),
 			'type' => 'list',
 			'options' => array(
 				'1' => tra('1'),
@@ -32,6 +34,7 @@ function prefs_morelikethis_list() {
 				'9' => tra('9'),
 				'10' => tra('10'),
 			),
+			'default' => '2',
 		),
 	);	
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-rename_page.php 28745 2010-08-28 21:12:10Z chealer $
+// $Id: tiki-rename_page.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
@@ -23,11 +23,6 @@ if (!isset($_REQUEST["page"])) {
 	$smarty->assign_by_ref('page', $_REQUEST["page"]);
 	$smarty->assign('newname', $_REQUEST["page"]);
 }
-if ( $tikilib->get_approved_page( $page ) ) {
-	$smarty->assign('msg', tra("You cannot rename staging pages. Please rename the approved page instead."));
-	$smarty->display("error.tpl");
-	die;
-}
 if (!($info = $tikilib->get_page_info($page))) {
 	$smarty->assign('msg', tra('Page cannot be found'));
 	$smarty->display('error.tpl');
@@ -35,7 +30,7 @@ if (!($info = $tikilib->get_page_info($page))) {
 }
 // Now check permissions to rename this page
 $tikilib->get_perm_object($page, 'wiki page', $info);
-$access->check_permission( array('tiki_p_view', 'tiki_p_rename') );
+$access->check_permission(array('tiki_p_view', 'tiki_p_rename'));
 
 if (isset($_REQUEST["rename"]) || isset($_REQUEST["confirm"])) {
 	check_ticket('rename-page');
@@ -58,31 +53,22 @@ if (isset($_REQUEST["rename"]) || isset($_REQUEST["confirm"])) {
 			switch($e->getCode()) {
 			case 1:
 				$smarty->assign('page_badchars_display', $wikilib->get_badchars());
-				break;
+    			break;
 			case 2:
 				$smarty->assign('msg', tra("Page already exists"));
-				break;
+    			break;
+			default:
+				throw $e;
 			}
 		}
 	}
 
 	if ($result) {
-		if ($prefs['feature_wikiapproval'] == 'y') {
-			$stagingPageName = $prefs['wikiapproval_prefix'] . $page;
-			if ($tikilib->page_exists($stagingPageName)) {
-				$newStagingPageName = $prefs['wikiapproval_prefix'] . $newName;
-				if (!$wikilib->wiki_rename_page($stagingPageName, $newStagingPageName)) {
-					$smarty->assign('msg', tra("Cannot rename page because maybe new staging page name already exists"));
-					$smarty->display("error.tpl");
-					die;
-				}
-			}
-		}
 		global $perspectivelib; require_once 'lib/perspectivelib.php';
-		$perspectivelib->replace_preference ('wsHomepage', $page, $newName ) ;
+		$perspectivelib->replace_preference('wsHomepage', $page, $newName);
 		if ($prefs['feature_sefurl'] == 'y') {
 			include_once('tiki-sefurl.php');
-			header('location: '. urlencode(filter_out_sefurl("tiki-index.php?page=$newName", $smarty, 'wiki')));
+			header('location: '. urlencode(filter_out_sefurl("tiki-index.php?page=$newName", 'wiki')));
 		} else {
 			header('location: tiki-index.php?page=' . urlencode($newName));
 		}

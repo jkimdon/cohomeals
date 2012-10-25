@@ -1,14 +1,13 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-browse_freetags.php 25079 2010-02-11 16:21:41Z changi67 $
+// $Id: tiki-browse_freetags.php 40234 2012-03-17 19:17:41Z changi67 $
 
 $section = 'freetags';
 require_once ('tiki-setup.php');
 include_once ('lib/freetag/freetaglib.php');
-$smarty->assign('headtitle', tra('Tags'));
 $access->check_feature('feature_freetags');
 $access->check_permission('tiki_p_view_freetags');
 
@@ -77,7 +76,7 @@ if (isset($_REQUEST['broaden']) && $_REQUEST['broaden'] == 'last') {
 $smarty->assign('broaden', $broaden);
 $tagArray = $freetaglib->_parse_tag((isset($_REQUEST['tag'])) ? $_REQUEST['tag'] : '');
 $tagString = '';
-foreach($tagArray as $t_ar) {
+foreach ($tagArray as $t_ar) {
 	if (strstr($t_ar, ' ')) {
 		$tagString.= '"' . $t_ar . '" ';
 	} else {
@@ -102,14 +101,11 @@ $most_popular_tags = $freetaglib->get_most_popular_tags('', 0, $maxPopular, $tso
 if (!empty($prefs['freetags_cloud_colors'])) {
 	$colors = explode(',', $prefs['freetags_cloud_colors']);
 	$prev = '';
-	foreach($most_popular_tags as $id => $tag) {
+	foreach ($most_popular_tags as $id => $tag) {
 		if (count($colors) == 1) {
 			$i = 0;
 		} elseif (count($colors) == 2) {
 			$i = $prev ? 0 : 1;
-		} else {
-			while (($i = rand(0, count($colors) - 1)) == $prev) {
-			}
 		}
 		$most_popular_tags[$id]['color'] = $colors[$i];
 		$prev = $i;
@@ -132,22 +128,23 @@ $smarty->assign('cant', $objects['cant']);
 include_once ('tiki-section_options.php');
 ask_ticket('browse-freetags');
 
-$smarty->assign('objects_with_freetags',
-			array (
-				'wiki page',
-				'blog post',
-				'article',
-				'directory',
-				'faq',
-				'file gallery',
-				'image gallery',
-				'image',
-				'poll',
-				'quiz',
-				'survey',
-				'tracker',
-				'tracker %d'
-			)
-	);
+$smarty->assign(
+				'objects_with_freetags',
+				array (
+					'wiki page',
+					'blog post',
+					'article',
+					'directory',
+					'faq',
+					'file gallery',
+					'image gallery',
+					'image',
+					'poll',
+					'quiz',
+					'survey',
+					'tracker',
+					'tracker %d'
+				)
+);
 $smarty->assign('mid', 'tiki-browse_freetags.tpl');
 $smarty->display("tiki.tpl");

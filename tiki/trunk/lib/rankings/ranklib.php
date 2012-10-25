@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ranklib.php 30020 2010-10-14 19:57:30Z jonnybradley $
+// $Id: ranklib.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -16,6 +16,7 @@ class RankLib extends TikiLib
 	function wiki_ranking_top_pages($limit, $categ=array(), $lang=null)
 	{
 		global $user, $prefs;
+		$pagesAdded = array();
 		
 		$bindvals = array();
 		$mid = '';
@@ -27,15 +28,6 @@ class RankLib extends TikiLib
 				$mid .= " OR tco.`categId` = " . $categ[$i];
 			}
 			$mid .= ")";
-		}
-		
-		if ($prefs['feature_wikiapproval'] == 'y') {
-			if ($mid) {
-				$mid .= " AND tp.`pageName` not like ?";
-			} else {
-				$mid .= " WHERE tp.`pageName` not like ?";	
-			}
-			$bindvals[] = $prefs['wikiapproval_prefix'] . '%';
 		}
 		
 		$query = "select distinct tp.`pageName`, tp.`hits`, tp.`lang`, tp.`page_id` from `tiki_pages` tp $mid order by `hits` desc";
@@ -58,7 +50,7 @@ class RankLib extends TikiLib
 						}
 					}
 				}		
-				if ($prefs['feature_best_language'] != 'y' || !$res['lang'] || !in_array($res['pageName'], $pagesAdded)) {
+				if ($prefs['feature_best_language'] != 'y' || !$res['lang'] || empty($pagesAdded) || !in_array($res['pageName'], $pagesAdded)) {
 					$aux['name'] = $res['pageName'];
 					$aux['hits'] = $res['hits'];
 					$aux['href'] = 'tiki-index.php?page=' . urlencode($res['pageName']);
@@ -96,14 +88,6 @@ class RankLib extends TikiLib
 				$mid .= " OR tco.`categId` = " . $categ[$i];
 			}
 			$mid .= ")";
-		}
-		if ($prefs['feature_wikiapproval'] == 'y') {
-			if ($mid) {
-				$mid .= " AND tp.`pageName` not like ?";
-			} else {
-				$mid .= " WHERE tp.`pageName` not like ?";	
-			}
-			$bindvals[] = $prefs['wikiapproval_prefix'] . '%';
 		}
 		
 		$query = "select tp.`pageName`, tp.`pageRank` from `tiki_pages` tp $mid order by `pageRank` desc";
@@ -143,14 +127,6 @@ class RankLib extends TikiLib
 			}
 			$mid .= ")";
 		}
-		if ($prefs['feature_wikiapproval'] == 'y') {
-			if ($mid) {
-				$mid .= " AND tp.`pageName` not like ?";
-			} else {
-				$mid .= " WHERE tp.`pageName` not like ?";	
-			}
-			$bindvals[] = $prefs['wikiapproval_prefix'] . '%';
-		}
 		
 		$query = "select tp.`pageName`, tp.`lastModif`, tp.`hits` from `tiki_pages` tp $mid order by `lastModif` desc";
 
@@ -182,15 +158,13 @@ class RankLib extends TikiLib
 	
 	function forums_ranking_last_posts($limit, $toponly=false, $forumId='')
 	{
-		global $user, $commentslib; require_once 'lib/comments/commentslib.php';
-		if (! $commentslib) {
-			$commentslib = new Comments;
-		}
+		global $user;
+		$commentslib = TikiLib::lib('comments');
 		$offset=0;
 		$count = 0;
 		$ret = array();
 		$result = $commentslib->get_all_comments('forum', 0, $limit, 'commentDate_desc', '', '', '', $toponly, $forumId);
-		$result['data'] = Perms::filter(array('type' => 'forum'), 'object', $result['data'], array('object' => 'forumId'), 'forum_read');
+		$result['data'] = Perms::filter(array('type' => 'forum'), 'object', $result['data'], array('object' => 'object'), 'forum_read');
 		foreach ($result['data'] as $res) {
 			$aux['name'] = $res['title'];
 			$aux['title'] = $res['parentTitle'];
@@ -211,7 +185,7 @@ class RankLib extends TikiLib
 		return $retval;
 	}
 
-	function forums_ranking_most_read_topics($limit)
+	function forums_ranking_most_read_topics($limit, $forumId='')
 	{
 		global $commentslib;
 		if (! $commentslib) {
@@ -219,16 +193,16 @@ class RankLib extends TikiLib
 			$commentslib = new Comments;
 		}
 
-		$result = $commentslib->get_all_comments('forum', 0, $limit, 'hits_desc', '', '', '', true);
+		$result = $commentslib->get_all_comments('forum', 0, $limit, 'hits_desc', '', '', '', true, $forumId);
 
 		$ret = array();
 		foreach ($result['data'] as $res) {
-				$aux['name'] = $res['name'] . ': ' . $res['title'];
+			$aux['name'] = $forumId? $res['title']: $res['parentTitle'] . ': ' . $res['title'];
 				$aux['title'] = $res['title'];
 				$aux['hits'] = $res['hits'];
-				$aux['href'] = 'tiki-view_forum_thread.php?forumId=' . $res['forumId'] . '&amp;comments_parentId=' . $res['threadId'];
+				$aux['href'] = 'tiki-view_forum_thread.php?forumId=' . $res['object'] . '&amp;comments_parentId=' . $res['threadId'];
 				$ret[] = $aux;
-			}
+		}
 
 		$retval["data"] = $ret;
 		$retval["title"] = tra("Forums most read topics");
@@ -237,22 +211,21 @@ class RankLib extends TikiLib
 		return $retval;
 	}
 
-    function forums_top_posters($qty)
-		{
-        $query = "select `user`, `posts` from `tiki_user_postings` order by ".$this->convertSortMode("posts_desc");
-        $result = $this->query($query, array(), $qty);
-        $ret = array();
+	function forums_top_posters($qty)
+	{
+		$query = "select `user`, `posts` from `tiki_user_postings` order by ".$this->convertSortMode("posts_desc");
+		$result = $this->query($query, array(), $qty);
+		$ret = array();
 
-        while ($res = $result->fetchRow()) {
-            $aux["name"] = $res["user"];
-	    $aux["posts"] = $res["posts"];
-	    $ret[] = $aux;
-        }
+		while ($res = $result->fetchRow()) {
+			$aux["name"] = $res["user"];
+			$aux["posts"] = $res["posts"];
+			$ret[] = $aux;
+		}
+		$retval["data"] = $ret;
 
-	$retval["data"] = $ret;
-
-        return $retval;
-    }
+		return $retval;
+	}
 
 	function forums_ranking_top_topics($limit)
 	{
@@ -494,7 +467,7 @@ class RankLib extends TikiLib
 		}
 
 		$retval["data"] = $ret;
-		$retval["title"] = tra("Top articles");
+		$retval["title"] = tra("Top Articles");
 		$retval["y"] = tra("Reads");
 		$retval["type"] = "nb";
 		return $retval;
@@ -542,7 +515,7 @@ class RankLib extends TikiLib
 		}
 
 		$retval["data"] = $ret;
-		$retval["title"] = tra("Most active blogs");
+		$retval["title"] = tra("Most-active Blogs");
 		$retval["y"] = tra("Activity");
 		$retval["type"] = "nb";
 		return $retval;

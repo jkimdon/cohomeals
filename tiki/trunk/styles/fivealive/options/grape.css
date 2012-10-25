@@ -1,11 +1,7 @@
-/* $Id: grape.css 30241 2010-10-23 06:22:18Z chibaguy $ 
+/* $Id: grape.css 42465 2012-07-25 05:03:22Z chibaguy $ 
 	Grape theme option for FiveAlive theme for
-	TikiWiki CMS/Groupware.
+	Tiki Wiki CMS Groupware.
 */
-
-#header-top {
-	background: url(grape/siteheader.png) no-repeat -250px 0
-}
 
 a,
 a:visited,
@@ -34,8 +30,12 @@ hr {
 	background: #a82a76;
 }
 
+#main .header_outer {
+	background: url(grape/siteheadertile.png) 0 0 no-repeat;
+}
+
 #header {
-	background: url(grape/siteheadertile.png) 900px 0 no-repeat;
+	background: url(grape/siteheader.png) -250px 0 no-repeat;
 }
 
 #sitetitle,
@@ -43,7 +43,7 @@ hr {
 	text-shadow: #781437 3px 2px 0;
 }
 
-#footer .container {
+.footer_liner {
 	border-top: 1px solid #a52873;
 	border-bottom: 1px solid #a52873;
 }
@@ -60,7 +60,6 @@ hr {
 #power a {
 	color: #a52873;
 }
-
 
 .button a,
 .button a:visited,
@@ -105,24 +104,35 @@ input[type="submit"]:hover,
 
 .cssmenu_vert li ul a,
 .cssmenu_horiz li ul a,
-#header .cssmenu_horiz li ul a,
-#header .cssmenu_horiz li:hover ul a  {
+.header .cssmenu_horiz li ul a,
+.header .cssmenu_horiz li:hover ul a,
+#main #topbar_modules .cssmenu_horiz li ul a,
+#main #topbar_modules .cssmenu_horiz li:hover ul a  {
 	background: #3b284a;
+	color: #fff;
 }
 
+#tiki-top .cssmenu_horiz li a {
+	background: url(grape/siteheader.png) no-repeat -600px -40px;
+}
+
+#tiki-top .cssmenu_horiz li a:hover,
 .cssmenu_vert li ul a:hover,
 .cssmenu_horiz li ul a:hover,
-#header .cssmenu_horiz li ul a:hover {
+.header .cssmenu_horiz li ul a:hover,
+#main #topbar_modules .cssmenu_horiz li ul a:hover {
 	background: #972269;
 }
 
-#header .cssmenu_horiz li.selected a,
+.header .cssmenu_horiz li.selected a,
+#topbar_modules .cssmenu_horiz li.selected li a,
 .cssmenu_horiz li.selected a,
 .cssmenu_vert li.selected a {
 	color: #da65ab;
 }
 
-#header .cssmenu_horiz li.selected li a,
+.header .cssmenu_horiz li.selected li a,
+#topbar_modules .cssmenu_horiz li.selected li a,
 .cssmenu_horiz li.selected li a,
 .cssmenu_vert li.selected li a {
 	font-style: normal;
@@ -174,6 +184,12 @@ tr.diffheader a:visited {
 	border: 2px solid #a82a76;
 }
 
+h3.box-title,
+.postbody-title,
+#top_modules .module.secondary_site_menu {
+	background: #97286e url(grape/siteheader.png) no-repeat -1000px -200px;
+}
+
 .adminanchors {
 	background: #a82a76;
 }
@@ -187,7 +203,8 @@ th,
 td.heading,
 tr.diffheader,
 .calHeading,
-.weeks {
+.weeks,
+th.header {
 	background: #a82a76;
 	color: #f4dded;
 }
@@ -207,8 +224,6 @@ tr.diffheader,
 .caleven {
 	background: #f4dded;
 }
-
-
 
 .tabmark {
 	border: 1px solid #a82a76;
@@ -251,13 +266,24 @@ form.admin fieldset,
 	border-left: 8px solid #efcde5;
 }
 
-.postbody-title {
-	background: #97286e url(grape/siteheader.png) -550px -90px no-repeat;
+.postbody-title > br {
+	display: none;
 }
 
 .post .author,
 .dirsite {
 	background: #e4afd3;
+}
+
+.postbody-content {
+	border: 1px solid #97286e;
+	border-top: none;
+}
+
+.post .author {
+	border: 1px solid #97286e;
+	border-top: none;
+	border-bottom: none;
 }
 
 /* cluptip tooltips */

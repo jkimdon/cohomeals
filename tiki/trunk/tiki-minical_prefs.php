@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minical_prefs.php 25081 2010-02-11 17:00:23Z changi67 $
+// $Id: tiki-minical_prefs.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/minical/minicallib.php');
 $access->check_feature('feature_minical');
 $access->check_user($user);
-//if($tiki_p_minical != 'y') {
-//  $smarty->assign('msg',tra("Permission denied to use this feature"));
+//if ($tiki_p_minical != 'y') {
+//  $smarty->assign('msg',tra("You do not have permission to use this feature"));
 //  $smarty->display("error.tpl");
 //  die;
 //}

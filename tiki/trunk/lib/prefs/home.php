@@ -1,32 +1,37 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: home.php 28579 2010-08-17 23:02:46Z sampaioprimo $
+// $Id: home.php 41159 2012-04-29 03:27:42Z lindonb $
 
-function prefs_home_list() {
+function prefs_home_list($partial = false)
+{
 
 	return array(
 		'home_blog' => array(
 			'name' => tra('Home Blog (main blog)'),
 			'type' => 'list',
-			'options' => listblog_pref(),
+			'options' => $partial ? array() : listblog_pref(),
+			'default' => 0,
 		),
 		'home_forum' => array(
 			'name' => tra('Home Forum (main forum)'),
 			'type' => 'list',
-			'options' => listforum_pref(),
+			'options' => $partial ? array() : listforum_pref(),
+			'default' => 0,
 		),
 		'home_file_gallery' => array(
 			'name' => tra('Home File Gallery (main file gallery)'),
 			'type' => 'list',
-			'options' => listfgal_pref(),
+			'options' => $partial ? array() : listfgal_pref(),
+			'default' => 1,
 		),
 		'home_gallery' => array(
 			'name' => tra('Home Gallery (main gallery)'),
 			'type' => 'list',
-			'options' => listimgal_pref(),
+			'options' => $partial ? array() : listimgal_pref(),
+			'default' => 0,
 		),
 	);
 }
@@ -65,9 +70,9 @@ function listimgal_pref()
  */
 function listfgal_pref()
 {
-	global $tikilib;
+	$filegallib = TikiLib::lib('filegal');
 
-	$allfgals = $tikilib->list_visible_file_galleries(0, -1, 'name_desc', 'admin', '');
+	$allfgals = $filegallib->list_visible_file_galleries(0, -1, 'name_desc', 'admin', '');
 
 	$listfgals = array();
 
@@ -94,7 +99,7 @@ function listforum_pref()
 	$commentslib = new Comments();
 	$allforums = $commentslib->list_forums(0, -1, 'name_desc', '');
 
-	$listforums = array();
+	$listforums = array('' => 'None');
 
 	if ($allforums['cant'] > 0) {
 		foreach ($allforums['data'] as $oneforum) {
@@ -118,7 +123,7 @@ function listblog_pref()
 	global $bloglib; require_once('lib/blogs/bloglib.php');
 
 	$allblogs = $bloglib->list_blogs(0, -1, 'created_desc', '');
-	$listblogs = array();
+	$listblogs = array('' => 'None');
 
 	if ($allblogs['cant'] > 0) {
 		foreach ($allblogs['data'] as $blog) {

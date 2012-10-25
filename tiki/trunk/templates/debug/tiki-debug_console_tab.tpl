@@ -1,9 +1,9 @@
-{* $Id: tiki-debug_console_tab.tpl 26967 2010-05-07 13:49:26Z jonnybradley $ *}
+{* $Id: tiki-debug_console_tab.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {* Debug console tab -- to display result of command *}
 
 
 {* Display command results if we have smth to show... *}
-{if $result_type ne 0 } {*NO_RESULT *}
+{if $result_type ne 0} {*NO_RESULT *}
 
   <pre>&gt;&nbsp;{$command|escape:"html"}</pre>
 

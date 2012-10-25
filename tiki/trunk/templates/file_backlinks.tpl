@@ -1,4 +1,4 @@
-{* $Id: file_backlinks.tpl 29142 2010-09-12 14:09:21Z changi67 $ *}
+{* $Id: file_backlinks.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div>
 	<div class='box-title'>{if $file_backlinks_title}{tr}{$file_backlinks_title}{/tr}{else}{tr}Backlinks{/tr}{/if}</div>
 	<div class='box-data'>

@@ -1,45 +1,44 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_smarty.php 26196 2010-03-18 14:08:55Z sylvieg $
+// $Id: wikiplugin_smarty.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-// this script may only be included - so it's better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
-  header("location: index.php");
-  die;
-}
-
-function wikiplugin_smarty_info() {
+function wikiplugin_smarty_info()
+{
 	return array(
 		'name' => tra('Smarty function'),
-		'documentation' => 'PluginSmarty',			
-		'description' => tra('Provides access to the tiki smarty functions like button.'),
+		'documentation' => 'PluginSmarty',
+		'description' => tra('Insert a Smarty function'),
 		'prefs' => array('wikiplugin_smarty'),
 		'validate' => 'all',
 		'extraparams' => true,
+		'tags' => array( 'experimental' ),
+		'icon' => 'img/icons/task_submitted.png',
 		'params' => array(
 			'name' => array(
-				'required' => false,
-				'name' => tra('Name of the smarty function'),
-				'description' => 'button',
+				'required' => true,
+				'name' => tra('Smarty function'),
+				'description' => tra('The name of the Smarty function that the button will activate. Available functions are: lib/smarty/libs/plugins/function.[name].php'),
 				'filter' => 'word',
+				'default' => '',
 			),
 		),
 	);
 }
 
-function wikiplugin_smarty($data, $params) {
+function wikiplugin_smarty($data, $params)
+{
 	global $smarty;
 	if (empty($params['name'])) {
-		return tra('Incorrect param');
+		return tra('Incorrect parameter');
 	}
 	$path = 'lib/smarty_tiki/function.'.$params['name'].'.php';
 	if (!file_exists($path)) {
 		$path = 'lib/smarty/libs/plugins/function.'.$params['name'].'.php';
-		if(!file_exists($path)){
-			return tra('Incorrect param');
+		if (!file_exists($path)) {
+			return tra('Incorrect parameter');
 		}
 	}
 	include_once($path);

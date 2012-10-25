@@ -1,4 +1,4 @@
-{* $Id: tiki-quiz_stats.tpl 29114 2010-09-10 19:24:58Z changi67 $ *}
+{* $Id: tiki-quiz_stats.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {title help="Quiz"}{tr}Stats for quizzes{/tr}{/title}
 
 <div class="navbar">
@@ -30,16 +30,14 @@
 	{section name=user loop=$channels}
 		{if ($tiki_p_admin eq 'y') or ($channels[user].individual eq 'n' and $tiki_p_view_quiz_stats eq 'y') or ($channels[user].individual_tiki_p_view_quiz_stats eq 'y')}
 			<tr class="{cycle}">
-				<td><a class="tablename" href="tiki-quiz_stats_quiz.php?quizId={$channels[user].quizId}">{$channels[user].quizName|escape}</a></td>
-				<td>{$channels[user].timesTaken}</td>
-				<td>{$channels[user].avgavg}%</td>
-				<td>{$channels[user].avgtime} secs</td>
+				<td class="text"><a class="tablename" href="tiki-quiz_stats_quiz.php?quizId={$channels[user].quizId}">{$channels[user].quizName|escape}</a></td>
+				<td class="date">{$channels[user].timesTaken}</td>
+				<td class="integer">{$channels[user].avgavg}%</td>
+				<td class="date">{$channels[user].avgtime} secs</td>
 			</tr>
 		{/if}
 	{sectionelse}
-		<tr class="{cycle}">
-			<td colspan="4">{tr}No records{/tr}</td>
-		</tr>
+		{norecords _colspan=4}
 	{/section}
 </table>
 

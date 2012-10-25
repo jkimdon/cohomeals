@@ -1,7 +1,4 @@
-{* $Id: tiki-index_p.tpl 30534 2010-11-05 12:01:38Z xavidp $ *}
-<!DOCTYPE html 
-	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{* $Id: tiki-index_p.tpl 36062 2011-08-11 14:51:33Z sept_7 $ *}<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}" lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
 {include file='header.tpl'}
@@ -18,7 +15,8 @@
       
       {if $prefs.feature_page_title eq 'y'}<h1><a  href="tiki-index_p.php?page={$page|escape:"url"}" class="pagetitle">{$page}</a>
 {if $lock}
-{icon _id='lock' alt="{tr}Locked{/tr}" title="{tr}Locked by{/tr} `$page_user`"}
+{capture assign=title}{tr _0=$page_user}Locked by %0{/tr}{/capture}{*FIXME*}
+{icon _id='lock' alt="{tr}Locked{/tr}" title=$title}
 {/if}
 </h1>{/if}
 <table >
@@ -91,7 +89,7 @@
 	<div align="center">
 		<a href="tiki-index.php?page={$page|escape:"url"}&amp;pagenum={$first_page}">{icon _id='resultset_first' alt="{tr}First page{/tr}"}</a>
 		<a href="tiki-index.php?page={$page|escape:"url"}&amp;pagenum={$prev_page}">{icon _id='resultset_previous' alt="{tr}Previous page{/tr}"}</a>
-		<small>{tr}page{/tr}:{$pagenum}/{$pages}</small>
+		<small>{tr}page:{/tr}{$pagenum}/{$pages}</small>
 		<a href="tiki-index.php?page={$page|escape:"url"}&amp;pagenum={$next_page}">{icon _id='resultset_next' alt="{tr}Next page{/tr}"}</a>
 		<a href="tiki-index.php?page={$page|escape:"url"}&amp;pagenum={$last_page}">{icon _id='resultset_last' alt="{tr}Last page{/tr}"}</a>
 	</div>
@@ -99,7 +97,7 @@
 </div>
 
 {if $smarty.capture.editdate_section neq ''}
-  <p class="editdate">{tr}Last modification date{/tr}: {$lastModif|tiki_long_datetime} {tr}by{/tr} <a class="link" href="tiki-user_information.php?view_user={$lastUser}">{$lastUser}</a></p>
+  <p class="editdate">{tr}Last modification date:{/tr} {$lastModif|tiki_long_datetime} {tr}by{/tr} <a class="link" href="tiki-user_information.php?view_user={$lastUser}">{$lastUser}</a></p>
 {/if}
       
       </div>

@@ -1,17 +1,20 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: rating.php 25402 2010-02-19 16:43:59Z lphuberdeau $
+// $Id: rating.php 39469 2012-01-12 21:13:48Z changi67 $
 
-function prefs_rating_list() {
+function prefs_rating_list()
+{
 	return array(
 		'rating_advanced' => array(
 			'name' => tra('Advanced Rating'),
 			'description' => tra('Rating system allowing for options and calculation method to be configured.'),
 			'type' => 'flag',
 			'help' => 'Advanced+Rating',
+			'default' => 'n',
+			'admin' => 'rating',
 		),
 		'rating_recalculation' => array(
 			'name' => tra('Rating recalculation mode'),
@@ -23,6 +26,7 @@ function prefs_rating_list() {
 				'randomvote' => tra('Randomly recalculate oldest ratings (on vote)'),
 				'period' => tra('Cron job (must be set manually)'),
 			),
+			'default' => 'vote',
 		),
 		'rating_recalculation_odd' => array(
 			'name' => tra('Recalculation odds (1 in X)'),
@@ -30,6 +34,7 @@ function prefs_rating_list() {
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
+			'default' => '100',
 		),
 		'rating_recalculation_count' => array(
 			'name' => tra('Recalculation count'),
@@ -37,6 +42,7 @@ function prefs_rating_list() {
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
+			'default' => '100',
 		),
 	);
 }

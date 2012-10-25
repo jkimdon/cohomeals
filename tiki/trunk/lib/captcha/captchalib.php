@@ -1,14 +1,13 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: captchalib.php 29780 2010-10-04 16:20:24Z sylvieg $
+// $Id: captchalib.php 42337 2012-07-11 09:54:31Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER["SCRIPT_NAME"],basename(__FILE__));
-
-require_once('lib/core/Zend/Captcha/Image.php');
+global $access;
+$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
 /**
  * A simple class to switch between Zend_Captcha_Image and
@@ -21,7 +20,7 @@ class Captcha
 	 * The type of the captch ('default' when using Zend_Captcha_Image
 	 * or 'recaptcha' when using Zend_Captcha_ReCaptcha)
 	 *
-	 * @var string 
+	 * @var string
 	 */
 	public $type = '';
 
@@ -39,34 +38,50 @@ class Captcha
 	 *
 	 * @return null
 	 */
-	function __construct() {
+	function __construct( $type = '' )
+	{
 		global $prefs;
-		
-		if ($prefs['recaptcha_enabled'] == 'y' && !empty($prefs['recaptcha_privkey']) && !empty($prefs['recaptcha_pubkey'])) {
+
+		if (empty($type)) {
+			if ($prefs['recaptcha_enabled'] == 'y' && !empty($prefs['recaptcha_privkey']) && !empty($prefs['recaptcha_pubkey'])) {
+				$type = 'recaptcha';
+			} else if (extension_loaded('gd') && function_exists('imagepng') && function_exists('imageftbbox')) {
+				$type = 'default';
+			} else {
+				$type = 'dumb';
+			}
+		}
+
+		if ($type === 'recaptcha') {
 			require_once('lib/core/Zend/Captcha/ReCaptcha.php');
-			$this->captcha = new Zend_Captcha_ReCaptcha(array(
-				'privkey' => $prefs['recaptcha_privkey'],
-				'pubkey' => $prefs['recaptcha_pubkey'],
-				'theme' => 'clean'
-			));
+			$this->captcha = new Zend_Captcha_ReCaptcha(
+							array(
+								'privkey' => $prefs['recaptcha_privkey'],
+								'pubkey' => $prefs['recaptcha_pubkey'],
+								'theme' => 'clean'
+							)
+			);
 
 			$this->type = 'recaptcha';
 
 			$this->recaptchaCustomTranslations();
-		} else if (extension_loaded('gd') && function_exists('imagepng') && function_exists('imageftbbox')) {
-			$this->captcha = new Zend_Captcha_Image(array(
-				'wordLen' => $prefs['captcha_wordLen'],
-				'timeout' => 600,
-				'font' => dirname(__FILE__) . '/DejaVuSansMono.ttf',
-				'imgdir' => 'temp/public/',
-				'suffix' => '.captcha.png',
-				'width' => $prefs['captcha_width'],
-				'dotNoiseLevel' => $prefs['captcha_noise'],
-			));
+		} else if ($type === 'default') {
+			$this->captcha = new Zend_Captcha_Image(
+							array(
+								'wordLen' => $prefs['captcha_wordLen'],
+								'timeout' => 600,
+								'font' => dirname(__FILE__) . '/DejaVuSansMono.ttf',
+								'imgdir' => 'temp/public/',
+								'suffix' => '.captcha.png',
+								'width' => $prefs['captcha_width'],
+								'dotNoiseLevel' => $prefs['captcha_noise'],
+							)
+			);
 			$this->type = 'default';
-		} else {
+		} else {		// implied $type==='dumb'
 			require_once('lib/core/Zend/Captcha/Dumb.php');
 			$this->captcha = new Zend_Captcha_Dumb;
+			$this->captcha->setWordlen($prefs['captcha_wordLen']);
 			$this->type = 'dumb';
 		}
 
@@ -78,15 +93,28 @@ class Captcha
 	 *
 	 * @return void
 	 */
-	function generate() {
-		$this->captcha->generate();
+	function generate()
+	{
+		try {
+			$key = $this->captcha->generate();
+			if ($this->type == 'default') {
+				// the following needed to keep session active for ajax checking
+				$session = $this->captcha->getSession();
+				$session->setExpirationHops(2, null, true);
+				$this->captcha->setSession($session);
+				$this->captcha->setKeepSession(false);
+			}
+			return $key;
+		} catch (Zend_Exception $e) {
+		}
 	}
 
 	/** Return captcha ID
 	 *
 	 * @return string captcha ID
 	 */
-	function getId() {
+	function getId()
+	{
 		return $this->captcha->getId();
 	}
 
@@ -95,24 +123,31 @@ class Captcha
 	 *
 	 * @return string
 	 */
-	function render() {
+	function render()
+	{
 		return $this->captcha->render();
 	}
 
 	/**
 	 * Validate user input for the captcha
 	 *
-	 * @return bool true or false 
+	 * @return bool true or false
 	 *
 	 */
-	function validate() {
+	function validate($input = null)
+	{
+		if (is_null($input)) {
+			$input = $_REQUEST;
+		}
 		if ($this->type == 'recaptcha') {
-			return $this->captcha->isValid(array(
-				'recaptcha_challenge_field' => $_REQUEST['recaptcha_challenge_field'],
-				'recaptcha_response_field' => $_REQUEST['recaptcha_response_field']
-			));
+			return $this->captcha->isValid(
+							array(
+								'recaptcha_challenge_field' => $input['recaptcha_challenge_field'],
+								'recaptcha_response_field' => $input['recaptcha_response_field']
+							)
+			);
 		} else {
-			return $this->captcha->isValid($_REQUEST['captcha']);
+			return $this->captcha->isValid($input['captcha']);
 		}
 	}
 
@@ -121,8 +156,9 @@ class Captcha
 	 *
 	 * @return string full path to default captcha image
 	 */
-	function getPath() {
-		return $this->captcha->getImgDir() . $this->captcha->getId() .  $this->captcha->getSuffix();
+	function getPath()
+	{
+		return $this->captcha->getImgDir() . $this->captcha->getId() . $this->captcha->getSuffix();
 	}
 
 	/**
@@ -131,7 +167,8 @@ class Captcha
 	 *
 	 * @return void
 	 */
-	function setErrorMessages() {
+	function setErrorMessages()
+	{
 		$errors = array(
 			'missingValue' => tra('Empty captcha value'),
 			'badCaptcha' => tra('You have mistyped the anti-bot verification code. Please try again.')
@@ -150,7 +187,8 @@ class Captcha
 	 *
 	 * @return string error messages
 	 */
-	function getErrors() {
+	function getErrors()
+	{
 		return implode('<br />', $this->captcha->getMessages());
 	}
 
@@ -159,20 +197,22 @@ class Captcha
 	 *
 	 * @return void
 	 */
-	function recaptchaCustomTranslations() {
+	function recaptchaCustomTranslations()
+	{
 		$recaptchaService = $this->captcha->getService();
-		$recaptchaService->setOption('custom_translations',
-			array(
-				'visual_challenge' => tra('Get a visual challenge'),
-				'audio_challenge' => tra('Get an audio challenge'),
-				'refresh_btn' => tra('Get a new challenge'),
-				'instructions_visual' => tra('Type the two words'),
-				'instructions_audio' => tra('Type what you hear'),
-				'help_btn' => tra('Help'),
-				'play_again' => tra('Play sound again'),
-				'cant_hear_this' => tra('Download sound as MP3'),
-				'incorrect_try_again' => tra('Incorrect. Try again.')
-			)
+		$recaptchaService->setOption(
+						'custom_translations',
+						array(
+							'visual_challenge' => tra('Get a visual challenge'),
+							'audio_challenge' => tra('Get an audio challenge'),
+							'refresh_btn' => tra('Get a new challenge'),
+							'instructions_visual' => tra('Type the two words'),
+							'instructions_audio' => tra('Type what you hear'),
+							'help_btn' => tra('Help'),
+							'play_again' => tra('Play sound again'),
+							'cant_hear_this' => tra('Download sound as MP3'),
+							'incorrect_try_again' => tra('Incorrect. Try again.')
+						)
 		);
 	}
 }

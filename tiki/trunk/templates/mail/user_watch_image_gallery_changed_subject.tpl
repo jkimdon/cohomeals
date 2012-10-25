@@ -1,2 +1,2 @@
-{* $Id: user_watch_image_gallery_changed_subject.tpl 13628 2008-07-13 14:36:41Z lphuberdeau $ *}
+{* $Id: user_watch_image_gallery_changed_subject.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {tr}Image Gallery {$galleryName} changed{/tr}

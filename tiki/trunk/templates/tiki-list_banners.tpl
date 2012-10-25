@@ -1,4 +1,4 @@
-{* $Id: tiki-list_banners.tpl 29087 2010-09-09 22:22:09Z changi67 $ *}
+{* $Id: tiki-list_banners.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="Banners" admpage=ads}{tr}Banners{/tr}{/title}
 
@@ -31,18 +31,18 @@
 {cycle values="odd,even" print=false}
 {section name=changes loop=$listpages}
 <tr class="{cycle}">
-<td>{if $tiki_p_admin_banners eq 'y'}<a class="link" href="tiki-edit_banner.php?bannerId={$listpages[changes].bannerId}">{/if}{$listpages[changes].bannerId}{if $tiki_p_admin_banners eq 'y'}</a>{/if}</td>
-<td>{$listpages[changes].client|username}</td>
-<td>{$listpages[changes].url}</td>
-<td>{$listpages[changes].zone|escape}</td>
-<td>{$listpages[changes].created|tiki_short_date}</td>
-<td>{$listpages[changes].which}</td>
-<td>{$listpages[changes].useDates}</td>
-<td>{$listpages[changes].maxImpressions}</td>
-<td>{$listpages[changes].impressions}</td>
-<td>{$listpages[changes].maxClicks}</td>
-<td>{$listpages[changes].clicks}</td>
-<td>
+<td class="id">{if $tiki_p_admin_banners eq 'y'}<a class="link" href="tiki-edit_banner.php?bannerId={$listpages[changes].bannerId}">{/if}{$listpages[changes].bannerId}{if $tiki_p_admin_banners eq 'y'}</a>{/if}</td>
+<td class="username">{$listpages[changes].client|username}</td>
+<td class="text">{$listpages[changes].url}</td>
+<td class="text">{$listpages[changes].zone|escape}</td>
+<td class="date">{$listpages[changes].created|tiki_short_date}</td>
+<td class="text">{$listpages[changes].which}</td>
+<td class="integer">{$listpages[changes].useDates}</td>
+<td class="integer">{$listpages[changes].maxImpressions}</td>
+<td class="integer">{$listpages[changes].impressions}</td>
+<td class="integer">{$listpages[changes].maxClicks}</td>
+<td class="integer">{$listpages[changes].clicks}</td>
+<td class="action">
 {if $tiki_p_admin_banners eq 'y'}
 <a class="link" href="tiki-edit_banner.php?bannerId={$listpages[changes].bannerId}">{icon _id='page_edit'}</a>
 <a class="link" href="tiki-list_banners.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;remove={$listpages[changes].bannerId}">{icon _id='cross' alt="{tr}Remove{/tr}"}</a>
@@ -51,9 +51,7 @@
 </td>
 </tr>
 {sectionelse}
-<tr><td class="odd" colspan="12">
-{tr}No records found{/tr}
-</td></tr>
+	{norecords _colspan=12}
 {/section}
 </table>
 

@@ -1,28 +1,32 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_googleanalytics.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_googleanalytics.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-function wikiplugin_googleanalytics_info() {
+function wikiplugin_googleanalytics_info()
+{
 	return array(
 		'name' => tra('Google Analytics'),
-		'documentation' => 'PluginGoogleAnalytics',	
-		'description' => tra('Add the tracking code for Google Analytics.'),
+		'documentation' => 'PluginGoogleAnalytics',
+		'description' => tra('Add the tracking code for Google Analytics'),
 		'prefs' => array( 'wikiplugin_googleanalytics' ),
+		'icon' => 'img/icons/chart_line.png',
 		'params' => array(
 			'account' => array(
 				'required' => true,
-				'name' => tra('Account number'),
+				'name' => tra('Account Number'),
 				'description' => tra('The account number for the site. Your account number from google looks like UA-XXXXXXX-YY. All you need to enter is XXXXXXX-YY'),
+				'default' => ''
 			),
 		),
 	);
 }
 
-function wikiplugin_googleanalytics($data, $params) {
-	extract($params,EXTR_SKIP);
+function wikiplugin_googleanalytics($data, $params)
+{
+	extract($params, EXTR_SKIP);
 	if (empty($account)) {
 		return tra('Missing parameter');
 	}

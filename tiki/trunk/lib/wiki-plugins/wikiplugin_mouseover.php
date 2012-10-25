@@ -1,23 +1,17 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_mouseover.php 29155 2010-09-13 02:23:47Z chealer $
+// $Id: wikiplugin_mouseover.php 41419 2012-05-10 21:36:10Z nkoth $
 
-/*
- * Plugin mouseover
- */
-function wikiplugin_mouseover_help() {
-	return tra("Create a mouseover feature on some text").":<br />~np~{MOUSEOVER(url=url,text=text,parse=y,width=300,height=300)}".tra('text')."{MOUSEOVER}~/np~";
-}
-
-function wikiplugin_mouseover_info() {
+function wikiplugin_mouseover_info()
+{
 	global $prefs;
 	include_once('lib/prefs/jquery.php');
 	$jqprefs = prefs_jquery_list();
 	$jqjx = array();
-	foreach($jqprefs['jquery_effect']['options'] as $k => $v) {
+	foreach ($jqprefs['jquery_effect']['options'] as $k => $v) {
 		$jqfx[] = array('text' => $v, 'value' => $k);
 	}
 	
@@ -25,28 +19,32 @@ function wikiplugin_mouseover_info() {
 	return array(
 		'name' => tra('Mouseover'),
 		'documentation' => 'PluginMouseover',
-		'description' => tra('Create a mouseover feature on some text'),
+		'description' => tra('Display hidden content by mousing over a text'),
 		'prefs' => array( 'wikiplugin_mouseover' ),
-		'body' => tra('Mouseover text if param label exists. Page text if text param exists'),
-		'icon' => 'pics/icons/comment_add.png',
+		'body' => tra('Hidden content, unless the label parameter is undefined, in which case this is the label.'),
+		'icon' => 'img/icons/comment_add.png',
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'label' => array(
 				'required' => true,
 				'name' => tra('Label'),
-				'description' => tra('Text displayed on the page. The body is the mouseover content'),
+				'description' => tra('Text displayed on the page. The body is the hidden content.'),
 				'filter' => 'striptags',
+				'default' => '',
 			),
 			'url' => array(
 				'required' => false,
 				'name' => tra('URL'),
 				'description' => tra('Destination link when mouseover text is clicked. Use http:// for external links'),
 				'filter' => 'url',
+				'default' => 'javascript:void(0)',
 			),
 			'text' => array(
 				'required' => false,
 				'name' => tra('Text'),
-				'description' => tra('DEPRECATED').' '.tra('Text displayed on the mouseover. The body contains the text of the page.'),
+				'description' => tra('DEPRECATED').' '.tra('Hidden content. The body contains the label.'),
 				'filter' => 'striptags',
+				'default' => '',
 				'advanced' => true,
 			),
 			'width' => array(
@@ -54,6 +52,7 @@ function wikiplugin_mouseover_info() {
 				'name' => tra('Width'),
 				'description' => tra('Mouseover box width. Default: 400px'),
 				'filter' => 'digits',
+				'default' => 400,
 				'advanced' => true,
 			),
 			'height' => array(
@@ -61,109 +60,136 @@ function wikiplugin_mouseover_info() {
 				'name' => tra('Height'),
 				'description' => tra('Mouseover box height. Default: 200px'),
 				'filter' => 'digits',
+				'default' => 200,
 				'advanced' => true,
 			),
 			'offsetx' => array(
 				'required' => false,
 				'name' => tra('Offset X'),
-				'description' => tra('Shifts the overlay to the right by the specified number of pixels relative to the cursor. Default: 5px'),
-				'filter' => 'digits',
+				'description' => tra('Shifts the overlay to the right by the specified number of pixels relative to the cursor. Default: 5'),
+				'filter' => 'int',
+				'default' => 5,
 				'advanced' => true,
 			),
 			'offsety' => array(
 				'required' => false,
 				'name' => tra('Offset Y'),
-				'description' => tra('Shifts the overlay lower by the specified number of pixels relative to the cursor. Default: 0px'),
-				'filter' => 'digits',
+				'description' => tra('Shifts the overlay lower by the specified number of pixels relative to the cursor. Default: 0'),
+				'filter' => 'int',
+				'default' => 0,
 				'advanced' => true,
 			),
 			'parse' => array(
 				'required' => false,
 				'name' => tra('Parse Body'),
-				'description' => tra('y|n, parse the body of the plugin as wiki content. (Default to y)'),
+				'description' => tra('Parse the body of the plugin as wiki content (parsed by default)'),
 				'filter' => 'alpha',
 				'advanced' => true,
+				'default' => 'y',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 'y'), 
+					array('text' => tra('No'), 'value' => 'n')
+				)
 			),
 			'parselabel' => array(
 				'required' => false,
 				'name' => tra('Parse Label'),
-				'description' => 'y|n '.tra('parse label'),
+				'description' => tra('Parse the label as wiki content (parsed by default)'),
 				'filter' => 'alpha',
 				'default' => 'y',
 				'advanced' => true,
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 'y'), 
+					array('text' => tra('No'), 'value' => 'n')
+				)
 			),
 			'class' => array(
 				'required' => false,
 				'name' => tra('CSS Class'),
-				'description' => 'Default: plugin-mouseover',
+				'description' => tra('CSS class to apply'),
 				'filter' => 'alpha',
+				'default' => 'plugin-mouseover',
 				'advanced' => true,
 			),
 			'bgcolor' => array(
 				'required' => false,
-				'name' => tra('Background color of the popup'),
-				'description' => tra(''),
+				'name' => tra('Background Color'),
+				'description' => tra('Background color to apply to the popup'),
 				'filter' => 'striptags',
+				'default' => '',
 				'advanced' => true,
 			),
 			'textcolor' => array(
 				'required' => false,
-				'name' => tra('Text color in the popup'),
-				'description' => tra(''),
+				'name' => tra('Text Color'),
+				'description' => tra('Color to apply to the text in the popup'),
 				'filter' => 'striptags',
+				'default' => '',
 				'advanced' => true,
 			),
 			'sticky' => array(
 				'required' => false,
 				'name' => tra('Sticky'),
-				'description' => 'y|n, when enabled, popup stays visible until it is clicked.',
+				'description' => tra('When enabled, popup stays visible until it is clicked.'),
 				'filter' => 'alpha',
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 'y'), 
+					array('text' => tra('No'), 'value' => 'n')
+				),
 				'advanced' => true,
 			),				
 			'padding' => array(
 				'required' => false,
 				'name' => tra('Padding'),
-				'description' => 'Default: 5px',
+				'description' => tra('Padding size in pixels'),
 				'filter' => 'digits',
+				'default' => '',
 				'advanced' => true,
 			),
 			'effect' => array(
 				'required' => false,
 				'name' => tra('Effect'),
 				'options' => $jqfx,
-				'description' => 'Show/hide animation',
+				'description' => tra('Set the type of show/hide animation that will be used'),
 				'filter' => 'striptags',
 				'advanced' => true,
 			),
 			'speed' => array(
 				'required' => false,
-				'name' => tra('Effect speed'),
+				'name' => tra('Effect Speed'),
 				'options' => array(
 					array('text' => tra('Normal'), 'value' => ''), 
 					array('text' => tra('Fast'), 'value' => 'fast'), 
 					array('text' => tra('Slow'), 'value' => 'slow'), 
 				),
-				'description' => '',
+				'description' => tra('Set the speed of the animation.'),
 				'filter' => 'alpha',
+				'default' => '',
 				'advanced' => true,
 			),
 			'closeDelay' => array(
 				'required' => false,
-				'name' => tra('Close delay'),
-				'description' => 'Number of seconds before popup closes',
+				'name' => tra('Close Delay'),
+				'description' => tra('Number of seconds before popup closes'),
 				'filter' => 'digits',
+				'default' => 0,
 				'advanced' => true,
 			),
 		),
 	);
 }
 
-function wikiplugin_mouseover( $data, $params ) {
+function wikiplugin_mouseover( $data, $params )
+{
 	global $smarty, $tikilib;
 
 	$default = array('parse'=>'y', 'parselabel'=>'y');
 	$params = array_merge($default, $params);
-	if( ! isset($params['url']) ) {
+	if ( ! isset($params['url']) ) {
 		$url = 'javascript:void(0)';
 	} else {
 		$url = $params['url'];
@@ -197,17 +223,17 @@ function wikiplugin_mouseover( $data, $params ) {
 		}
 	}
 
-	if( $parse ) {
+	if ( $parse ) {
 		$text = $tikilib->parse_data($text);
 	}
-	if( $params['parselabel'] == 'y' ) {
+	if ( $params['parselabel'] == 'y' ) {
 		$label = "~/np~$label~np~";
 	}
 
 	static $lastval = 0;
 	$id = "mo" . ++$lastval;
 
-	$url = htmlentities( $url, ENT_QUOTES, 'UTF-8' );
+	$url = htmlentities($url, ENT_QUOTES, 'UTF-8');
 
 	global $headerlib;
 	

@@ -1,4 +1,4 @@
-{* $Id: mod-freetags_most_popular.tpl 21667 2009-09-23 12:00:54Z pkdille $ *}
+{* $Id: mod-freetags_most_popular.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {tikimodule error=$module_params.error title=$tpl_module_title name="freetags_most_popular" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {if ($type ne 'cloud')}<ul class="freetag">{/if}
 {foreach from=$most_popular_tags item=tag}

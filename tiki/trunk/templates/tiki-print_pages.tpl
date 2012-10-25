@@ -1,4 +1,4 @@
-{* $Id: tiki-print_pages.tpl 28930 2010-09-04 06:09:03Z pkdille $ *}
+{* $Id: tiki-print_pages.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title}{tr}Print multiple pages{/tr}{/title}
 
@@ -20,6 +20,15 @@
         </ul>
         <input type="submit" name="print" value="{tr}Print{/tr}" />
       </form>
+
+      {if $pdf_export eq 'y'}
+      <form method="get" action="tiki-print_multi_pages.php">
+          <input type="hidden" name="printstructures" value="{$form_printstructures|escape}" />
+          <input type="hidden" name="find" value="{$find|escape}" />
+          <input type="hidden" name="display" value="pdf" />
+          <input type="submit" name="print" value="{tr}PDF{/tr}" />
+      </form>
+      {/if}
 
       <form action="tiki-print_pages.php" method="post">
         <input type="submit" name="clearstructures" value="{tr}Clear{/tr}" />
@@ -51,7 +60,7 @@
 <table class="formcolor">
 	<tr>
 		<td width="40%">
-			<h2>{tr}Available Pages{/tr}:</h2>
+			<h2>{tr}Available Pages:{/tr}</h2>
     <select name="pageName[]" multiple="multiple" size="5" style="width:99%" title="{tr}Available Pages{/tr}">
       {section name=ix loop=$pages}
         {if !in_array($pages[ix].pageName,$printpages)}{* don't show the page as available,if it is already selected *}
@@ -78,7 +87,7 @@
 			
 		</td>
 		<td width="40%">
-			<h2>{tr}Selected Pages{/tr}:</h2>
+			<h2>{tr}Selected Pages:{/tr}</h2>
 		<select name="selectedpages[]" size="15" multiple="multiple" style="width:99%" title="{tr}Selected Pages{/tr}">
 {section name=ix loop=$printpages}
 			<option value="{$smarty.section.ix.index}">{$printpages[ix]}</option>
@@ -95,8 +104,15 @@
 <div style="float:right;margin-right:20%;">
     <form method="get" action="tiki-print_multi_pages.php">
       <input type="hidden" name="printpages" value="{$form_printpages|escape}" />
-	  <p><input type="submit" name="print" title="{tr}Print{/tr}" value="{tr}Print{/tr}" /></p>
-	</form>
+      <input type="submit" name="print" title="{tr}Print{/tr}" value="{tr}Print{/tr}" />
+    </form>
+    {if $pdf_export eq 'y'}
+    <form method="get" action="tiki-print_multi_pages.php">
+      <input type="hidden" name="display" value="pdf" />
+      <input type="hidden" name="printpages" value="{$form_printpages|escape}" />
+      <input type="submit" name="print" title="{tr}PDF{/tr}" value="{tr}PDF{/tr}" />
+    </form>
+    {/if}
 </div>
 {/if}
 {if $prefs.feature_wiki_structure eq 'y'}
@@ -107,7 +123,7 @@
   <tbody>
 	<tr>
 		<td>
-    <h2>{tr}Add Pages from Structures{/tr}:</h2>
+    <h2>{tr}Add Pages from Structures:{/tr}</h2>
     <select name="structureId" size="5" style="width:99%" border="1">
       {section name=ix loop=$structures}
         {if !in_array($structures[ix].page_ref_id,$printstructures)}

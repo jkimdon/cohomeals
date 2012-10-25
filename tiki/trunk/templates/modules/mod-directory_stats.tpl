@@ -1,4 +1,4 @@
-{* $Id: mod-directory_stats.tpl 21109 2009-08-27 05:51:57Z chealer $ *}
+{* $Id: mod-directory_stats.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="directory_stats" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 

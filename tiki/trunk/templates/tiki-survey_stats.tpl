@@ -1,4 +1,4 @@
-{* $Id: tiki-survey_stats.tpl 29081 2010-09-09 20:56:56Z changi67 $ *}
+{* $Id: tiki-survey_stats.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title}{tr}Stats for surveys{/tr}{/title}
 
@@ -23,14 +23,14 @@
 {section name=user loop=$channels}
 {if ($tiki_p_admin eq 'y') or ($channels[user].individual eq 'n' and $tiki_p_view_survey_stats eq 'y') or ($channels[user].individual_tiki_p_view_survey_stats eq 'y')}
 <tr class="{cycle}">
-<td><a class="tablename" href="tiki-survey_stats_survey.php?surveyId={$channels[user].surveyId}">{$channels[user].name|escape}</a></td>
-<td>{$channels[user].taken}</td>
-<td>{$channels[user].created|tiki_short_datetime}</td>
-<td>{$channels[user].lastTaken|tiki_short_datetime}</td>
+<td class="text"><a class="tablename" href="tiki-survey_stats_survey.php?surveyId={$channels[user].surveyId}">{$channels[user].name|escape}</a></td>
+<td class="text">{$channels[user].taken}</td>
+<td class="date">{$channels[user].created|tiki_short_datetime}</td>
+<td class="date">{$channels[user].lastTaken|tiki_short_datetime}</td>
 </tr>
 {/if}
 {sectionelse}
-<tr><td class="odd" colspan="4"><strong>{tr}No records found.{/tr}</strong></td></tr>
+	{norecords _colspan=4}
 {/section}
 </table>
 

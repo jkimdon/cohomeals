@@ -1,4 +1,4 @@
-{* $Id: tiki-debug_dmsg_tab.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: tiki-debug_dmsg_tab.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 <table  id="log" cellspacing="0" cellpadding="0">
   <caption> {tr}Page generation debugging log{/tr} </caption>

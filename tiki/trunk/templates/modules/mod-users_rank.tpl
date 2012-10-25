@@ -1,4 +1,4 @@
-{* $Id: mod-users_rank.tpl 26273 2010-03-23 12:02:11Z sylvieg $ *}
+{* $Id: mod-users_rank.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="users_rank" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {if !empty($users_rank)}

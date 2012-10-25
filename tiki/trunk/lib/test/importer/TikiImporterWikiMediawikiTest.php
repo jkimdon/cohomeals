@@ -1,11 +1,16 @@
 <?php
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+// 
+// All Rights Reserved. See copyright.txt for details and a complete list of authors.
+// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
+// $Id: TikiImporterWikiMediawikiTest.php 40234 2012-03-17 19:17:41Z changi67 $
 
 require_once(dirname(__FILE__) . '/tikiimporter_testcase.php');
 require_once(dirname(__FILE__) . '/../../importer/tikiimporter_wiki_mediawiki.php');
 require_once(dirname(__FILE__) . '/../../tikilib.php');
 
 /** 
- * @group integration
+ * @group importer
  */
 class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
 {
@@ -62,6 +67,8 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $_POST['importAttachments'] = 'on';
 
         $obj->import(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
+        
+        unset($_POST['importAttachments']);
     }
 
     public function testImportShouldRaiseExceptionForInvalidMimeType()
@@ -84,9 +91,21 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
     {
         $this->obj->dom = new DOMDocument;
         $this->obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
-        $this->assertNull($this->obj->validateInput());
+        $this->assertTrue($this->obj->validateInput());
+        
+        $this->obj->dom = new DOMDocument;
+        $this->obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample_v0.4.xml');
+        $this->assertTrue($this->obj->validateInput());
     }
 
+    public function testValidateInputShouldRaiseExceptionForUnsupportedXmlFileVersion()
+    {
+    	$this->obj->dom = new DOMDocument;
+        $this->obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample_v0.2.xml');
+        $this->setExpectedException('DOMException');
+        $this->obj->validateInput();
+    }
+    
     public function testValidateInputShouldRaiseExceptionForInvalidXmlFile()
     {
         $this->obj->dom = new DOMDocument;
@@ -94,19 +113,27 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $this->setExpectedException('DOMException');
         $this->obj->validateInput();
     }
+    
+	public function testValidateInputShouldRaiseExceptionForWordpressFile()
+	{
+        $this->obj->dom = new DOMDocument;
+        $this->obj->dom->load(dirname(__FILE__) . '/fixtures/wordpress_sample.xml');
+        $this->setExpectedException('DOMException');
+        $this->obj->validateInput();
+	}
 
-    public function testParseData()
-    {
+	public function testParseData()
+	{
         $obj = $this->getMock('TikiImporter_Wiki_Mediawiki', array('extractInfo', 'downloadAttachment'));
         $obj->dom = new DOMDocument;
         $obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
         $obj->expects($this->exactly(4))->method('extractInfo')->will($this->returnValue(array()));
-        $this->expectOutputString("\nStarting to parse pages:\n");
+        $this->expectOutputString("\nParsing pages:\n");
         $this->assertEquals(4, count($obj->parseData()));
-    }
+	}
 
-    public function testParseDataShouldPrintMessageIfErrorToParseAPageWhenExtractInfoReturnException()
-    {
+	public function testParseDataShouldPrintMessageIfErrorToParseAPageWhenExtractInfoReturnException()
+	{
         $obj = $this->getMock('TikiImporter_Wiki_Mediawiki', array('extractInfo', 'saveAndDisplayLog', 'downloadAttachment'));
         $obj->expects($this->exactly(4))->method('extractInfo')->will($this->throwException(new ImporterParserException('')));
         $obj->expects($this->exactly(5))->method('saveAndDisplayLog')->will($this->returnValue(''));
@@ -115,10 +142,10 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
 
         $this->assertEquals(array(), $obj->parseData());
-    }
+	}
 
-    public function testParseDataHandleDifferentlyPagesAndFilePages()
-    {
+	public function testParseDataHandleDifferentlyPagesAndFilePages()
+	{
         $obj = $this->getMock('TikiImporter_Wiki_Mediawiki', array('extractInfo', 'saveAndDisplayLog'));
         $obj->expects($this->exactly(4))->method('extractInfo')->will($this->returnValue(array()));
         $obj->importAttachments = true;
@@ -126,10 +153,10 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $obj->dom = new DOMDocument;
         $obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
         $this->assertEquals(4, count($obj->parseData()));
-   }
+	}
 
-    public function testDownloadAttachment()
-    {
+	public function testDownloadAttachment()
+	{
         $this->obj->attachmentsDestDir = dirname(__FILE__) . '/fixtures/';
 
         $sourceAttachments = array('sourceTest.jpg', 'sourceTest2.jpg');
@@ -147,7 +174,7 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $this->obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_sample.xml');
         $this->obj->downloadAttachments();
 
-        $this->expectOutputString("\n\nStarting to import attachments:\nFile test2.jpg successfully imported!\nFile test.jpg successfully imported!\n");
+        $this->expectOutputString("\n\nImporting attachments:\nFile test2.jpg successfully imported!\nFile test.jpg successfully imported!\n");
 
         $i = count($sourceAttachments) - 1;
         while ($i >= 0) {
@@ -158,7 +185,7 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
             $i--;
         }
         chdir($cwd);
-    }
+	}
 
     public function testDownloadAttachmentShouldNotImportIfFileAlreadyExist()
     {
@@ -173,7 +200,7 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         }
 
         $this->obj->downloadAttachments();
-        $this->expectOutputString("\n\nStarting to import attachments:\nNOT importing file test2.jpg as there is already a file with the same name in the destination directory (" . $this->obj->attachmentsDestDir . ")\nNOT importing file test.jpg as there is already a file with the same name in the destination directory (" . $this->obj->attachmentsDestDir . ")\n");
+        $this->expectOutputString("\n\nImporting attachments:\nNOT importing file test2.jpg as there is already a file with the same name in the destination directory (" . $this->obj->attachmentsDestDir . ")\nNOT importing file test.jpg as there is already a file with the same name in the destination directory (" . $this->obj->attachmentsDestDir . ")\n");
        
         foreach ($attachments as $attachment) {
             $filePath = $this->obj->attachmentsDestDir . $attachment;
@@ -195,7 +222,7 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $this->obj->dom->load(dirname(__FILE__) . '/fixtures/mediawiki_invalid_upload.xml');
         $this->obj->downloadAttachments();
 
-        $this->expectOutputString("\n\nStarting to import attachments:\nUnable to download file Qlandkartegt-0.11.1.tar.gz. File not found.\nUnable to download file Passelivre.jpg. File not found.\n");
+        $this->expectOutputString("\n\nImporting attachments:\nUnable to download file Qlandkartegt-0.11.1.tar.gz. File not found.\nUnable to download file Passelivre.jpg. File not found.\n");
     }
 
     public function testExtractInfo()
@@ -340,13 +367,13 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $revisions = $dom->getElementsByTagName('revision');
 
         $i = 0;
-        foreach ($revisions as $revision) {
+		foreach ($revisions as $revision) {
             $obj = $this->getMock('TikiImporter_Wiki_Mediawiki', array('convertMarkup', 'extractContributor'));
             $obj->expects($this->once())->method('convertMarkup')->will($this->returnValue('Some text'));
             $obj->expects($this->once())->method('extractContributor')->will($this->returnValue($extractContributorReturn[$i]));
 
             $this->assertEquals($expectedResult[$i++], $obj->extractRevision($revision));
-       }
+		}
     }
 
     public function testExtractRevisionShouldRaiseExceptionForInvalidSyntax()
@@ -391,7 +418,7 @@ class TikiImporter_Wiki_Mediawiki_Test extends TikiImporter_TestCase
         $expectedResult = "((someWikiLink))\n\n";
         $this->assertEquals($expectedResult, $this->obj->convertMarkup($mediawikiText));
     }
-
+    
     public function testConvertMarkupShouldReturnNullIfEmptyMediawikiText()
     {
         $this->obj->dom = new DOMDocument;

@@ -1,24 +1,28 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-export_tracker_monitor.php 25080 2010-02-11 16:44:33Z changi67 $
+// $Id: tiki-export_tracker_monitor.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once('tiki-setup.php');
-global $monitor_filename, $stat_array;
+global $monitor_filename, $stat_array, $access;
 
 if ($prefs['feature_trackers'] != 'y') {
-	die(json_encode(array('msg' => tra('This feature is disabled').': feature_trackers')));
+	$access->output_serialized(array('msg' => tra('This feature is disabled').': feature_trackers'));
+	die();
 }
 if ($prefs['feature_ajax'] != 'y') {
-	die(json_encode(array('msg' => tra('This feature is disabled').': feature_ajax')));
+	$access->output_serialized(array('msg' => tra('This feature is disabled').': feature_ajax'));
+	die();
 }
 if (!isset($_REQUEST['trackerId'])) {
-	die(json_encode(array('msg' => tra('No tracker indicated'))));
+	$access->output_serialized(array('msg' => tra('No tracker indicated')));
+	die();
 }
 
-function saveStatus($in_vals = array()) {
+function saveStatus($in_vals = array())
+{
 	global $stat_array, $monitor_filename;
 	$stat_array = array_merge($stat_array, $in_vals);
 	$fp_mon = fopen($monitor_filename, 'w');
@@ -32,7 +36,8 @@ if (isset($_REQUEST['trackerId']) && isset($_REQUEST['xuser'])) {
 	if (is_file($monitor_filename)) {
 		$stat_array = unserialize(file_get_contents($monitor_filename));
 	} else {
-		die(json_encode(array('msg' => 'No monitor file found')));
+		$access->output_serialized(array('msg' => 'No monitor file found'));
+		die();
 	}
 	
 	$stat_array = unserialize(file_get_contents($monitor_filename));
@@ -41,12 +46,12 @@ if (isset($_REQUEST['trackerId']) && isset($_REQUEST['xuser'])) {
 	$json_data = array();
 	foreach ($stat_array as $k => $v) {
 		if ($k == 'user' && $v != $user) {
-			$json_data['msg'] = tra("Another user is currently exporting that tracker, please try again later.");
+			$json_data['msg'] = tra("Another user is currently exporting that tracker, please try again later.").' '.tra('Or delete the file: '.$monitor_filename);
 			break;
 		} else {
 			$json_data[$k] = $v;
 		}
 	}
 	
-	die(json_encode($json_data));
+	$access->output_serialized($json_data);
 }

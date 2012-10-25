@@ -1,16 +1,17 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.debugger.php 28400 2010-08-09 13:21:49Z jonnybradley $
+// $Id: function.debugger.php 39469 2012-01-12 21:13:48Z changi67 $
 
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function smarty_function_debugger($params, &$smarty) {
+function smarty_function_debugger($params, $smarty)
+{
 	
 	global $prefs;
 	if ($prefs['feature_debug_console'] == 'y') {
@@ -38,7 +39,7 @@ function smarty_function_debugger($params, &$smarty) {
 			if ($debugger->result_type() == TPL_RESULT) {
 				$smarty->assign('result_tpl', $debugger->result_tpl());
 		
-				$smarty->assign_by_ref('command_result', $command_result);
+				$smarty->assignByRef('command_result', $command_result);
 			} else {
 				$smarty->assign('command_result', $command_result);
 			}
@@ -51,7 +52,7 @@ function smarty_function_debugger($params, &$smarty) {
 		$tabs_list = $debugger->background_tabs_draw();
 		// Add results tab which is always exists...
 		$tabs_list["console"] = $smarty->fetch("debug/tiki-debug_console_tab.tpl");
-		ksort ($tabs_list);
+		ksort($tabs_list);
 		$tabs = array();
 		
 		// TODO: Use stupid dbl loop to generate links code and divs,
@@ -77,13 +78,14 @@ function smarty_function_debugger($params, &$smarty) {
 		$c = getCookie('debugconsole', 'menu');
 		$smarty->assign('debugconsole_style', $c == 'o' ? 'display:block;' : 'display:none;');
 		
-		$smarty->assign_by_ref('tabs', $tabs);
+		$smarty->assignByRef('tabs', $tabs);
 		
 		$js = '';
 		if ($prefs['feature_jquery_ui'] == 'y') {
 			global $headerlib;
 			require_once('lib/headerlib.php');
-			$headerlib->add_jq_onready( "
+			$headerlib->add_jq_onready(
+							"
 \$('#debugconsole').draggable({
 	stop: function(event, ui) {
 		var off = \$('#debugconsole').offset();
@@ -94,8 +96,9 @@ debugconsole_pos = getCookie('debugconsole_position')
 if (debugconsole_pos) {debugconsole_pos = debugconsole_pos.split(',');}
 if (debugconsole_pos) {
 	\$('#debugconsole').css({'left': debugconsole_pos[0] + 'px', 'top': debugconsole_pos[1] + 'px'});
-} 
-" );
+}
+" 
+			);
 		}
 		$ret = $smarty->fetch('debug/function.debugger.tpl');
 		return $ret;

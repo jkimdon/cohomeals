@@ -1,16 +1,17 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-theme_control_objects.php 28579 2010-08-17 23:02:46Z sampaioprimo $
+// $Id: tiki-theme_control_objects.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/themecontrol/tcontrol.php');
 include_once ('lib/categories/categlib.php');
 include_once ('lib/filegals/filegallib.php');
 include_once ('lib/htmlpages/htmlpageslib.php');
-function correct_array(&$arr, $id, $name) {
+function correct_array(&$arr, $id, $name)
+{
 	$temp_max = count($arr);
 	for ($i = 0; $i < $temp_max; $i++) {
 		$arr[$i]['objId'] = $arr[$i][$id];
@@ -36,14 +37,14 @@ switch ($_REQUEST['type']) {
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'galleryId', 'name');
-		break;
+    	break;
 
 	case 'file gallery':
 		$objects = $filegallib->list_file_galleries(0, -1, 'name_desc', 'admin', $find_objects, $prefs['fgal_root_id']);
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'galleryId', 'name');
-		break;
+    	break;
 
 	case 'forum':
 		require_once ('lib/comments/commentslib.php');
@@ -54,7 +55,7 @@ switch ($_REQUEST['type']) {
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'forumId', 'name');
-		break;
+    	break;
 
 	case 'blog':
 		require_once('lib/blogs/bloglib.php');
@@ -62,35 +63,36 @@ switch ($_REQUEST['type']) {
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'blogId', 'title');
-		break;
+    	break;
 
 	case 'wiki page':
 		$objects = $tikilib->list_pageNames(0, -1, 'pageName_asc', $find_objects);
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'pageName', 'pageName');
-		break;
+    	break;
 
 	case 'html page':
 		$objects = $htmlpageslib->list_html_pages(0, -1, 'pageName_asc', $find_objects);
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'pageName', 'pageName');
-		break;
+    	break;
 
 	case 'faq':
-		$objects = $tikilib->list_faqs(0, -1, 'title_asc', $find_objects);
+		$faqlib = TikiLib::lib('faq');
+		$objects = $faqlib->list_faqs(0, -1, 'title_asc', $find_objects);
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'faqId', 'title');
-		break;
+    	break;
 
 	case 'quiz':
-		$objects = $tikilib->list_quizzes(0, -1, 'name_asc', $find_objects);
+		$objects = TikiLib::lib('quiz')->list_quizzes(0, -1, 'name_asc', $find_objects);
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'quizId', 'name');
-		break;
+    	break;
 
 	case 'article':
 		global $artlib; require_once 'lib/articles/artlib.php';
@@ -98,10 +100,10 @@ switch ($_REQUEST['type']) {
 		$smarty->assign_by_ref('objects', $objects["data"]);
 		$objects = $objects['data'];
 		correct_array($objects, 'articleId', 'title');
-		break;
+    	break;
 
 	default:
-		break;
+    	break;
 }
 $smarty->assign_by_ref('objects', $objects);
 if (isset($_REQUEST['assign'])) {
@@ -111,7 +113,7 @@ if (isset($_REQUEST['assign'])) {
 }
 if (isset($_REQUEST["delete"])) {
 	check_ticket('tc-objects');
-	foreach(array_keys($_REQUEST["obj"]) as $obj) {
+	foreach (array_keys($_REQUEST["obj"]) as $obj) {
 		$tcontrollib->tc_remove_object($obj);
 	}
 }

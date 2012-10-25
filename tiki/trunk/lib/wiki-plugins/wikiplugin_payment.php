@@ -1,30 +1,34 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_payment.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_payment.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-function wikiplugin_payment_info() {
+function wikiplugin_payment_info()
+{
 	return array(
 		'name' => tra('Payment'),
-		'description' => tra('Display a payment request\'s details based on the user\'s privileges and the state of the payment. The payment details may include the payment options.'),
+		'documentaion' => 'PluginPayment',
+		'description' => tra('Show details of a payment request or invoice'),
 		'prefs' => array( 'wikiplugin_payment', 'payment_feature' ),
+		'icon' => 'img/icons/money.png',
 		'params' => array(
 			'id' => array(
 				'required' => true,
-				'name' => tra('Payment request number'),
-				'description' => tra('Unique identifier'),
+				'name' => tra('Payment Request Number'),
+				'description' => tra('Unique identifier of the payment request'),
 				'filter' => 'digits',
-			),
-		),
+				'default' => '',
+			)
+		)
 	);
 }
 
-function wikiplugin_payment( $data, $params ) {
+function wikiplugin_payment( $data, $params )
+{
 	global $smarty;
 
 	require_once 'lib/smarty_tiki/function.payment.php';
-	return '^~np~' . smarty_function_payment( $params, $smarty ) . '~/np~^';
+	return '^~np~' . smarty_function_payment($params, $smarty) . '~/np~^';
 }
-

@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_grouplist.tpl 25049 2010-02-11 09:11:46Z pkdille $ *}
+{* $Id: wikiplugin_grouplist.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {if empty($groups)}
 {else}
 	<ul>

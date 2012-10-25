@@ -1,14 +1,13 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_topics.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-admin_topics.php 40925 2012-04-15 17:42:29Z lindonb $
 
 $section = 'cms';
 require_once ('tiki-setup.php');
 include_once ('lib/articles/artlib.php');
-$smarty->assign('headtitle', tra('Admin topics'));
 $access->check_feature('feature_articles');
 // PERMISSIONS: NEEDS p_admin or tiki_p_articles_admin_topics
 $access->check_permission(array('tiki_p_articles_admin_topics'));
@@ -48,6 +47,10 @@ if (isset($_REQUEST["deactivate"])) {
 	$artlib->deactivate_topic($_REQUEST["deactivate"]);
 }
 $topics = $artlib->list_topics();
+/* To renumber array keys from 0 since smarty 3 doesn't seem to like arrays
+ * that start with other keys in a section loop, which this variable is used in
+ */
+$topics = array_values($topics);
 $temp_max = count($topics);
 for ($i = 0; $i < $temp_max; $i++) {
 	if ($userlib->object_has_one_permission($topics[$i]["topicId"], 'topic')) {

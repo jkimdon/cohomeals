@@ -3,7 +3,8 @@
 	<user><![CDATA[{$comment.userName}]]></user>
 	<date>{$comment.commentDate}</date>
 	<data><![CDATA[{$comment.data}]]></data>
-	{foreach from=$comment.replies_info.replies item=comment}
-		{include file='tiki-export_comment_xml.tpl'}
+	{*FIXME*}
+	{foreach from=$comment.replies_info.replies item=com}
+		{include file='tiki-export_comment_xml.tpl' comment=com}
 	{/foreach}
 </comment>

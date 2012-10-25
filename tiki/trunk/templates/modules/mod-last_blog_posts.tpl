@@ -1,4 +1,4 @@
-{* $Id: mod-last_blog_posts.tpl 28453 2010-08-11 16:33:38Z Jyhem $ *}
+{* $Id: mod-last_blog_posts.tpl 41653 2012-05-31 13:07:47Z xavidp $ *}
 {tikimodule error=$module_params.error title=$tpl_module_title name="last_blog_posts" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {modules_list list=$modLastBlogPosts nonums=$nonums}
 	{section name=ix loop=$modLastBlogPosts}
@@ -13,4 +13,7 @@
 		</li>
 	{/section}
 {/modules_list}
+{if ($tiki_p_blog_post eq 'y' or $tiki_p_blog_admin eq 'y')}
+	<p><a href="tiki-blog_post.php"><img src="img/icons/add.png" alt="" /> {tr}Add Post{/tr}</a></p>
+{/if}
 {/tikimodule}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_perm.php 25256 2010-02-16 13:02:18Z changi67 $
+// $Id: debug-command_perm.php 40130 2012-03-12 21:26:01Z pkdille $
 
 /**
  * \brief Show current permissions in a convenient way
@@ -17,36 +17,41 @@ require_once ('lib/debug/debugger-ext.php');
 class DbgPermissions extends DebuggerCommand
 {
 	/// \b Must have function to announce command name in debugger console
-	function name() {
+	function name()
+	{
 		return 'perm';
 	}
 
 	/// \b Must have function to provide help to debugger console
-	function description() {
+	function description()
+	{
 		return 'Show current permissions in a convenient way';
 	}
 
 	/// \b Must have function to provide help to debugger console
-	function syntax() {
+	function syntax()
+	{
 		return 'perm [partial-name]';
 	}
 
 	/// \b Must have function to show example of usage of given command
-	function example() {
+	function example()
+	{
 		return 'perm' . "\n" . 'perm admin' . "\n" . 'perm .*_comments$';
 	}
 
 	/// Execute command with given set of arguments.
-	function execute($params) {
+	function execute($params)
+	{
 		$this->set_result_type(TPL_RESULT);
 
 		$this->set_result_tpl('debug/tiki-debug_permissions.tpl');
 		// Is regex to match against var name given?
-		$p = explode(" ", trim($params));
+		$p = explode(' ', trim($params));
 		$mask = count($p) > 0 ? str_replace('$', '', trim($p[0])) : '';
 		// Get list of all vars
 		global $smarty;
-		$tpl_vars = $smarty->get_template_vars();
+		$tpl_vars = $smarty->getTemplateVars();
 		// Get descriptions for all permissions
 		global $userlib;
 		$pd = $userlib->get_permissions();
@@ -73,6 +78,7 @@ class DbgPermissions extends DebuggerCommand
 }
 
 /// Class factory to create instances of defined commands
-function dbg_command_factory_perm() {
+function dbg_command_factory_perm()
+{
 	return new DbgPermissions();
 }

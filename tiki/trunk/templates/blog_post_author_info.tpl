@@ -1,4 +1,4 @@
-{* $Id: blog_post_author_info.tpl 29083 2010-09-09 21:17:30Z Jyhem $ *}
+{* $Id: blog_post_author_info.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div class="author_info">
 	{if $blog_data.use_author eq 'y' || $blog_data.add_date eq 'y'}
 		{tr}Published {/tr}

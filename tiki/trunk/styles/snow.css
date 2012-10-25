@@ -1,4 +1,4 @@
-/* $Id: snow.css 30238 2010-10-23 04:31:14Z chibaguy $ The Snow theme for TikiWiki CMS/Groupware is an original
+/* $Id: snow.css 42454 2012-07-23 12:21:09Z chibaguy $ The Snow theme for Tiki Wiki CMS Groupware is an original
 	theme released under the LGPL license by author and maintainer
 	Gary Cunningham-Lee (http://zukakakina.com). Visit zukakakina.com or themes.tiki.org for
 	updates and other information about this theme.
@@ -14,13 +14,15 @@
 body {
 	background: #b1c1db url(snow/flakesptn.jpg) repeat;
 	color: #000;
-	font: 76%/1.4em arial, helvetica, verdana, sans-serif !important}
+	font: 76% arial, helvetica, verdana, sans-serif;
+	line-height: 1.4;
+}
 
 *:first-child+html body {font-size: 74% !important}
 
  /***** Layout (overrides layout.css;
 		also styling of page layout divs)  *****/
-#header {text-align: left}
+.header {text-align: left}
 #middle {text-align: left}
 
 #c1c2 {
@@ -29,20 +31,16 @@ body {
 	
 #col1 {background: url(snow/flakesptn3.jpg)}
 
-body.fullscreen #col1 {
-	margin-left: 30px !important;
-	margin-right: 30px !important}
-
 #c1c2 #wrapper #col1.marginleft {margin-left: 230px}
 #c1c2 #wrapper #col1.marginright {margin-right: 230px}
 
 #c1c2 #col2 {
 	width: 230px;
-	text-align: center}
+}
 
 #c1c2 #col2 .content {
 	overflow: visible;
-	text-align: center}
+}
 
 #col3 {
 	margin-left: -230px;
@@ -51,7 +49,7 @@ body.fullscreen #col1 {
 
 #col3 .content {
 	margin: 0;
-	text-align: center}
+}
 
 #footer {
  	text-align: center;
@@ -76,9 +74,9 @@ dt {font-weight: bold}
 
 h1, h2, h3, h4, h5 {
 	font-weight: bold;
-	color: #6c7b8c}
-	
-h1 {font-size: 1.7em}
+	color: #6c7b8c;
+	line-height: 1.1;
+}
 
 h1 {
 	font-size: 1.8em;
@@ -86,8 +84,6 @@ h1 {
 	margin-top: 0;
 	margin-bottom: 0}
 	
-*:first-child+html body h1 {}
-
 h2 {font-size: 1.6em}
 h3 {font-size: 1.5em}
 h4 {font-size: 1.3em}
@@ -95,12 +91,9 @@ h5 {font-size: 1em}
 h6 {font-size: 1em}
 
 hr {
-	width: 100%;
-	height: 1px;
 	background: #aaa;
-	border-width: 0;
-	padding: 0;
-	color: #6c7b8c}
+	color: #6c7b8c;
+}
 
 fieldset {
 	border: solid 1px #a9a9a9;
@@ -109,20 +102,12 @@ fieldset {
 form {color: black}
 legend {color: #000}
 
-
 .button a,
 .button a:visited,
 button,
 .button input,
 .submitbutton,
-.calbuttonBox a {
-	background: url(snow/pagetitle-bg.jpg) repeat-x;
-	font-weight: normal;
-	border: 1px solid #3f3f3f;
-	border-top: 1px solid #818181;
-	margin: 2px;
-	padding: 2px 4px}
-
+.calbuttonBox a,
 input[type="file"],
 input[type="reset"],
 input[type="submit"] {
@@ -132,13 +117,17 @@ input[type="submit"] {
 	border-top: 1px solid #818181;
 	margin: 2px;
 	padding: 2px 4px;
-/*	border: 1px solid #788596;*/}
+}
 
 .button a:hover,
 button a:hover,
+button:hover,
 .button input:hover,
 .submitbutton:hover,
-.calbuttonBox a:hover
+.calbuttonBox a:hover,
+input[type="file"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover,
 .button input:hover,
 .submitbutton:hover {
 	border-top: 1px solid #a9a9a9;
@@ -146,21 +135,10 @@ button a:hover,
 	border-right: 1px solid #696969;
 	border-bottom: 1px solid #696969;
 	background: url(snow/pagetitle-bg.jpg) repeat-x bottom;
-}
-
-input[type="file"]:hover,
-input[type="reset"]:hover,
-input[type="submit"]:hover  {
-	border-top: 1px solid #a9a9a9;
-	border-left: 1px solid #a9a9a9;
-	border-right: 1px solid #696969;
-	border-bottom: 1px solid #696969;
-	background: url(snow/pagetitle-bg.jpg) repeat-x bottom;
 	margin: 2px;
 	padding: 2px 4px;
+	text-decoration: none;
 }
-
-* html .wikitopline select {font-size: .9em}
 
 input[type="text"],
 input[type="password"] {
@@ -171,14 +149,10 @@ input[type="password"] {
 	width: 120px;
 	cursor: text}
 
-select {
-	font-weight: normal;
-	border: 1px solid #788596;
-}
-
 input[type=wikiaction] {margin-bottom: 2px}
 
 select {
+	font-weight: normal;
 	border: 1px solid #6c7b8c;
 	color: #000; 
 	background: #ECEEF2;
@@ -195,7 +169,6 @@ textarea {
 
 p {color: #000}
 small {font-size: 0.8em}
-label {color: #000}
 
 ul {
 	list-style-type: square;
@@ -204,21 +177,48 @@ ul {
 
 
 /***** Site Header & Identity *****/
-#header-top {min-height: 102px}
-* html #header-top {height: 102px}
-#sitead.floatright {padding-right: 100px}
-#sitead.floatleft {padding-left: 100px}
+/* Enable header and footer content to widen when middle has wide content. */ 
+body.fixed_width .fixedwidth .fixedwidth {
+	width: 100%;
+	padding: 0;
+}
 
-#siteloginbar {
-	bottom: 2px;
-	right: 6px;
-	font-size: 95%}
+#top_modules {min-height: 45px}
+
+#top_modules .box-login_box {
+	position: absolute;
+	right: 20px;
+	bottom: 0;
+	color: #f5f5f5;
+}
 	
 #siteloginbar_popup .cssmenu_horiz li ul {
 	margin-top: -8px;	
 }
 
-#bannertopright {padding-right: 1em}
+#top_modules .module.secondary_site_menu {
+	position: absolute;
+	top: 0;
+	right: 30px;
+}
+
+#top_modules .secondary_site_menu .cssmenu_horiz li ul {
+	margin-top: -10px;
+}
+
+#top_modules .secondary_site_menu .cssmenu_horiz li ul ul {
+	margin-top: 0;
+}
+
+#top_modules .box-logo {
+	float: left;
+	margin: 10px;
+}
+
+#top_modules #sitetitles {
+	margin: 10% 20px;
+	padding-left: 15px;
+}
 
 #sitetitle,
 #sitesubtitle {
@@ -226,19 +226,18 @@ ul {
 	color: #714952;
 	font-weight: 400;
 	letter-spacing: -.5px;
-	margin: 0}
+}
 
 #sitetitle {
 	font-size: 2.4em;
-	padding-top: 20px;
-	margin-left: 20px}
+}
 
 #sitesubtitle {
 	font-size: 1.6em;
-	margin-left: 20px}
+}
 
-#header a,
-#header a:visited {
+.header_fixedwidth .header a,
+.header_fixedwidth .header a:visited {
 	color: #714952;
 	text-decoration: none}
 
@@ -246,21 +245,22 @@ ul {
 	background:  url(snow/pagetitle-bg.jpg) repeat-x;
 	height: 35px;
 	margin-bottom: 5px}
-	
-* html #tiki-top {font-size: 11px}
-#tiki-top table {width: auto}
 
-#sitesearchbar {
-	margin-right: 10px;
-	margin-top: 6px}
+#topbar_modules .box-search {
+	position: absolute;
+	top: 0;
+	right: 20px;
+	height: 34px;
+	line-height: 34px;
+}
 
 /****** Menus, Links ******/
 /** CSS (suckerfish) menus **/
 
-/* default link padding */
 .cssmenu_horiz a,
 .cssmenu_vert a {
 	padding: .3em 1em;
+	font-size: 12px;
 }
 
 .cssmenu_horiz a,
@@ -274,13 +274,7 @@ ul {
 .cssmenu_horiz a:hover,
 .cssmenu_vert a:hover {
 	color: #6c7b8c;
-	text-decoration: none}
-}
-
-/* typography, colors */
-.cssmenu_horiz a,
-.cssmenu_vert a {
-	font-size: 12px;
+	text-decoration: none;
 }
 
 .cssmenu_vert li ul li,
@@ -359,100 +353,9 @@ ul {
 	top: .3em;
 }
 
-/** PHP Layers Menus **/
-.horbar {
-	margin-left: 0;
-	text-align: left} 
-
-.horbaritem {
-	font-size: 1.2em;
-	white-space: nowrap}
-
-.horbaritem a,
-.horbaritem a:link,
-.horbaritem a:visited {
-	text-decoration: none;
-	font-size: 1em;
-	font-weight: bold;
-	color: #393e51;
-	padding: 9px 3px 9px 1em;
-	border-right: 1px solid #6A6A6A} 
-
-.horbaritem a:hover {
-	color: #506A5C;
-	font-weight: bold;
-	text-decoration: none} 
-
-* html .horbaritem a {font-size: .8em}
-
-.mdksubmenu {
-	left: 20px;
-	width: 125px;
-	border: 1px solid #6A6A6A;	
-	background-image: url(snow/flakesptn2.jpg)}
-
-.mdksubmenu table {width: auto} 
-.mdksubframe {display: block} 
-
-.mdkitem {
-	width: 125px;
-	font-size: 1em}
-
-.mdkitem a {
-	color: #393e51;
-	font-size: 1em;
-	padding: 5px 2px 5px 8px} 
-
-.mdkitem a:link {
-	font-weight: normal;
-	text-decoration: none} 
-
-.mdkitem a:visited {text-decoration: none} 
-
-.mdkitem a:hover {
-	background-image: url(snow/flakesptn.jpg);
-	text-decoration: none} 
-
-.mdksubframe .mdkitem {font-size: 1em}
-
-.mdksubframe .mdkitem a:hover {
-	text-decoration: none;
-	color: #303030}
-
-.mdkverbar .mdkitem a, 
-.box .mdkitem a {/*vertical menu subitems */
-	padding: 4px 2px 2px 8px}
-
-.box .mdksubframe .mdkitem {
-	margin-left: 0;
-	padding-left: 0}
-
-.phplmnormal,
-a.phplmnormal:hover,
-a.phplm:link,
-a.phplm:visited,
-a.phplm:hover,
-a.phplm:active {
-	font-family: arial, helvetica, verdana, sans-serif;
-	color: #393e51;
-	font-weight: bold;
-	text-decoration: none}
-
-a.phplm:hover {
-	color: #6c7b8c;
-	text-decoration: underline;
-	background: none}
-
-a.phplmselected:link,
-a.phplmselected:visited,
-a.phplmselected:hover,
-a.phplmselected:active {
-	font: 100% Verdana, Tahoma, Arial, sans-serif;
-	color: #aaa;
-	text-decoration: underline;
-	font-weight: normal}
-
-a.phplmselected:hover {color: #aaa}
+.secondary_site_menu .cssmenu_horiz li a .sf-sub-indicator {
+	bottom: .5em;
+}
 
 /** Links in other menus **/
 
@@ -501,7 +404,8 @@ h3.box-title {
 	color: #393e51;
 	font-size: 120%;
 	overflow: hidden;
-	border-bottom: 1px solid #6c7b8c;	
+	border-bottom: 1px solid #6c7b8c;
+	line-height: normal;	
 }	
 	
 #col2 h3.box-title,
@@ -561,29 +465,20 @@ h3.box-title {
 	width: 48%;
  }
 
-.thirdfloat .box,
-.wikitext .thirdfloat .box {
-	width: 33%;
-}
-
-.quarterfloat .box,
-.wikitext .quarterfloat .box {
-	width: 24%;
-}
-
 /** Other boxes **/
 .wikitext .cbox {
 	overflow: hidden;
 	border: 2px solid #a1adc7;
 	padding: 2px}
 	
-.cbox-title {}
-.cbox-data {}
-
 .rbox {margin: 3px}
 
 .rbox-title,
 .rbox-data {background: #e7f2f4}
+
+.rbox-title {
+	margin-bottom: -.45em;
+}
 
 .simplebox {
 	overflow: hidden;
@@ -618,8 +513,6 @@ tr.odd {
 	background: #F7F9FA;
 	border-collapse: collapse;
 	color: #393e51}
-
-tr.odd:hover {}
 
 td.even,
 tr.even {
@@ -694,6 +587,7 @@ td.heading,
 .tabmark a:hover {
 	color: black;
 	background: #b1c1db url(snow/flakesptn3.jpg);
+	text-decoration: none;
 }
 	
 .tabactive {
@@ -702,15 +596,13 @@ td.heading,
 	padding-bottom: 1px;
 	background: #b1c1db url(snow/flakesptn3.jpg);
 }
-/*
-.tabinactive {
-	border: solid 1px #bbb !important;
-	border-bottom: 1px solid #ddd !important;
-}*/
 
 .admin #content1 .tabcontent .cbox {background: transparent}
 
-
+.statuson {
+	background: url(snow/flakesptn.jpg);
+	border: 1px inset #6c7b8c;	
+}
 
 /***** Wiki *****/
 body.tiki_wiki #c1c2 #wrapper #col1 > .content {
@@ -745,8 +637,7 @@ a.pagetitle:hover {
 .wikitopline {
 	display: block;
 	position: relative;
-	/*top: -56px;
-	z-index: 1*/}
+	}
 	
 .wikitopline .content {
 	background: transparent !important;
@@ -764,11 +655,7 @@ a.pagetitle:hover {
 	float: right;
 	font-size: small}
 
-.catpaths {} /* <-- Check (andreas09.css) ?? */
-.categpath {}
-
 .wikitext {
-	/*background: url(snow/pagetitle-bg.jpg) repeat-x;*/
 	line-height: 1.5em;
 	padding: .5em}
 
@@ -777,10 +664,6 @@ a.pagetitle:hover {
 	padding: 0}
 
 .wikitext h2 {margin-bottom: 10px}
-
-.wikitext ul li {} 
-.wikitext ul li ul li {}
-.wikitext ol {}
 
 .titlebar {
 	padding: 0.1em;
@@ -806,7 +689,7 @@ a.pagetitle:hover {
 
 ul.floatleft {
 	display: block;
-	list-style: 0;
+	list-style: none;
 	padding: 0;
 	text-align: left;
 	height: 20px;
@@ -828,26 +711,13 @@ ul.floatleft li {
 	white-space: nowrap;
 	font-weight: normal}
 
-.linkbut:hover {}
-.cache {}
-.cachedpage {}
-.wikicache, .wikicache:visited {}
-.wikicache:hover {}
-.wiki {}
-.wikinew {}
-.wiki-edithelp {display: none}
-#wikihelp-tab table{}
-#wikihelp-tab table td {padding: 2px}
-textarea.wikiedit {}
-p.editdate {}
-.wiki-edithelp {}
-img.externallink {}
+.wiki-edithelp {
+	display: none;
+}
 
-/* Needed esp. for light-on-dark theme */
-.quicktag {}
-.quicktag img,
-#wikihelp-tab td img {}
-#helptool {}
+#wikihelp-tab table td {
+padding: 2px;
+}
 
 /* Wiki plugins */
 
@@ -866,7 +736,7 @@ img.externallink {}
 	margin: 4px;
 	border: 1px dashed #ADACAF;
 	overflow: auto; 
-   width: 500px}
+}
 
 .codecaption {
 	font-size: 90%;
@@ -901,8 +771,6 @@ img.externallink {}
 #tocnavicons {float: left}
 #tocnavaddpage {float: right}
 #tocnavlinks {clear: both}
-.fancytoclevel {}
-li.toclevel {}
 
 .toc {
 	padding-left: 2em;
@@ -946,11 +814,6 @@ body.tiki_cms #tiki-center > h1 {
 	text-indent: 34px;
 	padding-top: 4px}
 	
-/*
-
-html > body .articletitle {
-	text-indent: 38px}*/
-
 .titleb {
 	float: right;
 	font-size: 1.0em;
@@ -962,10 +825,10 @@ html > body .articletitle {
 .articleheading {
 	margin-top: 6px;
 	padding: 20px 5px 6px}
-/* From han.css - Check ?? */.articleheading table {
-	width: auto}
 
-.articleheadingtext {}
+/* From han.css - Check ?? */
+.articleheading table {
+	width: auto}
 
 img.topicimage,
 img.articleimagenofloat,
@@ -985,8 +848,6 @@ img.articleimage {
 	clear: right;
 	padding: 2px 0;
 	margin-bottom: 10px}
-
-.articletrailer {}
 
 .articletrailer .wikitopline {float: right} 
  
@@ -1014,7 +875,8 @@ img.articleimage {
 	text-align: center;
 	padding: 3px;
 	line-height: 150%;
-	text-transform: 0}
+	text-transform: none;
+}
 
 a.blogt:hover {
 	color: #FFF;
@@ -1141,9 +1003,18 @@ a.blogt:hover {
 	background: #C7D0D9;
 	border: 1px solid #999}
 
-.forum_actions .headers .infos {font-size: smaller}
-input#comments-title {font-size: 1.1em; width: 300px}
-.subcomment {margin-left: 10px}
+.forum_actions .headers .infos {
+	font-size: smaller;
+}
+
+input#comments-title {
+	font-size: 1.1em;
+	width: 300px;
+}
+
+.subcomment {
+	margin-left: 10px;
+}
 
 .commentsedithelp {
 	background: #ffcfcf;
@@ -1175,9 +1046,9 @@ input#comments-title {font-size: 1.1em; width: 300px}
 
 textarea.tshoutbox{
 	font-size: .95em;
-	width: 162px}
+	width: 90%;
+}
 
-.wiki-table {}
 .wiki-tr-a td {border: 0}
 .wiki-tr-b td {border: 0}
 
@@ -1267,7 +1138,9 @@ Caltrack a:visited {color: #00BD02}
 
 .calfocus {font-size: 90%}
 
-.calfocuson {font-size: 100%}
+.calfocuson {
+	font-size: 100%;
+}
 
 .calprio1 a,
 .calprio2 a,
@@ -1309,13 +1182,17 @@ Caltrack a:visited {color: #00BD02}
 
 #caltable .calfocus a,
 #caltable .calfocuson a {
-  text-decoration:none}
+  text-decoration:none;
+}
 
 .calinput {background: #3f3f3f}
 .calfocuson + .calcontent {background: #f8fafb}
 .days {color: #D8D8D8}
 #caltable .weeks {color: #D8D8D8}
-.addevent {padding: 0 5px; float: right}
+.addevent {
+	padding: 0 5px;
+	float: right;
+}
 * html .addevent {padding: 0}
 .calodd, .caleven {border: 1px solid #999}
 .calodd {background: #f7f9fa}
@@ -1332,10 +1209,6 @@ Caltrack a:visited {color: #00BD02}
 
 #calscreen .calfocuson {
 	background: #cde4f3;
-}
-
-.calfocuson {
-	font-size: 100%;
 }
 
 .calfocuson a {

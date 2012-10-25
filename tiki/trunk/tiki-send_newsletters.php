@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-send_newsletters.php 29969 2010-10-12 17:39:45Z jonnybradley $
+// $Id: tiki-send_newsletters.php 42097 2012-06-26 14:36:09Z jonnybradley $
 
 $section = 'newsletters';
 require_once ('tiki-setup.php');
 @ini_set('max_execution_time', 0); //will not work if safe_mode is on
 $prefs['feature_wiki_protect_email'] = 'n'; //not to alter the email
 include_once ('lib/newsletters/nllib.php');
-$auto_query_args = array('sort_mode', 'offset', 'find', 'nlId', 'cookietab');
+$auto_query_args = array('sort_mode', 'offset', 'find', 'nlId', 'cookietab', 'editionId');
 
 $access->check_feature('feature_newsletters');
 $access->check_permission('tiki_p_send_newsletters');
@@ -34,11 +34,12 @@ if ( empty($_REQUEST["sendingUniqId"]) ) {
 	$smarty->assign('sendingUniqId', $sendingUniqId);
 }
 
-if(!isset($_REQUEST['cookietab']) || isset($_REQUEST['editionId'])) {
+if (!isset($_REQUEST['cookietab']) || isset($_REQUEST['editionId'])) {
 	$_REQUEST['cookietab'] = 1;
 }
 $cookietab = $_REQUEST['cookietab'];
 $smarty->assign('newsletters', $newsletters["data"]);
+$smarty->assign('absurl', 'y');
 if ($_REQUEST["nlId"]) {
 	$nl_info = $nllib->get_newsletter($_REQUEST["nlId"]);
 	if (!isset($_REQUEST["editionId"])) $_REQUEST["editionId"] = 0;
@@ -56,6 +57,16 @@ if ($_REQUEST["nlId"]) {
 		$info['wysiwyg'] = 'n';
 	}
 	$smarty->assign_by_ref('info', $info);
+
+	if ($prefs['newsletter_external_client'] == 'y') {
+		$subscribers = $nllib->get_all_subscribers($_REQUEST["nlId"], "");
+		$email_list = array();
+		foreach ($subscribers as $subscriber) {
+			$email_list[] = $subscriber['email'];
+		}
+
+		$smarty->assign('mailto_link', 'mailto:' . $prefs['sender_email'] . '?bcc=' . urlencode(implode(',', $email_list)));
+	}
 } else {
 	//No newsletter selected -> Check if the textarea for the first has to be displayed
 	$smarty->assign('allowTxt', $newsletters['data'][0]['allowTxt']);
@@ -134,49 +145,72 @@ if (isset($_REQUEST['mode_normal']) && $_REQUEST['mode_normal']=='y') {
 	$info["data"] = $editlib->parseToWysiwyg($_REQUEST["data"]);
 }
 
+if (isset($_REQUEST['is_html'])) {
+	$info['is_html'] = !empty($_REQUEST['is_html']);
+	$_REQUEST['is_html'] = 'on';
+} else {	// guess html based on wysiwyg mode
+	$info['is_html'] =  $info['wysiwyg'] === 'y' && $prefs['wysiwyg_htmltowiki'] !== 'y';
+	$_REQUEST['is_html'] = $info['is_html'] ? 'on' : '';
+}
+
 if (isset($_REQUEST["templateId"]) && $_REQUEST["templateId"] > 0 && (!isset($_REQUEST['previousTemplateId']) || $_REQUEST['previousTemplateId'] != $_REQUEST['templateId'])) {
 	global $templateslib; require_once 'lib/templates/templateslib.php';
 	$template_data = $templateslib->get_template($_REQUEST["templateId"]);
 	$_REQUEST["data"] = $template_data["content"];
-	if (isset($_SESSION['wysiwyg']) && $_SESSION['wysiwyg'] == 'y') {
+	if ($templateslib->template_is_in_section($_REQUEST['templateId'], 'wiki_html') ) {
+		$_REQUEST['is_html'] = 'on';
+		$_REQUEST['wysiwyg'] ='y';
+	}
+	if (isset($_SESSION['wysiwyg']) && $_SESSION['wysiwyg'] == 'y' || $_REQUEST['wysiwyg'] === 'y') {
 		$_REQUEST['data'] = $tikilib->parse_data($_REQUEST['data'], array('is_html'=>true, 'absolute_links' => true, 'suppress_icons' => true));
 	}
 	$_REQUEST["preview"] = 1;
 	$smarty->assign("templateId", $_REQUEST["templateId"]);
 }
-$newsletterfiles_post = isset($_REQUEST['newsletterfile']) && is_array($_REQUEST['newsletterfile']) ? $_REQUEST['newsletterfile'] : array();
 $newsletterfiles = array();
-foreach($newsletterfiles_post as $k => $id) {
-	$f = array();
-	if ((strlen($id) == 32) && preg_match('/^[0-9a-f]{32}$/', $id)) { // this is a valid md5 hash, so the file was just saved at preview time
-		$fpath = $prefs['tmpDir'] . '/newsletterfile-preview-' . $id;
-		$f = unserialize(file_get_contents($fpath . '.infos'));
-		$f['path'] = $fpath;
-		$newsletterfiles[] = $f;
-	} else if ((int)$_REQUEST['nlId'] > 0) {
-		foreach($info['files'] as $f) {
-			if ($f['id'] == (int)$id) {
-				$newsletterfiles[] = $f;
-				break;
+if (isset($_REQUEST['newsletterfile'])) {
+	$newsletterfiles_post = isset($_REQUEST['newsletterfile']) && is_array($_REQUEST['newsletterfile']) ? $_REQUEST['newsletterfile'] : array();
+	foreach ($newsletterfiles_post as $k => $id) {
+		$f = array();
+		if ((strlen($id) == 32) && preg_match('/^[0-9a-f]{32}$/', $id)) { // this is a valid md5 hash, so the file was just saved at preview time
+			$fpath = $prefs['tmpDir'] . '/newsletterfile-' . $id;
+			$f = unserialize(file_get_contents($fpath . '.infos'));
+			$f['path'] = $fpath;
+			$newsletterfiles[] = $f;
+		} else if ((int)$_REQUEST['nlId'] > 0) {
+			foreach ($info['files'] as $f) {
+				if ($f['id'] == (int)$id) {
+					$newsletterfiles[] = $f;
+					break;
+				}
 			}
 		}
 	}
+} else {
+	$newsletterfiles = $info['files'];
 }
 if (!empty($_FILES) && !empty($_FILES['newsletterfile'])) {
-	foreach($_FILES['newsletterfile']['name'] as $i => $v) {
+	foreach ($_FILES['newsletterfile']['name'] as $i => $v) {
 		if ($_FILES['newsletterfile']['error'][$i] == UPLOAD_ERR_OK) {
-			$newsletterfiles[] = array('name' => $_FILES['newsletterfile']['name'][$i], 'type' => $_FILES['newsletterfile']['type'][$i], 'path' => $_FILES['newsletterfile']['tmp_name'][$i], 'error' => $_FILES['newsletterfile']['error'][$i], 'size' => $_FILES['newsletterfile']['size'][$i], 'savestate' => 'phptmp');
+			$newsletterfiles[] = array(
+				'name' => $_FILES['newsletterfile']['name'][$i],
+				'type' => $_FILES['newsletterfile']['type'][$i],
+				'path' => $_FILES['newsletterfile']['tmp_name'][$i],
+				'error' => $_FILES['newsletterfile']['error'][$i],
+				'size' => $_FILES['newsletterfile']['size'][$i],
+				'savestate' => 'phptmp',
+			);
 		} else {
-			$smarty->assign('upload_err_msg', tra('A problem occured during file uploading') . '<br />' . tra('File which was causing trouble was at rank') . '&nbsp;' . ($i + 1) . '<br />' . tra('The error was:') . '&nbsp;<strong>' . $tikilib->uploaded_file_error($_FILES['newsletterfile']['error'][$i]) . '</strong>');
+			$smarty->assign('upload_err_msg', tra('A problem occurred during file uploading') . '<br />' . tra('File which was causing trouble was at rank') . '&nbsp;' . ($i + 1) . '<br />' . tra('The error was:') . '&nbsp;<strong>' . $tikilib->uploaded_file_error($_FILES['newsletterfile']['error'][$i]) . '</strong>');
 		}
 	}
 }
-$info['files'] = $newsletterfiles;
-foreach($info['files'] as $k => $newsletterfile) {
+$_REQUEST['files'] = $info['files'] = $newsletterfiles;
+foreach ($info['files'] as $k => $newsletterfile) {
 	if ($newsletterfile['savestate'] == 'phptmp') {
 		// move it to temp
 		$tmpfnamekey = md5(rand() . time() . $newsletterfile['path'] . $newsletterfile['name'] . $newsletterfile['type']);
-		$tmpfname = $prefs['tmpDir'] . '/newsletterfile-preview-' . $tmpfnamekey;
+		$tmpfname = $prefs['tmpDir'] . '/newsletterfile-' . $tmpfnamekey;
 		if (move_uploaded_file($newsletterfile['path'], $tmpfname)) {
 			$info['files'][$k]['savestate'] = 'tikitemp';
 			$info['files'][$k]['path'] = $tmpfname;
@@ -217,7 +251,17 @@ if (isset($_REQUEST["preview"])) {
 		}
 		$smarty->assign("usedTpl", $_REQUEST["usedTpl"]);
 	} else {
-		$info["dataparsed"] = "<html><body>" . (($info['wikiparse'] == 'y') ? $tikilib->parse_data($info["data"], array('absolute_links' => true, 'suppress_icons' => true)) : $info['data']) . "</body></html>";
+		$info['dataparsed'] = '<html><body>';
+		if ($info['wikiparse'] === 'y') {
+			$data = $info['data'];
+			$info['dataparsed'] .= $tikilib->parse_data($data, array('absolute_links' => true, 'suppress_icons' => true,'is_html' => $info['is_html']));
+			if (empty($info['data'])) {
+				$info['data'] = $data;		// somehow on massive pages this gets reset somewhere inside parse_data
+			}
+		} else {
+			$info['dataparsed'] .= $info['data'];
+		}
+		$info['dataparsed'] .= '</body></html>';
 	}
 	if (!empty($_REQUEST['replyto'])) {
 		$smarty->assign('replyto', $_REQUEST['replyto']);
@@ -225,7 +269,7 @@ if (isset($_REQUEST["preview"])) {
 	$previewdata = $info['dataparsed'];
 	if ($nl_info["allowArticleClip"] == 'y' && $nl_info["autoArticleClip"] == 'y') {
 		$articleClip = $nllib->clip_articles($_REQUEST["nlId"]);
-		$txtArticleClip = generateTxtVersion($articleClip);
+		$txtArticleClip = $nllib->generateTxtVersion($articleClip);
 		$info['datatxt'] = str_replace("~~~articleclip~~~", $txtArticleClip, $info['datatxt']);
 		$previewdata = str_replace("~~~articleclip~~~", $articleClip, $previewdata);
 	}
@@ -236,10 +280,10 @@ $smarty->assign('presend', 'n');
 if (isset($_REQUEST["save"])) {
 	check_ticket('send-newsletter');
 	// Now send the newsletter to all the email addresses and save it in sent_newsletters
+	$info['datatxt'] = $_REQUEST['datatxt'];
 	$smarty->assign('presend', 'y');
-	$subscribers = $nllib->get_all_subscribers($_REQUEST["nlId"], "");
+	$subscribers = isset($subscribers) ? $subscribers : $nllib->get_all_subscribers($_REQUEST["nlId"], "");
 	$smarty->assign('nlId', $_REQUEST["nlId"]);
-	$smarty->assign('data', $_REQUEST["data"]);
 	$smarty->assign('datatxt', $_REQUEST["datatxt"]);
 	$parsed = '';
 	if (isset($_REQUEST['wikiparse']) && $_REQUEST['wikiparse'] == 'on') {
@@ -249,12 +293,13 @@ if (isset($_REQUEST["save"])) {
 	} else {
 		$wikiparse = 'n';
 	}
+	$info['is_html'] = !empty($_REQUEST['is_html']);
 	if (!empty($_REQUEST["usedTpl"])) {
 		$smarty->assign('dataparsed', (($wikiparse == 'y') ? $tikilib->parse_data($_REQUEST["data"], array('absolute_links' => true, 'suppress_icons' => true)) : $_REQUEST['data']));
 		$smarty->assign('subject', $_REQUEST["subject"]);
 		$parsed = $smarty->fetch("newsletters/" . $_REQUEST["usedTpl"]);
 	} else {
-		$parsed = ($wikiparse == 'y') ? $tikilib->parse_data($_REQUEST["data"], array('absolute_links' => true, 'suppress_icons' => true)) : $_REQUEST['data'];
+		$parsed = ($wikiparse == 'y') ? $tikilib->parse_data($_REQUEST["data"], array('is_html' => (isset($_REQUEST['wysiwyg']) && $_REQUEST['wysiwyg']=='y')||$info['is_html']? 1: 0, 'absolute_links' => true, 'suppress_icons' => true)) : $_REQUEST['data'];
 	}
 	if (empty($parsed) && !empty($_REQUEST['datatxt'])) {
 		$parsed = $_REQUEST['datatxt'];
@@ -265,13 +310,14 @@ if (isset($_REQUEST["save"])) {
 	$previewdata = $parsed;
 	if ($nl_info["allowArticleClip"] == 'y' && $nl_info["autoArticleClip"] == 'y') {
 		$articleClip = $nllib->clip_articles($_REQUEST["nlId"]);
-		$txtArticleClip = generateTxtVersion($articleClip);
+		$txtArticleClip = $nllib->generateTxtVersion($articleClip, $parsed);
 		$info['datatxt'] = str_replace("~~~articleclip~~~", $txtArticleClip, $info['datatxt']);
 		$previewdata = str_replace("~~~articleclip~~~", $articleClip, $previewdata);
 	}
 	$smarty->assign('previewdata', $previewdata);
 	$smarty->assign('dataparsed', $parsed);
 	$smarty->assign('subject', $_REQUEST["subject"]);
+	$smarty->assign('data', $_REQUEST["data"]);
 	$cant = count($subscribers);
 	$smarty->assign('subscribers', $cant);
 	$smarty->assign_by_ref('subscribers_list', $subscribers);
@@ -281,17 +327,19 @@ if (isset($_REQUEST["save"])) {
 	}
 }
 $smarty->assign('emited', 'n');
-if (!empty($_REQUEST['datatxt'])) { $txt = $_REQUEST['datatxt']; }
+if (!empty($_REQUEST['datatxt'])) { 
+	$txt = $_REQUEST['datatxt']; 
+}
 if (empty($txt) && !empty($_REQUEST["data"])) {
 	//No txt message is explicitely provided -> Create one with the html Version & remove Wiki tags
 	$txt = $_REQUEST["data"];
-	$txt = generateTxtVersion($txt);
+	$txt = $nllib->generateTxtVersion($txt);
 	$info["datatxt"] = $txt;
 	$smarty->assign('datatxt', $txt);
 	if ($nl_info["allowArticleClip"] == 'y' && $nl_info["autoArticleClip"] == 'y') {
 		if (!isset($txtArticleClip)) {
 			$articleClip = $nllib->clip_articles($_REQUEST["nlId"]);
-			$txtArticleClip = generateTxtVersion($articleClip);
+			$txtArticleClip = $nllib->generateTxtVersion($articleClip);
 		}
 		$info['datatxt'] = str_replace("~~~articleclip~~~", $txtArticleClip, $info['datatxt']);
 	}
@@ -302,6 +350,7 @@ if (!empty($_REQUEST['resendEditionId'])) {
 		$_REQUEST['subject'] = $info['subject'];
 		$_REQUEST['datatxt'] = $info['datatxt'];
 		$_REQUEST['wysiwyg'] = $info['wysiwyg'];
+		$_REQUEST['is_html'] = $info['is_html'];
 		$_REQUEST['dataparsed'] = $info['data'];
 		$_REQUEST['editionId'] = $nllib->replace_edition($nl_info['nlId'], $info['subject'], $info['data'], 0, 0, false, $info['datatxt'], $info['files'], $info['wysiwyg']);
 		$resend = 'y';
@@ -329,23 +378,23 @@ if ( isset($_REQUEST["send"]) && ! empty($_REQUEST["sendingUniqId"]) || $resend 
 		} else {
 			$_SESSION["sendingUniqIds"][ $_REQUEST["sendingUniqId"] ] = 1;
 		}
-	} else {
-		
 	}
+	
+	$_REQUEST['begin'] = true;
 	$nllib->send($nl_info, $_REQUEST, true, $sent, $errors, $logFileName);
 
 	$nb_sent = count($sent);
 	$nb_errors = count($errors);
 
-	$msg = '<h4>' . sprintf( tra('Newsletter successfully sent to %s users.'), $nb_sent ) . '</h4>';
+	$msg = '<h4>' . sprintf(tra('Newsletter successfully sent to %s users.'), $nb_sent) . '</h4>';
 	if ( $nb_errors > 0 )
-		$msg .= "\n" . '<font color="red">' . '(' . sprintf( tra('There was %s errors.'), $nb_errors ) . ')' . '</font><br />';
+		$msg .= "\n" . '<font color="red">' . '(' . sprintf(tra('There was %s errors.'), $nb_errors) . ')' . '</font><br />';
 
 	// If logfile exists and if it is reachable from the web browser, add a download link
 	if ( !empty($logFileName) && $logFileName[0] != '/' && $logFileName[0] != '.' )
 		$smarty->assign('downloadLink', $logFileName);
 
-	echo str_replace( "'", "\\'", $msg);
+	echo str_replace("'", "\\'", $msg);
 	echo $smarty->fetch('send_newsletter_footer.tpl');
 
 	$smarty->assign('sent', $nb_sent);
@@ -357,9 +406,16 @@ if ( isset($_REQUEST["send"]) && ! empty($_REQUEST["sendingUniqId"]) || $resend 
 	exit; // Stop here since we are in an iframe and don't want to use smarty display
 }
 
+if (isset($_REQUEST['resume'])) {
+	$edition_info = $nllib->get_edition($_REQUEST['resume']);
+	$nl_info = $nllib->get_newsletter($edition_info['nlId']);
+	$nllib->send($nl_info, $edition_info, true, $sent, $errors, $logFileName);
+	exit;
+}
+
 // Article Clipping
 $articleClip = '';
-if ($nl_info["allowArticleClip"] == 'y' && empty($articleClip)) {
+if (isset($nl_info) && $nl_info["allowArticleClip"] == 'y' && empty($articleClip)) {
 	if ($nl_info["autoArticleClip"] == 'y' || isset($_REQUEST["clipArticles"])) {
 		$articleClip = $nllib->clip_articles($_REQUEST["nlId"]);
 		// prevent clearing of keyed in info if any
@@ -382,13 +438,10 @@ if (isset($_REQUEST["save_only"])) {
 	if (!isset($txt) || empty($_REQUEST['datatxt'])) $txt = "";
 	$smarty->assign('nlId', $_REQUEST['nlId']);
 	$editionId = $nllib->replace_edition($_REQUEST['nlId'], $_REQUEST['subject'], $_REQUEST['data'], -1, $_REQUEST['editionId'], true, $txt, $info['files'], $_REQUEST['wysiwyg']);
-	foreach($info['files'] as $k => $f) {
+	foreach ($info['files'] as $k => $f) {
 		if ($f['savestate'] == 'tikitemp') {
-			$newpath = $prefs['tmpDir'] . '/newsletterfile-' . $f['filename'];
-			rename($f['path'], $newpath);
 			unlink($f['path'] . '.infos');
 			$info['files'][$k]['savestate'] = 'tiki';
-			$info['files'][$k]['path'] = $newpath;
 		}
 	}
 	$info = $nllib->get_edition($editionId);
@@ -476,17 +529,3 @@ $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 $smarty->assign('mid', 'tiki-send_newsletters.tpl');
 $smarty->display("tiki.tpl");
 
-function generateTxtVersion($txt) {
-	//Add line breaks if none before stripping headers, paras, and br
-	$txt =  preg_replace('/(<\/h[1-6]>) *([^\r\n])/', "$1\n\n$2", $txt);
-	$txt =  preg_replace('/(<\/div>) *([^\r\n])/', "$1\n\n$2", $txt);
-	$txt =  preg_replace('/(<\/p>) *([^\r\n])/', "$1\n\n$2", $txt);
-	$txt =  str_replace('/(<br *\/?>)/', "\n", $txt);
-	// start stripping tags
-	$txt = strip_tags(str_replace(array("\r\n", "&nbsp;"), array("\n", " "), $txt));
-	$txt = preg_replace('/^!!!(.*?)$/m', "\n$1\n", $txt);
-	$txt = preg_replace('/^!!(.*?)$/m', "\n$1\n", $txt);
-	$txt = preg_replace('/^!(.*?)$/m', "\n$1\n", $txt);
-	$txt = html_entity_decode($txt);
-	return $txt;
-}

@@ -1,17 +1,14 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 99999999_image_plugins_kill_tiki.php 26716 2010-04-21 02:08:38Z rlpowell $
+// $Id: 99999999_image_plugins_kill_tiki.php 42327 2012-07-10 13:01:10Z jonnybradley $
 
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
-
-global $tikilib, $prefs, $tikiroot, $user_overrider_prefs, $tiki_p_trust_input;	// globals are required here for tiki-setup_base.php
-include_once('tiki-setup_base.php');
 
 // ABOUT THE NUMBERING:
 //
@@ -21,8 +18,14 @@ include_once('tiki-setup_base.php');
 // tiki-setup_base.php does.
 
 
-function upgrade_99999999_image_plugins_kill_tiki( $installer ) {
-	global $tikilib, $installer;
+function upgrade_99999999_image_plugins_kill_tiki($installer)
+{
+	global $tikilib, $prefs, $tikiroot, $user_overrider_prefs, $tiki_p_trust_input, $smarty, $access, $local_php;	// globals are required here for tiki-setup_base.php
+
+	require_once ('db/tiki-db.php');
+	require_once ('lib/tikilib.php');
+
+	$tikilib = new TikiLib;
 
 	include_once ('lib/profilelib/profilelib.php');
 	include_once ('lib/profilelib/installlib.php');
@@ -135,7 +138,7 @@ objects:
    description:
     name: Image
     documentation: PluginImage
-    description: Display images
+    description: Display images (transitional alias, use IMG plugin instead)
     params:
      fileId:
       required: false

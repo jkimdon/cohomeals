@@ -1,4 +1,4 @@
-{* $Id: tiki-page_contribution_form.tpl 29864 2010-10-07 11:25:39Z sept_7 $ *}
+{* $Id: tiki-page_contribution_form.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <form method="post" action="tiki-page_contribution.php">
 	<input type="hidden" name="page" id="page" value="{$page}" />
 	<fieldset>
@@ -22,16 +22,16 @@
 			  <th>{tr}Date{/tr}</th>
 			  <th>{tr}User{/tr}</th>
 			</tr>
-				<tr>
-					<td class="odd"><label><input type="radio" name="lastversion" value="{$info.version}"{if $lastversion==$info.version or $lastversion==0} checked="checked"{/if} title="{tr}Version{/tr} {$info.version}" /> <strong>{$info.version}</strong></label></td>
-					<td class="odd"><strong>{$info.lastModif|tiki_short_datetime}</strong></td>
-					<td class="odd"><strong>{$info.user|userlink}</strong></td>
+				<tr class="odd">
+					<td><label><input type="radio" name="lastversion" value="{$info.version}"{if $lastversion==$info.version or $lastversion==0} checked="checked"{/if} title="{tr}Version{/tr} {$info.version}" /> <strong>{$info.version}</strong></label></td>
+					<td><strong>{$info.lastModif|tiki_short_datetime}</strong></td>
+					<td><strong>{$info.user|userlink}</strong></td>
 				</tr>
 {cycle values="odd,even" print=false}{foreach name=hist item=element from=$history}
 				<tr class="{cycle}">
-					<td><label><input type="radio" name="lastversion" value="{$element.version}"{if $lastversion==$element.version} checked="checked"{/if}  title="{tr}Version{/tr} {$info.version}" /> {$element.version}</label></td>
-					<td>{$element.lastModif|tiki_short_datetime}</td>
-					<td>{$element.user|userlink}</td>
+					<td class="text"><label><input type="radio" name="lastversion" value="{$element.version}"{if $lastversion==$element.version} checked="checked"{/if}  title="{tr}Version{/tr} {$info.version}" /> {$element.version}</label></td>
+					<td class="date">{$element.lastModif|tiki_short_datetime}</td>
+					<td class="text">{$element.user|userlink}</td>
 				</tr>{/foreach}
 			</table>
 	</fieldset>

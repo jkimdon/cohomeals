@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_quiz_results.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-edit_quiz_results.php 40234 2012-03-17 19:17:41Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/quizzes/quizlib.php');
@@ -54,8 +54,13 @@ if (isset($_REQUEST["remove"])) {
 
 if (isset($_REQUEST["save"])) {
 	check_ticket('edit-quiz-result');
-	$quizlib->replace_quiz_result($_REQUEST["resultId"], $_REQUEST["quizId"], $_REQUEST["fromPoints"], $_REQUEST["toPoints"],
-		$_REQUEST["answer"]);
+	$quizlib->replace_quiz_result(
+					$_REQUEST["resultId"], 
+					$_REQUEST["quizId"], 
+					$_REQUEST["fromPoints"], 
+					$_REQUEST["toPoints"],
+					$_REQUEST["answer"]
+	);
 
 	$smarty->assign('answer', '');
 	$smarty->assign('resultId', 0);

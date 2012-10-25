@@ -1,4 +1,4 @@
-{* $Id: tiki-map_upload.tpl 28804 2010-08-31 14:05:01Z xavidp $ *}
+{* $Id: tiki-map_upload.tpl 40035 2012-03-04 21:22:53Z gezzzan $ *}
 
 <a class="pagetitle" href="tiki-map_upload.php">Layer Management</a><br /><br />
 <a class="link" href="tiki-map_upload.php?dir={$dir}">
@@ -23,7 +23,7 @@
 <td class="odd">
 {if $tiki_p_map_delete eq 'y'}
 <a class="link" href="tiki-map_upload.php?dir={$dir}&directory={$dirs[user]}&action=deldir">
-<img src='pics/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
+<img src='img/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
 </a>
 {/if}
 </td>
@@ -38,7 +38,7 @@
 <td class="even">
 {if $tiki_p_map_delete eq 'y'}
 <a class="link" href="tiki-map_upload.php?dir={$dir}&directory={$dirs[user]}&action=deldir">
-<img src='pics/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
+<img src='img/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
 </a>
 {/if}
 </td>
@@ -55,7 +55,7 @@
 <td class="{cycle advance=true}">
 {if $tiki_p_map_delete eq 'y'}
 <a class="link" href="tiki-map_upload.php?dir={$dir}&file={$files[user]}&action=delete">
-<img src='pics/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
+<img src='img/icons/cross.png' alt="{tr}Delete{/tr}" title="{tr}Delete{/tr}" width='16' height='16' />
 </a>
 {/if}
 </td>

@@ -1,49 +1,53 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_ftp.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_ftp.php 40419 2012-03-26 19:39:07Z jonnybradley $
 
-function wikiplugin_ftp_help() {
-	$help = tra('Download box for a file on ftp server.');
-	$help .= "~np~{FTP(server=, user=, password=, title=)}file{FTP}~/np~";
-	return $help;
-}
-
-function wikiplugin_ftp_info() {
+function wikiplugin_ftp_info()
+{
 	return array(
-		'name' => tra('ftp'),
+		'name' => tra('FTP'),
 		'documentation' => 'PluginFTP',
-		'description' => tra('Download box for a file on ftp server.'),
+		'description' => tra('Create a button for downloading a file from an FTP server'),
 		'prefs' => array( 'wikiplugin_ftp' ),
 		'validate' => 'all',
 		'body' => tra('file name'),
+		'icon' => 'img/icons/application_put.png',
 		'params' => array(
 			'server' => array(
 				'required' => true,
-				'name' => tra('Ftp Server Name'),
-				'description' => 'ftp.myserver.com'
+				'name' => tra('Server Name'),
+				'description' => tra('Name of the server where the FTP account is housed. Example: ') . 'ftp.myserver.com',
+				'default' => ''
 			),
 			'user' => array(
 				'required' => true,
-				'name' => tra('Ftp User name')
+				'name' => tra('User Name'),
+				'description' => tra('User name needed to access the FTP account'),
+				'default' => ''
 			),
 			'password' =>array(
 				'required' => true,
-				'name' => tra('Ftp password')
+				'name' => tra('Password'),
+				'description' => tra('Password needed to access the FTP account'),
+				'default' => ''
 			),
 			'title' =>array(
 				'required' => false,
-				'name' => tra('Download button label')
+				'name' => tra('Download Button Label'),
+				'description' => tra('Label for the FTP download button'),
+				'default' => ''
 			)
 		),
 	);
 }
 
-function wikiplugin_ftp($data, $params) {
+function wikiplugin_ftp($data, $params)
+{
 	global $smarty;
-	extract ($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 	if (empty($server) || empty($user) || empty($password)) {
 		return tra('missing parameters');
 	}
@@ -65,7 +69,7 @@ function wikiplugin_ftp($data, $params) {
 		$content = file_get_contents($local);
 		$type = filetype($local);
 		unlink($local);
-		header ("Content-type: $type");
+		header("Content-type: $type");
 		header("Content-Disposition: attachment; filename=\"$data\"");
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
@@ -75,7 +79,7 @@ function wikiplugin_ftp($data, $params) {
 
 	} else {
 		if (isset($title)) {
-			$smarty->assign_by_ref('title', $title);
+			$smarty->assign('ftptitle', $title);
 		}
 		$smarty->assign_by_ref('file', $data);
 		return $smarty->fetch('wiki-plugins/wikiplugin_ftp.tpl');

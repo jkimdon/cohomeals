@@ -1,4 +1,4 @@
-{* $Id: blog_wrapper.tpl 29178 2010-09-13 17:56:34Z Jyhem $ *}
+{* $Id: blog_wrapper.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 <div class="postbody clearfix">
 	<a name="postId{$post_info.postId}"></a>
 	{include file='blog_post_postbody_title.tpl'}

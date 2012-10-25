@@ -1,5 +1,5 @@
 <?php // -*- coding:utf-8 -*-
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
@@ -57,11 +57,11 @@
 // ### On 2009-03-02, it is: (':', '!', ';', '.', ',', '?')
 // ### For clarity, we explain here only for colons: ':' but it is the same for the rest
 // ###
-// ### Short version: it is not a problem that string "Login:" has no translation. Only "Login" needs to be translated.
+// ### Short version: it is not a problem that string "Log In:" has no translation. Only "Log In" needs to be translated.
 // ###
 // ### Technical justification:
 // ### If a string ending with colon needs translating (like "{tr}Login:{/tr}")
-// ### then TikiWiki tries to translate 'Login' and ':' separately.
+// ### then TikiWiki tries to translate 'Log In' and ':' separately.
 // ### This allows to have only one translation for "{tr}Login{/tr}" and "{tr}Login:{/tr}"
 // ### and it still allows to translate ":" as "&nbsp;:" for languages that
 // ### need it (like french)
@@ -83,15 +83,15 @@ $lang=Array(
 // ### uncomment value pairs as you translate
 // "Kalture Video" => "Kalture Video",
 // "Communication error" => "Communication error",
-// "Invalid response provided by the kaltura server. Please retry" => "Invalid response provided by the kaltura server. Please retry",
+// "Invalid response provided by the Kaltura server. Please retry" => "Invalid response provided by the Kaltura server. Please retry",
 // "Delete comments" => "Delete comments",
 "Approved Status" => "Aprovado",
 // "Queued" => "Queued",
 // "The file is already locked by %s" => "The file is already locked by %s",
 // "WARNING: The file is used in" => "WARNING: The file is used in",
-// "Permission denied you can edit this file" => "Permission denied you can edit this file",
+// "You do not have permission to edit this file" => "You do not have permission to edit this file",
 // "Not modified since" => "Not modified since",
-// "Not downloaded since" => "Not downloaded since",
+// "Test special \"characters\" escaping" => "Test special \"characters\" escaping",
 // ### end of untranslated words
 // ###
 
@@ -117,8 +117,9 @@ $lang=Array(
 "Error deleting the file" => "Erro ao deletar o arquivo",
 "The page is empty" => "A página está vazia",
 "You do not have permissions to view the maps" => "Você não possui permissões para ver os mapas",
+"Second test special \"characters\" escaping" => "Alguma tradução \"characters\"",
 "Should escape \"double quotes\" in the source string" => "Deve escapar \"aspas duplas\" na string original",
 "Something" => "Algo",
 "Trying to insert malicious PHP code back to the language.php file" => "asff\"); echo 'teste'; \$dois = array('',\"",
-"###end###"=>"###end###");
+);
 

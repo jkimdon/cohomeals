@@ -25,6 +25,8 @@
         <h3>Dependencies</h3>
         <ul>
 <li>UI Core</li>
+<li>UI Widget</li>
+<li>UI Mouse</li>
 </ul>
     </div>
     <div id="overview-example">
@@ -42,7 +44,7 @@ A simple jQuery UI Resizable.<br />
 &lt;html&gt;
 &lt;head&gt;
   &lt;link href=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;/&gt;
-  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js&quot;&gt;&lt;/script&gt;
   &lt;script src=&quot;http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js&quot;&gt;&lt;/script&gt;
   &lt;style type=&quot;text/css&quot;&gt;
     #resizable { width: 100px; height: 100px; background: silver; }
@@ -133,7 +135,7 @@ $( ".selector" ).resizable( "option", "disabled", true );</code></pre>
   Initialize a resizable with the <code>alsoResize</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ alsoResize: '.other' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ alsoResize: ".other" });</code></pre>
 </dd>
 
     
@@ -144,7 +146,7 @@ $( ".selector" ).resizable( "option", "disabled", true );</code></pre>
 <pre><code>//getter
 var alsoResize = $( ".selector" ).resizable( "option", "alsoResize" );
 //setter
-$( ".selector" ).resizable( "option", "alsoResize", '.other' );</code></pre>
+$( ".selector" ).resizable( "option", "alsoResize", ".other" );</code></pre>
 </dd>
 
     </dl>
@@ -202,7 +204,7 @@ $( ".selector" ).resizable( "option", "animate", true );</code></pre>
         <dd class="option-type">Integer, String</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'slow'</dd>
+        <dd class="option-default">"slow"</dd>
       
     </dl>
   </div>
@@ -244,7 +246,7 @@ $( ".selector" ).resizable( "option", "animateDuration", 500 );</code></pre>
         <dd class="option-type">String</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'swing'</dd>
+        <dd class="option-default">"swing"</dd>
       
     </dl>
   </div>
@@ -259,7 +261,7 @@ $( ".selector" ).resizable( "option", "animateDuration", 500 );</code></pre>
   Initialize a resizable with the <code>animateEasing</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ animateEasing: 'swing' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ animateEasing: "swing" });</code></pre>
 </dd>
 
     
@@ -270,7 +272,7 @@ $( ".selector" ).resizable( "option", "animateDuration", 500 );</code></pre>
 <pre><code>//getter
 var animateEasing = $( ".selector" ).resizable( "option", "animateEasing" );
 //setter
-$( ".selector" ).resizable( "option", "animateEasing", 'swing' );</code></pre>
+$( ".selector" ).resizable( "option", "animateEasing", "swing" );</code></pre>
 </dd>
 
     </dl>
@@ -370,7 +372,7 @@ $( ".selector" ).resizable( "option", "autoHide", true );</code></pre>
         <dd class="option-type">Selector</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">':input,option'</dd>
+        <dd class="option-default">":input,option"</dd>
       
     </dl>
   </div>
@@ -385,7 +387,7 @@ $( ".selector" ).resizable( "option", "autoHide", true );</code></pre>
   Initialize a resizable with the <code>cancel</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ cancel: ':input,option' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ cancel: ":input,option" });</code></pre>
 </dd>
 
     
@@ -396,7 +398,7 @@ $( ".selector" ).resizable( "option", "autoHide", true );</code></pre>
 <pre><code>//getter
 var cancel = $( ".selector" ).resizable( "option", "cancel" );
 //setter
-$( ".selector" ).resizable( "option", "cancel", ':input,option' );</code></pre>
+$( ".selector" ).resizable( "option", "cancel", ":input,option" );</code></pre>
 </dd>
 
     </dl>
@@ -427,7 +429,7 @@ $( ".selector" ).resizable( "option", "cancel", ':input,option' );</code></pre>
   Initialize a resizable with the <code>containment</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ containment: 'parent' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ containment: "parent" });</code></pre>
 </dd>
 
     
@@ -438,7 +440,7 @@ $( ".selector" ).resizable( "option", "cancel", ':input,option' );</code></pre>
 <pre><code>//getter
 var containment = $( ".selector" ).resizable( "option", "containment" );
 //setter
-$( ".selector" ).resizable( "option", "containment", 'parent' );</code></pre>
+$( ".selector" ).resizable( "option", "containment", "parent" );</code></pre>
 </dd>
 
     </dl>
@@ -622,7 +624,7 @@ $( ".selector" ).resizable( "option", "grid", [50, 50] );</code></pre>
         <dd class="option-type">String, Object</dd>
       
       <dt class="option-default-label">Default:</dt>
-        <dd class="option-default">'e, s, se'</dd>
+        <dd class="option-default">"e, s, se"</dd>
       
     </dl>
   </div>
@@ -638,7 +640,7 @@ $( ".selector" ).resizable( "option", "grid", [50, 50] );</code></pre>
   Initialize a resizable with the <code>handles</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ handles: 'n, e, s, w' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ handles: "n, e, s, w" });</code></pre>
 </dd>
 
     
@@ -649,7 +651,7 @@ $( ".selector" ).resizable( "option", "grid", [50, 50] );</code></pre>
 <pre><code>//getter
 var handles = $( ".selector" ).resizable( "option", "handles" );
 //setter
-$( ".selector" ).resizable( "option", "handles", 'n, e, s, w' );</code></pre>
+$( ".selector" ).resizable( "option", "handles", "n, e, s, w" );</code></pre>
 </dd>
 
     </dl>
@@ -680,7 +682,7 @@ $( ".selector" ).resizable( "option", "handles", 'n, e, s, w' );</code></pre>
   Initialize a resizable with the <code>helper</code> option specified.
 </dt>
 <dd>
-<pre><code>$( ".selector" ).resizable({ helper: 'ui-state-highlight' });</code></pre>
+<pre><code>$( ".selector" ).resizable({ helper: "ui-state-highlight" });</code></pre>
 </dd>
 
     
@@ -691,7 +693,7 @@ $( ".selector" ).resizable( "option", "handles", 'n, e, s, w' );</code></pre>
 <pre><code>//getter
 var helper = $( ".selector" ).resizable( "option", "helper" );
 //setter
-$( ".selector" ).resizable( "option", "helper", 'ui-state-highlight' );</code></pre>
+$( ".selector" ).resizable( "option", "helper", "ui-state-highlight" );</code></pre>
 </dd>
 
     </dl>
@@ -872,6 +874,45 @@ $( ".selector" ).resizable( "option", "minWidth", 75 );</code></pre>
     <h2 class="top-header">Events</h2>
     <ul class="events-list">
       
+<li class="event" id="event-create">
+  <div class="event-header">
+    <h3 class="event-name"><a href="#event-create">create</a></h3>
+    <dl>
+      <dt class="event-type-label">Type:</dt>
+        <dd class="event-type">resizecreate</dd>
+    </dl>
+  </div>
+  <div class="event-description">
+    <p>This event is triggered when resizable is created.</p>
+  </div>
+  <div class="event-examples">
+    <h4>Code examples</h4>
+    <dl class="event-examples-list">
+    
+<dt>
+  Supply a callback function to handle the <code>create</code> event as an init option.
+</dt>
+<dd>
+<pre><code>$( &quot;.selector&quot; ).resizable({
+   create: function(event, ui) { ... }
+});</code></pre>
+</dd>
+
+    
+<dt>
+  Bind to the <code>create</code> event by type: <code>resizecreate</code>.
+</dt>
+<dd>
+<pre><code>$( &quot;.selector&quot; ).bind( &quot;resizecreate&quot;, function(event, ui) {
+  ...
+});</code></pre>
+</dd>
+
+    </dl>
+  </div>
+</li>
+
+
 <li class="event" id="event-start">
   <div class="event-header">
     <h3 class="event-name"><a href="#event-start">start</a></h3>
@@ -1151,10 +1192,10 @@ $( ".selector" ).resizable( "option", "minWidth", 75 );</code></pre>
 </div>
 
 </p><!-- 
-Pre-expand include size: 46113 bytes
-Post-expand include size: 76304 bytes
-Template argument size: 41354 bytes
+Pre-expand include size: 47687 bytes
+Post-expand include size: 80197 bytes
+Template argument size: 42354 bytes
 Maximum: 2097152 bytes
 -->
 
-<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3770-1!1!0!!en!2 and timestamp 20100910074930 -->
+<!-- Saved in parser cache with key jqdocs_docs:pcache:idhash:3770-1!1!0!!en!2 and timestamp 20120605125211 -->

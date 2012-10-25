@@ -1,4 +1,4 @@
-{* $Id: messu-nav.tpl 29142 2010-09-12 14:09:21Z changi67 $ *}
+{* $Id: messu-nav.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 <div class="navbar">
 	{button href="messu-mailbox.php" _text="{tr}Mailbox{/tr}"}

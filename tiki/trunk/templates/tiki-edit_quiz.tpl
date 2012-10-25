@@ -1,4 +1,4 @@
-{* $Id: tiki-edit_quiz.tpl 28955 2010-09-04 20:19:16Z changi67 $ *}
+{* $Id: tiki-edit_quiz.tpl 37483 2011-09-21 01:52:57Z chealer $ *}
  
 {* Copyright (c) 2002-2008 *}
 {* All Rights Reserved. See copyright.txt for details and a complete list of authors. *}
@@ -39,18 +39,18 @@
 	{cycle values="odd,even" print=false}
 	{section name=user loop=$channels}
 		<tr class="{cycle}">
-			<td>{$channels[user].quizId}</td>
-			<td>
+			<td class="id">{$channels[user].quizId}</td>
+			<td class="text">
 				{$channels[user].name|escape}
 				<div class="subcomment">
 					{$channels[user].description|escape|nl2br}
 				</div>
 			</td>
-			<td style="text-align: center;">{$channels[user].canRepeat}</td>
-			<td style="text-align: center;">{$channels[user].timeLimited} {if $channels[user].timeLimited eq 'y'}({$channels[user].timeLimit} mins){/if}</td>
-			<td style="text-align: center;">{$channels[user].questions}</td>
-			<td style="text-align: center;">{$channels[user].results}</td>
-			<td style="text-align: right;">
+			<td class="text">{$channels[user].canRepeat}</td>
+			<td class="text">{$channels[user].timeLimited} {if $channels[user].timeLimited eq 'y'}({$channels[user].timeLimit} mins){/if}</td>
+			<td class="integer">{$channels[user].questions}</td>
+			<td class="integer">{$channels[user].results}</td>
+			<td class="action">
 
 			{self_link _icon='page_edit' cookietab='2' _anchor='anchor2' quizId=$channels[user].quizId}{tr}Edit{/tr}{/self_link}
 				<a class="link" href="tiki-edit_quiz_questions.php?quizId={$channels[user].quizId}">{icon _id='help' alt="{tr}Questions{/tr}" title="{tr}Questions{/tr}"}</a>
@@ -66,7 +66,7 @@
 			</td>
 		</tr>
 	{sectionelse}
-		<tr><td class="odd" colspan="7"><strong>{tr}No records found.{/tr}</strong></td></tr>
+		{norecords _colspan=7}
 	{/section}
 </table>
 
@@ -87,7 +87,7 @@
 	<table class="formcolor">
 		<tr>
 			<td>
-				<label for="quiz-name">{tr}Name{/tr}:</label>
+				<label for="quiz-name">{tr}Name:{/tr}</label>
 			</td>
 			<td>
 				<input type="text" size ="80" name="name" id="quiz-name" value="{$name|escape}" />
@@ -95,7 +95,7 @@
 		</tr>
 		<tr>
 			<td>
-				<label for="quiz-desc">{tr}Description{/tr}:</label>
+				<label for="quiz-desc">{tr}Description:{/tr}</label>
 			</td>
 			<td>
 				<textarea name="description" id="quiz-desc" rows="4" cols="75">{$description|escape}</textarea>
@@ -108,7 +108,7 @@
 				{html_select_date prefix="publish_" time=$publishDateSite start_year="-5" end_year="+10" field_order=$prefs.display_field_order}
 				&nbsp;{tr}at{/tr}&nbsp;
 				<span dir="ltr">
-					{html_select_time prefix="publish_" time=$publishDateSite display_seconds=false}
+					{html_select_time prefix="publish_" time=$publishDateSite display_seconds=false use_24_hours=$use_24hr_clock}
 					&nbsp;
 					{$siteTimeZone}
 				</span>
@@ -119,7 +119,7 @@
 			<td>
 				{html_select_date prefix="expire_" time=$expireDateSite start_year="-5" end_year="+10" field_order=$prefs.display_field_order}
 				&nbsp;{tr}at{/tr}&nbsp;
-				<span dir="ltr">{html_select_time prefix="expire_" time=$expireDateSite display_seconds=false}
+				<span dir="ltr">{html_select_time prefix="expire_" time=$expireDateSite display_seconds=false use_24_hours=$use_24hr_clock}
 					&nbsp;{$siteTimeZone}
 				</span>
 			</td>
@@ -140,6 +140,7 @@
 				<input type="checkbox" name="storeResults" id="quiz-results" {if $storeResults eq 'y'}checked="checked"{/if} />
 			</td>
 		</tr>
+		{* Not implemented
 		<tr>
 			<td>
 				<label for="immediate-feedback">{tr}Immediate feedback{/tr}</label>
@@ -171,7 +172,7 @@
 			<td>
 				<input type="checkbox" name="shuffleAnswers" id="shuffle-answers" {if $shuffleAnswers eq 'y'}checked="checked"{/if} />
 			</td>
-		</tr>
+		</tr>*}
 		<tr>
 			<td>
 				<label for="quiz-timelimit">{tr}Quiz is time limited{/tr}</label>

@@ -1,4 +1,4 @@
-{* $Id: tiki-tell_a_friend.tpl 28864 2010-09-02 20:19:55Z changi67 $ *}
+{* $Id: tiki-tell_a_friend.tpl 36279 2011-08-17 13:00:05Z jonnybradley $ *}
 
 {title}
 	{if $report eq 'y'}
@@ -62,9 +62,7 @@
 		<tr>
 			<td>{tr}Your comment{/tr}</td>
 			<td>
-				<textarea name="comment" style="width:95%;" rows="10" cols='{$cols}' id='comment'>
-					{$comment|escape|@default:"{tr}I found an interesting page that I thought you would like.{/tr}"}
-				</textarea>
+				<textarea name="comment" style="width:95%;" rows="10" id='comment'>{$comment|escape|@default:"{tr}I found an interesting page that I thought you would like.{/tr}"}</textarea>
 			</td>
 		</tr>
 		{if $prefs.feature_antibot eq 'y' && $user eq ''}

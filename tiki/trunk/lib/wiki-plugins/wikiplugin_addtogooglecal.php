@@ -1,39 +1,40 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
+// $Id: wikiplugin_addtogooglecal.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-function wikiplugin_addtogooglecal_help() {
-	return tra('Create an icon for a user to add an event to Google Calendar').":<br />~np~{ADDTOGOOGLECAL(calitemid=1) /}~/np~";;
-}
-
-function wikiplugin_addtogooglecal_info() {
+function wikiplugin_addtogooglecal_info()
+{
 	return array(
-		'name' => tra('Add Event to Google Calendar'),
+		'name' => tra('Add to Google Calendar'),
 		'documentation' => 'PluginAddToGoogleCal',
-		'description' => tra('Creates an icon for a user to add an event to a Google Calendar'),
+		'description' => tra('Add a calendar item to a Google calendar'),
 		'prefs' => array('wikiplugin_addtogooglecal'),
-    	'introduced' => 6,
+		'introduced' => 6,
+		'icon' => 'img/icons/calendar_add.png',
+		'format' => 'html',
 		'params' => array(
 			'calitemid' => array(
 				'required' => true,
-				'name' => 'Calendar item ID',
+				'name' => tra('Calendar item ID'),
 				'description' => tra('The item ID of the calendar to add to Google calendar.'),
-    			'accepted' => 'A calendar item ID number',
+				'accepted' => tra('A calendar item ID number'),
 				'filter' => 'digits', 
-    			'default' => 'none',
-    			'since' => '6.0', 
+				'default' => '',
+				'since' => '6.0', 
 	),
 			'iconstyle' => array(
 				'required' => false,
-				'name' => 'Icon style',
-				'description' => 'Choose the icon style',
-    			'accepted' => 'Either 1, 2 or 3',
+				'name' => tra('Icon Style'),
+				'description' => tra('Choose the icon style'),
+				'accepted' => tra('Either 1, 2 or 3'),
 				'filter' => 'digits', 
-    			'default' => 1,
-    			'since' => '6.0', 
-    			'options' => array(
+				'default' => 1,
+				'since' => '6.0', 
+				'options' => array(
+					array('text' => '', 'value' => ''), 
 					array('text' => tra('One'), 'value' => 1), 
 					array('text' => tra('Two'), 'value' => 2), 
 					array('text' => tra('Three'), 'value' => 3),
@@ -43,7 +44,8 @@ function wikiplugin_addtogooglecal_info() {
 	);
 }
 
-function wikiplugin_addtogooglecal($data, $params) {
+function wikiplugin_addtogooglecal($data, $params)
+{
 	global $access, $calendarlib;
 	$access->check_feature('feature_calendar');
 	if (!is_object($calendarlib)) {
@@ -52,7 +54,7 @@ function wikiplugin_addtogooglecal($data, $params) {
 	
 	$cal_item_id = $params['calitemid'];
 	$cal_id = $calendarlib->get_calendarid($cal_item_id);
-	$calperms = Perms::get( array( 'type' => 'calendar', 'object' => $cal_id ) );
+	$calperms = Perms::get(array( 'type' => 'calendar', 'object' => $cal_id ));
 	if (!$calperms->view_events) {
 		return '';
 	}
@@ -61,9 +63,9 @@ function wikiplugin_addtogooglecal($data, $params) {
 		return '';
 	}
 	$gcal_action = 'TEMPLATE';
-	$gcal_text = urlencode(str_replace(array("\n","\r"),array('',''), strip_tags($calitem['parsedName'])));
-	$gcal_details = urlencode(str_replace(array("\n","\r"),array('',''),$calitem['parsed']));
-	$gcal_location = urlencode(str_replace(array("\n","\r"),array('',''), strip_tags($calitem['locationName'])));
+	$gcal_text = urlencode(str_replace(array("\n","\r"), array('',''), strip_tags($calitem['parsedName'])));
+	$gcal_details = urlencode(str_replace(array("\n","\r"), array('',''), $calitem['parsed']));
+	$gcal_location = urlencode(str_replace(array("\n","\r"), array('',''), strip_tags($calitem['locationName'])));
 	$curtikidate = new TikiDate();
 	// Google requires date to be formatted in UTC
 	$old_tz = date_default_timezone_get();

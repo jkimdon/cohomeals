@@ -1,4 +1,4 @@
-{* $Id: fgal_listing_conf.tpl 28841 2010-09-01 18:55:49Z pkdille $ *}
+{* $Id: fgal_listing_conf.tpl 40355 2012-03-24 17:54:25Z jonnybradley $ *}
 
 {if is_array($fgal_options) and count($fgal_options) gt 0}
 	{foreach key=key item=item from=$fgal_options}
@@ -12,6 +12,14 @@
 		</select>
 	</td>
 </tr>
+		{elseif $key eq 'icon_fileId'}
+			<tr>
+				<td><label for="fgal_{$key}">{$item.name}:<label></td>
+				<td>
+					<input type="text" id="fgal_{$key}" name="fgal_{$key}" value="{$item.value}" /><br />
+					<em>{tr}Enter the ID of any file in any gallery to be used as the icon for this gallery in browse view{/tr}</em>
+				</td>
+			</tr>
 		{else}
 <tr>
 	<td><label for="fgal_{$key}{$fgal_ext}">{$item.name}:</label></td>
@@ -41,7 +49,7 @@
 			<option value="a"{if $item.value eq 'a'} selected="selected"{/if}>{tr}Name-filename{/tr}</option>
 			<option value="n"{if $item.value eq 'n'} selected="selected"{/if}>{tr}Name{/tr}</option>
 			<option value="f"{if $item.value eq 'f'} selected="selected"{/if}>{tr}Filename only{/tr}</option>
-		{else}
+		{elseif $key neq 'deleteAfter'}
 			<option value='n'{if $item.value eq 'n'} selected="selected"{/if}>{tr}Hide{/tr}</option>
 			<option value='y'{if $item.value eq 'y'} selected="selected"{/if}>{tr}Show as a column{/tr}</option>
 			<option value='o'{if $item.value eq 'o'} selected="selected"{/if}>{tr}Show in popup box{/tr}</option>
@@ -49,6 +57,11 @@
 		{/if}
 		{if $key eq 'lockedby' or $key eq 'lockedby_admin'}
 			<option value='i'{if $item.value eq 'i'} selected="selected"{/if}>{tr}Show an icon in a column{/tr}</option>
+		{/if}
+		
+		{if $key eq 'deleteAfter'}
+			<option value='n'{if $item.value eq 'n'} selected="selected"{/if}>{tr}Hide{/tr}</option>
+			<option value='y'{if $item.value eq 'y'} selected="selected"{/if}>{tr}Show as a column{/tr}</option>
 		{/if}
 		</select>
 	</td>

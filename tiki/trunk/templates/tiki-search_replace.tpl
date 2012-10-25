@@ -1,3 +1,4 @@
+{* $Id: tiki-search_replace.tpl 41405 2012-05-10 04:38:13Z nkoth $ *}
 {title}Mass Search and Replace{/title}
 
 {remarksbox type="note" title="{tr}Note{/tr}"}
@@ -6,19 +7,19 @@
  
 <div class="simplebox">
 <form action="tiki-search_replace.php" method="post">
-{tr}Search{/tr}: <input type="text" size="30" name="searchtext" value="{$searchtext|escape}" />
-&nbsp;{tr}Case sensitive{/tr}: <input type="checkbox" name="casesensitive" value="y" {if $casesensitive eq 'y'}checked="checked"{/if} />
-<br />{tr}Replace{/tr}: <input type="text" size="30" name="replacetext" value="{$replacetext|escape}" />
-<br />{tr}Max number of pages at a time{/tr}: <input type="text" size="5" name="maxRecords" value="{$maxRecords|escape}" />
-&nbsp;{tr}Number of surrounding chars to preview{/tr}: <input type="text" size="5" name="paddingLength" value="{$paddingLength|escape}" />
+{tr}Search:{/tr} <input type="text" size="30" name="searchtext" value="{$searchtext|escape}" />
+&nbsp;{tr}Case sensitive:{/tr} <input type="checkbox" name="casesensitive" value="y" {if $casesensitive eq 'y'}checked="checked"{/if} />
+<br />{tr}Replace:{/tr} <input type="text" size="30" name="replacetext" value="{$replacetext|escape}" />
+<br />{tr}Max number of pages at a time:{/tr} <input type="text" size="5" name="maxRecords" value="{$maxRecords|escape}" />
+&nbsp;{tr}Number of surrounding chars to preview:{/tr} <input type="text" size="5" name="paddingLength" value="{$paddingLength|escape}" />
 <br />
 <select name="categId">
 	<option value='' {if $find_categId eq ''}selected="selected"{/if}>{tr}any category{/tr}</option>
-	{section name=ix loop=$categories}
-		<option value="{$categories[ix].categId|escape}" {if $find_categId eq $categories[ix].categId}selected="selected"{/if}>
-		{capture}{tr}{$categories[ix].categpath}{/tr}{/capture}{$smarty.capture.default|escape}
+	{foreach $categories as $catix}
+		<option value="{$catix.categId|escape}" {if $find_categId eq $catix.categId}selected="selected"{/if}>
+		{capture}{tr}{$catix.categpath}{/tr}{/capture}{$smarty.capture.default|escape}
 		</option>
-	{/section}
+	{/foreach}
 </select>
 <input type="submit" name="search" value="{tr}Search{/tr}" />
 </form>
