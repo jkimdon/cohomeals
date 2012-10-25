@@ -1,1 +1,1 @@
-{* $Id: credits.tpl 28331 2010-08-06 05:12:16Z pkdille $ *}{tr}Theme{/tr}: <a href="http://zukakakina.com" title="Design by Gary Cunningham-Lee aka chibaguy">Snow</a>
+{* $Id: credits.tpl 33949 2011-04-14 05:13:23Z chealer $ *}{tr}Theme:{/tr} <a href="http://zukakakina.com" title="Design by Gary Cunningham-Lee aka chibaguy">Snow</a>

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_htmldiff.php 25256 2010-02-16 13:02:18Z changi67 $
+// $Id: renderer_htmldiff.php 40220 2012-03-16 19:50:45Z changi67 $
 
 /**
  * HTML diff renderer.
@@ -59,7 +59,8 @@ class Text_Diff_Renderer_htmldiff extends Tiki_Text_Diff_Renderer
 	{
 	}
 
-	function _insert_tag($line, $tag, &$span) {
+	function _insert_tag($line, $tag, &$span) 
+	{
 		$string = "";
 		if ($line != '') {
 			if (strstr($line, "<") === FALSE) {
@@ -84,7 +85,9 @@ class Text_Diff_Renderer_htmldiff extends Tiki_Text_Diff_Renderer
 		return $string;
 	}
 
-	function _count_tags($line, $version) {
+	function _count_tags($line, $version) 
+	{
+
 		preg_match("#<(/?)([^ >]+)#", $line, $out);
 		if (count($out) > 1 && in_array($out[2], $this->tracked_tags)) {
 			if (isset($this->tags[$version][$out[2]])) {
@@ -97,15 +100,16 @@ class Text_Diff_Renderer_htmldiff extends Tiki_Text_Diff_Renderer
 		}
 	}
 
-	function _can_break($line) {
+	function _can_break($line) 
+	{
 
 		if (preg_match("#<(p|h\d|br)#", $line) == 0) {
 			return false;
 		}
 
 		if (isset($this->tags)) {
-			foreach($this->tags as $v) {
-				foreach($v as $tag) {
+			foreach ($this->tags as $v) {
+				foreach ($v as $tag) {
 					if ($tag != 0) {
 						return false;
 					}
@@ -121,7 +125,7 @@ class Text_Diff_Renderer_htmldiff extends Tiki_Text_Diff_Renderer
 
 		switch($type) {
 			case 'context':
-				foreach($lines as $line) {
+				foreach ($lines as $line) {
 					if ($context == 0 and $this->_can_break($line)) {
 						$context = 1;
 						$this->n++;
@@ -137,32 +141,36 @@ class Text_Diff_Renderer_htmldiff extends Tiki_Text_Diff_Renderer
 						$this->final[$this->n] .= "</span>";
 						$this->rspan = false;
 					}
-					if (!isset($this->original[$this->n])) { $this->original[$this->n] = ''; }
+					if (!isset($this->original[$this->n])) { 
+						$this->original[$this->n] = '';
+					}
 					$this->original[$this->n] .= "$line";
-					if (!isset($this->final[$this->n])) { $this->final[$this->n] = ''; }
+					if (!isset($this->final[$this->n])) { 
+						$this->final[$this->n] = ''; 
+					}
 					$this->final[$this->n] .= "$line";
 				}
-				break;
+    			break;
 			case 'change-added':
 			case 'added':
-				foreach($lines as $line) {
+				foreach ($lines as $line) {
 					if ($line != '') {
 						$this->_count_tags($line, 'final');
 						$this->final[$this->n] .= $this->_insert_tag($line, 'diffadded', $this->rspan);
 						$context = 0;
 					}
 				}
-				break;
+    			break;
 			case 'deleted':
 			case 'change-deleted':
-				foreach($lines as $line) {
+				foreach ($lines as $line) {
 					if ($line != '') {
 						$this->_count_tags($line, 'original');
 						$this->original[$this->n] .= $this->_insert_tag($line, 'diffdeleted', $this->lspan);
 						$context = 0;
 					}
 				}
-				break;
+    			break;
 		}
 	}
 

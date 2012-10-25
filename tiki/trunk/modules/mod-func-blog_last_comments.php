@@ -1,21 +1,22 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-blog_last_comments.php 29905 2010-10-08 17:06:10Z Jyhem $
+// $Id: mod-func-blog_last_comments.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_blog_last_comments_info() {
+function module_blog_last_comments_info()
+{
 	return array(
-		'name' => tra('Last blog post comments'),
+		'name' => tra('Newest Blog Post Comments'),
 		'description' => tra('Displays the specified number of the blog post comments most recently added.'),
-		'prefs' => array( 'feature_blogs' ),
+		'prefs' => array('feature_blogs'),
 		'params' => array(
 			'nodate' => array(
 				'name' => tra('No date'),
@@ -30,7 +31,8 @@ function module_blog_last_comments_info() {
 	);
 }
 
-function module_blog_last_comments( $mod_reference, $module_params ) {
+function module_blog_last_comments($mod_reference, $module_params)
+{
 	global $bloglib, $smarty;
 	include_once ('lib/blogs/bloglib.php');
 	$comments = $bloglib->list_blog_post_comments('y', $mod_reference["rows"]);

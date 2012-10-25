@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_integrator.tpl 29084 2010-09-09 21:38:07Z changi67 $ *}
+{* $Id: tiki-admin_integrator.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="Integrator"}{tr}Integrator{/tr}{/title}
 
@@ -16,7 +16,7 @@
 	{button href="tiki-list_integrator_repositories.php" _text="{tr}List Repositories{/tr}"}
 	{button href="tiki-admin_integrator.php" _text="{tr}New Repository{/tr}"}
 	{if isset($repID) and $repID ne '0'}
-		{assign var=thisrepID value=$repID|escape }
+		{assign var=thisrepID value=$repID|escape}
 		{button href="tiki-integrator.php?repID=$thisrepID" _text="{tr}View Repository{/tr}"}
   {/if}
 </div>
@@ -26,8 +26,8 @@
 <form action="tiki-admin_integrator.php" method="post">
 <input type="hidden" name="repID" value="{$repID|escape}" />
 <table class="formcolor">
-  <tr><td><span title="{tr}Human readable repository name{/tr}">{tr}Name{/tr}</span></td>
-    <td><input type="text" name="name" value="{$name|escape}" title="{tr}Human readable repository name{/tr}" /></td>
+  <tr><td><span title="{tr}Human-readable repository name{/tr}">{tr}Name{/tr}</span></td>
+    <td><input type="text" name="name" value="{$name|escape}" title="{tr}Human-readable repository name{/tr}" /></td>
   </tr><tr>
     <td><span title="{tr}Path to repository (local filesystem: relative/absolute web root, remote: prefixed with 'http://'){/tr}">{tr}Path{/tr}</span></td>
     <td><input type="text" name="path" value="{$path|escape}" title="{tr}Path to repository (local filesystem: relative/absolute web root, remote: prefixed with 'http://'){/tr}" /></td>
@@ -55,8 +55,8 @@
     <td><span title="{tr}Seconds count 'till cached page will be expired{/tr}">{tr}Cache expiration{/tr}</span></td>
     <td><input type="text" maxlength="14" size="14" name="expiration" value="{$expiration|escape}" title="{tr}Seconds count 'till cached page will be expired{/tr}" /></td>
   </tr><tr>
-    <td><span title="{tr}Human readable text description of repository{/tr}">{tr}Description{/tr}</span></td>
-    <td><textarea name="description" rows="4" title="{tr}Human readable text description of repository{/tr}">{$description|escape}</textarea></td>
+    <td><span title="{tr}Human-readable text description of repository{/tr}">{tr}Description{/tr}</span></td>
+    <td><textarea name="description" rows="4" title="{tr}Human-readable text description of repository{/tr}">{$description|escape}</textarea></td>
   </tr><tr>
     <td></td>
     <td><input type="submit" name="save" value="{tr}Save{/tr}" /></td>
@@ -67,7 +67,7 @@
 <h2>{tr}Available Repositories{/tr}</h2>
 
 {* Table with list of repositories *}
-<table class="normal" id="integrator-repositories">
+<table class="normal" border=1 id="integrator-repositories">
   <tr>
     <th rowspan="2">{tr}Name{/tr}</th>
     <th>{tr}Path{/tr}</th>
@@ -80,15 +80,15 @@
   {cycle values="odd,even" print=false}
   {section name=rep loop=$repositories}
     <tr class="{cycle}">
-      <td{if (strlen($repositories[rep].description) > 0)} rowspan="2"{/if}>
+      <td class="text"{if (strlen($repositories[rep].description) > 0)} rowspan="2"{/if}>
         <a href="tiki-admin_integrator_rules.php?repID={$repositories[rep].repID|escape}" title="{tr}Edit rules{/tr}">
           {$repositories[rep].name}
         </a>
       </td>
-      <td>{$repositories[rep].path}</td>
-      <td>{$repositories[rep].start_page}</td>
-      <td>{$repositories[rep].css_file}</td>
-      <td>
+      <td class="text">{$repositories[rep].path}</td>
+      <td class="text">{$repositories[rep].start_page}</td>
+      <td class="text">{$repositories[rep].css_file}</td>
+      <td class="action">
         <a href="tiki-admin_integrator.php?action=edit&amp;repID={$repositories[rep].repID|escape}" title="{tr}Edit{/tr}">
             {icon _id='wrench' alt="{tr}Edit{/tr}"}
         </a>
@@ -99,7 +99,7 @@
     {* Show description as colspaned row if it is not an empty *}
     {if (strlen($repositories[rep].description) > 0)}
     </tr><tr class="{cycle}">
-      <td colspan="4">{$repositories[rep].description}</td>
+      <td class="text" colspan="4">{$repositories[rep].description}</td>
     {/if}
     </tr>
   {/section}

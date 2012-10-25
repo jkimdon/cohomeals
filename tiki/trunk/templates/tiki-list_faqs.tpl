@@ -25,20 +25,20 @@
 	{cycle values="odd,even" print=false}
 	{section name=user loop=$channels}
 		<tr class="{cycle}">
-			<td>
+			<td class="text">
 				<a class="tablename" href="tiki-view_faq.php?faqId={$channels[user].faqId}">{$channels[user].title|escape}</a>
 				<div class="subcomment">
 					{$channels[user].description|escape|nl2br}
 				</div>
 			</td>
-			<td style="text-align:right;">
+			<td class="integer">
 				{$channels[user].hits}
 			</td>
-			<td style="text-align:right;">
+			<td class="integer">
 				{$channels[user].questions} ({$channels[user].suggested})
 			</td>
 			{if $tiki_p_admin_faqs eq 'y'}
-				<td style="text-align:right">
+				<td class="action">
 					<a class="link" href="tiki-list_faqs.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;faqId={$channels[user].faqId}">{icon _id='page_edit'}</a>
 					<a class="link" href="tiki-faq_questions.php?faqId={$channels[user].faqId}">{icon _id='help' alt="{tr}Questions{/tr}"}</a>
 					<a class="link" href="tiki-list_faqs.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;remove={$channels[user].faqId}">{icon _id='cross' alt="{tr}Remove{/tr}"}</a>
@@ -46,11 +46,7 @@
 			{/if}
 		</tr>
 	{sectionelse}
-		<tr>
-			<td class="odd" colspan="{if $tiki_p_admin_faqs eq 'y'}5{else}4{/if}">
-				<strong>{tr}No records found.{/tr}</strong>
-			<td>
-		</tr>
+		{if $tiki_p_admin_faqs eq 'y'}{norecords _colspan=5}{else}{norecords _colspan=4}{/if}
 	{/section}
 </table>
 
@@ -73,7 +69,7 @@
 		<table class="formcolor">
 			<tr>
 				<td>
-					{tr}Title{/tr}:
+					{tr}Title:{/tr}
 				</td>
 				<td>
 					<input type="text" name="title" value="{$title|escape}" />
@@ -81,7 +77,7 @@
 			</tr>
 			<tr>
 				<td>
-					{tr}Description{/tr}:
+					{tr}Description:{/tr}
 				</td>
 				<td>
 					<textarea name="description" rows="4" cols="40">{$description|escape}</textarea>
@@ -90,7 +86,7 @@
 			{include file='categorize.tpl'}
 			<tr>
 				<td>
-					{tr}Users can suggest questions{/tr}:
+					{tr}Users can suggest questions:{/tr}
 				</td>
 				<td>
 					<input type="checkbox" name="canSuggest" {if $canSuggest eq 'y'}checked="checked"{/if} />

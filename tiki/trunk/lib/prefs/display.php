@@ -1,11 +1,12 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: display.php 25210 2010-02-14 20:52:22Z changi67 $
+// $Id: display.php 39469 2012-01-12 21:13:48Z changi67 $
 
-function prefs_display_list() {
+function prefs_display_list()
+{
 	return array(
 		'display_field_order' => array(
 			'name' => tra('Fields display order'),
@@ -18,6 +19,8 @@ function prefs_display_list() {
 				'YDM' => tra('Year')  . ' ' . tra('Day') . ' ' . tra('Month'),
 				'YMD' => tra('Year')  . ' ' . tra('Month') . ' ' . tra('Day'),
 			),
+			'default' => 'MDY',
+			'tags' => array('basic'),
 		),
 	);
 }

@@ -1,14 +1,20 @@
 <?php
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
+// All Rights Reserved. See copyright.txt for details and a complete list of authors.
+// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
+// $Id: mod-func-last_podcasts.php 39469 2012-01-12 21:13:48Z changi67 $
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function module_last_podcasts_info() {
+function module_last_podcasts_info()
+{
 	return array(
-		'name' => tra('Last Podcasts'),
+		'name' => tra('Newest Podcasts'),
 		'description' => tra('Displays Podcasts.'),
 		'prefs' => array('feature_file_galleries'),
 		'common_params' => array('nonums', 'rows'),
@@ -22,19 +28,18 @@ function module_last_podcasts_info() {
 			'width' => array(
 				'required' => false,
 				'name' => tra('width'),
-				'description' => tra('Width of mediaplayer in pixels. Default is 190.'),
+				'description' => tra('Width of mediaplayer in pixels.'),
 				'default' => 190,
 			),
 			'height' => array(
 				'required' => false,
 				'name' => tra('height'),
-				'description' => tra('Height of mediaplayer in pixels. Default is 20.'),
+				'description' => tra('Height of mediaplayer in pixels.'),
 				'default' => 20,
 			),
 			'mediaplayer' => array(
 				'name' => tra('mediaplayer'),
 				'description' => tra('Path to mp3 player. For instance media/player_mp3_maxi.swf if you downloaded player_mp3_maxi.swf from http://flash-mp3-player.net/players/maxi/download/ to directory media/ (directory needs to be created or you can chose another place).'),
-				'default' => 20,
 			),
 			'link_url' => array(
 				'required' => false,
@@ -44,14 +49,14 @@ function module_last_podcasts_info() {
 			'link_text' => array(
 				'required' => false,
 				'name' => tra('Bottom Link URL Text'),
-				'description' => tra('Text for link if Bottom Link URL is set. Default is "More Podcasts"'),
-				'default' => 'More Podcasts',
+				'description' => tra('Text for link if Bottom Link URL is set.'),
+				'default' => tra('More Podcasts'),
 				'filter' => 'striptags'
 			),
 			'verbose' => array(
 				'required' => false,
 				'name' => tra('Verbose'),
-				'description' => 'y|n' . tra('Display description of podcast below player if "y", and on title mouseover if "n". Default is "y".'),
+				'description' => 'y|n ' . tra('Display description of podcast below player if "y", and on title mouseover if "n".'),
 				'default' => 'y',
 				'filter' => 'striptags'
 			)
@@ -59,20 +64,23 @@ function module_last_podcasts_info() {
 	);
 }
 
-function module_last_podcasts( $mod_reference, $module_params ) {
-	global $tikilib, $smarty;
+function module_last_podcasts($mod_reference, $module_params)
+{
+	global $smarty;
+
+	$filegallib = TikiLib::lib('filegal');
 
 	if (isset($module_params['galleryId'])) {
 		if (strstr($module_params['galleryId'], ':')) {
-			$mediafiles = $tikilib->get_files(0, $mod_reference["rows"], 'created_desc', '', explode(':',$module_params['galleryId']));
+			$mediafiles = $filegallib->get_files(0, $mod_reference["rows"], 'created_desc', '', explode(':', $module_params['galleryId']));
 		} else {
-			$mediafiles = $tikilib->get_files(0, $mod_reference["rows"], 'created_desc', '', $module_params['galleryId']);
+			$mediafiles = $filegallib->get_files(0, $mod_reference["rows"], 'created_desc', '', $module_params['galleryId']);
 		}
 	} else {
-		$mediafiles = $tikilib->list_files(0, $mod_reference["rows"], 'created_desc', '');
+		$mediafiles = $filegallib->list_files(0, $mod_reference["rows"], 'created_desc', '');
 	}
 	
-	$mediaplayer=(isset($module_params['mediaplayer']) && is_readable($module_params['mediaplayer']))?$module_params['mediaplayer']:'';
+	$mediaplayer = (isset($module_params['mediaplayer']) && is_readable($module_params['mediaplayer'])) ? $module_params['mediaplayer'] : '';
 	
 	$smarty->assign('modLastFiles', $mediafiles['data']);
 	$smarty->assign('mediaplayer', $mediaplayer);

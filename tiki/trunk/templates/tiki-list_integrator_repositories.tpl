@@ -1,4 +1,4 @@
-{* $Id: tiki-list_integrator_repositories.tpl 29087 2010-09-09 22:22:09Z changi67 $ *}
+{* $Id: tiki-list_integrator_repositories.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title}{tr}Available Repositories{/tr}{/title}
 
@@ -19,12 +19,12 @@
   {cycle values="odd,even" print=false}
   {section name=rep loop=$repositories}
     <tr class="{cycle}">
-      <td>
+      <td class="text">
         <a href="tiki-integrator.php?repID={$repositories[rep].repID|escape}">
           {$repositories[rep].name}
         </a>
       </td>
-      <td>{$repositories[rep].description}</td>
+      <td class="text">{$repositories[rep].description}</td>
     </tr>
   {/section}
 </table>

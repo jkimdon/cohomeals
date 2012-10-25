@@ -1,93 +1,147 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_trackerprefill.php 28491 2010-08-13 20:43:50Z minger0 $
+// $Id: wikiplugin_trackerprefill.php 40902 2012-04-14 13:29:48Z eromneg $
 
-function wikiplugin_trackerprefill_help() {
-	$help = tra('Displays a button to link to a page with a tracker plugin with prefilled tracker fields.');
-	$help .= '~np~{TRACKERPREFILL(page=trackerpage,label=text,field1=id,value1=, field2=id,value2=... /)}';
-	return $help;
-}
-
-function wikiplugin_trackerprefill_info() {
+function wikiplugin_trackerprefill_info()
+{
 	return array(
 		'name' => tra('Tracker Prefill'),
 		'documentation' => 'PluginTrackerPrefill',
-		'description' => tra('Displays a button to link to a page with a tracker plugin with prefilled tracker fields.'),
+		'description' => tra('Create a button to prefill tracker fields'),
 		'prefs' => array( 'feature_trackers', 'wikiplugin_trackerprefill' ),
+		'icon' => 'img/icons/application_form.png',
 		'params' => array(
 			'page' => array(
 				'required' => true,
 				'name' => tra('Page'),
-				'description' => tra('Tracker page name'),
+				'description' => tra('Tracker Page Name'),
+				'default' => '',
 			),
 			'label' => array(
 				'required' => false,
 				'name' => tra('Label'),
-				'description' => tra('Button label.'),
+				'description' => tra('Button Label.'),
+				'default' => '',
 			),
 			'urlparams' => array(
 				'required' => false,
-				'name' => tra('URL parameters'),
+				'name' => tra('URL Parameters'),
 				'description' => tra('Parameters to pass in the url, e.g. &my_parameter1=123&my_parameter2=q'),
+				'default' => '',
 			),
 			'field1' => array(
 				'required' => true,
 				'name' => tra('Field 1'),
-				'description' => tra('Field ID'),
+				'description' => tra('Field ID for the first field'),
+				'filter' => 'digits',
+				'default' => '',
 			),
 			'value1' => array(
 				'required' => true,
 				'name' => tra('Value 1'),
-				'description' => tra('Content of the field.'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
 			),
 			'field2' => array(
 				'required' => false,
 				'name' => tra('Field 2'),
-				'description' => tra('Field ID'),
+				'description' => tra('Field ID for the second field'),
+				'filter' => 'digits',
+				'default' => '',
 			),
 			'value2' => array(
 				'required' => false,
 				'name' => tra('Value 2'),
-				'description' => tra('Content of the field.'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
 			),
 			'field3' => array(
 				'required' => false,
 				'name' => tra('Field 3'),
-				'description' => tra('Field ID'),
+				'description' => tra('Field ID for the third field'),
+				'filter' => 'digits',
+				'default' => '',
 			),
 			'value3' => array(
 				'required' => false,
 				'name' => tra('Value 3'),
-				'description' => tra('Content of the field.'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
 			),
 			'field4' => array(
 				'required' => false,
 				'name' => tra('Field 4'),
-				'description' => tra('Field ID'),
+				'description' => tra('Field ID for the fourth field'),
+				'filter' => 'digits',
+				'default' => '',
 			),
 			'value4' => array(
 				'required' => false,
 				'name' => tra('Value 4'),
-				'description' => tra('Content of the field.'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
 			),
 			'field5' => array(
 				'required' => false,
 				'name' => tra('Field 5'),
-				'description' => tra('Field ID'),
+				'description' => tra('Field ID for the fifth field'),
+				'filter' => 'digits',
+				'default' => '',
 			),
 			'value5' => array(
 				'required' => false,
 				'name' => tra('Value 5'),
-				'description' => tra('Content of the field.'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
 			),
+			'field6' => array(
+				'required' => false,
+				'name' => tra('Field 6'),
+				'description' => tra('Field ID for the sixth field'),
+				'filter' => 'digits',
+				'default' => '',
+			),
+			'value6' => array(
+				'required' => false,
+				'name' => tra('Value 6'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
+			),
+			'field7' => array(
+				'required' => false,
+				'name' => tra('Field 7'),
+				'description' => tra('Field ID for the seventh field'),
+				'filter' => 'digits',
+				'default' => '',
+			),
+			'value7' => array(
+				'required' => false,
+				'name' => tra('Value 7'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
+			),
+			'field8' => array(
+				'required' => false,
+				'name' => tra('Field 8'),
+				'description' => tra('Field ID for the eighth field'),
+				'filter' => 'digits',
+				'default' => '',
+			),
+			'value8' => array(
+				'required' => false,
+				'name' => tra('Value 8'),
+				'description' => tra('Content that should be used to prefill the field.'),
+				'default' => '',
+			),			
 		),
 	);
 }
 
-function wikiplugin_trackerprefill($data, $params) {
+function wikiplugin_trackerprefill($data, $params)
+{
 	global $smarty;
 	$prefills = array();
 	foreach ($params as $param=>$value) {

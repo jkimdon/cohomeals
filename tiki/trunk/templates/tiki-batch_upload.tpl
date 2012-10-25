@@ -1,4 +1,4 @@
-{* $Id: tiki-batch_upload.tpl 19224 2009-05-30 05:48:18Z pkdille $ *}
+{* $Id: tiki-batch_upload.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {title}{tr}Directory batch upload{/tr}{/title}
 
 <div class="navbar">

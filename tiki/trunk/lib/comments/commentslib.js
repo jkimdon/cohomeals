@@ -1,4 +1,4 @@
-//$Id: commentslib.js 28635 2010-08-20 17:54:29Z sampaioprimo $
+//$Id: commentslib.js 29615 2010-09-25 21:53:13Z sampaioprimo $
 
 $(document).ready(function() {
 
@@ -18,6 +18,21 @@ $(document).ready(function() {
 	$('#comments_previewComment').click(function() {
 		comments_anonymous_fields();
 	});
+
+	if ($('#comments_showArchived').length) {
+		$('#comments_showArchived').click(function() {
+			showJQ('.archived_comment', jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+			$('#comments_showArchived').toggle();
+			$('#comments_hideArchived').toggle();
+		});
+	}
+	if ($('#comments_hideArchived').length) {
+		$('#comments_hideArchived').click(function() {
+			hideJQ('.archived_comment', jqueryTiki.effect, jqueryTiki.effect_speed, jqueryTiki.effect_direction);
+			$('#comments_showArchived').toggle();
+			$('#comments_hideArchived').toggle();
+		});
+	}
 });
 
 // save anonymous name, website and email in a cookie

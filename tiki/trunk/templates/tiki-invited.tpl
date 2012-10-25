@@ -1,3 +1,5 @@
+{* $Id: tiki-invited.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+
 <h1><a href="tiki-invited.php" class="pagetitle">{tr}Invitation{/tr}</a></h1>
 
 {if $error}

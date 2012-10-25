@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_hotwords.tpl 29084 2010-09-09 21:38:07Z changi67 $ *}
+{* $Id: tiki-admin_hotwords.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title help="Hotwords"}{tr}Admin Hotwords{/tr}{/title}
 
@@ -40,17 +40,15 @@
 	{cycle values="odd,even" print=false}
 	{section name=user loop=$words}
 		<tr class="{cycle}">
-			<td>{$words[user].word}</td>
-			<td>{$words[user].url}</td>
-			<td>
+			<td class="text">{$words[user].word}</td>
+			<td class="text">{$words[user].url}</td>
+			<td class="action">
 				<a class="link" href="tiki-admin_hotwords.php?remove={$words[user].word|escape:"url"}{if $offset}&amp;offset={$offset}{/if}&amp;sort_mode={$sort_mode}" title="{tr}Delete{/tr}">{icon _id='cross' alt="{tr}Delete{/tr}"}</a>
 			</td>
 		</tr>
 	{sectionelse}
-		<tr>
-			<td colspan="3" class="odd">{tr}No records found{/tr}</td>
-		</tr>
+		{norecords _colspan=3}
 	{/section}
 </table>
 
-{pagination_links cant=$cant_pages step=$prefs.maxRecords offset=$offset }{/pagination_links}
+{pagination_links cant=$cant_pages step=$prefs.maxRecords offset=$offset}{/pagination_links}

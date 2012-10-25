@@ -1,16 +1,15 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-lastchanges.php 25080 2010-02-11 16:44:33Z changi67 $
+// $Id: tiki-lastchanges.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
 require_once ('tiki-setup.php');
 include_once ('lib/wiki/histlib.php');
 $auto_query_args = array('sort_mode', 'offset', 'find', 'days');
-$smarty->assign('headtitle', tra('Last Changes'));
 $access->check_feature('feature_wiki');
 $access->check_feature('feature_lastChanges');
 $access->check_permission('tiki_p_view');

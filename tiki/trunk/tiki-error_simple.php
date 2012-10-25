@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-error_simple.php 27270 2010-05-21 00:02:09Z jonnybradley $
+// $Id: tiki-error_simple.php 40234 2012-03-17 19:17:41Z changi67 $
 
 echo '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -12,8 +12,8 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
 echo '<html><head><title>maintenance</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /></head><body><pre><p>';
 if (isset($_REQUEST['error']) and !is_null($_REQUEST['error'])) {
 
-	$_REQUEST["error"] = substr($_REQUEST["error"],0,256);
-	echo htmlentities(strip_tags($_REQUEST["error"]), ENT_QUOTES, 'UTF-8' );	
+	$_REQUEST["error"] = substr($_REQUEST["error"], 0, 256);
+	echo htmlentities(strip_tags($_REQUEST["error"]), ENT_QUOTES, 'UTF-8');	
 
 } else {
 	echo 'There was an unspecified error.  Please go back and try again.';

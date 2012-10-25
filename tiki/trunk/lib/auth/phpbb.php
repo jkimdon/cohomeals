@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: phpbb.php 25258 2010-02-16 13:22:48Z changi67 $
+// $Id: phpbb.php 40056 2012-03-06 21:47:20Z changi67 $
 
 // Tikiwiki authentication backend for phpBB3 with adodb
 // By Jacob 'jacmoe2' Moen 10 Dec 2009
@@ -34,12 +34,12 @@ class TikiPhpBBLib
 	{
 
 	// no need to progress further if the user doesn't even exist
-		if(!$this->userExists($user)) {
+		if (!$this->userExists($user)) {
 			return PHPBB_NO_SUCH_USER;
 		}
 
 		// if the user does exist, authenticate
-		if($this->authenticate($user, $pass)) {
+		if ($this->authenticate($user, $pass)) {
 			return PHPBB_SUCCESS;
 		} else {
 			return PHPBB_INVALID_CREDENTIALS;
@@ -61,7 +61,7 @@ class TikiPhpBBLib
 		$dbconnection = NewADOConnection($dbtype);
 		$dbconnection->Connect($dbhost, $dbuser, $dbpasswd, $dbname);
 
-		if($dbconnection) {
+		if ($dbconnection) {
 			return $dbconnection;
 		}
 		return false;

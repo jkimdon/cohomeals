@@ -1,7 +1,7 @@
-{* $Id: tiki-print_forum_thread.tpl 22505 2009-10-21 00:35:31Z chealer $ *}
+{* $Id: tiki-print_forum_thread.tpl 36053 2011-08-11 09:20:49Z chealer $ *}
 <div style="margin:10px 20px 0px 20px">
 
-  {title}{tr}Forum:{/tr}&nbsp;{$forum_info.name|escape}{/title}
+  {title}{tr}Forum:{/tr} {$forum_info.name}{/title}
 
   <div class="top_post">
     {include file='comment.tpl' first='y' comment=$thread_info thread_style='commentStyle_plain'}

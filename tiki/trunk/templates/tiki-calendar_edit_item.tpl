@@ -1,79 +1,100 @@
 {strip}
-{title admpage="calendar"}{tr}Calendar Item{/tr}{/title}
-(Please note that common house events may require an event form or a cemetery parking permit. Contact Jude.)
-<div class="navbar">
-{if $tiki_p_view_calendar eq 'y'}
-	{button href="tiki-calendar.php" _text="{tr}View Calendars{/tr}"}
-{/if}
-{if $tiki_p_admin_calendar eq 'y'}
-	{button href="tiki-admin_calendars.php?calendarId=$calendarId" _text="{tr}Edit Calendar{/tr}"}
-{/if}
-{if $tiki_p_add_events eq 'y' and $id }
-	{button href="tiki-calendar_edit_item.php" _text="{tr}New event{/tr}"}
-{/if}
-{if $id eq '-1'}
-	{if $edit}
-		{button href="tiki-calendar_edit_item.php?viewrecurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}View event{/tr}"}
-	{elseif $tiki_p_change_events eq 'y'}
-		{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}Edit/Delete this event only{/tr}"}
-		{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=0" _text="{tr}Edit/Delete all unchanged events in this recurrence{/tr}"}
-	{/if}
-{elseif $id}
-	{if $edit}
-		{button href="tiki-calendar_edit_item.php?viewcalitemId=$id" _text="{tr}View event{/tr}"}
-	{elseif $tiki_p_change_events eq 'y'}
-		{button href="tiki-calendar_edit_item.php?calitemId=$id" _text="{tr}Edit/Delete event{/tr}"}
-	{/if}
-{/if}
-{if $tiki_p_admin_calendar eq 'y'}
-	{button href="tiki-admin_calendars.php" _text="{tr}Admin Calendars{/tr}"}
-{/if}
-</div>
+	{title admpage="calendar"}{tr}Calendar Item{/tr}{/title}
+	(Please note that common house events may require an event form or a cemetery parking permit. Contact Jude.)
 
-<div class="wikitext">
+   	<div class="navbar">
+     	        {if $tiki_p_view_calendar eq 'y'}
+	     	        {button href="tiki-calendar.php" _text="{tr}View Calendars{/tr}"}
+	        {/if}
+	     	{if $tiki_p_admin_calendar eq 'y'}
+	     	        {button href="tiki-admin_calendars.php?calendarId=$calendarId" _text="{tr}Edit Calendar{/tr}"}
+	        {/if}
+	        {if $tiki_p_add_events eq 'y' and $id }
+	     	        {button href="tiki-calendar_edit_item.php" _text="{tr}New event{/tr}"}
+	        {/if}
+		{if $id eq '-1'}
+	    	        {if $edit}
+			    {button href="tiki-calendar_edit_item.php?viewrecurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}View event{/tr}"}
+	        {elseif $tiki_p_change_events eq 'y'}
+			{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=$itemdate" _text="{tr}Edit/Delete this event only{/tr}"}
+			{button href="tiki-calendar_edit_item.php?recurrenceId=$recurrenceId&calendarId=$calendarId&itemdate=0" _text="{tr}Edit/Delete all unchanged events in this recurrence{/tr}"}
+	        {/if}
+	    {elseif $id}
+	    	    {if $edit}
+		    	    {button href="tiki-calendar_edit_item.php?viewcalitemId=$id" _text="{tr}View event{/tr}"}
+	            {elseif $tiki_p_change_events eq 'y'}
+		    	    {button href="tiki-calendar_edit_item.php?calitemId=$id" _text="{tr}Edit/Delete event{/tr}"}
+	            {/if}
+	    {/if}
+	    {if $tiki_p_admin_calendar eq 'y'}
+	    	{button href="tiki-admin_calendars.php" _text="{tr}Admin Calendars{/tr}"}
+            {/if}
+    	</div>
 
-{if $edit}
-	{if $preview}
-		<h2>{tr}Preview{/tr}</h2>
-		{$calitem.parsedName}
-		<div class="wikitext">{$calitem.parsed}</div>
-		<h2>{if $id}{tr}Edit Calendar Item{/tr}{else}{tr}New Calendar Item{/tr}{/if}</h2>
-	{/if}
-	<form action="{$myurl}" method="post" name="f" id="editcalitem">
-		<input type="hidden" name="save[user]" value="{$calitem.user}" />
-		{if $id}
-			<input type="hidden" name="save[calitemId]" value="{$id}" />
-		{/if}
-{/if}
-{if $prefs.calendar_addtogooglecal == 'y'}
-	{wikiplugin _name="addtogooglecal" calitemid=$id}{/wikiplugin}
-{/if}
-<table class="formcolor{if !$edit} vevent{/if}">
-<tr>
-	<td>{tr}Calendar{/tr}</td>
-	<td style="background-color:#{$calendar.custombgcolor};color:#{$calendar.customfgcolor};">
-{if $edit}
-	{if $prefs.javascript_enabled eq 'n'}
-		{$calendar.name|escape}<br />{tr}or{/tr}&nbsp;
-		<input type="submit" name="changeCal" value="{tr}Go to{/tr}" />
-	{/if}
-		<select name="save[calendarId]" id="calid" onchange="javascript:document.getElementById('editcalitem').submit();">
-			{foreach item=it key=itid from=$listcals}
-				{if $it.tiki_p_add_events eq 'y'}
-				<option value="{$it.calendarId}" style="background-color:#{$it.custombgcolor};color:#{$it.customfgcolor};"
-				{if $calitem.calendarId}
-					{if $calitem.calendarId eq $itid} selected="selected"{/if}
-				{else}
-					{if $calendarView}
-						{if $calendarView eq $itid} selected="selected"{/if}
+        <div class="wikitext">
+		{if $edit}
+			{if $preview}
+				<h2>
+					{tr}Preview{/tr}
+				</h2>
+				{$calitem.parsedName}
+				<div class="wikitext">
+					{$calitem.parsed}
+				</div>
+				<h2>
+					{if $id}
+						{tr}Edit Calendar Item{/tr}
 					{else}
-						{if $calendarId}
-							{if $calendarId eq $itid} selected="selected"{/if}
-						{/if}
+						{tr}New Calendar Item{/tr}
 					{/if}
-				{/if}>{$it.name|escape}</option>
+				</h2>
+			{/if}
+			<form action="{$myurl}" method="post" name="f" id="editcalitem">
+			        <input type="hidden" name="save[user]" value="{$calitem.user}" />
+				{if $id}
+					<input type="hidden" name="save[calitemId]" value="{$id}" />
 				{/if}
-			{/foreach}
+		{/if}
+		{if $prefs.calendar_addtogooglecal == 'y'}
+			{wikiplugin _name="addtogooglecal" calitemid=$id}{/wikiplugin}
+		{/if}
+		<table class="formcolor{if !$edit} vevent{/if}">
+			<tr>
+				<td>
+					{tr}Calendar{/tr}
+				</td>
+				<td style="background-color:#{$calendar.custombgcolor};color:#{$calendar.customfgcolor};">
+					{if $edit}
+						{if $prefs.javascript_enabled eq 'n'}
+							{$calendar.name|escape}<br />{tr}or{/tr}&nbsp;
+							<input type="submit" name="changeCal" value="{tr}Go to{/tr}" />
+						{/if}
+						<select name="save[calendarId]" id="calid" onchange="javascript:needToConfirm=false;document.getElementById('editcalitem').submit();">
+							{foreach item=it key=itid from=$listcals}
+								{if $it.tiki_p_add_events eq 'y'}
+									<option value="{$it.calendarId}" style="background-color:#{$it.custombgcolor};color:#{$it.customfgcolor};"
+										{if isset($calitem.calendarId)}
+											{if $calitem.calendarId eq $itid}
+												 selected="selected"
+											{/if}
+										{else}
+											{if $calendarView}
+												{if $calendarView eq $itid}
+													 selected="selected"
+												{/if}
+											{else}
+												{if $calendarId}
+													{if $calendarId eq $itid}
+														 selected="selected"
+													{/if}
+												{/if}
+											{/if}
+										{/if}
+									>
+										{$it.name|escape}
+									</option>
+								{/if}
+							  {/foreach}
 		</select>
 {else}
 	{$listcals[$calitem.calendarId].name|escape}
@@ -393,9 +414,7 @@
 </td><td>
 {if $edit}
 {*  {toolbars area_id="save[description]"} (Broken) *}
-  <textarea id='editwiki' class="wikiedit" cols="{$cols}" rows="{$rows}" name="save[description]" style="width:98%">{$calitem.description|escape}</textarea>
-  <input type="hidden" name="rows" value="{$rows}"/>
-  <input type="hidden" name="cols" value="{$cols}"/>
+  <textarea id='editwiki' class="wikiedit" name="save[description]" style="width:98%">{$calitem.description|escape}</textarea>
 {else}
   <span class="description">{$calitem.parsed|default:"<i>{tr}No description{/tr}</i>"}</span>
 {/if}

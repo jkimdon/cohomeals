@@ -1,11 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Adodb.php 28738 2010-08-27 17:18:06Z sampaioprimo $
-
-require_once 'lib/core/TikiDb.php';
+// $Id: Adodb.php 40203 2012-03-15 21:16:07Z changi67 $
 
 class TikiDb_Adodb extends TikiDb
 {
@@ -22,7 +20,7 @@ class TikiDb_Adodb extends TikiDb
 
 	function qstr( $str ) // {{{
 	{
-		return $this->db->quote( $str );
+		return $this->db->quote($str);
 	} // }}}
 
 	function query( $query = null, $values = null, $numrows = -1, $offset = -1, $reporterrors = true ) // {{{
@@ -35,7 +33,7 @@ class TikiDb_Adodb extends TikiDb
 		if ( $query == null ) {
 			$query = $this->getQuery();
 		}
-		$this->convertQueryTablePrefixes( $query );
+		$this->convertQueryTablePrefixes($query);
 
 		$starttime=$this->startTimer();
 		if ($numrows == -1 && $offset == -1)
@@ -46,16 +44,16 @@ class TikiDb_Adodb extends TikiDb
 		$this->stopTimer($starttime);
 
 		if (!$result ) {
-			$this->setErrorMessage( $this->db->ErrorMsg() );
+			$this->setErrorMessage($this->db->ErrorMsg());
 
 			if ($reporterrors) {
-				$this->handleQueryError( $query, $values, $result );
+				$this->handleQueryError($query, $values, $result);
 			}
 		}
 
 		global $num_queries;
 		$num_queries++;
-		$this->setQuery( null );
+		$this->setQuery(null);
 
 		return $result;
 	} // }}}

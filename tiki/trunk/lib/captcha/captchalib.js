@@ -1,10 +1,4 @@
-//$Id: captchalib.js 27791 2010-06-28 23:53:53Z sampaioprimo $
-
-jQuery(document).ready(function() {
-	jQuery('#captchaRegenerate').click(function() {
-		generateCaptcha();
-	});
-});
+//$Id: captchalib.js 42625 2012-08-21 02:24:01Z chealer $
 
 function generateCaptcha() {
 	jQuery('#captchaImg').attr('src', 'img/spinner.gif').show();
@@ -18,4 +12,6 @@ function generateCaptcha() {
 			jQuery('body').css('cursor', 'auto');
 		}
 	});
+	$("#antibotcode").focus();
+	return false;
 }

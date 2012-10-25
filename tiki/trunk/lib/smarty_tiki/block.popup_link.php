@@ -1,18 +1,29 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.popup_link.php 28400 2010-08-09 13:21:49Z jonnybradley $
+// $Id: block.popup_link.php 39783 2012-02-08 09:14:14Z sept_7 $
+
+/**
+ * Smarty plugin
+ * @package Smarty
+ * @subpackage plugins
+ *
+ */
 
 //this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
+if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
   exit;
 }
 
-function smarty_block_popup_link($params, $content, &$smarty, $repeat) {
+function smarty_block_popup_link($params, $content, $smarty, &$repeat)
+{
 	global $headerlib, $prefs;
+
+	if ( $repeat ) return;
+
 	static $counter = 0;
 
 	$linkId = 'block-popup-link' . ++$counter;
@@ -20,14 +31,15 @@ function smarty_block_popup_link($params, $content, &$smarty, $repeat) {
 
 	if ( $repeat === false ) {
 		if ($prefs['feature_jquery'] == 'y') {
-			$headerlib->add_js( <<<JS
+			$headerlib->add_js(
+<<<JS
 \$(document).ready( function() {
 
 	\$('#$block').hide();
 
 	\$('#$linkId').click( function() {
 		var block = \$('#$block');
-		if( block.css('display') == 'none' ) {
+		if ( block.css('display') == 'none' ) {
 			//var coord = \$(this).offset();
 			block.css( 'position', 'absolute' );
 			//block.css( 'left', coord.left);
@@ -39,7 +51,7 @@ function smarty_block_popup_link($params, $content, &$smarty, $repeat) {
 	});
 } );
 JS
-					);
+			);
 		}
 
 		$href = ' href="javascript:void(0)"';

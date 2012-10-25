@@ -1,35 +1,38 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_banner.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_banner.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-//this script may only be included - so its better to die if called directly.
-if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
-}
-function wikiplugin_banner_help() {
-	return tra("Insert a banner").":<br />~np~{BANNER(zone=zone, target=target) /}~/np~";
-}
-function wikiplugin_banner_info() {
+function wikiplugin_banner_info()
+{
 	return array(
 		'name' => tra('Banner'),
 		'documentation' => 'PluginBanner',
-		'description' => tra('Insert a banner'),
+		'description' => tra('Add a banner'),
 		'prefs' => array('wikiplugin_banner'),
+		'icon' => 'img/icons/page_lightning.png',
+		'tags' => array( 'basic' ),		
 		'params' => array(
 			'zone' => array(
-			'required' => true,
-			'name' => tra('Zone'),
-			'description' => tra('Zone'),
+				'required' => true,
+				'name' => tra('Zone'),
+				'description' => tra('Name of the zone created in Admin > Banners'),
+				'default' => '',
 			),
 			'target' => array(
-			'required' => false,
-			'name' => tra('Target'),
-			'description' => '_blank|display'),
+				'required' => false,
+				'name' => tra('Target'),
+				'description' => tra('Determines the browser behavior once the banner is clicked'),
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Blank'), 'value' => '_blank'), 
+					array('text' => tra('Display'), 'value' => 'display')
+				)
 			)
+		)
 	);
 }
 
@@ -41,7 +44,7 @@ function wikiplugin_banner($data, $params)
 	}
     global $bannerlib;include_once('lib/banners/bannerlib.php');
 
-	extract ($params, EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 		
     if (empty($zone)) {
         return tra('missing parameter');

@@ -1,4 +1,4 @@
-//$Id: tiki-js.js 30370 2010-10-27 19:00:59Z nkoth $
+//$Id: tiki-js.js 42057 2012-06-23 18:36:05Z jonnybradley $
 
 var feature_no_cookie = 'n';
 
@@ -47,37 +47,48 @@ function toggleCols(id,zeromargin,maincol) {
 	if (!zeromargin) { zeromargin = ''; }
 	if (!id) { id = ''; }
 	if (!maincol) { maincol = 'col1'; }
-	if (document.getElementById(id).style.display == "none") {
-		document.getElementById(id).style.display = "block";
-		if (zeromargin == 'left') {
-			document.getElementById(maincol).style.marginLeft = '';
-			if (!document.getElementById(maincol).style.marginLeft) {
-				document.getElementById(maincol).style.marginLeft = $("#"+id).width() + "px";
-			}
-			setSessionVar(showit,'y');
-		} else {
-			document.getElementById(maincol).style.marginRight = '';
-			if (!document.getElementById(maincol).style.marginRight) {
-				document.getElementById(maincol).style.marginRight = $("#"+id).width() + "px";
-			}
-			setSessionVar(showit,'y');
+	var $id = $('#' + id), $maincol = $('#' + maincol);
+	if (! $id.is(':visible')) {
+		showCol(id, zeromargin, maincol);
+		setSessionVar(showit,'y');
+	} else {
+		hideCol(id, zeromargin, maincol);
+		setSessionVar(showit,'n');
+	}
+}
+
+function showCol(id, zeromargin, maincol) {
+	var $id = $('#' + id), $maincol = $('#' + maincol);
+
+	$id.show();
+	if (zeromargin == 'left') {
+		$maincol.css('margin-left', '');
+		if (! $maincol.css('margin-left')) {
+			$maincol.css('margin-left', $id.width());
 		}
 	} else {
-		document.getElementById(id).style.display = "none";
-		if (zeromargin == 'left') {
-			document.getElementById(maincol).style.marginLeft = '0';
-			setSessionVar(showit,'n');
-		} else {
-			document.getElementById(maincol).style.marginRight = '0';
-			setSessionVar(showit,'n');
+		$maincol.css('margin-right', '');
+		if (! $maincol.css('margin-right')) {
+			$maincol.css('margin-right', $id.width());
 		}
 	}
 }
 
+function hideCol(id, zeromargin, maincol) {
+	var $id = $('#' + id), $maincol = $('#' + maincol);
+
+	$id.hide();
+	if (zeromargin == 'left') {
+		$maincol.css('margin-left', 0);
+	} else {
+		$maincol.css('margin-right', 0);
+	}
+}
+
 function toggle_dynamic_var(name) {
-	name1 = 'dyn_'+name+'_display';
-	name2 = 'dyn_'+name+'_edit';
-	if(document.getElementById(name1).style.display == "none") {
+	var name1 = 'dyn_'+name+'_display';
+	var name2 = 'dyn_'+name+'_edit';
+	if (document.getElementById(name1).style.display == "none") {
 		document.getElementById(name2).style.display = "none";
 		document.getElementById(name1).style.display = "inline";
 	} else {
@@ -95,7 +106,6 @@ function chgArtType() {
 	var propertyList = ['show_topline','y',
 	                    'show_subtitle','y',
 	                    'show_linkto','y',
-	                    'show_lang','y',
 	                    'show_author','y',
 	                    'use_ratings','y',
 	                    'heading_only','n',
@@ -108,7 +118,7 @@ function chgArtType() {
 	if (typeof articleCustomAttributes != 'undefined') {
 		propertyList = propertyList.concat(articleCustomAttributes);
 	}
-	var l = propertyList.length, property, value;
+	var l = propertyList.length, property, value, display;
 	for (var i=0; i<l; i++) {
 		property = propertyList[i++];
 		value = propertyList[i];
@@ -122,7 +132,7 @@ function chgArtType() {
 		if (document.getElementById(property)) {
 			document.getElementById(property).style.display = display;
 		} else {
-			j = 1;
+			var j = 1;
 			while (document.getElementById(property+'_'+j)) {
 				document.getElementById(property+'_'+j).style.display = display;
 				j++;
@@ -165,32 +175,6 @@ function toggleTrTd(id) {
 	}
 }
 
-function showTocToggle() {
-	if (document.createTextNode) {
-		// Uses DOM calls to avoid document.write + XHTML issues
-
-		var linkHolder = document.getElementById('toctitle');
-		if (!linkHolder) { return; }
-
-		var outerSpan = document.createElement('span');
-		outerSpan.className = 'toctoggle';
-
-		var toggleLink = document.createElement('a');
-		toggleLink.id = 'togglelink';
-		toggleLink.className = 'internal';
-		toggleLink.href = 'javascript:toggleToc()';
-		toggleLink.appendChild(document.createTextNode(tocHideText));
-
-		outerSpan.appendChild(document.createTextNode('['));
-		outerSpan.appendChild(toggleLink);
-		outerSpan.appendChild(document.createTextNode(']'));
-
-		linkHolder.appendChild(document.createTextNode(' '));
-		linkHolder.appendChild(outerSpan);
-		if (getCookie("hidetoc") == "1" ) { toggleToc(); }
-	}
-}
-
 function changeText(el, newText) {
 	// Safari work around
 	if (el.innerText) {
@@ -202,16 +186,11 @@ function changeText(el, newText) {
 
 function toggleToc() {
 	var toc = document.getElementById('toc').getElementsByTagName('ul')[0];
-	var toggleLink = document.getElementById('togglelink');
 
-	if (toc && toggleLink && toc.style.display == 'none') {
-		changeText(toggleLink, tocHideText);
+	if (toc && toc.style.display == 'none') {
 		toc.style.display = 'block';
-		setCookie("hidetoc","0");
 	} else {
-		changeText(toggleLink, tocShowText);
 		toc.style.display = 'none';
-		setCookie("hidetoc","1");
 	}
 }
 
@@ -284,7 +263,7 @@ function setMenuCon(foo) {
 }
 
 function genPass(w1) {
-	vo = "aeiouAEU";
+	var vo = "aeiouAEU", co, s, l, p, i, letter;
 
 	co = "bcdfgjklmnprstvwxzBCDFGHJKMNPQRSTVWXYZ0123456789_$%#";
 	s = Math.round(Math.random());
@@ -317,81 +296,38 @@ function replaceLimon(vec) {
 }
 
 function setSelectionRange(textarea, selectionStart, selectionEnd) {
-	if (typeof textarea.setSelectionRange != 'undefined') {
-		textarea.focus();
-		textarea.setSelectionRange(selectionStart, selectionEnd);
-	} else if (document.selection.createRange) {	// IE
-		var val = textarea.value, c = 0;
-		var isWin = val.indexOf("\r") > -1;
-		textarea.focus();
-		var range =  document.selection.createRange();
-		range.collapse();
-		if (selectionEnd > 1) {
-			if (isWin) {
-				for (var i = 0; i < selectionEnd; i++) {
-					if (val[i] == "\n") {
-						c++;
-					}
-				}
-			}
-			range.moveEnd('character', selectionEnd - c);
-		}
-		range.collapse(false);
-		if (selectionStart < selectionEnd) {
-			c = 0;
-			if (isWin) {
-				for (i = selectionEnd; i > selectionStart; i--) {
-					if (val[i] == "\n") {
-						c++;
-					}
-				}
-			}
-			range.moveStart('character', selectionStart - selectionEnd - c);
-		}
-		try {
-			range.select();
-		} catch (e) {}
+	var $textareaEditor = syntaxHighlighter.get($(textarea));
+	if ($textareaEditor) {
+		syntaxHighlighter.setSelection($textareaEditor, selectionStart, selectionEnd);
+		return;
 	}
+
+	$(textarea).selection(selectionStart, selectionEnd);
 }
 
 function getTASelection( textarea ) {
-	var ta_id = $(textarea).attr("id"), r, cked;
+	var $textareaEditor = syntaxHighlighter.get($(textarea));
+	if ($textareaEditor) {
+		return $textareaEditor.getSelection();
+	}
+	
+	var ta_id = $(textarea).attr("id"), r, cked, output;
 	if ($('#cke_contents_' + ta_id).length !== 0) {
 		// get selection from ckeditor
 		cked = typeof CKEDITOR !== 'undefined' ? CKEDITOR.instances[ta_id] : null;
 		if (cked) {
 			var sel = cked.getSelection();
 			if (sel && sel.getType() === CKEDITOR.SELECTION_TEXT) {	// why so fiddly?
-				r = sel.getRanges();
-				// collect all included elements from ranges
-				var output = "", el;
-				if (r[0].collapsed) {
-					return output;
-				} else if (r[0].startContainer.$ === r[0].endContainer.$) {
-					output += r[0].startContainer.$.nodeValue.substring(r[0].startOffset, r[0].endOffset);
+				if (CKEDITOR.env.ie) {
+					output = sel.document.$.selection.createRange().text;
 				} else {
-					el = sel.getStartElement();
-					if (el) {
-						if (!el.$.nextSibling) {
-							el = el.getChildren().getItem(0);	// for node lists
-						}
-						while (el.$.nextSibling) { // loop through selection if multiple elements
-							if (el.$ === r[0].startContainer.$) {
-								output += el.$.nodeValue.substring(r[0].startOffset);
-							} else if (el.$ === r[0].endContainer.$) {
-								output += el.$.nodeValue.substring(0, r[0].endOffset);
-							} else {
-								output += el.$.nodeValue;
-							}
-							el = new CKEDITOR.dom.element(el.$.nextSibling);
-						}
-					}
+					output = sel.getNative().toString();
 				}
 				return output;
 			}
 		}
 	} else {
-		if (typeof $(textarea).attr("selectionStartSaved") === 'string' && $(textarea).attr("selectionStartSaved")) { // forgetful firefox
+		if (typeof $(textarea).attr("selectionStartSaved") != 'undefined' && $(textarea).attr("selectionStartSaved")) { // forgetful firefox/IE now
 			return textarea.value.substring($(textarea).attr("selectionStartSaved"), $(textarea).attr("selectionEndSaved"));
 		} else if (typeof textarea.selectionStart != 'undefined') {
 			return textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
@@ -402,11 +338,32 @@ function getTASelection( textarea ) {
 	}
 }
 
+var ieFirstTimeInsertKludge = null;
+
+function storeTASelection( area_id ) {
+	if ($('#cke_contents_' + area_id).length === 0) {
+		var $el = $("#" + area_id);
+		var sel = $el.selection();
+		$el.attr("selectionStartSaved", sel.start)
+				.attr("selectionEndSaved", sel.end)
+				.attr("scrollTopSaved", $el.attr("scrollTop"));
+	}
+	if (ieFirstTimeInsertKludge === null) {
+		ieFirstTimeInsertKludge = true;
+	}
+}
+
 function setCaretToPos (textarea, pos) {
 	setSelectionRange(textarea, pos, pos);
 }
 
 function getCaretPos (textarea) {
+	var $textareaEditor = syntaxHighlighter.get($(textarea));
+	if ($textareaEditor) {
+		var endPoint = $textareaEditor.cursorCoords();
+		return (endPoint.x ? endPoint.x : 0);
+	}
+	
 	if (typeof textarea.selectionEnd != 'undefined') {
 		return textarea.selectionEnd;
 	} else if ( document.selection ) {
@@ -431,12 +388,16 @@ function insertAt(elementId, replaceString, blockLevel, perLine, replaceSelectio
 	
 	// inserts given text at selection or cursor position
 	var $textarea = $('#' + elementId);
+	var $textareaEditor = syntaxHighlighter.get($textarea);
 	var toBeReplaced = /text|page|area_id/g; //substrings in replaceString to be replaced by the selection if a selection was done
 	var hiddenParents = $textarea.parents('fieldset:hidden:last');
 	if (hiddenParents.length) { hiddenParents.show(); }
-
-	// get ckeditor handling out of the way - can only be simple text insert for now
-	if ($('#cke_contents_' + elementId).length !== 0) {
+	
+	if ($textareaEditor) {
+	 	syntaxHighlighter.insertAt($textareaEditor, replaceString, perLine, blockLevel, replaceSelection);
+		return;
+	 // get ckeditor handling out of the way - can only be simple text insert for now
+	} else if ($('#cke_contents_' + elementId).length !== 0) {
 		// get selection from ckeditor
 		var cked = typeof CKEDITOR !== 'undefined' ? CKEDITOR.instances[elementId] : null;
 		if (cked) {
@@ -457,7 +418,7 @@ function insertAt(elementId, replaceString, blockLevel, perLine, replaceSelectio
 			if (isPlugin && rng && !rng.collapsed) {
 				var com = cked.getSelection().getStartElement();
 				if (typeof com !== 'undefined' && com && com.$) {
-					while (com.$.nextSibling && com.$ !== rng.endContainer.$) {	// loop through selection if multiple elements
+					while (!$(com.$).hasClass("tiki_plugin") && com.$.nextSibling && com.$ !== rng.endContainer.$) {	// loop through selection if multiple elements
 						com = new CKEDITOR.dom.element(com.$.nextSibling);
 						if ($(com.$).hasClass("tiki_plugin") || $(com.$).find(".tiki_plugin").length === 0) {	// found it or parent (hmm)
 							break;
@@ -489,7 +450,7 @@ function insertAt(elementId, replaceString, blockLevel, perLine, replaceSelectio
 					}
 				}
 				if ($(com.$).hasClass("tiki_plugin")) {
-					$(com.$).replaceWith(document.createTextNode(replaceString));
+					$(com.$).replaceWith($("<pre class='tiki_plugin'>" + replaceString + "</pre>"));
 					cked.reParse();
 					return;
 				}
@@ -501,54 +462,82 @@ function insertAt(elementId, replaceString, blockLevel, perLine, replaceSelectio
 		// catch all other issues and do the insert wherever ckeditor thinks best,
 		// sadly as the first element sometimes FIXME
 		cked.insertText( replaceString );
-		if (isPlugin || replaceString.match(/^\s?\(\(.*?\)\)\s?$/)) {	// also ((wiki links))
+		if (typeof cked.reParse === "function" && (isPlugin || replaceString.match(/^\s?\(\(.*?\)\)\s?$/))) {	// also ((wiki links))
 			cked.reParse();
 		}
 		return;
 	}
+	
 	if (!$textarea.length && elementId === "fgal_picker") {	// ckeditor file browser
-		$(".cke_dialog_contents").find("input:first").val(replaceString);
+		$(".cke_dialog_contents").find("input:first").val(replaceString.replace("&amp;", "&"));
+		return;
+	} else if ($textarea.is(":input") && elementId === "fgal_picker_id") {
+		$textarea.val(replaceString);
 		return;
 	}
 
-	$textarea[0].focus();
+	$textarea.focus();
+	
 	var val = $textarea.val();
 	var selection = $textarea.selection();
-
-	var selectionStart = selection.start;
-	var selectionEnd = selection.end;
 	var scrollTop=$textarea[0].scrollTop;
-
-	if (selectionStart < 0 || (selectionStart == val.length && selectionStart == selectionEnd)) {	// couldn't get textarea selection via jq
-		if (typeof $textarea.attr("selectionStartSaved") === 'string' && $textarea.attr("selectionStartSaved")) {	// forgetful firefox
-			selectionStart = $textarea.attr("selectionStartSaved");
-			selectionEnd = $textarea.attr("selectionEndSaved");
+	
+	if (selection.start === 0 && selection.end === 0 &&
+					typeof $textarea.attr("selectionStartSaved") != 'undefined') {	// get saved textarea selection
+		if ($textarea.attr("selectionStartSaved")) {	// forgetful firefox/IE
+			selection.start = $textarea.attr("selectionStartSaved");
+			selection.end = $textarea.attr("selectionEndSaved");
+			if ($textarea.attr("scrollTopSaved")) {
+				scrollTop = $textarea.attr("scrollTopSaved");
+				$textarea.attr("scrollTopSaved", "");
+			}
+			$textarea.attr("selectionStartSaved", "").attr("selectionEndSaved", "");
 		} else {
-			selectionStart = getCaretPos($textarea[0]);
-			selectionEnd = selectionStart;
+			selection.start = getCaretPos($textarea[0]);
+			selection.end = selection.start;
 		}
 	}
 
-	if( blockLevel ) {
+	// deal with IE's two char line ends
+	var lines, startoff = 0, endoff = 0;
+	if ($textarea[0].createTextRange && $textarea[0].value !== val) {
+		val = $textarea[0].value;	// use raw value of the textarea
+		if (val.substring(selection.start, selection.start + 1) === "\n") {
+			selection.start++;
+		}
+		lines = val.substring(0, selection.start).match(/\r\n/g);
+		if (lines) {
+			startoff -= lines.length;	// remove one char per line for IE
+		}
+	}
+	var selectionStart = selection.start;
+	var selectionEnd = selection.end;
+
+	if ( blockLevel ) {
 		// Block level operations apply to entire lines
 
 		// +1 and -1 to handle end of line caret position correctly
 		selectionStart = val.lastIndexOf( "\n", selectionStart - 1 ) + 1;
-		selectionEnd = val.indexOf( "\n", selectionEnd );
+		var blockEnd = val.indexOf( "\r", selectionEnd ); // check for IE first
+		if (blockEnd < 0) {
+			selectionEnd = val.indexOf( "\n", selectionEnd );
+		} else {
+			selectionEnd = blockEnd;
+		}
 		if (selectionEnd < 0) {
 			selectionEnd = val.length;
 		}
 	}
 
-	if (selectionStart != selectionEnd) { // has there been a selection
-		var newString = '';
-		if( perLine ) {
-			var lines = val.substring(selectionStart, selectionEnd).split("\n");
-			for( k = 0; lines.length > k; ++k ) {
-				if( lines[k].length !== 0 ) {
+	var newString = '';
+	if ((selectionStart != selectionEnd) && !$textareaEditor) { // has there been a selection
+		if ( perLine ) {
+			lines = val.substring(selectionStart, selectionEnd).split("\n");
+			for( var k = 0; lines.length > k; ++k ) {
+				if ( lines[k].length !== 0 ) {
 					newString += replaceString.replace(toBeReplaced, lines[k]);
 				}
-				if( k != lines.length - 1 ) {
+				if ( k != lines.length - 1 ) {
 					newString += "\n";
 				}
 			}
@@ -561,23 +550,45 @@ function insertAt(elementId, replaceString, blockLevel, perLine, replaceSelectio
 				newString = replaceString + '\n' + val.substring(selectionStart, selectionEnd);
 			}
 		}
+		
 		$textarea.val(val.substring(0, selectionStart)
 						+ newString
 						+ val.substring(selectionEnd)
 					);
-		setSelectionRange($textarea[0], selectionStart, selectionStart + newString.length);
+		lines = newString.match(/\r\n/g);
+		if (lines) {
+			endoff   -= lines.length;	// lines within the replacement for IE
+		}
+		setSelectionRange($textarea[0], selectionStart + startoff, selectionStart + startoff + newString.length + endoff);
+		
 	} else { // insert at caret
 		$textarea.val(val.substring(0, selectionStart)
 						+ replaceString
 						+ val.substring(selectionEnd)
 					);
-		setCaretToPos($textarea[0], selectionStart + replaceString.length);
+		lines = replaceString.match(/\r\n/g);
+		if (lines) {
+			endoff   -= lines.length;	// lines within the replacement for IE
+		}
+		setCaretToPos($textarea[0], selectionStart + startoff + replaceString.length + endoff);
+
 	}
-	$textarea[0].scrollTop=scrollTop;
+	$textarea.attr("scrollTop", scrollTop);
+	if ($.browser.msie && ieFirstTimeInsertKludge) {
+		setTimeout(function(){		// not only does IE reset the scrollTop and selection the first time a dialog is used
+			if (newString.length) {	// but somehow all the ints have been converted into strings...
+				setSelectionRange($textarea[0], parseInt(selectionStart,10) + parseInt(startoff,10),
+						parseInt(selectionStart,10) + parseInt(startoff,10) + newString.length + parseInt(endoff,10));
+			}
+			$textarea.attr("scrollTop", scrollTop);
+		}, 1000);
+		ieFirstTimeInsertKludge = false;
+	}
 
 	if (hiddenParents.length) { hiddenParents.hide(); }
-	if (typeof auto_save_id != "undefined" && auto_save_id.length > 0 && typeof auto_save == 'function') {  auto_save(); }
-
+	if (typeof auto_save_id != "undefined" && auto_save_id.length > 0 && typeof auto_save == 'function') {
+		auto_save( elementId, auto_save_id[0]);
+	}
 }
 
 function setUserModuleFromCombo(id, textarea) {
@@ -587,10 +598,11 @@ function setUserModuleFromCombo(id, textarea) {
 
 
 function toggle(foo) {
-	if (document.getElementById(foo).style.display == "none") {
+	var display = $("#"+foo).css('display');
+	if (display == "none") {
 		show(foo, true, "menu");
 	} else {
-		if (document.getElementById(foo).style.display == "block") {
+		if (display == "block") {
 			hide(foo, true, "menu");
 		} else {
 			show(foo, true, "menu");
@@ -615,37 +627,24 @@ function flip_class(itemid, class1, class2) {
 	}
 }
 
-function tikitabs(focus,max,ini) {
-	var didit = false, didone = false;
-	if (!ini) {
-		ini = 1;
+function tikitabs( focus, tabElement) {
+	var container;
+	if (typeof tabElement === "undefined") {
+		container = $(".tabset:first");
+	} else {
+		container = $(tabElement).parents(".tabset:first");
 	}
-	for (var i = ini; i <= max; i++) {
-		var tabname = 'tab' + i;
-		var content = 'content' + i;
-		if (document.getElementById(tabname) && typeof document.getElementById(tabname) != 'undefined') {
-			if (i == focus) {
-				// show(tabname);
-				show(content);
-				setCookie('tab',focus);
-				document.getElementById(tabname).className = 'tabmark';
-				document.getElementById(tabname).className += ' tabactive';
-				didit = true;
-			} else {
-				// hide(tabname);
-				hide(content);
-				document.getElementById(tabname).className = 'tabmark';
-				document.getElementById(tabname).className += ' tabinactive';
-			}
-			if (!didone) { didone = true; }
-		}
+
+	if (focus > $("> .tabs .tabmark", container).length) {
+		focus = 1;	// limit to number of tabs - somehow getting set to 222 sometimes
 	}
-	if (didone && !didit) {
-		show('content'+ini);
-		setCookie('tab',ini);
-		document.getElementById('tab'+ini).className = 'tabmark';
-		document.getElementById('tab'+ini).className += ' tabactive';
-	}
+
+	$("> .tabs .tabmark:not(.tab" + focus + ":first)", container).removeClass("tabactive");		// may need .addClass("tabinactive");
+	$("> .tabs .tabmark.tab" + focus + ":first", container).addClass("tabactive");				// and .removeClass("tabinactive");
+	$("> .tabcontent:not(.content" + focus + ":first)", container).hide();
+	$("> .tabcontent.content" + focus + ":first", container).show();
+	setCookie( $(".tabs:first", container).data("name"), focus, "tabs", "session");
+
 }
 
 /* foo: name of the menu
@@ -691,6 +690,7 @@ function setheadingstate(foo) {
 }
 
 function setsectionstate(foo, def, img, status) {
+	var src;
 	if (!status) {
 		status = getCookie(foo, "menu", "o");
 	}
@@ -711,20 +711,20 @@ function setsectionstate(foo, def, img, status) {
 
 function icntoggle(foo, img) {
 	if (!img) {
-		if (document.getElementsByName('icn' + foo)[0].src.search(/[\\\/]/)) {
-			img = document.getElementsByName('icn' + foo)[0].src.replace(/.*[\\\/]([^\\\/]*)$/, "$1");
+		if ($("#icn" + foo).attr("src").search(/[\\\/]/)) {
+			img = $("#icn" + foo).attr("src").replace(/.*[\\\/]([^\\\/]*)$/, "$1");
 		} else {
 			img = 'folder.png';
 		}
 	}
-	if (document.getElementById(foo).style.display == "none") {
+	if ($("#" + foo + ":hidden").length) {
 		show(foo, true, "menu");
-		document.getElementsByName('icn' + foo)[0].src = document.getElementsByName('icn' + foo)[0].src.replace(/[^\\\/]*$/, 'o' + img);
+		$("#icn" + foo).attr("src", $("#icn" + foo).attr("src").replace(/[^\\\/]*$/, 'o' + img));
 
 	} else {
 		hide(foo, true, "menu");
 		img = img.replace(/(^|\/|\\)o(.*)$/, '$1$2');
-		document.getElementsByName('icn' + foo)[0].src = document.getElementsByName('icn' + foo)[0].src.replace(/[^\\\/]*$/, img);
+		$("#icn" + foo).attr("src", $("#icn" + foo).attr("src").replace(/[^\\\/]*$/, img));
 	}
 }
 
@@ -738,14 +738,14 @@ function icntoggle(foo, img) {
 //url - The URL to open
 function getHttpRequest( method, url, async )
 {
-	if( async === undefined ) {
+	if ( async === undefined ) {
 		async = false;
 	}
 	var request;
 
-	if( window.XMLHttpRequest ) {
+	if ( window.XMLHttpRequest ) {
 		request = new XMLHttpRequest();
-	} else if( window.ActiveXObject )
+	} else if ( window.ActiveXObject )
 	{
 		try
 		{
@@ -759,7 +759,7 @@ function getHttpRequest( method, url, async )
 	else {
 		return false;
 	}
-	if( !request ) {
+	if ( !request ) {
 		return false;
 	}
 	request.open( method, url, async );
@@ -812,8 +812,8 @@ function setCookie(name, value, section, expires, path, domain, secure) {
 }
 function setCookieBrowser(name, value, section, expires, path, domain, secure) {
 	if (section) {
-		valSection = getCookie(section);
-		name2 = "@" + name + ":";
+		var valSection = getCookie(section);
+		var name2 = "@" + name + ":";
 		if (valSection) {
 			if (new RegExp(name2).test(valSection)) {
 				valSection  = valSection.replace(new RegExp(name2 + "[^@;]*"), name2 + value);
@@ -839,7 +839,7 @@ function setCookieBrowser(name, value, section, expires, path, domain, secure) {
 //section - name of group of cookies or null
 // * return string containing value of specified cookie or null if cookie does not exist
 function getCookie(name, section, defval) {
-	if( feature_no_cookie == 'y' && (window.XMLHttpRequest || window.ActiveXObject) && typeof tiki_cookie_jar != "undefined" && tiki_cookie_jar.length > 0) {
+	if ( feature_no_cookie == 'y' && (window.XMLHttpRequest || window.ActiveXObject) && typeof tiki_cookie_jar != "undefined" && tiki_cookie_jar.length > 0) {
 		if (typeof tiki_cookie_jar[name] == "undefined") {
 			return defval;
 		}
@@ -893,8 +893,8 @@ function getCookieBrowser(name, section, defval) {
 // * path and domain default if assigned null or omitted if no explicit argument proceeds
 function deleteCookie(name, section, expires, path, domain, secure) {
 	if (section) {
-		valSection = getCookieBrowser(section);
-		name2 = "@" + name + ":";
+		var valSection = getCookieBrowser(section);
+		var name2 = "@" + name + ":";
 		if (valSection) {
 			if (new RegExp(name2).test(valSection)) {
 				valSection  = valSection.replace(new RegExp(name2 + "[^@;]*"), "");
@@ -904,7 +904,7 @@ function deleteCookie(name, section, expires, path, domain, secure) {
 	}
 	else {
 
-//		if( !setCookie( name, '', 0, path, domain ) ) {
+//		if ( !setCookie( name, '', 0, path, domain ) ) {
 //		if (getCookie(name)) {
 		document.cookie = name + "="
 		+ ((path) ? "; path=" + path : "") + ((domain) ? "; domain=" + domain : "") + "; expires=Thu, 01-Jan-70 00:00:01 GMT";
@@ -962,45 +962,8 @@ function collapseSign(foo) {
 	}
 } // flipWithSign()
 
-//Set client timezone
-//Added 7/25/03 by Jeremy Jongsma (jjongsma@tickchat.com)
-//Updated 11/04/07 by Nyloth to get timezone name instead of timezone offset
-//Updated feb 2010 by jonnyb (had stopped working)
-
-function inArray(item, array) {
-    for (var i in array) {
-        if (array[i] === item) {
-            return i;
-        }
-    }
-    return false;
-}
-
-var allTimeZoneCodes = ["A","ACDT","ACST","ADT","AEDT","AEST","AKDT","AKST","AST","AWDT","AWST","B","BST","C","CDT","CDT","CEDT","CEST","CET","CST","CST","CST","CXT","D","E","EDT","EDT","EEDT","EEST","EET","EST","EST","EST","F","G","GMT","H","HAA","HAC","HADT","HAE","HAP","HAR","HAST","HAT","HAY","HNA","HNC","HNE","HNP","HNR","HNT","HNY","HST","I","IST","K","L","M","MDT","MESZ","MEZ","MSD","MSK","MST","N","NDT","NFT","NST","O","P","PDT","PST","Q","R","S","T","U","UTC","V","W","WDT","WEDT","WEST","WET","WST","WST","X","Y","Z"];
-var expires = new Date();
-var local_tz = "";
-var local_dates = expires.toLocaleString().match(/[A-Za-z]{1,4}/g);	// split into alpha strings
-if (local_dates !== null) {
-	for (var i = local_dates.length - 1; i > -1; i--) {					// iterate through backwards
-		var cx = inArray(local_dates[i], allTimeZoneCodes);
-		if (cx) {
-			local_tz = allTimeZoneCodes[cx];							// until you find a matching timezone
-			break;
-		}
-	}
-}
-if (!local_tz) {													// some browsers only do the tz in toString()
-	local_dates = expires.toString().match(/[A-Za-z]{1,4}/g);
-	for (i = local_dates.length - 1; i > -1; i--) {
-		cx = inArray(local_dates[i], allTimeZoneCodes);
-		if (cx) {
-			local_tz = allTimeZoneCodes[cx];
-			break;
-		}
-	}
-}
-expires.setFullYear(expires.getFullYear() + 1);
-setCookie("local_tz", local_tz, null, expires, "/");
+// Set client timezone
+// moved to lib/setup/javascript.php
 
 //function added for use in navigation dropdown
 //example :
@@ -1009,7 +972,7 @@ setCookie("local_tz", local_tz, null, expires, "/");
 //</select>
 function go(o) {
 	if (o.options[o.selectedIndex].value !== "") {
-		location = o.options[o.selectedIndex].value;
+		location.replace(o.options[o.selectedIndex].value);
 
 		o.options[o.selectedIndex] = 1;
 	}
@@ -1039,7 +1002,7 @@ function targetBlank(url,mode) {
 	default:
 		break;
 	}
-	blankWin = window.open(url,'_blank',features);
+	window.open(url,'_blank',features);
 }
 
 //function: confirmTheLink
@@ -1067,19 +1030,19 @@ function confirmTheLink(theLink, theMsg)
  * 
  */
 function insertImgFile(elementId, fileId, oldfileId,type,page,attach_comment) {
-	textarea = $('#' + elementId)[0];
-	fileup   = $('input[name=' + fileId + ']')[0];
-	oldfile  = $('input[name=' + oldfileId + ']')[0];
-	prefixEl = $('input[name=prefix]')[0];
-	prefix   = "img/wiki_up/";
+	var textarea = $('#' + elementId)[0];
+	var fileup   = $('input[name=' + fileId + ']')[0];
+	var oldfile  = $('input[name=' + oldfileId + ']')[0];
+	var prefixEl = $('input[name=prefix]')[0];
+	var prefix   = "img/wiki_up/";
 
 	if (!textarea || ! fileup) {
 		return;
 	}
 	if ( prefixEl) { prefix= prefixEl.value; }
 
-	filename = fileup.value;
-	oldfilename = oldfile.value;
+	var filename = fileup.value, dirs, str;
+	var oldfilename = oldfile.value;
 
     if (filename == oldfilename || filename === "" ) { // insert only if name really changed
 		return;
@@ -1114,7 +1077,7 @@ function insertImgFile(elementId, fileId, oldfileId,type,page,attach_comment) {
 }
 
 /* add new upload image form in page edition */
-var img_form_count = 2;
+var img_form_count = 2, needToConfirm = false;
 function addImgForm() {
 	var new_text = document.createElement('span');
 	new_text.setAttribute('id','picfile' + img_form_count);
@@ -1144,7 +1107,7 @@ window.name = 'tiki';
 var fgals_window = null;
 
 function openFgalsWindow(filegal_manager_url, reload) {
-	if(fgals_window && typeof fgals_window.document != "undefined" && typeof fgals_window.document != "unknown" && !fgals_window.closed) {
+	if (fgals_window && typeof fgals_window.document != "undefined" && typeof fgals_window.document != "unknown" && !fgals_window.closed) {
 		if (reload) {
 			fgals_window.location.replace(filegal_manager_url);
 		}
@@ -1160,7 +1123,7 @@ function openFgalsWindow(filegal_manager_url, reload) {
 /* Count the number of words (spearated with space) */
 function wordCount(maxSize, source, cpt, message) {
 	var formcontent = source.value;
-	str = formcontent.replace(/^\s+|\s+$/g, '') ;
+	var str = formcontent.replace(/^\s+|\s+$/g, '') ;
 	formcontent = str.split(/[^\S]+/);
 	if (maxSize > 0 && formcontent.length > maxSize) {
 		alert(message);
@@ -1179,6 +1142,7 @@ function charCount(maxSize, source, cpt, message) {
 	}
 }
 
+// apparently this function is not used anymore, should we remove it? - sampaioprimo
 function show_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 {
 	var target = document.getElementById( type + index );
@@ -1205,7 +1169,7 @@ function popup_plugin_form(area_id, type, index, pageName, pluginArgs, bodyConte
 	minimize.appendChild( icon );
 	minimize.href = 'javascript:void(0)';
 	container.appendChild( minimize );
-	icon.src = 'pics/icons/cross.png';
+	icon.src = 'img/icons/cross.png';
 	icon.style.position = 'absolute';
 	icon.style.top = '5px';
 	icon.style.right = '5px';
@@ -1240,8 +1204,8 @@ function popup_plugin_form(area_id, type, index, pageName, pluginArgs, bodyConte
 		var params = [];
 		var edit = edit_icon;
 
-		for(i=0; i<form.elements.length; i++){
-			element = form.elements[i].name;
+		for(var i=0; i<form.elements.length; i++){
+			var element = form.elements[i].name;
 
 			var matches = element.match(/params\[(.*)\]/);
 
@@ -1253,12 +1217,17 @@ function popup_plugin_form(area_id, type, index, pageName, pluginArgs, bodyConte
 
 			var val = form.elements[i].value;
 
-			if( val !== '' ) {
+			if ( val !== '' ) {
 				params.push( param + '="' + val + '"' );
 			}
 		}
 
-		var blob = '{' + type.toUpperCase() + '(' + params.join(',') + ')}' + (typeof form.content != 'undefined' ? form.content.value : '') + '{' + type.toUpperCase() + '}';
+		var blob;
+		if (typeof form.content != 'undefined' && form.content.length > 0) {
+			blob = '{' + type.toUpperCase() + '(' + params.join(' ') + ')}' + form.content.value + '{' + type.toUpperCase() + '}';
+		} else {
+			blob = '{' + type.toLowerCase() + ' ' + params.join(' ') + '}';
+		}
 
 		if (edit) {
 			return true;
@@ -1282,9 +1251,11 @@ function popup_plugin_form(area_id, type, index, pageName, pluginArgs, bodyConte
 		edit_icon.style.display = 'none';
 	}
 	container.appendChild( form );
+	
+	handlePluginFieldsHierarchy(type);
 }
 
-function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
+function build_plugin_form( type, index, pageName, pluginArgs, bodyContent, selectedMod )
 {
 	var form = document.createElement( 'form' );
 	form.method = 'post';
@@ -1308,8 +1279,44 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 	hiddenIndex.name = 'index';
 	hiddenIndex.value = index;
 	form.appendChild( hiddenIndex );
-
-	var meta = tiki_plugins[type];
+	
+	//
+	var savedArgs = document.createElement( 'input' );
+	savedArgs.type = 'hidden';
+	savedArgs.name = 'args';
+	savedArgs.value = $.toJSON(pluginArgs);
+	form.appendChild( savedArgs );
+	
+	//Convert to JSON and then back to an object to break
+	//link between meta local variable and tiki_plugins[type] global variable.
+	//Otherwise each change to meta.params using the extend below was being appended to the global
+	//Probably a much easier way to do this
+	var infostring = $.toJSON(tiki_plugins[type]);
+	var meta = $.parseJSON(infostring);
+	
+	//For PluginModule, add selected module parameters to the plugin edit form
+	if (type == 'module') {
+		//isolate the module parameter object so it will be shown first in the form
+		var onlymod = {"params":{"module": meta.params.module}};
+		//user has not changed the module selection since opening the form
+		if (typeof selectedMod == 'undefined') {
+			//pick up the parameters of the saved module parameter
+			if (typeof pluginArgs.module != 'undefined') {
+				//this orders the module parameter first, module related parameters second, other PluginModule parameters besides module last
+				meta.params = $.extend(onlymod.params, tiki_module_params[pluginArgs.module].params, meta.params);
+				//Use the module description
+				meta.params.module.description = tiki_module_params[pluginArgs.module].description;
+			//otherwise pick up the parameters of the first module option since that will be selected automatically
+			} else {
+				meta.params = $.extend(onlymod.params, tiki_module_params[meta.params.module.options[0].value].params, meta.params);
+				meta.params.module.description = tiki_module_params[meta.params.module.options[0].value].description;
+			}
+		//user has selected another module while the form was open - pick up parameters for the selected module
+		} else {
+			meta.params = $.extend(onlymod.params, tiki_module_params[selectedMod].params, meta.params);
+			meta.params.module.description = tiki_module_params[selectedMod].description;
+		}
+	}
 
 	var header = document.createElement( 'h3' );
 	header.innerHTML = meta.name;
@@ -1317,9 +1324,15 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 
 	var desc = document.createElement( 'div' );
 	desc.innerHTML = meta.description;
+	if (meta.documentation) {
+		desc.innerHTML += ' <a href="http://doc.tiki.org/' + meta.documentation + '" target="tikihelp" class="tikihelp" tabIndex="-1">' +
+				'<img src="img/icons/help.png" alt="Help" width="16" height="16" class="icon" title="Help" class="icon">' +
+			'</a>';
+
+	}
 	form.appendChild( desc );
 
-	var table = document.createElement( 'table' );
+	var table = document.createElement( 'table' ), param;
 	table.className = 'normal';
 	table.id = 'plugin_params';
 	form.appendChild( table );
@@ -1334,7 +1347,7 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 			form.appendChild( span_advanced_button );
 
 			var advanced_button = document.createElement( 'a' );
-			advanced_button.innerHTML = 'Advanced options';
+			advanced_button.innerHTML = tr('Advanced options');
 			advanced_button.onclick = function() { flip('plugin_params_advanced');};
 			span_advanced_button.appendChild(advanced_button);
 
@@ -1348,13 +1361,13 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 		}
 	}
 
-	var potentiallyExtraPluginArgs = pluginArgs;
+	var potentiallyExtraPluginArgs = pluginArgs, extraArg;
 
 	var rowNumber = 0;
 	var rowNumberAdvanced = 0;
 	for( param in meta.params )
 	{
-		if( typeof(meta.params[param]) != 'object' || meta.params[param].name == 'array' ) {
+		if ( typeof(meta.params[param]) != 'object' || meta.params[param].name == 'array' ) {
 			continue;
 		}
 
@@ -1364,8 +1377,11 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 		} else {
 			row = table.insertRow( rowNumber++ );
 		}
-
-		build_plugin_form_row(row, param, meta.params[param].name, meta.params[param].required, pluginArgs[param], meta.params[param].description, meta.params[param]);
+		var value = pluginArgs.length < 1?'': pluginArgs[param];// for param like sort
+		//for use with PluginModule to identify saved module parameter value
+		var nsavedArgs = $.parseJSON($(form).find('input[name="args"][type="hidden"]').val());
+		//last two parameters (selectedMod and savedArgs are only needed for PluginModule
+		build_plugin_form_row(row, param, meta.params[param].name, meta.params[param].required, value, meta.params[param].description, meta.params[param], selectedMod, nsavedArgs);
 
 		delete potentiallyExtraPluginArgs[param];
 	}
@@ -1387,7 +1403,7 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 	bodyField.rows = '12';
 	var bodyDesc = document.createElement( 'div' );
 
-	if( meta.body ) {
+	if ( meta.body ) {
 		bodyDesc.innerHTML = meta.body;
 	} else {
 		bodyRow.style.display = 'none';
@@ -1413,13 +1429,14 @@ function build_plugin_form( type, index, pageName, pluginArgs, bodyContent )
 	return form;
 }
 
-
-function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, description, paramDef)
+//last two parameters (selectedMod and savedArgs are only needed for PluginModule
+function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, description, paramDef, selectedMod, savedArgs)
 {
 
 	var label = row.insertCell( 0 );
 	var field = row.insertCell( 1 );
 	row.className = 'formcolor';
+	row.id = 'param_' + name;
 
 	label.innerHTML = label_name;
 	label.style.width = '130px';
@@ -1431,7 +1448,7 @@ function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, 
 		label.style.fontStyle = 'italic';
 	}
 
-	var input;
+	var input, icon;
 	if (paramDef && paramDef.options) {
 		input = document.createElement('select');
 		input.name = 'params[' + name + ']';
@@ -1440,8 +1457,21 @@ function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, 
 			opt.value = paramDef.options[o].value;
 			var opt_text = document.createTextNode(paramDef.options[o].text);
 			opt.appendChild(opt_text);
-			if (value && opt.value == value) {
-				opt.selected = true;
+			//either not PluginModule or user has not changed module selection, so use saved value
+			if (typeof selectedMod == 'undefined') {
+				if (value && opt.value == value) {
+					opt.selected = true;
+				}
+			} else {
+				//user changed module selection in PluginModule
+				if (selectedMod == opt.value) {
+					opt.selected = true;
+				} else if (savedArgs.module == opt.value) {
+					//use later to display saved module parameter value
+					var savedtext = opt.innerHTML;
+					opt.style.fontWeight = 'bold';
+					opt.innerHTML = opt.innerHTML + '  -- ' + tr('saved value');
+				}
 			}
 			input.appendChild(opt);
 		}
@@ -1453,14 +1483,11 @@ function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, 
 			input.value = value;
 		}
 	}
-	var desc = document.createElement( 'div' );
-	desc.style.fontSize = 'x-small';
-	desc.innerHTML = description; 
 
 	field.appendChild( input );
 	if (paramDef && paramDef.type == 'image') {
 		icon = document.createElement( 'img' );
-		icon.src = 'pics/icons/image.png';
+		icon.src = 'img/icons/image.png';
 		input.id = paramDef.area ? paramDef.area : 'fgal_picker';
 		icon.onclick = function() {openFgalsWindowArea(paramDef.area ? paramDef.area :'fgal_picker');};
 		field.appendChild( icon );
@@ -1468,10 +1495,27 @@ function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, 
 		var help = document.createElement( 'span' );
 		input.id = paramDef.area ? paramDef.area : 'fgal_picker';
 		help.onclick = function() {openFgalsWindowArea(paramDef.area ? paramDef.area :'fgal_picker');};
-		help.innerHTML = " <a href='#'>Pick a file.</a>";
+		help.innerHTML = " <a href='#'>" + tr('Pick a file.') + "</a>";
 		field.appendChild( help );
 	}
-	field.appendChild( desc );
+
+	if (description) {
+		var desc = document.createElement( 'div' );
+		desc.style.fontSize = 'x-small';
+		desc.innerHTML = description;
+		field.appendChild( desc );
+	}
+	//in PluginModule, show saved nodule parameter value if user has changed selection
+	//since the form changes to match the newly selected module, it's useful to show the
+	//saved module parameter so the user can go back to it
+	if (typeof savedtext != 'undefined') {
+		var saved = document.createElement('div');
+		saved.style.fontSize = 'x-small';
+		saved.style.fontStyle = 'italic';
+		saved.style.fontWeight = 'bold';
+		saved.innerHTML = tr('Saved value:') + ' ' + savedtext;
+		field.appendChild( saved );
+	}
 
 	if (paramDef && paramDef.filter) {
 		if (paramDef.filter == "pagename") {
@@ -1488,7 +1532,7 @@ function build_plugin_form_row(row, name, label_name, requiredOrSpecial, value, 
 }
 
 function openFgalsWindowArea(area) {
-	openFgalsWindow('tiki-list_file_gallery.php?filegals_manager='+area, true);	// reload
+	openFgalsWindow('tiki-list_file_gallery.php?filegals_manager='+area+'&galleryId='+jqueryTiki.home_file_gallery, true);	// reload
 }
 
 
@@ -1633,28 +1677,28 @@ function runPassword(strPassword, strFieldID)
 	// -- Very Secure
 	if (nScore >= 90)
 	{
-		var strIcon = "<img src='pics/icons/accept.png' style='vertical-align:middle' alt='Very Secure' />";
+		var strIcon = "<img src='img/icons/accept.png' style='vertical-align:middle' alt='Very Secure' />";
 		var strText = tr("Very Secure");
 		var strColor = "#0ca908";
 	}
 	// -- Secure
 	else if (nScore >= 80)
 	{
-		strIcon = "<img src='pics/icons/accept.png' style='vertical-align:middle' alt='Secure' />";
+		strIcon = "<img src='img/icons/accept.png' style='vertical-align:middle' alt='Secure' />";
 		strText = tr("Secure");
-		vstrColor = "#0ca908";
+		strColor = "#0ca908";
 	}
 	// -- Very Strong
 	else if (nScore >= 70)
 	{
-		strIcon = "<img src='pics/icons/accept.png' style='vertical-align:middle' alt='Very Strong' />";
+		strIcon = "<img src='img/icons/accept.png' style='vertical-align:middle' alt='Very Strong' />";
 		strText = tr("Very Strong");
 		strColor = "#0ca908";
 	}
 	// -- Strong
 	else if (nScore >= 60)
 	{
-		strIcon = "<img src='pics/icons/accept.png' style='vertical-align:middle' alt='Strong' />";
+		strIcon = "<img src='img/icons/accept.png' style='vertical-align:middle' alt='Strong' />";
 		strText = tr("Strong");
 		strColor = "#0ca908";
 	}
@@ -1668,14 +1712,14 @@ function runPassword(strPassword, strFieldID)
 	// -- Weak
 	else if (nScore >= 25)
 	{
-		strIcon = "<img src='pics/icons/exclamation.png' style='vertical-align:middle' alt='Weak' />";
+		strIcon = "<img src='img/icons/exclamation.png' style='vertical-align:middle' alt='Weak' />";
 		strText = tr("Weak");
 		strColor = "#ff0000";
 	}
 	// -- Very Weak
 	else
 	{
-		strIcon = "<img src='pics/icons/exclamation.png' style='vertical-align:middle' alt='Very weak' />";
+		strIcon = "<img src='img/icons/exclamation.png' style='vertical-align:middle' alt='Very weak' />";
 		strText = tr("Very Weak");
 		strColor = "#ff0000";
 	}
@@ -1687,7 +1731,7 @@ function runPassword(strPassword, strFieldID)
 function countContain(strPassword, strCheck)
 {
 	// Declare variables
-	var nCount = 0;
+	var nCount = 0, i;
 
 	for (i = 0; i < strPassword.length; i++)
 	{
@@ -1702,7 +1746,7 @@ function countContain(strPassword, strCheck)
 
 function checkPasswordsMatch(in1, in2, el) {
 	if ($(in1).val().length && $(in1).val() == $(in2).val()) {
-		$(el).html("<img src='pics/icons/accept.png' style='vertical-align:middle' alt='Secure' /><em>" + tr("Passwords match") + "</em>");
+		$(el).html("<img src='img/icons/accept.png' style='vertical-align:middle' alt='Secure' /><em>" + tr("Passwords match") + "</em>");
 		return true;
 	} else {
 		$(el).html("");
@@ -1732,7 +1776,7 @@ function pollsToggleQuickOptions()
  */
 
 function hidedisabled(divid,value) {
-	if(value=='disabled') {
+	if (value=='disabled') {
 		document.getElementById(divid).style.display = 'none';
 	} else {
 		document.getElementById(divid).style.display = 'block';
@@ -1775,10 +1819,10 @@ function adjustThumbnails() {
 function open_webdav(url) {
 	// Works only in IE
 	if (typeof ActiveXObject != 'undefined') {
-		EditDocumentButton = new ActiveXObject("SharePoint.OpenDocuments.1");
+		var EditDocumentButton = new ActiveXObject("SharePoint.OpenDocuments.1");
 		EditDocumentButton.EditDocument(url); 
 	} else {
-		alert('Please use Internet Explorer to open this file in WebDAV');
+		prompt(tr('URL to open this file with WebDAV'), url);
 	}
 }
 
@@ -1804,4 +1848,122 @@ function checkbox_list_check_all(form,list,checking) {
   }
 }
 
+if (!window.syntaxHighlighter) {
+	window.syntaxHighlighter = {
+		get: function() {return null;}
+	};
+}
 
+/**
+* Wrapper for javascript encodeURI
+*/
+function tiki_encodeURI(rawstr)
+{
+	return encodeURI(rawstr);
+}
+
+/**
+* Wrapper for javascript decodeURI
+*/
+function tiki_decodeURI(encstr)
+{
+	return decodeURI(encstr.replace(/\+/g, " "));
+}
+
+/**
+* Wrapper for javascript encodeURIComponent
+*/
+function tiki_encodeURIComponent(rawstr)
+{
+	var str = encodeURIComponent(rawstr);
+    return str;
+}
+
+/**
+* Wrapper for javascript decodeURIComponent
+*/
+function tiki_decodeURIComponent(encstr)
+{
+    var str = decodeURIComponent(encstr.replace(/\+/g, " "));
+    return str;
+}
+
+//Date helpers for to and from unix times
+Date.prototype.toUnix = function() {
+	return Math.round(this.getTime() / 1000.0);
+};
+
+var UnixDate = function(unixDate) {
+	return new Date(unixDate * 1000);
+};
+
+Date.parseUnix = function(date) {
+	date = new Date(Date.parse(date));
+	return date.toUnix();
+};
+
+/**
+ * Tracker rating field adjust after voing using ajax
+ * (when rendered in search results)
+ *
+ * @param data	array containing result
+ *			'my_rate',
+ *			'numvotes',
+ *			'voteavg',
+ *			'request_rate',
+ *			'value',
+ *			'mode',
+ *			'labels',
+ *			'rating_options'
+ */
+
+function adjustRating(element, data) {
+
+	var $sibs, $help;
+
+	if ($(element).text() == "x") {	// unvote
+		$sibs = $("span > a", $(element).parent())
+		$help = $(element).prev().prev();
+	} else {
+		$sibs = $(element).siblings().andSelf();
+		$help = $(element).parent().next();
+	}
+
+	for (var i=0; i < $sibs.length; i++) {
+		var v = $($sibs[i]).attr("onclick");	// get value from onclick script
+		if (v) {
+			v = v.match(/,(\d+)\)/);
+			if (v && v.length === 2) {
+				v = v[1];
+				if (v <= data[0].voteavg && data[0].numvotes > 0) {
+					$("img", $sibs[i]).attr("src", "img/icons/star.png");
+				} else {
+					$("img", $sibs[i]).attr("src", "img/icons/star_grey.png");
+				}
+			}
+		}
+	}
+	var t = tr("Number of votes:") + " " + data[0].numvotes + ", " + tr("Average:") + " " + data[0].voteavg;
+	if (data[0].result) {
+		t = t + ", " + tr("Your rating:") + " " + data[0].my_rate;
+	} else {
+		t = t + ", " + tr("Vote not accepted");
+	}
+	$help.text("(" + data[0].numvotes + ")")
+			.next().attr("title", t);
+
+}
+
+function sendVote(element, itemId, fieldId, vote) {
+	$(element).parent().modal(" ");
+	$.getJSON(
+		$.service(
+			'tracker',
+			'vote',
+			{i:itemId,f:fieldId,v:vote}
+		), function(data){
+			$(element).parent().modal();
+			adjustRating(element, data);
+		}
+	);
+}

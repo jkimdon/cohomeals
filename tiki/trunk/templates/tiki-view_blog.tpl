@@ -1,4 +1,4 @@
-{* $Id: tiki-view_blog.tpl 29083 2010-09-09 21:17:30Z Jyhem $ *}
+{* $Id: tiki-view_blog.tpl 37770 2011-09-29 03:54:15Z chibaguy $ *}
 {if !isset($show_heading) or $show_heading neq "n"}
 	{if strlen($heading) > 0 and $prefs.feature_blog_heading eq 'y'}
 		{eval var=$heading}
@@ -19,7 +19,7 @@
 			{if ($user and $creator eq $user) or $tiki_p_blog_admin eq "y"}
 				<a class="bloglink" href="tiki-edit_blog.php?blogId={$blogId}">{icon _id='page_edit' alt="{tr}Edit Blog{/tr}"}</a>
 				{if $allow_comments eq 'y'}
-					<a class='bloglink' href='tiki-list_comments.php?types_section=blogs&blogId={$blogId}'>{icon _id='comments' alt="{tr}List all comments{/tr}" title="{tr}List all comments{/tr}"}</a>
+					<a class='bloglink' href='tiki-list_comments.php?types_section=blogs&amp;blogId={$blogId}'>{icon _id='comments' alt="{tr}List all comments{/tr}" title="{tr}List all comments{/tr}"}</a>
 				{/if}
 			{/if}
 
@@ -39,22 +39,15 @@
 			{if $category_watched eq 'y'}
 				{tr}Watched by categories:{/tr}
 				{section name=i loop=$watching_categories}
-					<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}" class="icon">{$watching_categories[i].name}</a>&nbsp;
+					<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}" class="icon">{$watching_categories[i].name|escape}</a>&nbsp;
 				{/section}
 			{/if}
 		{/if}
 	</div>
-	<br />
 	
 	{if $use_find eq 'y'}
 		<div class="blogtools">
-			<form action="tiki-view_blog.php" method="get">
-				<input type="hidden" name="sort_mode" value="{$sort_mode|escape}" />
-				<input type="hidden" name="blogId" value="{$blogId|escape}" />
-				{tr}Find:{/tr} 
-				<input type="text" name="find" value="{$find|escape}" /> 
-				<input type="submit" name="search" value="{tr}Find{/tr}" />
-			</form>
+			{include file='find.tpl'}
 		</div>
 	{/if}
 {/if}

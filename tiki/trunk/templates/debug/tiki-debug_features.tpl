@@ -1,4 +1,4 @@
-{* $Id: tiki-debug_features.tpl 17641 2009-03-26 14:24:18Z sylvieg $ *}
+{* $Id: tiki-debug_features.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {* Show features *}
 
 {if count($command_result) > 0} {* Can it be == 0 ?? *}
@@ -12,7 +12,7 @@
   {/if}
 
   <td>
-    <span class="o{if $command_result[i].value == 'y' }n{else}ff{/if}-option">
+    <span class="o{if $command_result[i].value == 'y'}n{else}ff{/if}-option">
       {$command_result[i].name}
     </span>
   </td>

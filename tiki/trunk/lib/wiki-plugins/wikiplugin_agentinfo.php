@@ -1,23 +1,18 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_agentinfo.php 28517 2010-08-15 03:29:54Z lindonb $
+// $Id: wikiplugin_agentinfo.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-// Wiki plugin to display a browser client information
-// damian aka damosoft May 2004
-
-function wikiplugin_agentinfo_help() {
-        return tra("Displays browser client info").":<br />~np~{AGENTINFO(info=>IP or SVRSW or BROWSER)/}~/np~";
-}
-
-function wikiplugin_agentinfo_info() {
+function wikiplugin_agentinfo_info()
+{
 	return array(
-		'name' => tra( 'User Agent Info' ),
+		'name' => tra('User Agent Info'),
 		'documentation' => 'PluginAgentinfo',
-		'description' => tra( 'Displays various information about the client.' ),
+		'description' => tra('Show user\'s browser and server information'),
 		'prefs' => array('wikiplugin_agentinfo'),
+		'icon' => 'img/icons/computer.png',
 		'params' => array(
 			'info' => array(
 				'required' => false,
@@ -25,21 +20,23 @@ function wikiplugin_agentinfo_info() {
 				'description' => tra('Display\'s the visitor\'s IP address (IP or default), browser information (BROWSER), or server software (SVRSW).'),
 				'default' => 'IP',
 				'filter' => 'alpha',
-    			'options' => array(
+				'options' => array(
+					array('text' => '', 'value' => ''), 
 					array('text' => tra('IP address'), 'value' => 'IP'), 
 					array('text' => tra('Server software'), 'value' => 'SVRSW'), 
 					array('text' => tra('Browser'), 'value' => 'BROWSER'), 
-				),  		
+				),
 				
 			),
 		),
 	);
 }
 
-function wikiplugin_agentinfo($data, $params) {
+function wikiplugin_agentinfo($data, $params)
+{
 	global $tikilib;
 	
-	extract ($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 
 	$asetup = '';
 
@@ -51,11 +48,11 @@ function wikiplugin_agentinfo($data, $params) {
 		$asetup = $tikilib->get_ip_address();
 	}
 
-	if ($info == 'SVRSW') {
+	if ($info == 'SVRSW' && isset($_SERVER['SERVER_SOFTWARE'])) {
 		$asetup = $_SERVER["SERVER_SOFTWARE"];
 	}
 	
-	if ($info == 'BROWSER') {
+	if ($info == 'BROWSER' && isset($_SERVER['HTTP_USER_AGENT'])) {
 		$asetup = $_SERVER["HTTP_USER_AGENT"];
 	}
 

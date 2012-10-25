@@ -1,74 +1,95 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_realnamelist.php 25177 2010-02-13 17:34:48Z changi67 $
+// $Id: wikiplugin_realnamelist.php 40893 2012-04-13 20:25:05Z pascalstjean $
 
-// Displays a list of users by their realName
-// Use:
-// {REALNAMELIST(sep=>", ",max=>10,sort=>asc|desc,layout=>table)}groupname{REALNAMELIST}
-//
-// If no pattern is given returns all users, else all that belong to 'groupname' or groupnames
-// 2009-06-27: omstefanov: written on base model of plugin USERLIST with group selection possibilities from USERCOUNT
-//                         For all users selected who have no realName login names are returned, but in italics.
-//                         All these sort before users who have a realName.
-// 2009-06-30: omstefanov: added option to surpress users with login values 'admin' and/or containing 'test'
-//                         using 'exclude=test|admin|test-admin|admin-test'.
-
-function wikiplugin_realnamelist_help() {
-	return tra("Displays a list of users showing their real name").":<br />~np~{REALNAMELIST(sep=>\"SEPARATOR\",max=>MAXROWS,sort=>asc|desc,layout=>table)}groupname{REALNAMELIST}~/np~";
-}
-
-function wikiplugin_realnamelist_info() {
+function wikiplugin_realnamelist_info()
+{
 	return array(
-		'name' => tra('User List (showing Real Name)'),
+		'name' => tra('User List with Real Names'),
 		'documentation' => 'PluginRealNameList',
-		'description' => tra("Displays a list of registered users showing their Real Names").tra(' (experimental, should be merged with UserList in Tiki5)'),		
+		'description' => tra('Show user real names for members of a group').tra(' (experimental, should be merged with UserList)'),
 		'prefs' => array( 'wikiplugin_realnamelist' ),
-		'body' => tra('Login Filter'),
+		'body' => tra('Group name - only users belonging to a group or groups with group names containing this text will be included in the list. If empty all site users will be included.'),
+		'icon' => 'img/icons/group.png',
 		'params' => array(
 			'sep' => array(
 				'required' => false,
 				'name' => tra('Separator'),
-				'description' => tra('String to use between elements of the list.'),
+				'description' => tra('String to use between elements of the list if table layout is not used'),
+				'default' => ', ',
 			),
 			'max' => array(
 				'required' => false,
 				'name' => tra('Maximum'),
-				'description' => tra('Result limit.'),
+				'description' => tra('Result limit'),
+				'default' => -1,
 			),
 			'sort' => array(
 				'required' => false,
 				'name' => tra('Sort Order'),
-				'description' => 'asc|desc',
+				'description' => tra('Set to sort in ascending or descending order (unsorted by default'),
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Ascending'), 'value' => 'asc'), 
+					array('text' => tra('Descending'), 'value' => 'desc')
+				)
 			),
 			'layout' => array(
 				'required' => false,
 				'name' => tra('Layout'),
-				'description' => 'table',
+				'description' => tra('Set to table to show results in a table (not shown in a table by default)'),
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Table'), 'value' => 'table')
+				)
 			),
 			'link' => array(
 				'required' => false,
 				'name' => tra('Link'),
-				'description' => 'userpage|userinfo|userpref',
+				'description' => tra('Make the listed names links to various types of user information'),
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('User Information'), 'value' => 'userinfo'),
+					array('text' => tra('User Page'), 'value' => 'userpage'),
+					array('text' => tra('User Preferences'), 'value' => 'userpref')
+				)
 			),
 			'exclude' => array(
 				'required' => false,
 				'name' => tra('Exclude'),
-				'description' => 'test|admin|test-admin|admin-test',
-			),
-		),
+				'description' => tra('Exclude certain test or admin names from the list'),
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('admin'), 'value' => 'admin'),
+					array('text' => tra('admin-test'), 'value' => 'admin-test'),
+					array('text' => tra('test'), 'value' => 'test'),
+					array('text' => tra('test-admin'), 'value' => 'test-admin')
+				)
+			)
+		)
 	);
 }
 
-function wikiplugin_realnamelist($data, $params) {
+function wikiplugin_realnamelist($data, $params)
+{
 	global $tikilib, $userlib, $prefs, $tiki_p_admin, $tiki_p_admin_users;
 
-	extract ($params,EXTR_SKIP);
+	extract($params, EXTR_SKIP);
 
-	if (!isset($sep)) $sep=', ';
-	if (!isset($max)) { $numRows = -1; } else { $numRows = (int) $max; }
+	if (!isset($sep))
+		$sep=', ';
+	if (!isset($max)) {
+		$numRows = -1;
+	} else {
+		$numRows = (int) $max;
+	}
 
 	if ($data) {
 		$mid = 'g.`groupName` like ?';
@@ -89,9 +110,10 @@ function wikiplugin_realnamelist($data, $params) {
 			$mid .= ' ORDER BY `value`, `login` '.$sort;
 		}
 	}
+
+	$exclude_clause='';
 	if (isset($exclude)) {
 		$exclude=strtolower($exclude);
-		$exclude_clause='';
 		if (($exclude=='test') || ($exclude=='admin')) {
 			$exclude_clause= ' u.`login` NOT LIKE \'%'.$exclude.'%\' AND ' ;
 			//$exclude_clause= ' `users_users`.`login` NOT LIKE \'%'.$exclude.'%\' AND ' ;
@@ -135,13 +157,13 @@ function wikiplugin_realnamelist($data, $params) {
 					$res = '<a href="tiki-user_information.php?userId='.$row['userId'].'" title="'.tra('User Information').'">';
 				} else {
 					$user_information = $tikilib->get_user_preference($row['login'], 'user_information', 'public');
-					if ($user_information == 'private' && $row['login'] != $user) {
+					if (isset($user) && $user_information != 'private' && $row['login'] != $user) {
 						$res = '<a href="tiki-user_information.php?userId='.$row['userId'].'" title="'.tra('User Information').'">';
 					}
 				}
 			}
 		}
-		if( $row['value'] != '' ) {
+		if ( $row['value'] != '' ) {
 			$row['login'] = $row['value'];
 		} else {
 			$temp = $row['login'];
@@ -149,5 +171,5 @@ function wikiplugin_realnamelist($data, $params) {
 		}
 		$ret[] = $res.$row['login'].($res?'</a>':'');
 	}
-	return $pre.implode ( $sep, $ret ).$post;
+	return $pre.implode($sep, $ret).$post;
 }

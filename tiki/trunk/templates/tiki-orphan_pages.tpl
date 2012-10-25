@@ -1,4 +1,4 @@
-{* $Id: tiki-orphan_pages.tpl 19638 2009-06-16 20:46:27Z changi67 $ *}
+{* $Id: tiki-orphan_pages.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 
 {title admpage="wiki" help="Using+Wiki+Pages#Backlinks_amp_Orphan_Pages"}{tr}Orphan Pages{/tr}{/title}
 

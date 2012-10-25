@@ -1,11 +1,15 @@
-{* $Id: tiki-shoutbox.tpl 28982 2010-09-06 19:37:08Z pkdille $ *}
+{* $Id: tiki-shoutbox.tpl 36021 2011-08-10 19:33:51Z chealer $ *}
 
 {title help="Shoutbox"}{tr}Shoutbox{/tr}{/title}
 
 {if $tiki_p_admin_shoutbox eq 'y'}
+  <div class="navbar">
+		{button href="tiki-admin_shoutbox_words.php" _text="{tr}Banned Words{/tr}"}
+  </div>
+
 	<h2>{tr}Change shoutbox general settings{/tr}</h2>
 	<form action="tiki-shoutbox.php" method="post">
-		<table class="normal">
+		<table class="formcolor">
 			<tr>
 				<td class="odd">{tr}auto-link urls{/tr}</td>
 				<td class="odd">
@@ -32,15 +36,15 @@
 		<input type="hidden" name="msgId" value="{$msgId|escape}" />
 		<table class="formcolor">
 			<tr>
-				<td>{tr}Message{/tr}:</td>
+				<td>{tr}Message:{/tr}</td>
 				<td>
 					<textarea rows="4" cols="60" name="message">{$message|escape}</textarea>
 					{if $prefs.feature_socialnetworks eq 'y' && $user neq ''}
 						{if $prefs.socialnetworks_twitter_consumer_key neq ''}
-							<div><input type="checkbox" name="tweet" id="tweet" value='1' /> {tr}Tweet with twitter{/tr}<br /></div>
+							<div><input type="checkbox" name="tweet" id="tweet" value='1' /> {tr}Tweet with Twitter{/tr}<br /></div>
 						{/if}
 						{if $prefs.socialnetworks_facebook_application_id neq ''}
-							<div><input type="checkbox" name="facebook" id="facebook" value='1' /> {tr}Post on my facebook wall{/tr}</div>
+							<div><input type="checkbox" name="facebook" id="facebook" value='1' /> {tr}Post on my Facebook wall{/tr}</div>
 						{/if}
 					{/if}
 				</td>
@@ -66,7 +70,7 @@
 	<div class="shoutboxmsg">
 		<b><a href="tiki-user_information.php?view_user={$channels[user].user}">{$channels[user].user}</a></b>, {$channels[user].timestamp|tiki_long_date}, {$channels[user].timestamp|tiki_long_time}
 
-		{if $tiki_p_admin_shoutbox eq 'y' || $channels[user].user == $user }
+		{if $tiki_p_admin_shoutbox eq 'y' || $channels[user].user == $user}
 			<a href="tiki-shoutbox.php?find={$find}&amp;offset={$offset}&amp;sort_mode={$sort_mode}&amp;remove={$channels[user].msgId}" class="link">
 				{icon _id='cross' alt="{tr}Delete{/tr}"}
 			</a>

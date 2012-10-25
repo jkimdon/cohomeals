@@ -1,67 +1,58 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_scroll.php 26831 2010-04-30 11:39:37Z jonnybradley $
+// $Id: wikiplugin_scroll.php 40035 2012-03-04 21:22:53Z gezzzan $
 
-/* Tiki-Wiki plugin scroll 
- *
- * This is an example plugin to let you know how to create
- * a plugin. Plugins are called using the syntax
- * {NAME(params)}content{NAME}
- * Name must be in uppercase!
- * params is in the form: name=>value,name2=>value2 (don't use quotes!)
- * If the plugin doesn't use params use {NAME()}content{NAME}
- *
- * The function will receive the plugin content in $data and the params
- * in the asociative array $params (using extract to pull the arguments
- * as in the example is a good practice)
- * The function returns some text that will replace the content in the
- * wiki page.
- */
-function wikiplugin_scroll_help() {
-	return tra("Scroll").":<br />~np~{SCROLL(width=> height=> speed=>)}".tra("text")."{SCROLL}~/np~";
-}
-function wikiplugin_scroll_info() {
+function wikiplugin_scroll_info()
+{
 	return array(
 		'name' => tra('Scroll'),
 		'documentation' => 'PluginScroll',
-		'description' => tra(''),
+		'description' => tra('Show animated text that scrolls up or down'),
 		'prefs' => array('wikiplugin_scroll'),
 		'body' => tra('text'),
+		'icon' => 'img/icons/script.png',
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'width' => array(
 				'required' => true,
 				'name' => tra('Width'),
-				'description' => tra('Width'),
+				'description' => tra('Width in pixels. Example: 600px.'),
+				'accepted' => tra('Number of pixels followed by "px". Example: 600px.'),
 				'filter' => 'striptags',
+				'default' => '',
 			),
 			'height' => array(
 				'required' => true,
 				'name' => tra('Height'),
-				'description' => tra('Height'),
+				'description' => tra('Height in pixels. Example: 450px'),
+				'accepted' => tra('Number of pixels followed by "px". Example: 450px.'),
 				'filter' => 'striptags',
+				'default' => '',
 			),
 			'speed' => array(
 				'required' => false,
 				'name' => tra('Speed'),
-				'description' => tra('Speed'),
+				'description' => tra('Scroll speed in number of seconds (default is 8 seconds)'),
 				'filter' => 'int',
+				'default' => 8,
 			),
 		)
 	);
 }
 
-function wikiplugin_scroll($data, $params) {
-	extract ($params, EXTR_SKIP);
+function wikiplugin_scroll($data, $params)
+{
+	extract($params, EXTR_SKIP);
 //minimum parameters
 	if (!isset($width)) {
-		return ("<b>missing width parameter for plugin</b><br/>");
+		return ('<b>missing width parameter for plugin</b><br/>');
 	}
 
 	if (!isset($height)) {
-		return ("<b>missing height parameter for plugin</b><br/>");
+		return ('<b>missing height parameter for plugin</b><br/>');
 	}
 	
 //optional parameters
@@ -72,21 +63,21 @@ function wikiplugin_scroll($data, $params) {
 
 // margin requierd for ilayer scrolling on mozilla
    $margin=40;
-	 if (substr($width,-1) == "x") {
-	 $width_w=substr($width,0,-2);
-	 $height_h=substr($height,0,-2); 
-	 } else if (substr($width,-1) == "%") {
-	 return ("<b>Warning the value of the height parameters must be set using px  (ex: 600px ) for plugin</b><br/>");
-	 } else {
-   return ("<b>Warning the value of the width parameters must be set using px  (ex: 600px ) for plugin</b><br/>");  
+	if (substr($width, -1) == "x") {
+		$width_w=substr($width, 0, -2);
+		$height_h=substr($height, 0, -2); 
+	} else if (substr($width, -1) == "%") {
+		return ("<b>Warning the value of the height parameters must be set using px  (ex: 600px ) for plugin</b><br/>");
+	} else {
+	   return ("<b>Warning the value of the width parameters must be set using px  (ex: 600px ) for plugin</b><br/>");  
 	}
    $margin =20;
    $i_width=$width_w - $margin;
-	 $c_width=$width_w - 10;
-	 $cx_width=$i_width."px";
-	 $z_width_w=$width_w+10;
-	 $z_width=$z_width_w."px";
-	 $ret= "~np~<div style=\"background-color:#FFFFDD;width:$width\"><center><a href=\"javascript:movedown()\">Down</a>  <a href=\"javascript:moveup()\">Up</a> 
+	$c_width=$width_w - 10;
+	$cx_width=$i_width."px";
+	$z_width_w=$width_w+10;
+	$z_width=$z_width_w."px";
+	$ret= "~np~<div style=\"background-color:#FFFFDD;width:$width\"><center><a href=\"javascript:movedown()\">Down</a>  <a href=\"javascript:moveup()\">Up</a> 
 	 <a href=\"javascript:stopscroll()\">Stop</a>  <a href=\"javascript:movetop()\">Top</a></center>
 	 </div>
 	 

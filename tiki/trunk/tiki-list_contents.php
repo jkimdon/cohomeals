@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_contents.php 25978 2010-03-08 02:54:41Z chealer $
+// $Id: tiki-list_contents.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/dcs/dcslib.php');
@@ -11,6 +11,7 @@ $auto_query_args = array('sort_mode', 'offset', 'find');
 if (!isset($dcslib)) {
 	$dcslib = new DCSLib;
 }
+//get_strings tra('Dynamic content')
 $access->check_feature('feature_dynamic_content');
 $access->check_permission('tiki_p_admin_dynamic');
 if (isset($_REQUEST["remove"])) {

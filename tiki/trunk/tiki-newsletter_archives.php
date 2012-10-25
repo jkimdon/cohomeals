@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-newsletter_archives.php 27802 2010-06-29 17:05:55Z lphuberdeau $
+// $Id: tiki-newsletter_archives.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/newsletters/nllib.php');
@@ -18,6 +18,10 @@ if (!empty($_REQUEST['nlId'])) {
 	}
 	$smarty->assign_by_ref('nl_info', $nl_info);
 }
+
+$access->check_feature('feature_newsletters');
+$access->check_permission_either(array('tiki_p_view_newsletter'));
+
 if (isset($_REQUEST['remove']) && !empty($_REQUEST['nlId'])) {
 	if (!$tikilib->user_has_perm_on_object($user, $_REQUEST['nlId'], 'newsletter', 'tiki_p_admin_newsletters')) {
 		$smarty->assign('msg', tra("You do not have permission to use this feature"));
@@ -76,7 +80,7 @@ if ($ed_offset > 0) {
 $smarty->assign_by_ref('channels', $channels["data"]);
 $smarty->assign('url', "tiki-newsletter_archives.php");
 if (isset($_REQUEST['editionId'])) {
-	foreach($channels['data'] as $edition) {
+	foreach ($channels['data'] as $edition) {
 		if ($edition['editionId'] == $_REQUEST['editionId']) {
 			$edition["dataparsed"] = $tikilib->parse_data($edition["data"]);
 			$smarty->assign_by_ref('edition', $edition);

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Static.php 29193 2010-09-13 21:26:38Z sylvieg $
+// $Id: Static.php 40104 2012-03-10 13:46:45Z pkdille $
 
 /**
  * Resolver containing the list of permissions for each group as a
@@ -15,17 +15,19 @@ class Perms_Resolver_Static implements Perms_Resolver
 	private $known = array();
 	private $from = '';
 
-	function __construct( array $known, $from = '' ) {
-		foreach( $known as $group => $perms ) {
-			$this->known[$group] = array_fill_keys( $perms, true );
+	function __construct( array $known, $from = '' )
+	{
+		foreach ( $known as $group => $perms ) {
+			$this->known[$group] = array_fill_keys($perms, true);
 		}
 		$this->from = $from;
 	}
 
-	function check( $name, array $groups ) {
-		foreach( $groups as $groupName ) {
-			if( isset( $this->known[$groupName] ) ) {
-				if( isset( $this->known[$groupName][$name] ) ) {
+	function check( $name, array $groups )
+	{
+		foreach ( $groups as $groupName ) {
+			if ( isset( $this->known[$groupName] ) ) {
+				if ( isset( $this->known[$groupName][$name] ) ) {
 					return true;
 				}
 			}
@@ -34,7 +36,13 @@ class Perms_Resolver_Static implements Perms_Resolver
 		return false;
 	}
 
-	function from() {
+	function from()
+	{
 		return $this->from;
+	}
+
+	function applicableGroups()
+	{
+		return array_keys($this->known);
 	}
 }

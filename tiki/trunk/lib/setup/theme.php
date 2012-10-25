@@ -1,12 +1,12 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
-// 
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: theme.php 26486 2010-04-06 14:41:00Z jonnybradley $
+// $Id: theme.php 40059 2012-03-07 06:25:54Z pkdille $
 
 //this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER["SCRIPT_NAME"],basename(__FILE__));
+$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
 if ( isset($_SESSION['try_style']) ) {
 	$prefs['style'] = $_SESSION['try_style'];
@@ -16,12 +16,20 @@ if ( isset($_SESSION['try_style']) ) {
 	$prefs['style_option'] = $prefs['site_style_option'];
 }
 
+if ($prefs['feature_fixed_width'] === 'y') {
+	$headerlib->add_css(
+					'.fixed_width .fixedwidth, .fixed_width .fixedwidth .fixedwidth { width:' . 
+					(!empty($prefs['layout_fixed_width']) ? $prefs['layout_fixed_width'] : '990px') . 
+					'; }'
+	);
+}
+
 if ( $prefs['useGroupTheme'] == 'y' && $group_style = $userlib->get_user_group_theme()) {
 	$prefs['style'] = $group_style;
 	$smarty->assign_by_ref('group_style', $group_style);
 }
 if (empty($prefs['style']) || $tikilib->get_style_path('', '', $prefs['style']) == '') {
-	$prefs['style'] = 'thenews.css';
+	$prefs['style'] = 'fivealive.css';
 }
 		
 $headerlib->add_cssfile($tikilib->get_style_path('', '', $prefs['style']), 51);

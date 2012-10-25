@@ -1,30 +1,41 @@
-// $Id: autosave.js 30532 2010-11-05 11:22:51Z jonnybradley $
+// $Id: autosave.js 41734 2012-06-03 12:40:42Z jonnybradley $
 
 var auto_save_id = [];
 var auto_save_refs = [];
 var auto_save_data = [];
-var submit = 0;
+var auto_save_submit = false;
 var sending_auto_save = false;
+var auto_save_timeoutId = 0;
+var auto_save_timeout_interval = 60000;
+var auto_save_debug = false;	// for development use
 
 function remove_save(editorId, autoSaveId) {
-	if (typeof editorId !== 'string' || !editorId || !autoSaveId || submit === 1) {
+	if (typeof editorId !== 'string' || !editorId || !autoSaveId || auto_save_submit) {
 		return;	// seems to get jQuery events arriving here or has been submitted before
 	}
 	if (sending_auto_save) {	// wait if autosaving
 		setTimeout(function () { remove_save(editorId, autoSaveId); }, 100);
 	}
-	submit = 1;
+	auto_save_submit = true;
 	$.ajax({
 		url: 'tiki-auto_save.php',
-		data: 'command=auto_remove&editor_id=' + editorId + '&data=&referer=' + autoSaveId,
+		data: {
+			command: "auto_remove",
+			editor_id: editorId,
+			referer: autoSaveId,
+			data: ""
+		},
 		type: "POST",
+		async: false,	// called on form submit (save or cancel) so should wait 
 		// good callback
 		success: function(data) {
 			// act casual?
 		},
 		// bad callback - no good info in the params :(
 		error: function(req, status, error) {
-			//alert(tr("Auto Save removal returned an error: ") + error);
+			if (error && auto_save_debug) {
+				alert(tr("Auto Save removal returned an error: ") + error);
+			}
 		}
 	});
 }
@@ -32,23 +43,31 @@ function remove_save(editorId, autoSaveId) {
 function toggle_autosaved(editorId, autoSaveId) {
 	if (typeof autoSaveId === 'undefined') { autoSaveId = ''; }
 	var output = '', prefix = '';
+	var textareaEditor = syntaxHighlighter.get($('#' + editorId));
 	var cked = typeof CKEDITOR !== 'undefined' ? CKEDITOR.instances[editorId] : null;
 	if ($("#"+editorId+"_original").length === 0) {	// no save version already?
 		if (cked) { prefix = 'cke_contents_'; }
 		ajaxLoadingShow(prefix + editorId);
 		$.ajax({
 			url: 'tiki-auto_save.php',
-			data: 'command=auto_get&editor_id=' + editorId + '&data=&referer=' + autoSaveId,
-			async: false,
+			data: {
+				command: "auto_get",
+				editor_id: editorId,
+				referer: autoSaveId,
+				data: ""
+			},
+			async: true,
 			type: "POST",
 			// good callback
 			success: function(data) {
-				output = jQuery(data).find('data').text();
+				output = tiki_decodeURIComponent(jQuery(data).find('data').text());
 				// back up current
 				$("#"+editorId).parents("form:first").
-					append($("<input type='hidden' id='"+editorId+"_original' value='"+$("#"+editorId).val()+"' />"));
+					append($("<input type='hidden' id='"+editorId+"_original' />").val(tiki_encodeURIComponent($("#"+editorId).val())));
 				if (cked) {
 					cked.setData(output);
+				} else if (textareaEditor) {
+					textareaEditor.setValue(output);
 				} else if ($("#"+editorId).length) {	// wiki editor
 					$("#"+editorId).val(output);
 				}
@@ -56,13 +75,19 @@ function toggle_autosaved(editorId, autoSaveId) {
 			},
 			// bad callback - no good info in the params :(
 			error: function(req, status, error) {
-				alert(tr("Auto Save get returned an error: ") + error);
+			if (error && auto_save_debug) {
+					alert(tr("Auto Save get returned an error: ") + error);
+				}
 			}
 		});
 	} else {	// toggle back to original
-		output = $("#"+editorId+"_original").val();
+		syntaxHighlighter.sync($('#' + editorId));
+		
+		output = tiki_decodeURIComponent($("#"+editorId+"_original").val());
 		if (cked) {
 			cked.setData(output);	// cked leaves the original content in the ta
+		} else if (textareaEditor) {
+			textareaEditor.setValue(output);
 		} else if ($("#"+editorId).length) {	// wiki editor
 			$("#"+editorId).val(output);
 		}
@@ -78,14 +103,28 @@ function toggle_autosaved(editorId, autoSaveId) {
 
 function auto_save( editorId, autoSaveId ) {
 	if (!autoSaveId) { autoSaveId = auto_save_refs[0]; }
-	if (submit === 0 && editorId && autoSaveId && !sending_auto_save) {
+	if ( !auto_save_submit && editorId && autoSaveId && !sending_auto_save) {
+		
+		syntaxHighlighter.sync($('#' + editorId));
+		
 		var data = $('#' + editorId).val();
-		if (auto_save_data[editorId] !== data) {
+		var allowHtml = $('#allowhtml:checked').length;
+		if (auto_save_timeoutId > 0) {
+			clearTimeout(auto_save_timeoutId);	// can be triggered by textarea onChange event
+			auto_save_timeoutId = 0;			// so reset timer
+		}
+		if (auto_save_data[editorId] !== data || $('#' + editorId).attr("old_allowhtml") != allowHtml) {
 			auto_save_data[editorId] = data;
 			sending_auto_save = true;
 			$.ajax({
 				url: 'tiki-auto_save.php',
-				data: 'command=auto_save&editor_id=' + editorId + '&data=' + encodeURIComponent(data) + '&referer=' + autoSaveId,
+				data: {
+					command: "auto_save",
+					editor_id: editorId,
+					referer: autoSaveId,
+					data: data,
+					allowHtml: allowHtml
+				},
 				type: "POST",
 				// good callback
 				success: function(data) {
@@ -95,17 +134,20 @@ function auto_save( editorId, autoSaveId ) {
 					} else {
 						ajax_preview( editorId, autoSaveId, true );
 					}
-					setTimeout(auto_save, 60000);
+					$('#' + editorId).attr("old_allowhtml", allowHtml);
+					auto_save_timeoutId = setTimeout( function () { auto_save( editorId, autoSaveId ); }, auto_save_timeout_interval);
 					sending_auto_save = false;
 				},
 				// bad callback - no good info in the params :(
 				error: function(req, status, error) {
-					if (error) {
+					if (error && auto_save_debug) {
 						alert(tr("Auto Save error: ") + error);
 					}
 					sending_auto_save = false;
 				}
 			});
+		} else {	// not changed, reset timeout
+			auto_save_timeoutId = setTimeout( function () { auto_save( editorId, autoSaveId ); }, auto_save_timeout_interval);
 		}
 	}
 }
@@ -113,7 +155,9 @@ function auto_save( editorId, autoSaveId ) {
 function register_id( editorId, autoSaveId ) {
 	auto_save_id[auto_save_id.length] = editorId;
 	auto_save_refs[editorId] = autoSaveId;
+	syntaxHighlighter.sync($('#' + editorId));
 	auto_save_data[editorId] = $('#' + editorId).val();
+	auto_save_timeoutId = setTimeout( function () { auto_save( editorId, autoSaveId ); }, auto_save_timeout_interval);
 	$('#' + editorId).parents('form').submit(function() { remove_save(editorId, autoSaveId); });
 	$('#' + editorId).change(function () { auto_save( editorId, autoSaveId ); });
 }
@@ -122,6 +166,8 @@ var ajaxPreviewWindow;
 
 function ajax_preview(editorId, autoSaveId, inPage) {
 	if (editorId) {
+		syntaxHighlighter.sync($('#' + editorId));
+		var allowHtml = $('#allowhtml:checked').length || $("#allowhtml[type=hidden]").val()!==undefined ? "1" : "";
 		if (!ajaxPreviewWindow) {
 			if (inPage) {
 				var $prvw = $("#autosave_preview:visible");
@@ -131,9 +177,10 @@ function ajax_preview(editorId, autoSaveId, inPage) {
 					h = h && h.length ? h[1] : "";
 					$.get("tiki-auto_save.php", {
 						editor_id: editorId,
-						autoSaveId: escape(autoSaveId),
+						autoSaveId: autoSaveId,
 						inPage: true,
-						hdr: h
+						hdr: h,
+						allowHtml: allowHtml
 					}, function(data) {
 						// remove JS and disarm links
 						data = data.replace(/\shref/gi, " tiki_href").
@@ -146,18 +193,20 @@ function ajax_preview(editorId, autoSaveId, inPage) {
 				}
 			} else {
 				var features = 'menubar=no,toolbar=no,location=no,directories=no,fullscreen=no,titlebar=no,hotkeys=no,status=no,scrollbars=yes,resizable=yes,width=600';
-				ajaxPreviewWindow = window.open('tiki-auto_save.php?editor_id=' + editorId + '&autoSaveId=' + escape(autoSaveId), '_blank', features);
+				ajaxPreviewWindow = window.open('tiki-auto_save.php?editor_id=' + editorId + '&autoSaveId=' + tiki_encodeURIComponent(autoSaveId) + '&allowHtml=' + allowHtml, '_blank', features);
 			}
 		} else {
 			if (typeof ajaxPreviewWindow.get_new_preview === 'function') {
 				ajaxPreviewWindow.get_new_preview();
 				ajaxPreviewWindow.focus();
 			} else {
-				ajaxPreviewWindow.open('tiki-auto_save.php?editor_id=' + editorId + '&autoSaveId=' + escape(autoSaveId));
+				ajaxPreviewWindow.open('tiki-auto_save.php?editor_id=' + editorId + '&autoSaveId=' + tiki_encodeURIComponent(autoSaveId));
 			}
 		}
 	} else {
-		alert("Auto save data not found");
+		if (auto_save_debug) {
+			alert("Auto save data not found");
+		}
 	}
 	
 }

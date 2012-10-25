@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FreetagTest.php 28736 2010-08-27 16:55:22Z sampaioprimo $
+// $Id: FreetagTest.php 39469 2012-01-12 21:13:48Z changi67 $
 
 require_once 'lib/freetag/freetaglib.php';
 
@@ -12,27 +12,30 @@ class FreetagTest extends TikiTestCase
 
 	private $lib;
 
-	function setUp() {
+	function setUp()
+	{
 		$this->lib = new FreetagLib();
 	}
 
-	function testDumbParseTagsShouldReturnEmptyArray() {
+	function testDumbParseTagsShouldReturnEmptyArray()
+	{
 		$this->assertEquals(array(), $this->lib->dumb_parse_tags(null));
 		$this->assertEquals(array(), $this->lib->dumb_parse_tags(array()));
 		$this->assertEquals(array(), $this->lib->dumb_parse_tags(''));
 	}
 
-	function testDumbParseTagsShouldReturnParsedArray() {
+	function testDumbParseTagsShouldReturnParsedArray()
+	{
 		//TODO: mock FreetagLib::_parse_tag() and FreetagLib::normalize_tag()
 		$expectedResult = array(
-			'data' => array(
-				0 => array('tag' => 'first'),
-				1 => array('tag' => 'multiple word tag'),
-				2 => array('tag' => 'third'),
-				3 => array('tag' => 'another multiple word tag')
-			),
-			'cant' => 4,
-		);
+				'data' => array(
+					0 => array('tag' => 'first'),
+					1 => array('tag' => 'multiple word tag'),
+					2 => array('tag' => 'third'),
+					3 => array('tag' => 'another multiple word tag')
+					),
+				'cant' => 4,
+				);
 
 		$tagString = 'first "multiple word tag" third "another Multiple Word tag"';
 

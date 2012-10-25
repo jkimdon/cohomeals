@@ -14,9 +14,9 @@
  *
  * @category   Zend
  * @package    Zend_Ldap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Attribute.php 22997 2010-09-22 17:04:28Z sgehrig $
+ * @version    $Id: Attribute.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 /**
@@ -29,7 +29,7 @@ require_once 'Zend/Ldap/Converter.php';
  *
  * @category   Zend
  * @package    Zend_Ldap
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Ldap_Attribute
@@ -58,13 +58,13 @@ class Zend_Ldap_Attribute
             foreach ($value as $v)
             {
                 $v = self::_valueToLdap($v);
-                if (!is_null($v)) $valArray[] = $v;
+                if ($v !== null) $valArray[] = $v;
             }
         }
-        else if (!is_null($value))
+        else if ($value !== null)
         {
             $value = self::_valueToLdap($value);
-            if (!is_null($value)) $valArray[] = $value;
+            if ($value !== null) $valArray[] = $value;
         }
 
         if ($append === true && isset($data[$attribName]))
@@ -89,7 +89,7 @@ class Zend_Ldap_Attribute
     public static function getAttribute(array $data, $attribName, $index = null)
     {
         $attribName = strtolower($attribName);
-        if (is_null($index)) {
+        if ($index === null) {
             if (!isset($data[$attribName])) return array();
             $retArray = array();
             foreach ($data[$attribName] as $v)
@@ -214,9 +214,9 @@ class Zend_Ldap_Attribute
     /**
      * Converts a PHP data type into its LDAP representation
      *
-     * @deprected	use Zend_Ldap_Converter instead
-     * @param  		mixed $value
-     * @return 		string|null - null if the PHP data type cannot be converted.
+     * @deprected    use Zend_Ldap_Converter instead
+     * @param          mixed $value
+     * @return         string|null - null if the PHP data type cannot be converted.
      */
     public static function convertToLdapValue($value)
     {
@@ -226,9 +226,9 @@ class Zend_Ldap_Attribute
     /**
      * Converts an LDAP value into its PHP data type
      *
-     * @deprected	use Zend_Ldap_Converter instead
-     * @param  		string $value
-     * @return 		mixed
+     * @deprected    use Zend_Ldap_Converter instead
+     * @param          string $value
+     * @return         mixed
      */
     public static function convertFromLdapValue($value)
     {
@@ -351,12 +351,12 @@ class Zend_Ldap_Attribute
         {
             foreach ($value as $v) {
                 $v = self::_valueToLdapDateTime($v, $utc);
-                if (!is_null($v)) $convertedValues[] = $v;
+                if ($v !== null) $convertedValues[] = $v;
             }
         }
-        else if (!is_null($value)) {
+        else if ($value !== null) {
             $value = self::_valueToLdapDateTime($value, $utc);
-            if (!is_null($value)) $convertedValues[] = $value;
+            if ($value !== null) $convertedValues[] = $value;
         }
         self::setAttribute($data, $attribName, $convertedValues, $append);
     }
@@ -392,9 +392,9 @@ class Zend_Ldap_Attribute
             }
         }
         else {
-			$newVal = self::_valueFromLdapDateTime($values);
-			if ($newVal !== null) $values = $newVal;
-		}
+            $newVal = self::_valueFromLdapDateTime($values);
+            if ($newVal !== null) $values = $newVal;
+        }
         return $values;
     }
 

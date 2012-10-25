@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_surveys.tpl 28880 2010-09-02 23:15:10Z changi67 $ *}
+{* $Id: tiki-admin_surveys.tpl 41473 2012-05-16 10:44:25Z jonnybradley $ *}
 
 {title help="Surveys"}{tr}Admin surveys{/tr}{/title}
 
@@ -34,22 +34,22 @@
 	{cycle values="odd,even" print=false}
 	{section name=user loop=$channels}
 		<tr class="{cycle}">
-			<td>{$channels[user].surveyId}</td>
-			<td>
+			<td class="id">{$channels[user].surveyId}</td>
+			<td class="text">
 				<b>{$channels[user].name|escape}</b>
 				<div class="subcomment">
-					{wiki}{$channels[user].description|escape}{/wiki}
+					{wiki}{$channels[user].description}{/wiki}
 				</div>
 			</td>
-			<td style="text-align:center;">
+			<td class="icon">
 				{if $channels[user].status eq 'o'}
 					{icon _id=ofolder alt="Open"}
 				{else}
 					{icon _id=folder alt="closed"}
 				{/if}
 			</td>
-			<td style="text-align:center;">{$channels[user].questions}</td>
-			<td style="text-align:right;">
+			<td class="integer">{$channels[user].questions}</td>
+			<td class="action">
 				{self_link _icon='page_edit' cookietab='2' _anchor='anchor2' surveyId=$channels[user].surveyId}{tr}Edit{/tr}{/self_link}
 				<a class="link" href="tiki-admin_survey_questions.php?surveyId={$channels[user].surveyId}">{icon _id='help' alt="{tr}Questions{/tr}" title="{tr}Questions{/tr}"}</a>
 				<a class="link" href="tiki-admin_surveys.php?offset={$offset}&amp;sort_mode={$sort_mode}&amp;remove={$channels[user].surveyId}">{icon _id='cross' alt="{tr}Remove{/tr}"}</a>
@@ -64,7 +64,7 @@
 			</td>
 		</tr>
 	{sectionelse}
-		<tr><td class="odd" colspan="5"><strong>{tr}No records found.{/tr}</strong></td></tr>
+		{norecords _colspan=5}
 	{/section}
 </table>
 
@@ -86,12 +86,12 @@
 	<input type="hidden" name="surveyId" value="{$info.surveyId|escape}" />
 	<table class="formcolor">
 		<tr>
-			<td>{tr}Name{/tr}:</td>
+			<td>{tr}Name:{/tr}</td>
 			<td><input type="text" name="name" size="80" value="{$info.name|escape}" /></td>
 		</tr>
 		<tr>
-			<td>{tr}Description{/tr}:</td>
-			<td>{textarea name="description" rows="6" cols="80" _toolbars='y' _zoom='n' _simple='y' comments='y'}{$info.description}{/textarea}</td>
+			<td>{tr}Description:{/tr}</td>
+			<td>{textarea name="description" rows="6" cols="80" _toolbars='y' _simple='y' comments='y'}{$info.description}{/textarea}</td>
 		</tr>
 		{include file='categorize.tpl'}
 		<tr>

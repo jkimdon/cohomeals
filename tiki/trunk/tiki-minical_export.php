@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minical_export.php 25081 2010-02-11 17:00:23Z changi67 $
+// $Id: tiki-minical_export.php 39467 2012-01-12 19:47:28Z changi67 $
 
 require_once ('tiki-setup.php');
 include_once ('lib/minical/minicallib.php');
@@ -13,7 +13,8 @@ if ($prefs['feature_minical'] != 'y') {
 if (!$user) {
 	die;
 }
-function _csv($item) {
+function _csv($item)
+{
 	$item = str_replace('"', '""', $item);
 	//  if (strpos($item, ",") !== FALSE) {
 	$item = '"' . $item . '"';
@@ -26,7 +27,7 @@ header("Content-type: text/plain");
 header("Content-Disposition: inline; filename=tiki-calendar");
 print ('"Subject","Start Date","Start Time","End Date","End Time","All day event","Reminder on/off","Reminder Date","Reminder Time","Meeting Organizer","Required Attendees","Optional Attendees","Meeting Resources","Billing Information","Categories","Description","Location","Mileage","Priority","Private","Sensitivity","Show time as"');
 print ("\r\n");
-foreach($events['data'] as $event) {
+foreach ($events['data'] as $event) {
 	$line = array();
 	$line[] = _csv($event['title']);
 	$line[] = _csv(date("n/j/Y", $event['start']));

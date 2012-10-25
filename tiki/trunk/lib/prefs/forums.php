@@ -1,11 +1,12 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: forums.php 26127 2010-03-15 12:33:50Z sylvieg $
+// $Id: forums.php 39469 2012-01-12 21:13:48Z changi67 $
 
-function prefs_forums_list() {
+function prefs_forums_list()
+{
 	return array(
 		'forums_ordering' => array(
 			'name' => tra('Default Ordering'),
@@ -20,6 +21,7 @@ function prefs_forums_list() {
 				'name_desc' => tra('Name (desc)'),
 				'name_asc' => tra('Name (asc)'),
 			),
+			'default' => 'created_desc',
 		),
 	);
 }

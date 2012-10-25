@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2010 by authors of the Tiki Wiki/CMS/Groupware Project
+// (c) Copyright 2002-2012 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_notifications.php 28579 2010-08-17 23:02:46Z sampaioprimo $
+// $Id: tiki-admin_notifications.php 39467 2012-01-12 19:47:28Z changi67 $
 
 $inputConfiguration = array(
 	array(
@@ -16,7 +16,6 @@ $inputConfiguration = array(
 			'ticket' => 'word',
 			'sort_mode' => 'word',
 			'find' => 'striptags',
-			'login' => 'username',
 			'email' => 'email',
 			'event' => 'word',
 			'add' => 'alpha',
@@ -38,62 +37,10 @@ $auto_query_args = array(
 	'find',
 	'maxRecords'
 );
-$watches['user_registers'] = array(
-	'label' => tra('A user registers') ,
-	'type' => 'users',
-	'url' => 'tiki-adminusers.php',
-	'object' => '*'
-);
-$watches['article_submitted'] = array(
-	'label' => tra('A user submits an article') ,
-	'type' => 'cms',
-	'url' => 'tiki-list_submissions.php',
-	'object' => '*'
-);
-$watches['article_edited'] = array(
-	'label' => tra('A user edits an article') ,
-	'type' => 'cms',
-	'url' => 'tiki-list_articles.php',
-	'object' => '*'
-);
-$watches['article_deleted'] = array(
-	'label' => tra('A user deletes an article') ,
-	'type' => 'cms',
-	'url' => 'tiki-list_submissions.php',
-	'object' => '*'
-);
-$watches['wiki_page_changes'] = array(
-	'label' => tra('Any wiki page is changed') ,
-	'type' => 'wiki page',
-	'url' => 'tiki-lastchanges.php',
-	'object' => '*'
-);
-$watches['wiki_page_changes_incl_minor'] = array(
-	'label' => tra('Any wiki page is changed, even minor changes') ,
-	'type' => 'wiki page',
-	'url' => 'tiki-lastchanges.php',
-	'object' => '*'
-);
-$watches['wiki_comment_changes'] = array(
-	'label' => tra('A comment in a wiki page is posted or edited') ,
-	'type' => 'wiki page',
-	'url' => '',
-	'object' => '*'
-);
-$watches['php_error'] = array(
-	'label' => tra('PHP error') ,
-	'type' => 'system',
-	'url' => '',
-	'object' => '*'
-);
-$watches['fgal_quota_exceeded'] = array(
-	'label' => tra('File gallery quota exceeded') ,
-	'type' => 'file gallery',
-	'url' => '',
-	'object' => '*'
-);
+$watches = $notificationlib->get_global_watch_types();
+
 $save = true;
-$login = $email = '';
+$login = '';
 if (isset($_REQUEST["add"])) {
 	check_ticket('admin-notif');
 	if (!empty($_REQUEST['login'])) {
@@ -124,7 +71,12 @@ if (isset($_REQUEST["add"])) {
 		$save = false;
 	}
 	if ($save and isset($_REQUEST['event']) and isset($watches[$_REQUEST['event']])) {
-		$tikilib->add_user_watch($login, $_REQUEST["event"], $watches[$_REQUEST['event']]['object'], $watches[$_REQUEST['event']]['type'], $watches[$_REQUEST['event']]['label'], $watches[$_REQUEST['event']]['url'], $email);
+		$result = $tikilib->add_user_watch($login, $_REQUEST["event"], $watches[$_REQUEST['event']]['object'], $watches[$_REQUEST['event']]['type'], $watches[$_REQUEST['event']]['label'], $watches[$_REQUEST['event']]['url'], isset($email) ? $email : NULL);
+		if (!$result) {
+			$tikifeedback[] = array(
+				'mes' => tra("The user has no email set. No notifications will be sent.")
+			);			
+		}
 	}
 }
 if (!empty($tikifeedback)) {
@@ -140,7 +92,7 @@ if (isset($_REQUEST["removeevent"]) && isset($_REQUEST['removetype'])) {
 }
 if (isset($_REQUEST['delsel_x']) && isset($_REQUEST['checked'])) {
 	check_ticket('admin-notif');
-	foreach($_REQUEST['checked'] as $id) {
+	foreach ($_REQUEST['checked'] as $id) {
 		if (strpos($id, 'user') === 0) $tikilib->remove_user_watch_by_id(substr($id, 4));
 		else $tikilib->remove_group_watch_by_id(substr($id, 5));
 	}
@@ -186,8 +138,7 @@ if ($prefs['feature_forums'] == 'y') {
 ask_ticket('admin-notif');
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
-$admin_mail = $userlib->get_user_email('admin');
-$smarty->assign('admin_mail', $admin_mail);
+
 // Display the template
 $smarty->assign('mid', 'tiki-admin_notifications.tpl');
 $smarty->display("tiki.tpl");

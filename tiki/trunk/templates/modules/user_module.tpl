@@ -1,4 +1,4 @@
-{* $Id: user_module.tpl 26965 2010-05-07 13:07:41Z sylvieg $ *}
+{* $Id: user_module.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
 {tikimodule error=$module_params.error title=$user_title name=$user_module_name flip=$module_params.flip decorations=$module_params.decorations overflow=$module_params.overflow nobox=$module_params.nobox notitle=$module_params.notitle type=$module_type}
 {* This will be nested 'box-data' div... *}
 <div id="{$user_module_name|stringfix:' ':'_'}" {if (isset($smarty.cookies.$user_module_name) && $smarty.cookies.$user_module_name ne 'c') || !isset($smarty.cookies.$user_module_name)}style="display:block;"{else}style="display:none;"{/if}>
