@@ -231,7 +231,7 @@
 									{/if}
 									{section name=idx loop=$galleries}
 										{if $galleries[idx].id neq $treeRootId and $galleries[idx].perms.tiki_p_upload_files eq 'y'}
-											<option value="{$galleries[idx].id|escape}" {if $galleries[idx].id eq $galleryId}selected="selected"{/if}>{$galleries[idx].name|escape}</option>
+											<option value="{$galleries[idx].id|escape}" {if $galleries[idx].id eq $galleryId}selected="selected"{/if}>{$galleries[idx].fullpath|escape}</option>
 										{/if}
 									{/section}
 								</select>
