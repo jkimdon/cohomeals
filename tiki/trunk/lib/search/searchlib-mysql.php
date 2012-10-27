@@ -220,6 +220,16 @@ class SearchLib extends TikiLib
 			$sqlFields .= ', -1 AS relevance';
 		}
 
+		// until they get a better search engine, this allows wildcard prefix and suffix
+		// for filenames (mysql match against does not allow both end wildcards)
+		if ( $h['from'] == '`tiki_files` f' ) {
+		  $words = html_entity_decode($words); // to have the "
+		  $sqlWhere .= ' OR ';
+		  $sqlWhere .= 'f.`filename` LIKE "%' . $words . '%" ';
+		}
+		// end search addition
+
+
 		$bindVars = array_merge($bindFields, $bindJoin, $bindCateg, $bindHaving);
 
 		$sql = $sqlFields . $sqlFrom . $sqlJoin . $sqlCategJoin . $sqlWhere . $sqlCategWhere . $sqlGroup . $sqlHaving . ' ORDER BY ' . $orderby;
