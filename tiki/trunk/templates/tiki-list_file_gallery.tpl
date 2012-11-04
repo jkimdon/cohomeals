@@ -162,8 +162,7 @@
 {elseif $dup_mode eq 'y'}
 	{include file='duplicate_file_gallery.tpl'}
 {else}
-<p>Use the "Find" box (above right) to search file names and within text, doc, and rtf files (as well as within wiki pages). Note that you can search for partial words, for example "agen" instead of "agenda".</p>
-
+{include file='coho_tiki-list_file_gallery.tpl'}
 	{if $prefs.fgal_quota_show neq 'n' and $gal_info.quota}
 		<div style="float:right">
 			{capture name='use'}{math equation="round((100*x)/(1024*1024*y),2)" x=$gal_info.usedSize y=$gal_info.quota}{/capture}
