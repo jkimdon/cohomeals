@@ -805,6 +805,10 @@ tr.diffheader {
 	background: #a8cce2;
 	min-height: 32px;
 }
+li.current {
+        background: #ffff70;
+        color: #000;
+}
 
 /* Cells in forms using a background color */
 .formcolor td,
