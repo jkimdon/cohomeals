@@ -542,6 +542,10 @@ table.normal tr:nth-child(2n+1) {
         background: #fff;
         color: #000;
 }
+.current {
+        background: #ffff70;
+        color: #000;
+}
 table.normal tr:nth-child(2n) {
 	background: #fff;
 	color: #000;

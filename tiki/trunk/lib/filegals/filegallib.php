@@ -1445,6 +1445,7 @@ class FileGalLib extends TikiLib
 		$nodes = array();
 		foreach ($subGalleries['data'] as $subGallery) {
 			$linkParameters['galleryId'] = $subGallery['id'];
+			$linkParameters['_anchor'] = 'topOfGalleries'; // so users don't have to scroll
 			$nodes[] = array(
 				'id' => $subGallery['id'],
 				'parent' => $subGallery['parentId'],
@@ -1452,6 +1453,7 @@ class FileGalLib extends TikiLib
 			);
 		}
 		$browseTreeMaker = new BrowseTreeMaker('Galleries');
+		$browseTreeMaker->setCurrentGalleryId($galleryIdentifier);
 		return $browseTreeMaker->make_tree($this->getGallerySpecialRoot($galleryIdentifier), $nodes);
 	}
 	
