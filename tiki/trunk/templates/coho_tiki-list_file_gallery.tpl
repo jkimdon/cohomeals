@@ -5,3 +5,4 @@
 <li>Use search feature (above left, below the coho logo) to search file names and within text, doc, and rtf files (as well as within wiki pages). Note that you can search for partial words, for example "agen" instead of "agenda".</li>
 <li>Click <a href='tiki-index.php?page=Links+to+Frequently+Accessed+Archive+Files'>HERE</a> to go to a page with Links to Frequently Accessed Files.</li>
 </ol>
+<a name="topOfGalleries"></a>
