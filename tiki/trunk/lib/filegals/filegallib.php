@@ -1488,7 +1488,7 @@ class FileGalLib extends TikiLib
 		$pathHtml = '';
 		foreach ( $path as $identifier => $name ) {
 			if ( $pathHtml != '' ) $pathHtml .= ' &nbsp;&gt;&nbsp;';
-			$pathHtml .= '<a href="tiki-list_file_gallery.php?galleryId=' . $identifier . (!empty($_REQUEST['filegals_manager']) ? '&amp;filegals_manager=' . urlencode($_REQUEST['filegals_manager']) : '') . '">' . htmlspecialchars($name) . '</a>';
+			$pathHtml .= '<a href="tiki-list_file_gallery.php?galleryId=' . $identifier . '#topOfGalleries' . (!empty($_REQUEST['filegals_manager']) ? '&amp;filegals_manager=' . urlencode($_REQUEST['filegals_manager']) : '') . '">' . htmlspecialchars($name) . '</a>';
 		}
 
 		return array(
