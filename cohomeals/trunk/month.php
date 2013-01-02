@@ -50,6 +50,9 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
   $first = true;
   $today = date( "Ymd" );
   $three_months_ago_month = substr ( $today, 4, 2 ) - 3;
+  if ( $three_months_ago_month <= 0 ) {
+    $three_months_ago_month += 12;
+  }
   if ( $three_months_ago_month > 9 ) {
     $three_months_ago_year = substr( $today, 0, 4 ) - 1;
   }
