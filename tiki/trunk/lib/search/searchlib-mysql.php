@@ -11,6 +11,8 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   exit;
 }
 
+include_once ('lib/filegals/filegallib.php');
+
 /**
  * SearchLib 
  * 
@@ -75,6 +77,7 @@ class SearchLib extends TikiLib
 					$categId = 0) 
 	{
 		global $tiki_p_admin, $prefs, $userlib, $user, $categlib;
+		global $filegallib; // for finding fullpaths for search display
 
 		if (!is_int($searchDate) && !ctype_digit($searchDate)) {
 			exit("Error: searchDate not an integer");
@@ -288,7 +291,18 @@ class SearchLib extends TikiLib
 			);
 			
 			if (!empty($h['parent'])) {
+			  if ( $type == 'File Gallery' ) {
+			        $tmpPath = $filegallib->get_full_virtual_path( $res['id1'], 'file' );
+				// get rid of the filename itself
+				$tmpPath = pathinfo( $tmpPath, PATHINFO_DIRNAME ) . "/";
+				// now get rid of the extraneous initial "/File Galleries/" to make it shorter
+				$galPath = preg_replace( '~^/File Galleries/~', '', $tmpPath );
+				$r['parentName'] = $galPath;
+			  } else if ( $type == 'Calendar item' ) {
+			        $r['parentName'] = "Calendar item:   ";
+			  } else {
 				$r['parentName'] = $res['parentName'];
+			  }
 				$r['location'] .= "::" . $res['parentName'];
 				$r['parentHref'] = str_replace('$', '?', $res['parentHref']);
 			}
