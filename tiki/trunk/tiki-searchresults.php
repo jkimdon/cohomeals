@@ -157,6 +157,8 @@ if (!isset($_REQUEST["words"]) || empty($_REQUEST["words"])) {
 	$smarty->assign('words', '');
 } else {
 	$words = strip_tags($_REQUEST["words"]);
+	$words = addslashes($words); // to allow quotes for literal fulltext searching
+
 	if (!method_exists($searchlib, $find_where)) {
 		$find_where = "find_pages";
 	}
