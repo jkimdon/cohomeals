@@ -263,7 +263,7 @@
 					{capture assign=link}
 						{strip}
 							{if $files[changes].isgal eq 1}
-								href="tiki-list_file_gallery.php?galleryId={$files[changes].id}#topOfGalleries{if !empty($filegals_manager)}&amp;filegals_manager={$filegals_manager|escape}{/if}{if !empty($insertion_syntax)}&amp;insertion_syntax={$insertion_syntax|escape}{/if}"
+								href="tiki-list_file_gallery.php?galleryId={$files[changes].id}{if !empty($filegals_manager)}&amp;filegals_manager={$filegals_manager|escape}{/if}{if !empty($insertion_syntax)}&amp;insertion_syntax={$insertion_syntax|escape}{/if}#topOfGalleries"
 							{else}
 		
 								{if !empty($filegals_manager)}
