@@ -1526,10 +1526,14 @@ html>body .galtable {
 }
 
 .searchresults li .objecttype,
-.searchresults li .parentname,
 .searchresults li .objectname  {
 	font-size: 120%;
 	font-weight: bold;
+}
+.searchresults li .parentname {
+	font-size: 120%;
+	font-weight: bold;
+	color: #000000;
 }
 
 .searchresults .itemhits,
