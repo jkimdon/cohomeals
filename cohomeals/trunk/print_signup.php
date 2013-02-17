@@ -223,7 +223,7 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
       if ( ($building <= 9) && ($building > 0) ) 
 	$label = "Building " . $building;
       else 
-	$label = "Non-residents (printed if signed up)";
+	$label = "Other meal plan participants (printed if active)";
       $this->Building( $label, $horiz_offset );
       $prev_building = $building;
     }
@@ -241,14 +241,14 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     
     $age = get_fee_category( $id, $username );
 
-    if ( ( $building <= 9 ) || ( $onsite ) ) {
+    /*  use the conditional if not using the is_active flag    if ( ( $building <= 9 ) || ( $onsite ) ) {  */
       $this->Cell( $horiz_offset );
       $this->Cell( 5,$height, $dining, 1, 0, 'C', $fill );
       $this->Cell( 8,$height, $name['cal_unit'], 1, 0, 'C', $fill );
       $this->Cell( 37,$height, $name['cal_fullname'], 1, 0, 'L', $fill );
       $this->Cell( 5,$height, $age, 1, 0, 'C', $fill );
       $this->Ln();
-    }
+      /*}*/
     
     
     // update counts

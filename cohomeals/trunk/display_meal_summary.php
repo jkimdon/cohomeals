@@ -88,7 +88,7 @@ if ( paperwork_done( $id ) ) {
     /// income
     $income = get_money_for_meal( $id );
 
-    // walkins part of income
+    // split walkins and pre-signups
     $walkin_income = 0;
     $sql = "SELECT cal_login FROM webcal_meal_participant " .
       "WHERE cal_id = $id AND cal_walkin = 1 " .

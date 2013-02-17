@@ -47,7 +47,7 @@ if ( $res = dbi_query( $sql ) ) {
 	if ( is_dining( $cur_id, $current_user ) ) {
 	  $sql4 = "DELETE FROM webcal_meal_participant " .
 	    "WHERE cal_id = $cur_id AND cal_login = '$current_user' " .
-	    "AND cal_type = 'M' OR cal_type = 'T'";
+	    "AND (cal_type = 'M' OR cal_type = 'T')";
 	  dbi_query( $sql4 );
 	}
 	

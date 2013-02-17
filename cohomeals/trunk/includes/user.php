@@ -379,7 +379,7 @@ function user_delete_user ( $user ) {
 }
 
 // Get a list of users and return info in an array.
-function user_get_users () {
+function user_get_users ( $include_inactive=FALSE ) {
   global $public_access, $PUBLIC_ACCESS_FULLNAME;
 
   $count = 0;
@@ -398,10 +398,14 @@ function user_get_users () {
        "cal_email" => "",
        "cal_password" => "",
        "cal_fullname" => $PUBLIC_ACCESS_FULLNAME );
-  $res = dbi_query ( "SELECT cal_login, cal_lastname, cal_firstname, " .
+    $sql = "SELECT cal_login, cal_lastname, cal_firstname, " .
     "cal_is_meal_coordinator, cal_email, " .
-    "cal_passwd, cal_birthdate, cal_unit FROM webcal_user " .
-    "ORDER BY cal_unit, cal_firstname, cal_lastname, cal_login" );
+      "cal_passwd, cal_birthdate, cal_unit FROM webcal_user ";
+    if ( $include_inactive == FALSE ) {
+      $sql .= "WHERE is_active = 1 ";
+    }
+    $sql .= "ORDER BY cal_unit, cal_firstname, cal_lastname, cal_login";
+    $res = dbi_query ( $sql );
   if ( $res ) {
     while ( $row = dbi_fetch_row ( $res ) ) {
       if ( strlen ( $row[1] ) && strlen ( $row[2] ) )
