@@ -152,7 +152,7 @@ function display_financial_log( $cur_group, $sortbymeal, $ordered_logs ) {
 
       echo "<tr class=\"d$row_num\">";
       if ( $cur_group == "all" ) 
-	echo "<td>" . htmlspecialchars( $log['billing_group'] ) . "</td.";
+	echo "<td>" . htmlspecialchars( $log['billing_group'] ) . "</td>";
       echo "<td>" . $log['time'] . "</td>";
       echo "<td>" . htmlspecialchars( $log['description'] ) . "</td>";
       $meal_id = $log['meal_id'];

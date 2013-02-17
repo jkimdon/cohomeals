@@ -37,6 +37,8 @@ CREATE TABLE webcal_user (
   cal_birthdate INT,
   /* Unit number at Coho, for example '241', '3xx' if not live in Coho. */
   cal_unit INT DEFAULT 0,
+  /* we keep all users for historical purposes, but only deal with active ones many times */
+  is_active CHAR DEFAULT 1,
   PRIMARY KEY ( cal_login )
 );
 
