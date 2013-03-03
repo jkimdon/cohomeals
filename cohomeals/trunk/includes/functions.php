@@ -909,7 +909,7 @@ function print_date_selection ( $prefix, $date, $formname ) {
  * @uses date_selection_html
  */
 function print_birthdate_selection ( $date, $formname ) {
-  print date_selection_html ( 'birth', $date, 200,$formname );
+  print date_selection_html ( 'ubirth', $date, 200,$formname );
 }
 
 
