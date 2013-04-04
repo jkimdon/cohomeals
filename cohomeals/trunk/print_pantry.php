@@ -23,9 +23,8 @@ function MyHeader() {
   $this->Cell( 50,4, $text, 0,1, 'C' );
 
   $this->Cell(1);
-  $this->SetFillColor( 255,255,0 );
-  $text = "yellow/orange highlighting = available for purchase by households (items with an asterisk are reserved for common meals)";
-  $this->Cell( 180,4, $text, 0,1, 'C', 1 );
+  $text = "items are available for purchase by households unless marked with an asterisk";
+  $this->Cell( 180,4, $text, 0,1, 'C' );
   
 }
 
@@ -56,12 +55,10 @@ function PrintFoods() {
       }
 
       if ( $color == true ) {
-	if ( $indiv == 1 ) $this->SetFillColor( 255,200,0 );
-	else $this->SetFillColor( 230,230,230 );
+	$this->SetFillColor( 230,230,230 );
 	$color = false;
       } else {
-	if ( $indiv == 1 ) $this->SetFillColor( 255,255,0 );
-	else $this->SetFillColor( 255,255,255 );
+	$this->SetFillColor( 255,255,255 );
 	$color = true;
       }
 
