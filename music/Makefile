@@ -1,3 +1,4 @@
+
 all: $(subst .abc,.ps,$(wildcard *.abc)) $(subst .ly,.pdf,$(wildcard *.ly))
 
 SCALE=0.90
