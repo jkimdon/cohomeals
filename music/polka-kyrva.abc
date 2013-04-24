@@ -4,10 +4,11 @@ T: Polka Kyrva
 M:2/2
 L:1/16
 K:F
+"N.C."D2E2F2D2 G2A2B2G2 | A2B2A2^c2 d4 d4 | 
 |:"Dm"d2f2 agf2|agf2 agf2|"A7"e2g4e2|"Dm"defga4|
-"Dm"d2f2 agf2|agf2 agf2|"A7"e2g4e2|[1"Dm"d8:|[2d4c4|
+"Dm"d2f2 agf2|agf2 agf2|"A7"e2g4e2|[1"Dm"d4 d4:|[2"Dm"d4c4|
 |:"F"c'2a4a2|c'2c'2 d'c'ba|"Gm"b2g4ga|b2b2 c'bag|
-"Dm"a2f4a2|a2a2 bagf|"A7"e2g2 f2e2|[1"Dm"d^cde fefg:|[2"Dm"d8|]
+"Dm"a2f4f2|a2a2 bagf|[1"A7"e2g2 f2e2|"Dm"d^cde fefg:|[2"A7"aba2 efe2|"Dm"d4 d4|]
 %%begintext center
 In memory of Zach Konowalchuk
 %%endtext
