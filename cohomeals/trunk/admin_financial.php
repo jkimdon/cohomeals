@@ -157,7 +157,8 @@ if ( $can_view == true ) {
    <tr>
     <td class="tooltip">Associated meal (optional):</td>
     <td><input type="button" name="meal" id="meal" value="Choose meal" onclick="selectMeal( <?php echo $mealid; ?> )" />
-     <input type="hidden" name="mealid" value="" /> 
+     OR enter meal ID: 
+     <input type="text" name="mealid" size="5" maxlength="5" /> 
     </td>
    </tr>
 
