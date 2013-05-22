@@ -394,7 +394,7 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
 
   /// calculate cost based on above information
   $cost = $base_price;
-  if ( $category == "walkin" ) $cost += 100;
+  if ( ($category == "walkin") && ($base_price != 0) ) $cost += 100;
 
   if ( $fee_class == "F" ) $cost = 0;
   else if ( $fee_class == "K" ) $cost /= 2;
