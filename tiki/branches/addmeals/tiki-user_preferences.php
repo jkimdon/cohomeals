@@ -247,6 +247,7 @@ if ($prefs['feature_userPreferences'] == 'y' && isset($_REQUEST["new_prefs"])) {
 	if ($prefs['feature_intertiki'] == 'y' && !empty($prefs['feature_intertiki_mymaster']) && $prefs['feature_intertiki_import_preferences'] == 'y') { //send to the master
 		$userlib->interSendUserInfo($prefs['interlist'][$prefs['feature_intertiki_mymaster']], $userwatch);
 	}
+	include_once ('coho_tiki-set_user_preferences.php');
 }
 if ($prefs['auth_method'] == 'ldap' && $user == 'admin' && $prefs['ldap_skip_admin'] == 'y') {
 	$change_password = 'y';
@@ -353,6 +354,9 @@ if (isset($user_preferences[$userwatch]['email is public'])) {
 $tikilib->get_user_preference($userwatch, 'mailCharset', $prefs['default_mail_charset']);
 $tikilib->get_user_preference($userwatch, 'user_dbl', 'y');
 $tikilib->get_user_preference($userwatch, 'display_12hr_clock', 'n');
+
+include_once ('coho_tiki-get_user_preferences.php');
+
 $userinfo = $userlib->get_user_info($userwatch);
 $smarty->assign_by_ref('userinfo', $userinfo);
 $llist = array();
@@ -413,5 +417,5 @@ if ($prefs['feature_wiki'] == 'y' and $prefs['feature_wiki_userpage'] == 'y') {
 $smarty->assign_by_ref('tikifeedback', $tikifeedback);
 include_once ('tiki-section_options.php');
 ask_ticket('user-prefs');
-$smarty->assign('mid', 'tiki-user_preferences.tpl');
+$smarty->assign('mid', 'coho_tiki-user_preferences.tpl');
 $smarty->display("tiki.tpl");
