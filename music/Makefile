@@ -5,7 +5,8 @@ SCALE=0.90
 FORMAT=common
 
 %.ps: %.abc $(FORMAT).fmt
-	abcm2ps -s $(SCALE) -n -O = -F $(FORMAT).fmt $*.abc
+	abcm2ps -s $(SCALE) -O = -F $(FORMAT).fmt $*.abc
+	#abcm2ps -s $(SCALE) -O = $*.abc
 
 %.pdf: %.ps
 	ps2pdf $*.ps
