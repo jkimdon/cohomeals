@@ -9,8 +9,8 @@ V:1
 %%staves        1 2 | 3 4 
 %%MIDI program 1 1
 %%MIDI program 2 2
-%%MIDI program 3 4
-%%MIDI program 4 5
+%%MIDI program 3 3
+%%MIDI program 4 4
 z c | (dc)BA GABc | BAGF =E3 C| F3 F A3 A |
 c3 c e3 f | ecBA AE A2 | dcBA A3 c |
 cA z E EC E2 | A2 c2 B3 e| eB z G GE B2 |
