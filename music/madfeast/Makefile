@@ -16,4 +16,4 @@ default: all soprano alto tenor bass
 	ps2pdf $*.ps
 
 clean:
-	-rm *.wav *.midi *.mp3
+	-rm *.wav *.midi *.mp3 *.pdf
