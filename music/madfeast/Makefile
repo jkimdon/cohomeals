@@ -1,6 +1,6 @@
 MIDI=if-music-be-the-food-of-love.midi
 
-all: soprano alto tenor bass
+default: all soprano alto tenor bass
 
 %: %.cfg $(MIDI)
 	timidity -Ow -o $(basename $(MIDI))-$@.wav --verbose -c $@.cfg $(MIDI)
@@ -8,6 +8,12 @@ all: soprano alto tenor bass
 
 %.midi: %.abc
 	abc2midi $*.abc -o $*.midi -RS
+
+%.ps: %.abc
+	abcm2ps -O = $*.abc
+
+%.pdf: %.ps
+	ps2pdf $*.ps
 
 clean:
 	-rm *.wav *.midi *.mp3
