@@ -305,7 +305,7 @@ class CalendarLib extends TikiLib
 		$cond .= " and ((c.`personal`='y' and i.`user`=?) or c.`personal` != 'y')";
 		$bindvars[] = $user;
 
-		$query = "select i.`recurrenceId` as `recurrenceId`, i.`calendarId` as `calendarId` ";
+		$query = "select i.`recurrenceId` as `recurrenceId`, i.`calendarId` as `calendarId`, i.`startPeriod` as `recurrenceStart`, i.`endPeriod` as `recurrenceEnd` ";
 
 		$tblRef = "i.";
 		$query .= "from `tiki_calendar_recurrence` as i left join `tiki_calendars` as c on i.`calendarId`=c.`calendarId` where ($cond)  order by ". $tblRef . $this->convertSortMode("$sort_mode");
@@ -314,7 +314,13 @@ class CalendarLib extends TikiLib
 		while ($row = $result->fetchRow()) {
 		  // calculate the dates/times where we would expect unchanged items to be rendered
 		  $recurrenceEntry = new CalRecurrence($row["recurrenceId"]);
-		  $expectedDates = $recurrenceEntry->coho_getUnchangedDates((int)$tstart,(int)$tstop);
+		  // want to find where to start and end the rendering, bounded by view and recurrence period
+		  $inview_start = $row["recurrenceStart"];
+		  if ($inview_start < $tstart) $inview_start = $tstart;
+		  $inview_end = $row["recurrenceEnd"];
+		  if ($inview_end == 0) $inview_end = $tstop;
+		  elseif ($inview_end > $tstop) $inview_end = $tstop;
+		  $expectedDates = $recurrenceEntry->coho_getUnchangedDates((int)$inview_start,(int)$inview_end);
 		  /// NOTE: only one-day events are treated here
 
 		  // query for overrides
