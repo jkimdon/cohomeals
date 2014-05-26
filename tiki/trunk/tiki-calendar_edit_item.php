@@ -302,7 +302,7 @@ if (isset($_POST['act'])) {
 								  $_REQUEST['startPeriod_Year']);
 				$calRecurrence->setStartPeriod($startPeriod);
 				if ($_REQUEST['endType'] == "dt") {
-				        $startPeriod = TikiLib::make_time(0,0,0,
+				        $endPeriod = TikiLib::make_time(0,0,0,
 									  $_REQUEST['endPeriod_Month'],
 									  $_REQUEST['endPeriod_Day'],
 									  $_REQUEST['endPeriod_Year']);
