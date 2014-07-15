@@ -18,5 +18,6 @@ function hide(foo,f,section) {
 tabs[1] = "users";
 tabs[2] = "buddies";
 tabs[3] = "foodpref";
+tabs[4] = "kidprices";
 //]]> -->
 </script>

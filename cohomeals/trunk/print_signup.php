@@ -86,11 +86,10 @@ if ( $res = dbi_query( $sql ) ) {
 
 $counts = array();
 $counts['dining_adult'] = 0;
-$counts['dining_kid'] = 0;
+$counts['dining_T'] = 0;
+$counts['dining_K'] = 0;
+$counts['dining_Q'] = 0;
 $counts['dining_free'] = 0;
-$counts['walkin_adult'] = 0;
-$counts['walkin_kid'] = 0;
-$counts['walkin_free'] = 0;
 $counts['all'] = 0;
 $counts['takehome'] = 0;
 
@@ -177,10 +176,16 @@ function PrintLegend() {
   $this->Cell( $remaining_width, $height, "(A = adult)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(K = kid 10-12 yrs)", "RTB",1,'L');
+  $this->Cell( $remaining_width, $height, "(T = kid 3/4 price)", "RTB",1,'L');
   $this->Cell( $horiz_offset );
   $this->Cell( $space_width, $height, "", "LTB" );
-  $this->Cell( $remaining_width, $height, "(F = free 0-9 yrs)", "RTB",1,'L');
+  $this->Cell( $remaining_width, $height, "(K = kid 1/2 price)", "RTB",1,'L');
+  $this->Cell( $horiz_offset );
+  $this->Cell( $space_width, $height, "", "LTB" );
+  $this->Cell( $remaining_width, $height, "(Q = kid 1/4 price)", "RTB",1,'L');
+  $this->Cell( $horiz_offset );
+  $this->Cell( $space_width, $height, "", "LTB" );
+  $this->Cell( $remaining_width, $height, "(F = kid no cost)", "RTB",1,'L');
 
 
   $this->SetX( $saveX );
@@ -252,21 +257,27 @@ function DinerTable( $names, $event_date, $id, &$counts ) {
     
     
     // update counts
-    $label = "";
-    if ( $dining != "" ) {
-      if ( $dining == "W" ) 
-	$label = "walkin";
-      else $label = "dining";
-      if ( $age == "A" ) 
-	$label .= "_adult";
-      else if ( $age == "F" )
-	$label .= "_free";
-      else $label .= "_kid";
-      $counts['all']++;
-      $counts[$label]++;
-      if ( $dining == "T" ) $counts['takehome']++;
-    }
-    
+      if ( $dining != "" ) {
+	switch ( $age ) {
+	case 'A':
+	  $counts['dining_adult']++;
+	  break;
+	case 'T':
+	  $counts['dining_T']++;
+	  break;
+	case 'K':
+	  $counts['dining_K']++;
+	  break;
+	case 'Q':
+	  $counts['dining_Q']++;
+	  break;
+	case 'F':
+	  $counts['dining_free']++;
+	  break;
+	}
+	$counts['all']++;
+	if ( $dining == "T" ) $counts['takehome']++;
+      }
   }
 
 }
@@ -291,9 +302,23 @@ function AddGuests( $guests, &$counts ) {
     $this->Cell( 5,$height, $age, 1, 0, 'C' );
     $this->Ln();
 
-    if ( $age == "A" ) $counts['dining_adult']++;
-    else if ( $age == "F" ) $counts['dining_free']++;
-    else $counts['dining_kid']++;
+    switch ( $age ) {
+    case 'A':
+      $counts['dining_adult']++;
+      break;
+    case 'T':
+      $counts['dining_T']++;
+      break;
+    case 'K':
+      $counts['dining_K']++;
+      break;
+    case 'Q':
+      $counts['dining_Q']++;
+      break;
+    case 'F':
+      $counts['dining_free']++;
+      break;
+    }
 
     $counts['all']++;
   }
@@ -354,10 +379,16 @@ function SumTotals( $counts, $id ) {
  $this->Cell( $label_width, $height, "Adults", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_adult'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Kids (10-12)", 1, 0, 'R' );
- $this->Cell( $number_width, $height, $counts['dining_kid'], 1, 1, 'C' );
+ $this->Cell( $label_width, $height, "Kids 3/4 price", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_T'], 1, 1, 'C' );
  $this->Cell( $horiz_offset );
- $this->Cell( $label_width, $height, "Free (0-9)", 1, 0, 'R' );
+ $this->Cell( $label_width, $height, "Kids 1/2 price", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_K'], 1, 1, 'C' );
+ $this->Cell( $horiz_offset );
+ $this->Cell( $label_width, $height, "Kids 1/4 price", 1, 0, 'R' );
+ $this->Cell( $number_width, $height, $counts['dining_Q'], 1, 1, 'C' );
+ $this->Cell( $horiz_offset );
+ $this->Cell( $label_width, $height, "Kids no cost", 1, 0, 'R' );
  $this->Cell( $number_width, $height, $counts['dining_free'], 1, 1, 'C' );
 
 }

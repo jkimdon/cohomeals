@@ -2269,9 +2269,8 @@ function paperwork_done( $id ) {
 //        = "walkin" for walkins only
 function demographics( $id, $status="all" ) {
 
-  $adults = 0;
-  $children = 0;
-  $free = 0;
+  $people = 0;
+  $adult_diner_equivalent = 0;
   
   // users
   $names = user_get_users();
@@ -2287,13 +2286,22 @@ function demographics( $id, $status="all" ) {
       else if ( ($walkin == false) && ( ($status == "all") || ($status == "pre") ) ) $counts = 1;
 
       if ( $counts == 1 ) {
+	$people++;
 	$age = get_fee_category( $id, $username );
-	if ( $age == "K" ) { 
-	  $children++;
-	}
-	else if ( $age == "F" ) $free++;
-	else {  // $age == "A"
-	  $adults++;
+	switch ( $age ) {
+	case 'A':
+	  $adult_diner_equivalent += 1.0;
+	  break;
+	case 'T':
+	  $adult_diner_equivalent += 0.75;
+	  break;
+	case 'K':
+	  $adult_diner_equivalent += 0.5;
+	  break;
+	case 'Q':
+	  $adult_diner_equivalent += 0.25;
+	  break;
+	  // case 'F' would just add 0 so do not consider it here.
 	}
       }
     }
@@ -2315,21 +2323,29 @@ function demographics( $id, $status="all" ) {
       else if ( ($walkin == false) && ( ($status == "all") || ($status == "pre") ) ) $counts = 1;
 
       if ( $counts == 1 ) {
+	$people++;
 	$age = $row[1];
-	if ( $age == "K" ) {
-	  $children++;
-	}
-	else if ( $age == "F" ) $free++;
-	else { // $age == "A"
-	  $adults++;
+	switch ( $age ) {
+	case 'A':
+	  $adult_diner_equivalent += 1.0;
+	  break;
+	case 'T':
+	  $adult_diner_equivalent += 0.75;
+	  break;
+	case 'K':
+	  $adult_diner_equivalent += 0.5;
+	  break;
+	case 'Q':
+	  $adult_diner_equivalent += 0.25;
+	  break;
+	  // case 'F' would just add 0 so do not consider it here.
 	}
       }
     }
     dbi_free_result( $res );
   }
 
-  $ret = sprintf( "%d people: %d adults, %d older children, %d younger children", 
-		  $adults + $children + $free, $adults, $children, $free );
+  $ret = sprintf( "%d people, equivalent to %.2f adults", $people, $adult_diner_equivalent );
   return $ret;
 }
 

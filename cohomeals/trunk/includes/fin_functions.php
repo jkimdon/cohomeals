@@ -299,7 +299,12 @@ function get_price( $id, $user, $known_walkin=false ) {
 
 
 
-function get_fee_category( $id, $username ) {
+// meal id is for determining age of child at the date of the meal. 
+// if $id is 0, calculate fee for today's date
+// $use_default, if present and true, indicates to find the default price 
+// (as opposed to the altered child price)
+
+function get_fee_category( $id, $username, $use_default=false ) {
 
   /// establish price category based on age
   $age = "A";
@@ -314,17 +319,20 @@ function get_fee_category( $id, $username ) {
     }
   }
 
-  $sql = "SELECT cal_date " . 
-    "FROM webcal_meal " .
-    "WHERE cal_id = $id";
-  $event_date = date( "Ymd" );
-  if ( $res = dbi_query( $sql ) ) {
-    if ( $row = dbi_fetch_row( $res ) ) {
-      $event_date = $row[0];
-      dbi_free_result( $res );
+  if ( $id == 0 ) {
+    $event_date = date( "Ymd" );
+  } else {
+    $sql = "SELECT cal_date " . 
+      "FROM webcal_meal " .
+      "WHERE cal_id = $id";
+    $event_date = date( "Ymd" );
+    if ( $res = dbi_query( $sql ) ) {
+      if ( $row = dbi_fetch_row( $res ) ) {
+	$event_date = $row[0];
+	dbi_free_result( $res );
+      }
     }
   }
-
 
 
 
@@ -340,6 +348,22 @@ function get_fee_category( $id, $username ) {
   else if ( $birthdate > $child_cutoff ) 
     $age = "K";
   else $age = "A";
+
+  if ( $use_default == false ) {
+    if ( $age == "F" || $age == "K" ) {
+      $sql = "SELECT cal_value FROM webcal_user_pref WHERE cal_setting = 'kid_price' AND cal_login = '" .
+	$username . "'";
+      if ( $res = dbi_query( $sql ) ) {
+	if ( $row = dbi_fetch_row( $res ) ) {
+	  $raw_age = $row[0];
+	  if ( $raw_age == "Q" ) $age = "Q";
+	  else if ( $raw_age == "K" ) $age = "K";
+	  else if ( $raw_age == "T" ) $age = "T";
+	  else $age = "A";
+	}
+      }
+    }
+  }
 
   return $age;
 }
@@ -396,8 +420,21 @@ function get_adjusted_price( $id, $fee_class, $known_walkin=false,
   $cost = $base_price;
   if ( ($category == "walkin") && ($base_price != 0) ) $cost += 100;
 
-  if ( $fee_class == "F" ) $cost = 0;
-  else if ( $fee_class == "K" ) $cost /= 2;
+  switch ( $fee_class ) {
+  case "F":
+    $cost = 0;
+    break;
+  case "Q":
+    $cost /= 4;
+    break;
+  case "K":
+    $cost /= 2;
+    break;
+  case "T":
+    $cost *= 3;
+    $cost /= 4;
+    break;
+  }
 
   return $cost;
 }

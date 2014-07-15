@@ -30,6 +30,23 @@ else
    
 for ( $i=0; $i<count( $signees ); $i++ ) {
   $user = $signees[$i]['cal_login'];
+  $fee_cat = get_fee_category( $id, $user );
+  $fee_print = "adult price";
+  switch ( $fee_cat ) {
+  case "F": 
+    $fee_print = "no-cost young kid";
+    break;
+  case "Q":
+    $fee_print = "quarter-price kid";
+    break;
+  case "K":
+    $fee_print = "half-price kid";
+    break;
+  case "T":
+    $fee_print = "three-quarters price kid";
+    break;
+  }
+
   $partic = is_participating( $id, $user, $type );
   if ( ( $type == 'C' ) ||  
        ( !$partic && ($action == 'A')) ||
@@ -47,7 +64,7 @@ for ( $i=0; $i<count( $signees ); $i++ ) {
 	"<input type=\"checkbox\" name=\"" . $user . 
 	"\"\></td>";
     }
-    echo "<td>" . $signees[$i]['cal_fullname'] . "</td>";
+    echo "<td>" . $signees[$i]['cal_fullname'] . " (" . $fee_print . ")" . "</td>";
     echo "</tr>\n";
     $count++;
   }
