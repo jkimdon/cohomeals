@@ -91,6 +91,48 @@ display_small_month ( $nextmonth, $nextyear, true, "nextmonth" );
   }
 ?>
 </span></p>
+
+<p>
+<span class="title"><br />
+    People currently in your billing group are: <br>
+<?php
+$billing_group = get_billing_group( $login );
+$sql = "SELECT cal_login, cal_firstname, cal_lastname FROM webcal_user " .
+  "WHERE cal_billing_group = '" . $billing_group . "'";
+if ( $res = dbi_query( $sql ) ) {
+  while ( $row = dbi_fetch_row( $res ) ) {
+    $child_login = $row[0];
+    $raw_fee_category = get_fee_category( 0, $child_login, true );
+    $altered_fee_category = get_fee_category( 0, $child_login );
+    if ( $raw_fee_category == "A" ) {
+      echo "<b>$row[1] $row[2] </b>- current price point: Adult (full price)<br>";
+    } else {
+      switch ( $altered_fee_category ) {
+      case "F":
+	$print_fee = "Child: Free/no cost (default for ages 0-9)";
+	break;
+      case "Q":
+	$print_fee = "Child: Quarter-price";
+	break;
+      case "K":
+	$print_fee = "Child: Half-price (default for ages 10-13)";
+	break;
+      case "T":
+	$print_fee = "Child: Three-quarter-price";
+	break;
+      case "A":
+	$print_fee = "Child: Full price";
+	break;
+      }
+      echo "<b>$row[1] $row[2] </b>- current price point: $print_fee <br>";    
+    }
+  }
+}
+?>
+To change child price points, click on the "kid prices" tab in the <a href="users.php#tabkidprices">User Info</a> page.
+</span>
+</p>
+
 </div>
 
 <hr>

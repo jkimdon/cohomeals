@@ -46,6 +46,8 @@ print_header( $INC );
 
   <span class="tabbak" id="tab_buddies"><a href="#tabbuddies" onclick="return showTab('buddies')">Buddies</a></span>
 
+  <span class="tabbak" id="tab_kidprices"><a href="#tabkidprices" onclick="return showTab('kidprices')">Kid prices</a></span>
+
 </div>
 
 
@@ -158,6 +160,48 @@ print_header( $INC );
   </form>
 
   </div>
+
+
+
+  <!-- KID PRICES -->
+  <a name="tabkidprices"></a>
+  <div id="tabscontent_kidprices">
+	People currently in your billing group are as follows:<br>
+	<dl>
+<?php 
+$billing_group = get_billing_group( $login );
+$sql = "SELECT cal_login, cal_firstname, cal_lastname FROM webcal_user " .
+  "WHERE cal_billing_group = '" . $billing_group . "'";
+if ( $res = dbi_query( $sql ) ) {
+  while ( $row = dbi_fetch_row( $res ) ) {
+    $child_login = $row[0];
+    $child_realname = $row[1] . " " . $row[2];
+    print_change_kid_price( $child_login, $child_realname );
+  }
+}
+?>
+</dl>
+
+<?php 
+
+  //// admin can change any kids
+if ( $is_meal_coordinator ) {
+
+  echo "<hr><p>Admin can change any child:</p>";
+
+  $names = user_get_users(); // only gets active users
+
+  foreach ( $names as $name ) {
+    $raw_fee_category = get_fee_category( 0, $name['cal_login'], true );
+    if ( $raw_fee_category != 'A' ) { // only list children
+      print_change_kid_price( $name['cal_login'], $name['cal_fullname'] );
+    }
+  }
+
+}
+?>
+  </div>
+
 
 
   <!-- FOOD RESTRICTIONS -->
@@ -286,3 +330,49 @@ showTab('foodpref');
 </body>
 </html>
 
+<?php
+
+function print_change_kid_price ( $child_login, $child_realname ) {
+
+  $raw_fee_category = get_fee_category( 0, $child_login, true );
+  $altered_fee_category = get_fee_category( 0, $child_login );
+  if ( $raw_fee_category == "A" ) {
+    echo "<dt> <b>" . $child_realname . "</b><dd>current price point: Adult (full price)";
+  } else {
+    switch ( $altered_fee_category ) {
+    case "F":
+      $print_fee = "Child: Free/no cost (default for ages 0-9)";
+      break;
+    case "Q":
+      $print_fee = "Child: Quarter-price";
+      break;
+    case "K":
+      $print_fee = "Child: Half-price (default for ages 10-13)";
+      break;
+    case "T":
+      $print_fee = "Child: Three-quarter-price";
+      break;
+    case "A":
+      $print_fee = "Child: Full price";
+      break;
+    }
+    echo "<dt> <b>" . $child_realname . " </b> <dd>current price point: $print_fee. To change price point, select: ";
+    ?>
+    <form action="edit_kid_prices_handler.php" method="post">
+       <input type="hidden" name="child_login" value="<?php echo $child_login;?>"/>
+       <select name="new_fee_category">
+       <option value="A">Full price</option>
+       <option value="T">Three-quarters price</option>
+       <option value="K">Half price (default for ages 10-13)</option>
+       <option value="Q">Quarter price</option>
+       <option value="F">Free/no cost (default for ages 0-9)</option>
+       </select>
+       <input type="submit" class="addbutton" value="Submit change" />
+    </form>
+    </p>
+    <?php
+  }
+}
+ 
+
+?>

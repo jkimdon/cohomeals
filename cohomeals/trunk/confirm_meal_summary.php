@@ -16,9 +16,6 @@ if ( !paperwork_done( $id ) ) {
   <?php 
   $names = user_get_users();
   $num_walkins = 0;
-  $walkins_adult = 0;
-  $walkins_kid = 0;
-  $walkins_free = 0;
   $walkin_income = 0;
   $adult_diner_equivalent = 0.0; // for calculating per-adult cost
   foreach ( $names as $name ) {
@@ -30,19 +27,24 @@ if ( !paperwork_done( $id ) ) {
       $walkin_income += get_price( $id, $username, true );
 
       $age = get_fee_category( $id, $username );
-      if ( $age == 'A' ) { 
+      switch ( $age ) {
+      case 'A':
 	$adult_diner_equivalent += 1.0;
-	$walkins_adult++;
-      }
-      else if ( $age == 'K' ) {
+	break;
+      case 'T':
+	$adult_diner_equivalent += 0.75;
+	break;
+      case 'K':
 	$adult_diner_equivalent += 0.5;
-	$walkins_kid++;
+	break;
+      case 'Q':
+	$adult_diner_equivalent += 0.25;
+	break;
+	// case 'F' would just add 0 so do not consider it here.
       }
-      else $walkins_free++;
     }
   }
 
-  $num_newguests = 0;
   for ( $i=0; $i<7; $i++ ) {
     $key = "newguest$i";
     if ( $guest_name = getValue( $key ) ) {
@@ -53,20 +55,28 @@ if ( !paperwork_done( $id ) ) {
       echo "<input type=\"hidden\" name=\"newguest$i\" value=\"$guest_name\"/>";
       echo "<input type=\"hidden\" name=\"host$i\" value=\"$host\"/>";
       echo "<input type=\"hidden\" name=\"fee$i\" value=\"$fee_class\"/>";
-      $num_newguests++;
+      $num_walkins++;
       $walkin_income += get_adjusted_price( $id, $fee_class, true );
 
-      if ( $fee_class == 'A' ) {
+      switch ( $fee_class ) {
+      case 'A':
 	$adult_diner_equivalent += 1.0;
-	$walkins_adult++;
-      }
-      else if ( $fee_class == 'K' ) {
+	break;
+      case 'T':
+	$adult_diner_equivalent += 0.75;
+	break;
+      case 'K':
 	$adult_diner_equivalent += 0.5;
-	$walkins_kid++;
+	break;
+      case 'Q':
+	$adult_diner_equivalent += 0.25;
+	break;
+	// case 'F' would just add 0 so do not consider it here.
       }
-      else $walkins_free++;
     }
   }
+
+  $adult_walkin_equivalent = $adult_diner_equivalent;
 
 
   $expenses = 0;
@@ -103,7 +113,7 @@ if ( !paperwork_done( $id ) ) {
 
 
 
-  /// pantry flat rate addition
+  /// pantry flat rate addition and pre-signup diner count
   $diners = 0;
   $sql = "SELECT cal_login FROM webcal_meal_participant " .
     "WHERE cal_id = $id AND (cal_type = 'M' OR cal_type = 'T')";
@@ -112,8 +122,21 @@ if ( !paperwork_done( $id ) ) {
       $diner_login = $row[0];
       $diners++;
       $age = get_fee_category( $id, $diner_login );
-      if ( $age == 'A' ) $adult_diner_equivalent += 1.0;
-      else if ( $age == 'K' ) $adult_diner_equivalent += 0.5;
+      switch ( $age ) {
+      case 'A':
+	$adult_diner_equivalent += 1.0;
+	break;
+      case 'T':
+	$adult_diner_equivalent += 0.75;
+	break;
+      case 'K':
+	$adult_diner_equivalent += 0.5;
+	break;
+      case 'Q':
+	$adult_diner_equivalent += 0.25;
+	break;
+	// case 'F' would just add 0 so do not consider it here.
+      }
     }
   }
   $sql = "SELECT cal_fee FROM webcal_meal_guest " .
@@ -122,8 +145,21 @@ if ( !paperwork_done( $id ) ) {
     while ( $row = dbi_fetch_row( $res ) ) {
       $age = $row[0];
       $diners++;
-      if ( $age == 'A' ) $adult_diner_equivalent += 1.0;
-      else if ( $age == 'K' ) $adult_diner_equivalent += 0.5;
+      switch ( $age ) {
+      case 'A':
+	$adult_diner_equivalent += 1.0;
+	break;
+      case 'T':
+	$adult_diner_equivalent += 0.75;
+	break;
+      case 'K':
+	$adult_diner_equivalent += 0.5;
+	break;
+      case 'Q':
+	$adult_diner_equivalent += 0.25;
+	break;
+	// case 'F' would just add 0 so do not consider it here.
+      }
     }
   }
   $diners += $num_walkins;
@@ -218,9 +254,11 @@ if ( !paperwork_done( $id ) ) {
 	 <tr><td><b>Income</b>:</td><td></td><td></td><td></td></tr>
 	 <tr><td></td><td>Diners signed up before meal summary</td>
  	     <td><?php echo price_to_str($regular_signup_income);?></td>
-             <td>(<?php echo demographics($id);?>)</td></tr>
-	 <tr><td></td><td>Walkins signed up during meal summary</td><td><?php echo price_to_str($walkin_income);?></td><td>
-	<?php echo "($walkins_adult adults, $walkins_kid older children, $walkins_free younger children)";?></td></tr>
+             <td><?php echo " (" . $diners . " diners, equivalent to " . ($adult_diner_equivalent-$adult_walkin_equivalent) . " adults)";?></td>
+         </tr>
+	 <tr><td></td><td>Walkins signed up during meal summary</td><td><?php echo price_to_str($walkin_income);?></td>
+             <td><?php echo " (" . $num_walkins . " diners, equivalent to " . $adult_walkin_equivalent . " adults)";?></td>
+         </tr>
  	 <tr><td></td><td>Total income</td><td></td><td><?php echo price_to_str( $income );?></td></tr>
          <tr><td><b>Expenses</b>:</td><td></td><td></td><td></td></tr>
          <tr><td></td><td>Shoppers</td><td><?php echo price_to_str($expenses_shoppers);?></td><td></td></tr>
@@ -229,6 +267,7 @@ if ( !paperwork_done( $id ) ) {
          <tr><td></td><td>Pantry purchases</td><td><?php echo price_to_str($expenses_pantry);?></td><td><?php echo $pantry_description;?></td></tr>
          <tr><td></td><td>Total expenses</td><td></td><td><?php echo price_to_str($expenses);?></td></tr>
 	 <tr><td><b>Difference</b>:</td><td></td><td></td><td><?php echo price_to_str($difference);?></td></tr>
+	 <tr><td><b>Number of adult-equivalent diners</b>:</td><td></td><td></td><td><?php echo $adult_diner_equivalent;?></td></tr>
 	 <tr><td><b>Per adult cost</b>:</td><td></td><td><?php echo price_to_str($per_person);?></td><td>(charged <?php echo price_to_str($base_price);?>)</td></tr>
       </table>
 

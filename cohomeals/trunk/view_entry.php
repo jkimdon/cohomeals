@@ -105,7 +105,7 @@ else echo "</p>";
 <tr>
   <td>Prices:</td>
   <td class="number">adult</td>
-  <td class="number">child</td>
+  <td class="number">half-price child</td>
   <td class="number">walkin</td>
 </tr>
 <tr>

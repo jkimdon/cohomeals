@@ -109,18 +109,33 @@ if ( $is_meal_coordinator || is_chef( $meal_id, $login ) ) {
 	  "<input type=\"text\" name=\"newguest$i\" size=\"30\" " .
 	  "value=\"$guest_name\" maxlength=\"50\"/></td>";
 
+
 	echo "<td><select name=\"fee$i\">";
+
 	echo "<option value=\"A\" ";
 	if ( $fee_class == "A" ) echo "selected=\"selected\"";
 	echo ">Adult</option>";
-	echo "<option value=\"K\" ";
-	if ( $fee_class == "K" ) echo "selected=\"selected\"";
-	echo ">Age 10-12</option>";
+
 	echo "<option value=\"F\" ";
 	if ( $fee_class == "F" ) echo "selected=\"selected\"";
-	echo ">Age 0-9</option>";
+	echo ">No cost (default for ages 0-9)</option>";
+
+	echo "<option value=\"Q\" ";
+	if ( $fee_class == "Q" ) echo "selected=\"selected\"";
+	echo ">Quarter-price (optional for kids)</option>";
+
+	echo "<option value=\"K\" ";
+	if ( $fee_class == "K" ) echo "selected=\"selected\"";
+	echo ">Half-price (default for ages 10-12)</option>";
+
+	echo "<option value=\"T\" ";
+	if ( $fee_class == "T" ) echo "selected=\"selected\"";
+	echo ">Three-quarters-price (optional for kids)</option>";
+
 	  ?>
+
         </select></td>
+
         <?php
 
 	echo "<td><select name=\"host$i\">";
