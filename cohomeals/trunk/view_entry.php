@@ -562,8 +562,11 @@ if ( is_chef( $id ) )
   $can_edit = true;
 
 if ( $can_edit ) {
-  echo "<p><a title=\"Edit meal\" class=\"nav\" " .
-    "href=\"edit_entry.php?id=$id\">Edit meal</a></p>\n";
+
+  if ( $event_date > date("Ymd") ) {
+    echo "<p><a title=\"Edit meal\" class=\"nav\" " .
+      "href=\"edit_entry.php?id=$id\">Edit meal</a></p>\n";
+  }
 }
 ?>
 
