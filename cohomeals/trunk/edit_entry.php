@@ -311,6 +311,13 @@ price_to_dollars_cents( $base_price, $base_dollars, $base_cents );
       value="<?php printf( "%02d", $base_cents );?>" maxlength="2" />
   <?php } else {
     printf( "\$%d.%02d", $base_dollars, $base_cents ); 
+
+    $three_days_before_deadline = get_day( get_day( $cal_date, -1*$deadline ), -3 );
+    if ( $three_days_before_deadline >= date( "Ymd" ) ) {
+      echo "&nbsp;&nbsp;<a class=\"addbutton\" href=\"edit_base_price.php?mealid=$id\">Change base price</a>";
+    } else {
+      echo "&nbsp;&nbsp;Base price cannot be changed within 3 days of the signup deadline<br>";
+    }
     echo "<input type=\"hidden\" name=\"base_dollars\" value=\"$base_dollars\" />\n";
     echo "<input type=\"hidden\" name=\"base_cents\" value=\"$base_cents\" />\n";
  }?>
