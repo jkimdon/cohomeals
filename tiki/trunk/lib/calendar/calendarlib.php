@@ -297,7 +297,7 @@ class CalendarLib extends TikiLib
 
 		$cond = "(" . implode(" or ", $where). ") and ";
 		// find all recurrences that intersect with the desired range
-		$cond .= " (i.`startPeriod` < ? and (i.`endPeriod` > ? or i.`endPeriod` = 0))";
+		$cond .= " (i.`startPeriod` < ? and (i.`endPeriod` > ? or i.`endPeriod` = 0 or i.`endPeriod` IS NULL))";
 
 		$bindvars[] = (int)$tstop;
 		$bindvars[] = (int)$tstart;
