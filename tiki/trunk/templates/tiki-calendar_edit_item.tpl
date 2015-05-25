@@ -248,12 +248,8 @@
 	<input type="hidden" name="startPeriod" value="{$recurrence.startPeriod}"/>
 	<input type="hidden" name="nbRecurrences" value="{$recurrence.nbRecurrences}"/>
 	<input type="hidden" name="endPeriod" value="{$recurrence.endPeriod}"/>
-	{tr}Starting on{/tr} {$recurrence.startPeriod|tiki_long_date},&nbsp;
-	{if $recurrence.endPeriod gt 0}{tr}ending by{/tr} {$recurrence.endPeriod|tiki_long_date}
-        {elseif $recurrence.nbRecurrences gt 0}{tr}ending after{/tr} {$recurrence.nbRecurrences} {tr}events{/tr}
-        {/if}.
-{else}
-		{tr}Start period{/tr} :
+{/if}
+		{tr}Starting on{/tr} :
 		{if $prefs.feature_jscalendar eq 'y' and $prefs.javascript_enabled eq 'y'}
 			{jscalendar id="startPeriod" date=$recurrence.startPeriod fieldname="startPeriod" align="Bc" showtime='n'}
 		{else}
@@ -270,7 +266,6 @@
 		{/if}
 		<br />
 		<input type="radio" id="id_endTypeDtNe" name="endType" value="dtneverending" {if $recurrence.endPeriod eq 0 or $calitem.calitemId eq 0}checked="checked"{/if}/>&nbsp;<label for="id_endTypeDtNe">{tr}Never ending{/tr}</label>
-{/if}
 		<br />&nbsp;
 	  </div>
 {else}
