@@ -1,0 +1,1 @@
+This software, based on WebCalendar, is used to coordinate eating and working at common meals.
