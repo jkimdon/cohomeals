@@ -5212,7 +5212,7 @@ class TikiLib extends TikiDb_Bridge
 	 * @param bool $is_strftime_format
 	 * @return string
 	 */
-	static function date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true)
+	static function old_date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true)
 	{
 		$tikilib = TikiLib::lib('tiki');
 		static $currentUserDateByFormat = array();
@@ -5256,7 +5256,7 @@ class TikiLib extends TikiDb_Bridge
 	 * @param $year
 	 * @return int
 	 */
-	function make_time($hour,$minute,$second,$month,$day,$year)
+	function old_make_time($hour,$minute,$second,$month,$day,$year)
 	{
 		$tikilib = TikiLib::lib('tiki');
 		$tikidate = TikiLib::lib('tikidate');
@@ -5267,6 +5267,38 @@ class TikiLib extends TikiDb_Bridge
 		return $tikidate->getTime();
 	}
 
+	static function date_format($format, $timestamp = false, $_user = false, $input_format = 5/*DATE_FORMAT_UNIXTIME*/, $is_strftime_format = true) 
+	{
+		global $tikidate, $tikilib;
+		if ( ! $timestamp ) {
+			$timestamp = time();
+		}
+
+		try {
+			$tikidate->setDate($timestamp, $input_format);
+		} catch (Exception $e) {
+			return $e->getMessage();
+		}
+
+		$tikidate->setTZbyID('PST'); /// DEBUG HACK!! 
+		return $tikidate->format($format, $is_strftime_format);
+	}
+
+	function make_time($hour,$minute,$second,$month,$day,$year) {
+		global $tikidate, $tikilib, $prefs;
+		if (!is_object($tikidate)) {
+			require_once('lib/tikidate.php');
+			$tikidate = new TikiDate();
+			$display_tz = $tikilib->get_display_timezone();
+			if ( $display_tz == '' ) $display_tz = 'UTC';
+		}
+		$tikidate->setTZbyID('PST'); /// DEBUG HACK!! 
+ 
+		$tikidate->setLocalTime($day,$month,$year,$hour,$minute,$second,0);
+		return $tikidate->getTime();
+	}
+
+    
 	/**
 	 * @param $timestamp
 	 * @param bool $user

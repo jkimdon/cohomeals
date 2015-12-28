@@ -192,7 +192,22 @@ if ( empty( $fileId ) ) {
 	} else {
 		$galleries = $filegallib->getSubGalleries($requestGalleryId, true, 'upload_files');
 	}
-	$smarty->assign_by_ref('galleries', $galleries["data"]);
+	// we want to display the entire path so we can tell where we are uploading things
+	foreach ( $galleries['data'] as $key => &$gal ) {
+	  $tmpPath = $filegallib->get_full_virtual_path( $gal['id'], 'filegal' );
+	  // now get rid of the extraneous initial "/File Galleries/" to make it shorter
+	  $galPath = preg_replace( '~^/File Galleries/~', '', $tmpPath );
+	  $gal['fullpath'] = $galPath;
+	  $g_fullpath[$key] = $galPath;
+	  $g_id[$key] = $gal['id'];
+	  $g_perms[$key] = $gal['perms'];
+	}
+
+	// and sort alphabetically by highest parent gallery to make it usable
+	// We care only about fullpath, id, and perms since that is what is used in tpl
+	array_multisort( $g_fullpath, SORT_ASC, $galleries['data'] );
+
+    $smarty->assign_by_ref('galleries', $galleries["data"]);
 	$smarty->assign('treeRootId', $galleries['parentId']);
 
 	if ( $prefs['fgal_upload_progressbar'] == 'ajax_flash' ) {

@@ -22,7 +22,6 @@ $headerlib->add_cssfile('css/calendar.css', 20);
 # 	$tiki_p_change_events
 # 	$tiki_p_add_events
 $access->check_feature('feature_calendar');
-
 $auto_query_args = array(
 	'viewmode',
 	'calIds',
@@ -110,6 +109,7 @@ $smarty->assign('infocals', $infocals["data"]);
 $smarty->assign('listcals', $listcals);
 $smarty->assign('modifTab', $modifTab);
 $smarty->assign('now', $tikilib->now);
+
 
 // set up list of groups
 $use_default_calendars = false;
@@ -202,17 +202,18 @@ if ($_SESSION['CalendarViewGroups']) {
 		}
 		$smarty->assign_by_ref('sort_mode', $sort_mode);
 		$listevents = $calendarlib->list_raw_items($_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1, $sort_mode);
+		$calendarlib->add_coho_recurrence_items($listevents, $_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1, $sort_mode);
 		for ($i = count($listevents) - 1; $i >= 0; --$i) {
 			$listevents[$i]['modifiable'] = in_array($listevents[$i]['calendarId'], $modifiable)? "y": "n";
 		}
 	} else {
 		$listevents = $calendarlib->list_items($_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1);
+		$calendarlib->add_coho_recurrence_items($listevents, $_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1);
 	}
 	$smarty->assign_by_ref('listevents', $listevents);
 } else {
 	$listevents = array();
 }
-
 $mloop = TikiLib::date_format("%m", $viewstart);
 $dloop = TikiLib::date_format("%d", $viewstart);
 $yloop = TikiLib::date_format("%Y", $viewstart);
@@ -220,7 +221,8 @@ $yloop = TikiLib::date_format("%Y", $viewstart);
 $curtikidate = new TikiDate();
 $display_tz = $tikilib->get_display_timezone();
 if ( $display_tz == '' ) $display_tz = 'UTC';
-$curtikidate->setTZbyID($display_tz);
+//$curtikidate->setTZbyID($display_tz);
+$curtikidate->setTZbyID('PST'); // debug
 $curtikidate->setLocalTime($dloop, $mloop, $yloop, 0, 0, 0, 0);
 
 $smarty->assign('display_tz', $display_tz);
@@ -300,13 +302,10 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 				$smarty->assign('cellstart', $le["startTimeStamp"]);
 				$smarty->assign('cellend', $le["endTimeStamp"]);
 
-				$organizers = $le['result']['organizers'];
-				$cellorganizers = '';
-				foreach ($organizers as $org) {
-					if ($org == '') continue;
-					if ($cellorganizers != '') $cellorganizers .= ', ';
-					$cellorganizers .= smarty_modifier_userlink(trim($org), 'link', 'not_set', '', 0, 'n');
-				}
+				if (array_key_exists("recurrenceId",$le)) 
+				  $smarty->assign('cellrecurrenceId', $le["recurrenceId"]);
+
+				$cellorganizers = $le['result']['organizers_realname'];
 				$smarty->assign('cellorganizers', $cellorganizers);
 
 				$cellparticipants = '';
@@ -371,8 +370,12 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 		$registeredIndexes = array();
 		if (is_array($cell[$i][$w]) && array_key_exists('items', $cell[$i][$w])) {
 			foreach ($cell[$i][$w]['items'] as $cpt=>$anEvent) {
-				if ($cell[$i][$w]['day'] + 86400 - $anEvent['result']['end'] < 0)	// event ends after the current day
+			  if ($cell[$i][$w]['day'] + 86400 - $anEvent['result']['end'] < 0) {	// event ends after the current day
 					$registeredIndexes[$anEvent['calitemId']] = $cpt;
+					$cell[$i][$w]['items'][$cpt]['notEndOfMultipleDayEvent'] = true;
+			  } elseif ($anEvent['result']['start'] >= $cell[$i][$w]['day']) {
+					$cell[$i][$w]['items'][$cpt]['notEndOfMultipleDayEvent'] = true;
+			  }
 			}
 		}
 	}

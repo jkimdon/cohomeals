@@ -12,7 +12,8 @@
 	<div class="tabrowLeft"></div>
 {/if}
 	<div class="viewmode">
-	{if !isset($calendar_type) or $calendar_type neq "tiki_actions"}
+	Navigation: 
+	{if $calendar_type neq "tiki_actions"}
 			{if $module neq 'y'}
 				{button _auto_args="viewmode,focus" _title="{tr}Today{/tr}" _text="{tr}Today{/tr}" _class="calbuttonoff" viewmode='day' focus=$now todate=$now}
 			{else}
@@ -81,7 +82,11 @@
 			<a {if $prefs.mobile_mode eq "y"}data-role="button" data-mini="true" data-inline="true" {/if}href="{query _type='relative' _ajax=$ajax _class='next' todate=$focus_next}" title="{tr}Year{/tr}">{icon _id=resultset_next alt="{tr}Year{/tr}"}</a> {* mobile *}
 		{/if}
 		</div>
-		{/strip}</span>
+		{/strip}</span><br/>
+		<span style="display: inline-block">
+		or jump to: <form action="tiki-calendar_nav.php" method="post" name="calnav">{html_select_date prefix="jumpto_" time=$today field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year = $prefs.calendar_end_year}<input type="submit" value="Go"/></form>
+		</span>
+
 	</div>
 </div>
 <br style="clear:both" />

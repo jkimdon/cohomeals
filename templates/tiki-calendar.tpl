@@ -35,16 +35,18 @@
 			{button href="tiki-calendar_edit_item.php" _text="{tr}Add Event{/tr}"}
 		{/if}
 
+{* temporarily disabled until sure recurrence shows up in exporting		
 		{if $tiki_p_view_events eq 'y' and $prefs.calendar_export eq 'y'}
 			{button href="#" _onclick="toggle('exportcal');return false;" _text="{tr}Export Calendars{/tr}" _title="{tr}Click to export calendars{/tr}"}
-		{/if}
+			{/if}*}
 
 		{if $viewlist eq 'list'}
 			{capture name=href}?viewlist=table{if $smarty.request.todate}&amp;todate={$smarty.request.todate}{/if}{/capture}
 			{button href=$smarty.capture.href _text="{tr}Calendar View{/tr}"}
 		{else}
+{* temporarily disabled until recurrence rendering works in list view			
 			{capture name=href}?viewlist=list{if $smarty.request.todate}&amp;todate={$smarty.request.todate}{/if}{/capture}
-			{button href=$smarty.capture.href _text="{tr}List View{/tr}"}
+			{button href=$smarty.capture.href _text="{tr}List View{/tr}"} *}
 		{/if}
 
 		{if count($listcals) >= 1}
@@ -56,14 +58,22 @@
 				{if count($checkedCals) > $maxCalsForButton}<select size="5">{/if}
 				{foreach item=k from=$listcals name=listc}
 					{if $thiscal.$k}
-						{assign var=thiscustombgcolor value=$infocals.$k.custombgcolor}
+					        {assign var=thiscustombgcolor value=$infocals.$k.custombgcolor}
 						{assign var=thiscustomfgcolor value=$infocals.$k.customfgcolor}
 						{assign var=thisinfocalsname value=$infocals.$k.name|escape}
-						{if count($checkedCals) > $maxCalsForButton}
-							<option style="background:#{$thiscustombgcolor};color:#{$thiscustomfgcolor};" onclick="toggle('filtercal')">{$thisinfocalsname}</option>
-						{else}
-							{button href="#" _style="background:#$thiscustombgcolor;color:#$thiscustomfgcolor;border:1px solid #$thiscustomfgcolor;" _onclick="toggle('filtercal');return false;" _text="$thisinfocalsname"}
-						{/if}
+					{else}
+					        {assign var=thiscustombgcolor value="FFFFFF"}
+						{assign var=thiscustomfgcolor value="000000"}
+						{assign var=tempname value=$infocals.$k.name|escape}
+						{assign var=thisinfocalsname value="$tempname (not shown)"}
+
+					        {assign var=thisinfocalsButtonname value="$thisinfocalsname (Not shown)"}
+					{/if}
+
+					{if count($checkedCals) > $maxCalsForButton}
+						<option style="background:#{$thiscustombgcolor};color:#{$thiscustomfgcolor};" onclick="toggle('filtercal')">{$thisinfocalsname}</option>
+					{else}
+						{button href="#" _style="background:#$thiscustombgcolor;color:#$thiscustomfgcolor;border:1px solid #$thiscustomfgcolor;" _onclick="toggle('filtercal');return false;" _text="$thisinfocalsname"}
 					{/if}
 				{/foreach}
 				{if count($checkedCals) > $maxCalsForButton}</select>{/if}
@@ -239,5 +249,13 @@ $('#calendar').fullCalendar({
 <div id='calendar'></div>
 <div id='calendar_dialog'></div>
 {/if}
+{if $tiki_p_admin_calendar eq 'y'}
 <p>&nbsp;</p>
+<form action="tiki-calendar_weeklyEmail.php" method="post" name="f" id="weeklyEmail">
+Prepare weekly calendar email for the week starting: 
+   {html_select_date prefix="weekly_email_start_" time=$today field_order=$prefs.display_field_order start_year=$prefs.calendar_start_year end_year=$prefs.calendar_end_year}
+&nbsp;
+<input type="submit" name="act" value="{tr}Go{/tr}" />
+</form>
+{/if}
 </div>

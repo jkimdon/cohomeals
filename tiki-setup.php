@@ -662,6 +662,10 @@ if ( session_id() ) {
 	}
 }
 
+$display_tz = $tikilib->get_display_timezone();
+if ( $display_tz == '' ) $display_tz = 'UTC';
+$tikidate->setTZbyID($display_tz);
+
 if ( isset($token_error) ) {
 	$smarty->assign('token_error', $token_error);
 	$smarty->display('error.tpl');

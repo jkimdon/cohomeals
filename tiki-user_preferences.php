@@ -370,6 +370,9 @@ if (isset($user_preferences[$userwatch]['email is public'])) {
 $tikilib->get_user_preference($userwatch, 'mailCharset', $prefs['default_mail_charset']);
 $tikilib->get_user_preference($userwatch, 'user_dbl', 'y');
 $tikilib->get_user_preference($userwatch, 'display_12hr_clock', 'n');
+
+include_once ('coho_tiki-user_preferences.php');
+
 $userinfo = $userlib->get_user_info($userwatch);
 $smarty->assign_by_ref('userinfo', $userinfo);
 $llist = array();
@@ -476,5 +479,5 @@ if ($prefs['feature_wiki'] == 'y' and $prefs['feature_wiki_userpage'] == 'y') {
 $smarty->assign_by_ref('tikifeedback', $tikifeedback);
 include_once ('tiki-section_options.php');
 ask_ticket('user-prefs');
-$smarty->assign('mid', 'tiki-user_preferences.tpl');
+$smarty->assign('mid', 'coho_tiki-user_preferences.tpl');
 $smarty->display("tiki.tpl");

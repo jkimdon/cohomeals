@@ -31,6 +31,8 @@ abstract class TreeMaker
 {
 	/// Unique prefix for cookies generated for this tree
 	var $prefix;
+	/// current id for gallery browsing
+	var $currentGalleryId;
 
 	/// Constructor
 	function __construct($prefix) 
@@ -121,6 +123,11 @@ abstract class TreeMaker
 		return '';
 	}
 
+	function setCurrentGalleryId($value)
+	{
+	        $this->currentGalleryId = $value;
+	}
+    
 	/**
 	 * To change behavior (xhtml layout :) of generated tree
 	 * it is enough to redefine following methods.

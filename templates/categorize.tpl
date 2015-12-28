@@ -7,7 +7,7 @@
 {if $mandatory_category >= 0 or $prefs.javascript_enabled neq 'y' or (isset($auto) and $auto eq 'y')}
   <div id="categorizator">
 {else}
-{if !isset($notable) || $notable neq 'y'}{button href="#" _flip_id='categorizator' _class='link' _text="{tr}Select Categories{/tr}" _flip_default_open='n'}{/if}
+{if !isset($notable) || $notable neq 'y'}{button href="#" _flip_id='categorizator' _class='link' _text="{tr}Select Categories{/tr}" _flip_default_open='y'}{/if}
   <div id="categorizator" style="display:{if isset($smarty.session.tiki_cookie_jar.show_categorizator) and $smarty.session.tiki_cookie_jar.show_categorizator eq 'y' or (isset($notable) && $notable eq 'y')}block{else}none{/if};">
 {/if}
   <div class="multiselect">

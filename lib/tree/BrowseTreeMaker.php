@@ -63,12 +63,18 @@ class BrowseTreeMaker extends TreeMaker
 
 	function node_start_code_flip($nodeinfo, $count=0)
 	{
-		return "\t" . '<li class="treenode withflip ' . (($count % 2) ? 'odd' : 'even') . '">';
+	        if ( $nodeinfo["id"] == $this->currentGalleryId ) 
+		         return "\t" . '<li class="treenode withflip ' . 'current' . '">';
+		else
+		         return "\t" . '<li class="treenode withflip ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
 
 	function node_start_code($nodeinfo, $count=0)
 	{
-		return "\t" . '<li class="treenode ' . (($count % 2) ? 'odd' : 'even') . '">';
+	        if ( $nodeinfo["id"] == $this->currentGalleryId ) 
+		         return "\t" . '<li class="treenode ' . 'current' . '">';
+		else
+		         return "\t" . '<li class="treenode ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
 
 	//

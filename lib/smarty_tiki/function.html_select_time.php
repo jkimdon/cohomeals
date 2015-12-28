@@ -44,7 +44,7 @@ function smarty_function_html_select_time($params, $smarty)
 	$display_minutes    = true;
 	$display_seconds    = true;
 	$display_meridian   = true;
-	$use_24_hours       = true;
+	$use_24_hours       = false;
 	$minute_interval    = 1;
 	$second_interval    = 1;
 	$hour_minmax        = '0-23';

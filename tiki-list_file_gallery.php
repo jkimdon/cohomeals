@@ -1025,15 +1025,16 @@ $smarty->assign('treeRootId', $subGalleries['parentId']);
 
 if ($prefs['fgal_show_explorer'] == 'y' || $prefs['fgal_show_path'] == 'y' || isset($_REQUEST['movesel_x']) || isset($_REQUEST["edit_mode"])) {
 	$gals = array();
-	foreach ($subGalleries['data'] as $gal) {
-		$gals[] = array(
-			'label' => $gal['parentName'] . ' > ' . $gal['name'],
-			'id' => $gal['id'],
-			'perms' => $gal['perms'],
-			'public' => $gal['public'],
-			'user' => $gal['user'],
-		);
+	// we want to display the entire path so we can tell where we are moving things
+	foreach ( $subGalleries['data'] as $key => &$gal ) {
+	  $tmpPath = $filegallib->get_full_virtual_path( $gal['id'], 'filegal' );
+	  // now get rid of the extraneous initial "/File Galleries/" to make it shorter
+	  $galPath = preg_replace( '~^/File Galleries/~', '', $tmpPath );
+	  $gals[] = array('label' => $galPath, 'id' => $gal['id']);
 	}
+
+	// and sort alphabetically by highest parent gallery to make it usable
+	// We care only about fullpath, id, and perms since that is what is used in tpl
 	sort($gals);
 	$smarty->assign_by_ref('all_galleries', $gals);
 

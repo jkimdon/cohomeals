@@ -40,8 +40,8 @@
 				{/if}
 				({tr}All day{/tr})
 			{else}
-				{if ($cellend - $cellstart < 86400)}
-					{$cellstart|tiki_short_time} &ndash; {$cellend|tiki_short_time}
+				  {if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. Hardcoded.*}
+				        {$cellstart|tiki_short_time} &ndash; {$cellend|tiki_short_time}
 				{else}
 					{$cellstart|tiki_short_date}&nbsp;({$cellstart|tiki_short_time}) &ndash; {$cellend|tiki_short_date}&nbsp;({$cellend|tiki_short_time})
 				{/if}
@@ -49,27 +49,22 @@
 		</strong>
 		<br>
 	{/if}
-	<a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if isset($cellstatus) and $cellstatus eq '2'} style="text-decoration:line-through"{/if}>
-		{$cellname|escape}
-	</a>
-	<br><br>
+	{if $cellid eq '-1'}
+  	  <a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	{else}
+  	  <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	{/if}
 	{if $show_description eq 'y'}
 		<div class="box-data">
 			{$celldescription|truncate:250:'...'}
 		</div>
 		<br>
 	{/if}
-	{if isset($show_participants) and $show_participants eq 'y' and $cellparticipants}
+	{if isset($show_participants) and $show_participants eq 'y' and $cellorganizers}
 		<span class="box-title">
-			{tr}Organized by:{/tr}
+			{tr}Contact/Host:{/tr}
 		</span>
 		{$cellorganizers}
-		<br>
-		<span class="box-title">
-			{tr}Participants:{/tr}
-		</span>
-		{$cellparticipants}
-		<br>
 		<br>
 	{/if}
 	{* need to check $cellCalendarId separately to eliminate notice fro some reason *}
