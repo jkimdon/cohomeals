@@ -203,12 +203,14 @@ if ($_SESSION['CalendarViewGroups']) {
 		$smarty->assign_by_ref('sort_mode', $sort_mode);
 		$listevents = $calendarlib->list_raw_items($_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1, $sort_mode);
 		$calendarlib->add_coho_recurrence_items($listevents, $_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1, $sort_mode);
+		$calendarlib->add_coho_meal_items($listevents, 1, $user, $viewstart, $viewend );
 		for ($i = count($listevents) - 1; $i >= 0; --$i) {
 			$listevents[$i]['modifiable'] = in_array($listevents[$i]['calendarId'], $modifiable)? "y": "n";
 		}
 	} else {
 		$listevents = $calendarlib->list_items($_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1);
 		$calendarlib->add_coho_recurrence_items($listevents, $_SESSION['CalendarViewGroups'], $user, $viewstart, $viewend, 0, -1);
+        $calendarlib->add_coho_meal_items($listevents, 1, $user, $viewstart, $viewend );
 	}
 	$smarty->assign_by_ref('listevents', $listevents);
 } else {
@@ -295,6 +297,8 @@ for ($i = 0; $i <= $numberofweeks; $i++) {
 				$smarty->assign('cellname', $le["name"]);
 				$smarty->assign('cellurl', $le["web"]);
 				$smarty->assign('cellid', $le["calitemId"]);
+				if ( $le["calendarId"] == 1 ) // coho meal program
+				  $smarty->assign('celldeadline', $le["deadline"]);
 				$smarty->assign('celldescription', $tikilib->parse_data($le["description"], array('is_html' => $prefs['calendar_description_is_html'] === 'y')));
 				$smarty->assign('cellmodif', $le['modifiable']);
 				$smarty->assign('cellvisible', $le['visible']);

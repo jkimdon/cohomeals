@@ -474,7 +474,15 @@ $icons = array(
 		'description' => tr('Settings and features for freetags'),
 		'help' => 'Tags',
 	),
-	"faqs" => array(
+	"cohomeals" => array(
+		'icon' => 'img/icons/large/vcard.png',
+		'position' => '-300px -415px;',
+		'title' => tr('CoHo Meals'),
+		'disabled' => $prefs['feature_cohomeals'] != 'y',
+		'description' => tr('Settings and features for CoHo meal program'),
+		'help' => 'cohomeals',
+	),
+    "faqs" => array(
 		'icon' => 'img/icons/large/stock_dialog_question.png',
 		'position' => '-500px -415px;',
 		'title' => tr('FAQs'),

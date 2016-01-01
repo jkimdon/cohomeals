@@ -804,6 +804,7 @@ tr.diffheader {
 	color: #93554a;
 	background: #a8cce2;
 	min-height: 32px;
+	border: 1px solid #909090;
 }
 li.current {
         background: #ffff70;

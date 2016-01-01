@@ -51,7 +51,7 @@
 	{assign var=calendarId value=$cell[w][d].items[item].calendarId}
 		<tr valign="top">
 
-{if ($calendarId neq '12' and $calendarId neq '2') or ($cell[w][d].items[item].notEndOfMultipleDayEvent eq true)} {* hardcoded. 2 is the guest room, 12 is camping *}
+{if ($calendarId neq '12' and $calendarId neq '2') or ($cell[w][d].items[item].notEndOfMultipleDayEvent eq true)} {* coho hardcoded. 2 is the guest room, 12 is camping *}
 
 {if is_array($cell[w][d].items[item])}
 			<td class="Cal{$cell[w][d].items[item].type} calId{$cell[w][d].items[item].calendarId} viewcalitemId_{$cell[w][d].items[item].calitemId}" style="padding:0px;height:14px;background-color:#{$infocals.$calendarId.custombgcolor};border-color:#{$infocals.$calendarId.customfgcolor};opacity:{if $cell[w][d].items[item].status eq '0'}0.8{else}1{/if};filter:Alpha(opacity={if $cell[w][d].items[item].status eq '0'}80{else}100{/if});text-align:left;border-width:1px {if $cell[w][d].items[item].endTimeStamp <= ($cell[w][d].day + 86400)}1{else}0{/if}px 1px {if $cell[w][d].items[item].startTimeStamp >= $cell[w][d].day}1{else}0{/if}px;cursor:pointer"
@@ -66,7 +66,9 @@
 			{if $myurl eq "tiki-action_calendar.php"}
 				{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="{$cell[w][d].items[item].url}"{/if}
 			{elseif $prefs.calendar_sticky_popup neq 'y'}
-                                {if $cell[w][d].items[item].calitemId eq "-1"}
+                                {if $cell[w][d].items[item].calendarId eq "1"} {* coho meal program is #1 *}
+				    {if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="coho_meals-view_entry.php?id={$cell[w][d].items[item].calitemId}"{/if}
+                                    {elseif $cell[w][d].items[item].calitemId eq "-1"}
 				        {if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="tiki-calendar_edit_item.php?viewrecurrenceId={$cell[w][d].items[item].recurrenceId}&calendarId={$cell[w][d].items[item].calendarId}&itemdate={$cell[w][d].items[item].startTimeStamp}"{/if}
   		                {else}
 				        {if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="tiki-calendar_edit_item.php?viewcalitemId={$cell[w][d].items[item].calitemId}"{/if}

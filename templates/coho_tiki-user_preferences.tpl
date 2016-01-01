@@ -56,20 +56,54 @@
     </tr>
 
     <tr>
+      <td>{tr}Enrolled in meal program?{/tr}</td>
+      <td>{html_radios values=$ynarray output=$ynarray name='in_meal_program' selected={$user_prefs.in_meal_program}}</td>
+    </tr>
+
+
+    <tr>
       <td>
-        {tr}Birthdate (can be 0 if you choose not to disclose, but then you will be charged adult rates):{/tr}
+        {tr}Birthdate (need not be set if you choose not to disclose, but then you will be charged adult rates):{/tr}
       </td>
-      <td>{$user_prefs.birthdate|escape}
-      </td>
+      <td>
+      {if $tiki_p_admin_users eq 'y'}
+         {if $user_prefs.birthdate eq ''}
+            {assign "starting_date" "32400"}
+         {else}
+	    {assign "starting_date" $user_prefs.birthdate}
+	 {/if}
+      	 {html_select_date prefix="birth_" time={$starting_date} field_order=$prefs.display_field_order start_year=1910 end_year = $prefs.calendar_end_year}
+      {else}
+        {if $user_prefs.birthdate eq ''}None set
+      	{else}{$user_prefs.birthdate|tiki_long_date}
+      	{/if}
+      {/if}
+       </td>
     </tr>
 
     <tr>
       <td>Billing group</td>
-      <td>{$user_prefs.billingGroup|escape}
+       <td>
+      {if $tiki_p_admin_users eq 'y'}
+      	  <input type="text" name="billingGroup" value="{$user_prefs.billingGroup|escape}" style="width:20em;font-size:1.1em;" />
+      {else}
+	{if $user_prefs.billingGroup eq ''}!!!NONE SET! Please fix!!!
+      	{else}
+      	{$user_prefs.billingGroup|escape}
+	{/if}
+      {/if}
       </td>
     </tr>
 
-
+  {if $showUnit eq 'y'}
+    <tr>
+      <td>Unit number</td>
+      <td>
+      <input type="text" name="unitNumber" value="{$user_prefs.unitNumber|escape}" style="width:20em;font-size:1.1em;" />
+      </td>
+    </tr>
+  {/if}
+  
 	{if $prefs.feature_community_gender eq 'y'}
       <tr><td>{tr}Gender:{/tr}</td>
         <td>
@@ -147,6 +181,17 @@
     <tr>
       <td>Food restrictions</td>
       <td>
+
+       <p>Your personal food restrictions are as follows. Adapt as
+        needed, though please limit yourself to restrictions rather
+        than preferences since it can be a lot of work for chefs to
+        accommodate food needs for many people.</p>
+
+  	<p> Please include details in the comments section such as
+  	suggested alternatives, if small amounts are ok, or anything
+  	else that might be useful for a chef who is trying to
+  	accommodate your needs.</p>
+
       </td>
     </tr>
 

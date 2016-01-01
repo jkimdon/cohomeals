@@ -258,6 +258,8 @@ if ($prefs['feature_userPreferences'] == 'y' && isset($_REQUEST["new_prefs"])) {
 			'user' => $GLOBALS['user'],
 		)
 	);
+
+    include_once ('coho_tiki-set_user_preferences.php');
 }
 if ($prefs['auth_method'] == 'ldap' && $user == 'admin' && $prefs['ldap_skip_admin'] == 'y') {
 	$change_password = 'y';
@@ -371,7 +373,7 @@ $tikilib->get_user_preference($userwatch, 'mailCharset', $prefs['default_mail_ch
 $tikilib->get_user_preference($userwatch, 'user_dbl', 'y');
 $tikilib->get_user_preference($userwatch, 'display_12hr_clock', 'n');
 
-include_once ('coho_tiki-user_preferences.php');
+include_once ('coho_tiki-get_user_preferences.php');
 
 $userinfo = $userlib->get_user_info($userwatch);
 $smarty->assign_by_ref('userinfo', $userinfo);

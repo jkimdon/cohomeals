@@ -12,6 +12,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 }
 
 include_once ('lib/calendar/calrecurrence.php');
+include_once ('lib/cohomeals/coho_mealslib.php');
 
 if (!defined('ROLE_ORGANIZER')) define('ROLE_ORGANIZER', '6');
 if (!defined('weekInSeconds')) define('weekInSeconds', 604800);
@@ -520,6 +521,84 @@ class CalendarLib extends TikiLib
 		return $res;
 	}
 
+	function add_coho_meal_items(&$eventArray, $mealCalId, $user, $tstart, $tstop)
+	{
+	  global $prefs;
+	  $cohoml = new CohoMealsLib;
+
+	  // find meals that occur within date range
+	  $start_day = $this->coho_unix_to_YYYYMMDD($tstart);
+
+	  $end_day = $this->coho_unix_to_YYYYMMDD($tstop);
+	  $cond = "WHERE `cal_date` >= $start_day AND `cal_date` <= $end_day";
+	  $cond .= " AND `cal_cancelled` = 0";
+	  
+	  $query = "SELECT `cal_id`, `cal_date`, `cal_time`, `cal_signup_deadline`, `cal_base_price`, `cal_max_diners`, `cal_menu`, `cal_notes` ";
+	  $query .= " FROM `coho_meals_meal` ";
+	  $query .= $cond;
+
+	  $allmeals = $this->fetchAll($query);
+	  foreach ($allmeals as $meal) {
+	    /* $i is timestamp unix of the beginning of a day */
+	    $i = $this->coho_date_to_unix_daystart($meal["cal_date"]);
+
+	    // find the crew members
+	    $mealid = $meal["cal_id"];
+	    $chef = $cohoml->has_head_chef($mealid);
+	    if ($chef == false) $chef = "No head chef";
+	    else $chef = $this->get_user_preference($chef, 'realName', '??');
+	    $crew = $cohoml->load_crew($mealid);
+
+	    // deadline printing is hardcoded into tiki-calendar_box.tpl
+	    $deadline = $cohoml->get_day($meal["cal_date"],-1*$meal["cal_signup_deadline"]);
+
+	    // description includes price, crew, menu, notes
+	    $description = "<u>Price:</u> " . $cohoml->price_to_str($meal["cal_base_price"]) . "<br>";
+	    $description .= "<u>Menu:</u> " . $meal["cal_menu"] . "<br>" . 
+	      "<u>Chef:</u> " . $chef . "<br>";
+	    $description .= "<u>Crew:</u><ul>";
+	    foreach( $crew as $cm ) {
+	      $description .= "<li>" . $cm["fullname"] . "&nbsp;&nbsp; (" . $cm["job"] . ")</li>";	      
+	    }
+	    $description .= "</ul>";
+
+	    $description .= "<u>Notes:</u> " . $meal["cal_notes"];
+
+	    
+	    // print person's eat/work status on the main view
+	    $eat_work = $cohoml->get_eat_work_status($mealid, $user);
+	    if ($eat_work == "") $title = "Community Meal";
+	    else $title = "Community Meal (" . $eat_work . ")";
+
+	    $meal_url = "coho_view_meal.php";
+
+	    $eventArray["$i"][] = array(
+					"result" => $meal,
+					"calitemId" => $mealid,
+					"calname" => "Meal Program",
+					"time" => $meal["cal_time"], /* user time */
+					"end" => $meal["cal_time"]+20000, /* assume 2 hrs */
+					"type" => 1,
+					"web" => "",
+					"startTimeStamp" => $this->coho_get_unix($meal["cal_time"],$i),
+					"endTimeStamp" => $this->coho_get_unix($meal["cal_time"]+20000,$i),
+					"nl" => 0, /* unknown */
+					"prio" => 0, /* unknown */
+					"location" => "CH dining room", /* CH dining room */
+					"category" => 0, /* unknown */
+					"name" => $title,
+					"head" => $head,
+					"deadline" => $deadline,
+					"parsedDescription" => $this->parse_data($description),
+					"description" => str_replace("\n|\r", "", $description),
+					"calendarId" => $mealCalId, /* presume 1 for Meal Program */
+					"status" => 0, /* unknown */
+					"user" => $user
+					);
+	  }
+	}
+
+    
     
     /**
      * @param $calIds
@@ -1651,15 +1730,33 @@ class CalendarLib extends TikiLib
 	}
 
 	function coho_get_unix($itemtimeHM,$itemdateUnix) {
-	  $tmp = str_pad($itemtimeHM,4,"0",STR_PAD_LEFT);
+	  $length = strlen($itemtimeHM);
+	  if ( ($length==3) || ($length==5) )
+	    $tmp = str_pad($itemtimeHM,$length+1,"0",STR_PAD_LEFT);
+	  else $tmp = $itemtimeHM;
+	  $tmp = str_pad($tmp,6,"0",STR_PAD_RIGHT);
 	  $itemhour = substr($tmp,0,2);
-	  $itemminute = substr($tmp,-2);
+	  $itemminute = substr($tmp,2,2);
 	  $itemdate = TikiLib::date_format2('Y/m/d',$itemdateUnix);
 	  $itemdate = explode("/",$itemdate);
 	  $unixtime = TikiLib::make_time($itemhour,$itemminute,0,$itemdate[1],$itemdate[2],$itemdate[0]);
 	  return $unixtime;
 	}
 
+
+	function coho_date_to_unix_daystart($YYYYMMDD) {
+	  $YYYY = substr($YYYYMMDD, 0, 4);
+	  $MM = substr($YYYYMMDD, 4, 2);
+	  $DD = substr($YYYYMMDD, 6, 2);
+	  $unixstartofday = TikiLib::make_time(0,0,0,$MM,$DD,$YYYY);
+	  return $unixstartofday;
+	}
+
+
+	function coho_unix_to_YYYYMMDD($unixdate) {
+	  $YYYYMMDD = TikiLib::date_format2('Ymd', $unixdate);
+	  return $YYYYMMDD;
+	}
 
 
     

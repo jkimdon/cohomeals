@@ -40,7 +40,7 @@
 				{/if}
 				({tr}All day{/tr})
 			{else}
-				  {if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. Hardcoded.*}
+				  {if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. coho Hardcoded.*}
 				        {$cellstart|tiki_short_time} &ndash; {$cellend|tiki_short_time}
 				{else}
 					{$cellstart|tiki_short_date}&nbsp;({$cellstart|tiki_short_time}) &ndash; {$cellend|tiki_short_date}&nbsp;({$cellend|tiki_short_time})
@@ -49,12 +49,18 @@
 		</strong>
 		<br>
 	{/if}
-	{if $cellid eq '-1'}
-  	  <a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	{if $cellcalendarId eq '1'} {* coho 1 is meal program *}
+  	    <a href="coho_meals-view_entry.php?id={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
 	{else}
-  	  <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	    {if $cellid eq '-1'}
+  	    	<a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	    {else}
+  	        <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
+	    {/if}
 	{/if}
-	{if $show_description eq 'y'}
+	{if $cellcalendarId eq '1'}<div class="box-data"><u>Deadline</u> {$celldeadline|tiki_date_format:"%a, %b %e"}</div>{/if} {* coho 1 is meal program *}
+
+{if $show_description eq 'y'}
 		<div class="box-data">
 			{$celldescription|truncate:250:'...'}
 		</div>
