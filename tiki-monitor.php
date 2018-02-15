@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-monitor.php 48270 2013-10-31 16:08:48Z lphuberdeau $
+// $Id: tiki-monitor.php 58740 2016-05-30 11:39:15Z jonnybradley $
 
 require_once ('tiki-setup.php');
 //TODO Use a pref to handle the list
@@ -38,6 +38,7 @@ if ($opcode_cache == 'WinCache') {
 	$txtUsed = tr('Available');
 }
 
+$result = [];
 $result['OPCodeCache'] = $opcode_stats['opcode_cache'];
 $result['OpCodeStats'] = $opcode_stats;
 

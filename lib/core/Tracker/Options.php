@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Options.php 48411 2013-11-13 14:03:47Z jonnybradley $
+// $Id: Options.php 63221 2017-07-09 19:03:58Z jonnybradley $
 
 class Tracker_Options
 {
@@ -51,7 +51,7 @@ class Tracker_Options
 		return $options;
 	}
 
-	public function fromArray(array $rawData, array $typeInfo)
+	public static function fromArray(array $rawData, array $typeInfo)
 	{
 		$options = new Tracker_Options;
 		$options->info = $typeInfo;
@@ -157,8 +157,10 @@ class Tracker_Options
 	{
 		$out = array();
 
-		foreach (array_keys($this->info['params']) as $key) {
-			$out[$key] = $this->getParam($key);
+		if (is_array($this->info['params'])) {
+			foreach (array_keys($this->info['params']) as $key) {
+				$out[$key] = $this->getParam($key);
+			}
 		}
 
 		return $out;

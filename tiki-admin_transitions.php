@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_transitions.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_transitions.php 62097 2017-04-05 16:28:48Z jonnybradley $
 
 require_once 'tiki-setup.php';
-require_once 'lib/categories/categlib.php';
+$categlib = TikiLib::lib('categ');
 require_once 'lib/transitionlib.php';
 
 $auto_query_args = array();
@@ -36,7 +36,7 @@ switch( $jitRequest->action->alpha() ) {
 
 		if ( $transition_mode == 'category' ) {
 			$jitPost->replaceFilter('cat_categories', 'int');
-			if ( $selection = $jitPost->cat_categories->asArray() ) {
+			if ( $selection = $jitPost->asArray('cat_categories') ) {
 				$available_states = array_combine(
 					$selection,
 					array_map(array( $categlib, 'get_category_name' ), $selection)
@@ -46,7 +46,7 @@ switch( $jitRequest->action->alpha() ) {
 			}
 		} else {
 			$jitPost->replaceFilter('groups', 'groupname');
-			if ( $selection = $jitPost->groups->asArray() ) {
+			if ( $selection = $jitPost->asArray('groups') ) {
 				$available_states = array_combine($selection, $selection);
 			} else {
 				$available_states = array();
@@ -81,7 +81,7 @@ switch( $jitRequest->action->alpha() ) {
 		$transitionlib = new TransitionLib($transition_mode);
 		$selected_transition = $transitionlib->getTransition((int) $_REQUEST['transitionId']);
 
-		if ( $selection = $jitPost->states->asArray() ) {
+		if ( $selection = $jitPost->asArray('states') ) {
 			$selected_transition['guards'][] = array(
 						$_REQUEST['type'],
 						(int) $_REQUEST['count'],
@@ -181,7 +181,8 @@ $smarty->display('tiki.tpl');
  */
 function transition_label_finder( $state )
 {
-	global $available_states, $transition_mode, $categlib;
+	global $available_states, $transition_mode;
+	$categlib = TikiLib::lib('categ');
 
 	if ( isset($available_states[$state]) ) {
 		return $available_states[$state];

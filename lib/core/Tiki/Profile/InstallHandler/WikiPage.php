@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiPage.php 55072 2015-04-14 09:37:06Z xavidp $
+// $Id: WikiPage.php 61491 2017-03-04 11:54:10Z eromneg $
 
 class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 {
@@ -19,7 +19,9 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 	private $wysiwyg;
 	private $wiki_authors_style;
 	private $geolocation;
-
+	private $hide_title;
+	private $locked;
+    private $freetags;
 	private $mode = 'create_or_update';
 	private $exists;
 
@@ -32,7 +34,8 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 
 		if ( array_key_exists('message', $data) )
 			$this->message = $data['message'];
-
+        if ( array_key_exists('freetags', $data) )
+            $this->freetags = $data['freetags'];
 		if ( array_key_exists('name', $data) )
 			$this->name = $data['name'];
 		if ( array_key_exists('namespace', $data) )
@@ -59,6 +62,11 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 			$this->wiki_authors_style = $data['wiki_authors_style'];
 		if ( array_key_exists('geolocation', $data) )
 			$this->geolocation = $data['geolocation'];
+		if ( array_key_exists('hide_title', $data) )
+			$this->hide_title = $data['hide_title'];
+		if ( array_key_exists('locked', $data) )
+			$this->locked = $data['locked'];
+
 	}
 
 	function canInstall()
@@ -122,6 +130,8 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 		$this->replaceReferences($this->wysiwyg);
 		$this->replaceReferences($this->wiki_authors_style);
 		$this->replaceReferences($this->geolocation);
+		$this->replaceReferences($this->hide_title);
+		$this->replaceReferences($this->locked);
 
 		$this->mode = $this->convertMode();
 
@@ -131,6 +141,8 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 		}
 
 		$finalName = $this->getPageName();
+		
+		$hash = array();
 
 		if ( $this->mode == 'create' ) {
 			if ( $this->wysiwyg ) {
@@ -140,10 +152,16 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 				$this->wysiwyg = 'n';
 				$is_html = false;
 			}
+			if ( $this->locked == 'y') {
+				$hash['lock_it'] = 'y';
+			} else {
+				$this->locked = 'n';
+				$hash = NULL;
+			}
 			if ( ! $this->message ) {
 				$this->message = tra('Created by profile installer');
 			}
-			if ( ! $tikilib->create_page($finalName, 0, $this->content, time(), $this->message, 'admin', '0.0.0.0', $this->description, $this->lang, $is_html, null, $this->wysiwyg, $this->wiki_authors_style))
+			if ( ! $tikilib->create_page($finalName, 0, $this->content, time(), $this->message, 'admin', '0.0.0.0', $this->description, $this->lang, $is_html, $hash, $this->wysiwyg, $this->wiki_authors_style))
 				return null;
 		} else {
 			$info = $tikilib->get_page_info($finalName, true, true);
@@ -186,8 +204,16 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 			TikiLib::lib('geo')->set_coordinates('wiki page', $this->name, $this->geolocation);
 		}
 
-		global $multilinguallib;
-		require_once 'lib/multilingual/multilinguallib.php';
+		if ($prefs['wiki_page_hide_title'] == 'y' && !empty($this->hide_title)) {
+			if ($this->hide_title == 'y') {
+				$isHideTitle = -1;
+			} elseif ($this->hide_title == 'n') {
+				$isHideTitle = 0;
+			}
+			TikiLib::lib('wiki')->set_page_hide_title($finalName, $isHideTitle);
+		}
+
+		$multilinguallib = TikiLib::lib('multilingual');
 
 		$current = $tikilib->get_page_id_from_name($finalName);
 		foreach ( $this->translations as $targetName ) {
@@ -200,7 +226,7 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 
 		// only create a new structure or add a new page to a structure if the structure parameter has been set AND mode is 'create'
 		if (isset($this->structure) && $this->mode == 'create') {
-			global $structlib; include_once 'lib/structures/structlib.php';
+			$structlib = TikiLib::lib('struct');
 			if ($this->structure === 0) {
 				$page_ref_id = 0;
 				// create a new structure with just the new wiki page if the profile structure: parameter is set to zero
@@ -224,6 +250,15 @@ class Tiki_Profile_InstallHandler_WikiPage extends Tiki_Profile_InstallHandler
 				$structlib->s_create_page($structure_parent, $page_ref_id, $finalName, '', $structure_id);
 			}
 		}
+
+        if ($this->freetags != "" && $tikilib->page_exists($finalName, false)) {
+            $cat_type = "wiki page";
+            $cat_objid = $finalName;
+            $cat_name = $finalName;
+            $tag_string = $this->freetags;
+            $cat_lang = null;
+            require_once 'freetag_apply.php';
+        }
 
 		return $finalName;
 	}

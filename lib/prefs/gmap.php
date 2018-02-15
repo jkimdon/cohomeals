@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: gmap.php 48608 2013-11-21 01:18:44Z nkoth $
+// $Id: gmap.php 61815 2017-03-22 14:50:08Z jyhem $
 
 function prefs_gmap_list()
 {
@@ -19,7 +19,7 @@ function prefs_gmap_list()
 		),
 		'gmap_defaultx' => array(
 			'name' => tra('Default x for map center'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'text',
 			'size' => 20,
 			'filter' => 'striptags',
@@ -27,7 +27,7 @@ function prefs_gmap_list()
 		),
 		'gmap_defaulty' => array(
 			'name' => tra('Default y for map center'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'text',
 			'size' => 20,
 			'filter' => 'striptags',
@@ -35,7 +35,7 @@ function prefs_gmap_list()
 		),
 		'gmap_defaultz' => array(
 			'name' => tra('Default zoom level'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				1 => tra('whole earth'),
@@ -61,7 +61,7 @@ function prefs_gmap_list()
 		),
 		'gmap_article_list' => array(
 			'name' => tra('Show map mode buttons in articles list'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'flag',
 			'dependencies' => array(
 				'geo_locate_article',
@@ -70,7 +70,7 @@ function prefs_gmap_list()
 		),
 		'gmap_page_list' => array(
 			'name' => tra('Show map mode buttons in page list'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'flag',
 			'dependencies' => array(
 				'geo_locate_wiki',

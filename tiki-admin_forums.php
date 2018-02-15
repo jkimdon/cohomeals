@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_forums.php 51186 2014-05-08 16:43:20Z xavidp $
+// $Id: tiki-admin_forums.php 59206 2016-07-16 00:51:01Z lindonb $
 
 $section = 'forums';
 require_once ('tiki-setup.php');
@@ -29,10 +29,6 @@ $auto_query_args = array(
 );
 
 $commentslib = TikiLib::lib('comments');
-if (isset($_REQUEST["remove"])) {
-	$access->check_authenticity();
-	$commentslib->remove_forum($_REQUEST["remove"]);
-}
 if (isset($_REQUEST['lock']) && isset($_REQUEST['forumId'])) {
 	check_ticket('view-forum');
 	if ($_REQUEST['lock'] == 'y') {
@@ -41,15 +37,10 @@ if (isset($_REQUEST['lock']) && isset($_REQUEST['forumId'])) {
 		$commentslib->unlock_object_thread('forum:' . ((int)$_REQUEST['forumId']));
 	}
 }
-if (isset($_REQUEST['batchaction']) && $_REQUEST['batchaction'] = 'delsel_x' && isset($_REQUEST['checked'])) {
-	check_ticket('admin-forums');
-	foreach ($_REQUEST['checked'] as $id) {
-		$commentslib->remove_forum($id);
-	}
-}
 if ($prefs['feature_multilingual'] === 'y') {
 	$languages = array();
-	$languages = $tikilib->list_languages();
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages();
 	$smarty->assign_by_ref('languages', $languages);
 } else {
 	$_REQUEST["forumLanguage"] = '';
@@ -75,7 +66,7 @@ if (isset($_REQUEST["save"])) {
 	$_REQUEST['topic_summary'] = isset($_REQUEST['topic_summary']) ? 'y' : 'n';
 	$_REQUEST['topic_smileys'] = isset($_REQUEST['topic_smileys']) ? 'y' : 'n';
 	$_REQUEST['ui_avatar'] = isset($_REQUEST['ui_avatar']) ? 'y' : 'n';
-    $_REQUEST['ui_rating_choice_topic'] = isset($_REQUEST['ui_rating_choice_topic']) ? 'y' : 'n';
+	$_REQUEST['ui_rating_choice_topic'] = isset($_REQUEST['ui_rating_choice_topic']) ? 'y' : 'n';
 	$_REQUEST['ui_flag'] = isset($_REQUEST['ui_flag']) ? 'y' : 'n';
 	$_REQUEST['ui_email'] = isset($_REQUEST['ui_email']) ? 'y' : 'n';
 	$_REQUEST['ui_posts'] = isset($_REQUEST['ui_posts']) ? 'y' : 'n';
@@ -91,6 +82,7 @@ if (isset($_REQUEST["save"])) {
 	if (empty($_REQUEST['threadOrdering'])) $_REQUEST['threadOrdering'] = '';
 	if (empty($_REQUEST['threadStyle'])) $_REQUEST['threadStyle'] = '';
 	if (empty($_REQUEST['commentsPerPage'])) $_REQUEST['commentsPerPage'] = '';
+	if (empty($_REQUEST['image'])) $_REQUEST['image'] = '';
 	if ($_REQUEST["section"] == '__new__') $_REQUEST["section"] = $_REQUEST["new_section"];
 	// Check for last character being a / or a \
 	if (substr($_REQUEST["att_store_dir"], -1) != "\\" && substr($_REQUEST["att_store_dir"], -1) != "/" && $_REQUEST["att_store_dir"] != "") {
@@ -99,6 +91,7 @@ if (isset($_REQUEST["save"])) {
 
 	$_REQUEST['forumLanguage'] = htmlspecialchars(isset($_REQUEST["forumLanguage"]) ? $_REQUEST["forumLanguage"] : '');
 
+	$tx = TikiDb::get()->begin();
 	$fid = $commentslib->replace_forum(
 		$_REQUEST["forumId"], $_REQUEST["name"], $_REQUEST["description"],
 		$controlFlood, $_REQUEST["floodInterval"], $_REQUEST["moderator"],
@@ -112,7 +105,7 @@ if (isset($_REQUEST["save"])) {
 		$_REQUEST['inbound_pop_password'], trim($_REQUEST['outbound_address']),
 		$_REQUEST['outbound_mails_for_inbound_mails'], $_REQUEST['outbound_mails_reply_link'],
 		$_REQUEST['outbound_from'], $_REQUEST['topic_smileys'], $_REQUEST['topic_summary'],
-        $_REQUEST['ui_avatar'], $_REQUEST['ui_rating_choice_topic'], $_REQUEST['ui_flag'], $_REQUEST['ui_posts'],
+		$_REQUEST['ui_avatar'], $_REQUEST['ui_rating_choice_topic'], $_REQUEST['ui_flag'], $_REQUEST['ui_posts'],
 		$_REQUEST['ui_level'], $_REQUEST['ui_email'], $_REQUEST['ui_online'],
 		$_REQUEST['approval_type'], $_REQUEST['moderator_group'], $_REQUEST['forum_password'],
 		$_REQUEST['forum_use_password'], $_REQUEST['att'], $_REQUEST['att_store'],
@@ -121,6 +114,10 @@ if (isset($_REQUEST["save"])) {
 		$_REQUEST['att_list_nb'], $_REQUEST['topics_list_lastpost_title'],
 		$_REQUEST['topics_list_lastpost_avatar'], $_REQUEST['topics_list_author_avatar'], $_REQUEST['forumLanguage']
 	);
+
+	$attributelib = TikiLib::lib('attribute');
+	$attributelib->set_attribute('forum', $fid, 'tiki.object.image', (int) $_REQUEST['image']);
+
 	$cat_type = 'forum';
 	$cat_objid = $fid;
 	$cat_desc = substr($_REQUEST["description"], 0, 200);
@@ -128,13 +125,15 @@ if (isset($_REQUEST["save"])) {
 	$cat_href = "tiki-view_forum.php?forumId=" . $cat_objid;
 	include_once ("categorize.php");
 	$_REQUEST["forumId"] = $fid;
+
+	$tx->commit();
+
 	$cookietab = 1;
 }
 if (!empty($_REQUEST['duplicate']) && !empty($_REQUEST['name']) && !empty($_REQUEST['forumId'])) {
 	$newForumId = $commentslib->duplicate_forum($_REQUEST['forumId'], $_REQUEST['name'], isset($_REQUEST['description']) ? $_REQUEST['description'] : '');
 	if (isset($_REQUEST['dupCateg']) && $_REQUEST['dupCateg'] == 'on' && $prefs['feature_categories'] == 'y') {
-		global $categlib;
-		include_once ('lib/categories/categlib.php');
+		$categlib = TikiLib::lib('categ');
 		$cats = $categlib->get_object_categories('forum', $_REQUEST['forumId']);
 		$catObjectId = $categlib->add_categorized_object('forum', $newForumId, isset($_REQUEST['description']) ? $_REQUEST['description'] : '', $_REQUEST['name'], "tiki-view_forum.php?forumId=$newForumId");
 		foreach ($cats as $cat) {
@@ -142,14 +141,17 @@ if (!empty($_REQUEST['duplicate']) && !empty($_REQUEST['name']) && !empty($_REQU
 		}
 	}
 	if (isset($_REQUEST['dupPerms']) && $_REQUEST['dupPerms'] == 'on') {
-		global $userlib;
-		include_once ('lib/userslib.php');
+		$userlib = TikiLib::lib('user');
 		$userlib->copy_object_permissions($_REQUEST['forumId'], $newForumId, 'forum');
 	}
 	$_REQUEST['forumId'] = $newForumId;
 }
 if ($_REQUEST["forumId"]) {
 	$info = $commentslib->get_forum($_REQUEST["forumId"]);
+
+	$attributelib = TikiLib::lib('attribute');
+	$attributes = $attributelib->get_attributes('forum', $_REQUEST['forumId']);
+	$info['image'] = isset($attributes['tiki.object.image']) ? $attributes['tiki.object.image'] : '';
 } else {
 	$info = array();
 	$info["name"] = '';
@@ -182,8 +184,8 @@ if ($_REQUEST["forumId"]) {
 	$info["topic_summary"] = 'n';
 	$info["topic_smileys"] = 'n';
 	$info["ui_avatar"] = 'y';
-    $info["ui_rating_choice_topic"] = 'n';
-    $info["ui_flag"] = 'y';
+	$info["ui_rating_choice_topic"] = 'n';
+	$info["ui_flag"] = 'y';
 	$info["ui_posts"] = 'n';
 	$info['ui_level'] = 'n';
 	$info["ui_email"] = 'n';
@@ -208,12 +210,16 @@ if ($_REQUEST["forumId"]) {
 	$info["forum_last_n"] = 0;
 	$info["is_flat"] = 'n';
 	$info["forumLanguage"] = '';
+	$info['image'] = '';
 }
 $smarty->assign('forumId', $_REQUEST["forumId"]);
 foreach ($info as $key => $value) {
-	if ($key == "section") // conflict with section management
-	$smarty->assign("forumSection", $value);
-	else $smarty->assign($key, $value);
+	if ($key == "section") {
+		// conflict with section management
+		$smarty->assign("forumSection", $value);
+	} else {
+		$smarty->assign($key, $value);
+	}
 }
 if (!isset($_REQUEST["sort_mode"])) {
 	$sort_mode = 'name_asc';
@@ -233,6 +239,11 @@ if (isset($_REQUEST["find"])) {
 }
 $smarty->assign('find', $find);
 $smarty->assign_by_ref('sort_mode', $sort_mode);
+if (isset($_REQUEST['numrows'])) {
+	$maxRecords = $_REQUEST['numrows'];
+} else {
+	$maxRecords = $prefs['maxRecords'];
+}
 $channels = $commentslib->list_forums($offset, $maxRecords, $sort_mode, $find);
 $max = count($channels["data"]);
 for ($i = 0; $i < $max; $i++) {
@@ -278,6 +289,20 @@ if (preg_match('/^([\d\.]+)([gmk])?$/i', $maxAttachSize, $matches) && !empty($ma
 			$maxAttachSize*= 1024;
 	}
 }
+
+//add tablesorter sorting and filtering
+$ts = Table_Check::setVars('adminforums', true);
+if ($ts['enabled'] && !$ts['ajax']) {
+	//set tablesorter code
+	Table_Factory::build(
+		'TikiAdminForums',
+		array(
+			'id' => $ts['tableid'],
+			'total' => $channels['cant'],
+		)
+	);
+}
+
 $smarty->assign_by_ref('maxAttachSize', $maxAttachSize);
 
 $oneday = 60 * 60 * 24;
@@ -359,7 +384,7 @@ $smarty->assign(
 		'average_desc' => tra('Score (desc)'),
 		'replies_desc' => tra('Replies (desc)'),
 		'hits_desc' => tra('Reads (desc)'),
-		'lastPost_desc' => tra('Last post (desc)'),
+		'lastPost_desc' => tra('Latest post (desc)'),
 		'title_desc' => tra('Title (desc)'),
 		'title_asc' => tra('Title (asc)')
 	)
@@ -383,7 +408,7 @@ $smarty->assign(
 		'' => tra('Default'),
 		'commentStyle_plain' => tra('Plain'),
 		'commentStyle_threaded' => tra('Threaded'),
-		'commentStyle_headers' => tra('Headers Only')
+		'commentStyle_headers' => tra('Headers only')
 	)
 );
 
@@ -405,5 +430,9 @@ ask_ticket('admin-forums');
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 // Display the template
-$smarty->assign('mid', 'tiki-admin_forums.tpl');
-$smarty->display("tiki.tpl");
+if ($ts['ajax']) {
+	$smarty->display('tiki-admin_forums.tpl');
+} else {
+	$smarty->assign('mid', 'tiki-admin_forums.tpl');
+	$smarty->display("tiki.tpl");
+}

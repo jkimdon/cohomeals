@@ -2,29 +2,29 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-login_openid.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-login_openid.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 // As a side note beyond the standard heading. Most of the code in this file was taken
 // directly from the OpenID library example files. The code was modified to suit the
 // specific needs.
 require_once ('tiki-setup.php');
-/**
- * Require the OpenID consumer code.
- */
-require_once "Auth/OpenID/Consumer.php";
-/**
- * Require the "file store" module, which we'll need to store
- * OpenID information.
- */
-require_once "Auth/OpenID/FileStore.php";
-/**
- * Require the Simple Registration extension API.
- */
-require_once "Auth/OpenID/SReg.php";
+require_once "vendor_extra/pear/Auth/OpenID/HMAC.php";
+require_once "vendor_extra/pear/Auth/OpenID/Consumer.php";
+require_once "vendor_extra/pear/Auth/OpenID/FileStore.php";
+require_once "vendor_extra/pear/Auth/OpenID/Message.php";
+require_once "vendor_extra/pear/Auth/OpenID/BigMath.php";
+require_once "vendor_extra/pear/Auth/OpenID/Association.php";
+require_once "vendor_extra/pear/Auth/OpenID/SReg.php";
+require_once "vendor_extra/pear/Auth/OpenID/Discover.php";
+require_once "vendor_extra/pear/Auth/Yadis/XRI.php";
+require_once "vendor_extra/pear/Auth/Yadis/Misc.php";
+require_once "vendor_extra/pear/Auth/OpenID/URINorm.php";
+require_once "vendor_extra/pear/Auth/Yadis/XML.php";
+require_once "vendor_extra/pear/Auth/OpenID/Nonce.php";
 if ($prefs['auth_method'] != 'openid') {
 	$smarty->assign('msg', tra("Authentication method is not OpenID"));
 	$smarty->display("error.tpl");
@@ -62,7 +62,8 @@ function getAccountsMatchingIdentifier($identifier) // {{{
  */
 function loginUser($identifier) // {{{
 {
-	global $user_cookie_site, $userlib;
+	global $user_cookie_site;
+	$userlib = TikiLib::lib('user');
 	$userlib->update_lastlogin($identifier);
 	$userlib->update_expired_groups();
 	$_SESSION[$user_cookie_site] = $identifier;
@@ -90,8 +91,10 @@ function filterExistingInformation(&$data, &$messages) // {{{
  */
 function displayRegisatrationForms($data, $messages) // {{{
 {
-	global $smarty, $userlib, $prefs;
-	global $registrationlib; require_once('lib/registration/registrationlib.php');
+	global $prefs;
+	$userlib = TikiLib::lib('user');
+	$smarty = TikiLib::lib('smarty');
+	$registrationlib = TikiLib::lib('registration');
 
 	if (is_a($registrationlib->merged_prefs, "RegistrationError")) {
 		register_error($registrationlib->merged_prefs->msg);
@@ -140,7 +143,7 @@ function displayRegisatrationForms($data, $messages) // {{{
  */
 function displaySelectionList($data, $messages) // {{{
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	// Display
 	$smarty->assign('mid', 'tiki-openid_select.tpl');
 	$smarty->display('tiki.tpl');
@@ -151,7 +154,7 @@ function displaySelectionList($data, $messages) // {{{
  */
 function displayError($message)
 { // {{{
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('msg', tra("Failure:") . " " . $message);
 	$smarty->assign('errortype', 'login');
 	$smarty->display("error.tpl");
@@ -269,7 +272,7 @@ function runAuth()
 } // }}}
 function runFinish()
 { // {{{
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$consumer = getConsumer();
 	// Complete the authentication process using the server's
 	// response.

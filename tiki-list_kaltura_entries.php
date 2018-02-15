@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_kaltura_entries.php 45403 2013-04-04 21:28:24Z lphuberdeau $
+// $Id: tiki-list_kaltura_entries.php 58588 2016-05-12 15:48:54Z jonnybradley $
 
 require_once 'tiki-setup.php';
 $access->check_feature('feature_kaltura');
@@ -104,7 +104,7 @@ try {
 
 	if ( $_REQUEST['list'] == 'mix' or !isset($_REQUEST['list']) ) {
 		if ($_REQUEST['view'] != 'browse') {
-			$kalturaadminlib = TikiLb::lib('kalturaadmin');
+			$kalturaadminlib = TikiLib::lib('kalturaadmin');
 			$kmixlist = $kalturaadminlib->listMix($sort_mode, $page, $page_size, $find);
 
 			for ($i =0 ; $i < $kmixlist->totalCount; $i++) {

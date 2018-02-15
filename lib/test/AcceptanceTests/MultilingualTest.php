@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MultilingualTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: MultilingualTest.php 58382 2016-04-20 08:59:56Z jonnybradley $
 
 /*************************************************************
  * Automated acceptance tests for Multilingual Features.
@@ -13,7 +13,6 @@
  * @group gui
  */
 
-require_once 'TikiSeleniumTestCase.php';
 
 class  AcceptanceTests_MultilingualTest extends TikiSeleniumTestCase
 {
@@ -132,7 +131,7 @@ class  AcceptanceTests_MultilingualTest extends TikiSeleniumTestCase
 		$this->select("language_list", "label=English British (en-uk)");
 		$this->type("translation_name", "Multilingual Test Page 1");
 		$this->clickAndWait("//input[@value='Create translation']");
-		$this->assertTrue($this->isTextPresent("Page already exists. Go back and choose a different name."));
+		$this->assertTrue($this->isTextPresent("That page already exists. Go back and choose a different name."));
 
 
 	}
@@ -151,7 +150,7 @@ class  AcceptanceTests_MultilingualTest extends TikiSeleniumTestCase
 		$this->select("language_list", "label=English British (en-uk)");
 		$this->type("translation_name", "Multilingual Test Page 1");
 		$this->clickAndWait("//input[@value='Create translation']");
-		$this->assertTrue($this->isTextPresent("Page already exists. Go back and choose a different name."));
+		$this->assertTrue($this->isTextPresent("That page already exists. Go back and choose a different name."));
 		$this->clickAndWait("link=Go back");
 		$this->clickAndWait("link=View Page");
 		//A bug: instead of English it shows English British although the page was not created

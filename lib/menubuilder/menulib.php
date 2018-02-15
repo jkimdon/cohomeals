@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: menulib.php 54684 2015-03-23 16:19:58Z jonnybradley $
+// $Id: menulib.php 63308 2017-07-21 17:36:18Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -16,7 +16,7 @@ class MenuLib extends TikiLib
 
 	public function empty_menu_cache($menuId = 0)
 	{
-		global $cachelib; include_once('lib/cache/cachelib.php');
+		$cachelib = TikiLib::lib('cache');
 		if ( $menuId > 0 ) {
 			$cachelib->empty_type_cache('menu_'.$menuId.'_');
 		} else {
@@ -119,14 +119,14 @@ class MenuLib extends TikiLib
 		return $max;
 	}
 
-	public function replace_menu_option($menuId, $optionId, $name, $url, $type='o', $position=1, $section='', $perm='', $groupname='', $level=0, $icon='')
+	public function replace_menu_option($menuId, $optionId, $name, $url, $type='o', $position=1, $section='', $perm='', $groupname='', $level=0, $icon='',$class='')
 	{
 		if ($optionId) {
-			$query = "update `tiki_menu_options` set `name`=?,`url`=?,`type`=?,`position`=?,`section`=?,`perm`=?,`groupname`=?,`userlevel`=?,`icon`=?  where `optionId`=?";
-			$bindvars=array($name,$url,$type,(int) $position,$section,$perm,$groupname,$level,$icon,$optionId);
+			$query = "update `tiki_menu_options` set `name`=?,`url`=?,`type`=?,`position`=?,`section`=?,`perm`=?,`groupname`=?,`userlevel`=?,`icon`=?,`class`=?  where `optionId`=?";
+			$bindvars=array($name,$url,$type,(int) $position,$section,$perm,$groupname,$level,$icon,$class,$optionId);
 		} else {
-			$query = "insert into `tiki_menu_options`(`menuId`,`name`,`url`,`type`,`position`,`section`,`perm`,`groupname`,`userlevel`,`icon`) values(?,?,?,?,?,?,?,?,?,?)";
-			$bindvars=array((int) $menuId,$name,$url,$type,(int) $position,$section,$perm,$groupname,$level,$icon);
+			$query = "insert ignore into `tiki_menu_options`(`menuId`,`name`,`url`,`type`,`position`,`section`,`perm`,`groupname`,`userlevel`,`icon`,`class`) values(?,?,?,?,?,?,?,?,?,?,?)";
+			$bindvars=array((int) $menuId,$name,$url,$type,(int) $position,$section,$perm,$groupname,$level,$icon,$class);
 		}
 
 		$this->empty_menu_cache($menuId);
@@ -292,12 +292,12 @@ class MenuLib extends TikiLib
 			$option['url'] = preg_replace('/&structure=.*/', '', $option['url']);
 		}
 		if (preg_match('/.*tiki.index.php$/', $url)) {
-			global $wikilib; include_once('lib/wiki/wikilib.php');
+			$wikilib = TikiLib::lib('wiki');
 			$homePage = $wikilib->get_default_wiki_page();
 			$url .= "?page=$homePage";
 		}
 		if (preg_match('/.*tiki.index.php$/', $option['url'])) {
-			global $wikilib; include_once('lib/wiki/wikilib.php');
+			$wikilib = TikiLib::lib('wiki');
 			$homePage = $wikilib->get_default_wiki_page();
 			$option['url'] .= "?page=$homePage";
 		}
@@ -457,17 +457,22 @@ class MenuLib extends TikiLib
 		// set sections open/close according to cookie
 		global $prefs;
 		foreach ($channels['data'] as $position => &$option) {
-			$option['open'] = false;
 			if (!empty($params['menu_cookie']) && $params['menu_cookie'] == 'n') {
 				if (!empty($option['selected']) || !empty($option['selectedAscendant'])) {
 					$option['open'] = true;
 				}
-			} elseif ($option['type'] == 's') {
+			} else {
 				if (empty($params['id']) && !empty($params['structureId'])) {
 					$params['id'] = $params['structureId'];
 				}
-				$ck = getCookie('menu'.$params['id'].'__'.$option['position'], 'menu', 'o');
-				$option['open'] = ($prefs['javascript_enabled'] == 'n' || $ck == 'o');
+				$ck = isset($option['position']) ? getCookie('menu'.$params['id'].'__'.$option['position'], 'menu'): 'o';
+				if ($prefs['javascript_enabled'] === 'n') {
+					$option['open'] = true;
+				} elseif ($ck === 'o') {
+					$option['open'] = true;
+				} elseif ($ck === 'c') {
+					$option['open'] = false;
+				}
 			}
 		}
 		return $channels;
@@ -502,20 +507,21 @@ class MenuLib extends TikiLib
 		}
 	}
 
-	public function import_menu_options()
+	public function import_menu_options($menuId)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
+
 		$options = array();
 		$fname = $_FILES['csvfile']['tmp_name'];
 		$fhandle = fopen($fname, "r");
 		$fields = fgetcsv($fhandle, 1000);
 		if (!$fields[0]) {
-			$smarty->assign('msg', tra('The file is not a CSV file or has not a correct syntax'));
+			$smarty->assign('msg', tra('The file has incorrect syntax or is not a CSV file'));
 			$smarty->display("error.tpl");
 			die;
 		}
 		while (!feof($fhandle)) {
-			$res = array('optionId'=>'', 'type'=>'', 'name'=>'', 'url'=>'', 'position'=>0, 'section'=>'', 'perm'=>'', 'groupname'=>'', 'userlevel'=>'', 'remove'=>'');
+			$res = array('optionId'=>'', 'type'=>'', 'name'=>'', 'url'=>'', 'position'=>0, 'section'=>'', 'perm'=>'', 'groupname'=>'', 'userlevel'=>'', 'class'=>'', 'remove'=>'');
 			$data = fgetcsv($fhandle, 1000);
 			if (empty($data)) {
 				continue;
@@ -523,10 +529,10 @@ class MenuLib extends TikiLib
 			for ($i = 0, $icount_fields = count($fields); $i < $icount_fields; $i++) {
 				$res[$fields[$i]] = $data[$i];
 			}
-			if ($res['optionId'] == 0 || $this->check_menu_option($_REQUEST['menuId'], $res['optionId'])) {
+			if ($res['optionId'] == 0 || $this->check_menu_option($menuId, $res['optionId'])) {
 				$options[] = $res;
 			} else {
-				$smarty->assign('msg', tra('You can only use optionId = 0 to create a new option or optionId equal an id that already belongs to the menu to update it.'));
+				$smarty->assign('msg', tra('You can only use optionId = 0 to create a new option; or, to update a menu, use an optionId that is the same as an optionId that is already used in the menu.'));
 				$smarty->display('error.tpl');
 				die;
 			}
@@ -536,15 +542,15 @@ class MenuLib extends TikiLib
 			if ($option['remove'] == 'y') {
 				$this->remove_menu_option($option['optionId']);
 			} else {
-				$this->replace_menu_option($_REQUEST['menuId'], $option['optionId'], $option['name'], $option['url'], $option['type'], $option['position'], $option['section'], $option['perm'], $option['groupname'], $option['userlevel']);
+				$this->replace_menu_option($menuId, $option['optionId'], $option['name'], $option['url'], $option['type'], $option['position'], $option['section'], $option['perm'], $option['groupname'], $option['userlevel'], '', $option['class']);
 			}
 		}
 	}
 
-	public function export_menu_options()
+	public function export_menu_options($menuId, $encoding)
 	{
-		$data = '"optionId","type","name","url","position","section","perm","groupname","userlevel","remove"' . "\r\n";
-		$options = $this->list_menu_options($_REQUEST['menuId'], 0, -1, 'position_asc', '', true, 0, true);
+		$data = '"optionId","type","name","url","position","section","perm","groupname","userlevel","class","remove"' . "\r\n";
+		$options = $this->list_menu_options($menuId, 0, -1, 'position_asc', '', true, 0, true);
 		foreach ($options['data'] as $option) {
 			$data .=  $option['optionId']
 							. ',"' . $option['type']
@@ -555,16 +561,17 @@ class MenuLib extends TikiLib
 							. '","' . $option['perm']
 							. '","' . $option['groupname']
 							. '",' . $option['userlevel']
+							. '",' . $option['class']
 							. ',"n"' . "\r\n"
 							;
 		}
-		if (empty($_REQUEST['encoding'])) {
-			$_REQUEST['encoding'] = 'UTF-8';
-		} elseif ($_REQUEST['encoding'] == 'ISO-8859-1') {
+		if (empty($encoding)) {
+			$encoding = 'UTF-8';
+		} elseif ($encoding == 'ISO-8859-1') {
 			$data = utf8_decode($data);
 		}
-		header("Content-type: text/comma-separated-values; charset:".$_REQUEST['encoding']);
-		header("Content-Disposition: attachment; filename=".tra('menu')."_".$_REQUEST['menuId'].".csv");
+		header("Content-type: text/comma-separated-values; charset:".$encoding);
+		header("Content-Disposition: attachment; filename=".tra('menu')."_".$menuId.".csv");
 		header("Expires: 0");
 		header("Cache-Control: must-revalidate, post-check=0,pre-check=0");
 		header("Pragma: public");
@@ -617,8 +624,12 @@ class MenuLib extends TikiLib
 		foreach ($result as $res) {
 			$res['canonic'] = $res['url'];
 			$resourceGroups = array_filter(explode(',', $res['groupname'] ?: ''));
-			if (!$do_not_parse && isset($menu['parse']) && $menu['parse'] === 'y') {
-				$res['name'] = $wikilib->parse_data($res['name'], array('is_html' => ($prefs['menus_item_names_raw'] === 'y')));
+			if (!$do_not_parse) {
+				if (isset($menu['parse']) && $menu['parse'] === 'y') {
+					$res['name'] = TikiLib::lib('parser')->parse_data($res['name'], ['suppress_icons' => true]);
+				} else {
+					$res['name'] = htmlspecialchars($res['name']);
+				}
 			}
 			if (preg_match('|^\(\((.+?)\)\)$|', $res['url'], $matches)) {
 				$res['url'] = 'tiki-index.php?page=' . rawurlencode($matches[1]);
@@ -742,23 +753,21 @@ class MenuLib extends TikiLib
 
 	function clean_menu_html($data)
 	{
-		global $prefs;
-
 		$data = preg_replace('/<ul>\s*<\/ul>/', '', $data);
 		$data = preg_replace('/<ol>\s*<\/ol>/', '', $data);
-		if ($prefs['mobile_feature'] !== 'y' || $prefs['mobile_mode'] !== 'y') {
-			return '<nav class="role_navigation">' . $data . '</nav>';
+		return '<nav class="role_navigation">' . $data . '</nav>';
+	}
+	
+	// helper function to get menuId from an optionId
+	public function get_menuId_from_optionId($optionId)
+	{
+		$query = 'SELECT `menuId` FROM `tiki_menu_options` WHERE `optionId` = ?';
+		$menuId = $this->getOne($query, array($optionId));
+		if (empty($menuId)) {
+			return FALSE;
 		} else {
-			$data = preg_replace('/<ul ([^>]*)>/Umi', '<ul $1 data-role="listview" data-theme="'.$prefs['mobile_theme_menus'].'">', $data, 1);
-			// crude but effective hack for loading menu items via ajax - hopefully to be replaced by something more elegant soon
-			$data = preg_replace('/<a ([^>]*)>/Umi', '<a $1 rel="external">', $data);
-			// remove unnecessary spans
-			$data = strip_tags($data, '<ul><li><ol><a>');
-			// remove links from parent items as these don't work in jqm
-			$data = preg_replace('/(<li.*? menuSection\d [^>]*?>)<a[^>]*>([^<]*)<\/a>(<ul><li)/mi', '$1$2$3', $data);
-
-			return $data;
+			settype($menuId, "integer");
+			return $menuId;
 		}
 	}
 }
-$menulib = new MenuLib;

@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: DeclFilter.php 47853 2013-10-02 14:03:06Z lphuberdeau $
+// $Id: DeclFilter.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 
 /**
  * Declarative filters are to be defined prior to filtering. Various rules can
  * be defined in sequence. The first filter that applies will be used.
  */
-class DeclFilter implements Zend_Filter_Interface
+class DeclFilter implements \Zend\Filter\FilterInterface
 {
 	private $rules = array();
 

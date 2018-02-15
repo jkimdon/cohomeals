@@ -1,9 +1,9 @@
-{* $Id: contribution.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}
+{* $Id: contribution.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
 {if $prefs.feature_contribution eq 'y'}
 	{if count($contributions) gt 0}
 		<tr>
 			<td>
-			{if $contribution_needed eq 'y'}<span class="mandatory_note highlight">{/if}<label for="contributions">{tr}Type of contribution:{/tr}</label>{if $prefs.feature_contribution_mandatory eq 'y'}<em class='mandatory_star'> *</em>{/if}{if $contribution_needed eq 'y'}</span>{/if}</td>
+			{if $contribution_needed eq 'y'}<span class="mandatory_note highlight">{/if}<label for="contributions">{tr}Type of contribution:{/tr}</label>{if $prefs.feature_contribution_mandatory eq 'y'} <strong class='mandatory_star text-danger tips' title=":{tr}This field is mandatory{/tr}">*</strong>{/if}{if $contribution_needed eq 'y'}</span>{/if}</td>
 				<td>
 					<select id="contributions" name="contributions[]" multiple="multiple" size="5">
 						{section name=ix loop=$contributions}
@@ -11,7 +11,7 @@
 							{assign var="help" value=$help|cat:$contributions[ix].name|cat:": "|cat:$contributions[ix].description|cat:"<br>"}
 						{/section}
 					</select>
-					<a {popup text=$help|replace:'"':"'" width=500}>{icon _id='help'}</a>
+					<a title="{tr}Help{/tr}" {popup text=$help|replace:'"':"'" width=500}>{icon name='help'}</a>
 			</td>
 		</tr>
 		{if $prefs.feature_contributor_wiki eq 'y' and $section eq 'wiki page' and empty($in_comment)}
@@ -26,9 +26,9 @@
 				</td>
 			</tr>
 		{/if}
+	{elseif $tiki_p_admin eq 'y'}
+		{tr}No records found{/tr}
 	{else}
 		<tr><td>&nbsp;</td></tr>
 	{/if}
-{elseif $tiki_p_admin eq 'y'}
-	{tr}No records found{/tr}
 {/if}

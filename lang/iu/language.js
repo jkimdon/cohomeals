@@ -2,7 +2,7 @@
  * Javascript translation definition
  * Example to help translation of some English strings in some js files
  * 
- * $Id: language.js 43759 2012-11-02 14:43:55Z lphuberdeau $
+ * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
  */
 
 lang = {

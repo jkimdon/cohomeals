@@ -1,134 +1,183 @@
-{title url="tiki-edit_structure.php?page_ref_id=$page_ref_id"}{if $editable == 'y'}{tr}Modify Structure{/tr}{else}{tr}Structure{/tr}{/if}: {$structure_name}{/title}
+{title url="tiki-edit_structure.php?page_ref_id=$page_ref_id"}{tr}Structure{/tr}: {$structure_name}{/title}
 
-<div class="navbar">
-{button href="tiki-admin_structures.php" _text="{tr}Structures{/tr}"}
+<div class="t_navbar margin-bottom-md">
+	{button href="tiki-admin_structures.php" _text="{tr}Structures{/tr}"}
 </div>
 
 {if $remove eq 'y'}
-	{tr}You will remove{/tr} '{$removePageName}' {if $page_removable == 'y'}{tr}and its subpages from the structure, now you have two options:{/tr}{else}{tr}and its subpages from the structure{/tr}{/if}
-<ul>
-	<li>
-		<a class="link"
-		   href="tiki-edit_structure.php?page_ref_id={$structure_id}&amp;rremove={$removepage}&amp;page={$removePageName|escape:"url"}">{tr}
-			Remove only from structure{/tr}</a>
-	</li>
-	{if $page_removable == 'y'}
-		<li>
-			<a class="link"
-			   href="tiki-edit_structure.php?page_ref_id={$structure_id}&amp;sremove={$removepage}&amp;page={$removePageName|escape:"url"}">{tr}
-				Remove from structure and remove page too{/tr}</a>
-		</li>
-	{/if}
-</ul>
-<br/>
+	{remarksbox type="warning" title="{tr}Warning{/tr}"}
+		{tr}You will remove{/tr} '{$removePageName}' {if $page_removable == 'y'}{tr}and its subpages from the structure, now you have two options:{/tr}{else}{tr}and its subpages from the structure{/tr}{/if}
+		<div class="text-center">
+			<a class="btn btn-warning btn-sm" href="tiki-edit_structure.php?page_ref_id={$structure_id}&amp;rremove={$removepage}&amp;page={$removePageName|escape:"url"}">{icon name="remove"} {tr}Remove from structure{/tr}</a>
+			{if $page_removable == 'y'}
+				<a class="btn btn-warning btn-sm" href="tiki-edit_structure.php?page_ref_id={$structure_id}&amp;sremove={$removepage}&amp;page={$removePageName|escape:"url"}">{icon name="delete"} {tr}Remove from structure and remove page too{/tr}</a>
+			{/if}
+		</div>
+	{/remarksbox}
 {/if}
 
 {if $alert_exists eq 'y'}
-<strong>{tr}The page already exists. The page that has been added to the structure is the existing one.{/tr}</strong>
-<br/>
+	<strong>{tr}The page already exists. The page that has been added to the structure is the existing one.{/tr}</strong>
+	<br/>
 {/if}
 
 {if count($alert_in_st) > 0}
+	{remarksbox type="warning" title="{tr}Warning{/tr}"}
 	{tr}Note that the following pages are also part of another structure. Make sure that access permissions (if any) do not conflict:{/tr}
-	{foreach from=$alert_in_st item=thest}
-	&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thest|escape:"url"}' target="_blank">{$thest}</a>
-	{/foreach}
-<br/>
-<br/>
+		{foreach from=$alert_in_st item=thest}
+			&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thest|escape:"url"}' target="_blank">{$thest}</a>
+		{/foreach}
+	{/remarksbox}
 {/if}
 
 {if count($alert_categorized) > 0}
-	{tr}The following pages added have automatically been categorized with the same categories as the structure:{/tr}
-	{foreach from=$alert_categorized item=thecat}
-	&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thecat|escape:"url"}' target="_blank">{$thecat}</a>
-	{/foreach}
-<br/>
-<br/>
+	{remarksbox type="warning" title="{tr}Warning{/tr}"}
+		{tr}The following pages added have automatically been categorized with the same categories as the structure:{/tr}
+		{foreach from=$alert_categorized item=thecat}
+			&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thecat|escape:"url"}' target="_blank">{$thecat}</a>
+		{/foreach}
+	{/remarksbox}
 {/if}
 
 {if count($alert_to_remove_cats) > 0}
 	{tr}The following pages have categories but the structure has none. You may wish to uncategorize them to be consistent:{/tr}
 	{foreach from=$alert_to_remove_cats item=thecat}
-	&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thecat|escape:"url"}' target="_blank">{$thecat}</a>
+		&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$thecat|escape:"url"}' target="_blank">{$thecat}</a>
 	{/foreach}
-<br/>
-<br/>
+	<br/>
+	<br/>
 {/if}
 
 {if count($alert_to_remove_extra_cats) > 0}
-	{tr}The following pages are in categories that the structure is not in. You may wish to recategorize them in order to be consistent:{/tr}
-	{foreach from=$alert_to_remove_extra_cats item=theextracat}
-	&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$theextracat|escape:"url"}'
-				   target="_blank">{$theextracat}</a>
-	{/foreach}
-<br/>
-<br/>
+	{remarksbox type="warning" title="{tr}Warning{/tr}"}
+		{tr}The following pages are in categories that the structure is not in. You may wish to recategorize them in order to be consistent:{/tr}
+		{foreach from=$alert_to_remove_extra_cats item=theextracat}
+			&nbsp;&nbsp;<a class='tablename' href='tiki-index.php?page={$theextracat|escape:"url"}' target="_blank">{$theextracat}</a>
+		{/foreach}
+	{/remarksbox}
 {/if}
 
-<h2>{tr}Structure Layout{/tr}</h2>
-{button _text="{tr}Save{/tr}" _style="display:none;" _class="save_structure" _ajax="n" _auto_args="save_structure,page_ref_id"}
-{self_link page_ref_id=$structure_id}
-	{if $structure_id eq $page_ref_id}<strong>{/if}
-	<big>{tr}Top{/tr}</big>
-	{if $structure_id eq $page_ref_id}</strong>
+<div class="admintoclevel" id="topnode_{$page_ref_id}">
+	<h2>{tr}Structure Layout{/tr}</h2>
+	{if $editable eq 'y'}
+		<form action="tiki-edit_structure.php?page_ref_id={$page_ref_id}" method="post" class="form-inline" role="form" style="display: inline-block">
+			<div class="form-group">
+				<label for="pageAlias" class="control-label">{tr}Alias{/tr}:</label>
+				<input type="hidden" name="page_ref_id" value="{$structure_id}">
+				<div class="input-group">
+					<input type="text" class="form-control input-sm" name="pageAlias" id="pageAlias" value="{$topPageAlias}">
+					<div class="input-group-btn">
+						<input type="submit" class="btn btn-primary btn-sm" name="create" value="{tr}Update{/tr}">
+					</div>
+				</div>
+			</div>
+		</form>
+		{* modified version of row from structures_toc-leaf.tpl *}
+		{if $prefs.lock_wiki_structures eq 'y'}
+			{lock type='wiki structure' object=$structure_name}
+		{/if}
+		{self_link _script='tiki-index.php' page=$structure_name structure=$structure_name _class="tips" _title=":{tr}View{/tr}" _noauto="y"}
+			{icon name="view"}
+		{/self_link}
+		{if $tiki_p_admin_structures == 'y'}
+			{permission_link mode=icon objectType='wiki page' type='wiki structure' id=$pageName title=$pageName}
+		{/if}
+		{if $tiki_p_watch_structure eq 'y'}
+			{if !$page_info.watching}
+				{self_link page_ref_id=$page_ref_id watch_object=$page_ref_id watch_action=add page=$structure_name _class="tips" _title=":{tr}Monitor the structure{/tr}"}
+					{icon name="watch"}
+				{/self_link}
+			{else}
+				{self_link page_ref_id=$page_ref_id watch_object=$page_ref_id watch_action=remove _class="tips" _title=":{tr}Stop Monitoring the structure{/tr}"}
+					{icon name="stop-watching"}
+				{/self_link}
+			{/if}
+		{/if}
+		{if $editable eq 'y'}
+			{if $page_info.flag == 'L'}
+				{capture assign=title}{tr _0=$page_info.user}locked by %0{/tr}{/capture}
+				{icon name='lock' alt="{tr}Locked{/tr}" title=$title}
+			{else}
+				{self_link _script='tiki-editpage.php' page=$structure_name _class='tips' _title=':{tr}Edit page{/tr}'}
+					{icon name="edit"}
+				{/self_link}
+			{/if}
+			{if empty($page)}
+				{self_link _onclick="addNewPage(this);return false;" _class="tips" _title=":{tr}Add new child page{/tr}"}
+					{icon name="add"}
+				{/self_link}
+			{/if}
+		{/if}
 	{/if}
-{/self_link}
-<form action="tiki-edit_structure.php" method="post" style="display: inline-block; margin-left: 1em;">
-	<input type="hidden" name="page_ref_id" value="{$structure_id}">
-	<label for="pageAlias">{tr}Alias:{/tr}</label>
-	<input type="text" name="pageAlias" id="pageAlias" value="{$topPageAlias}">
-	<small><input type="submit" class="btn btn-default" name="create" value="{tr}Update{/tr}"></small>
-</form>
+</div>
+<div>
+	{self_link page_ref_id=$structure_id}
+		{if $structure_id eq $page_ref_id}<strong>{/if}
+		<span class="lead">{tr}Top{/tr}</span>
+		{if $structure_id eq $page_ref_id}</strong>{/if}
+	{/self_link}
+</div>
+{button _text="{tr}Save{/tr}" _style="display:none;" _class="save_structure" _type="primary" _ajax="n" _auto_args="save_structure,page_ref_id"}
 <div class="structure-container">
 	{$nodelist}
 </div>
-{button _text="{tr}Save{/tr}" _style="display:none;" _class="save_structure" _ajax="n" _auto_args="save_structure,page_ref_id"}
+{button _text="{tr}Save{/tr}" _style="display:none;" _class="save_structure" _type="primary" _ajax="n" _auto_args="save_structure,page_ref_id"}
 
 {if $editable == 'y'}
-	<form action="tiki-edit_structure.php" method="post">
-		<h3>{tr}Add pages{/tr}</h3>
-		<input type="hidden" name="page_ref_id" value="{$page_ref_id}">
-
-		<table class="formcolor">
-			<tr>
-				<td>
-					<label for="page_list_container">{tr}Use pre-existing page by dragging into the structure above{/tr}</label>
-					<ul id="page_list_container">
-						{section name=list loop=$listpages}
-							<li class="ui-state-default">
-								{$listpages[list].pageName}
-							</li>
-						{/section}
-					</ul>
-					<label for="find_objects" style="display: inline-block;">{tr}Find:{/tr}</label>
-					<input type="text" name="find_objects" id="find_objects" value="{$find_objects|escape}">
-					<input type="submit" class="btn btn-default" value="{tr}Filter{/tr}" name="search_objects">
-					{autocomplete element='#find_objects' type='pagename'}
-
+	<form action="tiki-edit_structure.php" method="post" class="form-inline" role="form">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<strong>{tr}Add pages{/tr}</strong> <small>{tr}Use an existing page by dragging it into the structure above{/tr}</small>
+			</div>
+			<div class="panel-body">
+				<div>
+					<input type="hidden" name="page_ref_id" value="{$page_ref_id}">
+					<div class="form-group">
+						<label class="sr-only" for="find_objects">{tr}Find{/tr}</label>
+						<div class="input-group">
+							<input type="text" name="find_objects" id="find_objects" value="{$find_objects|escape}" class="form-control input-sm" placeholder="{tr}Find{/tr}...">
+							<div class="input-group-btn">
+								<input type="submit" class="btn btn-default btn-sm" value="{tr}Filter{/tr}" name="search_objects">
+							</div>
+							{autocomplete element='#find_objects' type='pagename'}
+						</div>
+					</div>
 					{if $prefs.feature_categories eq 'y'}
-						<select name="categId">
-							<option value='' {if $find_categId eq ''}selected="selected"{/if}>{tr}any category{/tr}</option>
-							{foreach $categories as $catix}
-								<option value="{$catix.categId|escape}"
-										{if !empty($find_categId) and $find_categId eq $catix.categId}selected="selected"{/if}>{tr}{$catix.categpath}{/tr}</option>
-							{/foreach}
-						</select>
+						<div class="form-group">
+							<select name="categId" class="form-control input-sm">
+								<option value='' {if $find_categId eq ''}selected="selected"{/if}>{tr}any category{/tr}</option>
+								{foreach $categories as $catix}
+									<option value="{$catix.categId|escape}" {if !empty($find_categId) and $find_categId eq $catix.categId}selected="selected"{/if}>{tr}{$catix.categpath}{/tr}</option>
+								{/foreach}
+							</select>
+						</div>
 					{/if}
-				</td>
-			</tr>
-		</table>
+				</div>
+				<ul id="page_list_container">
+					{section name=list loop=$listpages}
+						<li class="ui-state-default">
+							{$listpages[list].pageName}
+						</li>
+					{/section}
+				</ul>
+			</div>
+		</div>
 	</form>
-	{if $prefs.feature_wiki_categorize_structure == 'y' && $all_editable == 'y'}
+	{if $prefs.feature_categories eq 'y' && $prefs.feature_wiki_categorize_structure == 'y' && $all_editable == 'y'}
 		<form action="tiki-edit_structure.php" method="post">
-			<input type="hidden" name="page_ref_id" value="{$page_ref_id}">
-
-			<h3>{tr}Categorize all pages in structure together:{/tr}</h3>
-			<table class="table normal">
-			{include file='categorize.tpl'}
-			</table>
-			<input type="submit" class="btn btn-default" name="recategorize" value="{tr}Update{/tr}">
-			&nbsp;&nbsp;{tr}Remove existing categories from ALL pages before recategorizing:{/tr} <input type="checkbox"
-																										 name="cat_override">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<strong>{tr}Categorize all pages in structure together{/tr}</strong>
+				</div>
+				<div class="panel-body">
+					<input type="hidden" name="page_ref_id" value="{$page_ref_id}">
+					{include file='categorize.tpl'}
+				</div>
+				<div class="panel-footer text-center">
+					<input type="submit" class="btn btn-primary btn-sm" name="recategorize" value="{tr}Update{/tr}">
+					<input type="checkbox" name="cat_override" >{tr}Remove existing categories from ALL pages before recategorizing{/tr}
+				</div>
+			</div>
 		</form>
 	{/if}
 	<div id="move_dialog" style="display: none;">
@@ -147,29 +196,32 @@
 					{/section}
 				</select>
 			</div>
-			<label class="floatleft" for="begin1">{tr}at the beginning{/tr}</label>
-			<div class="floatleft"><input type="radio" id="begin1" name="begin" value="1" checked="checked" {if $structures|@count eq '1'} disabled="disabled"{/if}></div>
-			<label class="floatleft" for="begin2">{tr}at the end{/tr}</label>
-			<div class="floatleft"><input type="radio" id="begin2" name="begin" value="0" {if $structures|@count eq '1'}disabled="disabled"{/if}></div>
+			<label class="pull-left" for="begin1">{tr}at the beginning{/tr}</label>
+			<div class="pull-left"><input type="radio" id="begin1" name="begin" value="1" checked="checked" {if $structures|@count eq '1'} disabled="disabled"{/if}></div>
+			<label class="pull-left" for="begin2">{tr}at the end{/tr}</label>
+			<div class="pull-left"><input type="radio" id="begin2" name="begin" value="0" {if $structures|@count eq '1'}disabled="disabled"{/if}></div>
 			<hr>
-			<div class="floatleft input_submit_container">
-				<input type="submit" class="btn btn-default" name="move_to" value="{tr}Move{/tr}" {if $structures|@count eq '1'} disabled="disabled"{/if}>
+			<div class="pull-left input_submit_container">
+				<input type="submit" class="btn btn-primary btn-sm" name="move_to" value="{tr}Move{/tr}" {if $structures|@count eq '1'} disabled="disabled"{/if}>
 			</div>
 		</form>
 	</div>
 	<div id="newpage_dialog" style="display: none;">
-		<form action="tiki-edit_structure.php" method="post">
+		<form action="tiki-edit_structure.php" method="post" class="form-horizontal">
 			<input type="hidden" name="page_ref_id" value="{$page_ref_id}">
-			<table class="formcolor">
-				<tr>
-					<td>
-						<label for="name">{tr}Create Page:{/tr}</label>
-						<input type="text" name="name" id="name">
-						{autocomplete element='#name' type='pagename'}
-						<input type="submit" class="btn btn-default" name="create" value="{tr}Update{/tr}">
-					</td>
-				</tr>
-			</table>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">{tr}Create Page{/tr}</label>
+				<div class="col-sm-7">
+					<input type="text" name="name" id="name" class="form-control">
+					{autocomplete element='#name' type='pagename'}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label"></label>
+				<div class="col-sm-7">
+					<input type="submit" class="btn btn-primary btn-sm" name="create" value="{tr}Update{/tr}">
+				</div>
+			</div>
 		</form>
 	</div>
 {/if}{* end of if structure editable *}

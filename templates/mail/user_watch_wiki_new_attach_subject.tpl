@@ -1,1 +1,1 @@
-{tr}New attachment on %s, page{/tr} {$mail_page}, {tr}by{/tr} {$mail_user|username} 
+{* $Id: user_watch_wiki_new_attach_subject.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}{tr}New {$prefs.mail_template_custom_text}attachment on %s, page{/tr} {$mail_page|sefurl}, {tr}by{/tr} {$mail_user|username}

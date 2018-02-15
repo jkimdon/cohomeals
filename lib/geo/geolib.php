@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: geolib.php 52376 2014-08-21 11:19:31Z jonnybradley $
+// $Id: geolib.php 62983 2017-06-12 16:25:06Z jonnybradley $
 
 /**
  *
@@ -64,7 +64,7 @@ class GeoLib
 
 			$string = "{$coords['lon']},{$coords['lat']}";
 
-			if (! empty($coords['zoom'])) {
+			if (isset($coords['zoom'])) {
 				$string .= ",{$coords['zoom']}";
 			}
 
@@ -106,7 +106,7 @@ class GeoLib
 				'lon' => $parts[1],
 			);
 
-			if (! empty($parts[6])) {
+			if (isset($parts[6])) {
 				$coords['zoom'] = $parts[6];
 			}
 
@@ -160,8 +160,8 @@ class GeoLib
 		if (empty($geo["lon"]) || empty($geo["lat"])) {
 			return array("lon" => 0, "lat" => 0);
 		}
-		$geo["lon"] = $geo["lon"] + rand(0, 10000) / 8000;
-		$geo["lat"] = $geo["lat"] + rand(0, 10000) / 10000;
+		$geo["lon"] = $geo["lon"] + mt_rand(0, 10000) / 8000;
+		$geo["lat"] = $geo["lat"] + mt_rand(0, 10000) / 10000;
 		return $geo;
 	}
 
@@ -171,10 +171,8 @@ class GeoLib
      */
     function setTrackerGeo($itemId, $geo)
 	{
-		global $prefs, $trklib;
-		if (!is_object($trklib)) {
-			include_once('lib/trackers/trackerlib.php');
-		}
+		global $prefs;
+		$trklib = TikiLib::lib('trk');
 		$item = $trklib->get_tracker_item($itemId);
 		$fields = $trklib->list_tracker_fields($item['trackerId']);
 		foreach ($fields["data"] as $f) {
@@ -201,4 +199,3 @@ class GeoLib
         }
 }
 
-$geolib = new GeoLib;

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-shoutbox.php 52860 2014-10-13 13:24:08Z jonnybradley $
+// $Id: mod-func-shoutbox.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 /*
  * AJAXified Shoutbox module (jonnybradley for mpvolt Aug/Sept 2008 - de-AJAXified for Tiki 7 Dec 2010 jb)
@@ -76,7 +76,9 @@ function module_shoutbox_info()
  */
 function doProcessShout($inFormValues)
 {
-	global $shoutboxlib, $user, $smarty, $prefs, $captchalib;
+	global $shoutboxlib, $user, $prefs;
+	$captchalib = TikiLib::lib('captcha');
+	$smarty = TikiLib::lib('smarty');
 //	$smarty->assign('tweet',$inFormValues['tweet']);
 	if (array_key_exists('shout_msg', $inFormValues) && strlen($inFormValues['shout_msg']) > 2) {
 		if (empty($user) && $prefs['feature_antibot'] == 'y' && (!$captchalib->validate())) {
@@ -95,9 +97,11 @@ function doProcessShout($inFormValues)
  */
 function module_shoutbox($mod_reference, $module_params)
 {
-	global $tikilib; require_once ('lib/tikilib.php');
 	global $shoutboxlib, $prefs, $user, $tiki_p_view_shoutbox;
-	global $tiki_p_admin_shoutbox, $tiki_p_post_shoutbox, $base_url, $smarty, $access;
+	global $tiki_p_admin_shoutbox, $tiki_p_post_shoutbox, $base_url;
+	$access = TikiLib::lib('access');
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 
 	include_once ('lib/shoutbox/shoutboxlib.php');
 

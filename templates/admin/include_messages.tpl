@@ -1,17 +1,20 @@
-{* $Id: include_messages.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
+{* $Id: include_messages.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
 
-<form action="tiki-admin.php?page=messages" method="post" name="messages">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="messagesprefs" value="{tr}Change preferences{/tr}" />
+<form class="form-horizontal" action="tiki-admin.php?page=messages" method="post" name="messages">
+	{include file='access/include_ticket.tpl'}
+
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
 
-	<fieldset class="admin">
+	<fieldset>
 		<legend>{tr}Activate the feature{/tr}</legend>
 		{preference name=feature_messages visible="always"}
 	</fieldset>
 
-	<fieldset class="admin">
+	<fieldset>
 		<legend>{tr}Settings{/tr}</legend>
 
 		{preference name=allowmsg_by_default}
@@ -23,7 +26,5 @@
 		{preference name=messu_truncate_internal_message}
 
 	</fieldset>
-	<div class="heading input_submit_container" style="text-align: center">
-		<input type="submit" class="btn btn-default" name="messagesprefs" value="{tr}Change preferences{/tr}" />
-	</div>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

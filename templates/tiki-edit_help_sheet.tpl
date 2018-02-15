@@ -1,11 +1,8 @@
-{* $Id: tiki-edit_help_sheet.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
-{* \brief Show spreadsheet help (for jQuery.sheet) 
+{* $Id: tiki-edit_help_sheet.tpl 57084 2015-12-30 17:43:55Z xavidp $ *}
+{* \brief Show spreadsheet help (for jQuery.sheet)
  * included by toolbarslib *}
 
-{add_help show='n' id="sheet_help" title="{tr}Spreadsheet Creation{/tr}"}
-
 <h3>{tr}Spreadsheet{/tr}</h3>
-<div class="help_section">	
-	<iframe id="jQuerySheet_help" style="height: 320px; width: 100% !important" src="http://tiki.org/tiki-index_p.php?page=TikiSheet"></iframe>
+<div class="help_section">
+	<iframe id="jQuerySheet_help" style="height: 320px; width: 100% !important" src="https://doc.tiki.org/tiki-index_p.php?page=Spreadsheet"></iframe>
 </div>
-{/add_help}

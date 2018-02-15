@@ -1,52 +1,45 @@
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
-	{tr}See also{/tr} <a class="rbox-link" href="tiki-admin.php?page=sefurl">{tr}Search Engine Friendly URLs{/tr}</a>.
+	{tr}See also{/tr} <a class="alert-link" href="tiki-admin.php?page=sefurl">{tr}Search Engine Friendly URLs{/tr}</a>. {tr}Also{/tr} <a target="_blank" href="http://en.wikipedia.org/wiki/Geotagging#HTML_pages">{tr}here{/tr}</a> {tr}for more information on geo tagging.{/tr}
 {/remarksbox}
 
-<form action="tiki-admin.php?page=metatags" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="metatags" value="{tr}Change preferences{/tr}" />
-	</div>
-{tabset name="admin_metatags"}
-	{tab name="{tr}Meta tags{/tr}"}
-	<fieldset>
-		<legend>
-			{tr}Meta tags{/tr}
-		</legend>
+<form class="form-horizontal" action="tiki-admin.php?page=metatags" method="post">
+	{include file='access/include_ticket.tpl'}
 
-		<div class="adminoptionbox">
-			{preference name=metatag_keywords}
-			{preference name=metatag_freetags}
-			{preference name=metatag_threadtitle}
-			{preference name=metatag_imagetitle}
-			{preference name=metatag_description}
-			{preference name=metatag_pagedesc}
-			{preference name=metatag_author}
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			{include file='admin/include_apply_top.tpl'}
 		</div>
-	</fieldset>
-	{/tab}
-
-	{tab name="{tr}Geo URL{/tr}"}
-	<fieldset>
-		<legend>
-			{tr}Geo URL{/tr} {if $prefs.feature_help eq 'y'}<a target="_blank" href="http://geourl.org/">{icon _id='help'}</a>{/if}
-		</legend>
-		{preference name=metatag_geoposition}
-		{preference name=metatag_georegion}
-		{preference name=metatag_geoplacename}
-	</fieldset>
-	{/tab}
-	{tab name="{tr}Robots{/tr}"}
-	<fieldset>
-		<legend>{tr}Robots{/tr}</legend>
-		{* Need to show site_metatag_robots as real metatags are overridden at runtime *}
-				
-		{preference name=metatag_robots}
-		{preference name=metatag_revisitafter}
-	</fieldset>
-	{/tab}
-{/tabset}
-	<div class="heading input_submit_container" style="text-align: center">
-		<input type="submit" class="btn btn-default" name="metatags" value="{tr}Change preferences{/tr}" />
 	</div>
+
+	{tabset name="admin_metatags"}
+		{tab name="{tr}Meta tags{/tr}"}
+			<br>
+
+			<div class="adminoptionbox">
+				{preference name=metatag_keywords}
+				{preference name=metatag_freetags}
+				{preference name=metatag_threadtitle}
+				{preference name=metatag_imagetitle}
+				{preference name=metatag_description}
+				{preference name=metatag_pagedesc}
+				{preference name=metatag_author}
+			</div>
+		{/tab}
+
+		{tab name="{tr}Geo Metatags{/tr}"}
+			<br>
+
+			{preference name=metatag_geoposition}
+			{preference name=metatag_georegion}
+			{preference name=metatag_geoplacename}
+		{/tab}
+		{tab name="{tr}Robots{/tr}"}
+			<br>
+			{* Need to show site_metatag_robots as real metatags are overridden at runtime *}
+
+			{preference name=metatag_robots}
+			{preference name=metatag_revisitafter}
+		{/tab}
+	{/tabset}
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

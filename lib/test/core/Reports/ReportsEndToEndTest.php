@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ReportsEndToEndTest.php 47853 2013-10-02 14:03:06Z lphuberdeau $
+// $Id: ReportsEndToEndTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
 
 require_once('lib/test/TikiDatabaseTestCase.php');
 
@@ -15,12 +15,12 @@ class Reports_EndToEndTest extends TikiDatabaseTestCase
 		$this->dt = new DateTime;
 		$this->dt->setTimestamp(strtotime('2012-03-27 15:55:16'));
 
-		$this->mail = $this->getMock('TikiMail');
+		$this->mail = $this->createMock('TikiMail');
 
-		$this->tikilib = $this->getMock('TikiLib', array('get_user_preference'));
+		$this->tikilib = $this->createMock('TikiLib', array('get_user_preference'));
 
 		$this->overrideLibs = new TestableTikiLib;
-		$this->overrideLibs->overrideLibs(array('calendar' => $this->getMock('MockCalendarLib', array('get_item'))));
+		$this->overrideLibs->overrideLibs(array('calendar' => $this->createMock('MockCalendarLib', array('get_item'))));
 
 		$tikiPrefs = array('short_date_format' => '%Y-%m-%d');
 

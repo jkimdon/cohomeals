@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Language.php 46458 2013-06-25 17:06:31Z lphuberdeau $
+// $Id: Language.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 class Tracker_Field_Language extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable
 {
@@ -112,7 +112,8 @@ class Tracker_Field_Language extends Tracker_Field_Abstract implements Tracker_F
 
 	private function getLanguages()
 	{
-		return TikiLib::get_language_map();
+		$langLib = TikiLib::lib('language');
+		return $langLib->get_language_map();
 	}
 
 	private function isLanguageAvailable($lang)

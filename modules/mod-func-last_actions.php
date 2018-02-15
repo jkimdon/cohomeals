@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_actions.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-last_actions.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -47,9 +47,10 @@ function module_last_actions_info()
  */
 function module_last_actions($mod_reference, $module_params)
 {
-	global $tiki_p_admin, $user, $smarty;
+	global $tiki_p_admin, $user;
+	$smarty = TikiLib::lib('smarty');
 	if ($user) {
-		global $logslib; require_once('lib/logs/logslib.php');
+		$logslib = TikiLib::lib('logs');
 		
 		$results = $logslib->list_actions('', '', $tiki_p_admin == 'y' ? '' : $user, 0, $mod_reference["rows"]);
 		$actions = $results['data'];

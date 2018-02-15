@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-received_pages.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-received_pages.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
 include_once ('lib/commcenter/commlib.php');
-include_once ('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 $auto_query_args = array('receivedPageId', 'sort_mode', 'offset', 'find', 'sort_modes');
 $access->check_feature('feature_comm');
 $access->check_permission('tiki_p_admin_received_pages');
@@ -21,7 +21,7 @@ if (isset($_REQUEST["accept"])) {
 	// CODE TO ACCEPT A PAGE HERE
 	if (!$commlib->accept_page($_REQUEST["accept"])) {
 		$info = $commlib->get_received_page($_REQUEST['accept']);
-		$errors[] = array('error' => 'Page already exists');
+		$errors[] = tr('Page already exists');
 	}
 }
 if ($_REQUEST["receivedPageId"]) {
@@ -46,7 +46,7 @@ $smarty->assign('pageName', $info["pageName"]);
 $smarty->assign('data', $info["data"]);
 $smarty->assign('comment', $info["comment"]);
 // Assign parsed
-$smarty->assign('parsed', $tikilib->parse_data($info["data"]));
+$smarty->assign('parsed', TikiLib::lib('parser')->parse_data($info["data"]));
 if (isset($_REQUEST["remove"])) {
 	$access->check_authenticity();
 	$commlib->remove_received_page($_REQUEST["remove"]);
@@ -58,14 +58,14 @@ if (isset($_REQUEST["save"])) {
 	$smarty->assign('data', $_REQUEST["data"]);
 	$smarty->assign('comment', $_REQUEST["comment"]);
 	$smarty->assign('receivedPageId', 0);
-	$smarty->assign('parsed', $tikilib->parse_data($_REQUEST["data"]));
+	$smarty->assign('parsed', TikiLib::lib('parser')->parse_data($_REQUEST["data"]));
 }
 if (!empty($_REQUEST['checked']) && (!empty($_REQUEST['prefix']) || !empty($_REQUEST['postfix']))) {
 	check_ticket('received-pages');
 	foreach ($_REQUEST['checked'] as $page) {
 		$newpage = empty($_REQUEST['postfix']) ? $_REQUEST['prefix'] . $page : $page . $_REQUEST['postfix'];
 		if ($tikilib->page_exists($newpage)) {
-			$errors[] = array('error' => 'Page already exists', 'param' => $page);
+			$errors[] = tr('Page already exists') . ' ' . $page;
 		}
 	}
 	if (empty($errors)) {
@@ -101,7 +101,7 @@ if (!isset($_REQUEST['sort_modes'])) {
 $structures = $tikilib->list_received_pages(0, -1, $sort_modes, $find, 's');
 $smarty->assign_by_ref('structures', $structures['data']);
 if (!empty($errors)) {
-	$smarty->assign_by_ref('errors', $errors);
+	Feedback::error(['mes' => $errors]);
 }
 ask_ticket('received-pages');
 // Display the template

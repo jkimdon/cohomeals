@@ -1,30 +1,35 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_translated.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_translated.php 60452 2016-11-29 09:30:37Z drsassafras $
 
 function wikiplugin_translated_info()
 {
 	return array(
 		'name' => tra('Translated'),
 		'documentation' => 'PluginTranslated',
-		'description' => tra('Create multi-lingual links'),
+		'description' => tra('Create multilingual links'),
 		'prefs' => array( 'feature_multilingual', 'wikiplugin_translated' ),
 		'body' => tra('[url] or ((wikiname)) or ((inter:interwiki)) (use wiki syntax)'),
-		'icon' => 'img/icons/world_link.png',
+		'iconname' => 'language',
+		'introduced' => 1,
 		'params' => array(
 			'lang' => array(
 				'required' => true,
 				'name' => tra('Language'),
-				'description' => tra('Two letter language code of the language, ex: fr'),
+				'description' => tra('Two letter language code of the language, example:') . ' <code>fr</code>',
+				'since' => '1',
+				'filter' => 'alpha',
 				'default' => '',
 			),
 			'flag' => array(
 				'required' => false,
 				'name' => tra('Flag'),
-				'description' => tra('Country name, ex: France'),
+				'description' => tr('Country name, example:') . ' <code>France</code>',
+				'since' => '1',
+				'filter' => 'alpha',
 				'default' => '',
 			),
 		),
@@ -38,13 +43,13 @@ function wikiplugin_translated($data, $params)
 
 	$h = opendir("img/flags/");
 	while ($file = readdir($h)) {
-		if (substr($file, 0, 1) != '.' and substr($file, -4, 4) == '.gif') {
+		if (substr($file, 0, 1) != '.' and substr($file, -4, 4) == '.png') {
 			$avflags[] = substr($file, 0, strlen($file)-4);
 		}
 	}
 	if (isset($flag)) {
 		if (in_array($flag, $avflags)) { 
-			$img = "<img src='img/flags/$flag.gif' width='18' height='13' vspace='0' hspace='3' alt='$lang' align='baseline' /> "; 
+			$img = "<img src='img/flags/$flag.png' width='18' height='13' vspace='0' hspace='3' alt='$lang' align='baseline' /> ";
 		}
 	}
 

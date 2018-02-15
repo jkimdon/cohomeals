@@ -1,42 +1,46 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_contributionsdashboard.php 47997 2013-10-12 04:23:19Z marclaporte $
+// $Id: wikiplugin_contributionsdashboard.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 function wikiplugin_contributionsdashboard_info()
 {
 	return array(
 		'name' => tra('Contributions Dashboard'),
-		'documentation' => '',
-		'description' => tra('List users contributions to your work'),
+		'documentation' => 'PluginContributionsDashboard',
+		'description' => tra('List users\' contributions to a page'),
 		'prefs' => array( 'feature_trackers', 'wikiplugin_contributionsdashboard' ),
 		'tags' => array( 'basic' ),
 		'body' => tra('Notice'),
 		'format' => 'html',
-		'icon' => 'img/icons/database_table.png',
+		'introduced' => 9,
+		'iconname' => 'dashboard',
 		'filter' => 'text',
 		'params' => array(
 			'start' => array(
 				'required' => false,
 				'name' => tra('Start Date'),
 				'description' => tra('Default Beginning Date'),
-				'filter' => 'striptags',
+				'since' => '9.0',
+				'filter' => 'text',
 				'default' => 'Today - 7 days',
 			),
 			'end' => array(
 				'required' => false,
 				'name' => tra('End Date'),
 				'description' => tra('Default Ending Date'),
-				'filter' => 'striptags',
+				'since' => '9.0',
+				'filter' => 'text',
 				'default' => 'Today',
 			),
 			'types' => array(
 				'required' => true,
 				'name' => tra('Dashboard Types'),
-				'description' => tra('The type of charts that will be rendered separated by comma'),
-				'filter' => 'striptags',
+				'description' => tra('The types of charts that will be rendered, separated by commas'),
+				'since' => '9.0',
+				'filter' => 'text',
 				'default' => 'trackeritems',
 			),
 		),
@@ -45,7 +49,9 @@ function wikiplugin_contributionsdashboard_info()
 
 function wikiplugin_contributionsdashboard($data, $params)
 {
-	global $tikilib, $headerlib, $user;
+	global $user;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
 	$trklib = TikiLib::lib("trk");
 	$logsqrylib = TikiLib::lib("logsqry");
 	$smarty = TikiLib::lib("smarty");
@@ -71,8 +77,8 @@ function wikiplugin_contributionsdashboard($data, $params)
 
 	$types = explode(',', $types);
 
-	$headerlib->add_jsfile("vendor/jquery/jquery-sheet/plugins/raphael-min.js", "external");
-	$headerlib->add_jsfile("vendor/jquery/jquery-sheet/plugins/g.raphael-min.js", "external");
+	$headerlib->add_jsfile("vendor_bundled/vendor/jquery/jquery-sheet/plugins/raphael-min.js", true);
+	$headerlib->add_jsfile("vendor_bundled/vendor/jquery/jquery-sheet/plugins/g.raphael-min.js", true);
 	$headerlib->add_jq_onready("$('.cDashDate').datepicker();");
 
 	$usersTrackerItems = array();

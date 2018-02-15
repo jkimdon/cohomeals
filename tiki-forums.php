@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-forums.php 46727 2013-07-19 11:47:04Z jonnybradley $
+// $Id: tiki-forums.php 59206 2016-07-16 00:51:01Z lindonb $
 
 $section = 'forums';
 require_once ('tiki-setup.php');
@@ -41,6 +41,10 @@ if (isset($_REQUEST["find"])) {
 
 $smarty->assign('find', $find);
 
+if (isset($_REQUEST['numrows'])) {
+	$maxRecords = $_REQUEST['numrows'];
+}
+
 $smarty->assign_by_ref('sort_mode', $sort_mode);
 $channels = $commentslib->list_forums($offset, $maxRecords, $sort_mode, $find);
 Perms::bulk(array( 'type' => 'forum' ), 'object', $channels['data'], 'forumId');
@@ -59,8 +63,24 @@ $smarty->assign_by_ref('channels', $channels["data"]);
 $smarty->assign('cant', $channels["cant"]);
 include_once ('tiki-section_options.php');
 
-ask_ticket('forums');
+//add tablesorter sorting and filtering
+$ts = Table_Check::setVars('forums', true);
+if ($ts['enabled'] && !$ts['ajax']) {
+	//set tablesorter code
+	Table_Factory::build(
+		'TikiForums',
+		array(
+			'id' => $ts['tableid'],
+			'total' => $channels["cant"],
+		)
+	);
+}
 
+ask_ticket('forums');
 // Display the template
-$smarty->assign('mid', 'tiki-forums.tpl');
-$smarty->display("tiki.tpl");
+if ($ts['ajax']) {
+	$smarty->display('tiki-forums.tpl');
+} else {
+	$smarty->assign('mid', 'tiki-forums.tpl');
+	$smarty->display("tiki.tpl");
+}

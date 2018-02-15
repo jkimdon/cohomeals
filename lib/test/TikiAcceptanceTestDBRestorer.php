@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiAcceptanceTestDBRestorer.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: TikiAcceptanceTestDBRestorer.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 /*
  * Created on Apr 7, 2009
@@ -78,7 +78,10 @@ abstract class TikiAcceptanceTestDBRestorer
 
 	function reinitialize_internal_values_and_clear_caches()
 	{
-		global $cachelib, $prefs, $tikilib;
+		global $prefs;
+		$tikilib = TikiLib::lib('tiki');
+		$cachelib = TikiLib::lib('cache');
+
 		initialize_prefs();			
 		$tikilib->cache_page_info = array();	
 		$cachelib->empty_cache();

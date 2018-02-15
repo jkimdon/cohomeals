@@ -17,7 +17,7 @@
 // | Based on OLE::Storage_Lite by Kawai, Takanori                        |
 // +----------------------------------------------------------------------+
 //
-// $Id: root.php 25061 2010-02-11 13:27:17Z pkdille $
+// $Id: root.php 61625 2017-03-11 16:37:58Z lindonb $
 
 
 /**
@@ -42,7 +42,7 @@ class OLE_PPS_Root extends OLE_PPS
     * @param integer $time_1st A timestamp
     * @param integer $time_2nd A timestamp
     */
-    function OLE_PPS_Root($time_1st, $time_2nd, $raChild)
+    function construct($time_1st, $time_2nd, $raChild)
     {
         $this->_tmp_dir = '';
         $this->OLE_PPS(

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Init.php 47202 2013-08-22 10:29:57Z changi67 $
+// $Id: Init.php 60724 2016-12-21 16:00:18Z kroky6 $
 
 namespace Tiki\Command\ProfileExport;
 
@@ -35,10 +35,26 @@ class Init extends Command
 			mkdir('profiles');
 		}
 
+		$htaccess = <<<HTACCESS
+<FilesMatch ".*">
+    <IfModule mod_authz_core.c>
+       Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        order deny,allow
+        deny from all
+    </IfModule>
+</FilesMatch>
+HTACCESS;
+		file_put_contents("profiles/.htaccess", $htaccess);
+
 		$definition = <<<INI
 profile.name = $profileName
 INI;
 		file_put_contents("profiles/info.ini", $definition);
-		mkdir("profiles/$profileName");
+		
+		if( !file_exists("profiles/$profileName") ) {
+			mkdir("profiles/$profileName");
+		}
 	}
 }

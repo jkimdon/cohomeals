@@ -1,12 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: sections.php 48773 2013-11-27 13:17:35Z manivannans $
+// $Id: sections.php 62779 2017-05-28 03:06:43Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
+if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
+	header('location: index.php');
+	exit;
+}
 
 $sections = array(
 	// tra('Wiki Page') -- tra() comments are there for get_strings.php
@@ -142,18 +145,6 @@ $sections = array(
 		'objectType' => 'calendar',
 		'itemObjectType' => 'event',
 	),
-	// tra('Map')
-	'maps' => array(
-		'feature' => 'feature_maps',
-		'key' => 'mapId',
-		'itemkey' => '',
-		'objectType' => 'map',
-	),
-	'gmaps' => array(
-		'feature' => 'feature_gmap',
-		'key' => '',
-		'itemkey' => '',
-	),
 	'categories' => array(
 		'feature' => 'feature_categories',
 		'key' => 'categId',
@@ -200,7 +191,7 @@ if ( ! empty($section_class) ) {
 
 function current_object()
 {
-	global $section, $sections, $cat_type, $cat_objid, $postId;
+	global $section, $sections, $cat_type, $cat_objid, $postId, $prefs;
 
 	if ($section == 'blogs' && !empty($postId)) { // blog post check the category on the blog - but freetags are on blog post
 		return array(
@@ -213,6 +204,14 @@ function current_object()
 		return array(
 			'type' => 'forum post',
 			'object' => $_REQUEST['comments_parentId'],
+		);
+	}
+
+	// Pretty tracker pages
+	if ($section == 'wiki page' && isset($_REQUEST['itemId'])) {
+		return array(
+			'type' => 'trackeritem',
+			'object' => (int) $_REQUEST['itemId'],
 		);
 	}
 
@@ -244,6 +243,10 @@ function current_object()
 				$k = $_REQUEST[ $info['key'] ][0];
 			} else {
 				$k = $_REQUEST[ $info['key'] ];
+				// when using wiki_url_scheme the page request var is the page slug, not the page/object name
+				if ($prefs['wiki_url_scheme'] !== 'urlencode' && $info['objectType'] === 'wiki page') {
+					$k = TikiLib::lib('wiki')->get_page_by_slug($k);
+				}
 			}
 			return array(
 				'type' => $info['objectType'],

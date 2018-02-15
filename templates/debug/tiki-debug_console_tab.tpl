@@ -1,30 +1,30 @@
-{* $Id: tiki-debug_console_tab.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}
+{* $Id: tiki-debug_console_tab.tpl 53397 2015-01-04 05:13:24Z jyhem $ *}
 {* Debug console tab -- to display result of command *}
 
 
 {* Display command results if we have smth to show... *}
 {if $result_type ne 0} {*NO_RESULT *}
 
-  <pre>&gt;&nbsp;{$command|escape:"html"}</pre>
+	<pre>&gt;&nbsp;{$command|escape:"html"}</pre>
 
-  {if    $result_type == 1}{*TEXT_RESULT*}
+	{if $result_type == 1}{*TEXT_RESULT*}
 
-    {* Show text in PRE section *}
-    <pre>{strip}
-      {$command_result|escape:"html"|wordwrap:90:"\n":true|replace:"\n":"<br>"}
-    {/strip}</pre>
+		{* Show text in PRE section *}
+		<pre>{strip}
+			{$command_result|escape:"html"|wordwrap:90:"\n":true|replace:"\n":"<br>"}
+		{/strip}</pre>
 
-  {elseif $result_type == 2}{*HTML_RESULT*}
+	{elseif $result_type == 2}{*HTML_RESULT*}
 
-    {* Type HTML as is *}
-    {$command_result}
+		{* Type HTML as is *}
+		{$command_result}
 
-  {elseif $result_type == 3 && strlen($result_tpl) > 0}{*TPL_RESULT*}
+	{elseif $result_type == 3 && strlen($result_tpl) > 0}{*TPL_RESULT*}
 
-    {* Result have its own template *}
-    {include file=$result_tpl}
+		{* Result have its own template *}
+		{include file=$result_tpl}
 
-  {/if}{* Check result type *}
+	{/if}{* Check result type *}
 
-<br>
+	<br>
 {/if}{* We have smth to show as result *}

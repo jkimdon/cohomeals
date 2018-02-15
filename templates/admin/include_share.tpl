@@ -1,36 +1,35 @@
-{* $Id: include_share.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
+{* $Id: include_share.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
 
-<form action="tiki-admin.php?page=share" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="commentssetprefs" value="{tr}Change preferences{/tr}" />
+<form class="form-horizontal" action="tiki-admin.php?page=share" method="post">
+	{include file='access/include_ticket.tpl'}
+
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
 
-	<fieldset class="admin">
+	<fieldset>
 		<legend>{tr}Activate the feature{/tr}</legend>
 		{preference name=feature_share visible="always"}
-	</fieldset>		
-	
-			<fieldset class="admin">
-				<legend>{tr}Site-wide features{/tr}</legend>
+	</fieldset>
 
-				<div class="admin featurelist">
-					{preference name=share_display_links}
-					{preference name=share_token_notification}
-					{preference name=share_contact_add_non_existant_contact}
-					{preference name=share_display_name_and_email}
-					{preference name=share_can_choose_how_much_time_access}
-					<div class="adminoptionboxchild" id="share_can_choose_how_much_time_access_childcontainer">
-						{remarksbox type="remark" title="{tr}Default{/tr}"}
-							{tr}If you don't want to limit it, an input box will be displayed; otherwise, it will be checkbox{/tr}
-						{/remarksbox}
-						{preference name=share_max_access_time}
-					</div>
-				</div>
-			</fieldset>
+	<fieldset>
+		<legend>{tr}Site-wide features{/tr}</legend>
 
-
-<div class="heading input_submit_container" style="text-align: center">
-	<input type="submit" class="btn btn-default" name="sharesetprefs" value="{tr}Change preferences{/tr}" />
-</div>
+		<div class="admin featurelist">
+			{preference name=share_display_links}
+			{preference name=share_token_notification}
+			{preference name=share_contact_add_non_existant_contact}
+			{preference name=share_display_name_and_email}
+			{preference name=share_can_choose_how_much_time_access}
+			<div class="adminoptionboxchild" id="share_can_choose_how_much_time_access_childcontainer">
+				{remarksbox type="remark" title="{tr}Default{/tr}"}
+					{tr}If you don't want to limit it, an input box will be displayed; otherwise, it will be checkbox{/tr}
+				{/remarksbox}
+				{preference name=share_max_access_time}
+			</div>
+		</div>
+	</fieldset>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

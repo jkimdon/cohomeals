@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: phpbb.php 53822 2015-02-06 14:44:54Z nkoth $
+// $Id: phpbb.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 // Tikiwiki authentication backend for phpBB3 with adodb
 // By Jacob 'jacmoe2' Moen 10 Dec 2009
@@ -43,9 +43,6 @@ class TikiPhpBBLib
 		} else {
 			return PHPBB_INVALID_CREDENTIALS;
 		}
-
-		// shouldn't happen..
-		return PHPBB_INVALID_SYNTAX;
 	}
 
 	function connectdb()

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UserGroups.php 46458 2013-06-25 17:06:31Z lphuberdeau $
+// $Id: UserGroups.php 60051 2016-10-25 09:18:17Z kroky6 $
 
 /**
  * Handler class for UserGroups
@@ -32,13 +32,17 @@ class Tracker_Field_UserGroups extends Tracker_Field_Abstract
 	function getFieldData(array $requestData = array())
 	{
 		$itemId = $this->getItemId();
+
+		$value = array();
 		
 		if ($itemId) {
-			$itemUser = $this->getTrackerDefinition()->getItemUser($itemId);
+			$itemUsers = $this->getTrackerDefinition()->getItemUsers($itemId);
 			
-			if (!empty($itemUser)) {
+			if (!empty($itemUsers)) {
 				$tikilib = TikiLib::lib('tiki');
-				$value = array_diff($tikilib->get_user_groups($itemUser), array('Registered', 'Anonymous'));
+				foreach( $itemUsers as $itemUser ) {
+					$value = array_merge($value, array_diff($tikilib->get_user_groups($itemUser), array('Registered', 'Anonymous')));
+				}
 			}
 		}
 	

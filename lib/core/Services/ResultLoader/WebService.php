@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WebService.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: WebService.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Services_ResultLoader_WebService
 {
@@ -28,12 +28,13 @@ class Services_ResultLoader_WebService
 				$this->countKey => $count,
 			)
 		);
-		$this->client->setHeaders('Accept', 'application/json');
+		$this->client->setHeaders(array('Accept' => 'application/json'));
 
-		$response = $this->client->request('POST');
+		$this->client->setMethod(Zend\Http\Request::METHOD_POST);
+		$response = $this->client->send();
 
-		if (! $response->isSuccessful()) {
-			throw new Services_Exception(tr('Remote service unaccessible (%0)', $response->getStatus()), 400);
+		if (! $response->isSuccess()) {
+			throw new Services_Exception(tr('Remote service inaccessible (%0)', $response->getStatusCode()), 400);
 		}
 
 		$out = json_decode($response->getBody(), true);

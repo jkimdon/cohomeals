@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-accounting_books.php 50145 2014-03-02 07:38:00Z lindonb $
+// $Id: tiki-accounting_books.php 58749 2016-06-01 01:39:05Z lindonb $
 
 $section = 'accounting';
 require_once ('tiki-setup.php');
@@ -43,7 +43,7 @@ switch ($_REQUEST['action']) {
 					);
 					if (!is_numeric($bookId)) {
 						$errors[]=tra($bookId);
-						$smarty->assign('errors', $errors);
+						Feedback::error($errors);
 						$smarty->assign('bookName', $_REQUEST['bookName']);
 						$smarty->assign('bookStartDate', $_REQUEST['bookStartDate']);
 						$smarty->assign('bookEndDate', $_REQUEST['bookEndDate']);

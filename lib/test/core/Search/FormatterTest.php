@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FormatterTest.php 46837 2013-07-25 14:29:53Z lphuberdeau $
+// $Id: FormatterTest.php 59709 2016-09-15 11:07:20Z kroky6 $
 
 class Search_FormatterTest extends PHPUnit_Framework_TestCase
 {
@@ -103,6 +103,9 @@ OUT;
 
 		$formatter = new Search_Formatter($plugin);
 
+		// required for the SmartyFormatter since r59367
+		$GLOBALS['base_url'] ='';
+
 		$output = $formatter->format(
 			array(
 				array('object_type' => 'wiki page', 'object_id' => 'HomePage'),
@@ -177,7 +180,6 @@ OUT;
 
 	function testPaginationInformationProvided()
 	{
-		$this->markTestSkipped('Template issues in this context.');
 		$plugin = new Search_Formatter_Plugin_SmartyTemplate(dirname(__FILE__).'/paginate.tpl');
 
 		$formatter = new Search_Formatter($plugin);
@@ -195,31 +197,35 @@ OUT;
 
 		$this->assertContains('>1<', $output);
 		$this->assertContains('>2<', $output);
-		$this->assertContains('>3<', $output);
+		$this->assertContains('<span>3 ', $output);
 		$this->assertNotContains('>4<', $output);
 	}
 
 	function testSpecifyDataSource()
 	{
-		$searchResult = array(
+		$searchResult = Search_ResultSet::create(array(
 			array('object_type' => 'wiki page', 'object_id' => 'HomePage'),
 			array('object_type' => 'wiki page', 'object_id' => 'SomePage'),
-		);
+		));
 		$withData = array(
 			array('object_type' => 'wiki page', 'object_id' => 'HomePage', 'description' => 'ABC'),
 			array('object_type' => 'wiki page', 'object_id' => 'SomePage', 'description' => 'DEF'),
 		);
 
-		$source = $this->getMock('Search_Formatter_DataSource_Interface');
-		$source->expects($this->once())
-			->method('getInformation')
-			->with($this->equalTo(Search_ResultSet::create($searchResult)), $this->equalTo(array('object_id', 'description')))
-			->will($this->returnValue(Search_ResultSet::create($withData)));
+		$source = $this->createMock('Search_Formatter_DataSource_Interface');
+		for( $i = 0; $i < 4; $i++ ) {
+			$source->expects($this->at($i))
+				->method('getData')
+				->will($this->returnCallback(function ($entry, $field) use (& $withData, $i) {
+					$this->assertContains($field, array('object_id', 'description'));
+					return $withData[intval($i/2)];
+				}));
+		}
 
 		$plugin = new Search_Formatter_Plugin_WikiTemplate("* {display name=object_id} ({display name=description})\n");
 
 		$formatter = new Search_Formatter($plugin);
-		$formatter->setDataSource($source);
+		$searchResult->applyTransform(new Search_Formatter_Transform_DynamicLoader($source));
 
 		$output = $formatter->format($searchResult);
 
@@ -257,7 +263,7 @@ OUT;
 
 		$expect = <<<OUT
 * ~np~<a href="HomePage" class="" title="Home" data-type="wiki page" data-object="HomePage">Home</a>~/np~
-* ~np~<a href="Some+Page" class="" title="Test" data-type="wiki page" data-object="Some Page">Test</a>~/np~
+* ~np~<a href="Some Page" class="" title="Test" data-type="wiki page" data-object="Some Page">Test</a>~/np~
 
 OUT;
 		$this->assertEquals($expect, $output);
@@ -323,7 +329,7 @@ OUT;
 	}
 }
 
-class Search_FormatterTest_HighlightHelper implements Zend_Filter_Interface
+class Search_FormatterTest_HighlightHelper implements Zend\Filter\FilterInterface
 {
 	function filter($content)
 	{

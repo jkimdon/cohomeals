@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: InstallCommand.php 45724 2013-04-26 17:33:23Z changi67 $
+// $Id: RedactDBCommand.php 62176 2017-04-10 06:01:52Z drsassafras $
 
 namespace Tiki\Command;
 
@@ -46,7 +46,7 @@ class RedactDBCommand extends Command
 		$query = "UPDATE users_users SET email = ? WHERE login='admin';";
 		$bindvars = array('admin@example.com');
 		$result = $tikilib->query($query, $bindvars);
-		$query = "UPDATE `users_users` SET `password`='admin', `hash`= md5('admin') WHERE `login`='admin'";
+		$query = "UPDATE `users_users` SET `hash`= md5('admin') WHERE `login`='admin'";
 		$result = $tikilib->query($query);
 
 		// first get valid prefix
@@ -133,8 +133,6 @@ class RedactDBCommand extends Command
 		}
 		$query = "UPDATE `users_users` SET `provpass` = '';";
 		$result = $tikilib->query($query);		
-		$query = "UPDATE `users_users` SET `password` = '';";
-		$result = $tikilib->query($query);
 
 		// Remove user web-mail accounts
 		$output->writeln('<info>Removing user mail accounts.</info>');

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: activitylib.php 47596 2013-09-20 23:23:49Z nkoth $
+// $Id: activitylib.php 58564 2016-05-09 18:23:46Z nkoth $
 
 class ActivityLib
 {
@@ -11,7 +11,9 @@ class ActivityLib
 
 	function getRules()
 	{
-		return $this->rulesTable()->fetchAll(
+		$table = $this->rulesTable();
+		$table->useExceptions();
+		return $table->fetchAll(
 			array(
 				'ruleId',
 				'eventType',
@@ -65,6 +67,17 @@ class ActivityLib
 		);
 	}
 
+	function deleteActivity($id)
+	{
+		$info = $this->streamTable()->delete(
+			array(
+				'activityId' => $id,
+			)
+		);
+		require_once 'lib/search/refresh-functions.php';
+		refresh_index('activity', $id);
+	}
+
 	function preserveRules(array $ids)
 	{
 		$table = $this->rulesTable();
@@ -97,6 +110,44 @@ class ActivityLib
 		);
 
 		TikiLib::lib('unifiedsearch')->invalidateObject('activity', $id);
+	}
+
+	/**
+	 * Logs an event to the web server log via final tiki.eventlog.commit event.
+	 * Needs to be activated via setting TIKI_HEADER_REPORT_EVENTS as a
+	 * server environment variable
+	 *
+	 * @param $event
+	 * @param $arguments
+	 */
+	function logEvent($event, $arguments, $includes = array(), $excludes = array())
+	{
+		if (!$event) {
+			return; // prevent false recording of test runs
+		}
+
+		if ($includes) {
+			// if includes is provided, then everything is excluded by default
+			$clean_args = array();
+			foreach ($arguments as $k => $v) {
+				if (in_array($k, $includes)) {
+					$clean_args[$k] = $v;
+				}
+			}
+		} else if ($excludes) {
+			$clean_args = array();
+			foreach ($arguments as $k => $v) {
+				if (!in_array($k, $excludes)) {
+					$clean_args[$k] = $v;
+				}
+			}
+		} else {
+			$clean_args = $arguments;
+		}
+
+		$events = TikiLib::events();
+		$events->logEvent($event, $clean_args);
+		$events->trigger('tiki.eventlog.commit');
 	}
 
 	function bindBasicEvents(Tiki_Event_Manager $manager)
@@ -133,11 +184,15 @@ class ActivityLib
 		$runner = $this->getRunner($manager);
 		$customizer = new Tiki_Event_Customizer;
 
-		foreach ($this->getRules() as $rule) {
-			$customizer->addRule($rule['eventType'], $rule['rule']);
-		}
+		try {
+			foreach ($this->getRules() as $rule) {
+				$customizer->addRule($rule['eventType'], $rule['rule']);
+			}
 
-		$customizer->bind($manager, $runner);
+			$customizer->bind($manager, $runner);
+		} catch (TikiDb_Exception $e) {
+			// Prevent failure while binding events to avoid locking out users
+		}
 	}
 
 	private function getRunner($manager)
@@ -151,8 +206,12 @@ class ActivityLib
 						return new Tiki_Event_Function_EventTrigger($manager);
 					case 'event-record':
 						return new Tiki_Event_Function_EventRecord($self);
+					case 'event-notify':
+						return new Tiki_Event_Function_EventNotify($self);
 					case 'event-sample':
 						return new Tiki_Event_Function_EventSample($self);
+					case 'event-log':
+						return new Tiki_Event_Function_EventLog($self);
 					}
 				},
 				'Math_Formula_Function_' => '',

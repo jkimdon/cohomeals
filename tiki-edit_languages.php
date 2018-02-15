@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_languages.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-edit_languages.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
 require_once('lib/language/Language.php');
@@ -16,16 +16,9 @@ $access->check_feature('lang_use_db');
 $access->check_permission('tiki_p_edit_languages');
 
 // Get available languages
-$languages = $tikilib->list_languages();
+$langLib = TikiLib::lib('language');
+$languages = $langLib->list_languages();
 $smarty->assign_by_ref('languages', $languages);
-
-// check if is possible to write to lang/
-// TODO: check if each language file is writable instead of the whole lang/ dir
-if (is_writable('lang/')) {
-	$smarty->assign('langIsWritable', true);
-} else {
-	$smarty->assign('langIsWritable', false);
-}
 
 // preserving variables
 if (isset($_REQUEST["edit_language"])) {
@@ -153,41 +146,8 @@ if ($action == "edit_rec_sw" || $action == "edit_tran_sw") {
 	$smarty->assign('hasDbTranslations', $translations->hasDbTranslations);
 }
 
-if (isset($_REQUEST["exp_language"])) {
-	$exp_language = $_REQUEST["exp_language"];
-	$export_language = new LanguageTranslations($exp_language);
-	$smarty->assign('exp_language', $exp_language);
-} else {
-	$smarty->assign('exp_language', $prefs['language']);
-}
-
-// Export
-if (isset($_REQUEST['downloadFile'])) {
-	check_ticket('edit-languages');
-	$data = $export_language->createCustomFile();
-	header("Content-type: application/unknown");
-	header("Content-Disposition: inline; filename=language.php");
-	header("Content-encoding: UTF-8");
-	echo $data;
-	exit (0);
-}
-
-// Write to language.php
-if (isset($_REQUEST['exportToLanguage']) && $tiki_p_admin == 'y') {
-	try {
-		$stats = $export_language->writeLanguageFile();
-	} catch (Exception $e) {
-		$smarty->assign('msg', $e->getMessage());
-		$smarty->display('error.tpl');
-		die;
-	}
-
-	$expmsg = sprintf(tra('Wrote %d new strings and updated %d to lang/%s/language.php'), $stats['new'], $stats['modif'], $export_language->lang);
-	$smarty->assign('expmsg', $expmsg);
-}
-
 $db_languages = Language::getDbTranslatedLanguages();
-$db_languages = $tikilib->format_language_list($db_languages);
+$db_languages = $langLib->format_language_list($db_languages);
 $smarty->assign_by_ref('db_languages', $db_languages);
 
 ask_ticket('edit-languages');
@@ -195,7 +155,7 @@ ask_ticket('edit-languages');
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 
-$headerlib->add_cssfile('css/admin.css');
+$headerlib->add_cssfile('themes/base_files/feature_css/admin.css');
 $headerlib->add_jsfile('lib/language/js/tiki-edit_languages.js');
 
 $headtitle = tra('Edit languages');

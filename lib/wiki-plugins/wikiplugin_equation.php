@@ -1,24 +1,27 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_equation.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_equation.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_equation_info()
 {
 	return array(
 		'name' => tra('Equation'),
 		'documentation' => 'PluginEquation',
-		'description' => tra('Render an equation written in LaTeX syntax as an image.'),
+		'description' => tra('Render an equation written in LaTeX syntax as an image'),
 		'prefs' => array('wikiplugin_equation'),
 		'body' => tra('equation'),
-		'icon' => 'img/icons/sum.png',
+		'iconname' => 'superscript',
+		'introduced' => 2,
 		'params' => array(
 			'size' => array(
 				'required' => false,
 				'name' => tra('Size'),
-				'description' => tra('Size expressed as a percentage of the normal size. 100 produces the default size. 200 produces an image twice as large.'),
+				'description' => tr('Size expressed as a percentage of the normal size. %0 produces the default size.
+					%1 produces an image twice as large.', '<code>100</code>', '<code>200</code>'),
+				'since' => '2.0',
 				'default' => 100,
 				'filter' => 'digits',
 			),

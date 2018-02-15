@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: display_banner.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: display_banner.php 60348 2016-11-21 16:55:47Z jonnybradley $
 
 // Only to be called from edit_banner or view_banner to display the banner without adding
 // impressions to the banner
@@ -30,19 +30,11 @@ switch ($data["which"]) {
     	break;
 
 	case 'useImage':
-		$raw = "<img border=\"0\" src=\"banner_image.php?id=" . $id . "\" />";
+		$raw = "<img src=\"banner_image.php?id=" . $id . "\" />";
     	break;
 
 	case 'useFixedURL':
-		$fp = fopen($data["fixedURLData"], "r");
-		if ($fp) {
-			$raw = '';
-			while (!feof($fp)) {
-				$raw .= fread($fp, 8192);
-			}
-		}
-
-		fclose($fp);
+		$raw = '<img src="'.$data["fixedURLData"].'">"';
     	break;
 
 	case 'useText':

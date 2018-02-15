@@ -1,21 +1,31 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Add.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Add.php 59752 2016-09-20 11:11:40Z kroky6 $
 
 class Math_Formula_Function_Add extends Math_Formula_Function
 {
 	function evaluate( $element )
 	{
-		$out = 0;
+		$list = array();
 
-		foreach ( $element as $child ) {
-			$out += $this->evaluateChild($child);
+		foreach ($element as $child) {
+			$child = $this->evaluateChild($child);
+
+			if (is_array($child)) {
+				$list = array_merge($list, $child);
+			} else {
+				$list[] = $child;
+			}
 		}
 
-		return $out;
+		if (empty($list)) {
+			return 0;
+		} else {
+			return array_sum($list);
+		}
 	}
 }
 

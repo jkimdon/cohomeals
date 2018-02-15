@@ -1,10 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: lslib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: lslib.php 62837 2017-05-31 11:07:05Z drsassafras $
 
+global $access;
 $access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
 class Lslib extends TikiLib
@@ -175,7 +176,7 @@ class Lslib extends TikiLib
 		);
 	}
 
-	function get_event($reqId, $event, $senderId)
+	function get_support_event($reqId, $event, $senderId)
 	{
 		return $this->getOne(
 			'select `data` from `tiki_live_support_events` where `senderId`<>? and `reqId`=? and `seqId`=?',

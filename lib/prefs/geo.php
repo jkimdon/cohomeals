@@ -1,34 +1,34 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: geo.php 48608 2013-11-21 01:18:44Z nkoth $
+// $Id: geo.php 62023 2017-04-02 07:10:43Z lindonb $
 
 function prefs_geo_list()
 {
 	return array(
 		'geo_locate_wiki' => array(
 			'name' => tra('Geolocate wiki pages'),
-			'description' => tra('Provide controls to geolocate wiki pages from the edit functionality.'),
+			'description' => tra('Provide controls to indicate a geographic location of wiki pages in the edit form.'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
 		'geo_locate_article' => array(
 			'name' => tra('Geolocate articles'),
-			'description' => tra('Provide controls to geolocate articles from the edit functionality.'),
+			'description' => tra('Provide controls to indicate a geographic location in the article edit form.'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
 		'geo_locate_blogpost' => array(
 			'name' => tra('Geolocate blog posts'),
-			'description' => tra('Provide controls to geolocate blog posts from the edit functionality.'),
+			'description' => tra('Provide controls to indicate a geographic location in the blog post edit form.'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
 		'geo_tilesets' => array(
 			'name' => tra('Available tile layers on maps'),
-			'description' => tra('Allows to replace the default OpenStreetMap tiles for tiles from other mapping services, such as Google or Bing.'),
+			'description' => tra('Enables replacement of the default OpenStreetMap tiles with tiles from other mapping services, such as Google or Bing.'),
 			'hint' => tr(
 				'Valid options are: %0',
 				implode(
@@ -57,19 +57,19 @@ function prefs_geo_list()
 			'filter' => 'word',
 			'separator' => ',',
 			'default' => array('openstreetmap'),
-			'tags' => array('advanced', 'experimental'),
+			'tags' => array('advanced'),
 		),
 		'geo_google_streetview' => array(
 			'name' => tr('Google Street View'),
-			'description' => tr('Open up Google Street View in a window to see the visible coordinates.'),
+			'description' => tr('Open Google Street View in a new window to see the visible coordinates.'),
 			'dependencies' => array('gmap_key'),
 			'type' => 'flag',
 			'default' => 'n',
 			'tags' => array('basic', 'experimental'),
 		),
 		'geo_google_streetview_overlay' => array(
-			'name' => tr('Google Street View Overlay'),
-			'description' => tr('Open up Google Street View in a window to see the visible coordinates.'),
+			'name' => tr('Google Street View overlay'),
+			'description' => tr('Open Google Street View in a new window to see the visible coordinates.'),
 			'dependencies' => array('geo_google_streetview'),
 			'warning' => tr('This is not guaranteed to work.'),
 			'type' => 'flag',
@@ -83,18 +83,27 @@ function prefs_geo_list()
 			'default' => 'n',
 		),
 		'geo_zoomlevel_to_found_location' => array(
-			'name' => tr('Zoom to found location'),
-			'description' => tr('Zoom to street level when finding a searched location'),
+			'name' => tr('Zoom level for the found location'),
+			'description' => tr('Zoom level when a searched-for location is found'),
 			'type' => 'list',
 			'options' => array(
-					'street' => tra('Street level'),
-					'town' => tra('Town level'),
-					'region' => tra('Region level'),
-					'country' => tra('Country level'),
-					'continent' => tra('Continent level'),
+					'street' => tra('Street'),
+					'town' => tra('Town'),
+					'region' => tra('Region'),
+					'country' => tra('Country'),
+					'continent' => tra('Continent'),
 					'world' => tra('World'),
 				),
 			'default' => 'street',
+		),
+		'geo_openlayers_version' => array(
+			'name' => tr('OpenLayers version'),
+			'type' => 'list',
+			'options' => array(
+					'ol2' => tra('OpenLayers 2.x (for use up to at least 15.x)'),
+					'ol3' => tra('OpenLayers 3.x (experimental)'),
+				),
+			'default' => 'ol2',
 		),
 	);
 }

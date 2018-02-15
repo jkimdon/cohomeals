@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_docs.php 46138 2013-06-02 18:38:13Z changi67 $
+// $Id: tiki-edit_docs.php 57957 2016-03-17 19:58:54Z jonnybradley $
 $section = 'docs';
 
 require_once ('tiki-setup.php');
-include_once ('lib/filegals/filegallib.php');
+$filegallib = TikiLib::lib('filegal');
 include_once ('lib/mime/mimetypes.php');
 global $mimetypes;
 
@@ -150,14 +150,14 @@ $headerlib->add_jq_onready(
 	});
 
 	runtime.writeFile = function(path, data) {
-		$.modal($savingText);
+		$.tikiModal($savingText);
 		var base64 = new core.Base64();
 		data = base64.convertUTF8ArrayToBase64(data);
 		$.post('tiki-edit_docs.php', {
 			fileId: $('#fileId').val(),
 			data: data
 		}, function(id) {
-				$.modal();
+				$.tikiModal();
 				$('#fileId').val(id);
 		});
 	};

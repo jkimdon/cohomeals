@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-webdav.php 44848 2013-02-08 17:12:52Z lphuberdeau $
+// $Id: tiki-webdav.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 
 // If Apache is calling PHP in CGI mode, authentication HTTP Headers are not
@@ -121,7 +121,7 @@ if ( $_SERVER['REQUEST_METHOD'] === 'GET' && $_SERVER['REQUEST_URI'] === $_SERVE
 	}
 
 	print_debug("\n=== handle() ===\n");
-	global $filegallib; require_once('lib/filegals/filegallib.php');
+	$filegallib = TikiLib::lib('filegal');
 	$server->handle($backend, $path); 
 	print_debug("\n=== end handle() ===\n");
 }

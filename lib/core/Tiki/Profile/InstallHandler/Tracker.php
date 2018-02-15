@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Tracker.php 49721 2014-02-05 09:21:17Z xavidp $
+// $Id: Tracker.php 60550 2016-12-06 15:42:20Z kroky6 $
 
 class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 {
@@ -27,6 +27,7 @@ class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 		return array(
 			'name' => '',
 			'description' => '',
+			'fieldPrefix' => '',
 			'show_status' => 'showStatus',
 			'show_status_admin_only' => 'showStatusAdminOnly',
 			'list_default_status' => 'defaultStatus',
@@ -57,6 +58,8 @@ class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 			'section_format' => 'sectionFormat',
 			'popup_fields' => 'showPopup',
 			'admin_only_view' => 'adminOnlyViewEditItem',
+			'use_form_classes' => 'useFormClasses',
+			'form_classes' => 'formClasses',
 		);
 	} // }}}
 
@@ -68,7 +71,6 @@ class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 		$defaults['creation_date_format'] = '';
 		$defaults['modification_date_format'] = '';
 		$defaults['email'] = '';
-		$defaults['outboundEmail'] = '';
 		$defaults['default_status'] = 'o';
 		$defaults['modification_status'] = '';
 		$defaults['list_default_status'] = 'o';
@@ -76,6 +78,8 @@ class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 		$defaults['sort_default_field'] = '';
 		$defaults['restrict_start'] = '';
 		$defaults['restrict_end'] = '';
+		$defaults['popup_fields'] = '';
+		$defaults['section_format'] = 'flat';
 		return $defaults;
 	} // }}}
 
@@ -148,7 +152,7 @@ class Tiki_Profile_InstallHandler_Tracker extends Tiki_Profile_InstallHandler
 		return $trklib->replace_tracker($trackerId, $name, $description, $options, 'y');
 	} // }}}
 
-	function export(Tiki_Profile_Writer $writer, $trackerId) // {{{
+	public static function export(Tiki_Profile_Writer $writer, $trackerId) // {{{
 	{
 		$trklib = TikiLib::lib('trk');
 		$info = $trklib->get_tracker($trackerId);

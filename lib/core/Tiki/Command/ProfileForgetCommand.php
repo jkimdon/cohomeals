@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ProfileForgetCommand.php 45724 2013-04-26 17:33:23Z changi67 $
+// $Id: ProfileForgetCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 namespace Tiki\Command;
 
@@ -56,7 +56,7 @@ class ProfileForgetCommand extends Command
 			$transaction->commit();
 			$output->writeln('Profile forgotten.');
 		} else {
-			$output->writeln('<info>Profile was not installed.</info>');
+			$output->writeln('<info>Profile was not installed or did not create any objects.</info>');
 		}
 	}
 }

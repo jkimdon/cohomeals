@@ -1,17 +1,21 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Broker.php 49260 2013-12-25 16:36:02Z arildb $
+// $Id: Broker.php 61834 2017-03-23 16:19:33Z chealer $
+
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Services_Broker
 {
-	private $controllerMap;
+	private $container;
+	private $addonpackage;
 
-	function __construct(array $controllerMap)
+	function __construct($container, $addonpackage = '')
 	{
-		$this->controllerMap = $controllerMap;
+		$this->container = $container;
+		$this->addonpackage = $addonpackage;
 	}
 
 	function process($controller, $action, JitFilter $request)
@@ -36,12 +40,33 @@ class Services_Broker
 			if ($access->is_serializable_request()) {
 				echo $access->output_serialized($output);
 			} else {
-				echo $this->render($controller, $action, $output);
+				TikiLib::events()->trigger('tiki.process.render');
+				echo $this->render($controller, $action, $output, $request);
 			}
-		} catch (Services_Exception $e) {
-			$access->display_error(NULL, $e->getMessage(), $e->getCode());
+		} catch (Services_Exception_FieldError $e) {
+			if ($request->modal->int() && $access->is_xml_http_request()) {
+				// Special handling for modal dialog requests
+				// Do not send an error code as bootstrap will just blank out
+				// Render the error as a modal
+				$smarty = TikiLib::lib('smarty');
+				$smarty->assign('title', tr('Oops'));
+				$smarty->assign('detail', ['message' => $e->getMessage()]);
+				$smarty->display("extends:internal/modal.tpl|error-ajax.tpl");
+			} else {
+				$access->display_error(NULL, $e->getMessage(), $e->getCode());
+			}
 		} catch (Exception $e) {
-			$access->display_error(NULL, $e->getMessage(), $e->getCode());
+			if ($request->modal->int() && $access->is_xml_http_request()) {
+				// Special handling for modal dialog requests
+				// Do not send an error code as bootstrap will just blank out
+				// Render the error as a modal
+				$smarty = TikiLib::lib('smarty');
+				$smarty->assign('title', tr('Oops'));
+				$smarty->assign('detail', ['message' => $e->getMessage()]);
+				$smarty->display("extends:internal/modal.tpl|error-ajax.tpl");
+			} else {
+				$access->display_error(NULL, $e->getMessage(), $e->getCode());
+			}
 		}
 	}
 
@@ -56,15 +81,22 @@ class Services_Broker
 
 	function internalRender($controller, $action, $request)
 	{
+		if (! $request instanceof JitFilter) {
+			$request = new JitFilter($request);
+		}
+
 		$output = $this->internal($controller, $action, $request);
-		return $this->render($controller, $action, $output, true);
+		return $this->render($controller, $action, $output, $request, true);
 	}
 
 	private function attemptProcess($controller, $action, $request)
 	{
-		if (isset($this->controllerMap[$controller])) {
-			$controllerClass = $this->controllerMap[$controller];
-			$handler = new $controllerClass;
+		try {
+			if ($this->addonpackage) {
+				$handler = $this->container->get("tikiaddon.controller." . $this->addonpackage . ".$controller");
+			} else {
+				$handler = $this->container->get("tiki.controller.$controller");
+			}
 			$method = 'action_' . $action;
 
 			if (method_exists($handler, $method)) {
@@ -76,7 +108,7 @@ class Services_Broker
 			} else {
 				throw new Services_Exception(tr('Action not found (%0 in %1)', $action, $controller), 404);
 			}
-		} else {
+		} catch (ServiceNotFoundException $e) {
 			throw new Services_Exception(tr('Controller not found (%0)', $controller), 404);
 		}
 	}
@@ -91,13 +123,11 @@ class Services_Broker
 		}
 	}
 
-	private function render($controller, $action, $output, $internal = false)
+	private function render($controller, $action, $output, JitFilter $request, $internal = false)
 	{
 		if (isset($output['FORWARD'])) {
-			$loc = $_SERVER['PHP_SELF'];
-			$arguments = $output['FORWARD'];
-			header("Location: $loc?" . http_build_query($arguments, '', '&'));
-			exit;
+			$url = TikiLib::lib('service')->getUrl($output['FORWARD']);
+			TikiLib::lib('access')->redirect($url);
 		}
 
 		$smarty = TikiLib::lib('smarty');
@@ -105,27 +135,30 @@ class Services_Broker
 		$template = "$controller/$action.tpl";
 
 		//if template doesn't exists, simply return the array given from the action
-		if ($smarty->templateExists($template) == false) return json_encode($output);
+        //if noTemplate is specified in the query string, it will skip the template
+		if (! $smarty->templateExists($template) || strpos($_SERVER['QUERY_STRING'], '&noTemplate') !== false) {
+			return json_encode($output);
+		}
 
 		$access = TikiLib::lib('access');
 		foreach ($output as $key => $value) {
 			$smarty->assign($key, $value);
 		}
 
+		$layout = null;
+
 		if ($internal) {
-			return $smarty->fetch($template);
+			$layout = "layouts/internal/layout_view.tpl";
 		} elseif ($access->is_xml_http_request()) {
-			$headerlib = TikiLib::lib('header');
+			$layout = $request->modal->int()
+				? 'layouts/internal/modal.tpl'
+				: 'layouts/internal/ajax.tpl';
+		}
 
-			$content = $smarty->fetch($template);
-
-			$content .= $headerlib->output_js_files();
-			$content .= $headerlib->output_js();
-
-			return $content;
+		if ($layout) {
+			return $smarty->fetch("extends:$layout|$template");
 		} else {
-			$smarty->assign('mid', $template);
-			return $smarty->fetch('tiki.tpl');
+			return $smarty->fetch($template);
 		}
 	}
 }

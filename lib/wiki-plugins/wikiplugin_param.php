@@ -1,25 +1,28 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_param.php 53319 2014-12-19 14:35:15Z jonnybradley $
+// $Id: wikiplugin_param.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 
 function wikiplugin_param_info()
 {
 	return array(
-		'name' => tra('Param'),
+		'name' => tra('Parameter'),
 		'documentation' => 'PluginParam',
-		'description' => tra('Display content based on request parameters'),
+		'description' => tra('Display content based on URL parameters'),
 		'prefs' => array( 'wikiplugin_param' ),
-		'body' => tra('Wiki text to display if conditions are met. The body may contain {ELSE}. Text after the marker will be displayed if conditions are not met.'),
-		'icon' => 'img/icons/page_gear.png',
+		'body' => tr('Wiki text to display if conditions are met. The body may contain %0{ELSE}%1. Text after the
+			marker will be displayed if conditions are not met.', '<code>', '</code>'),
+		'iconname' => 'cog',
+		'introduced' => 7,
 		'params' => array(
 			'name' => array(
 				'required' => true,
 				'name' => tra('Name'),
-				'description' => tra('Names of parameters required to display text, separated by |.'),
+				'description' => tr('Names of parameters required to display text, separated by %0|%1.', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'separator' => '|',
 			),
@@ -28,7 +31,8 @@ function wikiplugin_param_info()
 				'name' => tra('Source'),
 				'default' => 'request',
 				'description' => tra('Source where the parameter is checked.'),
-				'filter' => 'text',
+				'since' => '7.0',
+				'filter' => 'word',
 				'options' => array (
 					array('text' => tra('REQUEST'), 'value' => ''),
 					array('text' => tra('GET'), 'value' => 'get'),
@@ -39,7 +43,9 @@ function wikiplugin_param_info()
 			'value' => array(
 				'required' => false,
 				'name' => tra('Value'),
-				'description' => tra('Value to test for. If empty then just tests if the named params are set and not "empty".'),
+				'description' => tra('Value to test for. If empty then just tests if the named params are set and not
+					"empty".'),
+				'since' => '13.1',
 				'filter' => 'text',
 			),
 		)

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2017 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_fade.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_fade.php 61395 2017-02-25 04:29:34Z drsassafras $
 
 function wikiplugin_fade_info()
 {
@@ -14,13 +14,15 @@ function wikiplugin_fade_info()
 		'prefs' => array('wikiplugin_fade'),
 		'body' => tra('Wiki syntax containing the content that can be hidden or shown.'),
 		'filter' => 'wikicontent',
-		'icon' => 'img/icons/wand.png',
-		'tags' => array( 'basic' ),		
+		'format' => 'html',
+		'iconname' => 'wizard',
+		'introduced' => 3,
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'label' => array(
 				'required' => true,
 				'name' => tra('Label'),
-				'filter' => 'striptags',
+				'filter' => 'text',
 				'description' => tra('Label for link that shows and hides the content when clicked'),
 				'default' => tra('Unspecified label'),
 				'since' => '3.0',
@@ -42,21 +44,46 @@ function wikiplugin_fade_info()
 				'required' => false,
 				'name' => tra('Show Speed'),
 				'filter' => 'alnum',
-				'description' => tra('Speed of animation in milliseconds when showing content (200 is fast and 600 is slow. 1000 equals 1 second).'),
+				'description' => tr('Speed of animation in milliseconds when showing content (%0200%1 is fast and
+					%0600%1 is slow. %01000%1 equals 1 second).', '<code>', '</code>'),
 				'default' => 400,
 				'since' => '7.0',
-				'accepted' => tra('Integer greater than 0 and less than or equal to 1000, or \'fast\' or \'slow\''),
+				'accepted' => tr('Integer greater than 0 and less than or equal to 1000, or %0 or %1',
+					'<code>fast</code>', '<code>slow</code>'),
 				'advanced' => true,
 			),
 			'hide_speed' => array(
 				'required' => false,
 				'name' => tra('Hide Speed'),
 				'filter' => 'alnum',
-				'description' => tra('Speed of animation in milliseconds when hiding content (200 is fast and 600 is slow. 1000 equals 1 second).'),
+				'description' => tr('Speed of animation in milliseconds when hiding content (%0200%1 is fast and
+					%0600%1 is slow. %01000%1 equals 1 second).', '<code>', '</code>'),
 				'default' => 400,
 				'since' => '7.0',
-				'accepted' => tra('Integer greater than 0 and less than or equal to 1000, or \'fast\' or \'slow\''),
+				'accepted' => tr('Integer greater than 0 and less than or equal to 1000, or %0 or %1',
+					'<code>fast</code>', '<code>slow</code>'),
 				'advanced' => true,
+			),
+ 			'bootstrap' => array(
+				'required' => false,
+				'name' => tra('Use Boostrap'),
+				'description' => tra('Use Boostrap collapsible box'),
+				'since' => '16.0',
+				'filter' => 'alpha',
+				'default' => 'n',
+				'options' => array(
+					array('text' => '', 'value' => ''), 
+					array('text' => tra('Yes'), 'value' => 'y'), 
+					array('text' => tra('No'), 'value' => 'n')
+				)
+			),
+			'class' => array(
+				'required' => false,
+				'name' => tra('CSS Class'),
+				'description' => tra('Apply custom CSS class.'),
+				'since' => '16.0',
+				'filter' => 'text',
+				'default' => '',
 			),
 		)
 	);
@@ -65,7 +92,6 @@ function wikiplugin_fade_info()
 function wikiplugin_fade( $body, $params )
 {
 	static $id = 0;
-	global $tikilib;
 	//set defaults
 	$plugininfo = wikiplugin_fade_info();
 	foreach ($plugininfo['params'] as $key => $param) {
@@ -92,29 +118,74 @@ function wikiplugin_fade( $body, $params )
 		$div_class = 'wpfade-div-plain';
 	}
 		
+  	// We specify format html, so parse the contained wiki text
 	$body = trim($body);
-	$body = $tikilib->parse_data($body);
+	$body = TikiLib::lib('parser')->parse_data($body);
+
+    // Both variants will need $headerlib
+    $headerlib = TikiLib::lib('header');
+
+	if ($params['bootstrap'] == 'y')
+    {
+      $unique_outer = $unique . '-outer';
+      $unique_inner = $unique . '-inner';
+
+      // The java script is used to toggle the chevron icon from down to up.
+      //
+      // It is based on the suggestion by zessz here
+      // http://stackoverflow.com/a/18337268/1626109
+      // and the working example here
+      // http://jsfiddle.net/zessx/R6EAW/12/
+      //
+      // It might not be necessary to go back to the 'panel-heading' before
+      // going forward to the icon.
+
+      $jq = "function toggleChevron(e) 
+             {
+               $(e.target)
+                  .prev('.panel-heading')
+                  .find('span.icon')
+                  .toggleClass('fa-chevron-down fa-chevron-up');
+             }
+             $('#" . $unique_outer. "').on('hide.bs.collapse', toggleChevron);
+             $('#" . $unique_outer. "').on('show.bs.collapse', toggleChevron);" ;
+
+      $headerlib->add_jq_onready($jq);
+
+      return "<div id='" . $unique_outer . "' class='panel panel-default" . ( isset($params['class']) ? ' '.$params['class'] : '' ) . "'>"
+                ."<div class='panel-heading'>"
+                  ."<a data-toggle='collapse' href='#" . $unique_inner . "'>" . htmlspecialchars($params['label']) . "<span class='icon icon-menu-extra fa fa-chevron-down fa-fw' style='float:right'></span>" . "</a>"
+                ."</div>"
+                ."<div id='" . $unique_inner . "' class='panel-collapse collapse'>"
+                  ."<div class='panel-body'>" . $body . "</div>"
+                ."</div>"
+              ."</div>" ;
+    }
+    else
+    {
 	$jq = '
-				$(document).ready(function(){
-					$(\'#' . $unique_link . '\').toggle(
+				$(document).ready( function() {
+					$(\'#' . $unique_link . '\').click(
 						function() {
-							$(\'#' . $unique . '\').show(\'blind\', {}, \'' . $params['show_speed'] . '\');
-							$(\'#' . $unique_link . '\').addClass(' . $a_class_shown . ').removeClass(' . $a_class_hidden . ');
-						},
-						function() {
-							$(\'#' . $unique . '\').hide(\'blind\', {}, \'' . $params['hide_speed'] . '\');
-							$(\'#' . $unique_link . '\').addClass(' . $a_class_hidden . ').removeClass(' . $a_class_shown . ');
+							if ( $(\'#' . $unique . '\').is(":hidden") ) {
+								$(\'#' . $unique . '\').show(\'blind\', {}, \'' . $params['show_speed'] . '\');
+								$(\'#' . $unique_link . '\').addClass(' . $a_class_shown . ').removeClass(' . $a_class_hidden . ');
+							} else {
+								$(\'#' . $unique . '\').hide(\'blind\', {}, \'' . $params['hide_speed'] . '\');
+								$(\'#' . $unique_link . '\').addClass(' . $a_class_hidden . ').removeClass(' . $a_class_shown . ');
+							}
 						}
 					);
 					return false;
 				});';
-	global $headerlib;
 	$headerlib->add_jq_onready($jq);
 	//wrapping in an extra div makes animation smoother	
-	return '~np~<div>' . "\r\t" . '<span class="' . $span_class . '">' . "\r\t\t" 
+    	return ( isset($params['class']) ? "<div class='" . $params['class'] . "'>": "<div>" )
+            . "\r\t" . '<span class="' . $span_class . '">' . "\r\t\t"
 		. '<a id="' . $unique_link . '" class=' . $a_class_hidden . '>' . "\r\t\t\t" . htmlspecialchars($params['label']) . "\r\t\t" 
 		. '</a>' . "\r\t" . '</span>' . "\r\t" . '<div id="' . $unique . '" class="' . $div_class . '">' . "\r\t\t\t" 
-		. $body . "\r\t" . '</div>' . "\r" . '</div>' . "\r" . '~/np~';
+		. $body . "\r\t" . '</div>' . "\r" . '</div>' . "\r";
+	}
 }
 
 function validate_speed($speed_param)

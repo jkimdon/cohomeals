@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikihelplib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tikihelplib.php 63030 2017-06-19 04:38:39Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -19,7 +19,7 @@ class TikiHelpLib
 
 	}
 	*/
-/* end of class */
+	/* end of class */
 }
 
 
@@ -35,7 +35,8 @@ function help_doclink($params)
 
 	extract($params);
 	// Param = zone
-		$ret = '';
+	$ret = '';
+	if (!isset($url)) $url = '';
 	if (empty($url) && empty($desc) && empty($crumb)) {
 		return;
 	}
@@ -45,14 +46,18 @@ function help_doclink($params)
 		$desc = $crumb->helpDescription;
 	}
 
-	if ($prefs['feature_help'] == 'y' and $url) {
+	// always display help buttons with descriptions, but only display help links when option is enabled.
+	if (($prefs['feature_help'] == 'y' and $url) or ($desc && empty($crumb))) {
 		if (!isset($desc))
 			$desc = tra('Help link');
 
-			$ret = '<a title="' . htmlentities($desc, ENT_COMPAT, 'UTF-8') . '" href="'
-						. $prefs['helpurl'] . $url . '" target="tikihelp" class="tikihelp">'
-						. '<img src="img/icons/help.png"'
-						. ' height="16" width="16" alt="' . tra('Help', '', true) . '" /></a>';
+		$smarty = TikiLib::lib('smarty');
+		$smarty->loadPlugin('smarty_function_icon');
+
+		$ret = '<a title="' . $url . '|' . htmlentities($desc, ENT_COMPAT, 'UTF-8') . '" href="'
+			. $prefs['helpurl'] . $url . '" target="tikihelp" class="tikihelp btn btn-link">'
+			. smarty_function_icon(array('name' => 'help'), $smarty)
+			. '</a>';
 	}
 
 	return $ret;

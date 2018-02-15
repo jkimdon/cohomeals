@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ArticleInfo.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: ArticleInfo.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 class Tiki_Formula_Function_ArticleInfo extends Math_Formula_Function
 {
 	function evaluate( $element )
 	{
-		global $prefs, $artlib;
+		global $prefs;
 
 		if ( count($element) != 3 ) {
 			$this->error(tra('Expecting three arguments for article-info.'));
@@ -21,7 +21,7 @@ class Tiki_Formula_Function_ArticleInfo extends Math_Formula_Function
 		}
 
 		if ( $prefs['feature_articles'] != 'y' ) {
-			$this->error(tra('Articles feature not enabled.'));
+			$this->error(tra('The Articles feature is not activated.'));
 		}
 
 		$type = $this->evaluateChild($element[0]);
@@ -29,7 +29,7 @@ class Tiki_Formula_Function_ArticleInfo extends Math_Formula_Function
 		$property = $element[2];
 
 		if ( $type == 'article' ) {
-			require_once 'lib/articles/artlib.php';
+			$artlib = TikiLib::lib('art');
 			$article = $artlib->get_article($object, false);
 
 			if ( $property == 'rating' ) {

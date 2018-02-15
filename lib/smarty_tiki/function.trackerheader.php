@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.trackerheader.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: function.trackerheader.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -20,12 +20,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function smarty_function_trackerheader($params, $smarty)
 {
 	global $prefs;
-	global $headerlib; include_once('lib/headerlib.php');
+	$headerlib = TikiLib::lib('header');
 	$output = $js = '';
 	static $trackerheaderStack = array();
 	static $iTrackerHeader = 0;
 	$last = count($trackerheaderStack);
-	$default = array('level'=>2, 'inTable'=>'');
+	$default = array('level'=>3, 'inTable'=>'');
 	$params = array_merge($default, $params);
 	extract($params, EXTR_SKIP);
 

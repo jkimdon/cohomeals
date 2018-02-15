@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_bytes.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: renderer_bytes.php 59671 2016-09-11 16:37:15Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -17,13 +17,18 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 class Text_Diff_Renderer_bytes extends Text_Diff_Renderer
 {
-    function Text_Diff_Renderer_bytes($first = -1)
+    function __construct($first = -1)
     {
         $this->_addBytes = 0;
         $this->_delBytes = 0;
         $this->_first = $first;
     }
-	function _endDiff() 
+
+	function _startDiff()
+	{
+	}
+
+	function _endDiff()
 	{
         return 'add='.$this->_addBytes.'&amp;del='.$this->_delBytes;
 	}

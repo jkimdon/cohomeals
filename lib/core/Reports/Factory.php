@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Factory.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Factory.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 require_once('lib/webmail/tikimaillib.php');
 
@@ -42,7 +42,7 @@ class Reports_Factory
 			case 'Reports_Cache':
 				return new Reports_Cache($db, $dt);
 			case 'Reports_Manager':
-				global $userlib;
+				$userlib = TikiLib::lib('user');
 				return new Reports_Manager(
 					Reports_Factory::build('Reports_Users', $dt, $tm, $tikilib),
 					Reports_Factory::build('Reports_Cache', $dt, $tm, $tikilib),

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: JsCalendar.php 51312 2014-05-15 15:22:53Z jonnybradley $
+// $Id: JsCalendar.php 60897 2017-01-14 11:57:45Z luciash $
 
 class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 {
@@ -12,7 +12,7 @@ class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 		return array(
 			'j' => array(
 				'name' => tr('Date and Time (Date Picker)'),
-				'description' => tr('Provides jQuery-UI date picker select a date and optionally time.'),
+				'description' => tr('Provides a jQuery UI date picker to select a date and optionally time.'),
 				'prefs' => array('trackerfield_jscalendar'),
 				'tags' => array('advanced'),
 				'default' => 'y',
@@ -37,6 +37,15 @@ class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 						),
 						'legacy_index' => 1,
 					),
+					'useTimeAgo' => array(
+						'name' => tr('Time Ago'),
+						'description' => tr('Use timeago.js if the feature is enabled'),
+						'filter' => 'int',
+						'options' => array(
+							0 => tr('No'),
+							1 => tr('Yes'),
+						),
+					),
 				),
 			),
 		);
@@ -57,8 +66,18 @@ class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 
 		if (!empty($value) && !is_int((int) $value)) {	// prevent corrupted date values getting saved (e.g. from inline edit sometimes)
 			$value = '';
-			TikiLib::lib('errorreport')->report(tr('Date Picker Field: "%0" is not a valid internal date value', $value));
+			Feedback::error(tr('Date Picker Field: "%0" is not a valid internal date value', $value), 'session');
 		}
+
+		// if local browser offset is submitted, convert timestamp to server-based timezone
+		if( isset($requestData['tzoffset']) && $value && isset($requestData[$ins_id]) ) {
+			$browser_offset = 0 - intval($requestData['tzoffset']) * 60;
+
+			$server_offset = TikiDate::tzServerOffset(TikiLib::lib('tiki')->get_display_timezone());
+
+			$value = $value - $server_offset + $browser_offset;
+		}
+
 		return array(
 			'value' => $value,
 		);
@@ -74,7 +93,7 @@ class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 		$smarty = TikiLib::lib('smarty');
 		$smarty->loadPlugin('smarty_function_jscalendar');
 
-		$params = array( 'fieldname' => $this->getInsertId());
+		$params = array( 'fieldname' => $this->getConfiguration('ins_id') ? $this->getConfiguration('ins_id') : $this->getInsertId());
 		$params['showtime'] = $this->getOption('datetime') === 'd' ? 'n' : 'y';
 		if ( empty($context['inForm'])) {
 			$params['date'] = $this->getValue();
@@ -85,7 +104,13 @@ class Tracker_Field_JsCalendar extends Tracker_Field_DateTime
 				$params['date'] = TikiLib::lib('tiki')->now;
 			}
 		} else {
-			$params['date'] = '';
+			$params['date'] = $this->getValue();
+		}
+
+		if( $params['date'] ) {
+			// convert to UTC to display it properly for browser based timezone
+			$params['date'] += TikiDate::tzServerOffset(TikiLib::lib('tiki')->get_display_timezone());
+			$params['isutc'] = true;
 		}
 
 		return smarty_function_jscalendar($params, $smarty);

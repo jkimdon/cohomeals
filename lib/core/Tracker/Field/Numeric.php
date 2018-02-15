@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Numeric.php 46458 2013-06-25 17:06:31Z lphuberdeau $
+// $Id: Numeric.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 /**
  * Handler class for numeric and currency field
@@ -11,14 +11,14 @@
  * Letter key: ~n~
  *
  */
-class Tracker_Field_Numeric extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable
+class Tracker_Field_Numeric extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Tracker_Field_Exportable
 {
 	public static function getTypes()
 	{
 		return array(
 			'n' => array(
 				'name' => tr('Numeric Field'),
-				'description' => tr('Provides a one-line field for numeric input only. Prepend or append values may be alphanumeric.'),
+				'description' => tr('Provides a one-line field for numeric input only. Prepended or appended values may be alphanumeric.'),
 				'help' => 'Numeric Tracker Field',
 				'prefs' => array('trackerfield_numeric'),
 				'tags' => array('basic'),
@@ -38,13 +38,13 @@ class Tracker_Field_Numeric extends Tracker_Field_Abstract implements Tracker_Fi
 					),
 					'size' => array(
 						'name' => tr('Display Size'),
-						'description' => tr('Visible size of the field in characters. Does not affect the numeric length.'),
+						'description' => tr('Visible size of the field, in characters. Does not affect the numeric length.'),
 						'filter' => 'int',
 						'legacy_index' => 1,
 					),
 					'prepend' => array(
 						'name' => tr('Prepend'),
-						'description' => tr('Text to be displayed prior to the numeric value.'),
+						'description' => tr('Text to be displayed in front of the numeric value.'),
 						'filter' => 'text',
 						'legacy_index' => 2,
 					),
@@ -56,20 +56,20 @@ class Tracker_Field_Numeric extends Tracker_Field_Abstract implements Tracker_Fi
 					),
 					'decimals' => array(
 						'name' => tr('Decimal Places'),
-						'description' => tr('Amount of decimals to preserve before rounding.'),
+						'description' => tr('Number of decimal places to round to.'),
 						'filter' => 'int',
 						'legacy_index' => 4,
 					),
 					'dec_point' => array(
 						'name' => tr('Decimal separator when displaying data'),
-						'description' => tr('Single character. Use c for comma, d for dot or s for space. The valid decimal separator when inserting numbers may depend on site language and web browser. See documentation for more details.'),
+						'description' => tr('Single character. Use "c" for comma, "d" for dot or "s" for space. The valid decimal separator when inserting numbers may depend on the site language and web browser. See the documentation for more details.'),
 						'filter' => 'text',
 						'default' => '.',
 						'legacy_index' => 5,
 					),
 					'thousands' => array(
-						'name' => tr('Thousand separator when displaying data'),
-						'description' => tr('Single character,  Use c for comma, d for dot or s for space.  When inserting data no thousands separator is needed.'),
+						'name' => tr('Thousands separator when displaying data'),
+						'description' => tr('Single character: use "c" for comma, "d" for dot or "s" for space.  When inserting data, no thousands separator is needed.'),
 						'filter' => 'text',
 						'default' => ',',
 						'legacy_index' => 6,
@@ -124,6 +124,38 @@ class Tracker_Field_Numeric extends Tracker_Field_Abstract implements Tracker_Fi
 	function importRemoteField(array $info, array $syncInfo)
 	{
 		return $info;
+	}
+
+	function getTabularSchema()
+	{
+		$schema = new Tracker\Tabular\Schema($this->getTrackerDefinition());
+
+		$permName = $this->getConfiguration('permName');
+		$schema->addNew($permName, 'default')
+			->setLabel($this->getConfiguration('name'))
+			->setRenderTransform(function ($value) {
+				return $value;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = $value;
+			})
+			;
+
+		$prepend = $this->getOption('prepend');
+		$append = $this->getOption('append');
+		$schema->addNew($permName, 'formatted')
+			->setLabel($this->getConfiguration('name'))
+			->addIncompatibility($permName, 'default')
+			->setRenderTransform(function ($value) use ($prepend, $append) {
+				return $prepend . $value . $append;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName, $prepend, $append) {
+				$value = substr($value, strlen($prepend), -strlen($append));
+				$info['fields'][$permName] = $value;
+			})
+			;
+
+		return $schema;
 	}
 }
 

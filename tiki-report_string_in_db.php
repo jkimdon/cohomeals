@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-report_string_in_db.php 50266 2014-03-08 19:35:00Z lindonb $
+// $Id: tiki-report_string_in_db.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
@@ -77,7 +77,7 @@ function searchAllDB($search)
 	foreach ($rs as $key => $val) {
 		$vals = array_values($val);
 		$table = $vals[0];
-		$sql2 = "SHOW COLUMNS FROM ".$table;
+		$sql2 = "SHOW COLUMNS FROM `$table`";
 		$rs2 = $tikilib->fetchAll($sql2);
 		foreach ($rs2 as $key2 => $val2) {
 			$vals2 = array_values($val2);
@@ -88,7 +88,7 @@ function searchAllDB($search)
 				$qrySearch = '%'.$search.'%';
 				$args = array($qrySearch);
 				$sql_search_fields[] = "`" . $colum . "` like ?"; // '%" . str_replace("'", "''", $search) . "%'";
-				$sql_search = "select * from " . $table . " where ";
+				$sql_search = "select * from `$table` where ";
 				$sql_search .= implode(" OR ", $sql_search_fields);
 				$rs3 = $tikilib->fetchAll($sql_search, $args);
 				if (!empty($rs3)) {

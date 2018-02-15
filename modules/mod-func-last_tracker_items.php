@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_tracker_items.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-last_tracker_items.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -60,9 +60,11 @@ function module_last_tracker_items_info()
  */
 function module_last_tracker_items($mod_reference, $module_params)
 {
-	global $prefs, $tikilib, $smarty, $user;
-	global $trklib; include_once('lib/trackers/trackerlib.php');
-	
+	global $prefs, $user;
+
+	$tikilib = TikiLib::lib('tiki');
+	$trklib = TikiLib::lib('trk');
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('module_error', '');
 	if ($tikilib->user_has_perm_on_object($user, $module_params['trackerId'], 'tracker', 'tiki_p_view_trackers')) {
 		if (isset($module_params['name'])) {
@@ -97,5 +99,5 @@ function module_last_tracker_items($mod_reference, $module_params)
 	}
 	$smarty->assign('tpl_module_title', tra("Last Items"));
 	if (!strcasecmp($module_params['sort_mode'], 'lastModif_desc'))
-		$smarty->assign('tpl_module_title', tra("Last Modified Items"));
+		$smarty->assign('tpl_module_title', tra("Last modified Items"));
 }

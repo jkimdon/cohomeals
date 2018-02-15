@@ -1,9 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TranslationController.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: TranslationController.php 61938 2017-03-29 16:16:32Z gezzzan $
+//
+// TranslationController manages translations of objects (for example translations of a wiki page)
 
 class Services_Language_TranslationController
 {
@@ -23,6 +25,15 @@ class Services_Language_TranslationController
 		}
 	}
 
+	/**
+	 * List translations relation of an instance of an object type (eg: translations of a wiki page)
+	 *
+	 * @param $input
+	 *
+	 * @return array Array of objects linked together as translations of each other
+	 *
+	 * @throws Services_Exception
+	 */
 	function action_manage($input)
 	{
 		$type = $input->type->text();
@@ -39,6 +50,7 @@ class Services_Language_TranslationController
 		}
 
 		return array(
+			'title' => tr('Manage translations'),
 			'type' => $type,
 			'source' => $object,
 			'filters' => $this->getSearchFilters($type, $object),
@@ -48,6 +60,15 @@ class Services_Language_TranslationController
 		);
 	}
 
+	/**
+	 * Attach (link) translations for objects (eg: wiki pages)
+	 *
+	 * @param $input Instances of object types, eg: wiki pages
+	 *
+	 * @return Forward to utility action to perform the attaching
+	 *
+	 * @throws Services_Exception
+	 */
 	function action_attach($input)
 	{
 		$type = $input->type->text();
@@ -67,7 +88,7 @@ class Services_Language_TranslationController
 		}
 
 		if (! $this->canAttach($type, $source) || ! $this->canAttach($type, $target)) {
-			throw new Services_Exception(tr('Not allowed to attach the selected translations'), 403);
+			throw new Services_Exception(tr('You do not have permission to attach the selected translations'), 403);
 		}
 
 		$succeeded = $this->utilities->insertTranslation($type, $source, $target);
@@ -85,6 +106,15 @@ class Services_Language_TranslationController
 		);
 	}
 
+	/**
+	 * Detach (unlink) translations for objects (eg: wiki pages)
+	 *
+	 * @param $input Instances of object types, eg: wiki pages
+	 *
+	 * @return Forward to utility action to perform the deattaching
+	 *
+	 * @throws Services_Exception
+	 */
 	function action_detach($input)
 	{
 		$type = $input->type->text();
@@ -103,11 +133,12 @@ class Services_Language_TranslationController
 		}
 
 		if (! $this->canDetach($type, $source) || ! $this->canDetach($type, $target)) {
-			throw new Services_Exception(tr('Not allowed to detach the selected translations'), 403);
+			throw new Services_Exception(tr('You do not have permission to detach the selected translations'), 403);
 		}
 
 		if (! $confirmed) {
 			return array(
+				'title' => tr('Manage translations'),
 				'type' => $type,
 				'source' => $source,
 				'target' => $target,
@@ -125,6 +156,37 @@ class Services_Language_TranslationController
 		);
 	}
 
+	/**
+	 * Machine translation of an object (eg: a wiki page)
+	 *
+	 * @param $input An object, eg: a wiki page
+	 *
+	 * @return action Forward to utility action to perform the attaching
+	 */
+	function action_translate($input)
+	{
+		Services_Exception_Disabled::check('feature_machine_translation');
+
+		global $prefs;
+
+		$content = $input->content->rawhtml_unsafe();
+		if (!empty($input->lang->text())) {
+			$lang = $input->lang->text();
+		} else {
+			$lang = $prefs['language'];
+		}
+
+		$factory = new Multilingual_MachineTranslation;
+		$impl = $factory->getDetectImplementation($lang);
+
+		$content = $impl->translateText($content);
+
+		return array(
+			'content' => $content,
+			'target' => $lang
+		);
+	}
+
 	private function getObjectFilter($type)
 	{
 		switch ($type) {
@@ -139,7 +201,8 @@ class Services_Language_TranslationController
 	private function getSearchFilters($type, $object)
 	{
 		$translations = $this->utilities->getTranslations($type, $object);
-		$languages = TikiLib::get_language_map();
+		$langLib = TikiLib::lib('language');
+		$languages = $langLib->get_language_map();
 
 		foreach ($translations as $trans) {
 			unset($languages[$trans['lang']]);
@@ -165,6 +228,14 @@ class Services_Language_TranslationController
 		return $filters;
 	}
 
+	/**
+	 * Private function to determine if user is allowed to attach (link) translations for objects (eg: wiki pages)
+	 *
+	 * @param string $type object type, eg: wiki page
+	 * @param int $object an instance of object type, eg: a wiki page
+	 *
+	 * @return
+	 */
 	private function canAttach($type, $object)
 	{
 		global $prefs, $user;
@@ -192,6 +263,14 @@ class Services_Language_TranslationController
 		return $perms->admin;
 	}
 
+	/**
+	 * Private function to determine if user is allowed to detach (unlink) translations for objects (eg: wiki pages)
+	 *
+	 * @param string $type object type, eg: wiki page
+	 * @param int $object an instance of object type, eg: a wiki page
+	 *
+	 * @return
+	 */
 	private function canDetach($type, $object)
 	{
 		$perms = Perms::get($type, $object);

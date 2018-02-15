@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: categorize_list.php 49677 2014-02-02 19:10:55Z jonnybradley $
+// $Id: categorize_list.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 require_once('tiki-setup.php');
 $access = TikiLib::lib('access');

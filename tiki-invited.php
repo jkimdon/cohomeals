@@ -2,17 +2,20 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-invited.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-invited.php 62028 2017-04-02 14:52:01Z jonnybradley $
 require_once ('tiki-setup.php');
 $access->check_feature('feature_invite');
 
 function tiki_invited()
 {
-	global $smarty, $tikilib, $user, $userlib;
+	global $user;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 
 	$invite=(int)isset($_REQUEST['invite']) ? $_REQUEST['invite'] : 0;
 	$email=isset($_REQUEST['email']) ? $_REQUEST['email'] : null;
@@ -67,7 +70,7 @@ function tiki_invited()
 		$smarty->display("tiki.tpl");
 		return;
 	} else {
-		$text=$tikilib->parse_data($inviterow['wikicontent']);
+		$text=TikiLib::lib('parser')->parse_data($inviterow['wikicontent']);
 		$text=str_replace('{email}', $invited['email'], $text);
 		$text=str_replace('{firstname}', $invited['firstname'], $text);
 		$text=str_replace('{lastname}', $invited['lastname'], $text);

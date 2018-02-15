@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-download_forum_attachment.php 46727 2013-07-19 11:47:04Z jonnybradley $
+// $Id: tiki-download_forum_attachment.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $force_no_compression = true;
 require_once ('tiki-setup.php');
@@ -40,8 +40,13 @@ header("Expires: 0");
 header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 header("Pragma: Public");
 
-if ($info["dir"]) {
+// if database has content, means file was uploaded to DB storage
+if (strlen($content) > 0) {
+	echo "$content";
+} else if (file_exists($info["dir"] . $info["path"])) {
+	// Check if file was uploaded to file syste
 	readfile($info["dir"] . $info["path"]);
 } else {
-	echo "$content";
+	// Something is wrong
+	die('File data was not found');
 }

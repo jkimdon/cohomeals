@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Wiki.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: Wiki.php 62015 2017-04-01 15:48:08Z lindonb $
 
 class WikiPlugin_Negotiator_Wiki
 {
@@ -32,7 +32,7 @@ class WikiPlugin_Negotiator_Wiki
 	private $alias;
 
 	public static $standardRelativePath = 'lib/wiki-plugins/wikiplugin_';
-	public static $zendRelativePath = 'vendor/zendframework/zendframework1/library/';
+	public static $zendRelativePath = 'vendor_bundled/vendor/zendframework/zendframework1/library/';
 	public static $checkZendPaths = true;
 	static $pluginIndexes = array();
 	static $pluginInfo = array();
@@ -406,15 +406,6 @@ class WikiPlugin_Negotiator_Wiki
 			$real[] = $plugin;
 		}
 
-		//Check for existence of Zend wiki plugins
-		foreach ( glob('lib/core/WikiPlugin/*.php') as $file ) {
-			$base = basename($file);
-			if (strtolower($base) == $base) { //the zend plugins all have lower case names
-				$plugin = substr($base, 0, -4);
-				$real[] = $plugin;
-			}
-		}
-
 		if ( $includeReal && $includeAlias ) {
 			$plugins = array_merge($real, WikiPlugin_Negotiator_Wiki_Alias::getList());
 		} elseif ( $includeReal ) {
@@ -572,7 +563,8 @@ class WikiPlugin_Negotiator_Wiki
 
 	function button($wrapInNp = true)
 	{
-		global $headerlib, $smarty;
+		$headerlib = TikiLib::lib('header');
+		$smarty = TikiLib::lib('smarty');
 
 		if (
 			$this->isEditable() &&
@@ -595,15 +587,10 @@ class WikiPlugin_Negotiator_Wiki
 				}
 			}
 
-			$headerlib->add_jsfile('tiki-jsplugin.php?language='.$this->prefs['language'], 'dynamic');
-			if ($this->prefs['wikiplugin_module'] === 'y' && $this->prefs['wikiplugininline_module'] === 'n') {
-				$headerlib->add_jsfile('tiki-jsmodule.php?language='.$this->prefs['language'], 'dynamic');
-			}
-
 			$headerlib->add_jq_onready(
 				'$("#' . $id . '")
 					.click( function(event) {'
-				. '		popup_plugin_form('
+				. '		popupPluginForm('
 				. json_encode('editwiki') . ', '
 				. json_encode($this->name) . ', '
 				. json_encode($this->index) . ', '
@@ -620,11 +607,11 @@ class WikiPlugin_Negotiator_Wiki
 				. '	$(this).prev().removeClass("ui-state-highlight");'
 				. '});'
 			);
-			include_once('lib/smarty_tiki/function.icon.php');
+			$smarty->loadPlugin('smarty_function_icon');
 
-			$button = '<a id="' . $id . '" class="editplugin"' . $iconDisplayStyle . '>' .
-								smarty_function_icon(array('_id'=>'wiki_plugin_edit', 'alt'=>tra('Edit Plugin') . ':' . $this->name), $smarty) .
-								'</a>'
+			$button = '<a id="' . $id . '" class="editplugin tips"' . $iconDisplayStyle . '>' .
+						smarty_function_icon(array('name'=>'plugin', 'iclass' => 'tips',
+						'ititle'=>tra('Edit Plugin') . ':' . $this->name), $smarty) . '</a>'
 			;
 
 			if ($wrapInNp == false) return $button;
@@ -637,7 +624,7 @@ class WikiPlugin_Negotiator_Wiki
 
 	function blockFromExecution($status = '')
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		$smarty->assign('plugin_fingerprint', $status);
 		$smarty->assign('plugin_name', $this->name);
 		$smarty->assign('plugin_index', 0);

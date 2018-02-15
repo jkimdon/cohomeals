@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Bridge.php 49545 2014-01-23 22:31:39Z lphuberdeau $
+// $Id: Bridge.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 class TikiDb_Bridge extends TikiDb
 {
@@ -35,6 +35,11 @@ class TikiDb_Bridge extends TikiDb
 	function queryError( $query, &$error, $values = null, $numrows = -1, $offset = -1 ) // {{{
 	{
 		return self::get()->queryError($query, $error, $values, $numrows, $offset);
+	} // }}}
+
+	function queryException( $query, $values = null, $numrows = -1, $offset = -1 ) // {{{
+	{
+		return self::get()->queryException($query, $values, $numrows, $offset);
 	} // }}}
 
 	function getOne( $query, $values = null, $reporterrors = true, $offset = 0 ) // {{{
@@ -77,9 +82,9 @@ class TikiDb_Bridge extends TikiDb
 		self::get()->setErrorMessage($message);
 	} // }}}
 
-	protected function handleQueryError( $query, $values, $result ) // {{{
+	protected function handleQueryError( $query, $values, $result, $mode ) // {{{
 	{
-		self::get()->handleQueryError($query, $values, $result);
+		self::get()->handleQueryError($query, $values, $result, $mode);
 	} // }}}
 
 	protected function convertQueryTablePrefixes( &$query ) // {{{

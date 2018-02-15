@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EmailBuilder.php 54744 2015-03-26 08:26:18Z xavidp $
+// $Id: EmailBuilder.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 /**
  * Build an periodic report e-mail with the changes
@@ -104,7 +104,7 @@ class Reports_Send_EmailBuilder
      */
     public function makeEmailBody(array $report_cache, array $report_preferences)
     {
-        global $userlib;
+		$userlib = TikiLib::lib('user');
 
         $change_array = $this->makeChangeArray($report_cache);
         $body = '';
@@ -138,6 +138,16 @@ class Reports_Send_EmailBuilder
                         $change['data']['user'] = smarty_modifier_username($change['data']['user']);
                     }
 
+                    if (isset($change['data']['editUser'])) {
+                        include_once('lib/smarty_tiki/modifier.username.php');
+                        $change['data']['editUser'] = smarty_modifier_username($change['data']['editUser']);
+                    }
+
+                    if (isset($change['user'])) {
+                        include_once('lib/smarty_tiki/modifier.username.php');
+                        $change['user'] = smarty_modifier_username($change['user']);
+                    }
+                    
                     $body .= $eventObject->getOutput($change);
 
                     $body .= "<br>\n";

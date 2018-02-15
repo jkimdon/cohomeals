@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Interface.php 46259 2013-06-10 14:41:22Z lphuberdeau $
+// $Id: Interface.php 60381 2016-11-23 10:56:42Z jonnybradley $
 
 interface Search_Type_Factory_Interface
 {
@@ -19,6 +19,12 @@ interface Search_Type_Factory_Interface
 	function numeric($value);
 	// tokenized - indexed - unstored in database
 	function multivalue($values);
+	// tokenized - indexed - unstored in database
+	function object($values);
+	// tokenized - indexed - unstored in database
+	function nested($values);
 	// tokenized - indexed - stored in database
 	function sortable($value);
+	// tokenized - indexed - unstored in database (?)
+	function geopoint($value);
 }

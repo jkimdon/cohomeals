@@ -1,22 +1,21 @@
-{* $Id: tiki-plugin_help.tpl 40134 2012-03-13 11:24:37Z jyhem $ *}
+{* $Id: tiki-plugin_help.tpl 61598 2017-03-09 16:22:02Z jonnybradley $ *}
 
+{if $prefs.javascript_enabled eq 'y' && $area_id}
+	<a href="javascript:void(0);" onclick="needToConfirm=false;$.closeModal();$(document).one('hidden.bs.modal', function () {ldelim}popupPluginForm('{$area_id}','{$plugin_name|lower|@addslashes}');{rdelim}); return false;">{icon name=$plugin.iconname|default:"plugin" _text="{tr}Insert{/tr}"}</a>
+{/if}
 <strong>{$plugin.name|escape}</strong>
 <em>{$plugin_name|lower}</em>
 
-{if $prefs.javascript_enabled eq 'y' && $area_id}
-	<a href="javascript:void(0);" onclick="needToConfirm=false;$('#help_sections').dialog('close');popup_plugin_form('{$area_id}','{$plugin_name|lower|@addslashes}');return false;">
-		{icon _id=$plugin.icon|default:"plugin_add" _text="{tr}Insert{/tr}"}
-	</a>
-{/if}
-
 {if $prefs.feature_help eq 'y'}
 	{if !empty($plugin.documentation)}
-		<a href="{$plugin.documentation|escape}" onclick="needToConfirm=false;" target="tikihelp" class="tikihelp">{icon _id=help}</a>
+		<a href="{$plugin.documentation|escape}" onclick="needToConfirm=false;" target="tikihelp" class="tikihelp">
+			{icon name='help'}
+		</a>
 	{/if}
 {/if}
 
 
-<div class="plugin-desc">
+<div class="plugin-desc" style="margin-left:30px">
 	{$plugin.description}
 </div>
 

@@ -1,24 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_addfreetag.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_addfreetag.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_addfreetag_info()
 {
 	return array(
-		'name' => tra('Add Freetag'),
-		'description' => tra('Add a single freetag to specified object'),
+		'name' => tra('Add Tag'),
+		'description' => tra('Provide an input field for adding a freetag to an object'),
 		'format' => 'html',
 		'prefs' => array('feature_freetags', 'wikiplugin_addfreetag'),
 		'introduced' => 8,
+		'iconname' => 'tag',
 		'documentation' => 'PluginAddFreetag',
 		'params' => array(
 			'object' => array(
 				'required' => false,
 				'name' => tra('Object'),
-				'description' => tra('Object type and id, as in type:id, if unset, will use current object.'),
+				'description' => tr('Object type and id, as in %0type:id%1, if unset, will use current object.', '<code>',
+					'</code>'),
 				'filter' => 'text',
 				'default' => null,
 				'since' => '8.0',

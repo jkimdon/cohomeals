@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: editlib.php 53318 2014-12-19 14:26:44Z xavidp $
+// $Id: editlib.php 63047 2017-06-20 18:51:37Z jonnybradley $
 
 /****
  * Initially just a collection of the functions dotted around tiki-editpage.php for v4.0
@@ -29,8 +29,11 @@ class EditLib
 
 	function make_sure_page_to_be_created_is_not_an_alias($page, $page_info)
 	{
-		global $_REQUEST, $semanticlib, $access, $wikilib, $tikilib;
-		require_once 'lib/wiki/semanticlib.php';
+		$access = TikiLib::lib('access');
+		$tikilib = TikiLib::lib('tiki');
+		$wikilib = TikiLib::lib('wiki');
+		$semanticlib = TikiLib::lib('semantic');
+
 		$aliases = $semanticlib->getAliasContaining($page, true);
 		if (!$page_info && count($aliases) > 0) {
 			$error_title = tra("Cannot create aliased page");
@@ -41,16 +44,16 @@ class EditLib
 				$error_msg .= '<a href="'.$wikilib->editpage_url($an_alias['fromPage'], false).'">'.$an_alias['fromPage'].'</a>, ';
 			}
 			$error_msg .= "\n<p>\n";
-			$error_msg .= tra("If you want to create the page, you must first edit each the pages above, and remove the alias link it may contain. This link should look something like this");
+			$error_msg .= tra("If you want to create the page, you must first edit each of the pages above to remove the alias link they may contain. This link should look something like this");
 			$error_msg .= ": <b>(alias($page))</b>";
-			require_once('lib/tikiaccesslib.php');
+
 			$access->display_error(page, $error_title, "", true, $error_msg);
 		}
 	}
 
 	function user_needs_to_specify_language_of_page_to_be_created($page, $page_info, $new_page_inherited_attributes = null)
 	{
-		global $_REQUEST, $multilinguallib, $prefs, $tikilib;
+		global $prefs;
 		if (isset($_REQUEST['need_lang']) && $_REQUEST['need_lang'] == 'n') {
 			return false;
 		}
@@ -108,14 +111,13 @@ class EditLib
 
 	function prepareTranslationData()
 	{
-		global $_REQUEST, $tikilib, $smarty;
 		$this->setTranslationSourceAndTargetPageNames();
 		$this->setTranslationSourceAndTargetVersions();
 	}
 
 	private function setTranslationSourceAndTargetPageNames()
 	{
-		global $_REQUEST, $smarty;
+		$smarty = TikiLib::lib('smarty');
 
 		if (!$this->isTranslationMode()) {
 			return;
@@ -692,7 +694,8 @@ class EditLib
 
 	function saveCompleteTranslation()
 	{
-		global $multilinguallib, $tikilib;
+		$multilinguallib = TikiLib::lib('multilingual');
+		$tikilib = TikiLib::lib('tiki');
 
 		$sourceInfo = $tikilib->get_page_info($this->sourcePageName);
 		$targetInfo = $tikilib->get_page_info($this->targetPageName);
@@ -709,7 +712,8 @@ class EditLib
 
 	function savePartialTranslation()
 	{
-		global $multilinguallib, $tikilib;
+		$tikilib = TikiLib::lib('tiki');
+		$multilinguallib = TikiLib::lib('multilingual');
 
 		$sourceInfo = $tikilib->get_page_info($this->sourcePageName);
 		$targetInfo = $tikilib->get_page_info($this->targetPageName);
@@ -778,17 +782,17 @@ class EditLib
 	 * @return string			html to send to ckeditor
 	 */
 
-	function parseToWysiwyg( $inData, $fromWiki = false, $isHtml = false )
+	function parseToWysiwyg( $inData, $fromWiki = false, $isHtml = false, $options = array() )
 	{
-		global $tikilib, $tikiroot, $prefs;
+		global $tikiroot;
 		// Parsing page data for wysiwyg editor
 		$inData = $this->partialParseWysiwygToWiki($inData);	// remove any wysiwyg plugins so they don't get double parsed
 		$parsed = preg_replace('/(!!*)[\+\-]/m', '$1', $inData);		// remove show/hide headings
 		$parsed = preg_replace('/&#039;/', '\'', $parsed);			// catch single quotes at html entities
 
-		$parsed = $tikilib->parse_data(
+		$parsed = TikiLib::lib('parser')->parse_data(
 			$parsed,
-			array(
+			array_merge( array(
 				'absolute_links'=>true,
 				'noheaderinc'=>true,
 				'suppress_icons' => true,
@@ -796,7 +800,7 @@ class EditLib
 				'is_html' => ($isHtml && !$fromWiki),
 				'process_wiki_paragraphs' => (!$isHtml || $fromWiki),
 				'process_double_brackets' => 'n'
-			)
+			), $options )
 		);
 
 		if ($fromWiki) {
@@ -886,6 +890,8 @@ class EditLib
 					$add = str_replace('&nbsp;', ' ', $add);
 					TikiLib::lib('parser')->plugins_replace($add, $noparsed, true);
 					$src .= $add;
+				} else {
+					$src .= str_replace(array("\n", "\r"), '', $c[$i]["data"]);	// keep the spaces
 				}
 			} elseif ($c[$i]["type"] == "comment") {
 				$src .= preg_replace('/<!--/', "\n~hc~", preg_replace('/-->/', "~/hc~\n", $c[$i]["data"]));
@@ -924,7 +930,25 @@ class EditLib
 
 					switch ($c[$i]["data"]["name"]) {
 						// Tags we don't want at all.
-						case "meta": $c[$i]["content"] = '';
+						case "meta":
+						case 'link':
+							$c[$i]["content"] = '';
+							break;
+						case 'script':
+							$c[$i]['content'] = '';
+							if (!isset($c[$i]['pars']['src'])) {
+								$i++;
+								while ($c[$i]['data']['name'] !== 'script' && $c[$i]['data']['type'] !== 'close' && $i <= $c['contentpos']) {
+									$i++;    // skip contents of script tag
+								}
+							}
+							break;
+						case 'style':
+							$c[$i]['content'] = '';
+							$i++;
+							while ($c[$i]['data']['name'] !== 'style' && $c[$i]['data']['type'] !== 'close' && $i <= $c['contentpos']) {
+								$i++;    // skip contents of script tag
+							}
 							break;
 
 						// others we do want
@@ -965,6 +989,8 @@ class EditLib
 						case "div": // Wiki parsing creates divs for center
 							if (isset($c[$i]['pars'])) {
 								$this->parseParDivTag($isPar, $c[$i]['pars'], $src, $p);
+							} else if ( $p['table']) {
+								$src .= '%%%';
 							} else {	// normal para or div
 								$src .= $this->startNewLine($src);
 								$p['stack'][] = array('tag' => $c[$i]['data']['name'], 'string' => "\n\n");
@@ -1037,11 +1063,27 @@ class EditLib
 						case "s"  : $src .= $this->processWikiTag('s', $src, $p, '--', '--', true);
     						break;
 						// Table parser
-						case "table": $src .= $this->startNewLine($src) . '||'; $p['stack'][] = array('tag' => 'table', 'string' => '||'); $p['first_tr'] = true;
+						case "table":
+							$src .= $this->startNewLine($src) . '||';
+							$p['stack'][] = array('tag' => 'table', 'string' => '||');
+							$p['first_tr'] = true;
+							$p['table'] = true;
     						break;
-						case "tr": $src .= $p['first_tr'] ? '' : $this->startNewLine($src); $p['first_tr'] = false; $p['first_td'] = true;
+						case "tr":
+							if (! $p['first_tr']) {
+								$this->startNewLine($src);
+							}
+							$p['first_tr'] = false;
+							$p['first_td'] = true;
+							$p['wiki_lbr']++; // force wiki line break mode
     						break;
-						case "td": $src .= $p['first_td'] ? '' : '|'; $p['first_td'] = false;
+						case "td":
+							if ($p['first_td']) {
+								$src .= '';
+							} else {
+								$src .= '|';
+							}
+							$p['first_td'] = false;
     						break;
 						// Lists parser
 						case "ul": $p['listack'][] = '*';
@@ -1121,6 +1163,9 @@ class EditLib
 								$src .= $e['string'];
 								array_pop($p['stack']);
 							}
+							if ($c[$i]["data"]["name"] === 'table') {
+								$p['table'] = false;
+							}
 							break;
 					}
 
@@ -1139,7 +1184,9 @@ class EditLib
 						case "h3":
 						case "h4":
 						case "h5":
-						case "h6": $p['wiki_lbr']--;
+						case "h6":
+						case "tr":
+							$p['wiki_lbr']--;
 							break;
 					}
 				}
@@ -1171,12 +1218,12 @@ class EditLib
 
 	function parse_html(&$inHtml)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 
 		include ('lib/htmlparser/htmlparser.inc');
 
 		// Read compiled (serialized) grammar
-		$grammarfile = 'lib/htmlparser/htmlgrammar.cmp';
+		$grammarfile = TIKI_PATH . '/lib/htmlparser/htmlgrammar.cmp';
 		if (!$fp = @fopen($grammarfile, 'r')) {
 			$smarty->assign('msg', tra("Can't parse HTML data - no grammar file"));
 			$smarty->display("error.tpl");
@@ -1232,7 +1279,9 @@ class EditLib
 
 	function get_new_page_attributes_from_parent_pages($page, $page_info)
 	{
-		global $wikilib, $tikilib;
+		$tikilib = TikiLib::lib('tiki');
+		$wikilib = TikiLib::lib('wiki');
+
 		$new_page_attrs = array();
 		$parent_pages = $wikilib->get_parent_pages($page);
 		$parent_pages_info = array();
@@ -1271,6 +1320,3 @@ class EditLib
 	}
 }
 
-
-global $editlib;
-$editlib = new EditLib;

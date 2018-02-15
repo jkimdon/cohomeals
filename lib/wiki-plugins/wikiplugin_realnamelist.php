@@ -1,36 +1,44 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_realnamelist.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_realnamelist.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_realnamelist_info()
 {
 	return array(
 		'name' => tra('User List with Real Names'),
 		'documentation' => 'PluginRealNameList',
-		'description' => tra('Show user real names for members of a group').tra(' (experimental, should be merged with UserList)'),
+		'description' => tra('Show user real names for members of a group'),
 		'prefs' => array( 'wikiplugin_realnamelist' ),
-		'body' => tra('Group name - only users belonging to a group or groups with group names containing this text will be included in the list. If empty all site users will be included.'),
-		'icon' => 'img/icons/group.png',
+		'body' => tra('Group name - only users belonging to a group or groups with group names containing this text
+			will be included in the list. If empty all site users will be included.'),
+		'iconname' => 'user',
+		'introduced' => 4,
 		'params' => array(
 			'sep' => array(
 				'required' => false,
 				'name' => tra('Separator'),
 				'description' => tra('String to use between elements of the list if table layout is not used'),
+				'since' => '4.0',
+				'filter' => 'striptags',
 				'default' => ', ',
 			),
 			'max' => array(
 				'required' => false,
 				'name' => tra('Maximum'),
 				'description' => tra('Result limit'),
+				'since' => '4.0',
+				'filter' => 'int',
 				'default' => -1,
 			),
 			'sort' => array(
 				'required' => false,
-				'name' => tra('Sort Order'),
+				'name' => tra('Sort order'),
 				'description' => tra('Set to sort in ascending or descending order (unsorted by default'),
+				'since' => '4.0',
+				'filter' => 'word',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -42,6 +50,8 @@ function wikiplugin_realnamelist_info()
 				'required' => false,
 				'name' => tra('Layout'),
 				'description' => tra('Set to table to show results in a table (not shown in a table by default)'),
+				'since' => '4.0',
+				'filter' => 'word',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -52,6 +62,8 @@ function wikiplugin_realnamelist_info()
 				'required' => false,
 				'name' => tra('Link'),
 				'description' => tra('Make the listed names links to various types of user information'),
+				'since' => '4.0',
+				'filter' => 'word',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -64,6 +76,8 @@ function wikiplugin_realnamelist_info()
 				'required' => false,
 				'name' => tra('Exclude'),
 				'description' => tra('Exclude certain test or admin names from the list'),
+				'since' => '4.0',
+				'filter' => 'text',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -79,7 +93,9 @@ function wikiplugin_realnamelist_info()
 
 function wikiplugin_realnamelist($data, $params)
 {
-	global $tikilib, $userlib, $prefs, $tiki_p_admin, $tiki_p_admin_users;
+	global $prefs, $tiki_p_admin, $tiki_p_admin_users;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	extract($params, EXTR_SKIP);
 
@@ -142,7 +158,7 @@ function wikiplugin_realnamelist($data, $params)
 		if (isset($link)) {
 			if ($link == 'userpage') {
 				if ($prefs['feature_wiki_userpage'] == 'y') {
-					global $wikilib; include_once('lib/wiki/wikilib.php');
+					$wikilib = TikiLib::lib('wiki');
 					$page = $prefs['feature_wiki_userpage_prefix'].$row['login'];
 					if ($tikilib->page_exists($page)) {
 						$res = '<a href="'.$wikilib->sefurl($page).'" title="'.tra('Page').'">';

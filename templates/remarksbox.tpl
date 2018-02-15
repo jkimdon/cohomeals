@@ -1,20 +1,23 @@
-{* $Id: remarksbox.tpl 49126 2013-12-17 15:38:01Z sept_7 $ *}
+{* $Id: remarksbox.tpl 62964 2017-06-11 16:38:34Z lindonb $ *}
 {strip}
-	{* Simple remarks box used by Smarty entity block.remarksbox.php & wikiplugin_remarksbox.php *}
-	<div class="clearfix rbox {$rbox_params.type} panel" id="{$rbox_guid}">
-		{if $rbox_params.close and $rbox_params.type ne 'errors' and $rbox_params.type ne 'confirm'}
-			{icon _id='close' class='rbox-close' onclick=$rbox_close_click|default:''}
-		{/if}
-		{if $rbox_params.title ne ''}
-			<div class="rbox-title panel-heading">
-				{if $rbox_params.icon ne 'none'}
-                    <img src="img/icons/{$rbox_params.icon}.png" alt="{tr}{$rbox_params.type}{/tr}" class="icon">
-				{/if}
-				<span>{$rbox_params.title|escape}</span>
-			</div>
-		{/if}
-		<div class="rbox-data {$rbox_params.highlight} panel-body"{if !empty($rbox_params.width)} style="width:{$rbox_params.width}"{/if}>
-			{$remarksbox_content}
-		</div>
-	</div>
+{* Simple remarks box used by Smarty entity block.remarksbox.php & wikiplugin_remarksbox.php *}
+<div {if $remarksbox_id}id="{$remarksbox_id|escape}"{/if} class="alert {$remarksbox_class|escape} {if $remarksbox_close}alert-dismissable{/if} {if $remarksbox_highlight}{$remarksbox_highlight}{/if}{if $remarksbox_hidden} hide{/if}">
+	{if $remarksbox_close}
+		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+	{/if}
+	<h4>
+		{icon name="$remarksbox_icon"}
+		&nbsp;
+		<span class="rboxtitle">{$remarksbox_title|escape}</span>
+	</h4>
+	<div class="rboxcontent" style="display: inline">{$remarksbox_content}</div>
+</div>
 {/strip}
+
+{if $remarksbox_cookie}
+{jq}
+$("button.close", "#{{$remarksbox_id|escape}}").click(function() {
+	setCookie("{{$remarksbox_cookiehash}}", "1", "rbox");
+});
+{/jq}
+{/if}

@@ -1,6 +1,6 @@
-{* $Id: tiki-directory_admin.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}
+{* $Id: tiki-directory_admin.tpl 57907 2016-03-16 13:23:47Z patrick-proulx $ *}
 
-{title help="Directory" admpage="directory"}{tr}Directory Administration{/tr}{/title}
+{title help="Directory" admpage="directory"}{tr}Admin Directory{/tr}{/title}
 
 {include file='tiki-directory_admin_bar.tpl'} <br>
 <h2>{tr}Statistics{/tr}</h2>

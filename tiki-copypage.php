@@ -2,18 +2,19 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-copypage.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-copypage.php 60844 2017-01-10 22:24:37Z montefuscolo $
 
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
 
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/histlib.php');
-include_once ('lib/wiki/wikilib.php');
+$histlib = TikiLib::lib('hist');
+$wikilib = TikiLib::lib('wiki');
+$userlib = TikiLib::lib('user');
 
 $access->check_feature('feature_wiki');
 
@@ -49,6 +50,9 @@ if (!$tikilib->page_exists($page)) {
 	die;
 }
 
+$smarty->assign('tiki_p_add_object', $userlib->user_has_permission($user, 'tiki_p_add_object'));
+$smarty->assign('tiki_p_freetags_tag', $userlib->user_has_permission($user, 'tiki_p_freetags_tag'));
+
 if (isset($_REQUEST["copy"]) || isset($_REQUEST["confirm"])) {
 	check_ticket('copy-page');
 	// If the new pagename does match userpage prefix then display an error
@@ -58,13 +62,16 @@ if (isset($_REQUEST["copy"]) || isset($_REQUEST["confirm"])) {
 		$smarty->display("error.tpl");
 		die;
 	}
+	$dupCateg = isset($_REQUEST['dupCateg']) && $_REQUEST['dupCateg'] === 'y';
+	$dupTags = isset($_REQUEST['dupTags']) && $_REQUEST['dupTags'] === 'y';
 
 	$smarty->assign('newname', $newName);
 	$result = false;
+
 	if (!isset($_REQUEST["confirm"]) && $wikilib->contains_badchars($newName)) {
 		$smarty->assign('page_badchars_display', $wikilib->get_badchars());
 	} else {
-		$result = $wikilib->wiki_duplicate_page($page, $newName);
+		$result = $wikilib->wiki_duplicate_page($page, $newName, $dupCateg, $dupTags);
 
 		if ($result) {
 			if ($prefs['feature_sefurl'] == 'y') {
@@ -76,8 +83,8 @@ if (isset($_REQUEST["copy"]) || isset($_REQUEST["confirm"])) {
 		} else {
 			$smarty->assign('msg', tra("Cannot copy page because maybe new page name already exists"));
 			$smarty->display("error.tpl");
-			die;
 		}
+		die;
 	}
 }
 ask_ticket('copy-page');

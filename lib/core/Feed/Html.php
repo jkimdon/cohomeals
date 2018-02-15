@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Html.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Html.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 class Feed_Html extends Feed_Abstract
 {
@@ -20,17 +20,17 @@ class Feed_Html extends Feed_Abstract
 		$caching = true; //this variable is used to block recursive parse_data below
 		foreach (TikiLib::lib("wiki")->get_pages_contains("{htmlfeed") as $pagesInfo) {
 			foreach ($pagesInfo as $pageInfo) {
-				$feedItem = (object)array(
-					"origin" 		=> $this->name,
-					"name" 			=> $pageInfo['pageName'],
-					"title" 		=> $pageInfo['pageName'],
-					"data" 			=> "",
-					"date" 			=> (int)$pageInfo['lastModif'],
-					"author" 		=> $pageInfo['user'],
-					"hits"			=> $pageInfo['hits'],
-					"importance" 	=> $pageInfo['pageRank'],
-					"keywords"		=> $pageInfo['keywords'],
-					"href"			=> $this->name . "/tiki-index.php?page=" . urlencode($pageInfo['pageName'])
+				$feedItem = new Feed_Item(
+					$this->name,
+					$pageInfo['pageName'],
+					$pageInfo['pageName'],
+					"",
+					(int)$pageInfo['lastModif'],
+					$pageInfo['user'],
+					$pageInfo['hits'],
+					$pageInfo['pageRank'],
+					$pageInfo['keywords'],
+					$this->name . "/tiki-index.php?page=" . urlencode($pageInfo['pageName'])
 				);
 
 				TikiLib::lib("parser")->parse_data($pageInfo['data']);

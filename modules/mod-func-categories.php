@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-categories.php 52262 2014-08-06 16:54:33Z jonnybradley $
+// $Id: mod-func-categories.php 59933 2016-10-07 15:23:21Z patrick-proulx $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -54,6 +54,16 @@ function module_categories_info()
 				'description' => 'y|n .'.tra('If y, only categories with child objects will be shown.'),
 				'filter' => 'alpha',
 			),
+			'onlyChildren' => array(
+				'name' => tra('Only Children'),
+				'description' => 'y|n .'.tra('If y, only direct child categories will be shown. Default: n'),
+				'filter' => 'alpha',
+			),
+			'customURL' => array(
+				'name' => tra('Custom URL'),
+				'description' => tra('Custom URL for link to send you. Use %catId% as placeholder for catId. E.g. "ProductBrowse?categ=%catId%" '),
+				'filter' => 'alpha',
+			),
 		),
 	);
 }
@@ -64,12 +74,13 @@ function module_categories_info()
  */
 function module_categories($mod_reference, &$module_params)
 {
-	global $smarty, $prefs;
+	global $prefs;
 	global $user;
-	global $categlib; include_once ('lib/categories/categlib.php');
+	$smarty = TikiLib::lib('smarty');
+	$categlib = TikiLib::lib('categ');
 	if (isset($module_params['type'])) {
 		$type = $module_params['type'];
-		$urlEnd = 'type='.urlencode($type);
+		$urlEnd = '&amp;type='.urlencode($type);
 	} else {
 		$type = '';
 		$urlEnd = '';
@@ -80,17 +91,18 @@ function module_categories($mod_reference, &$module_params)
 		$deep= 'on';
 	}
 	if ($deep === 'on') {
-		if (!empty($urlEnd)) {
-			$urlEnd .= '&amp;';
-		}
-		$urlEnd .= "deep=$deep";
+		$urlEnd .= "&amp;deep=$deep";
 	}
 	$name = "";
 
 
 	if (isset($module_params['categId'])) {
 		$categId = $module_params['categId'];
-		$categories = $categlib->getCategories(array('identifier' => $categId, 'type' => 'descendants'));
+		if (isset($module_params['onlyChildren']) && $module_params['onlyChildren'] == 'y') {
+			$categories = $categlib->getCategories(array('identifier' => $categId, 'type' => 'children'));
+		} else {
+			$categories = $categlib->getCategories(array('identifier' => $categId, 'type' => 'descendants'));
+		}
 		foreach ($categories as $cat) {
 			if ($cat['categId'] == $categId)
 				$name = $cat['name'];
@@ -125,7 +137,7 @@ function module_categories($mod_reference, &$module_params)
 		if (!empty($module_params['hideEmpty']) && $module_params['hideEmpty'] === 'y' && $cat['objects'] == 0) {
 			$has_children = false;
 			foreach ($cat['children'] as $child) {
-				if ($categories[$child]['objects'] != 0) {
+				if (!empty($categories[$child]['objects'])) {
 					$has_children = true;
 					break;
 				}
@@ -136,6 +148,8 @@ function module_categories($mod_reference, &$module_params)
 		}
 		if (isset($module_params['selflink']) && $module_params['selflink'] == 'y') {
 			$url = filter_out_sefurl('tiki-index.php?page=' . urlencode($cat['name']));
+		} else if (isset($module_params['customUrl'])) {
+			$url = str_replace("%catId%", $cat['categId'], $module_params['customUrl']);
 		} else {
 			$url = filter_out_sefurl('tiki-browse_categories.php?parentId=' . $cat['categId'], 'category', $cat['name'], !empty($urlEnd)) .$urlEnd;
 		}

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-setup_base.php 47443 2013-09-13 16:51:36Z nkoth $
+// $Id: tiki-setup_base.php 62770 2017-05-27 10:49:54Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -14,6 +14,17 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	exit;
 }
 require_once ('tiki-filter-base.php');
+
+if (!isset($_SERVER['QUERY_STRING'])) {
+	$_SERVER['QUERY_STRING'] = '';
+}
+if (empty($_SERVER['REQUEST_URI'])) {
+	$_SERVER['REQUEST_URI'] = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
+}
+if (empty($_SERVER['SERVER_NAME'])) {
+	$_SERVER['SERVER_NAME'] = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']: '';
+}
+
 // ---------------------------------------------------------------------
 // basic php conf adjustment
 // xhtml compliance
@@ -62,15 +73,14 @@ $needed_prefs = array(
 	'memcache_prefix' => 'tiki_',
 	'memcache_compress' => 'y',
 	'memcache_servers' => false,
-	'display_timezone' => 'UTC',
-	'server_timezone' => 'UTC',
 	'min_pass_length' => 5,
 	'pass_chr_special' => 'n',
-	'menus_item_names_raw' => 'n',
 	'cookie_consent_feature' => 'n',
+	'cookie_consent_disable' => 'n',
 	'cookie_consent_name' => 'tiki_cookies_accepted',
 
 );
+
 // check that tiki_preferences is there
 if ($tikilib->query("SHOW TABLES LIKE 'tiki_preferences'")->numRows() == 0) {
 	// smarty not initialised at this point to do a polite message, sadly
@@ -81,6 +91,17 @@ $tikilib->get_preferences($needed_prefs, true, true);
 global $systemConfiguration;
 $prefs = $systemConfiguration->preference->toArray() + $prefs;
 
+// mose : simulate strong var type checking for http vars
+$patterns['int'] = "/^[0-9]*$/"; // *Id
+$patterns['intSign'] = "/^[-+]?[0-9]*$/"; // *offset,
+$patterns['char'] = "/^(pref:)?[-,_a-zA-Z0-9]*$/"; // sort_mode
+$patterns['string'] = "/^<\/?(b|strong|small|br *\/?|ul|li|i)>|[^<>\";#]*$/"; // find, and such extended chars
+$patterns['stringlist'] = "/^[^<>\"#]*$/"; // to, cc, bcc (for string lists like: user1;user2;user3)
+$patterns['vars'] = "/^[-_a-zA-Z0-9]*$/"; // for variable keys
+$patterns['dotvars'] = "/^[-_a-zA-Z0-9\.]*$/"; // same pattern as a variable key, but that may contain a dot
+$patterns['hash'] = "/^[a-z0-9]*$/"; // for hash reqId in live support
+$patterns['url'] = "/^(https?:\/\/)?[^<>\"]*$/";
+
 // IIS always sets the $_SERVER['HTTPS'] value (on|off)
 $noSSLActive = !isset($_SERVER['HTTPS']) || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'off');
 if (isset($prefs['session_protected']) && $prefs['session_protected'] == 'y' && $noSSLActive && php_sapi_name() != 'cli') {
@@ -88,22 +109,24 @@ if (isset($prefs['session_protected']) && $prefs['session_protected'] == 'y' && 
 	exit;
 }
 
-global $cachelib;
-require_once ('lib/cache/cachelib.php');
-global $logslib;
-require_once ('lib/logs/logslib.php');
+$cachelib = TikiLib::lib('cache');
+$logslib = TikiLib::lib('logs');
 include_once ('lib/init/tra.php');
-require_once ('lib/tikidate.php');
-$tikidate = new TikiDate();
+$tikidate = TikiLib::lib('tikidate');
 // set session lifetime
 if (isset($prefs['session_lifetime']) && $prefs['session_lifetime'] > 0) {
 	ini_set('session.gc_maxlifetime', $prefs['session_lifetime'] * 60);
 }
 // is session data  stored in DB or in filesystem?
 if (isset($prefs['session_storage']) && $prefs['session_storage'] == 'db') {
-	if ($api_tiki == 'adodb') {
+	$db = TikiDb::get();
+	if ($db instanceof TikiDb_MasterSlaveDispatch) {
+		$db->getReal();
+	}
+
+	if ($db instanceof TikiDb_AdoDb) {
 		require_once ('lib/tikisession-adodb.php');
-	} elseif ($api_tiki == 'pdo') {
+	} elseif ($db instanceof TikiDb_Pdo) {
 		require_once ('lib/tikisession-pdo.php');
 	}
 } elseif ( isset($prefs['session_storage']) && $prefs['session_storage'] == 'memcache' && TikiLib::lib("memcache")->isEnabled() ) {
@@ -118,19 +141,33 @@ session_name($prefs['session_cookie_name']);
 
 // Only accept PHP's session ID in URL when the request comes from the tiki server itself
 // This is used by features that need to query the server to retrieve tiki's generated html and images (e.g. pdf export)
-if (isset($_GET[session_name()]) && $tikilib->get_ip_address() == '127.0.0.1') {
+// It could be , that the server initiates his request with its own ip, so we check also if server == remote
+// Note: this is an incomplete implemenation - the session handling does not really work this way. Session data is lost and not regenerated.
+// Maybe better to use tokens: see i.e. the example in lib/pdflib.php
+if (isset($_GET[session_name()]) && (($tikilib->get_ip_address() == '127.0.0.1') || ($_SERVER["SERVER_ADDR"] == $_SERVER["REMOTE_ADDR"]))) {
 	$_COOKIE[session_name()] = $_GET[session_name()];
-	session_id($_GET[session_name()]);
+	session_id($_GET[session_name()]);		
 }
 
-if ($prefs['cookie_consent_feature'] === 'y' && empty($_COOKIE[$prefs['cookie_consent_name']])) {
+//Set tikiroot and tikidomain to blank string if not set.
+if (empty($tikiroot)) {
+	$tikiroot = "";
+}
+if (empty($tikidomain)) {
+	$tikidomain = "";
+}
+
+if ($prefs['cookie_consent_feature'] === 'y' && empty($_COOKIE[$prefs['cookie_consent_name']]) && $prefs['cookie_consent_disable'] !== 'y' ) {
+	// No consent yet
 	$feature_no_cookie = true;
 } else {
+	// Cookie consent not implemented or consent given or consent forced with preference cookie_consent_disable
 	$feature_no_cookie = false;
 }
 
 $start_session = true;
-if ( ($prefs['session_silent'] == 'y' || $feature_no_cookie) && empty($_COOKIE[session_name()]) ) {
+$extra_cookie_name = session_name() . 'CV';
+if ( $prefs['session_silent'] == 'y' && empty($_COOKIE[session_name()]) && empty($_COOKIE[$extra_cookie_name]) ) {
 	$start_session = false;
 }
 
@@ -153,7 +190,8 @@ if (isset($_SERVER["REQUEST_URI"])) {
 		unset($session_params);
 
 		try {
-			Zend_Session::start();
+						
+			Zend\Session\Container::getDefaultManager()->start();
 
 			/* This portion may seem strange, but it is an extra validation against session
 			 * collisions. An extra cookie is set with an additional random value. When loading
@@ -163,22 +201,26 @@ if (isset($_SERVER["REQUEST_URI"])) {
 			 * Effectively, in the occurence of a collision, both users are kicked out.
 			 * This is an extremely rare occurence that is hard to reproduce by nature.
 			 */ 
-			$extra_cookie_name = session_name() . 'CV';
 			if (isset($_SESSION['extra_validation'])) {
 				$cookie = isset($_COOKIE[$extra_cookie_name]) ? $_COOKIE[$extra_cookie_name] : null;
 
 				if ($cookie !== $_SESSION['extra_validation']) {
-					Zend_Session::destroy();
+
+					TikiLib::lib('logs')->add_log('system', 'session cookie validation failed');
+
+					Zend\Session\Container::getDefaultManager()->destroy();
 					header('Location: ' . $_SERVER['REQUEST_URI']);
 					exit;
 				}
 			} else {
 				$sequence = $tikilib->generate_unique_sequence(16);
 				$_SESSION['extra_validation'] = $sequence;
-				setcookie($extra_cookie_name, $sequence, time() + 365*24*3600, ini_get('session.cookie_path'));
+				setcookie($extra_cookie_name, $sequence, time() + 365*24*3600, ini_get('session.cookie_path'), null, null, true);
 				unset($sequence);
 			}
-		} catch( Zend_Session_Exception $e ) {
+		} catch( Zend\Session\Exception\ExceptionInterface $e ) {
+			// Ignore
+		} catch( Zend\Stdlib\Exception\InvalidArgumentException $e ) {
 			// Ignore
 		}
 	}
@@ -188,19 +230,29 @@ if (isset($_SERVER["REQUEST_URI"])) {
 if (isset($prefs['feature_fullscreen']) && $prefs['feature_fullscreen'] == 'y') {
 	require_once ('lib/setup/fullscreen.php');
 }
+
+// Retrieve Tiki addons
+TikiAddons::refresh();
+
 // Retrieve all preferences
 require_once ('lib/setup/prefs.php');
+
+if ($prefs['ids_enabled'] == 'y') {
+	require_once 'lib/setup/ids.php';
+}
+
+$access = TikiLib::lib('access');
+
+require_once ('lib/setup/absolute_urls.php');
 // Smarty needs session since 2.6.25
-global $smarty; require_once ('lib/init/smarty.php');
+$smarty = TikiLib::lib('smarty');
 
 // Define the special maxRecords global variable
 $maxRecords = $prefs['maxRecords'];
 $smarty->assignByRef('maxRecords', $maxRecords);
 
-require_once ('lib/userslib.php'); global $userlib;
-$userlib = new UsersLib;
-require_once ('lib/tikiaccesslib.php');
-$access = new TikiAccessLib;
+global $userlib;
+$userlib = TikiLib::lib('user');
 require_once ('lib/breadcrumblib.php');
 // ------------------------------------------------------
 // DEAL WITH XSS-TYPE ATTACKS AND OTHER REQUEST ISSUES
@@ -216,21 +268,6 @@ function remove_gpc(&$var)
 	} else {
 		$var = stripslashes($var);
 	}
-}
-// mose : simulate strong var type checking for http vars
-$patterns['int'] = "/^[0-9]*$/"; // *Id
-$patterns['intSign'] = "/^[-+]?[0-9]*$/"; // *offset,
-$patterns['char'] = "/^(pref:)?[-,_a-zA-Z0-9]*$/"; // sort_mode
-$patterns['string'] = "/^<\/?(b|strong|small|br *\/?|ul|li|i)>|[^<>\";#]*$/"; // find, and such extended chars
-$patterns['stringlist'] = "/^[^<>\"#]*$/"; // to, cc, bcc (for string lists like: user1;user2;user3)
-$patterns['vars'] = "/^[-_a-zA-Z0-9]*$/"; // for variable keys
-$patterns['dotvars'] = "/^[-_a-zA-Z0-9\.]*$/"; // same pattern as a variable key, but that may contain a dot
-$patterns['hash'] = "/^[a-z0-9]*$/"; // for hash reqId in live support
-// allow quotes in url for additional tag attributes if html allowed in menu options links
-if ($prefs['menus_item_names_raw'] == 'y' and strpos($_SERVER["SCRIPT_NAME"], 'tiki-admin_menu_options.php') !== false) {
-	$patterns['url'] = "/^(https?:\/\/)?[^<>]*$/";
-} else {
-	$patterns['url'] = "/^(https?:\/\/)?[^<>\"]*$/";
 }
 // parameter type definitions. prepend a + if variable may not be empty, e.g. '+int'
 $vartype['id'] = '+int';
@@ -253,7 +290,6 @@ $vartype['thread_style'] = '+char';
 $vartype['comments_per_page'] = '+int';
 $vartype['topics_offset'] = 'int';
 $vartype['topics_sort_mode'] = '+char';
-$vartype['priority'] = 'int';
 $vartype['theme'] = 'string';
 $vartype['flag'] = 'char';
 $vartype['lang'] = 'char';
@@ -262,7 +298,7 @@ $vartype['page'] = 'string';
 $vartype['edit_mode'] = 'char';
 $vartype['find'] = 'string';
 $vartype['topic_find'] = 'string';
-$vartype['initial'] = 'char';
+$vartype['initial'] = 'string';
 $vartype['username'] = '+string';
 $vartype['realName'] = 'string';
 $vartype['homePage'] = 'string';
@@ -280,12 +316,11 @@ $vartype['rows'] = '+int';
 $vartype['cols'] = '+int';
 $vartype['topicname'] = '+string';
 $vartype['error'] = 'string';
-$vartype['editmode'] = 'char'; // from calendar
-$vartype['actpass'] = '+string'; // remind password page
-$vartype['user'] = '+string'; // remind password page
-$vartype['remind'] = 'string'; // remind password page
+$vartype['editmode'] = 'char';		// from calendar
+$vartype['actpass'] = '+string';	// remind password page
+$vartype['user'] = '+string';		// remind password page
+$vartype['remind'] = 'string';		// remind password page
 $vartype['url'] = 'url';
-
 $vartype['aid'] = '+int';
 $vartype['description'] = 'string';
 $vartype['filter_active'] = 'char';
@@ -300,7 +335,7 @@ $vartype['userole'] = 'int';
 $vartype['focus'] = 'string';
 $vartype['filegals_manager'] = 'vars';
 $vartype['filesyntax'] = 'string';
-$vartype['ver'] = 'dotvars'; // filename hash for drawlib + rss type for rsslib
+$vartype['ver'] = 'dotvars';		// filename hash for drawlib + rss type for rsslib
 $vartype['trackerId'] = 'int';
 $vartype['articleId'] = 'int';
 $vartype['galleryId'] = 'int';
@@ -325,7 +360,7 @@ $vartype['page_ref_id'] = 'int';
  */
 function varcheck(&$array, $category)
 {
-	global $patterns, $vartype, $prefs;
+	global $patterns, $vartype;
 	$return = array();
 	if (is_array($array)) {
 		foreach ($array as $rq => $rv) {
@@ -372,15 +407,6 @@ if (!empty($_REQUEST['highlight'])) {
 	$_REQUEST['highlight'] = str_replace('&lt;x&gt;', '<x>', $_REQUEST['highlight']);
 }
 // ---------------------------------------------------------------------
-if (!isset($_SERVER['QUERY_STRING'])) {
-	$_SERVER['QUERY_STRING'] = '';
-}
-if (empty($_SERVER['REQUEST_URI'])) {
-	$_SERVER['REQUEST_URI'] = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
-}
-if (empty($_SERVER['SERVER_NAME'])) {
-	$_SERVER['SERVER_NAME'] = isset($_SERVER['HTTP_HOST'])?$_SERVER['HTTP_HOST']: '';
-}
 
 /*
  * Clean variables past in _GET & _POST & _COOKIE
@@ -392,7 +418,10 @@ if ($magic_quotes_gpc) {
 	remove_gpc($_COOKIE);
 }
 
-require_once ('lib/setup/absolute_urls.php');
+global $base_uri;
+if (!empty($base_uri) && is_object($smarty)) {
+	$smarty->assign('base_uri', $base_uri);
+}
 
 // in the case of tikis on same domain we have to distinguish the realm
 // changed cookie and session variable name by a name made with browsertitle
@@ -417,6 +446,14 @@ if (($prefs['rememberme'] != 'disabled') and (isset($_COOKIE["$user_cookie_site"
 	}
 	if (isset($user) && $user) {
 		$_SESSION["$user_cookie_site"] = $user;
+		if ($prefs['cookie_refresh_rememberme'] === 'y') {
+			if (empty($userId)) {    // for intertiki
+				$userId = $userlib->get_user_id($user);
+			}
+			$secret = $userlib->create_user_cookie($userId);
+			setcookie($user_cookie_site, $secret . '.' . $userId, $tikilib->now + $prefs['remembertime'], $prefs['cookie_path'], $prefs['cookie_domain']);
+			$logslib->add_log('login', 'refreshed a cookie for ' . $prefs['remembertime'] . ' seconds');
+		}
 	}
 }
 // if the auth method is 'web site', look for the username in $_SERVER
@@ -446,12 +483,14 @@ if (($prefs['auth_method'] == 'ws') and (isset($_SERVER['REMOTE_USER']))) {
 // Check for Shibboleth Login
 if ($prefs['auth_method'] == 'shib' and isset($_SERVER['REMOTE_USER'])) {
 	// Validate the user (if not created create it)
-	if ($userlib->validate_user($_SERVER['REMOTE_USER'], "", "", "")) {
+	if ($userlib->validate_user($_SERVER['REMOTE_USER'], "")) {
 		$_SESSION["$user_cookie_site"] = $_SERVER['REMOTE_USER'];
 	}
 }
 
 $userlib->check_cas_authentication($user_cookie_site);
+
+$userlib->check_saml_authentication($user_cookie_site);
 
 // if the username is already saved in the session, pull it from there
 if (isset($_SESSION["$user_cookie_site"])) {
@@ -461,8 +500,7 @@ if (isset($_SESSION["$user_cookie_site"])) {
 	// Example : If using the same PHP SESSION cookies for more than one tiki.
 	$user_details = $userlib->get_user_details($user);
 	if (!is_array($user_details) || !is_array($user_details['info']) || (int) $user_details['info']['lastLogin'] <= 0) {
-		global $cachelib;
-		require_once ('lib/cache/cachelib.php');
+		$cachelib = TikiLib::lib('cache');
 		$cachelib->invalidate('user_details_' . $user);
 		$user_details = $userlib->get_user_details($user);
 		if (!is_array($user_details) || !is_array($user_details['info'])) {
@@ -563,6 +601,8 @@ array_unshift(
 			'local_tz' => 'text',
 			'preview' => 'text',
 			'rbox' => 'text',
+			'ticket' => 'alnum',
+			'daconfirm' => 'alpha'
 		),
 		'staticKeyFiltersForArrays' => array(
 			'cat_managed' => 'digits',
@@ -638,5 +678,7 @@ if (function_exists('mb_internal_encoding')) {
 if (!isset($_SERVER['QUERY_STRING'])) {
 	$_SERVER['QUERY_STRING'] = '';
 }
+
+
 
 $smarty->assign("tikidomain", $tikidomain);

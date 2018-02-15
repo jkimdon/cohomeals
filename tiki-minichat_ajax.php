@@ -2,15 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minichat_ajax.php 53915 2015-02-13 10:46:04Z xavidp $
+// $Id: tiki-minichat_ajax.php 62563 2017-05-12 15:05:22Z luciash $
 
 require_once ('tiki-setup.php');
 require_once ('lib/smarty_tiki/modifier.username.php');
+require_once ('lib/smarty_tiki/modifier.userlink.php');
 $access->check_feature('feature_minichat');
+$access->check_permission('tiki_p_chat');
 header("Pragma: public");
 header("Pragma: no-cache");
 header("Cache-Control: no-cache, must-revalidate, no-store, post-check=0, pre-check=0, max-age=0");
@@ -133,25 +135,26 @@ foreach ($chans as $chan) {
                     $t = date("H:i", $row['ts']);
                 }
             }
-            $msgtotal = "<span class='minichat_ts'>[$t]</span><span class='minichat_nick'>&lt;" . ($row['nick'] === null ? '' : $row['nick']) . "&gt;</span><span class='minichat_msg'>" . htmlentities($row['msg'], ENT_QUOTES, 'UTF-8') . "</span><br>" . $msgtotal;
+	//TODO: improve matching and replace with better smileys + use global lib
+            $msgtotal = "<span class='minichat_ts'>[$t]</span>&nbsp;<span class='minichat_nick'>&lt;" . ($row['nick'] == '' ? "<em>" . tra('Anonymous') . "</em>" : str_replace('"', '\"', smarty_modifier_userlink($row['user']))) . "&gt;</span> <span class='minichat_msg'>" . htmlentities($row['msg'], ENT_QUOTES, 'UTF-8') . "</span><br>" . $msgtotal;
 		}
-		$msgtotal = str_replace(":-D", "<img border='0' src='img/smiles/icon_biggrin.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":D", "<img border='0' src='img/smiles/icon_biggrin.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":-/", "<img border='0' src='img/smiles/icon_confused.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace("8-)", "<img border='0' src='img/smiles/icon_cool.gif' width='19' height='25'>", $msgtotal);
-		$msgtotal = str_replace("8)", "<img border='0' src='img/smiles/icon_cool.gif' width='19' height='25'>", $msgtotal);
-		$msgtotal = str_replace(":-)", "<img border='0' src='img/smiles/icon_smile.gif' width='16' height='16'>", $msgtotal);
-		$msgtotal = str_replace(":)", "<img border='0' src='img/smiles/icon_smile.gif' width='16' height='16'>", $msgtotal);
-		$msgtotal = str_replace(":-(", "<img border='0' src='img/smiles/icon_sad.gif' width='40' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":(", "<img border='0' src='img/smiles/icon_sad.gif' width='40' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":-|", "<img border='0' src='img/smiles/icon_neutral.gif' width='40' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":|", "<img border='0' src='img/smiles/icon_neutral.gif' width='40' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":-p", "<img border='0' src='img/smiles/icon_razz.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":p", "<img border='0' src='img/smiles/icon_razz.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":-o", "<img border='0' src='img/smiles/icon_surprised.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(":o", "<img border='0' src='img/smiles/icon_surprised.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(";-)", "<img border='0' src='img/smiles/icon_wink.gif' width='15' height='15'>", $msgtotal);
-		$msgtotal = str_replace(";)", "<img border='0' src='img/smiles/icon_wink.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-D", "<img src='img/smiles/icon_biggrin.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":D", "<img src='img/smiles/icon_biggrin.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-/", "<img src='img/smiles/icon_confused.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace("8-)", "<img src='img/smiles/icon_cool.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace("8)", "<img src='img/smiles/icon_cool.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-)", "<img src='img/smiles/icon_smile.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":)", "<img src='img/smiles/icon_smile.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-(", "<img src='img/smiles/icon_sad.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":(", "<img src='img/smiles/icon_sad.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-|", "<img src='img/smiles/icon_neutral.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":|", "<img src='img/smiles/icon_neutral.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-p", "<img src='img/smiles/icon_razz.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":p", "<img src='img/smiles/icon_razz.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":-o", "<img src='img/smiles/icon_surprised.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(":o", "<img src='img/smiles/icon_surprised.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(";-)", "<img src='img/smiles/icon_wink.gif' width='15' height='15'>", $msgtotal);
+		$msgtotal = str_replace(";)", "<img src='img/smiles/icon_wink.gif' width='15' height='15'>", $msgtotal);
 		echo "document.getElementById('minichatdiv_'+minichat_getchanid('$channel')).innerHTML=\"$msgtotal\";\n";
 		echo "document.getElementById('minichat').scrollTop=99999;\n";
 	}

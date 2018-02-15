@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2015 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id$
+// $Id: Webmail.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_Webmail extends Tiki_Profile_InstallHandler
 {
@@ -23,7 +23,6 @@ class Tiki_Profile_InstallHandler_Webmail extends Tiki_Profile_InstallHandler
 			'fattId' => null,         // add a File Gallery file as an attachment
 			'pageaftersend' => null,  // defines wiki page to go to after webmail is sent
 			'html' => 'y',
-			'reload' => 'y',		// reload the profile to update external refs
 		);
 
 		$data = array_merge($defaults, $this->obj->getData());
@@ -53,18 +52,6 @@ class Tiki_Profile_InstallHandler_Webmail extends Tiki_Profile_InstallHandler
 	{
 		global $tikilib, $user;
 		$data = $this->getData();
-		
-		if ($data['reload']) {
-			// must be fresh data as the profile may have altered stuff since canInstall was run
-			$this->obj->refreshExternals();
-			foreach ($this->obj->getProfile()->getObjects() as $obj) {
-				if ($obj->getRef() == $this->obj->getRef()) {
-					$this->obj = $obj;
-				}
-			}
-			$this->data = null;	
-			$data = $this->getData();
-		}
 		
 		$this->replaceReferences($data);
 

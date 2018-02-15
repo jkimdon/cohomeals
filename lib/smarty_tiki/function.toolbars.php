@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.toolbars.php 51283 2014-05-13 18:20:36Z jonnybradley $
+// $Id: function.toolbars.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 /*
  * Smarty plugin to display content only to some groups
@@ -11,7 +11,7 @@
 
 function smarty_function_toolbars($params, $smarty)
 {
-	global $prefs, $is_html, $tiki_p_admin, $section;
+	global $prefs, $is_html, $tiki_p_admin, $tiki_p_admin_toolbars, $section;
 	$default = array(
 		'comments' => 'n',
 		'is_html' => $is_html,
@@ -28,7 +28,7 @@ function smarty_function_toolbars($params, $smarty)
 		$hidden[] = 'switcheditor';
 	}
 	
-	if(!$tiki_p_admin) {
+	if( $tiki_p_admin != 'y' || $tiki_p_admin_toolbars != 'y' ) {
 		$hidden[] = 'admintoolbar';
 	}
 
@@ -39,7 +39,7 @@ function smarty_function_toolbars($params, $smarty)
 	include_once( 'lib/toolbars/toolbarslib.php' );
 	$list = ToolbarsList::fromPreference($params, $hidden);
 	if ( isset($params['_wysiwyg']) && $params['_wysiwyg'] == 'y') {
-		return $list->getWysiwygArray("'+CurrentEditorName+'", $params['is_html']);
+		return $list->getWysiwygArray($params['area_id'], $params['is_html']);
 	} else {
 		return $list->getWikiHtml($params['area_id'], $params['comments']);
 	}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiText.php 48096 2013-10-20 18:13:47Z nkoth $
+// $Id: WikiText.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 class Search_Type_WikiText implements Search_Type_Interface
 {
@@ -16,8 +16,8 @@ class Search_Type_WikiText implements Search_Type_Interface
 
 	function getValue()
 	{
-		global $tikilib, $prefs;
-		$out = $tikilib->parse_data(
+		global $prefs;
+		$out = TikiLib::lib('parser')->parse_data(
 			$this->value, array(
 				'parsetoc' => false,
 				'indexing' => true,

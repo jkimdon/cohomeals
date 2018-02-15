@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: zoterolib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: zoterolib.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 /**
  *
@@ -52,7 +52,7 @@ class ZoteroLib extends TikiDb_Bridge
 		);
 
 		if ($response && $response->isSuccessful()) {
-			$feed = Zend_Feed_Reader::importString($response->getBody());
+			$feed = Zend\Feed\Reader\Reader::importString($response->getBody());
 
 			$data = array();
 			foreach ($feed as $entry) {
@@ -60,7 +60,7 @@ class ZoteroLib extends TikiDb_Bridge
 					'key' => basename($entry->getLink()),
 					'url' => $entry->getLink(),
 					'title' => $entry->getTitle(),
-					'content' => $entry->getContent(),
+					'content' => $entry->getDescription(),
 				);
 			}
 
@@ -111,14 +111,14 @@ class ZoteroLib extends TikiDb_Bridge
 		if ($response->isSuccessful()) {
 			$entry = $response->getBody();
 			$entry = str_replace('<entry ', '<feed xmlns="http://www.w3.org/2005/Atom"><entry ', $entry) . '</feed>';
-			$feed = Zend_Feed_Reader::importString($entry);
+			$feed = Zend\Feed\Reader\Reader::importString($entry);
 
 			foreach ($feed as $entry) {
 				return array(
 					'key' => basename($entry->getLink()),
 					'url' => $entry->getLink(),
 					'title' => $entry->getTitle(),
-					'content' => $entry->getContent(),
+					'content' => $entry->getDescription(),
 				);
 			}
 		}

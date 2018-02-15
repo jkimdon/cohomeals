@@ -2,16 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-articles_rss.php 46138 2013-06-02 18:38:13Z changi67 $
+// $Id: tiki-articles_rss.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
-require_once ('lib/tikilib.php');
-require_once ('lib/articles/artlib.php');
-require_once ('lib/rss/rsslib.php');
+$rsslib = TikiLib::lib('rss');
 
 $access->check_feature('feature_articles');
 
@@ -36,7 +34,7 @@ if (isset($_REQUEST["topic"])) {
     $uniqueid = $feed.".".$topic;
     $topic = (int) preg_replace('/[^0-9]/', '', $topic);
 } elseif (isset($_REQUEST['topicname'])) {
-	global $artlib; require_once 'lib/articles/artlib.php';
+	$artlib = TikiLib::lib('art');
 	$topic = $artlib->fetchtopicId($_REQUEST['topicname']);
 	$uniqueid = $feed.".".$topic;
 } else {
@@ -114,11 +112,12 @@ if ($output["data"]=="EMPTY") {
 		$desc = $tmp;
 	}
 
-	$changes = $artlib -> list_articles(0, $prefs['feed_articles_max'], $dateId.'_desc', '', 0, $tikilib->now, $user, $type, $topic, 'y', '', $categId, '', '', $articleLang, '', '', false, 'y');
+	$artlib = TikiLib::lib('art');
+	$changes = $artlib->list_articles(0, $prefs['feed_articles_max'], $dateId.'_desc', '', 0, $tikilib->now, $user, $type, $topic, 'y', '', $categId, '', '', $articleLang, '', '', false, 'y');
 	$tmp = array();
 	include_once('tiki-sefurl.php');
 	foreach ($changes["data"] as $data) {
-		$data["$descId"] = $tikilib->parse_data($data[$descId], array('print'=>true));
+		$data["$descId"] = TikiLib::lib('parser')->parse_data($data[$descId], array('print'=>true));
 		$data["body"] = null;
 		$data['sefurl'] = filter_out_sefurl(sprintf($readrepl, $data['articleId']), 'article', $data['title']);
 		$tmp[] = $data;

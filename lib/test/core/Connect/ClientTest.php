@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ClientTest.php 45731 2013-04-26 19:52:41Z changi67 $
+// $Id: ClientTest.php 59625 2016-09-07 18:12:47Z jonnybradley $
 
 /**
  * Test class for TikiConnect.
@@ -30,6 +30,11 @@ class Connect_Client_Test extends TikiTestCase
 
 	public function testBuildConnectData()
 	{
+		global $TWV;
+
+		include_once ('lib/setup/twversion.class.php');
+		$TWV = new TWVersion();
+
 		$data = $this->obj->buildConnectData(); // TODO check status etc
 
 		$this->assertGreaterThan(0, count($data));

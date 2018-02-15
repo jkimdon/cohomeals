@@ -1,23 +1,25 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_trackercomments.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_trackercomments.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_trackercomments_info()
 {
 	return array(
 		'name' => tra('Tracker Comments'),
 		'documentation' => 'PluginTrackerComments',
-		'description' => tra('Display the number of tracker comments'),
+		'description' => tra('Display the number of comments for a tracker'),
 		'prefs' => array( 'feature_trackers', 'wikiplugin_trackercomments' ),	
-		'icon' => 'img/icons/comments.png',
+		'iconname' => 'comments',
+		'introduced' => 5,
 		'params' => array(
 			'trackerId' => array(
 				'required' => true,
 				'name' => tra('Tracker ID'),
 				'description' => tra('Numeric value representing the tracker ID'),
+				'since' => '5.0',
 				'filter' => 'digits',
 				'default' => '',
 				'profile_reference' => 'tracker',
@@ -26,6 +28,7 @@ function wikiplugin_trackercomments_info()
 				'required' => false,
 				'name' => tra('Item Count'),
 				'description' => tra('Determines whether the number of items will be shown (not shown by default)'),
+				'since' => '5.0',
 				'filter' => 'alpha',
 				'default' => '',
 				'options' => array(
@@ -37,9 +40,10 @@ function wikiplugin_trackercomments_info()
 			'view' => array(
 				'required' => false,
 				'name' => tra('View'),
-				'description' => tra('Enter a user name to select the items of the current user'),
+				'description' => tra('Enter a username to select the items of the current user'),
+				'since' => '5.0',
 				'accepted' => tra('a user name'),
-				'filter' => 'alpha',
+				'filter' => 'text',
 				'default' => ''
 			),
 		)
@@ -47,7 +51,7 @@ function wikiplugin_trackercomments_info()
 }
 function wikiplugin_trackercomments($data, $params)
 {
-	global $trklib; include_once('lib/trackers/trackerlib.php');
+	$trklib = TikiLib::lib('trk');
 	global $user;
 	extract($params, EXTR_SKIP);
 	$ret = '';

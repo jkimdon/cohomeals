@@ -1,4 +1,4 @@
-{* $Id: tiki-list_users.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
+{* $Id: tiki-list_users.tpl 60452 2016-11-29 09:30:37Z drsassafras $ *}
 
 {title help="UserList"}{tr}User List{/tr}{/title}
 
@@ -20,9 +20,9 @@
 		{/if}
 		{if $prefs.feature_community_list_distance eq 'y'}<th>{tr}Distance (km){/tr}&nbsp;</th>{/if}
 	</tr>
-	{cycle values="odd,even" print=false}
+
 	{section name=changes loop=$listusers}
-		<tr class="{cycle}">
+		<tr>
 			<td class="username">&nbsp;{$listusers[changes].login|userlink}&nbsp;</td>
 			{if $prefs.feature_community_list_name eq 'y' and $prefs.user_show_realnames neq 'y'}
 				<td class="text">&nbsp;{$listusers[changes].realName}&nbsp;</td>
@@ -33,9 +33,9 @@
 			{if $prefs.feature_community_list_country eq 'y'}
 				<td class="text">
 					{if $listuserscountry[changes] == "None" || $listuserscountry[changes] == "Other" || $listuserscountry[changes] == ""}
-						{html_image file='img/flags/Other.gif' hspace='4' vspace='1' alt="{tr}Flag{/tr}" title="{tr}Flag{/tr}"}
+						{html_image file='img/flags/Other.png' hspace='4' vspace='1' alt="{tr}Flag{/tr}" title="{tr}Flag{/tr}"}
 					{else}
-						{html_image file="img/flags/{$listuserscountry[changes]}.gif" hspace='4' vspace='1' alt="{tr}Flag{/tr}" title="{tr}Flag{/tr}"}&nbsp;{tr}{$listuserscountry[changes]}{/tr}
+						{html_image file="img/flags/{$listuserscountry[changes]}.png" hspace='4' vspace='1' alt="{tr}Flag{/tr}" title="{tr}Flag{/tr}"}&nbsp;{tr}{$listuserscountry[changes]}{/tr}
 					{/if}&nbsp;
 				</td>
 			{/if}

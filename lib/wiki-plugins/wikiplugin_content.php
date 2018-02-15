@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_content.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_content.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_content_info()
 {
@@ -13,13 +13,15 @@ function wikiplugin_content_info()
 		'description' => tra('Display content from dynamic content repository'),
 		'prefs' => array( 'feature_dynamic_content', 'wikiplugin_content'),
 		'filter' => 'text',
-		'icon' => 'img/icons/database_table.png',
-		'tags' => array( 'basic' ),		
+		'iconname' => 'merge',
+		'introduced' => 3,
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'id' => array(
 				'required' => false,
 				'name' => tra('Content ID'),
 				'description' => tra('Dynamic content ID. The value can be obtained in the listing.'),
+				'since' => '3.0',
 				'filter' => 'digits',
 				'default' => '',
 			),
@@ -27,7 +29,8 @@ function wikiplugin_content_info()
 				'required' => false,
 				'name' => tra('Content Label'),
 				'description' => tra('Label of the dynamic content to display.'),
-				'filter' => 'description',
+				'since' => '5.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 		),

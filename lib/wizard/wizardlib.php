@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wizardlib.php 48875 2013-12-01 19:23:46Z arildb $
+// $Id: wizardlib.php 62572 2017-05-13 10:06:16Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -24,7 +24,7 @@ class WizardLib extends TikiLib
 	 * 
 	 * Use the start functions, e.g. startAdminWizard, to start the wizard manually, not this function
 	 *
-	 * @param mixed $user The logged in user
+	 * @param mixed $user The logged-in user
 	 * @param string $homePageUrl The return URL
 	 * @param bool $force Force the opening of the admin wizard
 	 * @return none
@@ -32,7 +32,8 @@ class WizardLib extends TikiLib
 	 */
 	public function onLogin($user, $homePageUrl, $force = false)
 	{
-		global $base_url, $userlib;
+		global $base_url;
+		$userlib = TikiLib::lib('user');
 		
 		// Check the user status
 		$isAdmin = $userlib->user_has_permission($user, 'tiki_p_admin');
@@ -41,7 +42,7 @@ class WizardLib extends TikiLib
 		$activeLoginWizard = $this->get_preference('wizard_admin_hide_on_login') !== 'y';
 		if ($force || ($isAdmin && $activeLoginWizard)) {
 
-			// User is an admin. Show Admin Wizard
+			// User is an admin. Show Setup Wizards
 			$this->startAdminWizard($homePageUrl,0);
 			
 		} else {
@@ -101,8 +102,8 @@ class WizardLib extends TikiLib
 	*/
 	public function showPages($pages, $adminWizard=false)
 	{
-		global	$smarty, $base_url;
-		
+		global $base_url;
+		$smarty = TikiLib::lib('smarty');
 		try {
 			if (!isset($_REQUEST['url'])) {
 				// User the base url as the return URL
@@ -121,11 +122,11 @@ class WizardLib extends TikiLib
 
 			// User pressed "Close".
 			//	Save the "Show on login" setting, and no other preferences
-			if (isset($_REQUEST['close'])) {
+			if (isset($_POST['close'])) {
 
 				if ($adminWizard) {
 					// Save "Show on login" setting
-					$showOnLogin = ( isset($_REQUEST['showOnLogin']) && $_REQUEST['showOnLogin'] == 'on' ) ? 'y' : 'n';
+					$showOnLogin = ( isset($_POST['showOnLogin']) && $_POST['showOnLogin'] == 'on' ) ? 'y' : 'n';
 					$this->showOnLogin($showOnLogin);
 				}
 
@@ -134,16 +135,16 @@ class WizardLib extends TikiLib
 				$accesslib->redirect($homepageUrl);
 			}
 
-			$isFirstStep = !isset($_REQUEST['wizard_step']);
-			$isUserStep = isset($_REQUEST['stepNr']);	// User defined step nr
+			$isFirstStep = !isset($_POST['wizard_step']);
+			$isUserStep = isset($_GET['stepNr']);	// User defined step nr
 			if ($isUserStep) {
-				$stepNr = intval($_REQUEST['stepNr']);
+				$stepNr = intval($_GET['stepNr']);
 			} else {
-				$stepNr = isset($_REQUEST['wizard_step']) ? intval($_REQUEST['wizard_step']) : 0;
+				$stepNr = isset($_POST['wizard_step']) ? intval($_POST['wizard_step']) : 0;
 			}
 
 			$stepBack = false;
-			if (isset($_REQUEST['back'])) {
+			if (isset($_POST['back'])) {
 				// Discard changes on page
 				//	Go to previous page
 				$stepNr -= 1;
@@ -178,6 +179,8 @@ class WizardLib extends TikiLib
 					
 						// Do not show page, if it doesn't return a boolean
 						if ($show === true) {
+							$template = $pages[$stepNr]->getTemplate();
+							$smarty->assign('wizardBody', $smarty->fetch($template));
 							$next = false;
 							break;
 						}
@@ -199,6 +202,8 @@ class WizardLib extends TikiLib
 
 					// Do not show page, if it doesn't return a boolean
 					if ($show === true) {
+						$template = $pages[$stepNr]->getTemplate();
+						$smarty->assign('wizardBody', $smarty->fetch($template));
 						$next = false;
 					}
 

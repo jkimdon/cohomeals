@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: validatorslib.php 47769 2013-09-27 00:21:13Z nkoth $
+// $Id: validatorslib.php 60772 2017-01-02 18:56:18Z rjsmelo $
 
 class Validators
 {
@@ -52,7 +52,7 @@ class Validators
 		return $validators;
 	}
 
-	function generateTrackerValidateJS( $fields_data, $prefix = 'ins_', $custom_rules = '', $custom_messages = '' )
+	function generateTrackerValidateJS( $fields_data, $prefix = 'ins_', $custom_rules = '', $custom_messages = '', $custom_handlers = '' )
 	{
 		$validationjs = 'rules: { ';
 		foreach ($fields_data as $field_value) {
@@ -91,14 +91,16 @@ class Validators
 					$validationjs .= 'data: { ';
 					$validationjs .= 'validator: "' .$field_value['validation'].'", ';
 					if ($field_value['validation'] == 'distinct' && empty($field_value['validationParam'])) {
-						if (isset($_REQUEST['itemId']) && $_REQUEST['itemId'] > 0) {
-							$current_id = $_REQUEST['itemId'];
+						global $jitRequest;
+
+						if ($jitRequest->itemId->int()) {
+							$current_id = $jitRequest->itemId->int();
 						} else {
 							$current_id = 0;
 						}
 						$validationjs .= 'parameter: "trackerId=' .$field_value['trackerId'].'&fieldId=' .$field_value['fieldId'] . '&itemId=' . $current_id . '", ';
 					} else {
-						$validationjs .= 'parameter: "' .$field_value['validationParam'].'", ';
+						$validationjs .= 'parameter: "' .addslashes($field_value['validationParam']).'", ';
 					}
 					$validationjs .= 'message: "' .tra($field_value['validationMessage']).'", ';
 					$validationjs .= 'input: function() { ';
@@ -141,10 +143,43 @@ class Validators
 		$validationjs .= $custom_messages;
 		// remove last comma (not supported in IE7)
 		$validationjs = rtrim($validationjs, ' ,');
-		$validationjs .= '} ';
+		$validationjs .= '}, ';
+		// Add an invalidHandler to scroll the first error into view
+		// works in both modal and full page modes and leaves the focus on the error input
+		$validationjs .= '
+focusInvalid: false,
+invalidHandler: function(event, validator) {
+	var errors = validator.numberOfInvalids();
+	if (errors) {
+		var $container = $(this).parents(".modal");
+		if (!$container.length) {
+			$container = $("html, body");
+		}
+		var containerScrollTop = $container.scrollTop(),
+			$firstError = $(validator.errorList[0].element),
+			$scrollElement = $firstError.parents(".form-group");
+
+		if (! $scrollElement.length) {
+			$scrollElement = $firstError;
+		}
+
+		if ($firstError.parents(".tab-content").length > 0) {
+			$tab = $firstError.parents(".tab-pane");
+			$(\'a[href="#\' + $tab.attr("id") + \'"]\').tab("show");
+		}
+
+		$container.animate({
+			scrollTop: containerScrollTop + $scrollElement.offset().top
+		}, 1000, function () {
+			$firstError.focus();
+		});
+	}
+}
+';
+		if ($custom_handlers) {
+			$validationjs .= ",\n$custom_handlers";
+		}
 		return $validationjs;
 	}
 }
 
-global $validatorslib;
-$validatorslib = new Validators;

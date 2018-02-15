@@ -1,17 +1,19 @@
-{* $Id: searchresults-plain.tpl 48006 2013-10-12 19:23:48Z jonnybradley $ *}
+{* $Id: searchresults-plain.tpl 58777 2016-06-03 14:35:47Z amnabilal $ *}
 {if $facets|@count}
 	<div class="facets" style="width: 25%; float: right;">
 		{foreach from=$facets item=facet}
-			<h6>{$facet.label|escape}</h6>
-			<select multiple data-for="#search-form input[name='filter~{$facet.name|escape}']" data-join="{$facet.operator|escape}">
-				{foreach from=$facet.options key=value item=label}
-					<option value="{$value|escape}">{$label|escape}</option>
-				{/foreach}
-			</select>
+			<div class="form-group facet-hide-group">
+				<label for="{$facet.name|escape}">{$facet.label|escape}</label>
+				<select id="{$facet.name|escape}" class="form-control" multiple data-for="#search-form input[name$='filter~{$facet.name|escape}']" data-join="{$facet.operator|escape}">
+					{foreach from=$facet.options key=value item=label}
+						<option value="{$value|escape}">{$label|escape}</option>
+					{/foreach}
+				</select>
+			</div>
 		{/foreach}
-		<p>
-			<button>{tr}Filter{/tr}</button>
-		</p>
+		<div class="form-group">
+			<button class="btn btn-default">{tr}Filter{/tr}</button>
+		</div>
 	</div>
 	{jq}
 		$('.facets select').registerFacet();
@@ -41,6 +43,8 @@
 		{/if}
 
 		{if !empty($result.parent_object_id)} {tr}in{/tr} {object_link type=$result.parent_object_type id=$result.parent_object_id}{/if}
+
+		{if $result._external}<span class="label label-info">{tr}External{/tr}</span>{/if}
 		</strong>
 
 		<blockquote>
@@ -52,7 +56,7 @@
 		</blockquote>
 	</li>
 	{foreachelse}
-		<li>{tr}No pages matched the search criteria{/tr}</li>
+			<li>{tr}No pages matched the search criteria test{/tr} </li>
 	{/foreach}
 </ul>
 {pagination_links resultset=$results}{/pagination_links}

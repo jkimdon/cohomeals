@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_vimeo.php 47938 2013-10-09 16:50:08Z jonnybradley $
+// $Id: wikiplugin_vimeo.php 58747 2016-05-31 23:00:07Z lindonb $
 
 require_once('lib/wiki-plugins/wikiplugin_flash.php');
 
@@ -14,17 +14,18 @@ function wikiplugin_vimeo_info()
 	return array(
 		'name' => tra('Vimeo'),
 		'documentation' => 'PluginVimeo',
-		'description' => tra('Display a Vimeo video'),
+		'description' => tra('Embed a Vimeo video'),
 		'prefs' => array( 'wikiplugin_vimeo' ),
-		'icon' => 'img/icons/vimeo.png',
+		'iconname' => 'vimeo',
 		'introduced' => 6.1,
 		'format' => 'html',
 		'params' => array(
 			'url' => array(
 				'required' => $prefs['vimeo_upload'] !== 'y',
 				'name' => tra('URL'),
-				'description' => tra('Entire URL to the Vimeo video. Example: http://vimeo.com/3319966') .
-								($prefs['vimeo_upload'] === 'y' ? ' ' . tra('or leave blank to upload one.') : ''),
+				'description' => tra('Complete URL to the Vimeo video. Example:') . ' <code>http://vimeo.com/3319966</code>'
+					.	($prefs['vimeo_upload'] === 'y' ? ' ' . tra('or leave blank to upload one.') : ''),
+				'since' => '6.1',
 				'filter' => 'url',
 				'default' => '',
 			),
@@ -32,22 +33,25 @@ function wikiplugin_vimeo_info()
 				'required' => false,
 				'name' => tra('Width'),
 				'description' => tra('Width in pixels'),
-				'filter' => 'digits',
+				'since' => '6.1',
+				'filter' => 'text',
 				'default' => 425,
 			),
 			'height' => array(
 				'required' => false,
 				'name' => tra('Height'),
 				'description' => tra('Height in pixels'),
-				'filter' => 'digits',
+				'since' => '6.1',
+				'filter' => 'text',
 				'default' => 350,
 			),
 			'quality' => array(
 				'required' => false,
 				'name' => tra('Quality'),
 				'description' => tra('Quality of the video'),
+				'since' => '6.1',
 				'filter' => 'alpha',
-    			'options' => array(
+				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('High'), 'value' => 'high'),
 					array('text' => tra('Medium'), 'value' => 'medium'),
@@ -60,8 +64,9 @@ function wikiplugin_vimeo_info()
 				'required' => false,
 				'name' => tra('Full screen'),
 				'description' => tra('Expand to full screen'),
+				'since' => '6.1',
 				'filter' => 'alpha',
-    			'options' => array(
+				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'true'),
 					array('text' => tra('No'), 'value' => 'false'),
@@ -72,8 +77,10 @@ function wikiplugin_vimeo_info()
 			'fileId' => array(
 				'required' => false,
 				'name' => tra('File ID'),
-				'description' => tra('Numeric ID of a Vimeo file in a File Gallery (or list separated by commas or |).'),
-				'filter' => 'striptags',
+				'description' => tr('Numeric ID of a Vimeo file in a File Gallery (or list separated by commas or %0).',
+					'<code>|</code>'),
+				'since' => '12.0',
+				'filter' => 'text',
 				'default' => '',
 				'advanced' => true
 			),
@@ -81,6 +88,7 @@ function wikiplugin_vimeo_info()
 				'required' => false,
 				'name' => tra('Field ID'),
 				'description' => tra('Numeric ID of a Tracker Files field, using Vimeo displayMode.'),
+				'since' => '12.0',
 				'filter' => 'int',
 				'default' => 0,
 				'advanced' => true
@@ -89,6 +97,7 @@ function wikiplugin_vimeo_info()
 				'required' => false,
 				'name' => tra('Item ID'),
 				'description' => tra('Numeric ID of a Tracker item, using Vimeo displayMode.'),
+				'since' => '12.0',
 				'filter' => 'int',
 				'default' => 0,
 				'advanced' => true
@@ -97,11 +106,109 @@ function wikiplugin_vimeo_info()
 				'required' => false,
 				'name' => tra('Gallery ID'),
 				'description' => tra('Gallery ID to upload to.'),
+				'since' => '12.0',
 				'filter' => 'int',
 				'advanced' => true
 			),
+			'useFroogaloopApi' => array(
+				'required' => false,
+				'name' => tra('Froogaloop API'),
+				'description' => tra('Use Vimeo Froogaloop API'),
+				'since' => '14.0',
+				'filter' => 'alpha',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'true'),
+					array('text' => tra('No'), 'value' => 'false'),
+				),
+				'default' => '',
+				'advanced' => true,
+			),
+			'showTitle' => array(
+				'required' => false,
+				'name' => tra('Show Title'),
+				'description' => tra('Show the Video Title') . ' ' . tra('(default is to show)'),
+				'since' => '15.0',
+				'filter' => 'alpha',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'true'),
+					array('text' => tra('No'), 'value' => 'false'),
+				),
+				'default' => '',
+				'advanced' => true,
+			),
+			'showByline' => array(
+				'required' => false,
+				'name' => tra('Show Byline') . ' ' . tra('(default is to show)'),
+				'description' => tra("Show the creator's byline"),
+				'since' => '15.0',
+				'filter' => 'alpha',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'true'),
+					array('text' => tra('No'), 'value' => 'false'),
+				),
+				'default' => '',
+				'advanced' => true,
+			),
+			'showPortrait' => array(
+				'required' => false,
+				'name' => tra('Show Portrait') . ' ' . tra('(default is to show)'),
+				'description' => tra("Show the creator's profile picture"),
+				'since' => '15.0',
+				'filter' => 'alpha',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'true'),
+					array('text' => tra('No'), 'value' => 'false'),
+				),
+				'default' => '',
+				'advanced' => true,
+			),
 		),
 	);
+}
+
+function vimeo_iframe($data, $params) {
+	if (!empty($params['height'])) {
+		$height = $params['height'];
+	} else {
+		$height = '350';
+	}	
+	if (!empty($params['width'])) {
+		$width = $params['width'];
+	} else {
+		$width = '425';
+	}
+
+	$urlparts = explode('/', $params['vimeo']);
+	foreach ($urlparts as $urlpart) {
+		if (ctype_digit($urlpart)) {
+			$vimeoId = $urlpart;
+		}
+	}	
+	if (!isset($vimeoId)) {
+		return '';
+	}
+	$url = '//player.vimeo.com/video/' . $vimeoId;
+
+	$args = [];
+	if (!empty($params['showTitle']) && $params['showTitle'] === 'false') {
+		$args['title'] = 0;
+	}
+	if (!empty($params['showByline']) && $params['showByline'] === 'false') {
+		$args['byline'] = 0;
+	}
+	if (!empty($params['showPortrait']) && $params['showPortrait'] === 'false') {
+		$args['portrait'] = 0;
+	}
+	if ($args) {
+		$url .= '?' . http_build_query($args);
+	}
+
+	$output = '<iframe data-fileid="' . $params['vimeo_fileId'] . '" id="' . $params['player_id'] . '" src="' . $url . '" width="' . $width . '" height="' . $height . '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+	return $output;
 }
 
 function wikiplugin_vimeo($data, $params)
@@ -110,10 +217,20 @@ function wikiplugin_vimeo($data, $params)
 	static $instance = 0;
 	$instance++;
 
+	if ($params['useFroogaloopApi']) { 
+		TikiLib::lib('header')->add_jsfile('vendor_extra/vimeo/froogaloop.min.js', true);
+		TikiLib::lib('header')->add_jsfile('vendor_extra/vimeo/vimeo.js');
+	}
+
 	if (isset($params['url'])) {
 		$params['vimeo'] = $params['url'];
+		$params['player_id'] = "pid_".uniqid(); 
+		$params['vimeo_fileId'] = 0;
 		unset($params['url']);
-		return wikiplugin_flash($data, $params);
+		if ($params['useFroogaloopApi']) {
+			$params['vimeo'] .= "?api=1&player_id=".$params['player_id'];
+		}
+		return vimeo_iframe($data, $params);
 	} elseif (isset($params['fileId'])) {
 		$fileIds = preg_split('/\D+/', $params['fileId'], -1, PREG_SPLIT_NO_EMPTY);
 		unset($params['fileId']);
@@ -124,9 +241,14 @@ function wikiplugin_vimeo($data, $params)
 			$attributes = $attributelib->get_attributes('file', $fileId);
 			if (!empty($attributes['tiki.content.url'])) {
 				$params['vimeo'] = $attributes['tiki.content.url'];
-				$out .= wikiplugin_flash($data, $params);
+				$params['player_id'] = "pid_".uniqid(); 
+				$params['vimeo_fileId'] = $fileId;
+				if ($params['useFroogaloopApi']) {
+					$params['vimeo'] .= "?api=1&player_id=".$params['player_id'];
+				}
+				$out .= vimeo_iframe($data, $params);
 			} else {
-				TikiLib::lib('errorreport')->report(tr('Vimeo video not found for file #%0', $fileId));
+				Feedback::error(tr('Vimeo video not found for file #%0', $fileId));
 			}
 		}
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_textarea.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: include_textarea.php 63549 2017-08-15 16:13:53Z robertokir $
 
 // This script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -16,17 +16,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 
 $parserlib = TikiLib::lib('parser');
 
-$plugins = array();
-foreach ($parserlib->plugin_get_list() as $name) {
-	$info = $parserlib->plugin_info($name);
-	if (isset($info['prefs']) && is_array($info['prefs']) && count($info['prefs']) > 0) {
-		$plugins[$name] = $info;
+if ($prefs['unified_search_textarea_admin'] === 'n' || $prefs['javascript_enabled'] === 'n') {
+	$plugins = array();
+	foreach ($parserlib->plugin_get_list() as $name) {
+		$info = $parserlib->plugin_info($name);
+		if (isset($info['prefs']) && is_array($info['prefs']) && count($info['prefs']) > 0) {
+			$plugins[$name] = $info;
+		}
 	}
-}
-$smarty->assign('plugins', $plugins);
-if (isset($_REQUEST['textareasetup']) && (getCookie('admin_textarea', 'tabs') != 3)) {
+	$smarty->assign('plugins', $plugins);
+}if (isset($_REQUEST['textareasetup']) && (getCookie('admin_textarea', 'tabs') != '#contentadmin_textarea-3')
+	&& $access->ticketMatch())
+{
 	// tab=3 is plugins alias tab (TODO improve)
-	ask_ticket('admin-inc-textarea');
 	foreach (glob('temp/cache/wikiplugin_*') as $file) {
 		unlink($file);
 	}
@@ -38,24 +40,13 @@ $cookietab = 1;
 global $tikilib;
 $pluginsAlias = WikiPlugin_Negotiator_Wiki_Alias::getList();
 $pluginsReal = $parserlib->plugin_get_list(true, false);
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-	global $cachelib;
-	require_once ('lib/cache/cachelib.php');
-	$areanames = array(
-		'editwiki',
-		'editpost',
-		'editpost2',
-		'blogedit',
-		'faqans',
-		'body',
-		'description',
-		'trackerDescription'
-	);
-	foreach ($tikilib->list_languages() as $tlang) {
-		foreach ($areanames as $an) {
-			$cachetag = 'plugindesc' . $tlang['value'] . $an . '_js=' . $prefs['javascript_enabled'];
-			$cachelib->invalidate($cachetag);
-		}
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $access->ticketMatch()) {
+	$cachelib = TikiLib::lib('cache');
+	$languages = TikiLib::lib('language')->list_languages();
+
+	foreach ($languages as $tlang) {
+		$cachetag = 'plugindesc' . $tlang['value'] . '_js=' . $prefs['javascript_enabled'];
+		$cachelib->invalidate($cachetag);
 	}
 	if (isset($_POST['enable'])) {
 		if (!is_array($_POST['enabled'])) {
@@ -72,15 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		if (!is_array($_POST['enabled'])) {
 			$_POST['enabled'] = array();
 		}
-		foreach ($pluginsAlias as $name) {
+		foreach ($_POST['enabled'] as $name) {
 			WikiPlugin_Negotiator_Wiki_Alias::delete($name);
 		}
 		$pluginsAlias = WikiPlugin_Negotiator_Wiki_Alias::getList();
 	}
-	if (isset($_POST['textareasetup'])
-			&& !in_array($_POST['plugin_alias'], $pluginsReal)
-			&& isset($_REQUEST['plugin_alias'])
-			&& (getCookie('admin_textarea', 'tabs') == 3)
+	if (! empty($_REQUEST['plugin_alias']) && ! in_array($_POST['plugin_alias'], $pluginsReal)
+			&& (getCookie('admin_textarea', 'tabs') == '#contentadmin_textarea-3')
 	) {
 		// tab=3 is plugins alias tab (TODO improve)
 		$info = array(
@@ -223,7 +212,7 @@ if (isset($_REQUEST['plugin_alias']) && $pluginInfo = WikiPlugin_Negotiator_Wiki
 $smarty->assign('plugins_alias', $pluginsAlias);
 $smarty->assign('plugins_real', $pluginsReal);
 
-if (isset($_REQUEST['disabled']) && $tiki_p_admin == 'y') {
+if (isset($_REQUEST['disabled']) && $tiki_p_admin == 'y' && $access->ticketMatch()) {
 	$offset = 0;
 	$disabled = array();
 	foreach ($parserlib->plugin_get_list() as $name) {
@@ -250,4 +239,4 @@ if (isset($_REQUEST['disabled']) && $tiki_p_admin == 'y') {
 	} while (true);
 	$smarty->assign_by_ref('disabled', $disabled);
 }
-setcookie('tab', $cookietab);
+

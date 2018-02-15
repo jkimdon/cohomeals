@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BrowseTreeMaker.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: BrowseTreeMaker.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 /** \file
  * \brief Browse a tree, for example a categories tree
@@ -22,13 +22,9 @@ class BrowseTreeMaker extends TreeMaker
 	/// Generate HTML code for tree. Need to redefine to add javascript cookies block
 	function make_tree($rootid, $ar)
 	{
-		global $headerlib, $prefs;
+		$headerlib = TikiLib::lib('header');
 
-		if ($prefs['mobile_feature'] === 'y' && $prefs['mobile_mode'] === 'y') {
-			$r = '<ul class="tree root" data-role="listview" data-inset="true">'."\n";
-		} else {
-			$r = '<ul class="tree root">'."\n";
-		}
+		$r = '<ul class="tree root">'."\n";
 
 		$r .= $this->make_tree_r($rootid, $ar) . "</ul>\n";
 
@@ -63,18 +59,12 @@ class BrowseTreeMaker extends TreeMaker
 
 	function node_start_code_flip($nodeinfo, $count=0)
 	{
-	        if ( $nodeinfo["id"] == $this->currentGalleryId ) 
-		         return "\t" . '<li class="treenode withflip ' . 'current' . '">';
-		else
-		         return "\t" . '<li class="treenode withflip ' . (($count % 2) ? 'odd' : 'even') . '">';
+		return "\t" . '<li class="treenode withflip ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
 
 	function node_start_code($nodeinfo, $count=0)
 	{
-	        if ( $nodeinfo["id"] == $this->currentGalleryId ) 
-		         return "\t" . '<li class="treenode ' . 'current' . '">';
-		else
-		         return "\t" . '<li class="treenode ' . (($count % 2) ? 'odd' : 'even') . '">';
+		return "\t" . '<li class="treenode ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
 
 	//

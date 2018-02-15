@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-since_last_visit.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-since_last_visit.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -18,7 +18,7 @@ function module_since_last_visit_info()
 {
 	return array(
 		'name' => tra('Since Last Visit (Simple)'),
-		'description' => tra('Displays to logged in users the number of new or updated objects since their last login date and time.')
+		'description' => tra('Displays to logged-in users the number of new or updated objects since their last login date and time.')
 	);
 }
 
@@ -28,9 +28,11 @@ function module_since_last_visit_info()
  */
 function module_since_last_visit($mod_reference, $params = null)
 {
-	global $user, $tikilib, $smarty;
-	$nvi_info = $tikilib->get_news_from_last_visit($user);
+	global $user;
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 
+	$nvi_info = $tikilib->get_news_from_last_visit($user);
 	$smarty->assign('nvi_info', $nvi_info);
 	$smarty->assign('tpl_module_title', tra('Since your last visit'));
 }

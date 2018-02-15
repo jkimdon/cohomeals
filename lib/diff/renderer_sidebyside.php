@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_sidebyside.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: renderer_sidebyside.php 60916 2017-01-17 03:30:09Z drsassafras $
 
 /**
  * "Side-by-Side" diff renderer.
@@ -14,7 +14,7 @@
  */
 class Text_Diff_Renderer_sidebyside extends Tiki_Text_Diff_Renderer
 {
-    function Text_Diff_Renderer_sidebyside($context_lines = 4, $words = 1)
+    function __construct($context_lines = 4, $words = 1)
     {
         $this->_leading_context_lines = $context_lines;
         $this->_trailing_context_lines = $context_lines;
@@ -24,7 +24,7 @@ class Text_Diff_Renderer_sidebyside extends Tiki_Text_Diff_Renderer
     function _startDiff()
     {
         ob_start();
-        //echo '<table class="normal diff">';
+        //echo '<table class="table-bordered diff">';
     }
 
     function _endDiff()
@@ -82,9 +82,9 @@ class Text_Diff_Renderer_sidebyside extends Tiki_Text_Diff_Renderer
 	            echo "<tr><td class='diffdeleted'>$prefix</td><td class='diffdeleted'>$line</td><td colspan='2'>&nbsp;</td></tr>\n";
 	        }
     	} elseif ($type == 'change-deleted') {
-    		echo '<tr><td class="diffdeleted" valign="top">'.$prefix.'</td><td class="diffdeleted" valign="top">'.implode("<br />", $lines)."</td>\n";
+    		echo '<tr><td class="diffdeleted">'.$prefix.'</td><td class="diffdeleted">'.implode("<br />", $lines)."</td>\n";
     	} elseif ($type == 'change-added') {
-    		echo '<td class="diffadded" valign="top">'.$prefix.'</td><td class="diffadded" valign="top">'.implode("<br />", $lines)."</td></tr>\n";
+    		echo '<td class="diffadded">'.$prefix.'</td><td class="diffadded">'.implode("<br />", $lines)."</td></tr>\n";
     	}
     }
 

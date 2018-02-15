@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-wiki_last_comments.php 47408 2013-09-11 10:49:21Z jonnybradley $
+// $Id: mod-func-wiki_last_comments.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -39,8 +39,8 @@ function module_wiki_last_comments_info()
 				'default' => 40,
 			),
 			'avatars' => array(
-				'name' => tra('Show user avatars'),
-				'description' => tra("Display user avatars instead of numbers."),
+				'name' => tra('Show user profile pictures'),
+				'description' => tra('Display user profile pictures instead of numbers.'),
 				'filter' => 'alpha',
 				'default' => 'n',
 			),
@@ -129,11 +129,11 @@ function module_wiki_last_comments($mod_reference, $module_params)
 			return $ret;
 		}
 	}
-	global $smarty, $prefs;
+	global $prefs;
 	if (!isset($module_params['type'])) $module_params['type'] = "wiki page";
 	if (!isset($module_params['commentlength'])) $module_params['commentlength'] = 40;
 	if (!isset($module_params['avatars'])) $module_params['avatars'] = 'n';
-
+	$smarty = TikiLib::lib('smarty');
 	switch ($module_params['type']) {
 		case 'cms': case 'article': case 'articles':
 			if (!$prefs['feature_articles']) {

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.filter.php 46972 2013-08-02 20:41:01Z lphuberdeau $
+// $Id: block.filter.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 /**
  * Smarty plugin
@@ -63,7 +63,7 @@ function smarty_block_filter($params, $content, $smarty, &$repeat)
 		$smarty->assign('filter_categmap', json_encode(TikiDb::get()->fetchMap('SELECT categId, name FROM tiki_categories')));
 
 		// Generate the category tree {{{
-		global $categlib; require_once 'lib/categories/categlib.php';
+		$categlib = TikiLib::lib('categ');
 		require_once 'lib/tree/BrowseTreeMaker.php';
 		$ctall = $categlib->getCategories();
 
@@ -96,7 +96,7 @@ BODY;
 	}
 
 	if ($prefs['feature_freetags'] == 'y') {
-		global $freetaglib; require_once 'lib/freetag/freetaglib.php';
+		$freetaglib = TikiLib::lib('freetag');
 
 		$smarty->assign('filter_tags', isset($filter['tags']) ? $filter['tags'] : '');
 		$smarty->assign('filter_tagmap', json_encode(TikiDb::get()->fetchMap('SELECT tagId, tag FROM tiki_freetags')));
@@ -105,7 +105,8 @@ BODY;
 
 	// Language
 	if ($prefs['feature_multilingual'] == 'y') {
-		$languages = $tikilib->list_languages();
+		$langLib = TikiLib::lib('language');
+		$languages = $langLib->list_languages();
 		$smarty->assign('filter_languages', $languages);
 		$smarty->assign('filter_language_unspecified', isset($filter['language_unspecified']));
 		$smarty->assign('filter_language', isset($filter['language']) ? $filter['language'] : '');

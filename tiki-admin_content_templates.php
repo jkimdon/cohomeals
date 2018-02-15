@@ -2,22 +2,20 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_content_templates.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_content_templates.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'admin';
 require_once ('tiki-setup.php');
-$access->check_feature(array('feature_wiki_templates','feature_cms_templates'), '', 'features', true);
+$access->check_feature(array('feature_wiki_templates','feature_cms_templates','feature_file_galleries_templates'), '', 'features', true);
 
-global $templateslib;
-include_once ('lib/templates/templateslib.php');
+$templateslib = TikiLib::lib('template');
 
 $auto_query_args = array('templateId');
 
-$access->check_permission('tiki_p_edit_content_templates');
 //get_strings tra('Content Templates')
 
 if (!isset($_REQUEST["templateId"])) {
@@ -79,6 +77,9 @@ if ($_REQUEST["templateId"]) {
 	$info["section_newsletters"] = 'n';
 	$info["section_event"] = 'n';
 }
+$cat_type = 'template';
+$cat_objid = $_REQUEST['templateId'];
+include_once ("categorize_list.php");
 
 $smarty->assign_by_ref('info', $info);
 if (isset($_REQUEST["remove"])) {
@@ -91,13 +92,16 @@ if (isset($_REQUEST["removesection"])) {
 }
 $smarty->assign('preview', 'n');
 if (isset($_REQUEST["preview"])) {
+
+	TikiLib::lib('access')->check_permission('edit_content_templates', 'Edit template', 'template', $_REQUEST['templateId']);
+
 	$smarty->assign('preview', 'y');
 	if (isset($_REQUEST["section_html"]) && $_REQUEST["section_html"] == 'on') {
 		$info["section_html"] = 'y';
 		$parsed = nl2br($_REQUEST["content"]);
 	} else {
 		$info["section_html"] = 'n';
-		$parsed = $tikilib->parse_data($_REQUEST["content"], array('is_html' => $info['section_wiki_html'] === 'y'));
+		$parsed = TikiLib::lib('parser')->parse_data($_REQUEST["content"], array('is_html' => $info['section_wiki_html'] === 'y'));
 	}
 	$smarty->assign('parsed', $parsed);
 	if (isset($_REQUEST["section_wiki"]) && $_REQUEST["section_wiki"] == 'on') {
@@ -130,6 +134,8 @@ if (isset($_REQUEST["preview"])) {
 	$info['page_name'] = $_REQUEST['page_name'];
 	$info['template_type'] = $_REQUEST['template_type'];
 	$smarty->assign('info', $info);
+
+	$cookietab = 2;
 }
 if (isset($_REQUEST["save"])) {
 	check_ticket('admin-content-templates');
@@ -188,6 +194,22 @@ if (isset($_REQUEST["save"])) {
 		} else {
 			$templateslib->remove_template_from_section($tid, 'html');
 		}
+
+		$cat_type = 'template';
+		$cat_objid = $tid;
+		$cat_desc = '';
+		$cat_name = $_REQUEST["name"];
+		$cat_href = "tiki-admin_content_templates.php?templateId=" . $cat_objid;
+		include_once ("categorize.php");
+
+		// Locking: only needed on new templates, ajax locks existing ones
+		if ($prefs['lock_content_templates'] === 'y' && empty($_REQUEST['templateId'])) {
+			if (!empty($_REQUEST['locked'])) {
+				TikiLib::lib('attribute')->set_attribute('template', $tid, 'tiki.object.lock', $_REQUEST['locked']);
+			}
+		}
+
+		$cookietab = 1;
 	} else {
 		$smarty->assign("templateId", '0');
 		$info["name"] = '';
@@ -201,6 +223,8 @@ if (isset($_REQUEST["save"])) {
 		$info["section_html"] = (isset($_REQUEST["section_html"]) && $_REQUEST["section_html"] == 'on') ? 'y' : 'n';
 		$smarty->assign('info', $info);
 		$smarty->assign('emptyname', "true");
+
+		$cookietab = 2;
 	}
 }
 if (!isset($_REQUEST["sort_mode"])) {
@@ -233,7 +257,7 @@ include 'lib/setup/editmode.php';
 $info['section_wiki_html'] = $_SESSION['wysiwyg'];	//$info['is_html'] ? 'y' : 'n';
 
 // Handles switching editor modes
-global $editlib; include_once ('lib/wiki/editlib.php');
+$editlib = TikiLib::lib('edit');
 if (isset($_REQUEST['mode_normal']) && $_REQUEST['mode_normal']=='y') {
 	// Parsing page data as first time seeing html page in normal editor
 	$smarty->assign('msg', "Parsing html to wiki");
@@ -246,10 +270,26 @@ if (isset($_REQUEST['mode_normal']) && $_REQUEST['mode_normal']=='y') {
 	$smarty->assign('parsed', $parsed);
 }
 
+// check edit/create perms
+if ($_REQUEST['templateId']) {
+	$perms = Perms::get(array('type' => 'template', 'object' => $_REQUEST['templateId']));
+	$canEdit = $perms->edit_content_templates;
+	if ($prefs['lock_content_templates'] === 'y' && $canEdit) {	// check for locked
+		$lockedby = TikiLib::lib('attribute')->get_attribute('template', $_REQUEST['templateId'], 'tiki.object.lock');
+		if ($lockedby && $lockedby === $user && $perms->lock_content_templates || ! $lockedby || $perms->admin_content_templates) {
+			$canEdit = true;
+		} else {
+			$canEdit = false;
+		}
+	}
+} else {
+	$canEdit = ($tiki_p_admin_content_templates === 'y') || ($tiki_p_admin === 'y');	// create
+}
+$smarty->assign('canEdit', $canEdit);
+
 $smarty->assign_by_ref('channels', $channels["data"]);
 ask_ticket('admin-content-templates');
-global $wikilib;
-include_once ('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 $plugins = $wikilib->list_plugins(true, 'editwiki');
 $smarty->assign_by_ref('plugins', $plugins);
 // disallow robots to index page:

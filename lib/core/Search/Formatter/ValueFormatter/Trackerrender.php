@@ -1,15 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Trackerrender.php 51191 2014-05-09 13:54:03Z lphuberdeau $
+// $Id: Trackerrender.php 60105 2016-11-01 10:47:15Z jonnybradley $
 
 class Search_Formatter_ValueFormatter_Trackerrender extends Search_Formatter_ValueFormatter_Abstract
 {
 	private $list_mode = 'n';
 	private $cancache = null;
 	private $editable = false;
+	private $group = false;
 
 	function __construct($arguments)
 	{
@@ -21,8 +22,15 @@ class Search_Formatter_ValueFormatter_Trackerrender extends Search_Formatter_Val
 			}
 		}
 
-		if (isset($arguments['editable']) && in_array($arguments['editable'], array('block', 'inline'))) {
-			$this->editable = $arguments['editable'];
+		if (isset($arguments['editable'])) {
+			$parts = explode(' ', $arguments['editable']);
+			$editable = array_shift($parts);
+			$group = array_shift($parts);
+
+			if (in_array($editable, array('block', 'inline', 'dialog'))) {
+				$this->editable = $editable;
+				$this->group = $group;
+			}
 		}
 	}
 
@@ -42,8 +50,10 @@ class Search_Formatter_ValueFormatter_Trackerrender extends Search_Formatter_Val
 				break;
 			}
 
-			$alt = tr($status);
-			return "<img src=\"img/icons/status_$status.gif\" alt=\"$status\"/>";
+			$smarty = TikiLib::lib('smarty');
+			$smarty->loadPlugin('smarty_function_icon');
+			return smarty_function_icon(['name' => 'status-' . $status, 'iclass' => 'tips', 'ititle' => ':'
+				. ucfirst($status) ], $smarty);
 		} elseif (substr($name, 0, 14) !== 'tracker_field_') {
 			return $value;
 		}
@@ -53,9 +63,28 @@ class Search_Formatter_ValueFormatter_Trackerrender extends Search_Formatter_Val
 			return $value;
 		}
 		$field = $tracker->getField(substr($name, 14));
+
+		// check translations of multilingual fields
+		global $prefs;
+		if ($field['isMultilingual'] === 'y' && isset($entry[$name . '_' . $prefs['language']])) {
+			$name = $name . '_' . $prefs['language'];
+			$value = $entry[$name];
+		}
+		// TextArea fields need the raw wiki syntax here for it to get wiki parsed if necessary
+		if ($field['type'] === 'a' && isset($entry[$name . '_raw'])) {
+			$value = $entry[$name . '_raw'];
+		} elseif( in_array($field['type'], array('f', 'j')) ) {
+			$formatter = new Search_Formatter_ValueFormatter_Datetime();
+			$value = $formatter->timestamp($value);
+		}
 		$field['value'] = $value;
 
 		$this->cancache = ! in_array($field['type'], array('STARS', 's'));	// don't cache ratings fields
+
+		if ($this->editable) {
+			// Caching breaks inline editing
+			$this->cancache = false;
+		}
 
 		$item = array();
 		if ($entry['object_type'] == 'trackeritem') {
@@ -71,6 +100,8 @@ class Search_Formatter_ValueFormatter_Trackerrender extends Search_Formatter_Val
 				'search_render' => 'y',
 				'list_mode' => $this->list_mode,
 				'editable' => $this->editable,
+				'editgroup' => $this->group,
+				'showpopup' => $field['isMain'],
 			)
 		);
 		return '~np~' . $rendered . '~/np~';

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: perform_trade.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: perform_trade.php 57966 2016-03-17 20:05:33Z jonnybradley $
 
 
 /**
@@ -20,7 +20,10 @@
  */
 function payment_behavior_perform_trade( $params )
 {
-	global $userlib, $paymentlib, $prefs, $cclitelib, $smarty;
+	global $prefs, $cclitelib;
+	$userlib = TikiLib::lib('user');
+	$paymentlib = TikiLib::lib('payment');
+	$smarty = TikiLib::lib('smarty');
 	require_once 'lib/payment/cclitelib.php';
 
 	$default = array( 'wanted' => 'n', 'registry' => '', 'currency' => '' );
@@ -53,7 +56,7 @@ function payment_behavior_perform_trade( $params )
 		$smarty->assign('ccresult2', $result);
 		$smarty->assign('ccresult_ok', (strpos($result, 'Transaction Accepted') !== false));
 	} else {
-		$smarty->assign('ccresult2', tr('Payment sent but verification not currently available. (Work in progress)'));
+		$smarty->assign('ccresult2', tr('Payment was sent but verification is not currently available (this feature is a work in progress)'));
 	}
 	return $result;
 }

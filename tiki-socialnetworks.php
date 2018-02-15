@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-socialnetworks.php 50740 2014-04-10 16:55:01Z jonnybradley $
+// $Id: tiki-socialnetworks.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
@@ -39,7 +39,10 @@ if ($user) {
 	$token=$tikilib->get_user_preference($user, 'twitter_token', '');
 	$smarty->assign('twitter', ($token!=''));
 }
-
+if ($user) {
+	$token=$tikilib->get_user_preference($user, 'linkedin_token', '');
+	$smarty->assign('linkedIn', ($token!=''));
+}
 if (isset($_REQUEST['request_facebook'])) {
 	if ($prefs["socialnetworks_facebook_login"] != 'y') {
 		$access->check_user($user);
@@ -84,6 +87,7 @@ if ($user) {
 }
 $smarty->assign('twitterRegistered', $socialnetworkslib->twitterRegistered());
 $smarty->assign('facebookRegistered', $socialnetworkslib->facebookRegistered());
+$smarty->assign('linkedInRegistered', $socialnetworkslib->linkedInRegistered());
 
 ask_ticket('socialnetworks');
 $smarty->assign('mid', 'tiki-socialnetworks.tpl');

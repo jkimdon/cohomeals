@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_rssmodules.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_rssmodules.php 62097 2017-04-05 16:28:48Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/rss/rsslib.php');
+$rsslib = TikiLib::lib('rss');
 //get_strings tra('External Feeds')
 $auto_query_args = array(
 	'rssId',
@@ -18,9 +18,7 @@ $auto_query_args = array(
 	'sort_mode',
 	'find'
 );
-if (!isset($rsslib)) {
-	$rsslib = new RssLib;
-}
+
 $access->check_permission('tiki_p_admin_rssmodules');
 
 if (isset($_REQUEST["rssId"])) {
@@ -81,11 +79,16 @@ if ( isset($_REQUEST['article']) && $prefs['feature_articles'] == 'y' ) {
 				'active' => isset( $_POST['enable'] ),
 				'expiry' => $jitPost->expiry->int(),
 				'atype' => $jitPost->type->text(),
+				'custom_atype' => $jitPost->asArray('custom_atype'),
 				'topic' => $jitPost->topic->int(),
+				'custom_topic' => $jitPost->asArray('custom_topic'),
 				'future_publish' => $jitPost->future_publish->int(),
 				'categories' => (array) $jitPost->cat_categories->int(),
 				'rating' => $jitPost->rating->int(),
+				'custom_rating' => $jitPost->asArray('custom_rating'),
 				'submission' => isset( $_POST['submission'] ),
+				'custom_priority' => $jitPost->asArray('custom_priority'),
+				'a_lang' => $jitPost->a_lang->word(),
 			)
 		);
 		$cookietab = 1;
@@ -95,9 +98,14 @@ if ( isset($_REQUEST['article']) && $prefs['feature_articles'] == 'y' ) {
 
 	$config = $rsslib->get_article_generator($_REQUEST['article']);
 	$smarty->assign('articleConfig', $config);
-	$smarty->assign('ratingOptions', range(0, 10));
+	$smarty->assign('ratingOptions', array_map('strval', range(0, 10)));
 
-	global $artlib; require_once 'lib/articles/artlib.php';
+	$sourcecats = $rsslib->get_feed_source_categories($_REQUEST["article"]);
+	$smarty->assign('sourcecats', $sourcecats);
+	$article_custom_info = $rsslib->get_article_custom_info($_REQUEST["article"]);
+	$smarty->assign('article_custom_info', $article_custom_info);
+
+	$artlib = TikiLib::lib('art');
 	$smarty->assign('topics', $artlib->list_topics());
 	$smarty->assign('types', $artlib->list_types());
 
@@ -149,6 +157,12 @@ if (isset($_REQUEST["find"])) {
 	$find = $_REQUEST["find"];
 } else {
 	$find = '';
+}
+if ($prefs['feature_multilingual'] == 'y') {
+	$languages = array();
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages();
+	$smarty->assign_by_ref('languages', $languages);
 }
 $smarty->assign('find', $find);
 $smarty->assign_by_ref('sort_mode', $sort_mode);

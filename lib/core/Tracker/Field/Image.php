@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Image.php 47289 2013-08-27 12:19:56Z lphuberdeau $
+// $Id: Image.php 58091 2016-03-28 09:44:07Z jonnybradley $
 
 /**
  * Handler class for Image
@@ -21,11 +21,11 @@ class Tracker_field_Image extends Tracker_Field_File
 		return array(
 			'i' => array(
 				'name' => tr('Image'),
-				'description' => tr('Allow users to upload images on the tracker item.'),
+				'description' => tr('Deprecated in favor of the Files field.'),
 				'help' => 'Image Tracker Field',
 				'prefs' => array('trackerfield_image'),
 				'tags' => array('basic'),
-				'default' => 'y',
+				'default' => 'n',
 				'params' => array(
 					'xListSize' => array(
 						'name' => tr('List image width'),
@@ -93,8 +93,8 @@ class Tracker_field_Image extends Tracker_Field_File
 
 	function getFieldData(array $requestData = array())
 	{
-		global $prefs, $smarty;
-
+		global $prefs;
+		$smarty = TikiLib::lib('smarty');
 		$ins_id = $this->getInsertId();
 
 		if (!empty($prefs['fgal_match_regex']) && !empty($_FILES[$ins_id]['name'])) {
@@ -111,6 +111,12 @@ class Tracker_field_Image extends Tracker_Field_File
 				die;
 			}
 		}
+
+		// "Blank" means remove image
+		if (!empty($requestData[$ins_id]) && $requestData[$ins_id] == 'blank') {
+			return array( 'value' => 'blank' );
+		}
+
 		if (!empty($requestData)) {
 			return parent::getFieldData($requestData);
 		} else {
@@ -144,7 +150,7 @@ class Tracker_field_Image extends Tracker_Field_File
 					$rel = '['.$this->getConfiguration('fieldId').']';
     				break;
 				}
-				$pre = "<a href=\"$val\" rel=\"shadowbox$rel;type=img\">";
+				$pre = "<a href=\"$val\" data-box=\"shadowbox$rel;type=img\">";
 			}
 			if ( $this->getOption('xListSize') || $this->getOption('yListSize') || $this->getOption('xDetailSize') || $this->getOption('yDetailSize')) {
 				$image_size_info = getimagesize($val);
@@ -295,5 +301,14 @@ class Tracker_field_Image extends Tracker_Field_File
 		return in_array($mimeType, $this->imgMimeTypes);
 	}
 
+	function getDocumentPart(Search_Type_Factory_Interface $typeFactory)
+	{
+		$value = $this->getValue();
+		$baseKey = $this->getBaseKey();
+
+		return array(
+			$baseKey => $typeFactory->plaintext($value),
+		);
+	}
 }
 

@@ -1,9 +1,9 @@
 <?php // -*- coding:utf-8 -*-
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: langmapping.php 50612 2014-04-02 11:44:30Z jp_eagle $
+// $Id: langmapping.php 58905 2016-06-14 12:48:12Z amnabilal $
 
 /** \brief this table associates language extension and language name in the current language and language name in the native language
 * CAUTION: it is utf-8 encoding !
@@ -68,5 +68,7 @@ $langmapping = array(
 	'tr' => array('Türkçe', tra("Turkish")),
 	'tw' => array('正體中文', tra("Traditional Chinese")),
 	'uk' => array('Українська', tra("Ukrainian")),
+     'ur' => array('اردو', tra("Urdu")),
+
 	'vi' => array('Tiếng Việt', tra("Vietnamese")),
 );

@@ -1,24 +1,27 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_youtube.php 52390 2014-08-26 11:50:35Z jonnybradley $
+// $Id: wikiplugin_youtube.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_youtube_info()
 {
 	return array(
 		'name' => tra('YouTube'),
 		'documentation' => 'PluginYouTube',
-		'description' => tra('Display a YouTube video'),
+		'description' => tra('Embed a YouTube video in a page'),
 		'prefs' => array( 'wikiplugin_youtube' ),
-		'icon' => 'img/icons/youtube.png',
+		'iconname' => 'youtube',
+		'introduced' => 2,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'movie' => array(
 				'required' => true,
 				'name' => tra('Movie'),
-				'description' => tra('Entire URL to the YouTube video or last part (after www.youtube.com/v/ and before the first question mark)'),
+				'description' => tr('Complete URL to the YouTube video or last part (after %0www.youtube.com/v/%1 and
+					before the first question mark)', '<code>', '</code>'),
+				'since' => '2.0',
 				'filter' => 'url',
 				'default' => '',
 			),
@@ -37,21 +40,31 @@ function wikiplugin_youtube_info()
 			'width' => array(
 				'required' => false,
 				'name' => tra('Width'),
-				'description' => tra('Width in pixels'),
+				'description' => tra('Width in pixels.') . ' ' . tra('Default')  . ' :<code>425</code>',
+				'since' => '2.0',
 				'filter' => 'digits',
 				'default' => 425,
 			),
 			'height' => array(
 				'required' => false,
 				'name' => tra('Height'),
-				'description' => tra('Height in pixels'),
+				'description' => tra('Height in pixels') . ' ' . tra('Default')  . ' :<code>350</code>',
+				'since' => '2.0',
 				'filter' => 'digits',
 				'default' => 350,
+			),
+			'start' => array(
+				'required' => false,
+				'name' => tra('Start time'),
+				'description' => tra('Start time offset in seconds'),
+				'filter' => 'digits',
+				'default' => 0,
 			),
 			'quality' => array(
 				'required' => false,
 				'name' => tra('Quality'),
-				'description' => tra('Quality of the video. Default is high.'),
+				'description' => tr('Quality of the video. Default is %0high%1.', '<code>', '</code>'),
+				'since' => '2.0',
 				'default' => 'high',
 				'filter' => 'alpha',
     			'options' => array(
@@ -64,8 +77,9 @@ function wikiplugin_youtube_info()
 			),
 			'allowFullScreen' => array(
 				'required' => false,
-				'name' => tra('Allow Fullscreen'),
+				'name' => tra('Allow full-screen'),
 				'description' => tra('Enlarge video to full screen size'),
+				'since' => '5.0',
 				'default' => '',
 				'filter' => 'alpha',
      			'options' => array(
@@ -79,7 +93,7 @@ function wikiplugin_youtube_info()
 				'required' => false,
 				'name' => tra('Related'),
 				'description' => tra('Show related videos (shown by default)'),
-				'since' => 6.1,
+				'since' => '6.1',
 				'default' => '',
 				'filter' => 'alpha',
     			'options' => array(
@@ -92,20 +106,22 @@ function wikiplugin_youtube_info()
 			'background' => array(
 				'required' => false,
 				'name' => tra('Background'),
-				'description' => tra('Toolbar background color. Use an HTML color code. Example: ffffff'),
+				'description' => tra('Toolbar background color. Use an HTML color code.') . ' ' . tra('Example')
+					. ': <code>ffffff</code>',
 				'accepted' => tra('HTML color code, e.g. ffffff'),
-				'since' => 6.1,
-				'filter' => 'striptags',
+				'since' => '6.1',
+				'filter' => 'text',
 				'default' => '',
 				'advanced' => true
 			),
 			'border' => array(
 				'required' => false,
 				'name' => tra('Borders'),
-				'description' => tra('Toolbar border colors. Use an HTML color code. Example: ffffff'),
+				'description' => tra('Toolbar border colors. Use an HTML color code.') . ' ' . tra('Example')
+					. ': <code>ffffff</code>',
 				'accepted' => tra('HTML color code, e.g. ffffff'),
-				'since' => 6.1,
-				'filter' => 'striptags',
+				'since' => '6.1',
+				'filter' => 'text',
 				'default' => '',
 				'advanced' => true
 			),
@@ -154,6 +170,9 @@ function wikiplugin_youtube($data, $params)
 		} else {
 			$params['movie'] .= '&fs=0';
 		}
+	}
+	if (!empty($params['start'])) {
+		$params['movie'] .= '&start=' . $params['start'];
 	}
 	if (isset($params['related']) && $params['related'] == 'n') {
 		$params['movie'] .= '&rel=0';

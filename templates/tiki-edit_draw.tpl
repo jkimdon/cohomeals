@@ -1,4 +1,4 @@
-{* $Id: tiki-edit_draw.tpl 47507 2013-09-16 13:52:16Z chibaguy $ *}
+{* $Id: tiki-edit_draw.tpl 53176 2014-11-21 23:12:16Z jyhem $ *}
 {if $drawFullscreen neq 'true'}
 	{title help="Draw"}{$name}{/title}
 {/if}
@@ -7,7 +7,7 @@
 	<span style="display: none;">
 		<textarea id="fileData">{$data}</textarea>
 	</span>
-	
+
 	<input type="hidden" id="fileId" value="{$fileId}">
 	<input type="hidden" id="galleryId" value="{$galleryId}">
 	<input type="hidden" id="fileName" value="{$name}">
@@ -15,7 +15,7 @@
 	<input type="hidden" id="fileHeight" value="{$height}">
 	<input type="hidden" id="archive" value="{$archive}">
 	<input type="hidden" name="action" value="replace">
-	
+
 	<div id="drawEditor">
 		<div id="drawMenu">
 			{if $drawFullscreen neq 'true'}
@@ -25,10 +25,10 @@
 				<button id="drawBack">{tr}Back{/tr}</button>
 				<button id="drawFullscreen">{tr}Toggle Fullscreen{/tr}</button>
 			{else}
-				<input type="submit" class="btn btn-default" style="display: none;" value="{tr}Save{/tr}">
+				<input type="submit" class="btn btn-default btn-sm" style="display: none;" value="{tr}Save{/tr}">
 			{/if}
 		</div>
 	</div>
-	
+
 	<div id="map">{$map}</div>
 </form>

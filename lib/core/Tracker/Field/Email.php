@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Email.php 52501 2014-09-12 16:07:04Z jonnybradley $
+// $Id: Email.php 63350 2017-07-26 05:04:53Z kroky6 $
 
 /**
  * Handler class for simple fields:
  * 
  * - email key ~m~
  */
-class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable
+class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Tracker_Field_Exportable, Tracker_Field_Filterable
 {
 	private $type;
 
@@ -19,8 +19,8 @@ class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Fiel
 		return array(
 			'm' => array(
 				'name' => tr('Email'),
-				'description' => tr('Allows an email address to be input with options of making it active.'),
-				'help' => 'Email Tracker Field',				
+				'description' => tr('Allows an email address to be input with the option of making it active.'),
+				'help' => 'Email Tracker Field',
 				'prefs' => array('trackerfield_email'),
 				'tags' => array('basic'),
 				'default' => 'y',
@@ -56,7 +56,7 @@ class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Fiel
 						),
 						'legacy_index' => 2,
 					),
-					'watchopen' => array(
+					'watchclosed' => array(
 						'name' => tr('Watch Closed'),
 						'description' => tr('Notify this address every time the status changes to closed.'),
 						'filter' => 'alpha',
@@ -83,6 +83,27 @@ class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Fiel
 	{
 		$this->type = $type;
 		parent::__construct($fieldInfo, $itemData, $trackerDefinition);
+	}
+
+	function getDocumentPart(Search_Type_Factory_Interface $typeFactory)
+	{
+		$baseKey = $this->getBaseKey();
+		return array(
+			$baseKey => $typeFactory->sortable($this->getValue()),
+			"{$baseKey}_text" => $typeFactory->identifier($this->getValue()),
+		);
+	}
+
+	function getProvidedFields()
+	{
+		$baseKey = $this->getBaseKey();
+		return array($baseKey, "{$baseKey}_text");
+	}
+
+	function getGlobalFields()
+	{
+		$baseKey = $this->getBaseKey();
+		return array($baseKey => true, "{$baseKey}_text" => true);
 	}
 	
 	function getFieldData(array $requestData = array())
@@ -131,6 +152,61 @@ class Tracker_Field_Email extends Tracker_Field_Abstract implements Tracker_Fiel
 	function importRemoteField(array $info, array $syncInfo)
 	{
 		return $info;
+	}
+
+	function getTabularSchema()
+	{
+		$schema = new Tracker\Tabular\Schema($this->getTrackerDefinition());
+
+		$permName = $this->getConfiguration('permName');
+		$smarty = TikiLib::lib('smarty');
+		$smarty->loadPlugin('smarty_modifier_escape');
+
+		$schema->addNew($permName, 'default')
+			->setLabel($this->getConfiguration('name'))
+			->setRenderTransform(function ($value) {
+				return $value;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = $value;
+			})
+			;
+		$schema->addNew($permName, 'mailto')
+			->setLabel($this->getConfiguration('name'))
+			->setPlainReplacement('default')
+			->setRenderTransform(function ($value) {
+				$escape = smarty_modifier_escape($value);
+				return "<a href=\"mailto:$escape\">$escape</a>";
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = strip_tags($value);
+			})
+			;
+
+		return $schema;
+	}
+
+	function getFilterCollection()
+	{
+		$filters = new Tracker\Filter\Collection($this->getTrackerDefinition());
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+		$baseKey = $this->getBaseKey();
+
+
+		$filters->addNew($permName, 'lookup')
+			->setLabel($name)
+			->setControl(new Tracker\Filter\Control\TextField("tf_{$permName}_lookup"))
+			->setApplyCondition(function ($control, Search_Query $query) use ($baseKey) {
+				$value = $control->getValue();
+
+				if ($value) {
+					$query->filterContent($value, $baseKey);
+				}
+			})
+			;
+
+		return $filters;
 	}
 }
 

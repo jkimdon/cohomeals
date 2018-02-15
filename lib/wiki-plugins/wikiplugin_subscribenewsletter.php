@@ -1,25 +1,27 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_subscribenewsletter.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_subscribenewsletter.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_subscribenewsletter_info()
 {
 	return array(
-		'name' => tra('Subscribe newsletter'),
+		'name' => tra('Subscribe to newsletter'),
 		'documentation' => 'PluginSubscribeNewsletter',
 		'description' => tra('Allow users to subscribe to a newsletter'),
 		'prefs' => array('feature_newsletters', 'wikiplugin_subscribenewsletter'),
 		'body' => tra('Invitation message'),
-		'icon' => 'img/icons/newspaper_add.png',
+		'iconname' => 'articles',
+		'introduced' => 5,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'nlId' => array(
 				'required' => true,
 				'name' => tra('Newsletter ID'),
-				'description' => tra('Identification number (nlId) of the Newsletter that you want to allow the users to subscribe to'),
+				'description' => tra('Identification number of the Newsletter that you want to allow the users to subscribe to'),
+				'since' => '5.0',
 				'filter' => 'digits',
 				'default' => '',
 				'profile_reference' => 'newsletter',
@@ -28,19 +30,22 @@ function wikiplugin_subscribenewsletter_info()
 				'required' => false,
 				'name' => tra('Confirmation Message'),
 				'description' => tra('Confirmation message after posting form. The plugin body is then the button label.'),
+				'since' => '5.0',
 				'filter' => 'wikicontent',
 			),
 			'button' => array(
 				'required' => false,
 				'name' => tra('Button'),
 				'description' => tra('Button label. The plugin body is then the confirmation message'),
+				'since' => '5.0',
 				'filter' => 'wikicontent',
 			),
 			'wikisyntax' => array(
 				'required' => false,
 				'safe' => true,
 				'name' => tra('Wiki Syntax'),
-				'description' => tra('Choose whether the output should be parsed as wiki syntax (Optional). Options: 0 (no parsing, default), 1 (parsing)'),
+				'description' => tra('Choose whether the output should be parsed as wiki syntax'),
+				'since' => '6.0',
 				'filter' => 'int',
 				'default' => 0,
 				'options' => array(
@@ -55,7 +60,10 @@ function wikiplugin_subscribenewsletter_info()
 }
 function wikiplugin_subscribenewsletter($data, $params)
 {
-	global $prefs, $user, $userlib, $smarty, $tikilib;
+	global $prefs, $user;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 	global $nllib; include_once('lib/newsletters/nllib.php');
 	extract($params, EXTR_SKIP);
 	if ($prefs['feature_newsletters'] != 'y') {

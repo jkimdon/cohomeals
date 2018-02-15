@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BlogPost.php 50089 2014-02-25 22:57:06Z xavidp $
+// $Id: BlogPost.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_BlogPost extends Tiki_Profile_InstallHandler
 {
@@ -39,16 +39,16 @@ class Tiki_Profile_InstallHandler_BlogPost extends Tiki_Profile_InstallHandler
 
 	function _install()
 	{
-		global $bloglib, $prefs;
-		if ( ! $bloglib ) require_once 'lib/blogs/bloglib.php';
+		global $prefs;
+		$bloglib = TikiLib::lib('blog');
 
 		$data = $this->getData();
 
 		$this->replaceReferences($data);
 
 		if ( isset( $data['blog'] ) && empty( $data['user'] ) ) {
-			global $bloglib, $tikilib;
-			if ( ! $bloglib ) require_once 'lib/blogs/bloglib.php';
+			$tikilib = TikiLib::lib('tiki');
+			$bloglib = TikiLib::lib('blog');
 
 			$result = $tikilib->query("SELECT `user` FROM `tiki_blogs` WHERE `blogId` = ?", array( $data['blog'] ));
 

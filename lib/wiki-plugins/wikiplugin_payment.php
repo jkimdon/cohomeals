@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_payment.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_payment.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_payment_info()
 {
@@ -12,12 +12,14 @@ function wikiplugin_payment_info()
 		'documentaion' => 'PluginPayment',
 		'description' => tra('Show details of a payment request or invoice'),
 		'prefs' => array( 'wikiplugin_payment', 'payment_feature' ),
-		'icon' => 'img/icons/money.png',
+		'iconname' => 'money',
+		'introduced' => 5,
 		'params' => array(
 			'id' => array(
 				'required' => true,
 				'name' => tra('Payment Request Number'),
 				'description' => tra('Unique identifier of the payment request'),
+				'since' => '5.0',
 				'filter' => 'digits',
 				'default' => '',
 			)
@@ -27,7 +29,7 @@ function wikiplugin_payment_info()
 
 function wikiplugin_payment( $data, $params )
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 
 	require_once 'lib/smarty_tiki/function.payment.php';
 	return '^~np~' . smarty_function_payment($params, $smarty) . '~/np~^';

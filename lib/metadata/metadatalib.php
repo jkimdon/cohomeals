@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: metadatalib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: metadatalib.php 63322 2017-07-22 16:54:18Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -282,7 +282,7 @@ class FileMetadata
 	 */
 	function dialogTabs($metadata, $id, $id_link, $filename)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		$smarty->assign('id', $id);
 		$smarty->assign('id_link', $id_link);
 		$smarty->assign('filename', $filename);
@@ -297,12 +297,12 @@ class FileMetadata
 		} else {
 			$smarty->assign('type', 'nodata');
 		}
-		$smarty->display('metadata/meta_view_dialog.tpl');
+		return $smarty->fetch('metadata/meta_view_dialog.tpl');
 	}
 
 	function pageTabs($metadata)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		if (is_array($metadata) && count($metadata) > 0) {
 			$metarray = $metadata;
 		} elseif (!empty($metadata)) {

@@ -1,22 +1,24 @@
-<form action="tiki-admin.php?page=webmail" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="webmail" value="{tr}Change preferences{/tr}" />
+<form class="form-horizontal" action="tiki-admin.php?page=webmail" method="post">
+	{include file='access/include_ticket.tpl'}
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			<a role="button" class="btn btn-link" href="tiki-webmail.php" title="{tr}Webmail{/tr}">
+				{icon name="inbox"} {tr}Webmail{/tr}
+			</a>
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
-	
-	<fieldset class="admin">
+	<fieldset>
 		<legend>{tr}Activate the feature{/tr}</legend>
 		{preference name=feature_webmail visible="always"}
-	</fieldset>		
+	</fieldset>
 
-	
-	<fieldset class="admin">
+
+	<fieldset>
 		<legend>{tr}Settings{/tr}</legend>
 		{preference name=webmail_view_html}
 		{preference name=webmail_max_attachment}
 		{preference name=webmail_quick_flags}
 	</fieldset>
-	<div class="heading input_submit_container" style="text-align: center">
-		<input type="submit" class="btn btn-default" name="webmail" value="{tr}Change preferences{/tr}" />
-	</div>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

@@ -1,27 +1,29 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_comment.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_comment.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_comment_info()
 {
 	return array(
 		'name' => tra('Comment'),
 		'documentation' => 'PluginComment',
-		'description' => tra('Display a comment area for any specified object'),
+		'description' => tra('Display a comment area for a specified object'),
 		'prefs' => array( 'wikiplugin_comment' ),
 		'format' => 'html',
-		'icon' => 'img/icons/comments.png',
+		'iconname' => 'comment',
+		'introduced' => 8,
 		'params' => array(
 			'objectType' => array(
 				'required' => true,
 				'name' => tra('Object Type'),
-				'description' => tra('Object Type'),
+				'description' => tra('Object type the comment is associated with'),
+				'since' => '8.0',
 				'filter' => 'text',
 				'options' => array(
-					array('text' => tr('Tracker'), 'value' => 'tracker'),
+					array('text' => tr('Tracker Item'), 'value' => 'trackeritem'),
 					array('text' => tr('Image Gallery'), 'value' => 'image gallery'),
 					array('text' => tr('Image'), 'value' => 'image'),
 					array('text' => tr('File Gallery'), 'value' => 'file gallery'),
@@ -43,8 +45,9 @@ function wikiplugin_comment_info()
 				'required' => true,
 				'name' => tra('Object ID'),
 				'description' => tra('Object ID'),
-				'filter' => 'int',
-				'default' => tr('The current wiki page you have added the plugin to'),
+				'since' => '8.0',
+				'filter' => 'digits',
+				'default' => tr('The current wiki page to which you have added the plugin'),
 				'profile_reference' => 'type_in_param',
 			),
 		)
@@ -53,8 +56,8 @@ function wikiplugin_comment_info()
 
 function wikiplugin_comment($data, $params)
 {
-	global $smarty, $page;
-
+	global $page;
+	$smarty = TikiLib::lib('smarty');
 	$params = array_merge(
 		array(
 			"objectId"=> $page,

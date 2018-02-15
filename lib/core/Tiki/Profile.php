@@ -1,9 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Profile.php 55074 2015-04-14 12:37:26Z nkoth $
+// $Id: Profile.php 62468 2017-05-07 13:47:17Z jonnybradley $
+
+use Symfony\Component\Yaml\Yaml;
 
 class Tiki_Profile
 {
@@ -76,7 +78,7 @@ class Tiki_Profile
 
 	public static function convertYesNo( $data ) // {{{
 	{
-		$copy = $data;
+		$copy = (array) $data;
 		foreach ( $copy as &$value )
 			if ( is_bool($value) )
 				$value = $value ? 'y' : 'n';
@@ -211,8 +213,8 @@ class Tiki_Profile
 
 	public static function fromDb( $pageName ) // {{{
 	{
-		global $tikilib, $wikilib;
-		require_once 'lib/wiki/wikilib.php';
+		$tikilib = TikiLib::lib('tiki');
+		$wikilib = TikiLib::lib('wiki');
 		$parserlib = TikiLib::lib('parser');
 
 		$profile = new self;
@@ -264,7 +266,7 @@ class Tiki_Profile
 		$profile->transport = new Tiki_Profile_Transport_File($path, $name);
 
 		if (file_exists($ymlPath)) {
-			$profile->data = Horde_Yaml::load(file_get_contents($ymlPath));
+			$profile->data = Yaml::parse(file_get_contents($ymlPath));
 
 			$profile->fetchExternals();
 			$profile->getObjects();
@@ -314,12 +316,6 @@ class Tiki_Profile
 		return true;
 	} // }}}
 
-	public function refreshYaml() // {{{
-	{
-		$this->objects = null;
-		$this->loadYaml($this->pageContent);
-	} // }}}
-
 	private function loadYaml( $content ) // {{{
 	{
 		$this->pageContent = $content;
@@ -337,7 +333,14 @@ class Tiki_Profile
 				|| $match->getName() == 'profile' ) {
 				$yaml = $match->getBody();
 
-				$data = Horde_Yaml::load($yaml);
+				try {
+					$data = Yaml::parse($yaml);
+				} catch (Exception $e) {
+					$this->data = [
+						'error' => tr('Could not parse YAML in profile: "%0"', $e->getMessage())
+					];
+					return;
+				}
 
 				foreach ( $data as $key => $value ) {
 					if ( array_key_exists($key, $this->data) )
@@ -352,7 +355,15 @@ class Tiki_Profile
 		$this->getObjects();
 	} // }}}
 
-	private function fetchExternals() // {{{
+	public function getData(){
+		return $this->data;
+	}
+
+	public function setData($data){
+		$this->data = $data;
+	}
+
+	public function fetchExternals() // {{{
 	{
 		$this->traverseForExternals($this->data);
 	} // }}}
@@ -399,7 +410,7 @@ class Tiki_Profile
 				if ( is_numeric($key) )
 					$old[] = $value;
 				else
-					$this->mergeData(isset($old[$key]) ? $old[$key] : null, $value);	
+					$old[$key] = $this->mergeData(isset($old[$key]) ? $old[$key] : null, $value);	
 			}
 
 			return $old;
@@ -617,7 +628,7 @@ class Tiki_Profile
 					$preferenceName = $row[1];
 					$definition = TikiLib::lib('prefs')->getPreference($preferenceName);
 
-					if (! empty($definition['public'])) {
+					if (! empty($definition)) {
 						$needles[] = $row[0];
 						$replacements[] = $definition['value'];
 					}
@@ -680,7 +691,6 @@ class Tiki_Profile
 			} else {
 				$groupInfo = array();
 			}
-
 			$defaultInfo = array(
 				'description' => !empty($groupInfo['groupDesc']) ? $groupInfo['groupDesc'] : '',
 				'home' => !empty($groupInfo['groupHome']) ? $groupInfo['groupHome'] : '',
@@ -691,7 +701,13 @@ class Tiki_Profile
 				'user_signup' => !empty($groupInfo['userChoice']) ? $groupInfo['userChoice'] : 'n',
 				'default_category' => !empty($groupInfo['groupDefCat']) ? $groupInfo['groupDefCat'] : 0,
 				'theme' => !empty($groupInfo['groupTheme']) ? $groupInfo['groupTheme'] : '',
+				'color' => !empty($groupInfo['groupColor']) ? $groupInfo['groupColor'] : '',
 				'registration_fields' => !empty($groupInfo['registrationUsersFieldIds']) ? explode(':', $groupInfo['registrationUsersFieldIds']) : array(),
+				'is_external' => !empty($groupInfo['isExternal']) ? $groupInfo['isExternal'] : 'n',
+				'expire_after' => !empty($groupInfo['expireAfter']) ? $groupInfo['expireAfter'] : 0,
+				'email_pattern' => !empty($groupInfo['emailPattern']) ? $groupInfo['emailPattern'] : '',
+				'anniversary' => !empty($groupInfo['anniversary']) ? $groupInfo['anniversary'] : '',
+				'prorate_interval' => !empty($groupInfo['prorateInterval']) ? $groupInfo['prorateInterval'] : '',
 				'include' => array(),
 				'autojoin' => 'n',
 			);
@@ -732,10 +748,29 @@ class Tiki_Profile
 		return $groups;
 	} // }}}
 
+	/**
+	 * Gets the objects that have already been loaded from the profile or have been installed, otherwise
+	 * it loads it from the profile itself.
+	 * @return array|null
+	 */
+	function getLoadedObjects() // {{{
+	{
+		if ( !is_null($this->objects) ) {
+			return $this->objects;
+                } else {
+			return $this->getObjects();
+		}
+	} // }}}
+
+	/**
+	 * Loads objects for the profile for the purpose of installation or the steps before the installation.
+	 * Should not be called after installation is complete as it will reload it from the profile causing things
+	 * like the reference IDs to be lost.
+	 * @return array|null
+	 */
 	function getObjects() // {{{
 	{
-		if ( !is_null($this->objects) )
-			return $this->objects;
+		// Note this function needs to be called each time the objects need to be refreshed after YAML replacements
 
 		$objects = array();
 
@@ -816,9 +851,58 @@ class Tiki_Profile
 		);
 	} // }}}
 
-	function getProfileKey() // {{{
+	function getProfileKey($prefix = true) // {{{
 	{
-		return self::getProfileKeyfor($this->domain, $this->withPrefix($this->profile));
+		if (!$prefix) {
+			return self::getProfileKeyfor($this->domain, $this->profile);
+		} else {
+			return self::getProfileKeyfor($this->domain, $this->withPrefix($this->profile));
+		}
+	} // }}}
+	
+	function getObjectSymbolDetails($type, $value) // Based on an objectType (eg: menu) and an objectId (eg: Id of a menu) query tiki_profile_symbols table and return domain, profile and object information
+	{
+		global $tikilib;
+				
+		if (!$type) {
+			return false;
+		}
+		elseif (!$value) {
+			return false;
+		}
+		else {
+			$query = 'select * from `tiki_profile_symbols` where `type`=? and `value`=?';
+			$result = $tikilib->fetchAll($query, array($type, $value));
+		
+			if (empty ($result)) {
+				return null;
+			} else {
+				$symbolDetails = array (
+					'domain' => $result["0"]["domain"],
+					'profile' => $result["0"]["profile"],
+					'object' => $result["0"]["object"],
+					);
+				return $symbolDetails;
+			}
+		}
+	}
+
+	function getPath()
+	{
+		$domain = $this->domain;
+		$profile = $this->profile;
+		if ( strpos($domain, '://') === false ) {
+			if ( is_dir($domain) ) {
+				$domain = "file://" . $domain;
+			} else {
+				$domain = "http://" . $domain;
+			}
+		}
+		if ( substr($domain, 0, 7) == "file://" ) {
+			return TIKI_PATH . '/' . substr($domain, 7);
+		} else {
+			return $domain;
+		}
 	} // }}}
 }
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-contributors.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-contributors.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -31,7 +31,11 @@ function module_contributors_info()
  */
 function module_contributors($mod_reference, $module_params)
 {
-	global $smarty, $userlib, $wikilib, $tikilib, $headerlib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+	$headerlib = TikiLib::lib('header');
+	$wikilib = TikiLib::lib('wiki');
 	$currentObject = current_object();
 	if ($currentObject['type'] == 'wiki page') {
 		$objectperms = Perms::get(array('type' => 'wiki page', 'object' => $currentObject['object']));
@@ -48,9 +52,8 @@ function module_contributors($mod_reference, $module_params)
 				}
 				$email_isPublic = $tikilib->get_user_preference($contributor, 'email is public');
 				if ($email_isPublic != 'n') {
-					include_once ('lib/userprefs/scrambleEmail.php');
 					$details['email'] = $userlib->get_user_email($contributor);
-					$details['scrambledEmail'] = scrambleEmail($details['email'], $email_isPublic);
+					$details['scrambledEmail'] = TikiMail::scrambleEmail($details['email'], $email_isPublic);
 				}
 				$details['homePage'] = $tikilib->get_user_preference($contributor, 'homePage');
 				$details['avatar'] = $tikilib->get_user_avatar($contributor);

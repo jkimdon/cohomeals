@@ -1,4 +1,4 @@
-{* $Id: tiki.tpl 45793 2013-04-29 15:53:26Z lphuberdeau $ *}
+{* $Id: tiki.tpl 53309 2014-12-16 23:02:25Z jyhem $ *}
 {extends 'layout_view.tpl'}
 
 {block name=title}
@@ -6,6 +6,6 @@
 {/block}
 
 {block name=content}
-    {$mid_data}
+	{$mid_data}
 {/block}
 

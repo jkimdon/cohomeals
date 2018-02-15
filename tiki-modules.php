@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-modules.php 45714 2013-04-25 12:56:36Z jonnybradley $
+// $Id: tiki-modules.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 require_once('tiki-setup.php');

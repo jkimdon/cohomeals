@@ -1,15 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Indexer.php 47553 2013-09-18 14:10:32Z lphuberdeau $
+// $Id: Indexer.php 61782 2017-03-20 10:10:10Z jonnybradley $
 
 class Search_Indexer
 {
 	private $searchIndex;
 	private $contentSources = array();
 	private $globalSources = array();
+	private $addonSources = array();
 
 	private $cacheGlobals = null;
 	private $cacheTypes = array();
@@ -20,13 +21,17 @@ class Search_Indexer
 
 	public function __construct(Search_Index_Interface $searchIndex, $logWriter = null)
 	{
-		if (! $logWriter instanceof Zend_Log_Writer_Abstract) {
-			$logWriter = new Zend_Log_Writer_Null();
+		if (! $logWriter instanceof \Zend\Log\Writer\AbstractWriter) {
+			$logWriter = new Zend\Log\Writer\Noop();
 		}
-		$logWriter->setFormatter(new Zend_Log_Formatter_Simple(Zend_Log_Formatter_Simple::DEFAULT_FORMAT . ' [%memoryUsage% bytes]' . PHP_EOL));
-		$this->log = new Zend_Log($logWriter);
+		$logWriter->setFormatter(new Zend\Log\Formatter\Simple(Zend\Log\Formatter\Simple::DEFAULT_FORMAT . ' [%memoryUsage% bytes]' . PHP_EOL));
+		$this->log = new Zend\Log\Logger();
+		$this->log->addWriter($logWriter);
 
 		$this->searchIndex = $searchIndex;
+
+		$api = new TikiAddons_Api_Search();
+		$this->addonSources = $api->getAddonSources();
 	}
 
 	public function addContentSource($objectType, Search_ContentSource_Interface $contentSource)
@@ -36,6 +41,9 @@ class Search_Indexer
 
 	public function addGlobalSource(Search_GlobalSource_Interface $globalSource)
 	{
+		if (is_a($globalSource, "Search_GlobalSource_RelationSource")){
+			$globalSource->setContentSources($this->contentSources);
+		}
 		$this->globalSources[] = $globalSource;
 	}
 
@@ -45,7 +53,7 @@ class Search_Indexer
 		$this->globalSources = array();
 	}
 
-	public function addContentFilter(Zend_Filter_Interface $filter)
+	public function addContentFilter(Zend\Filter\FilterInterface $filter)
 	{
 		$this->contentFilters[] = $filter;
 	}
@@ -74,9 +82,9 @@ class Search_Indexer
 
 	public function update(array $objectList)
 	{
-		$this->searchIndex->invalidateMultiple($objectList);
 
-		foreach ($objectList as $object) {
+		foreach (array_unique($objectList, SORT_REGULAR) as $object) {
+			$this->searchIndex->invalidateMultiple(array($object));
 			$this->addDocument($object['object_type'], $object['object_id']);
 		}
 
@@ -92,13 +100,45 @@ class Search_Indexer
 			try {
 				$this->searchIndex->addDocument($entry);
 			} catch (Exception $e) {
-				$msg = tr('Indexing failed while processing "%0" (type %1) with the error "%2"', $objectId, $objectType, $e->getMessage());
-				TikiLib::lib('errorreport')->report($msg);
+				$msg = tr('Indexing failed while processing "%0" (type %1) with the error "%2"', $objectId, $objectType, 
+					$e->getMessage());
+				Feedback::error($msg, 'session');
 				$this->log->err($msg);
 			}
 		}
 
 		return count($data);
+	}
+
+
+	/**
+	 * Return all supported content types and their fields
+	 *
+	 * @return array
+	 */
+	public function getAvailableFields()
+	{
+		$output = [
+			'global' => [],
+			'object_types' => [],
+		];
+		/**
+		 * @var  string $objectType
+		 * @var  Search_ContentSource_Interface $contentSource
+		 */
+		foreach ($this->contentSources as $objectType => $contentSource) {
+			$output['object_types'][$objectType] = $contentSource->getProvidedFields();
+			$output['global'] = array_unique(
+				array_merge(
+					$output['global'],
+					array_keys(
+						array_filter($contentSource->getGlobalFields())
+					)
+				)
+			);
+		}
+
+		return $output;
 	}
 
 	public function getDocuments($objectType, $objectId)
@@ -113,6 +153,11 @@ class Search_Indexer
 			$contentSource = $this->contentSources[$objectType];
 
 			if (false !== $data = $contentSource->getDocument($objectId, $typeFactory)) {
+				if ($data === null) {
+					Feedback::error(tr('Object %0 type %1 returned null from getDocument function', $objectId, 
+						$objectType), 'session');
+					$data = array();
+				}
 				if (! is_int(key($data))) {
 					$data = array($data);
 				}
@@ -135,6 +180,15 @@ class Search_Indexer
 
 			if (false !== $local) {
 				$data = array_merge($data, $local);
+			}
+		}
+		foreach ($this->addonSources as $addonSource) {
+			if ($addonSource->toIndex($objectType, $objectId, $initialData)) {
+				$local = $addonSource->getData($objectType, $objectId, $typeFactory, $initialData);
+
+				if (false !== $local) {
+					$data = array_merge($data, $local);
+				}
 			}
 		}
 
@@ -224,8 +278,7 @@ class Search_Indexer
 
 	private function log($message)
 	{
-		$this->log->setEventItem('memoryUsage', memory_get_usage());
-		$this->log->info($message);
+		$this->log->info($message, array('memoryUsage' => memory_get_usage()));
 	}
 }
 

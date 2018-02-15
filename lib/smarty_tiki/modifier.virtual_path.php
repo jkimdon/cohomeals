@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.virtual_path.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: modifier.virtual_path.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 // Translate only if feature_multilingual is on
 
@@ -17,7 +17,7 @@ function smarty_modifier_virtual_path($fileId, $type = 'file')
 {
 	global $prefs;
 	global $base_url;
-	global $filegallib; include_once('lib/filegals/filegallib.php');
+	$filegallib = TikiLib::lib('filegal');
 
 	return  $base_url . 'tiki-webdav.php' . ($filegallib->get_full_virtual_path($fileId, $type));
 }

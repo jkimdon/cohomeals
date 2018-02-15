@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_invoice.php 45405 2013-04-05 16:35:07Z jonnybradley $
+// $Id: tiki-edit_invoice.php 59837 2016-09-28 16:36:57Z jonnybradley $
 
 require_once('tiki-setup.php');
 $trklib = TikiLib::lib('trk');
@@ -140,7 +140,7 @@ $smarty->assign("invoiceItems", $invoiceItems);
 $headerlib->add_jq_onready(
     "function setupTotal() {
 		$('#InvoiceForm :input')
-			.unbind('change')
+			.off('change')
 			.change(function() {
 				findTotal();
 			})

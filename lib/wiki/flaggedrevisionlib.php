@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: flaggedrevisionlib.php 45925 2013-05-13 16:47:35Z lphuberdeau $
+// $Id: flaggedrevisionlib.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 class FlaggedRevisionLib extends TikiDb_Bridge
 {
@@ -82,7 +82,7 @@ class FlaggedRevisionLib extends TikiDb_Bridge
 		}
 
 		if ($prefs['feature_categories'] == 'y') {
-			global $categlib; require_once 'lib/categories/categlib.php';
+			$categlib = TikiLib::lib('categ');
 			$approvalCategories = $tikilib->get_preference('flaggedrev_approval_categories', array(), true);
 
 			$objectCategories = $categlib->get_object_categories('wiki page', $pageName);
@@ -117,4 +117,3 @@ class FlaggedRevisionLib extends TikiDb_Bridge
 	}
 }
 
-global $flaggedrevisionlib; $flaggedrevisionlib = new FlaggedRevisionLib;

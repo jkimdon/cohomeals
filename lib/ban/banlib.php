@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: banlib.php 55449 2015-05-16 18:31:54Z jonnybradley $
+// $Id: banlib.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -164,14 +164,14 @@ class BanLib extends TikiLib
      */
     function importCSV($fname, $import_as_new)
 	{
-		global $smarty;
-
 		$fields = false;
 		if ($fhandle = fopen($fname, 'r')) {
 			$fields = fgetcsv($fhandle, 1000);
 		}
 		if ($fields === false) {
-			$smarty->assign('msg', tra("The file is not a CSV file or has not a correct syntax"));
+			$smarty = TikiLib::lib('smarty');
+
+			$smarty->assign('msg', tra("The file has incorrect syntax or is not a CSV file"));
 			$smarty->display("error.tpl");
 			die;
 		}

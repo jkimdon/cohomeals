@@ -1,14 +1,17 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ManageController.php 47292 2013-08-27 13:55:09Z lphuberdeau $
+// $Id: ManageController.php 58990 2016-06-27 20:50:14Z lindonb $
 
 class Services_ActivityStream_ManageController
 {
 	private $lib;
-
+	
+	/**
+	 * Set up the controller
+	 */
 	function setUp()
 	{
 		if (! Perms::get()->admin) {
@@ -17,17 +20,29 @@ class Services_ActivityStream_ManageController
 
 		$this->lib = TikiLib::lib('activity');
 	}
-
+	
+	/**
+	 * List activity rules from tiki_activity_stream_rules table
+	 */
 	function action_list(JitFilter $request)
 	{
 		$rules = $this->lib->getRules();
+		
+		foreach($rules as &$rule){
+			$status = $this->getRuleStatus($rule['ruleId']);
+			$rule['status'] = $status;
+		}
 
 		return array(
 			'rules' => $rules,
 			'ruleTypes' => $this->getRuleTypes(),
+			'event_graph' => TikiLib::events()->getEventGraph(),
 		);
 	}
-
+	
+	/**
+	 * Delete an activity rule from tiki_activity_stream_rules table
+	 */
 	function action_delete(JitRequest $request)
 	{
 		$id = $request->ruleId->int();
@@ -40,12 +55,37 @@ class Services_ActivityStream_ManageController
 		}
 
 		return array(
+			'title' => tr('Delete Rule'),
 			'removed' => $removed,
 			'rule' => $rule,
 			'eventTypes' => $this->getEventTypes(),
 		);
 	}
 
+	/**
+	 * Delete a recorded activity from tiki_activity_stream table
+	 */
+	function action_deleteactivity(JitFilter $request)
+	{
+		$id = $request->activityId->int();
+
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+			$this->lib->deleteActivity($id);
+			Feedback::success(tr('Your activity (id:'.$id.') was successfully deleted'), 'session');
+			//return to page
+			$referer = Services_Utilities::noJsPath();
+			return Services_Utilities::refresh($referer);
+		}
+
+		return array(
+			'title' => tra('Delete Activity'),
+			'activityId' => $id,
+		);
+	}
+	
+	/**
+	 * Create/update a sample activity rule. Sample rules are never recorded.
+	 */
 	function action_sample(JitFilter $request)
 	{
 		$id = $request->ruleId->int();
@@ -65,22 +105,44 @@ class Services_ActivityStream_ManageController
 		}
 
 		$rule = $this->getRule($id);
+		
+		$getEventTypes = $this->getEventTypes();
+		foreach($getEventTypes as $key => $eventType){
+			$eventTypes[$key]['eventType'] = $eventType;
+			$sample = $this->lib->getSample($eventType);
+			if(!empty($sample)){
+				$eventTypes[$key]['sample'] = $sample;
+			}
+		}
+		
 		return array(
+			'title' => $id ? tr('Edit Rule %0', $id) : tr('Create Sample Rule'),
 			'data' => $this->lib->getSample($rule['eventType']),
 			'rule' => $rule,
-			'eventTypes' => $this->getEventTypes(),
+			'eventTypes' => $eventTypes,
 		);
 	}
-
+	
+	/**
+	 * Create/update a basic activity rule. Basic rules are recorded by default.
+	 */
 	function action_record(JitFilter $request)
 	{
 		$id = $request->ruleId->int();
+		$priority = $request['priority'];
+		$user = $request['user'];
+
+		if ($request['is_notification'] != "on"){
+			$rule = '(event-record event args)';
+		}else{
+			$rule = "(event-notify event args (str $priority) (str $user))";
+		}
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$id = $this->replaceRule(
 				$id,
 				array(
-					'rule' => '(event-record event args)',
+					'rule' => $rule,
 					'ruleType' => 'record',
 					'notes' => $request->notes->text(),
 					'eventType' => $request->event->attribute_type(),
@@ -90,11 +152,15 @@ class Services_ActivityStream_ManageController
 		}
 
 		return array(
+			'title' => $id ? tr('Edit Rule %0', $id) : tr('Create Record Rule'),
 			'rule' => $this->getRule($id),
 			'eventTypes' => $this->getEventTypes(),
 		);
 	}
 
+	/**
+	 * Create/update a tracker_filter activity rule. Tracker rules are recorded and linked to a tracker.
+	 */
 	function action_tracker_filter(JitFilter $request)
 	{
 		$id = $request->ruleId->int();
@@ -141,6 +207,7 @@ $customArguments
 		}
 
 		return array(
+			'title' => $id ? tr('Edit Rule %0', $id) : tr('Create Tracker Rule'),
 			'rule' => $rule,
 			'eventTypes' => $this->getEventTypes(),
 			'targetEvent' => $targetEvent,
@@ -150,6 +217,9 @@ $customArguments
 		);
 	}
 
+	/**
+	 * Create/update an advanced activity rule. Advanced rules are recorded by default.
+	 */
 	function action_advanced(JitFilter $request)
 	{
 		$id = $request->ruleId->int();
@@ -168,11 +238,15 @@ $customArguments
 		}
 
 		return array(
+			'title' => $id ? tr('Edit Rule %0', $id) : tr('Create Advanced Rule'),
 			'rule' => $this->getRule($id),
 			'eventTypes' => $this->getEventTypes(),
 		);
 	}
 
+	/**
+	 * Private function to perform updating of rules
+	 */
 	private function replaceRule($id, array $data, $ruleField)
 	{
 		try {
@@ -184,16 +258,22 @@ $customArguments
 		}
 	}
 
+	/**
+	 * Private function listing activity rule types
+	 */
 	private function getRuleTypes()
 	{
 		return array(
-			'sample' => tr('Sample Event'),
-			'record' => tr('Record Event'),
-			'tracker_filter' => tr('Tracker Filter'),
+			'sample' => tr('Sample'),
+			'record' => tr('Basic'),
+			'tracker_filter' => tr('Tracker'),
 			'advanced' => tr('Advanced'),
 		);
 	}
 
+	/**
+	 * Private function to get available event types
+	 */
 	private function getEventTypes()
 	{
 		$graph = TikiLib::events()->getEventGraph();
@@ -201,6 +281,9 @@ $customArguments
 		return $graph['nodes'];
 	}
 
+	/**
+	 * Private function to get details of an activity rule
+	 */
 	private function getRule($id)
 	{
 		if (! $rule = $this->lib->getRule($id)) {
@@ -221,5 +304,117 @@ $customArguments
 
 		return $rule;
 	}
-}
+	
+	/**
+	 * Change rule type for an activity rule. Sample rules can be changed to basic or advanced rule. Basic rule can be changed to advanced rule. Other type changes are not supported.
+	 */
+	function action_change_rule_type($input)
+	{
+		$id = $input->ruleId->int();
+		$rule = $this->getRule($id);
+		$status = $this->getRuleStatus($id);
+		$ruleTypes = $this->getRuleTypes();
+		$currentRuleType = array_intersect_key($ruleTypes, array_flip(array('ruleType' => $rule['ruleType'])));
 
+		if ($rule['ruleType'] === 'sample'){
+			$updateRuleTypes = array(
+				'record' => tr('Basic'),
+				'advanced' => tr('Advanced'),
+			);
+		}
+		elseif ($rule['ruleType'] === 'record'){
+			$updateRuleTypes = array(
+				'advanced' => tr('Advanced'),
+			);
+		}
+		else {
+			throw new Services_Exception_Denied(tr('Invalid rule type'));
+		}
+		
+		$confirm = $input->confirm->int();
+		if($confirm){
+			$currentRuleType = $rule['ruleType'];
+			$newRuleType = $input->ruleType->text();
+			//if sample is changed to basic or advanced, "event-sample" needs to be changed to "event-record" in the rule 
+			if ($currentRuleType === 'sample'){
+				$rule['rule'] = str_replace('event-sample', 'event-record', $rule['rule']);
+			}
+			
+			$id = $this->replaceRule(
+				$id,
+				array(
+					'rule' => $rule['rule'],
+					'ruleType' => $newRuleType,
+					'notes' => $rule['notes'],
+					'eventType' => $rule['eventType'],
+				),
+				'notes'
+			);
+		}
+		
+		return array(
+			'title' => tr('Change Rule Type'),
+			'rule' => $rule,
+			'currentRuleType' => $currentRuleType,
+			'ruleTypes' => $updateRuleTypes,
+		);
+	}
+	
+	/**
+	 * Enable/disable an activity rule. Can be used for basic and advanced types. Tracker type is always enabled, sample type is always disabled, so no need to manage them.
+	 */
+	function action_change_rule_status($input)
+	{
+		$id = $input->ruleId->int();
+		$rule = $this->getRule($id);
+		$status = $this->getRuleStatus($id);
+		$confirm = $input->confirm->int();
+
+		if($confirm){
+			//to disable a rule "event-record" needs to be changed to "event-sample" in the rule 
+			if (($rule['ruleType'] === 'record' || $rule['ruleType'] === 'advanced') && $status === 'enabled'){
+				$rule['rule'] = str_replace('event-record', 'event-sample', $rule['rule']);
+			}
+			//to enable a rule "event-sample" needs to be changed to "event-record" in the rule
+			elseif (($rule['ruleType'] === 'record' || $rule['ruleType'] === 'advanced') && $status === 'disabled'){
+				$rule['rule'] = str_replace('event-sample', 'event-record', $rule['rule']);
+			}
+			
+			$id = $this->replaceRule(
+				$id,
+				array(
+					'rule' => $rule['rule'],
+					'ruleType' => $rule['ruleType'],
+					'notes' => $rule['notes'],
+					'eventType' => $rule['eventType'],
+				),
+				'notes'
+			);
+		}
+		
+		return array(
+			'title' => tr('Change Rule Status'),
+			'rule' => $rule,
+			'status' => $status,
+		);
+	}
+	
+	/**
+	 * Private function to get the status of an activity rule
+	 */
+	private function getRuleStatus($id)
+	{
+		$rule = $this->getRule($id);
+		$ruleCommandRaw = explode(' ', $rule['rule']);
+		$ruleCommand = str_replace('(','', $ruleCommandRaw[0]);
+		if($ruleCommand === 'event-sample'){
+			return 'disabled';
+		}
+		if($ruleCommand === 'event-record' || $ruleCommand === 'event-notify' || $rule['ruleType'] === 'tracker_filter'){
+			return 'enabled';
+		}
+		else {
+			return 'unknown';
+		}
+	}
+}

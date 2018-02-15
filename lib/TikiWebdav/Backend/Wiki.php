@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Wiki.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Wiki.php 58787 2016-06-05 13:59:28Z lindonb $
 
 class TikiWebdav_Backends_Wiki extends ezcWebdavSimpleBackend
 {
@@ -381,8 +381,8 @@ class TikiWebdav_Backends_Wiki extends ezcWebdavSimpleBackend
 
 	protected function performCopy($fromPath, $toPath, $depth = ezcWebdavRequest::DEPTH_INFINITY)
 	{
-		global $tikilib, $wikilib;
-		include_once ('lib/wiki/wikilib.php');
+		$wikilib = TikiLib::lib('wiki');
+		$tikilib = TikiLib::lib('tiki');
 
 		print_debug('performCopy ' . $fromPath . " -> " . $toPath . "\n");
 
@@ -467,7 +467,6 @@ class TikiWebdav_Backends_Wiki extends ezcWebdavSimpleBackend
 		print_debug('getCollectionMembers ' . $path . "\n");
 
 		$contents = array();
-		$errors = array();
 
 		if ($path !== '/') {
 			return $contents;

@@ -2,14 +2,19 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-login_scr.php 45949 2013-05-15 16:53:16Z lphuberdeau $
+// $Id: tiki-login_scr.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section_class = 'tiki_login';	// This will be body class instead of $section
 include_once ("tiki-setup.php");
+
+if ($prefs['login_autologin'] == 'y' && $prefs['login_autologin_redirectlogin'] == 'y' && !empty($prefs['login_autologin_redirectlogin_url'])) {
+	$access->redirect($prefs['login_autologin_redirectlogin_url']);
+}
+
 if (isset($_REQUEST['clearmenucache'])) {
 	TikiLib::lib('menu')->empty_menu_cache();
 }

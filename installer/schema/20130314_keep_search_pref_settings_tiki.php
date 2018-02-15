@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20130314_keep_search_pref_settings_tiki.php 46402 2013-06-18 13:38:49Z jonnybradley $
+// $Id: 20130314_keep_search_pref_settings_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");

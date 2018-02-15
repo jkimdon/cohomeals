@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Definition.php 51975 2014-07-16 12:40:34Z lphuberdeau $
+// $Id: Definition.php 61387 2017-02-24 19:45:29Z kroky6 $
 
 class Tracker_Definition
 {
@@ -105,7 +105,7 @@ class Tracker_Definition
 		
 			return $this->fields = $fields['data'];
 		} else {
-			$this->fields = array();
+			return $this->fields = array();
 		}
 	}
 
@@ -197,6 +197,30 @@ class Tracker_Definition
 		}
 	}
 
+	function getItemOwnerFields()
+	{
+		$ownerFields = array();
+		foreach ($this->getFields() as $field) {
+			if ($field['type'] == 'u'
+				&& $field['options_map']['owner'] == 1) {
+				$ownerFields[] = $field['fieldId'];
+			}
+		}
+		if( !$ownerFields ) {
+			$ownerFields = array($this->getUserField());
+		}
+		return array_filter($ownerFields);
+	}
+
+	function getArticleField()
+ 	{
+ 		foreach ($this->getFields() as $field) {
+ 			if ($field['type'] == 'articles') { 
+ 				return $field['fieldId'];
+ 			}
+ 		}
+ 	}
+
 	function getGeolocationField()
 	{
 		foreach ($this->getFields() as $field) {
@@ -204,6 +228,17 @@ class Tracker_Definition
 				return $field['fieldId'];
 			}
 		}
+	}
+
+	function getWikiFields()
+	{
+		$fields = array(); 
+		foreach ($this->getFields() as $field) {
+			if ($field['type'] == 'wiki') {
+				$fields[] = $field['fieldId'];
+			}
+		}
+		return $fields;
 	}
 
 	function getIconField()
@@ -267,19 +302,29 @@ class Tracker_Definition
 
 		return $out;
 	}
+
+	function getRelationField($relation)
+	{
+		foreach ($this->getFields() as $field) {
+			if ($field['type'] == 'REL'
+				&& $field['options_map']['relation'] == $relation) {
+				return $field['fieldId'];
+			}
+		}
+	}
 	
 	/**
-	 * Get the name of the item user if any.
-	 * A item user is defined if a 'user selector' field
-	 * exist for this tracker and it has one user selected.
+	 * Get the names of the item user(s) if any.
+	 * An item user is defined if a 'user selector' field
+	 * exist for this tracker and it has at least one user selected.
 	 * 
 	 * @param int $itemId
 	 * @return string item user name
 	 */
-	function getItemUser($itemId)
+	function getItemUsers($itemId)
 	{
-		global $trklib;
-		return $trklib->get_item_creator($this->trackerInfo['trackerId'], $itemId);
+		$trklib = TikiLib::lib('trk');
+		return $trklib->get_item_creators($this->trackerInfo['trackerId'], $itemId);
 	}
 
 	function getSyncInformation()

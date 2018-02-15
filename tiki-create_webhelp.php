@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-create_webhelp.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-create_webhelp.php 61056 2017-01-25 03:01:42Z drsassafras $
 
 require_once ('tiki-setup.php');
-include_once ('lib/structures/structlib.php');
+$structlib = TikiLib::lib('struct');
 
 /**
  * @param $source
@@ -81,6 +81,13 @@ if (isset($_REQUEST['create'])) {
 	$output .= '<li>' . tr("Directory: <strong>%0</strong>", $dir) . '</li></ul>';
 	$base = "whelp/$dir";
 
+	if (!is_dir("whelp")) {
+		if (!mkdir("whelp")){
+			$smarty->assign('msg', tra("Unable to create directory Run <code>sh setup.sh</code> from the command line to fix."));
+			$smarty->display('error.tpl');
+			die;
+		}
+	}
 	if (!is_writeable('whelp')) {
 		$smarty->assign('msg', tra("You need to change chmod 'whelp' manually to 777"));
 		$smarty->display('error.tpl');
@@ -107,6 +114,7 @@ if (isset($_REQUEST['create'])) {
 	deldirfiles("$base/pages/img/wiki_up");
 	// Copy base files to the webhelp directory
 	copys('lib/tikihelp', "$base/");
+    copys('img/tikihelp', "$base/icons");
 
 	$structlib->structure_to_webhelp($struct, $dir, $top);
 	$smarty->assign('generated', 'y');

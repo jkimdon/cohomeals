@@ -1,14 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_override_menu.php 46727 2013-07-19 11:47:04Z jonnybradley $
+// $Id: function.rating_override_menu.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 function smarty_function_rating_override_menu( $params, $smarty )
 {
-	global $prefs, $headerlib, $ratinglib;
-	require_once("lib/rating/ratinglib.php");
+	global $prefs;
+	$headerlib = TikiLib::lib('header');
+	$ratinglib = TikiLib::lib('rating');
 
 	$menu = '';
 	$options = $ratinglib->override_array($params['type'], true, true);

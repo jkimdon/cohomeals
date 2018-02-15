@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-months_links.php 48312 2013-11-02 12:27:35Z xavidp $
+// $Id: mod-func-months_links.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -41,7 +41,8 @@ function module_months_links_info()
  */
 function module_months_links($mod_reference, $module_params)
 {
-	global $prefs, $sections, $smarty;
+	global $prefs, $sections;
+	$smarty = TikiLib::lib('smarty');
 
 	if (isset($module_params['feature'])
 		&& isset($sections[$module_params['feature']])
@@ -67,13 +68,11 @@ function module_months_links($mod_reference, $module_params)
 	}
 
 	if (isset($link)) {
-		global $tikilib;
+		$tikilib = TIkiLib::lib('tiki');
 		if ($module_params['feature'] == 'blogs') {
-			global $bloglib;
-			include_once ('lib/blogs/bloglib.php');
+			$bloglib = TikiLib::lib('blog');
 		} elseif ($module_params['feature'] == 'cms') {
-			global $artlib;
-			include_once ('lib/articles/artlib.php');
+			$artlib = TikiLib::lib('art');
 		}
 
 		$month_names = array(

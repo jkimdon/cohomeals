@@ -2,17 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-slideshow.php 53778 2015-02-04 20:20:06Z jonnybradley $
+// $Id: tiki-slideshow.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 $section = 'wiki page';
 require_once ('tiki-setup.php');
-global $tikilib;
-include_once ('lib/structures/structlib.php');
-include_once ('lib/wiki/wikilib.php');
+$tikilib = TikiLib::lib('tiki');
+$structlib = TikiLib::lib('struct');
+$wikilib = TikiLib::lib('wiki');
 include_once ('lib/wiki-plugins/wikiplugin_slideshow.php');
 
 $access->check_feature('feature_wiki');
@@ -36,23 +36,35 @@ if (!isset($_SESSION["thedate"])) {
 if (isset($_REQUEST['pdf'])) {
 	$access->check_feature("feature_slideshow_pdfexport");
 	set_time_limit(777);
-	
-	$_POST["html"] = urldecode($_POST["html"]);
-	
-	define("DOMPDF_ENABLE_REMOTE", true);
-	define('DOMPDF_ENABLE_AUTOLOAD', false);
 
-	require_once("vendor/dompdf/dompdf/dompdf_config.inc.php");
-	
+	$_POST["html"] = urldecode($_POST["html"]);
+
 	if ( isset( $_POST["html"] ) ) {
+
+		require_once 'lib/pdflib.php';
+		PdfGenerator::setupMPDFCacheLocation(); // reuse mPDF settings
+		if (class_exists('mPDF')) { // use mPDF if available
+			$orientation =  isset($_REQUEST['landscape']) ? "L" : "P";
+			$mpdf = new mPDF(null, "letter-" . $orientation);
+			$mpdf->WriteHTML(preg_replace('/%u([a-fA-F0-9]{4})/', '&#x\\1;',$_POST["html"]));
+			$mpdf->Output();
+			exit(0);
+		}
+
+		define("DOMPDF_ENABLE_REMOTE", true);
+		define('DOMPDF_ENABLE_AUTOLOAD', false);
+
+		require_once("vendor_bundled/vendor/dompdf/dompdf/dompdf_config.inc.php");
+
+		// fallback to DOMPDF
 		$dompdf = new DOMPDF();
 
-		$dompdf->load_html(urldecode($_REQUEST["html"]));
+		$dompdf->load_html($_POST["html"]);
 		$dompdf->set_paper("letter", (isset($_REQUEST['landscape']) ? "landscape" : "portrait"));
 		$dompdf->render();
-		
+
 		$dompdf->stream("dompdf_out.pdf", array("Attachment" => false));
-		
+
 		exit(0);
 	}
 	die;
@@ -108,9 +120,7 @@ if (!in_array($page, $_SESSION["breadCrumb"])) {
 }
 
 // Now increment page hits since we are visiting this page
-if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
-	$tikilib->add_hit($page);
-}
+$tikilib->add_hit($page);
 
 // Get page data
 $parserlib = TikiLib::lib('parser');
@@ -140,15 +150,15 @@ $smarty->assign_by_ref('lastUser', $info["user"]);
 
 include_once ('tiki-section_options.php');
 
-$headerlib->add_cssfile('vendor/jquery/jquery-s5/jquery.s5.css');
-$headerlib->add_jsfile('vendor/jquery/jquery-s5/jquery.s5.js');
+$headerlib->add_cssfile('vendor_bundled/vendor/jquery/jquery-s5/jquery.s5.css');
+$headerlib->add_jsfile('vendor_bundled/vendor/jquery/jquery-s5/jquery.s5.js');
 $headerlib->add_jq_onready(
     '
-	$("#toc,.cluetip-title").remove();
+	$("#toc").remove();
 	
 	window.s5Settings = (window.s5Settings ? window.s5Settings : {});
 	
-	window.s5Settings.basePath = "vendor/jquery/jquery-s5/";
+	window.s5Settings.basePath = "vendor_bundled/vendor/jquery/jquery-s5/";
 
 	$.s5.start($.extend(window.s5Settings, {
 		menu: function() {
@@ -198,7 +208,7 @@ $headerlib->add_jq_onready(
 						});
 					}
 
-					$.modal(tr("Updating Theme..."));
+					$.tikiModal(tr("Updating Theme..."));
 					$.get("tiki-slideshow.php", {theme: theme}, function(o) {
 						$.s5.makeTheme($.parseJSON(o));
 						
@@ -213,11 +223,11 @@ $headerlib->add_jq_onready(
 								content: "~same~",
 								params: (window.slideshowSettings ? window.slideshowSettings : {})
 							}, function() {
-								$.modal();
+								$.tikiModal();
 								window.s5Busy = false;
 							});
 						} else {*/
-							$.modal();
+							$.tikiModal();
 							window.s5Busy = false;
 /*						}*/
 					}); 
@@ -254,7 +264,6 @@ $headerlib->add_js('
 ask_ticket('index-raw');
 
 // Display the Index Template
-$smarty->assign('dblclickedit', 'y');
 $smarty->assign('mid', 'tiki-show_page_raw.tpl');
 
 // use tiki_full to include include CSS and JavaScript

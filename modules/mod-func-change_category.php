@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-change_category.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-change_category.php 58675 2016-05-23 17:50:57Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -18,7 +18,7 @@ function module_change_category_info()
 {
 	return array(
 		'name' => tra('Change Category'),
-		'description' => tra('Enables to categorize an object.') . " " . tra('This module currently only supports Wiki pages. Some combinations of Multiple categories, Detailed, Unassign and Assign may challenge intuition or be simply broken.'),
+		'description' => tra('Enables to categorize an object.') . " " . tra('Some combinations of Multiple categories, Detailed, Unassign and Assign may challenge intuition or be simply broken.'),
 		'prefs' => array('feature_categories', 'feature_wiki'),
 		'documentation' => 'Module change_category',
 		'params' => array(
@@ -83,7 +83,10 @@ function module_change_category_info()
  */
 function module_change_category($mod_reference, $module_params)
 {
-	global $prefs, $tikilib, $smarty, $modlib;
+	global $prefs;
+	$smarty = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+	$modlib = TikiLib::lib('mod');
 
 	$smarty->assign('showmodule', false);
 
@@ -121,7 +124,8 @@ function module_change_category($mod_reference, $module_params)
 		$categories = $categlib->getCategories($id ? array('identifier'=>$id, 'type'=>'descendants') : null);
 
 		if (!empty($module_params['group']) && $module_params['group'] == 'y') {
-			global $userlib, $user;
+			global $user;
+			$userlib = TikiLib::lib('user');
 			if (!$user) {
 				return;
 			}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Client.php 54463 2015-03-16 18:52:52Z jonnybradley $
+// $Id: Client.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Connect_Client extends Tiki_Connect_Abstract
 {
@@ -165,8 +165,8 @@ class Tiki_Connect_Client extends Tiki_Connect_Abstract
 	function getVote($pref)
 	{
 		$votes = $this->getVotes();
-		if (isset($votes[$pref])) {
-			return $votes[$pref];
+		if (isset($votes->$pref)) {
+			return (array) $votes->$pref;
 		} else {
 			return array();
 		}
@@ -203,7 +203,7 @@ class Tiki_Connect_Client extends Tiki_Connect_Abstract
 	{
 
 		if (is_array($votes) || is_object($votes)) {
-			$votes = serialize($votes);
+			$votes = json_encode($votes);
 		}
 
 		$count = $this->connectTable->fetchCount(

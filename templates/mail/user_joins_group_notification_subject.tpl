@@ -1,1 +1,1 @@
-{tr}User joined group{/tr} {$mail_group}
+{* $Id: user_joins_group_notification_subject.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}{tr}User joined{/tr} {$prefs.mail_template_custom_text}{$mail_group}

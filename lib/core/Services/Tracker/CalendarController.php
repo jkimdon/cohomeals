@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CalendarController.php 55293 2015-04-30 16:39:08Z jonnybradley $
+// $Id: CalendarController.php 61082 2017-01-26 15:56:08Z kroky6 $
 
 class Services_Tracker_CalendarController
 {
@@ -18,7 +18,6 @@ class Services_Tracker_CalendarController
 
 		$unifiedsearchlib = TikiLib::lib('unifiedsearch');
 		$index = $unifiedsearchlib->getIndex();
-		$dataSource = $unifiedsearchlib->getDataSource();
 
 		$start = 'tracker_field_' . $input->beginField->word();
 		$end = 'tracker_field_' . $input->endField->word();
@@ -36,13 +35,11 @@ class Services_Tracker_CalendarController
 		$query->setRange(0, $prefs['unified_lucene_max_result']);
 
 		if ($body = $input->filters->none()) {
-			$builder = new Search_Query_WikiBuilder($query);
+			$builder = new Search_Query_WikiBuilder($query, $input);
 			$builder->apply(WikiParser_PluginMatcher::match($body));
 		}
 
 		$result = $query->search($index);
-
-		$result = $dataSource->getInformation($result, array('title', $start, $end));
 
 		$response = array();
 

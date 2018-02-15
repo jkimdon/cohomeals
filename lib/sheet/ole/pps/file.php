@@ -17,7 +17,7 @@
 // | Based on OLE::Storage_Lite by Kawai, Takanori                        |
 // +----------------------------------------------------------------------+
 //
-// $Id: file.php 25061 2010-02-11 13:27:17Z pkdille $
+// $Id: file.php 61625 2017-03-11 16:37:58Z lindonb $
 
 /**
 * Class for creating File PPS's for OLE containers
@@ -41,7 +41,7 @@ class OLE_PPS_File extends OLE_PPS
     * @param string $name The name of the file (in Unicode)
     * @see OLE::Asc2Ucs()
     */
-    function OLE_PPS_File($name)
+    function __construct($name)
     {
         $this->_tmp_dir = '';
         $this->OLE_PPS(

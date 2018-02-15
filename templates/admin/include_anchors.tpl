@@ -1,9 +1,8 @@
-{*$Id: include_anchors.tpl 47975 2013-10-11 11:40:35Z jonnybradley $*}
-
-{foreach from=$icons key=page item=info}
-	{if ! $info.disabled and $info.icon}
-		{self_link _icon=$info.icon _icon_class="reflect" _width="32" _height="32" _alt=$info.title page=$page _class="icon tips" _title="`$info.title`|`$info.description`"}{/self_link}
+{*$Id: include_anchors.tpl 60181 2016-11-07 11:00:44Z jonnybradley $*}
+{foreach from=$admin_icons key=page item=info}
+	{if ! $info.disabled}
+		<li><a href="tiki-admin.php?page={$page}" alt="{$info.title} {$info.description}" class="tips bottom slow icon text-muted" title="{$info.title}|{$info.description}">
+			{icon name="admin_$page"}
+		</a></li>
 	{/if}
 {/foreach}
-
-<br class="clear" />

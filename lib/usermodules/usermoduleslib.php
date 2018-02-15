@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: usermoduleslib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: usermoduleslib.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 /** \file
  * \brief Manage user assigned modules
@@ -159,7 +159,8 @@ class UserModulesLib extends TikiLib
 	// Return the list of modules that can be assigned by the user
 	function get_user_assignable_modules($user)
 	{
-		global $prefs,$userlib;
+		global $prefs;
+		$userlib = TikiLib::lib('user');
 
 		$query = "select * from `tiki_modules`";
 		$result = $this->query($query, array());
@@ -249,4 +250,3 @@ class UserModulesLib extends TikiLib
 		}
 	} 
 }
-global $usermoduleslib; $usermoduleslib = new UserModulesLib;

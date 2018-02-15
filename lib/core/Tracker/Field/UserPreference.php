@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UserPreference.php 45930 2013-05-13 19:57:37Z lphuberdeau $
+// $Id: UserPreference.php 60051 2016-10-25 09:18:17Z kroky6 $
 
 /**
  * Handler class for User preference
@@ -42,19 +42,20 @@ class Tracker_Field_UserPreference extends Tracker_Field_Abstract
 		if (isset($requestData[$ins_id])) {
 			$value = $requestData[$ins_id];
 		} else {
-			global $trklib, $userlib;
+			$userlib = TikiLib::lib('user');
+			$trklib = TikiLib::lib('trk');
 	
 			$value = '';
 			$itemId = $this->getItemId();
 			
 			if ($itemId) {
-				$itemUser = $this->getTrackerDefinition()->getItemUser($itemId);
+				$itemUsers = $this->getTrackerDefinition()->getItemUsers($itemId);
 		
-				if (!empty($itemUser)) {
+				if (!empty($itemUsers)) {
 					if ($this->getOption('type') == 'email') {
-						$value = $userlib->get_user_email($itemUser);
+						$value = $userlib->get_user_email($itemUsers[0]);
 					} else {
-						$value = $userlib->get_user_preference($itemUser, $this->getOption('type'));
+						$value = $userlib->get_user_preference($itemUsers[0], $this->getOption('type'));
 					}
 				}
 			}
@@ -63,9 +64,29 @@ class Tracker_Field_UserPreference extends Tracker_Field_Abstract
 		return array('value' => $value);
 	}
 
+	function renderInnerOutput($context = array()) {
+		$fieldData = $this->getFieldData();
+		$value = $fieldData['value'];
+		if ($this->getOption('type') === 'country') {
+			$value = str_replace('_', ' ', $value);
+		}
+		return $value;
+	}
+
 	function renderInput($context = array())
 	{
+		if ($this->getOption('type') === 'country') {
+			$context['flags'] = TikiLib::lib('tiki')->get_flags('', '', '', true);
+		}
 		return $this->renderTemplate('trackerinput/userpreference.tpl', $context);
+	}
+
+	function getDocumentPart(Search_Type_Factory_Interface $typeFactory)
+	{
+		$baseKey = $this->getBaseKey();
+		return array(
+			$baseKey => $typeFactory->plaintext($this->renderInnerOutput()),
+		);
 	}
 }
 

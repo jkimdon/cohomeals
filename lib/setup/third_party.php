@@ -6,10 +6,10 @@
  *
  * @package TikiWiki
  * @subpackage lib\setup
- * @copyright (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
+ * @copyright (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
-// $Id: third_party.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: third_party.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 // die if called directly.
 if ( basename($_SERVER['SCRIPT_NAME']) == basename(__FILE__) ) {
@@ -18,7 +18,7 @@ if ( basename($_SERVER['SCRIPT_NAME']) == basename(__FILE__) ) {
 }
 
 // The following constant is at least used in the release.php script and in the error handling functions
-define('THIRD_PARTY_LIBS_PATTERN', '#(lib/pear|lib/ajax|vendor)#');
+define('THIRD_PARTY_LIBS_PATTERN', '#(lib/pear|lib/ajax|vendor_bundled/vendor|vendor)#');
 
 define('TIKI_SMARTY_DIR', 'lib/smarty_tiki/');
 // add a line like the following in db/local.php to use an external smarty installation: $smarty_path='/usr/share/php/smarty/'

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cclitelib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: cclitelib.php 58747 2016-05-31 23:00:07Z lindonb $
 
 class CCLiteLib extends TikiDb_Bridge
 {
@@ -16,7 +16,8 @@ class CCLiteLib extends TikiDb_Bridge
 
 	function __construct()
 	{
-		global $prefs, $access;
+		global $prefs;
+		$access = TikiLib::lib('access');
 		$access->check_feature('payment_feature');
 
 		// need to add a check for empty, not just y/n - TODO one day
@@ -51,7 +52,7 @@ class CCLiteLib extends TikiDb_Bridge
 		if (!empty($this->registries)) {
 			return $this->registries[0];	// default if not specified in plugins etc
 		} else {
-			TikiLib::lib('errorreport')->report(tra('No registries specified in admin/payment/cclite.'));
+			Feedback::error(tra('No registries specified in admin/payment/cclite.'), 'session');
 		}
 	}
 
@@ -139,8 +140,9 @@ class CCLiteLib extends TikiDb_Bridge
 	 */
 	public function pay_invoice($invoice, $amount, $currency = '', $registry = '', $source_user = '')
 	{
-		global $user, $prefs, $paymentlib, $tikilib;
-		require_once 'lib/payment/paymentlib.php';
+		global $user, $prefs;
+		$tikilib = TikiLib::lib('tiki');
+		$paymentlib = TikiLib::lib('payment');
 
 		$msg = tr('Cclite payment initiated on %0', $tikilib->get_short_datetime($tikilib->now));
 
@@ -162,8 +164,8 @@ class CCLiteLib extends TikiDb_Bridge
 	 */
 	public function pay_user( $amount, $currency = '', $registry = '', $destination_user = '', $source_user = '')
 	{
-		global $user, $prefs, $paymentlib;
-		require_once 'lib/payment/paymentlib.php';
+		global $user, $prefs;
+		$paymentlib = TikiLib::lib('payment');
 		if (empty($source_user)) {
 			$source_user = $this->merchant_user;
 		}
@@ -184,7 +186,7 @@ class CCLiteLib extends TikiDb_Bridge
 	 * @amount		amount (decimal/float for cost, or email for adduser command)
 	 * @currency	currency (same as currency "name" in cclite (not "code" yet)
 	 * 				defaults to registry currency
-	 * @main_user	source of payment - uses logged in user if empty
+	 * @main_user	source of payment - uses logged-in user if empty
 	 *
 	 * @return		result from cclite server (html hopefully)
 	 */
@@ -220,7 +222,7 @@ class CCLiteLib extends TikiDb_Bridge
 			if ($logon_result[0] != 'failed' && strlen($logon_result[1])) {
 				curl_setopt($ch, CURLOPT_COOKIE, $logon_result[1]);
 			} else {
-				return tr('Connection to cclite server %0 failed for %1<br />"%2"', $cclite_base_url, $main_user, $logon_result[1]);
+				return tr('Connection to Cclite server %0 failed for %1<br />"%2"', $cclite_base_url, $main_user, $logon_result[1]);
 			}
 		}
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
@@ -289,7 +291,8 @@ class CCLiteLib extends TikiDb_Bridge
 	 */
 	private function cclite_remote_logon($username = '', $registry = '')
 	{
-		global $user, $prefs, $userlib;
+		global $user, $prefs;
+		$userlib = TikiLib::lib('user');
 
 		if (empty($username)) {
 			$username = $user;

@@ -1,19 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Controller.php 62097 2017-04-05 16:28:48Z jonnybradley $
 
 class Services_Rating_Controller
 {
+	/**
+	 * @param JitFilter $input
+	 * @return array
+	 */
 	function action_vote($input)
 	{
-		$type = $input->type->string();
+		$type = $input->type->text();
 		$id = $input->id->id();
 
-		$rating_value = $input->rating_value->array();
-		$rating_prev = $input->rating_prev->array();
+		$rating_value = $input->asArray('rating_value');
+		$rating_prev = $input->asArray('rating_prev');
 
 		$_REQUEST['rating_value'] = $rating_value;
 		$_REQUEST['rating_prev'] = $rating_prev;

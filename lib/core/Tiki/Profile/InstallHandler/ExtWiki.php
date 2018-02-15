@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ExtWiki.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ExtWiki.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_ExtWiki extends Tiki_Profile_InstallHandler
 {
@@ -25,7 +25,7 @@ class Tiki_Profile_InstallHandler_ExtWiki extends Tiki_Profile_InstallHandler
 
 	function _install()
 	{
-		global $adminlib; require_once 'lib/admin/adminlib.php';
+		$adminlib = TikiLib::lib('admin');
 
 		$data = $this->getData();
 

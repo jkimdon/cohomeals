@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Table.php 48844 2013-11-30 01:01:47Z nkoth $
+// $Id: Table.php 61698 2017-03-15 17:35:36Z kroky6 $
 
 class Search_MySql_Table extends TikiDb_Table
 {
@@ -25,7 +25,11 @@ class Search_MySql_Table extends TikiDb_Table
 
 	function __destruct()
 	{
-		$this->flush();
+		try {
+			$this->flush();
+		} catch( Search_MySql_Exception $e ) {
+			# ignore this to cleanly destruct the object
+		}
 	}
 
 	function drop()
@@ -79,10 +83,17 @@ class Search_MySql_Table extends TikiDb_Table
 
 	function ensureHasIndex($fieldName, $type)
 	{
+		global $prefs;
+
 		$this->loadDefinition();
 
-		if (! isset($this->definition[$fieldName])) {
-			throw new Search_MySql_QueryException(tr('Field %0 does not exist in the current index.'));
+		if (! isset($this->definition[$fieldName]) && $prefs['search_error_missing_field'] === 'y') {
+			if( preg_match('/^tracker_field_/', $fieldName) ) {
+				$msg = tr('Field %0 does not exist in the current index. Please check field permanent name and if you have any items in that tracker.', $fieldName);
+			} else {
+				$msg = tr('Field %0 does not exist in the current index. If this is a tracker field, the proper syntax is tracker_field_%0.', $fieldName, $fieldName);
+			}
+			throw new Search_MySql_QueryException($msg);
 		}
 
 		$indexName = $fieldName . '_' . $type;

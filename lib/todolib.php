@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: todolib.php 46638 2013-07-12 14:52:39Z lphuberdeau $
+// $Id: todolib.php 60051 2016-10-25 09:18:17Z kroky6 $
 
 /**
  *
@@ -84,7 +84,7 @@ class TodoLib
 		$db = TikiDb::get();
 		$query = 'DELETE FROM `tiki_todo` WHERE `todoId`=? OR (`objectId`=? AND `objectType`=?)';
 		$db->query($query, array($id, $id, 'todo'));
-		TodoLib::cleanNotif();
+		self::cleanNotif();
 	}
 
     /**
@@ -98,7 +98,7 @@ class TodoLib
 		$db->query($query, array($objectType, $objectId));
 		$query = 'DELETE FROM `tiki_todo` WHERE `objectType`=? AND `objectId`=?';
 		$db->query($query, array($objectType, $objectId));
-		TodoLib::cleanNotif();
+		self::cleanNotif();
 	}
 
 	// apply a todo
@@ -204,7 +204,10 @@ class TodoLib
      */
     function mailTodo($todo, $to, $default_subject='Change notification', $default_body='')
 	{
-		global $userlib, $tikilib, $prefs, $smarty;
+		global $prefs;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
+		$smarty = TikiLib::lib('smarty');
 		if (empty($to['email']) && !empty($to['user'])) {
 			$to['email'] = $userlib->get_user_email($to['user']);
 		}
@@ -236,7 +239,7 @@ class TodoLib
     function listObjectsTodo_tracker($todo, $except=null)
 	{
 		global $tikilib;
-		global $trklib; include_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 
 		switch ($todo['event']) {
 			case 'creation':
@@ -251,12 +254,18 @@ class TodoLib
 		$definition = Tracker_Definition::get($todo['objectId']);
 		$fieldId = $definition->getUserField();
 
+		if ($fieldId) {
+			$filterFields = array($fieldId => $trklib->get_tracker_field($fieldId));
+		} else {
+			$filterFields = '';
+		}
+
 		$objects = $trklib->list_items(
 			$todo['objectId'],
 			0,
 			-1,
 			'created_asc',
-			array($fieldId=>$trklib->get_tracker_field($fieldId)),
+			$filterFields,
 			'',
 			'',
 			$todo['from']['status'],
@@ -284,7 +293,7 @@ class TodoLib
      */
     function applyTodo_tracker($todo, $objects)
 	{
-		global $trklib; include_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		$trklib->change_status($objects, $todo['to']['status']);
 	}
 
@@ -294,13 +303,15 @@ class TodoLib
      */
     function notifyTodo_tracker($todo, $objects)
 	{
-		global $smarty, $tikilib, $prefs;
-		global $trklib; include_once('lib/trackers/trackerlib.php');
+		global $prefs;
+		$smarty = TikiLib::lib('smarty');
+		$trklib = TikiLib::lib('trk');
+		$tikilib = TikiLib::lib('tiki');
 		foreach ($objects as $object) {
 			// get the creator
-			$u = $object['field_values'][0]['value'];
-			if (empty($u)) {
-				$u = $object['itemUser'];
+			$creators = array($object['field_values'][0]['value']);
+			if (empty($creators)) {
+				$creators = $object['itemUsers'];
 			}
 			if (!empty($todo['to']['body'])) { // assign whatever needed
 				$smarty->assign('todo_itemId', $object['itemId']);
@@ -310,12 +321,12 @@ class TodoLib
 				$smarty->assign('todo_after', $todo['to']['before']);
 				$smarty->assign('todo_desc', $trklib->get_isMain_value($object['trackerId'], $object['itemId']));
 			}
-			// mail creator
-			$this->mailTodo($todo, array('user'=>$u), 'Tracker item status will be changed');
+			foreach( $creators as $creator ) {
+				// mail creator
+				$this->mailTodo($todo, array('user'=>$creator), 'Tracker item status will be changed');
+			}
 			//register as been mailed
 			$this->addNotif($todo['todoId'], 'trackeritem', $object['itemId']);
 		}
 	}
 }
-global $todolib;
-$todolib = new TodoLib;

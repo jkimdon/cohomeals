@@ -1,15 +1,14 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-discount.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-discount.php 58749 2016-06-01 01:39:05Z lindonb $
 include_once('tiki-setup.php');
 global $discountlib; include_once('lib/payment/discountlib.php');
 $access->check_permission(array('tiki_p_admin'));
 
 $auto_query_args = array();
-$errors = array();
 $tab = 1;
 
 if (!empty($_REQUEST['save']) && !empty($_REQUEST['code'])) {
@@ -23,7 +22,7 @@ if (!empty($_REQUEST['save']) && !empty($_REQUEST['code'])) {
 		$default = array('id'=>0);
 		$_REQUEST = array_merge($default, $_REQUEST);
 		if (!$discountlib->replace_discount($_REQUEST)) {
-			$errors[] = tra('Discount code already exists');
+			Feedback::error(tra('Discount code already exists'));
 			$smarty->assign_by_ref('info', $_REQUEST);
 			$tab = 2;
 		} else {
@@ -57,7 +56,6 @@ $smarty->assign_by_ref('discounts', $discounts);
 
 setcookie('tab', $tab);
 $smarty->assign_by_ref('cookietab', $tab);
-$smarty->assign_by_ref('errors', $errors);
 ask_ticket('discount');
 $smarty->assign('mid', 'tiki-discount.tpl');
 $smarty->display('tiki.tpl');

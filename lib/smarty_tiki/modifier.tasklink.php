@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.tasklink.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: modifier.tasklink.php 62116 2017-04-06 15:40:53Z drsassafras $
 
 // Martin Hausner
 //this script may only be included - so its better to die if called directly.
@@ -13,7 +13,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 }
 function smarty_modifier_tasklink($taskId, $class_name="link", $offset="0", $sort_mode="priority_desc")
 {
-	global $tikilib, $tasklib, $userlib, $user, $dbTiki, $prefs;
+	global $tasklib, $user, $prefs;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	include_once('lib/tasks/tasklib.php');
 
@@ -43,19 +45,19 @@ function smarty_modifier_tasklink($taskId, $class_name="link", $offset="0", $sor
 			$description = $info['description'];
 		}
 
-		$description =str_replace("\"", "\'", str_replace("'", "\\'", str_replace("\n", "", (str_replace("\r\n", "<br />", $tikilib->parse_data($description)))))) . $append;
+		$description =str_replace("\"", "\'", str_replace("'", "\\'", str_replace("\n", "", (str_replace("\r\n", "<br />", TikiLib::lib('parser')->parse_data($description)))))) . $append;
 
 		$fillin = tra("Task") . ' ' . tra("from") . ' <b>' . $info['creator'] . '</b> ' . tra("for") .
 			' <b>' . $info['user'] . '</b>.<br />' . tra("Priority") . ': <b>' . $info['priority'] . '</b>, (<b>' .
 					$info['percentage'] . '%</b>) ' . tra('done') . '.<br />';
 
-		if ($info[start] != 0 ) {
+		if ($info['start'] != 0 ) {
 			$fillin .= tra("Start date:") . " " . $tikilib->date_format("%H:%M -- %d. %e. %Y", $info['start']) . "<br />";
 		} else {
 			$fillin .= tra("Start date:") . " -<br />";
 		}
 
-		if ($info[end]) {
+		if ($info['end']) {
 			$fillin .= tra("End date:") . " " . $tikilib->date_format("%H:%M -- %d. %e. %Y", $info['end']) . "<br />";
 		} else {
 			$fillin .= tra("End date:") . " -<br />";
@@ -63,7 +65,7 @@ function smarty_modifier_tasklink($taskId, $class_name="link", $offset="0", $sor
 
 		$fillin .= "<hr />" . $description;
 
-		$mouseover = " onmouseover=\"return overlib('<table><tr><td>" . $fillin . "</td></tr></table>',HAUTO,VAUTO,CAPTION,'<div align=\'center\'>&nbsp; " .
+		$mouseover = " onmouseover=\"return overlib('<table><tr><td>" . $fillin . "</td></tr></table>',HAUTO,VAUTO,CAPTION,'<div style=\"text-align: center;\">&nbsp; " .
 			tra("Task") . ":&nbsp;&nbsp;" . htmlspecialchars($info['title']) . "</div>');\" onmouseout=\"nd()\"";
 	}
 	$content = "<a class='" . $class_name . "'" . $mouseover . " href='tiki-user_tasks.php?taskId=" . $taskId . "&amp;tiki_view_mode=view&amp;offset=" .

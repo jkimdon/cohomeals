@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MultiExplodeTest.php 46005 2013-05-20 15:47:29Z lphuberdeau $
+// $Id: MultiExplodeTest.php 59578 2016-09-01 13:48:28Z kroky6 $
 
 class TikiLib_MultiExplodeTest extends PHPUnit_Framework_TestCase
 {
@@ -25,8 +25,17 @@ class TikiLib_MultiExplodeTest extends PHPUnit_Framework_TestCase
 	{
 		$lib = TikiLib::lib('tiki');
 		$this->assertEquals(array('A', 'B'), $lib->multi_explode(':', 'A:B'));
-		$this->assertEquals(array('A::B'), $lib->multi_explode(':', 'A::B'));
-		$this->assertEquals(array('A:::B'), $lib->multi_explode(':', 'A:::B'));
+		$this->assertEquals(array('A', '', 'B'), $lib->multi_explode(':', 'A::B'));
+		$this->assertEquals(array('A', '', '', 'B'), $lib->multi_explode(':', 'A:::B'));
+	}
+
+	function testEmpty()
+	{
+		$lib = TikiLib::lib('tiki');
+		$this->assertEquals(array(''), $lib->multi_explode(':', ''));
+		$this->assertEquals(array('', ''), $lib->multi_explode(':', ':'));
+		$this->assertEquals(array('', 'B'), $lib->multi_explode(':', ':B'));
+		$this->assertEquals(array('A', ''), $lib->multi_explode(':', 'A:'));
 	}
 
 	function testIgnoreCharactersUsedInNamespace()

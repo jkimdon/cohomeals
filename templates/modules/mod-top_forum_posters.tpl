@@ -1,4 +1,4 @@
-{* $Id: mod-top_forum_posters.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+{* $Id: mod-top_forum_posters.tpl 49405 2014-01-16 05:39:16Z chibaguy $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="top_forum_posters" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {modules_list list=$modTopForumPosters nonums=$nonums}
@@ -7,7 +7,7 @@
 			<div style="position: relative">
 			<div class="module" style="position: absolute; right: 0; bottom: -.4em;">{$modTopForumPosters[ix].posts}</div>
 			<span class="module">{$modTopForumPosters[ix].name|avatarize}</span>
-			<div class="module" style="position: absolute; left: 0; bottom: -.4em">{$modTopForumPosters[ix].name|escape}</div><br class="clear" /></div>
+			<div class="module clearfix" style="position: absolute; left: 0; bottom: -.4em">{$modTopForumPosters[ix].name|escape}</div></div>
 		</li>
 	{/section}
 {/modules_list}

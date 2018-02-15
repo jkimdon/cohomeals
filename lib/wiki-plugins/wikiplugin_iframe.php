@@ -1,28 +1,31 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_iframe.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_iframe.php 59376 2016-08-05 13:56:48Z xavidp $
 
 function wikiplugin_iframe_info()
 {
 	return array(
 		'name' => tra('Iframe'),
 		'documentation' => 'PluginIframe',
-		'description' => tra('Include another web page within a frame'),
+		'description' => tra('Include the body of another web page in a scrollable frame within a page'),
 		'prefs' => array( 'wikiplugin_iframe' ),
 		'body' => tra('URL'),
 		'format' => 'html',
 		'validate' => 'all',
 		'tags' => array( 'basic' ),
-		'icon' => 'img/icons/page_copy.png',
+		'iconname' => 'copy',
+		'introduced' => 3,
 		'params' => array(
 			'name' => array(
 				'safe' => true,
 				'required' => false,
 				'name' => tra('Name'),
 				'description' => tra('Name'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'title' => array(
@@ -30,6 +33,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Title'),
 				'description' => tra('Frame title'),
+				'since' => '3.2',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'width' => array(
@@ -37,6 +42,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Width'),
 				'description' => tra('Width in pixels or %'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'height' => array(
@@ -44,6 +51,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Height'),
 				'description' => tra('Pixels or %'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'align' => array(
@@ -51,6 +60,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Alignment'),
 				'description' => tra('Align the iframe on the page'),
+				'since' => '3.0',
+				'filter' => 'word',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -66,6 +77,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Frame Border'),
 				'description' => tra('Choose whether to show a border around the iframe'),
+				'since' => '3.0',
+				'filter' => 'digits',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -78,6 +91,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Margin Height'),
 				'description' => tra('Margin height in pixels'),
+				'since' => '3.0',
+				'filter' => 'digits',
 				'default' => '',
 			),
 			'marginwidth' => array(
@@ -85,6 +100,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Margin Width'),
 				'description' => tra('Margin width in pixels'),
+				'since' => '3.0',
+				'filter' => 'digits',
 				'default' => '',
 			),
 			'scrolling' => array(
@@ -92,6 +109,8 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('Scrolling'),
 				'description' => tra('Choose whether to add a scroll bar'),
+				'since' => '3.0',
+				'filter' => 'word',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -104,7 +123,24 @@ function wikiplugin_iframe_info()
 				'required' => false,
 				'name' => tra('URL'),
 				'description' => tra('URL'),
+				'filter' => 'url',
+				'since' => '3.0',
 				'default' => '',
+			),
+			'responsive' => array(
+				'safe' => true,
+				'required' => false,
+				'name' => tra('Responsive'),
+				'description' => tra('Make the display responsive so that browsers determine dimensions based on the width of their containing block by creating an intrinsic ratio that will properly scale on any device.'),
+				'since' => '16.0',
+				'filter' => 'word',
+				'default' => '16by9',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('16 by 9'), 'value' => '16by9'),
+					array('text' => tra('4 by 3'), 'value' => '4by4'),
+					array('text' => tra('no'), 'value' => 'no'),
+				)
 			),
 		), 
 	);
@@ -114,7 +150,15 @@ function wikiplugin_iframe($data, $params)
 {
 
 	extract($params, EXTR_SKIP);
-	$ret = '<iframe ';
+	if (isset($responsive) AND $responsive != 'no' AND $responsive != 'n') {
+		if ($responsive == '4by3' ) {
+			$ret = '<div class="embed-responsive embed-responsive-4by3"><iframe class="embed-responsive-item" ';
+		} else {
+			$ret = '<div class="embed-responsive embed-responsive-16by9"><iframe class="embed-responsive-item" ';
+		}
+	} else {
+		$ret = '<iframe ';
+	}
 
 	if (isset($name)) {
 		$ret .= " name=\"$name\"";
@@ -148,6 +192,13 @@ function wikiplugin_iframe($data, $params)
 	} elseif (!empty($data)) {
 		$ret .= " src=\"$data\"";
 	}
-	$ret .= ">$data</iframe>";
+	if (strpos($src, 'ViewerJS') !== false) {
+		$ret .= " allowfullscreen webkitallowfullscreen";
+	}
+	if (isset($responsive) AND $responsive != 'no' AND $responsive != 'n') {
+		$ret .= ">$data</iframe></div>";
+	} else {
+		$ret .= ">$data</iframe>";
+	}
 	return $ret;
 }

@@ -5,10 +5,10 @@
  * @ignore 
  * @package TikiWiki
  * @subpackage doc
- * @copyright (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+ * @copyright (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
-// $Id: index.php 44694 2013-01-30 20:55:37Z marclaporte $
+// $Id: index.php 57973 2016-03-17 20:10:42Z jonnybradley $
 
 header("location: ../tiki-index.php");
 die;

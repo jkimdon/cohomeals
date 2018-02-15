@@ -1,4 +1,4 @@
-{* $Id: mod-last_podcasts.tpl 45019 2013-03-01 10:30:34Z chibaguy $ *}
+{* $Id: mod-last_podcasts.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
 
 {if $prefs.feature_file_galleries eq 'y'}
 	{if !isset($tpl_module_title)}
@@ -36,7 +36,7 @@
 						{tr}The path to a podcast player is required.{/tr}
 					{/if}
 				</div>
-	 		</li>
+			</li>
 			{/section}
 		{if $nonums != 'y'}</ol>{else}</ul>{/if}
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: binderlib.php 53794 2015-02-05 17:23:56Z jonnybradley $
+// $Id: binderlib.php 60518 2016-12-04 15:40:28Z jonnybradley $
 
 // For documentation how to use this file please see the comment at the end of this file
 
@@ -13,9 +13,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	exit;
 }
 
-
-require_once('lib/perspectivelib.php');
-require_once('lib/categories/categlib.php');
+$categlib = TikiLib::lib('categ');
 
 class AreasLib extends CategLib
 {
@@ -26,11 +24,15 @@ class AreasLib extends CategLib
 	{
 		$this->areas = $this->table('tiki_areas');
 		$this->cacheAreas();
+
+		parent::__construct();
 	}
 
 	function HandleObjectCategories($objectCategoryIds)
 	{
-		global $prefs, $perspectivelib, $_SESSION;
+		global $prefs;
+		$perspectivelib = TikiLib::lib('perspective');
+		$accesslib = TikiLib::lib('access');
 
 		$current_object = current_object();
 
@@ -61,7 +63,7 @@ class AreasLib extends CategLib
 
 				if (($area && !$area['share_common']) || ($objectArea && $objectArea['exclusive'])) {
 					$perspectivelib->set_perspective($objectPerspective, true);
-					Zend_OpenId::redirect(Zend_OpenId::selfUrl());
+					$accesslib->redirect(ZendOpenId\OpenId::selfUrl(), '', 301	);
 				}
 			}
 		}
@@ -71,7 +73,7 @@ class AreasLib extends CategLib
 			if ($area) {
 				if ( !$area['share_common']) {
 					$perspectivelib->set_perspective($objectPerspective, true);
-					Zend_OpenId::redirect(Zend_OpenId::selfUrl());
+					$accesslib->redirect(ZendOpenId\OpenId::selfUrl(), '', 301);
 				}
 			}
 		}
@@ -121,7 +123,7 @@ class AreasLib extends CategLib
 	function update_areas()
 	{
 		global $prefs;
-		$this->areas->deleteMultiple();	// empty areas table before rebuilding
+		$this->areas->deleteMultiple([]);	// empty areas table before rebuilding
 		$areas = array();
 		$descendants = $this->get_category_descendants($prefs['areas_root']);
 		if (is_array($descendants)) {
@@ -154,7 +156,7 @@ class AreasLib extends CategLib
 			$this->cacheAreas(true); // recache the whole table
 			return true;
 		} else {
-			return tra("Areas root category id") . " " . tra("is invalid.");
+			return tra("Areas root category ID") . " " . tra("is invalid.");
 		}
 	}
 
@@ -172,8 +174,6 @@ class AreasLib extends CategLib
 		}
 	}
 } // class end
-$areaslib = new AreasLib();
-global $areaslib;
 
 /*-----------------------------------------------
 +++ Description of Perspective Binder / Areas +++ 

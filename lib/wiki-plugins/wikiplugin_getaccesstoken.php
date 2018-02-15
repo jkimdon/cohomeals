@@ -1,40 +1,45 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_getaccesstoken.php 50620 2014-04-02 16:11:47Z lphuberdeau $
+// $Id: wikiplugin_getaccesstoken.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_getaccesstoken_info()
 {
 	return array(
 		'name' => tra('Get Security Token'),
 		'documentation' => tra('PluginGetAccessToken'),
-		'description' => tra('Get security token for specified parameters'),
+		'description' => tra('Display a link on a secure page using an access token'),
 		'prefs' => array( 'auth_token_access', 'wikiplugin_getaccesstoken' ),
 		'inline' => true,
 		'validate' => 'all',
+		'iconname' => 'lock',
 		'filter' => 'wikicontent',
+		'introduced' => 7,
 		'params' => array(
 			'entry' => array(
 				'required' => true,
-				'name' => tra('Entry point path or part of it'),
-				'description' => tra('The path of part of the path for which the token is for'),
+				'name' => tra('Entry Patg'),
+				'description' => tra('The path or part of the path that the token is for'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => ''
 			),
 			'keys' => array(
 				'required' => false,
-				'keys' => tra('Query string parameter keys'),
-				'description' => tra('Query string parameter keys for which the token is for, separated by :'),
+				'keys' => tra('Query Keys'),
+				'description' => tra('Query string parameter keys that the token is for, separated by a colon (:)'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => ':'
 			),
 			'values' => array(
 				'required' => false,
-				'name' => tra('Query string parameter Values'),
-				'description' => tra('Query string parameter values for which the token is for, separated by :'),
+				'name' => tra('Query Values'),
+				'description' => tra('Query string parameter values that the token is for, separated by a colon (:)'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => ':'

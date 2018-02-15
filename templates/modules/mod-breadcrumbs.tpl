@@ -1,4 +1,4 @@
-{* $Id: mod-breadcrumbs.tpl 47751 2013-09-26 08:45:31Z gezzzan $ *}
+{* $Id: mod-breadcrumbs.tpl 53712 2015-02-01 02:51:59Z walper $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name=$tpl_module_name flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	{strip}
@@ -6,7 +6,7 @@
 		<div id="sitelocbar" class="breadcrumb">
 			{if !empty($module_params.label) and not $crumbs_all_hidden}{tr}{$module_params.label|escape:"html"}{/tr} {/if}
 			{if $trail}
-				{breadcrumbs type="trail" loc="site" crumbs=$trail showLinks=$module_params.showLinks}
+				{breadcrumbs type="trail" loc="site" crumbs=$trail showLinks=$module_params.showLinks|default:null}
 			{else}
 				<a title="{tr}{$crumbs[0]->description}{/tr}" href="{$crumbs[0]->url}" accesskey="1">{$crumbs[0]->title}</a>
 				{if $structure eq 'y'}

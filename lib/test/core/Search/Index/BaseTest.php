@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BaseTest.php 51730 2014-06-24 19:33:42Z lphuberdeau $
+// $Id: BaseTest.php 59709 2016-09-15 11:07:20Z kroky6 $
 
 /**
  * @group unit
@@ -144,7 +144,7 @@ abstract class Search_Index_BaseTest extends PHPUnit_Framework_TestCase
 		$formatter = new Search_Formatter($plugin);
 		$output = $formatter->format($resultSet);
 
-		$this->assertContains('<b style="color:black;background-color:#ff66ff">Bonjour</b>', $output);
+		$this->assertContains($this->highlight('Bonjour'), $output);
 		$this->assertNotContains('<body>', $output);
 	}
 
@@ -157,7 +157,7 @@ abstract class Search_Index_BaseTest extends PHPUnit_Framework_TestCase
 	function testMatchInitial()
 	{
 		$this->assertResultCount(1, 'filterInitial', 'a description for', 'description');
-		$this->assertResultCount(0, 'filterInitial', 'a description in', 'description');
+		$this->assertResultCount(0, 'filterInitial', 'a description about', 'description');
 
 		$this->assertResultCount(1, 'filterInitial', 'HomePage');
 		$this->assertResultCount(1, 'filterInitial', 'Home');
@@ -165,6 +165,19 @@ abstract class Search_Index_BaseTest extends PHPUnit_Framework_TestCase
 		$this->assertResultCount(0, 'filterInitial', 'Ham');
 		$this->assertResultCount(0, 'filterInitial', 'HomePagd');
 		$this->assertResultCount(0, 'filterInitial', 'Home Page');
+	}
+
+	function testNotMatchInitial()
+	{
+		$this->assertResultCount(0, 'filterNotInitial', 'a description for', 'description');
+		$this->assertResultCount(1, 'filterNotInitial', 'a description about', 'description');
+
+		$this->assertResultCount(0, 'filterNotInitial', 'HomePage');
+		$this->assertResultCount(0, 'filterNotInitial', 'Home');
+		$this->assertResultCount(1, 'filterNotInitial', 'Fuzzy');
+		$this->assertResultCount(1, 'filterNotInitial', 'Ham');
+		$this->assertResultCount(1, 'filterNotInitial', 'HomePagd');
+		$this->assertResultCount(1, 'filterNotInitial', 'Home Page');
 	}
 
 	function testFilterRelations()
@@ -193,9 +206,17 @@ abstract class Search_Index_BaseTest extends PHPUnit_Framework_TestCase
 		$arguments = array_slice($arguments, 2);
 
 		$query = new Search_Query;
+		// add something positive  to search as Lucene negative only search returns no results
+		if( $filterMethod == 'filterNotInitial' )
+			$query->filterContent('description');
 		call_user_func_array(array($query, $filterMethod), $arguments);
 
 		$this->assertEquals($count, count($query->search($this->index)));
+	}
+
+	protected function highlight($word)
+	{
+		return '<b class="highlight_word highlight_word_1">'.$word.'</b>';
 	}
 }
 

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-import_xml_zip.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-import_xml_zip.php 60751 2016-12-30 01:43:34Z lindonb $
 
 $section = 'wiki page';
 require_once('tiki-setup.php');
@@ -19,10 +19,13 @@ if (isset($_REQUEST['import'])) {
 	check_ticket('import_xml_zip');
 	if (!empty($_REQUEST['local'])) {
 		$zipFile = $_REQUEST['local'];
+		$path = pathinfo($_REQUEST['local']);
+		$filename = $path['basename'];
 	} elseif (is_uploaded_file($_FILES['zip']['tmp_name'])) {
 		$zipFile = $_FILES['zip']['tmp_name'];
+		$filename = $_FILES['zip']['name'];
 	} else {
-		$smarty->assign('error', tra('Error'));
+		$error = tra('Unable to locate import file.');
 		$zipFile = '';
 	}
 	if ($zipFile) {
@@ -30,11 +33,18 @@ if (isset($_REQUEST['import'])) {
 		$xmllib = new XmlLib;
 		$config = array();
 		if ($xmllib->import_pages($zipFile, $config)) {
-			$smarty->assign('msg', tra('Operations executed successfully'));
+
+			$success = tr('Pages in zip file %0 successfully imported.', $filename);
 		} else {
-			$smarty->assign('error', $xmllib->get_error());
+			$error = $xmllib->get_error();
 		}
 	}
+	if (isset($success)) {
+		Feedback::success(['mes' => $success]);
+	}
+	if (isset($error)) {
+		Feedback::error(['mes' => $error]);
+	} 
 }
 ask_ticket('import_xml_zip');
 $smarty->assign('mid', 'tiki-import_xml_zip.tpl');

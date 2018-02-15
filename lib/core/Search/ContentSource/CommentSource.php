@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CommentSource.php 49427 2014-01-16 19:03:56Z lphuberdeau $
+// $Id: CommentSource.php 59189 2016-07-14 17:27:41Z jonnybradley $
 
 class Search_ContentSource_CommentSource implements Search_ContentSource_Interface
 {
@@ -37,12 +37,17 @@ class Search_ContentSource_CommentSource implements Search_ContentSource_Interfa
 		$commentslib = TikiLib::lib('comments');
 		$comment = $commentslib->get_comment($objectId);
 
+		if (! $comment) {
+			return false;
+		}
+
 		$url = $commentslib->getHref($comment['objectType'], $comment['object'], $objectId);
 		$url = str_replace('&amp;', '&', $url);
 
 		$data = array(
 			'title' => $typeFactory->sortable($comment['title']),
 			'language' => $typeFactory->identifier('unknown'),
+			'creation_date' => $typeFactory->timestamp($comment['commentDate']),
 			'modification_date' => $typeFactory->timestamp($comment['commentDate']),
 			'contributors' => $typeFactory->multivalue(array($comment['userName'])),
 
@@ -66,6 +71,7 @@ class Search_ContentSource_CommentSource implements Search_ContentSource_Interfa
 		return array(
 			'title',
 			'language',
+			'creation_date',
 			'modification_date',
 			'contributors',
 			'url',

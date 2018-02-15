@@ -1,16 +1,19 @@
 <?php
 
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikisecure.php 44847 2013-02-08 16:29:44Z lphuberdeau $
+// $Id: tikisecure.php 61780 2017-03-20 07:18:31Z rjsmelo $
+
+use phpseclib\Crypt\RSA;
+use Tiki\FileGallery;
 
 class TikiSecure
 {
-	var $certName = "Tiki Secure Certificate";
-	var $bits = 1024;
-	var $type = "file";
+	private $certName = "Tiki Secure Certificate";
+	private $bits = 1024;
+	private $type = "file";
 	
 	function __construct($certName = "", $bits = 0)
 	{
@@ -33,7 +36,7 @@ class TikiSecure
 		$keys = $this->getKeys();
 		
 		$path = get_include_path();
-		$rsa = new Crypt_RSA();
+		$rsa = new RSA();
 		
 		$rsa->loadKey($keys->publickey);
 		
@@ -48,7 +51,7 @@ class TikiSecure
 		
 		$keys = $this->getKeys();
 
-		$rsa = new Crypt_RSA();
+		$rsa = new RSA();
 
 		$rsa->loadKey($keys->publickey);
 		$rsa->loadKey($keys->privatekey);
@@ -59,7 +62,7 @@ class TikiSecure
 	function hasKeys()
 	{
 		if ($this->type == "filegallery")
-			return FileGallery_File::filename($this->certName)->exists();
+			return FileGallery\File::filename($this->certName)->exists();
 		
 		if ($this->type == "file") {
 			return file_exists("temp/" . $this->certName);
@@ -71,7 +74,7 @@ class TikiSecure
 		//Get existing certificate if it exists
 		if ($this->hasKeys()) {
 			if ($this->type == "filegallery") {
-				$keys = json_decode(FileGallery_File::filename($this->certName)->data());
+				$keys = json_decode(FileGallery\File::filename($this->certName)->data());
 			}
 			
 			if ($this->type == "file") {
@@ -89,13 +92,13 @@ class TikiSecure
 		set_time_limit(30000);
 		$path = get_include_path();
 		
-		$rsa = new Crypt_RSA();
+		$rsa = new RSA();
 		$keys = $rsa->createKey($this->bits);
 		
 		set_include_path($path);
 		
 		if ($this->type == "filegallery") {
-			FileGallery_File::filename($this->certName)
+			FileGallery\File::filename($this->certName)
 				->setParam("description", $this->certName)
 				->replace(json_encode($keys));
 		}

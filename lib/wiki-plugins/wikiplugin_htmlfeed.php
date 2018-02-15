@@ -1,22 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_htmlfeed.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_htmlfeed.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_htmlfeed_info()
 {
 	return array(
-		'name' => tra('Textlink'),
+		'name' => tra('HTML Feed'),
 		'documentation' => 'PluginHtmlFeed',
-		'description' => tra('Adds an item to HTML feed'),
+		'description' => tra('Add an item to HTML Feed'),
 		'prefs' => array( 'feature_wiki', 'wikiplugin_htmlfeed' , 'feature_htmlfeed'),
-		'icon' => 'img/icons/link.png',
-		'params' => array(			
+		'iconname' => 'link',
+		'introduced' => 9,
+		'params' => array(
 			'name' => array(
 				'required' => true,
 				'name' => tra('Name'),
+				'description' => tra('Name of this feed'),
+				'since' => '9.0',
+				'filter' => 'text',
 				'default' => false
 			),
 		),
@@ -25,7 +29,10 @@ function wikiplugin_htmlfeed_info()
 
 function wikiplugin_htmlfeed($data, $params)
 {
-    global $tikilib, $headerlib, $feedItem, $caching, $page;
+    global $feedItem, $caching, $page;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
+
     static $feedhtmlFeedI = 0;
 	++$feedhtmlFeedI;
 	

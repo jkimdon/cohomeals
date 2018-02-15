@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-action_calendar.php 45714 2013-04-25 12:56:36Z jonnybradley $
+// $Id: mod-func-action_calendar.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -35,13 +35,13 @@ function module_action_calendar_info()
  */
 function module_action_calendar($mod_reference, &$module_params)
 {
-	global $prefs, $tiki_p_view_tiki_calendar, $tikilib, $smarty;
+	global $prefs, $tiki_p_view_tiki_calendar;
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('show_calendar_module', 'n');
 	if ($tiki_p_view_tiki_calendar == 'y') {
 		$smarty->assign('show_calendar_module', 'y');	
-		global $tikicalendarlib; include_once('lib/calendar/tikicalendarlib.php');
-//		Note: calendar css file now loaded in tiki-modules.php
-//		global $headerlib; $headerlib->add_cssfile('css/calendar.css', 20);
+		$tikicalendarlib = TikiLib::lib('tikicalendar');
 		global $calendarViewMode;
 	
 		$calendarViewMode['casedefault'] = 'month';

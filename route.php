@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: route.php 49882 2014-02-14 15:01:17Z lphuberdeau $
+// $Id: route.php 59811 2016-09-26 23:47:25Z rjsmelo $
 
 // Adding support for an other web server? Check the end of the file
 
@@ -50,6 +50,7 @@ function tiki_route($path)
 		'surveys' => 'tiki-list_surveys.php',
 		'trackers' => 'tiki-list_trackers.php',
 		'users' => 'tiki-list_users.php',
+		'tiki-check' => 'tiki-check.php',
 	);
 
 	foreach ($simple as $key => $file) {
@@ -112,7 +113,7 @@ function tiki_route($path)
 	tiki_route_attempt_prefix('tracker', 'tiki-view_tracker.php', 'trackerId');
 	tiki_route_attempt_prefix('sheet', 'tiki-view_sheets.php', 'sheetId');
 	tiki_route_attempt_prefix('user', 'tiki-user_information.php', 'userId');
-	tiki_route_attempt('|^userinfo$|', 'tiki-view_tracker_item.php', null, array('view' => ' user', 'cookietab' => '2'));
+	tiki_route_attempt('|^userinfo$|', 'tiki-view_tracker_item.php', function () { return array('view' => ' user'); });
 
 	tiki_route_attempt_prefix('dl', 'tiki-download_file.php', 'fileId');
 	tiki_route_attempt_prefix('thumbnail', 'tiki-download_file.php', 'fileId', array('thumbnail' => ''));
@@ -170,7 +171,7 @@ function tiki_route($path)
 
 function tiki_route_attempt($pattern, $file, $callback = null, $extra = array())
 {
-	global $path, $inclusion;
+	global $path, $inclusion, $base, $full;
 
 	if ($inclusion) {
 		return;
@@ -178,6 +179,8 @@ function tiki_route_attempt($pattern, $file, $callback = null, $extra = array())
 
 	if (preg_match($pattern, $path, $parts)) {
 		$inclusion = $file;
+
+		$full = $base . $file;
 
 		if ($callback && is_callable($callback)) {
 			$_GET = array_merge($_GET, $callback($parts), $extra);
@@ -207,6 +210,16 @@ $inclusion = null;
 switch ($sapi) {
 case 'apache2handler':
 default:
+
+	// Fix $_SERVER['REQUEST_URI', which is ASCII encoded on IIS
+	//	Convert the SERVER variable itself, to fix $_SERVER['REQUEST_URI'] access everywhere
+	//	route.php comes first in the processing.  Avoid dependencies.
+	if (isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'],'IIS') !== false) {
+		if (mb_detect_encoding($_SERVER['REQUEST_URI'], 'UTF-8', true) == false) {
+			$_SERVER['REQUEST_URI'] = utf8_encode($_SERVER['REQUEST_URI']);
+		}
+	}
+
 	if (isset($_SERVER['SCRIPT_URL'])) {
 		$full = $_SERVER['SCRIPT_URL'];
 	} elseif (isset($_SERVER['REQUEST_URI'])) {
@@ -241,15 +254,27 @@ if (is_null($base) || is_null($path)) {
 tiki_route($path);
 
 if ($inclusion) {
-	$_SERVER['PHP_SELF'] = $inclusion;
+	$_SERVER['PHP_SELF'] = $base . $inclusion;
+	$_SERVER['SCRIPT_NAME'] = $base . basename($inclusion);
 	include __DIR__ . '/' . $inclusion;
 } else {
 	error_log("No route found - full:$full query:{$_SERVER['QUERY_STRING']}");
 
-	header('HTTP/1.0 404 Not Found');
-	header('Content-Type: text/plain; charset=utf-8');
+	// Route to the "no-route" URL, if found
+	require_once('lib/init/initlib.php');
+	$local_php = TikiInit::getCredentialsFile();
+	if ( file_exists($local_php) ) {
+		include($local_php);
+	}
+	if (empty($noroute_url)) {
+		// Fail
+		header('HTTP/1.0 404 Not Found');
+		header('Content-Type: text/plain; charset=utf-8');
 
-	echo "No route found. Please see http://dev.tiki.org/URL+Rewriting+Revamp";
+		echo "No route found. Please see http://dev.tiki.org/URL+Rewriting+Revamp";
+	} else {
+		header('Location: '.$noroute_url);
+	}
 	exit;
 }
 

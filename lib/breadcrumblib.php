@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: breadcrumblib.php 48083 2013-10-19 23:05:37Z nkoth $
+// $Id: breadcrumblib.php 59784 2016-09-23 22:00:51Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -32,7 +32,7 @@ class Breadcrumb
      * @param string $helpurl
      * @param string $helpdesc
      */
-    function Breadcrumb($title, $desc='', $url='', $helpurl='', $helpdesc='')
+    function __construct($title, $desc='', $url='', $helpurl='', $helpdesc='')
 	{
 		if ($title == '') {
 			$this->title = 'Home';
@@ -91,7 +91,7 @@ function breadcrumb_buildTrail($crumbs, $loc, $showLinks = true)
 {
 	global $prefs, $info;
 	if ($prefs['feature_breadcrumbs'] == 'y') {
-		if ($loc == 'page' && ($prefs['feature_siteloc'] == 'page' || ($prefs['feature_page_title'] == 'y' && $info) ) ) {
+		if ($loc == 'page' && ($prefs['feature_siteloc'] == 'page' || ($prefs['feature_page_title'] == 'y' || $prefs['wiki_page_name_inside'] == 'y' && $info) ) ) {
 			return _breadcrumb_buildTrail($crumbs, -1, -1, $showLinks);
 		} else if (($loc == 'site' || $loc == 'location') && $prefs['feature_siteloc'] == 'y') {
 			return _breadcrumb_buildTrail($crumbs, -1, -1, $showLinks);
@@ -293,14 +293,14 @@ function breadcrumb_getTitle($crumbs, $loc)
 	} else if ($prefs['feature_breadcrumbs'] == 'n' && $loc == "admin") {
 		return _breadcrumb_getTitle($crumbs, $loc);
 	} else if ($prefs['feature_breadcrumbs'] == 'y') {
-		if ($loc == 'page' && ($prefs['feature_siteloc'] == 'page' || ($prefs['feature_page_title'] == 'y' && $info) ) ) {
+		if ($loc == 'page' && ($prefs['feature_siteloc'] == 'page' || ($prefs['feature_page_title'] == 'y' || $prefs['wiki_page_name_inside'] == 'y' && $info) ) ) {
 			return _breadcrumb_getTitle($crumbs, $loc);
 		} else if (($loc == 'site' || $loc == 'location') && $prefs['feature_siteloc'] == 'y') {
 			return _breadcrumb_getTitle($crumbs, $loc);
 		}
 	} else if ($loc == "admin") {
 		return _breadcrumb_getTitle($crumbs, 'page');
-	} else if ($prefs['feature_breadcrumbs'] != 'y' && $loc == "page" && $prefs['feature_page_title'] == 'y') {// for previous compatibility
+	} else if ($prefs['feature_breadcrumbs'] != 'y' && $loc == "page" && $prefs['feature_page_title'] == 'y' || $prefs['wiki_page_name_inside'] == 'y') {// for previous compatibility
 		return _breadcrumb_getTitle($crumbs, 'page');
 	}
 	return;
@@ -314,15 +314,16 @@ function breadcrumb_getTitle($crumbs, $loc)
 /* static */
 function _breadcrumb_getTitle($crumbs, $loc)
 {
-	global $prefs, $print_page, $info, $structure, $structure_path, $tikilib, $smarty;
-
+	global $prefs, $print_page, $info, $structure, $structure_path;
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 	$len = count($crumbs);
 
 	if ( $prefs['feature_breadcrumbs'] == 'n' || $prefs['feature_sitetitle'] == 'title' ) {
-    $smarty->loadPlugin('smarty_modifier_sefurl');
-    $smarty->loadPlugin('smarty_modifier_escape');
+		$smarty->loadPlugin('smarty_modifier_sefurl');
+		$smarty->loadPlugin('smarty_modifier_escape');
 
-		$class = "pagetitle";
+		$class = "";
 		$metadata = '';
 
 		$current = current_object();
@@ -337,7 +338,7 @@ function _breadcrumb_getTitle($crumbs, $loc)
 			}
 		}
 
-		$ret = '<strong><a class="'.$class.'"' . $metadata . ' title="'.tra("refresh").'" href="' . $escapedHref . '">';
+		$ret = '<a class="'.$class.'"' . $metadata . ' title="'.tra("refresh").'" href="' . $escapedHref . '">';
 	} else {
 		$class = "crumblink";
 		$ret = '<a class="'.$class.'" title="';
@@ -364,7 +365,8 @@ function _breadcrumb_getTitle($crumbs, $loc)
 			}
 		}
 	}
-	if (!empty($prefs['wiki_pagename_strip'])) {
+	if (!empty($prefs['wiki_pagename_strip']) || $prefs['namespace_indicator_in_page_title'] == 'y')
+	{
 		include_once('lib/smarty_tiki/modifier.pagename.php');
 		$ret .= tra(smarty_modifier_pagename($cur_title)).'</a>';
 	} else {
@@ -372,11 +374,9 @@ function _breadcrumb_getTitle($crumbs, $loc)
 	}
 	$ret .= help_doclink(array('crumb'=>$crumbs[$len-1]));
 	if ( isset($info['flag']) && $info['flag'] == 'L' && $print_page != 'y' ) {
-		$ret .= ' <img src="img/icons/lock.png" height="16" width="16" alt="' .
-							tra('locked') . '" title="' . tra('locked by') . ' ' . $info['user'] . '" />';
-	}
-	if ( $prefs['feature_breadcrumbs'] == 'n' || $prefs['feature_sitetitle'] == 'title' ) {
-		$ret .= '</strong>';
+		$smarty->loadPlugin('smarty_function_icon');
+		$ret .= smarty_function_icon(['name' => 'lock', 'iclass' => 'tips', 'ititle' => ':' . tra('Locked by')
+			. $info['user']], $smarty);
 	}
 	return $ret;
 }

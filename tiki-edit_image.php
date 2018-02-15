@@ -2,21 +2,18 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_image.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-edit_image.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
 
-include_once ('lib/imagegals/imagegallib.php');
+$imagegallib = TikiLib::lib('imagegal');
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 $access->check_feature('feature_galleries');
@@ -68,12 +65,6 @@ if (isset($_REQUEST['editimage']) || isset($_REQUEST['editimage_andgonext'])) {
 	}
 
 	$error_msg = '';
-
-	// Avoid warnings
-	if ($prefs['feature_maps'] != 'y') {
-		$_REQUEST['lat'] = '';
-		$_REQUEST['lon'] = '';
-	}
 
 	if (!empty($_FILES['userfile']) && !empty($_FILES['userfile']['name'])) {
 		if ((!empty($prefs['gal_match_regex']) && !preg_match('/' . $prefs['gal_match_regex'] . '/', $_FILES['userfile']['name'], $reqs))

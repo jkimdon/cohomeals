@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_aname.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_aname.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_aname_info()
 {
@@ -13,9 +13,10 @@ function wikiplugin_aname_info()
 		'description' => tra('Create an anchor that can be linked to'),
 		'prefs' => array('wikiplugin_aname'),
 		'body' => tra('The name of the anchor.'),
-		'tags' => array( 'basic' ),		
+		'tags' => array( 'basic' ),
+		'introduced' => 1,
 		'params' => array(),
-		'icon' => 'img/icons/anchor.png',
+		'iconname' => 'link',
 	);
 }
 

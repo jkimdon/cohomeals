@@ -1,10 +1,15 @@
-{* $Id: tiki-wizard_user.tpl 49682 2014-02-03 16:43:09Z xavidp $ *}
+{* $Id: tiki-wizard_user.tpl 53176 2014-11-21 23:12:16Z jyhem $ *}
+{extends "layout_plain.tpl"}
 
+{block name="title"}
 {title}{tr}User Wizard{/tr}{/title}
 
+{/block}
+
+{block name="content"}
 <form action="tiki-wizard_user.php" method="post">
 {include file="wizard/wizard_bar_user.tpl"}
-<div id="wizardBody"> 
+<div id="wizardBody">
 <table class="adminWizardTable">
 	<tr>
 	{if !empty($wizard_toc)}
@@ -14,10 +19,11 @@
 		</td>
 	{/if}
 		<td class="adminWizardBody">
-			{include file="{$wizardBody}"}
+			{$wizardBody}
 		</td>
 	</tr>
 </table>
 </div>
 {include file="wizard/wizard_bar_user.tpl"}
 </form>
+{/block}

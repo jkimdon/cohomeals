@@ -1,12 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikicalendarlib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tikicalendarlib.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
-global $calendarlib;
-require_once('calendarlib.php');
+$calendarlib = TikiLib::lib('calendar');
 
 /**
  *
@@ -95,7 +94,7 @@ class TikiCalendarLib extends CalendarLib
 
 						switch ( $res['type'] ) {
 							case 'art':
-								$res['description'] = $this->parse_data($res['description']);
+								$res['description'] = TikiLib::lib('parser')->parse_data($res['description']);
 								break;
 
 							case 'blog':

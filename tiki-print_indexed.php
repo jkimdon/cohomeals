@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-print_indexed.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-print_indexed.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once 'tiki-setup.php';
-require_once 'lib/categories/categlib.php';
+$categlib = TikiLib::lib('categ');
 
 $access->check_feature('feature_print_indexed');
 
@@ -194,9 +194,8 @@ class ObjectRenderer_TrackerItem extends ObjectRenderer // {{{
     function __construct($type, $object, $options = array())
 	{
 		parent::__construct($type, $object, $options);
-		global $trklib;
 
-		require_once 'lib/trackers/trackerlib.php';
+		$trklib = TikiLib::lib('trk');
 
 		$info = $trklib->get_tracker_item($object);
 		$trackerId = $info['trackerId'];
@@ -287,7 +286,7 @@ class ObjectRenderer_Wiki extends ObjectRenderer // {{{
 
 		$info = $tikilib->get_page_info($objectId);
 
-		$info['parsed'] = $tikilib->parse_data(
+		$info['parsed'] = TikiLib::lib('parser')->parse_data(
 			$info['data'],
 			array(
 				'is_html' => $info['is_html'],
@@ -339,7 +338,8 @@ class ObjectRenderer_MultilingualWiki extends ObjectRenderer // {{{
     function __construct($type, $object, $options = array())
 	{
 		parent::__construct($type, $object, $options);
-		global $multilinguallib, $tikilib; require_once 'lib/multilingual/multilinguallib.php';
+		$multilinguallib = TikiLib::lib('multilingual');
+		$tikilib = TikiLib::lib('tiki');
 
 		$languages = $options['languages'];
 		$this->renderers = array_fill_keys($languages, null);

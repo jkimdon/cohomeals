@@ -1,4 +1,4 @@
-{tr}Remove file{/tr}
+{* $Id: fgal_old_file_deleted.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}{tr}Remove {$prefs.mail_template_custom_text}file{/tr}
 ---
 {tr}Gallery:{/tr} {$galInfo.name}
 {tr}GalleryId:{/tr} {$galInfo.galleryId}

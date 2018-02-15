@@ -1,14 +1,14 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_choice.php 51186 2014-05-08 16:43:20Z xavidp $
+// $Id: function.rating_choice.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 function smarty_function_rating_choice( $params, $smarty )
 {
-	global $prefs, $ratinglib, $user;
-	require_once 'lib/rating/ratinglib.php';
+	global $prefs, $user;
+	$ratinglib = TikiLib::lib('rating');
 
 	if ( ! isset($params['comment_author'], $params['type'], $params['id']) ) {
 		return tra('No object information provided for rating.');

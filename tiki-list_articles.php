@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_articles.php 50192 2014-03-03 19:45:26Z jonnybradley $
+// $Id: tiki-list_articles.php 57957 2016-03-17 19:58:54Z jonnybradley $
 $section = 'cms';
 require_once ('tiki-setup.php');
-include_once ('lib/articles/artlib.php');
+$artlib = TikiLib::lib('art');
 $access->check_feature('feature_articles');
 $access->check_permission('tiki_p_read_article');
 $auto_query_args = array('sort_mode', 'category', 'offset', 'maxRecords', 'find', 'find_from_Month', 'find_from_Day', 'find_from_Year', 'find_to_Month', 'find_to_Day', 'find_to_Year', 'type', 'topic', 'cat_categories', 'categId', 'lang', 'mode', 'mapview', 'searchmap', 'searchlist');
@@ -180,15 +180,15 @@ $smarty->assign_by_ref('topics', $topics);
 $types = $artlib->list_types();
 $smarty->assign_by_ref('types', $types);
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 	$categories = $categlib->getCategories();
 	$smarty->assign_by_ref('categories', $categories);
 	$smarty->assign('cat_tree', $categlib->generate_cat_tree($categories, true, $selectedCategories));	
 }
 if ($prefs['feature_multilingual'] == 'y') {
 	$languages = array();
-	$languages = $tikilib->list_languages(false, 'y');
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages(false, 'y');
 	$smarty->assign_by_ref('languages', $languages);
 }
 if ($tiki_p_edit_article != 'y' && $tiki_p_remove_article != 'y') { //check one editable

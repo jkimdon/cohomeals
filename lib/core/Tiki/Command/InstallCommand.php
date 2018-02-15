@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: InstallCommand.php 48775 2013-11-27 15:04:33Z lphuberdeau $
+// $Id: InstallCommand.php 60091 2016-10-31 09:01:14Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -51,6 +51,7 @@ class InstallCommand extends Command
 			\TikiLib::lib('cache')->empty_cache();
 			initialize_prefs(true);
 			\TikiLib::lib('unifiedsearch')->rebuild();
+			\TikiLib::lib('prefs')->rebuildIndex();
 		} else {
 			$output->writeln('<error>Database already exists.</error>');
 		}

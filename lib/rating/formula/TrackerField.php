@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TrackerField.php 49285 2013-12-31 15:33:15Z lphuberdeau $
+// $Id: TrackerField.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 class Tiki_Formula_Function_TrackerField extends Math_Formula_Function
 {

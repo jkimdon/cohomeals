@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-page_contribution.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-page_contribution.php 62028 2017-04-02 14:52:01Z jonnybradley $
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/histlib.php');
+$histlib = TikiLib::lib('hist');
 require_once("lib/diff/difflib.php");
 
 $access->check_feature('feature_wiki');
@@ -87,7 +87,7 @@ if ($showstatistics==1) {
 }
 if ($showpage==1) {
 	$data=$document->get('wiki', $getOptions);
-	$data=$tikilib->parse_data($data);
+	$data=TikiLib::lib('parser')->parse_data($data);
 	if ($escape==1) { // make breaks visible again
 		$data=preg_replace('/[\n]/', "<br />\n", $data);
 	}

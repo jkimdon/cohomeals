@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MenuOption.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: MenuOption.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 {
@@ -32,7 +32,7 @@ class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 		$this->replaceReferences($data);
 
 		if (!empty($data['menuId']) && !empty($data['url'])) {
-		   global $menulib; require_once 'lib/menubuilder/menulib.php';
+		   $menulib = TikiLib::lib('menu');
 		   $data['optionId'] = $menulib->get_option($data['menuId'], $data['url']);
 		}
 		return $this->data = $data;
@@ -48,7 +48,7 @@ class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 	}
 	function _install()
 	{
-		global $menulib; require_once 'lib/menubuilder/menulib.php';
+		$menulib = TikiLib::lib('menu');
 
 		$data = $this->getData();
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-translation.php 45596 2013-04-19 05:16:19Z nkoth $
+// $Id: mod-func-translation.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -54,15 +54,16 @@ function filter_languages_from_pivot($langInfo)
  */
 function module_translation($mod_reference, $module_params)
 {
-	global $pivotLanguage, $tikilib, $smarty, $prefs, $page, $_REQUEST;
+	global $pivotLanguage, $prefs, $page;
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 
-
-//are we arriving from the edit page?
-		if (isset($module_params['from_edit_page']) && $module_params['from_edit_page'] == 'y') {
-			$smarty->assign('from_edit_page', 'y');
-		} else {
-			$smarty->assign('from_edit_page', 'n');
-		}
+	//are we arriving from the edit page?
+	if (isset($module_params['from_edit_page']) && $module_params['from_edit_page'] == 'y') {
+		$smarty->assign('from_edit_page', 'y');
+	} else {
+		$smarty->assign('from_edit_page', 'n');
+	}
 
 	if ((!$page or $page == '') and isset($_REQUEST['page'])) {
 		$page = $_REQUEST['page'];
@@ -72,8 +73,7 @@ function module_translation($mod_reference, $module_params)
 
 	if (! empty($page) && is_string($page)) {
 
-		global $multilinguallib;
-		include_once('lib/multilingual/multilinguallib.php');
+		$multilinguallib = TikiLib::lib('multilingual');
 
 		if (isset($module_params['show_language']) && $module_params['show_language'] == 'n') {
 			$smarty->assign('show_language', 'n');

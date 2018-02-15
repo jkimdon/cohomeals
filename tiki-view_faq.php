@@ -2,20 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_faq.php 50841 2014-04-20 22:16:25Z jyhem $
+// $Id: tiki-view_faq.php 58749 2016-06-01 01:39:05Z lindonb $
 
 $section = 'faqs';
 require_once ('tiki-setup.php');
-include_once ('lib/faqs/faqlib.php');
+$faqlib = TikiLib::lib('faq');
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once ('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 $access->check_feature('feature_faqs');
@@ -51,8 +48,7 @@ if (isset($_REQUEST["sugg"])) {
 	check_ticket('view-faq');
 	if ($tiki_p_suggest_faq == 'y') {
 		if (empty($user) && $prefs['feature_antibot'] == 'y' && !$captchalib->validate()) {
-			$error = $captchalib->getErrors();
-			$smarty->assign('error', $error);
+			Feedback::error(['mes' => $captchalib->getErrors()]);
 			// Save the pending question and answer if antibot code is wrong
 			$smarty->assign('pendingquestion', $_REQUEST["suggested_question"]);
 			$smarty->assign('pendinganswer', $_REQUEST["suggested_answer"]);
@@ -60,8 +56,7 @@ if (isset($_REQUEST["sugg"])) {
 			if (!empty($_REQUEST["suggested_question"])) {
 				$faqlib->add_suggested_faq_question($_REQUEST["faqId"], $_REQUEST["suggested_question"], $_REQUEST["suggested_answer"], $user);
 			} else {
-				$error = tra('You must suggest a question; please try again.');
-				$smarty->assign('error', $error);
+				Feedback::error(tra('You must suggest a question; please try again.'));
 				// Save the pending answer if question is empty
 				$smarty->assign('pendinganswer', $_REQUEST["suggested_answer"]);
 			}

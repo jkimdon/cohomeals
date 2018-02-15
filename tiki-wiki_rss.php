@@ -2,17 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-wiki_rss.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-wiki_rss.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
-require_once ('lib/tikilib.php');
-require_once ('lib/wiki/histlib.php');
-require_once ('lib/wiki/wikilib.php');
-require_once ('lib/rss/rsslib.php');
+$tikilib = TikiLib::lib('tiki');
+$histlib = TikiLib::lib('hist');
+$wikilib = TikiLib::lib('wiki');
+$rsslib = TikiLib::lib('rss');
 
 $access->check_feature('feature_wiki');
 
@@ -72,25 +72,29 @@ if ($output["data"]=="EMPTY") {
 		}
 		$_REQUEST['redirectpage'] = 'y';//block the redirect interpretation
 		$_REQUEST['page'] = $data["pageName"];
-		$curr_page_p = $tikilib->parse_data($curr_page[$descId], array('print'=>true));
-		$prev_page_p = $tikilib->parse_data($prev_page[$descId], array('print'=>true));
+		$curr_page_p = TikiLib::lib('parser')->parse_data($curr_page[$descId], array('print' => true, 'is_html' => $curr_page['is_html']));
+		$prev_page_p = TikiLib::lib('parser')->parse_data($prev_page[$descId], array('print' => true, 'is_html' => $curr_page['is_html']));
 
 		// do a diff between both pages
 		require_once('lib/diff/difflib.php');
-		$diff = diff2($prev_page_p, $curr_page_p, "unidiff");
+		$diff = diff2($prev_page_p, $curr_page_p, $curr_page['is_html'] ? 'htmldiff' : 'unidiff');
 
 
-		foreach ($diff as $part) {
-			if ($part["type"]=="diffdeleted") {
-				foreach ($part["data"] as $chunk) {
-					$result.="<blockquote>- $chunk</blockquote>";
+		if (is_array($diff)) {
+			foreach ($diff as $part) {
+				if ($part["type"] == "diffdeleted") {
+					foreach ($part["data"] as $chunk) {
+						$result .= "<blockquote>- $chunk</blockquote>";
+					}
+				}
+				if ($part["type"] == "diffadded") {
+					foreach ($part["data"] as $chunk) {
+						$result .= "<blockquote>+ $chunk</blockquote>";
+					}
 				}
 			}
-			if ($part["type"]=="diffadded") {
-				foreach ($part["data"] as $chunk) {
-					$result.="<blockquote>+ $chunk</blockquote>";
-				}
-			}
+		} else {
+			$result = strpos($diff, '<tr>') === 0 ? '<table>' . $diff . '</table>' : $diff;
 		}
 
 		$data["$descId"] = $result;

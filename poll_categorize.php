@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: poll_categorize.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: poll_categorize.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 //this script may only be included - so its better to err & die if called directly.
 //smarty is not there - we need setup
@@ -15,10 +15,10 @@ $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 
 global $prefs;
 if ($prefs['feature_polls'] == 'y') {
-	global $categlib, $polllib;
 	#echo '<div>hier</div>';
-	if (!is_object($categlib))  include_once('lib/categories/categlib.php');
-	if (!is_object($polllib))  include_once('lib/polls/polllib.php');
+	$polllib = TikiLib::lib('poll');
+	$categlib = TikiLib::lib('categ');
+
 	if (!isset($_REQUEST['poll_title'])) {
 		$_REQUEST['poll_title'] = 'rate it!';
 	}

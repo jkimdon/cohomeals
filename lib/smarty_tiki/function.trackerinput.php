@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.trackerinput.php 49030 2013-12-09 12:40:22Z xavidp $
+// $Id: function.trackerinput.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -31,7 +31,7 @@ function smarty_function_trackerinput( $params, $smarty )
 			if ($params['field']['descriptionIsParsed'] == 'y') {
 				$desc = TikiLib::lib('parser')->parse_data($desc);
 			}
-			if (!empty($desc)) $desc = '<div class="description">'.$desc.'</div>';
+			if (!empty($desc)) $desc = '<div class="description help-block">'.$desc.'</div>';
 		}
 
 		return $handler->renderInput($context).$desc;

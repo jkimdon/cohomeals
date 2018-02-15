@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_surveys.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_surveys.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section = 'surveys';
 require_once ('tiki-setup.php');
@@ -36,15 +36,17 @@ if (isset($_REQUEST["save"])) {
 	$cat_href = "tiki-take_survey.php?surveyId=" . $cat_objid;
 	include_once ("categorize.php");
 	$cookietab = 1;
+	$_REQUEST["surveyId"] = 0;
 }
-if ($_REQUEST["surveyId"]) {
+if (!empty($_REQUEST["surveyId"])) {
 	$info = $srvlib->get_survey($_REQUEST["surveyId"]);
+	$cookietab = 2;
 } else {
 	$info = array();
 	$info["name"] = '';
 	$info["description"] = '';
 	$info["status"] = 'o'; //check to see if survey is open
-	
+	$cookietab = 1;
 }
 $smarty->assign('info', $info);
 if (isset($_REQUEST["remove"])) {

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.treetable.php 52878 2014-10-14 16:08:48Z jonnybradley $
+// $Id: function.treetable.php 62415 2017-05-02 10:43:16Z chibaguy $
 
 /**
  * Tree Table Smarty func - smarty_function_treetable()
@@ -38,6 +38,10 @@
  *
  * _checkboxTitles = ''		:	Comma delimited list (or array) of header titles for checkboxes (optional, but needs to match number of checkboxes above)
  *
+ * _checkboxTooltips = ''	:	Defaults to _checkboxTitles. Columns get joined together using ' : '
+ *
+ * _checkboxTooltipFormat = '' : tr() type formatting string to format the array defined for each checkbox by _checkboxTooltips above
+ *
  * _listFilter = 'y'		:	include dynamic text filter
  *
  * _filterMinRows = 12		:	don't show filter box if less than this number of rows
@@ -68,9 +72,15 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   exit;
 }
 
+/**
+ * @param array $params
+ * @param Smarty $smarty
+ * @return string html output
+ */
 function smarty_function_treetable($params, $smarty)
 {
-	global $headerlib, $tree_table_id, $prefs;
+	global $tree_table_id, $prefs;
+	$headerlib = TikiLib::lib('header');
 
 	extract($params);
 
@@ -173,7 +183,7 @@ function smarty_function_treetable($params, $smarty)
 		$_sortColumn = $_groupColumn;
 	}
 
-	$class = empty($class) ? 'treetable' : $class;	// treetable
+	$class = empty($class) ? 'table table-striped' : $class;	// treetable
 
 /*
 	if ($prefs['feature_jquery_tablesorter'] == 'y' && strpos($class, 'sortable') === false) {
@@ -196,20 +206,28 @@ function smarty_function_treetable($params, $smarty)
 
 	if ($_openall == 'y') {
 		$smarty->loadPlugin('smarty_function_icon');
-		$html .= '&nbsp;<label id="' . $id . '_openall">' . smarty_function_icon(
-			array(
-				'_id' => 'folder',
-				'title' => tra('Toggle sections')
-			),
-			$smarty
-		) . ' ' . tra('Toggle sections') . '</label>';
+		$html .= '&nbsp;<label id="' . $id . '_openall" style="cursor:pointer">'
+			. smarty_function_icon(
+				array(
+					'name' => 'file-archive',
+				),
+				$smarty
+			)
+			. smarty_function_icon(
+				array(
+					'name' => 'file-archive-open',
+					'istyle' => 'display:none'
+				),
+				$smarty
+			)
+			. ' ' . tra('Toggle sections') . '</label>';
 
 		$headerlib->add_jq_onready(
 			'
 $("#'.$id.'_openall").click( function () {
-	$this = $(this).modal(" ");
-	var img = $("img:first", this)[0];
-	if (img.src.indexOf("ofolder.png") > -1) {
+	$this = $(this).tikiModal(" ");
+	var visible = $(this).find(".icon:visible")
+	if ($(visible).hasClass("icon-file-archive-open")) {
 
 		$(".expanded .indenter", "#'.$id.'").eachAsync({
 			delay: 20,
@@ -218,10 +236,11 @@ $("#'.$id.'_openall").click( function () {
 				$(this).click();
 			},
 			end: function ()  {
-				$this.modal();
+				$this.tikiModal();
 			}
 		});
-		img.src = img.src.replace("ofolder", "folder");
+		$(this).find(".icon-file-archive-open").hide();
+		$(this).find(".icon-file-archive").show();
 	} else {
 		$(".collapsed .indenter", "#'.$id.'").eachAsync({
 			delay: 20,
@@ -230,10 +249,11 @@ $("#'.$id.'_openall").click( function () {
 				$(this).click();
 			},
 			end: function ()  {
-				$this.modal();
+				$this.tikiModal();
 			}
 		});
-		img.src = img.src.replace("folder", "ofolder");
+		$(this).find(".icon-file-archive").hide();
+		$(this).find(".icon-file-archive-open").show();
 	}
 	return false;
 });'
@@ -270,7 +290,7 @@ $("#'.$id.'_showSelected").click( function () {
 			$html .= smarty_function_select_all(
 				array(
 					'checkbox_names'=>array($_checkbox[$i] . '[]'),
-					'label' => empty($_checkboxTitles) ? '' : htmlspecialchars($_checkboxTitles[$i]),
+					'label' => empty($_checkboxTitles) ? '' : htmlspecialchars(tra($_checkboxTitles[$i])),
 					'hidden_too' => $_selectAllHiddenToo,
 				),
 				$smarty
@@ -337,9 +357,9 @@ $("#'.$id.'_showSelected").click( function () {
 					$html .= '<tr data-tt-id="subHeader_'.$rowCounter.'" data-tt-parent-id="'.$tt_parent_id.'" class="subHeader' . $childRowClass . '">';
 					if (!empty($_checkbox)) {
 						for ($i = 0, $icount_checkbox = count($_checkbox); $i < $icount_checkbox; $i++) {
-							$html .= '<td class="checkBoxHeader">';
-							$html .= empty($_checkboxTitles) ? '' : htmlspecialchars($_checkboxTitles[$i]);
-							$html .= '</td>';
+							$html .= '<td class="checkBoxHeader"><span class="checkBoxLabel">';
+							$html .= empty($_checkboxTitles) ? '' : htmlspecialchars(tra($_checkboxTitles[$i]));
+							$html .= '</span></td>';
 						}
 					}
 					foreach ($_columns as $column => $columnName) {
@@ -373,7 +393,25 @@ $("#'.$id.'_showSelected").click( function () {
 				// get checkbox's "value"
 				$cbxVal = htmlspecialchars($row[$_checkboxColumnIndex[$i]]);
 				$rowVal = htmlspecialchars($row[$_valueColumnIndex]);
-				$cbxTit = empty($_checkboxTitles) ? $cbxVal : htmlspecialchars($_checkboxTitles[$i]);
+
+				if (empty($_checkboxTooltips)) {
+					$cbxTit = empty($_checkboxTitles) ? $cbxVal : htmlspecialchars($_checkboxTitles[$i]);
+				} else {
+					$cbxTit = [];
+					foreach ($_checkboxTooltips as $col) {
+						if (isset($row[$col])) {
+							$cbxTit[] = tra($row[$col]);
+						} else if ($col = '_checkboxTitles') {
+							$cbxTit[] = tra($_checkboxTitles[$i]);
+						}
+					}
+					if (empty($_checkboxTooltipFormat)) {
+						$cbxTit = htmlspecialchars(implode(' ', $cbxTit));
+					} else {
+						$cbxTit = htmlspecialchars(tra($_checkboxTooltipFormat, '', false, $cbxTit));
+					}
+				}
+
 				$html .= '<td class="checkBoxCell" style="white-space: nowrap;">';
 				$html .= '<input type="checkbox" name="' . htmlspecialchars($_checkbox[$i]) . '[]" value="' . $rowVal . '"' .
 									($cbxVal=='y' ? ' checked="checked"' : '') . ' title="' . $cbxTit . '" />';

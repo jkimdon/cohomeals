@@ -2,16 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-directory_rss.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-directory_rss.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
-require_once ('lib/tikilib.php');
 require_once ('lib/directory/dirlib.php');
-require_once ('lib/rss/rsslib.php');
+$rsslib = TikiLib::lib('rss');
 if ($prefs['feed_directories'] != 'y') {
 	$errmsg = tra("rss feed disabled");
 	require_once ('tiki-rss_error.php');
@@ -35,7 +34,7 @@ $output = $rsslib->get_from_cache($uniqueid);
 if ($output["data"] == "EMPTY") {
 	$title = tra("Tiki RSS feed for directory sites");
 	$rc = $dirlib->dir_get_category($_REQUEST["parent"]);
-	$desc = tr("Last sites of directory %0.", $rc["name"]);
+	$desc = tr("Latest sites of directory %0.", $rc["name"]);
 	$id = "siteId";
 	$titleId = "name";
 	$descId = "description";

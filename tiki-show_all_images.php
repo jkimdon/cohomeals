@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-show_all_images.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-show_all_images.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $fontfile = "/usr/share/fonts/truetype/ttf-bitstream-vera/VeraBd.ttf";
 if (!isset($_REQUEST['view'])) {
@@ -43,7 +43,7 @@ if (!isset($_REQUEST['view'])) {
 	die;
 } elseif ($_REQUEST['view'] == 'image') {
 	include_once ("tiki-setup.php");
-	include_once ("lib/imagegals/imagegallib.php");
+	$imagegallib = TikiLib::lib('imagegal');
 	if ($prefs['feature_galleries'] != 'y') {
 		header("HTTP/1.0 404 Not Found");
 		die;

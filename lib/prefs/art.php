@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: art.php 50063 2014-02-24 13:22:30Z xavidp $
+// $Id: art.php 63589 2017-08-18 03:43:46Z drsassafras $
 
 function prefs_art_list()
 {
@@ -11,7 +11,7 @@ function prefs_art_list()
 		'publishDate_desc' => tra('Newest first'),
 	);
 
-	global $prefslib;
+	$prefslib = TikiLib::lib('prefs');
 	$advanced_columns = $prefslib->getExtraSortColumns();
 
 	foreach ( $advanced_columns as $key => $label ) {
@@ -21,14 +21,14 @@ function prefs_art_list()
 
 	return array(
 		'art_sort_mode' => array(
-			'name' => tra('Article ordering'),
-			'description' => tra('Default sort mode for the articles on the article listing'),
+			'name' => tra('Article order'),
+			'description' => tra('Default sort mode for the articles on the list-articles page'),
 			'type' => 'list',
 			'options' => $article_sort_orders,
 			'default' => 'publishDate_desc',
 		),
 		'art_home_title' => array(
-			'name' => tra('Title of articles home page'),
+			'name' => tra('Title of articles homepage'),
 			'type' => 'list',
 			'options' => array(
 				'' => '',
@@ -45,6 +45,7 @@ function prefs_art_list()
 		),
 		'art_list_title_len' => array(
 			'name' => tra('Title length'),
+			'units' => tra('characters'),
 			'type' => 'text',
 			'size' => '5',
 			'filter' => 'digits',
@@ -86,17 +87,17 @@ function prefs_art_list()
 			'default' => 'y',
 		),
 		'art_list_authorName' => array(
-			'name' => tra('Author Name (as displayed)'),
+			'name' => tra('Author name (as displayed)'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
 		'art_list_rating' => array(
-			'name' => tra('Author Rating'),
+			'name' => tra('Author rating'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
 		'art_list_usersRating' => array(
-			'name' => tra('Users Rating'),
+			'name' => tra('Users rating'),
 			'type' => 'flag',
 			'default' => 'n',
 		),
@@ -104,6 +105,9 @@ function prefs_art_list()
 			'name' => tra('Reads'),
 			'type' => 'flag',
 			'default' => 'y',
+			'dependencies' => array(
+				'feature_stats',
+			),
 		),
 		'art_list_size' => array(
 			'name' => tra('Size'),
@@ -117,6 +121,11 @@ function prefs_art_list()
 		),
 		'art_list_id' => array(
 			'name' => tra('Id'),
+			'type' => 'flag',
+			'default' => 'y',
+		),
+		'art_list_ispublished' => array(
+			'name' => tra('Is published'),
 			'type' => 'flag',
 			'default' => 'y',
 		),

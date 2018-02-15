@@ -2,25 +2,30 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_articles.php 50077 2014-02-25 13:16:08Z xavidp $
+// $Id: tiki-view_articles.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'cms';
 //get_strings tra('Articles Home');
 require_once ('tiki-setup.php');
-include_once ('lib/articles/artlib.php');
+$artlib = TikiLib::lib('art');
+
+if ($prefs['article_use_new_list_articles'] == 'y') {
+	include "lists/articles.php";
+	die;
+}
+
 if ($prefs['feature_freetags'] == 'y') {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 }
 if ($prefs['feature_categories'] == 'y') {
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 }
 
 $access->check_feature('feature_articles');
-$access->check_permission_either(array('tiki_p_read_article', 'tiki_p_articles_read_heading'));
 
 if (isset($_REQUEST["remove"])) {
 	$access->check_permission('tiki_p_remove_article');
@@ -101,7 +106,7 @@ if (!isset($_REQUEST['lang'])) {
 // Get a list of last changes to the Wiki database
 $listpages = $artlib->list_articles($offset, $prefs['maxArticles'], $sort_mode, $find, $date_min, $date_max, $user, $type, $topic, 'y', $topicName, $categId, '', '', $_REQUEST['lang'], $min_rating, $max_rating, false, 'y');
 if ($prefs['feature_multilingual'] == 'y') {
-	include_once ("lib/multilingual/multilinguallib.php");
+	$multilinguallib = TikiLib::lib('multilingual');
 	$listpages['data'] = $multilinguallib->selectLangList('article', $listpages['data']);
 	foreach ($listpages['data'] as &$article) {
 		$article['translations'] = $multilinguallib->getTranslations('article', $article['articleId'], $article["title"], $article['lang']);
@@ -111,7 +116,7 @@ $topics = $artlib->list_topics();
 $smarty->assign_by_ref('topics', $topics);
 $temp_max = count($listpages["data"]);
 for ($i = 0; $i < $temp_max; $i++) {
-	$listpages["data"][$i]["parsed_heading"] = $tikilib->parse_data(
+	$listpages["data"][$i]["parsed_heading"] = TikiLib::lib('parser')->parse_data(
 		$listpages["data"][$i]["heading"],
 		array(
 			'min_one_paragraph' => true,

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: GeographicFeature.php 46458 2013-06-25 17:06:31Z lphuberdeau $
+// $Id: GeographicFeature.php 60587 2016-12-09 12:42:08Z kroky6 $
 
 /**
  * Handler class for geographic features (points, lines, polygons)
@@ -18,8 +18,8 @@ class Tracker_Field_GeographicFeature extends Tracker_Field_Abstract implements 
 		return array(
 			'GF' => array(
 				'name' => tr('Geographic Feature'),
-				'description' => tr('Stores a geographic feature on a map.'),
-				'help' => 'Location Tracker Field',
+				'description' => tr('Stores a geographic feature on a map, allowing paths (LineString) and boundaries (Polygon) to be drawn on a map and saved.'),
+				'help' => 'Geographic feature Tracker Field',
 				'prefs' => array('trackerfield_geographicfeature'),
 				'tags' => array('advanced'),
 				'default' => 'n',

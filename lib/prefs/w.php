@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: w.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: w.php 61881 2017-03-26 23:55:44Z lindonb $
 
 function prefs_w_list()
 {
@@ -22,7 +22,7 @@ function prefs_w_list()
 		),
 		'w_use_db' => array(
 			'name' => tra('Storage'),
-			'type' => 'radio',
+			'type' => 'list',
 			'perspective' => false,
 			'options' => array(
 				'y' => tra('Store in database'),

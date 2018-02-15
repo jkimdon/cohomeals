@@ -1,31 +1,34 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-error_simple.php 52038 2014-07-19 20:45:08Z nkoth $
+// $Id: tiki-error_simple.php 62116 2017-04-06 15:40:53Z drsassafras $
+
+require_once 'tiki-filter-base.php';
+$filter = \TikiFilter::get('xss');
 
 if (!empty($_REQUEST['error'])) {
-	$error = substr($_REQUEST["error"], 0, 256);
+	$error = $filter->filter(substr($_REQUEST["error"], 0, 256));
 } else {
 	$error = 'There was an unspecified error.  Please go back and try again.';
 }
 if (!empty($_REQUEST['title'])) {
-	$title = $_REQUEST['title'];
+	$title = $filter->filter($_REQUEST['title']);
 } else {
 	$title = 'Maintenance';
 }
 
 $login = '<form name="loginbox" action="tiki-login.php?page=tikiIndex" method="post"><table><tr><td>' .
 	'User:</td><td><input type="text" name="user"  size="20" /></td></tr><tr><td>' .
-	'Pass:</td><td><input type="password" name="pass" size="20" /></td></tr><tr><td align="center"><input type="submit" name="login" value="login" /></td></tr></table></form>';
+	'Pass:</td><td><input type="password" name="pass" size="20" /></td></tr><tr><td style="text-align: center;" colspan="2"><input type="submit" name="login" value="login" class="btn btn-default" /></td></tr></table></form>';
 
 $back = '<p><a href="javascript:history.back()">Go back</a></p>';
 
-if (file_exists('templates/styles/site_closed_local.html')) {
-	$html = file_get_contents('templates/styles/site_closed_local.html');
+if (file_exists('themes/base_files/other/site_closed_local.html')) {
+	$html = file_get_contents('themes/base_files/other/site_closed_local.html');
 } else {
-	$html = file_get_contents('templates/styles/site_closed.html');
+	$html = file_get_contents('themes/base_files/other/site_closed.html');
 }
 
 $html = str_replace('{error}', $error, $html);

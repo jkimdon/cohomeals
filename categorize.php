@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: categorize.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: categorize.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 require_once('tiki-setup.php');
 $access = TikiLib::lib('access');
@@ -16,7 +16,6 @@ $smarty = TikiLib::lib('smarty');
 global $prefs;
 
 $catobjperms = Perms::get(array( 'type' => $cat_type, 'object' => $cat_objid ));
-
 if ($prefs['feature_categories'] == 'y' && $catobjperms->modify_object_categories ) {
 	$categlib = TikiLib::lib('categ');
 

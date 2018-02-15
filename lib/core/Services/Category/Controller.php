@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 47960 2013-10-10 17:21:41Z jonnybradley $
+// $Id: Controller.php 60201 2016-11-08 09:52:00Z kroky6 $
 
 class Services_Category_Controller
 {
@@ -136,9 +136,8 @@ class Services_Category_Controller
 
 		$tx->commit();
 
-		$query = new Search_Query;
+		$query = $unifiedsearchlib->buildQuery([]);
 		$query->filterCategory((string) $categId);
-		$query->filterPermissions(Perms::get()->getGroups());
 		$query->setRange(0, 1);
 		$result = $query->search($unifiedsearchlib->getIndex());
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BaseTest.php 46982 2013-08-03 18:29:06Z lphuberdeau $
+// $Id: BaseTest.php 59593 2016-09-04 17:03:54Z jonnybradley $
 
 class Search_Elastic_BaseTest extends Search_Index_BaseTest
 {
@@ -15,7 +15,7 @@ class Search_Elastic_BaseTest extends Search_Index_BaseTest
 
 		$status = $connection->getStatus();
 		if (! $status->ok) {
-			$this->markTestSkipped('ElasticSearch needs to be available on localhost:9200 for the test to run.');
+			$this->markTestSkipped('Elasticsearch needs to be available on localhost:9200 for the test to run.');
 		}
 
 		$this->index = new Search_Elastic_Index($connection, 'test_index');
@@ -40,7 +40,7 @@ class Search_Elastic_BaseTest extends Search_Index_BaseTest
 		$formatter = new Search_Formatter($plugin);
 		$output = $formatter->format($resultSet);
 
-		$this->assertContains('<em>Bonjour</em>', $output);
+		$this->assertRegExp('/<em.*>Bonjour<\/em>/', $output);
 		$this->assertNotContains('<body>', $output);
 	}
 }

@@ -2,17 +2,33 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-wizard_admin.php 52392 2014-08-26 17:16:50Z xavidp $
+// $Id: tiki-wizard_admin.php 63087 2017-06-27 09:50:12Z jonnybradley $
+
+
+$inputConfiguration =	[[
+	'staticKeyFilters'	=> [
+		'use-default-prefs'	=> 'alnum', 		// request
+		'use-upgrade-wizard'=> 'alnum', 		// request
+		'url'				=> 'relativeurl',	// request
+		'close'				=> 'alnum',			// post
+		'showOnLogin'		=> 'alnum',			// post
+		'wizard_step'		=> 'int',			// post
+		'stepNr'			=> 'int',			// get
+		'back'				=> 'alnum',			// post
+	],
+
+	// catchAllUnset not advised because 'lm_preference' has variable array content.
+]];
 
 require 'tiki-setup.php';
 
-require_once('lib/headerlib.php');
-$headerlib->add_cssfile('css/admin.css');
-$headerlib->add_cssfile('css/wizards.css');
+$headerlib = TikiLib::lib('header');
+$headerlib->add_cssfile('themes/base_files/feature_css/admin.css');
+$headerlib->add_cssfile('themes/base_files/feature_css/wizards.css');
 
 // Hide the display of the preference dependencies in the wizard
 $headerlib->add_css('.pref_dependency{display:none !important;}');
@@ -31,23 +47,23 @@ $pages = array();
 require_once('lib/wizard/pages/admin_wizard.php'); 
 $pages[] = new AdminWizard();
 
-// If $useDefaultPrefs is set, the profiles "wizard" should be run. Otherwise the standard 
+// If $useDefaultPrefs is set, the "profiles wizard" should be run. Otherwise the "admin wizard". 
 $useDefaultPrefs = isset($_REQUEST['use-default-prefs']) ? true : false;
-// If $useUpgradeWizard is set, the "upgrade wizard" should be run. Otherwise the "admin wizard".
+// If $useUpgradeWizard is set, the "upgrade wizard" should be run. Otherwise the "admin wizard". 
 $useUpgradeWizard = isset($_REQUEST['use-upgrade-wizard']) ? true : false;
 if ($useDefaultPrefs) {
 	
 	// Store the default prefs selection in the wizard bar
 	$smarty->assign('useDefaultPrefs', $useDefaultPrefs);
 
-    require_once('lib/wizard/pages/profiles_featured_site_confs.php');
-    $pages[] = new ProfilesWizardFeaturedSiteConfs();
+	require_once('lib/wizard/pages/profiles_featured_site_confs.php');
+	$pages[] = new ProfilesWizardFeaturedSiteConfs();
 
     require_once('lib/wizard/pages/profiles_useful_micro_confs.php');
     $pages[] = new ProfilesWizardUsefulMicroConfs();
 
-    require_once('lib/wizard/pages/profiles_useful_changes_in_display.php');
-    $pages[] = new ProfilesWizardUsefulChangesInDisplay();
+	require_once('lib/wizard/pages/profiles_useful_changes_in_display.php');
+	$pages[] = new ProfilesWizardUsefulChangesInDisplay();
 
     require_once('lib/wizard/pages/profiles_useful_new_tech_confs.php');
     $pages[] = new ProfilesWizardUsefulNewTechConfs();
@@ -58,34 +74,34 @@ if ($useDefaultPrefs) {
     require_once('lib/wizard/pages/profiles_demo_common_confs.php');
     $pages[] = new ProfilesWizardDemoCommonConfs();
 
-    require_once('lib/wizard/pages/profiles_demo_interesting_use_cases.php');
-    $pages[] = new ProfilesWizardDemoInterestingUseCases();
+	require_once('lib/wizard/pages/profiles_demo_interesting_use_cases.php');
+	$pages[] = new ProfilesWizardDemoInterestingUseCases();
 
     require_once('lib/wizard/pages/profiles_demo_other_interesting_use_cases.php');
     $pages[] = new ProfilesWizardDemoOtherInterestingUseCases();
 
-    require_once('lib/wizard/pages/profiles_demo_more_advanced_confs.php');
-    $pages[] = new ProfilesWizardDemoMoreAdvancedConfs();
+	require_once('lib/wizard/pages/profiles_demo_more_advanced_confs.php');
+	$pages[] = new ProfilesWizardDemoMoreAdvancedConfs();
 
-    require_once('lib/wizard/pages/profiles_demo_highly_specialized_confs.php');
-    $pages[] = new ProfilesWizardHighlySpecializedConfs();
+	require_once('lib/wizard/pages/profiles_demo_highly_specialized_confs.php');
+	$pages[] = new ProfilesWizardHighlySpecializedConfs();
 
-    require_once('lib/wizard/pages/profiles_completed.php');
-    $pages[] = new AdminWizardProfilesCompleted();
+	require_once('lib/wizard/pages/profiles_completed.php');
+	$pages[] = new AdminWizardProfilesCompleted();
 
 } elseif ($useUpgradeWizard) {
 
-    // Store the use Upgrade Wizard selection in the wizard bar
-    $smarty->assign('useUpgradeWizard', $useUpgradeWizard);
+	// Store the use Upgrade Wizard selection in the wizard bar
+	$smarty->assign('useUpgradeWizard', $useUpgradeWizard);
+	
+	require_once('lib/wizard/pages/upgrade_ui.php');
+	$pages[] = new UpgradeWizardUI();
 
-    require_once('lib/wizard/pages/upgrade_ui.php');
-    $pages[] = new UpgradeWizardUI();
+	require_once('lib/wizard/pages/upgrade_novice_admin_assistance.php');
+	$pages[] = new UpgradeWizardNoviceAdminAssistance();
 
-    require_once('lib/wizard/pages/upgrade_novice_admin_assistance.php');
-    $pages[] = new UpgradeWizardNoviceAdminAssistance();
-
-    require_once('lib/wizard/pages/upgrade_trackers.php');
-    $pages[] = new UpgradeWizardTrackers();
+	require_once('lib/wizard/pages/upgrade_trackers.php');
+	$pages[] = new UpgradeWizardTrackers();
 
     require_once('lib/wizard/pages/upgrade_permissions_and_logs.php');
     $pages[] = new UpgradeWizardPermissionsAndLogs();
@@ -93,16 +109,32 @@ if ($useDefaultPrefs) {
     require_once('lib/wizard/pages/upgrade_others.php');
     $pages[] = new UpgradeWizardOthers();
 
-    require_once('lib/wizard/pages/upgrade_doc_page_iframe.php');
+    require_once('lib/wizard/pages/upgrade_new_in_13.php');
+    $pages[] = new UpgradeWizardNewIn13();
+
+    require_once('lib/wizard/pages/upgrade_new_in_14.php');
+    $pages[] = new UpgradeWizardNewIn14();
+
+    require_once('lib/wizard/pages/upgrade_new_in_15.php');
+    $pages[] = new UpgradeWizardNewIn15();
+
+	require_once('lib/wizard/pages/upgrade_new_in_16.php');
+	$pages[] = new UpgradeWizardNewIn16();
+
+	require_once('lib/wizard/pages/upgrade_new_in_17.php');
+	$pages[] = new UpgradeWizardNewIn17();
+
+	require_once('lib/wizard/pages/upgrade_doc_page_iframe.php');
     $pages[] = new UpgradeWizardDocPageIframe();
 
     require_once('lib/wizard/pages/upgrade_send_feedback.php');
     $pages[] = new UpgradeWizardSendFeedback();
 
-    require_once('lib/wizard/pages/upgrade_wizard_completed.php');
-    $pages[] = new UpgradeWizardCompleted();
+	require_once('lib/wizard/pages/upgrade_wizard_completed.php');
+	$pages[] = new UpgradeWizardCompleted();
 
 } else {
+	
 	require_once('lib/wizard/pages/admin_language.php');
 	$pages[] = new AdminWizardLanguage();
 
@@ -136,10 +168,7 @@ if ($useDefaultPrefs) {
 	require_once('lib/wizard/pages/admin_structures.php'); 
 	$pages[] = new AdminWizardStructures();
 
-	require_once('lib/wizard/pages/admin_jcapture.php'); 
-	$pages[] = new AdminWizardJCapture();
-
-	require_once('lib/wizard/pages/admin_files.php'); 
+	require_once('lib/wizard/pages/admin_files.php');
 	$pages[] = new AdminWizardFiles();
 
 	require_once('lib/wizard/pages/admin_files_storage.php'); 
@@ -194,15 +223,22 @@ foreach ($pages as $page) {
 	$url = $base_url.'tiki-wizard_admin.php?&amp;stepNr=' . $stepNr . '&amp;url=' . rawurlencode($homepageUrl);
 	if ($useDefaultPrefs) {
 		$url .= '&amp;use-default-prefs=1';
-    }
-    if ($useUpgradeWizard) {
-        $url .= '&amp;use-upgrade-wizard=1';
+	}
+	if ($useUpgradeWizard) {
+		$url .= '&amp;use-upgrade-wizard=1';
 	}
 	$cnt = 	$stepNr+1;
+	if ($stepNr == 1 && $useUpgradeWizard) {
+		$toc .= '<ul><li>'. tra("New in Tiki 12 (LTS)") .'</li>';
+	}
 	if ($cnt <= 9) {
 		$cnt = '&nbsp;&nbsp;'.$cnt;
 	}
-	$toc .= '<li><a ';
+	if (preg_match('/ Tiki /',$page->pageTitle()) OR $stepNr == 0) {
+		$toc .= '</ul><ul><li><a ';
+	} else {
+		$toc .= '<ul><li><a ';
+	}
 	$cssClasses .= 'adminWizardTOCItem ';
 	if ($stepNr == $reqStepNr) {
 		$cssClasses .= 'highlight ';
@@ -216,17 +252,10 @@ foreach ($pages as $page) {
 	}
 	$toc .= $css;
 	$toc .= 'href="'.$url.'">'.$page->pageTitle().'</a></li>';
+	$toc .= '</ul>';
 	$stepNr++;
 }
 $toc .= '</ul>';
-	// Hide the left and right sidebars when the admin wizard is run
-	$headerlib = TikiLib::lib('header');
-	$headerlib->add_js(
-<<<JS
-	hideCol('col2','left', 'col1');
-	hideCol('col3','right', 'col1');
-JS
-);
 
 if ($reqStepNr > 0) {
 	$smarty->assign('wizard_toc', $toc);
@@ -236,5 +265,4 @@ if ($reqStepNr > 0) {
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 
-$smarty->assign('mid', 'tiki-wizard_admin.tpl');
-$smarty->display("tiki.tpl");
+$smarty->display('tiki-wizard_admin.tpl');

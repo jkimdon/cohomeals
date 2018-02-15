@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_perm.php 44577 2013-01-21 20:08:05Z luciash $
+// $Id: wikiplugin_perm.php 59737 2016-09-18 15:01:26Z rjsmelo $
 
 function wikiplugin_perm_info()
 {
@@ -11,34 +11,63 @@ function wikiplugin_perm_info()
 		'name' => tra('Permissions'),
 		'documentation' => 'PluginPerm',
 		'description' => tra('Display content based on permission settings'),
-		'body' => tra('Wiki text to display if conditions are met. The body may contain {ELSE}. Text after the marker will be displayed to users not matching the conditions.'),
+		'body' => tr('Wiki text to display if conditions are met. The body may contain %0{ELSE}%1. Text after the
+			marker will be displayed to users not matching the conditions.', '<code>', '</code>'),
 		'prefs' => array('wikiplugin_perm'),
 		'filter' => 'wikicontent',
-		'icon' => 'img/icons/page_white_key.png',
+		'iconname' => 'permission',
+		'introduced' => 5,
 		'params' => array(
 			'perms' => array(
 				'required' => false,
 				'name' => tra('Possible Permissions'),
-				'description' => tra('Pipe separated list of permissions, one of which is needed to view the default text.') . ' ' . tra('Example:') . 'tiki_p_rename|tiki_p_edit',
+				'description' => tra('Pipe-separated list of permissions, one of which is needed to view the default
+					text.') . ' ' . tra('Example:') . ' <code>tiki_p_rename|tiki_p_edit</code>',
+				'since' => '5.0',
+				'filter' => 'text',
+				'separator' => '|',
 				'default' => '',
 			),
 			'notperms' => array(
 				'required' => false,
 				'name' => tra('Forbidden Permissions'),
-				'description' => tra('Pipe separated list of permissions, any of which will cause the default text not to show.') . ' ' . tra('Example:') . 'tiki_p_rename|tiki_p_edit',
+				'description' => tra('Pipe-separated list of permissions, any of which will cause the default text
+					not to show.') . ' ' . tra('Example:') . ' <code>tiki_p_rename|tiki_p_edit</code>',
+				'since' => '5.0',
+				'filter' => 'text',
+				'separator' => '|',
 				'default' => '',
-			)
+			),
+			'global' => array(
+				'required' => false,
+				'name' => tra('Global'),
+				'description' => tra('Indicate whether the permissions are global or local to the object'),
+				'since' => '5.0',
+				'filter' => 'text',
+				'default' => '',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => '1'),
+					array('text' => tra('No'), 'value' => '0')
+				),
+			),
 		)
 	);
 }
 
 function wikiplugin_perm($data, $params)
 {
-	global $user, $userlib;
+	global $user;
+	$userlib = TikiLib::lib('user');
 	if (!empty($params['perms']))
-		$perms = explode('|', $params['perms']);
+		$perms = $params['perms'];
 	if (!empty($params['notperms']))
-		$notperms = explode('|', $params['notperms']);
+		$notperms = $params['notperms'];
+	if (!empty($params['global']) && $params['global'] == '1') {
+		$global = true;
+	} else {
+		$global = false;
+	}
 
 	if (strpos($data, '{ELSE}')) {
 		$dataelse = substr($data, strpos($data, '{ELSE}')+6);
@@ -50,7 +79,7 @@ function wikiplugin_perm($data, $params)
 	if (!empty($perms)) {
 		$ok = false;
 		foreach ($perms as $perm) {
-			if (!empty($params['global']) && $params['global']) {
+			if ($global) {
 				if ($userlib->user_has_permission($user, $perm)) {
 					$ok = true;
 					break;
@@ -69,7 +98,7 @@ function wikiplugin_perm($data, $params)
 	if (!empty($notperms)) {
 		$ok = true;
 		foreach ($notperms as $perm) {
-			if (!empty($params['global']) && $params['global']) {
+			if ($global) {
 				if ($userlib->user_has_permission($user, $perm)) {
 					$ok = false;
 					break;

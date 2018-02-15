@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_mono.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_mono.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_mono_info()
 {
@@ -12,14 +12,17 @@ function wikiplugin_mono_info()
 		'documentation' => 'PluginMono',
 		'description' => tra('Display text in a monospace font'),
 		'prefs' => array( 'wikiplugin_mono' ),
-		'body' => tra('text'),
-		'icon' => 'img/icons/font.png',
+		'body' => tra('Text that the font will be applied to'),
+		'iconname' => 'font',
+		'introduced' => 1,
 		'params' => array(
 			'font' => array(
 				'required' => false,
 				'name' => tra('Font'),
-				'description' => tra('Font name as known in browsers.'),
+				'description' => tra('Font name as recognized by browsers.'),
+				'since' => '1',
 				'default' => 'monospace',
+				'filter' => 'text',
 			),
 		),
 	);

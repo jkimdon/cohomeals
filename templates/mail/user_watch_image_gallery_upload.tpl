@@ -1,5 +1,5 @@
-{* $Id: user_watch_image_gallery_upload.tpl 39901 2012-02-21 18:50:23Z jonnybradley $ *}
-{tr}A new file was posted to image gallery:{/tr} {$galleryName}
+{* $Id: user_watch_image_gallery_upload.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}
+{tr}A new file was posted to {$prefs.mail_template_custom_text}image gallery:{/tr} {$galleryName}
 
 {tr}Posted by:{/tr} {$author|username}
 {tr}Date:{/tr} {$mail_date|tiki_short_datetime:"":"n"}

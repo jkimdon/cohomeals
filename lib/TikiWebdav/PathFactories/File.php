@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: File.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: File.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 class TikiWebdav_PathFactories_File implements ezcWebdavPathFactory
 {
@@ -14,7 +14,7 @@ class TikiWebdav_PathFactories_File implements ezcWebdavPathFactory
 	public function parseUriToPath($uri)
 	{
 		global $base_url;
-		global $filegallib; require_once('lib/filegals/filegallib.php');
+		$filegallib = TikiLib::lib('filegal');
 
 		$requestPath = preg_replace('#.*tiki-webdav\.php#', '', rawurldecode(trim($uri)));
 
@@ -43,7 +43,7 @@ class TikiWebdav_PathFactories_File implements ezcWebdavPathFactory
 	public function generateUriFromPath($path)
 	{
 		global $base_url;
-		global $filegallib; require_once('lib/filegals/filegallib.php');
+		$filegallib = TikiLib::lib('filegal');
 
 		$result = $base_url . 'tiki-webdav.php' . implode('/', array_map('rawurlencode', explode('/', $path)));
 

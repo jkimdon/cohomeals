@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_addtocart.tpl 50839 2014-04-20 12:48:39Z arildb $ *}
+{* $Id: wikiplugin_addtocart.tpl 62445 2017-05-04 10:06:56Z yonixxx $ *}
 <form method="post" action="{query _type=relative _keepall=y}" style="display: inline;" class="wp_addtocart_form"{$form_data}>
 	<input type="hidden" name="code" value="{$params.code|escape}">
 	{if $onbehalf == 'y'}
@@ -11,7 +11,7 @@
 		</select>
 		<br>
 	{/if}
-	
+
 	{if $params.giftcertificate eq 'y' or $hideamountfield eq 'y'}
 		<table>
 			{if $params.giftcertificate == 'y'}
@@ -31,9 +31,13 @@
 			{/if}
 		</table>
 	{else}
-		{tr}Qty:{/tr} <input type="text" name="quantity" value="1" size="2">
+		{if $params.hidequantity eq 'y'}
+			<input type="hidden" name="quantity" value="1">
+		{else}
+			{tr}Qty:{/tr} <input type="text" name="quantity" value="1" size="2">
+		{/if}
 	{/if}
-	<input type="submit" class="btn btn-default" value="{tr}{$params.label|escape}{/tr}">
+	<input type="submit" class="btn btn-primary" value="{tr}{$params.label|escape}{/tr}">
 	{if $params.exchangeorderitemid}
 		<input type="hidden" value="{$params.exchangeorderitemid|escape}" name="exchangeorderitemid">
 		<input type="hidden" value="{$params.exchangetoproductid|escape}" name="exchangetoproductid">

@@ -2,20 +2,21 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-all_languages.php 48580 2013-11-20 13:46:46Z manivannans $
+// $Id: tiki-all_languages.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 global $prefs;
 
 require 'tiki-setup.php';
-include_once('lib/multilingual/multilinguallib.php');
-include_once('lib/wiki/wikilib.php');
 include_once('lib/wiki/renderlib.php');
 
 $access->check_feature(array('feature_multilingual', 'feature_multilingual_one_page'));
+
+$multilinguallib = TikiLib::lib('multilingual');
+$wikilib = TikiLib::lib('wiki');
 
 if ( !isset($_REQUEST['page']) ) {
 	header('Location: tiki-index.php');
@@ -23,6 +24,8 @@ if ( !isset($_REQUEST['page']) ) {
 }
 
 $pages = array();
+
+$_REQUEST['page'] = $wikilib->get_page_by_slug($_REQUEST['page']);
 
 $requested = $tikilib->get_page_info($_REQUEST['page']);
 $page_id = $requested['page_id'];
@@ -93,7 +96,7 @@ foreach ( array_reverse($pages) as $id => $info ) {
 	if ( $tiki_p_view == 'y' ) {
 		$renderer->runSetups();
 
-		$contents[] = $smarty->fetch('tiki-show_content.tpl');
+		$contents[] = $smarty->fetch('extends:layouts/internal/layout_view.tpl|tiki-show_page.tpl');
 
 		if ( $id === count($pages) - 1 )
 			$renderer->restoreAll();

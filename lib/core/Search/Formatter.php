@@ -1,25 +1,22 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Formatter.php 45188 2013-03-18 18:18:10Z lphuberdeau $
+// $Id: Formatter.php 63357 2017-07-26 14:35:57Z jonnybradley $
 
 class Search_Formatter
 {
 	private $plugin;
+	private $counter;
 	private $subFormatters = array();
-	private $dataSource;
+	private $customFilters = array();
 	private $alternateOutput;
 
-	function __construct(Search_Formatter_Plugin_Interface $plugin)
+	function __construct(Search_Formatter_Plugin_Interface $plugin, $counter = 0)
 	{
 		$this->plugin = $plugin;
-	}
-
-	function setDataSource(Search_Formatter_DataSource_Interface $dataSource)
-	{
-		$this->dataSource = $dataSource;
+		$this->counter = $counter;
 	}
 
 	function setAlternateOutput($output)
@@ -32,17 +29,22 @@ class Search_Formatter
 		$this->subFormatters[$name] = $formatter;
 	}
 
+	function addCustomFilter($filter) {
+		$this->customFilters[] = $filter;
+	}
+
 	function format($list)
 	{
 		if (0 == count($list) && $this->alternateOutput) {
-			return $this->alternateOutput;
+			return $this->renderFilters() . $this->alternateOutput;
 		}
 
 		$list = $this->getPopulatedList($list);
-		return $this->render($this->plugin, $list, Search_Formatter_Plugin_Interface::FORMAT_WIKI);
+		return $this->renderFilters()
+			. $this->render($this->plugin, $list, Search_Formatter_Plugin_Interface::FORMAT_WIKI);
 	}
 
-	function getPopulatedList($list)
+	function getPopulatedList($list, $preload = true)
 	{
 		$list = Search_ResultSet::create($list);
 		$defaultValues = $this->plugin->getFields();
@@ -54,22 +56,30 @@ class Search_Formatter
 			$fields = array_merge($fields, array_keys($subDefault[$key]));
 		}
 
-		if ($this->dataSource) {
-			$list = $this->dataSource->getInformation($list, $fields);
-		}
-
-		if (in_array('highlight', $fields)) {
-			foreach ($list as & $entry) {
-				$entry['highlight'] = $list->highlight($entry);
-			}
-		}
-
 		$data = array();
 
-		foreach ($list as $row) {
+		$enableHighlight = in_array('highlight', $fields);
+		foreach ($list as $pre) {
+			if( $preload ) {
+				foreach ($fields as $f) {
+					if (isset($pre[$f])) {
+						$pre[$f]; // Dynamic loading if applicable
+					}
+				}
+			}
+
+			$row = array_filter($defaultValues, function ($v) {
+				return ($v !== null);	// allow empty default values like "" or 0 (or even false) but not null
+			});
 			// Clear blank values so the defaults prevail
-			$row = array_filter($row, array($this, 'is_empty_string'));
-			$row = array_merge($defaultValues, $row);
+			foreach ($pre as $k => $value) {
+				if ($value !== '' && $value !== null) {
+					$row[$k] = $value;
+				}
+			}
+			if ($enableHighlight) {
+				$row['highlight'] = $list->highlight($row);
+			}
 
 			$subEntries = array();
 			foreach ($this->subFormatters as $key => $plugin) {
@@ -85,9 +95,43 @@ class Search_Formatter
 		return $list->replaceEntries($data);
 	}
 
-	private function is_empty_string($v)
-	{
-		return $v !== '';
+	public function renderFilters() {
+		$filters = array();
+		foreach ($this->customFilters as $filter) {
+			$fieldName = str_replace('tracker_field_', '', $filter['field']);
+			$mode = $filter['mode'];
+			$filters[] = Tracker\Filter\Collection::getFilter($fieldName, $mode);
+		}
+		$input = new JitFilter(@$_REQUEST);
+		$fields = array();
+		foreach ($filters as $filter) {
+			if (! $filter->getControl()->isUsable()) {
+				continue;
+			}
+			$filter->applyInput($input);
+			$field = array(
+				'id' => $filter->getControl()->getId(),
+				'name' => $filter->getLabel(),
+				'renderedInput' => $filter->getControl(),
+			);
+			if (preg_match("/<input.*type=['\"](text|search)['\"]/", $field['renderedInput'])) {
+				$field['textInput'] = true;
+			}
+			$fields[] = $field;
+		}
+
+		if ($fields) {
+			$smarty = TikiLib::lib('smarty');
+			$smarty->assign('filterFields', $fields);
+			$smarty->assign('filterCounter', $this->counter);
+			return '~np~' . $smarty->fetch('templates/search/list/filter.tpl') . '~/np~';
+		}
+
+		return '';
+	}
+
+	public function getCounter() {
+		return $this->counter;
 	}
 
 	private function render($plugin, $resultSet, $target)

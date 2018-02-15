@@ -1,43 +1,35 @@
-<div class="field-tabs">
-	<ul>
-		{foreach from=$sections key=k item=sect}
-			<li><a href="#{$k|escape}">{$sect.heading|escape}</a></li>
-		{/foreach}
-	</ul>
-	{foreach from=$sections key=k item=sect}
-		<div id="{$k|escape}">
+{tabset name="tracker_section_output"|cat:$tracker_info.trackerId}
+	{foreach $sections as $pos => $sect}
+		{tab name=$sect.heading}
+			{if ! $pos && $status}
+				<div class="form-group">
+					<label for="trackerinput_status" class="control-label">{tr}Status{/tr}</label>
+					<div id="trackerinput_status">
+						{include 'trackerinput/status.tpl' status_types=$status_types status=$status}
+					</div>
+				</div>
+			{/if}
 			{foreach from=$sect.fields item=field}
-				<label for="trackerinput_{$field.fieldId|escape}">
-					{$field.name|tra|escape}
-					{if $field.isMandatory eq 'y'}
-						<span class="mandatory_star">*</span>
-					{/if}
-				</label>
-				<div id="trackerinput_{$field.fieldId|escape}">
-					{trackerinput field=$field}
-					{if !empty($field.description) && $field.type ne 'S'}
-						{if $field.descriptionIsParsed eq 'y'}
-							<div class="description">{wiki}{$field.description}{/wiki}</div>
-						{else}
-							<div class="description">{$field.description|escape}</div>
+				<div class="form-group">
+					<label for="trackerinput_{$field.fieldId|escape}" class="control-label">
+						{$field.name|tra|escape}
+						{if $field.isMandatory eq 'y'}
+							<strong class='mandatory_star text-danger tips' title=":{tr}This field is mandatory{/tr}">*</strong>
 						{/if}
-					{/if}
+					</label>
+					<div id="trackerinput_{$field.fieldId|escape}">
+						{trackerinput field=$field item=$item}
+						{if !empty($field.description) && $field.type ne 'S'}
+							{if $field.descriptionIsParsed eq 'y'}
+								<div class="description help-block">{wiki}{$field.description}{/wiki}</div>
+							{else}
+								<div class="description help-block">{$field.description|tra|escape}</div>
+							{/if}
+						{/if}
+					</div>
 				</div>
 			{/foreach}
-		</div>
+		{/tab}
 	{/foreach}
-</div>
-{jq}
-	$('.field-tabs')
-		.tabs()
-		.closest('.ui-dialog-content')
-		.css('margin', '0px')
-		.css('padding', '0px')
-		.closest('.ui-dialog')
-		.css('margin', '0px')
-		.css('padding', '0px')
-		;
-	$('label').click(function() {
-		$('input, select, textarea', '#'+$(this).attr('for')).focus();
-	});
-{/jq}
+{/tabset}
+{jq}$('label').click(function() {$('input, select, textarea', '#'+$(this).attr('for')).focus();});{/jq}

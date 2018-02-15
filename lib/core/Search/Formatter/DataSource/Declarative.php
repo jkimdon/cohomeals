@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Declarative.php 46982 2013-08-03 18:29:06Z lphuberdeau $
+// $Id: Declarative.php 59055 2016-07-03 15:35:28Z lindonb $
 
 class Search_Formatter_DataSource_Declarative implements Search_Formatter_DataSource_Interface
 {
@@ -21,27 +21,32 @@ class Search_Formatter_DataSource_Declarative implements Search_Formatter_DataSo
 		$this->globalSources[] = $globalSource;
 	}
 
-	function getInformation(Search_ResultSet $list, array $fields)
+	function getData($entry, $requestedField)
 	{
-		foreach ($list as & $entry) {
-			$type = $entry['object_type'];
-			$object = $entry['object_id'];
-			$hash = isset($entry['hash']) ? $entry['hash'] : null;
-			$missingFields = $this->handlePrefilter($fields, $entry);
-			
-			$entry = array_merge($entry, $this->obtainFromContentSource($type, $object, $hash, $missingFields));
+		$type = $entry['object_type'];
+		$object = $entry['object_id'];
+		$hash = isset($entry['hash']) ? $entry['hash'] : null;
+		$missingFields = $this->handlePrefilter([$requestedField], $entry);
 
-			$initial = $entry;
+		$primaryFields = $this->obtainFromContentSource($type, $object, $hash, $missingFields);
+
+		if (! empty($primaryFields)) {
+			return $primaryFields;
+		} else {
+			// Do not use array merge as the entry may be an object
+			foreach ($primaryFields as $key => $value) {
+				$entry[$key] = $value;
+			}
+
 			foreach ($this->globalSources as $globalSource) {
-				$local = $this->obtainFromGlobalSource($globalSource, $type, $object, $missingFields, $initial);
-
-				if (false !== $local) {
-					$entry = array_merge($entry, $local);
+				$local = $this->obtainFromGlobalSource($globalSource, $type, $object, $missingFields, $entry);
+				if (! empty($local)) {
+					return $local;
 				}
 			}
 		}
 
-		return $list;
+		return [];
 	}
 
 	private function obtainFromContentSource($type, $object, $hash, & $missingFields)
@@ -79,11 +84,18 @@ class Search_Formatter_DataSource_Declarative implements Search_Formatter_DataSo
 
 	private function obtainFromGlobalSource($globalSource, $type, $object, & $missingFields, $data)
 	{
-		if (in_array('highlight', $missingFields)) {
-			$missingFields = array_merge($missingFields, array_keys($globalSource->getGlobalFields()));
+		if (is_array($missingFields)) {
+			if (in_array('highlight', $missingFields)) {
+				$missingFields = array_merge($missingFields, array_keys($globalSource->getGlobalFields()));
+			}
 		}
 
 		if ($this->sourceProvidesValue($globalSource, $missingFields)) {
+			// The field may exist, but contain mangled data
+			foreach ($globalSource->getProvidedFields() as $field) {
+				unset($data[$field]);
+			}
+
 			$data = $globalSource->getData($type, $object, new Search_Type_Factory_Direct, $data);
 
 			return $this->getRaw($data, $missingFields);

@@ -1,39 +1,49 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_jq.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_jq.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_jq_info()
 {
 	return array(
 		'name' => tra('jQuery'),
 		'documentation' => 'PluginJQ',
-		'description' => tra('Add JavaScript code'),
+		'description' => tra('Add jQuery JavaScript code'),
 		'prefs' => array( 'wikiplugin_jq' ),
 		'body' => tra('JavaScript code'),
 		'validate' => 'all',
 		'filter' => 'none',
-		'icon' => 'img/icons/script_code_red.png',
+		'iconname' => 'code',
+		'introduced' => 3,
 		'params' => array(
 			'notonready' => array(
 				'required' => false,
 				'name' => tra('Not On Ready'),
 				'description' => tra('Do not execute on document ready (execute inline)'),
+				'since' => '3.0',
 			),
 			'nojquery' => array(
 				'required' => false,
 				'name' => tra('No JavaScript'),
 				'description' => tra('Optional markup for when JavaScript is off'),
-			)
+				'since' => '3.0',
+			),
+			'lang' => array(
+				'required' => false,
+				'name' => tra('Language'),
+				'description' => tra('Language to apply JQuery to'),
+				'since' => '13.0',
+			),
 		)
 	);
 }
 	
 function wikiplugin_jq($data, $params)
 {
-	global $headerlib, $prefs;
+	global $prefs;
+	$headerlib = TikiLib::lib('header');
 	extract($params, EXTR_SKIP);
 	
 	$nojquery = isset($nojquery) ? $nojquery : tr('<!-- jq plugin inactive: JavaScript off -->');
@@ -41,6 +51,10 @@ function wikiplugin_jq($data, $params)
 		return $nojquery;
 	}
 	$notonready = isset($notonready) ? $notonready : false;
+
+	if (!empty($lang) && $lang != $prefs['language']) {
+		return;
+	}
 
 	// Need to manually decode greater than and less than (not sure if we want to decode all HTML entities
 	$data = str_replace('&lt;', '<', $data);

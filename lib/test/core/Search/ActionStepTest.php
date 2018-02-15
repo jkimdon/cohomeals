@@ -1,27 +1,29 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ActionStepTest.php 45134 2013-03-15 18:47:02Z changi67 $
+// $Id: ActionStepTest.php 60878 2017-01-12 15:16:08Z kroky6 $
 
 class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 {
 	function testMissingField()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
 
 		$step = new Search_Action_ActionStep($action, array());
-		$this->assertFalse($step->validate(array()));
+		$this->expectException(Search_Action_Exception::class);
+		$this->expectExceptionMessage("Missing required action parameter or value: hello");
+		$step->validate(array());
 		$this->assertEquals(array('hello'), $step->getFields());
 	}
 
 	function testMissingValueButNotRequired()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => false)));
@@ -37,7 +39,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testValueProvidedStaticInDefinition()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
@@ -53,7 +55,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testValueProvidedInEntryDirectly()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
@@ -69,7 +71,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testDefinitionDefersToSingleField()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
@@ -85,7 +87,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testDefinitionCoalesceField()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
@@ -101,19 +103,20 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testDefinitionCoalesceFieldNoMatch()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello' => true)));
 
 		$step = new Search_Action_ActionStep($action, array('hello_field_coalesce' => 'foo,bar,test,baz,hello'));
-		$this->assertFalse($step->validate(array()));
+		$this->expectException(Search_Action_Exception::class);
+		$step->validate(array());
 		$this->assertEquals(array('foo', 'bar', 'test', 'baz', 'hello'), $step->getFields());
 	}
 
 	function testRequiresValueAsArrayButMissing()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello+' => false)));
@@ -129,7 +132,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testRequiresValueAsArrayAndSingleValue()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello+' => false)));
@@ -145,7 +148,7 @@ class Search_ActionStepTest extends PHPUnit_Framework_TestCase
 
 	function testRequiresValueAsArrayAndMultipleValues()
 	{
-		$action = $this->getMock('Search_Action_Action');
+		$action = $this->createMock('Search_Action_Action');
 		$action->expects($this->any())
 			->method('getValues')
 			->will($this->returnValue(array('hello+' => false)));

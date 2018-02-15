@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: https.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: https.php 63679 2017-08-28 01:13:12Z drsassafras $
 
 function prefs_https_list()
 {
@@ -17,13 +17,12 @@ function prefs_https_list()
 		),
 		'https_port' => array(
 			'name' => tra('HTTPS port'),
-            'description' => tra('the HTTPS port for this server, default=443'),
+			'description' => tra('the HTTPS port for this server.'),
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
-			'default' => '',
-			'keywords' => 'SSL secure', 
-			'shorthint' => tra('If left empty, port 443 will be used'),
+			'default' => '443',
+			'keywords' => 'SSL secure',
 		),
 		'https_login' => array(
 			'name' => tra('Use HTTPS login'),
@@ -31,13 +30,13 @@ function prefs_https_list()
 			'type' => 'list',
 			'options' => array(
 				'disabled' => tra('Disabled'),
-				'allowed' => tra('Allow secure (https) login'),
-				'encouraged' => tra('Encourage secure (https) login'),
+				'allowed' => tra('Allow secure (HTTPS) login'),
+				'encouraged' => tra('Encourage secure (HTTPS) login'),
 				'force_nocheck' => tra('Consider we are always in HTTPS, but do not check'),
-				'required' => tra('Require secure (https) login'),
+				'required' => tra('Require secure (HTTPS) login'),
 			),
 			'default' => 'allowed',
-			'warning' => tra('Do not require HTTPS until you have setup and tested the connection, otherwise, you will make your whole site unaccessible'),
+			'warning' => tra('Do not require HTTPS until the connection has been set up and tested; otherwise, the website will be inaccessible'),
 			'keywords' => 'SSL secure', 
 		),
 	);

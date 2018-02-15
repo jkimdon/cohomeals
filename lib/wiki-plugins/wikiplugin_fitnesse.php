@@ -1,22 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_fitnesse.php 50136 2014-02-28 19:22:53Z lphuberdeau $
+// $Id: wikiplugin_fitnesse.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_fitnesse_info()
 {
 	return array(
 		'name' => tra('Fitnesse Test Suite'),
 		'documentation' => 'PluginFitnesse',
-		'description' => tra('Executable test suite'),
+		'description' => tra('Create test suites for applications built using Tiki'),
 		'prefs' => array('wikiplugin_fitnesse'),
 		'default' => 'n',
 		'format' => 'wiki',
 		'body' => tra('Test execution scenario'),
 		'filter' => 'wikicontent',
-		'icon' => 'img/icons/text_list_bullets.png',
+		'iconname' => 'pencil',
+		'introduced' => 12.1,
 		'tags' => array('advanced'),
 		'profile_reference' => 'fitnesse_content',
 		'params' => array(

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: net_pop3.php 46209 2013-06-06 16:56:41Z arildb $
+// $Id: net_pop3.php 61319 2017-02-17 11:17:13Z jonnybradley $
 
 // +-----------------------------------------------------------------------+
 // | Copyright (c) 2002, Richard Heyes                                     |
@@ -145,7 +145,7 @@ class Net_POP3
 	 * the socket object.
 	 *
 	 */
-	function Net_POP3()
+	function __construct()
 	{
 		$this->_timestamp =  ''; // Used for APOP
 		$this->_maildrop  =  array();

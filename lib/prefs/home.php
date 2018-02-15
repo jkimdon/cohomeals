@@ -1,41 +1,37 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: home.php 48676 2013-11-22 15:01:03Z jonnybradley $
+// $Id: home.php 63572 2017-08-17 06:01:40Z drsassafras $
 
 function prefs_home_list($partial = false)
 {
 
 	return array(
 		'home_blog' => array(
-			'name' => tra('Home Blog (main blog)'),
-            'description' => tra(''),
+			'name' => tra('Home blog (main blog)'),
 			'type' => 'list',
 			'options' => $partial ? array() : listblog_pref(),
 			'default' => 0,
 			'profile_reference' => 'blog',
 		),
 		'home_forum' => array(
-			'name' => tra('Home Forum (main forum)'),
-            'description' => tra(''),
-			'type' => 'list',
-			'options' => $partial ? array() : listforum_pref(),
+			'name' => tra('Home forum (main forum)'),
+			'type' => 'text',
 			'default' => 0,
 			'profile_reference' => 'forum',
 		),
 		'home_file_gallery' => array(
-			'name' => tra('Home File Gallery (main file gallery)'),
-            'description' => tra(''),
+			'name' => tra('Home file gallery (main file gallery)'),
+			'description' => tra('Select the default file gallery'),
 			'type' => 'list',
 			'options' => $partial ? array() : listfgal_pref(),
 			'default' => 1,
 			'profile_reference' => 'file_gallery',
 		),
 		'home_gallery' => array(
-			'name' => tra('Home Gallery (main gallery)'),
-            'description' => tra(''),
+			'name' => tra('Home gallery (main gallery)'),
 			'type' => 'list',
 			'options' => $partial ? array() : listimgal_pref(),
 			'default' => 0,
@@ -52,8 +48,7 @@ function prefs_home_list($partial = false)
  */
 function listimgal_pref()
 {
-	include_once ('lib/imagegals/imagegallib.php');
-	global $imagegallib;
+	$imagegallib = TikiLib::lib('imagegal');
 
 	$allimgals = $imagegallib->list_visible_galleries(0, -1, 'name_desc', 'admin', '');
 
@@ -99,29 +94,6 @@ function listfgal_pref()
 }
 
 /**
- * listforum_pref: retrieve the list of forums for the home_forum preference
- *
- * @access public
- * @return array: forumId => name(truncated)
- */
-function listforum_pref()
-{
-	$allforums = TikiLib::lib('comments')->list_forums(0, -1, 'name_desc', '');
-
-	$listforums = array('' => 'None');
-
-	if ($allforums['cant'] > 0) {
-		foreach ($allforums['data'] as $oneforum) {
-			$listforums[ $oneforum['forumId'] ] = substr($oneforum['name'], 0, 30);
-		}
-	} else {
-		$listforums[''] = tra('No forum available (create one first)');
-	}
-
-	return $listforums;
-}
-
-/**
  * listblog_pref: retrieve the list of blogs for the home_blog preference
  *
  * @access public
@@ -129,7 +101,7 @@ function listforum_pref()
  */
 function listblog_pref()
 {
-	global $bloglib; require_once('lib/blogs/bloglib.php');
+	$bloglib = TikiLib::lib('blog');
 
 	$allblogs = $bloglib->list_blogs(0, -1, 'created_desc', '');
 	$listblogs = array('' => 'None');

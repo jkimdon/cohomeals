@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: webmail.php 50838 2014-04-19 17:21:42Z jyhem $
+// $Id: webmail.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 function prefs_webmail_list()
 {
 	return array(
 		'webmail_view_html' => array(
-			'name' => tra('Allow viewing HTML mails?'),
+			'name' => tra('Allow viewing HTML emails?'),
 			'type' => 'flag',
 			'default' => 'y',
 		),
@@ -28,7 +28,7 @@ function prefs_webmail_list()
 			'default' => 1500000,
 		),
 		'webmail_quick_flags' => array(
-			'name' => tra('Include a flag by each email to quickly flag/un-flag them?'),
+			'name' => tra('Include a flag by all messages to quickly flag/unflag them?'),
 			'type' => 'flag',
 			'default' => 'n',
 		),

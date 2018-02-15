@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_rcontent.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_rcontent.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_rcontent_info()
 {
@@ -12,12 +12,15 @@ function wikiplugin_rcontent_info()
 		'documentation' => 'PluginRcontent',
 		'description' => tra('Display pre-programmed changing content'),
 		'prefs' => array( 'feature_dynamic_content', 'wikiplugin_rcontent' ),
-		'icon' => 'img/icons/database_table.png',
+		'iconname' => 'merge',
+		'introduced' => 3,
 		'params' => array(
 			'id' => array(
 				'required' => true,
 				'name' => tra('Content ID'),
 				'description' => tra('Numeric value representing the content ID'),
+				'since' => '3.0',
+				'filter' => 'digits',
 				'default' => '',
 			)
 		)

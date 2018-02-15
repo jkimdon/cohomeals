@@ -1,14 +1,14 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-pagehistory.php 46606 2013-07-08 20:03:58Z lphuberdeau $
+// $Id: tiki-pagehistory.php 62205 2017-04-14 00:35:26Z lindonb $
 
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/histlib.php');
+$histlib = TikiLib::lib('hist');
 require_once ('lib/wiki/renderlib.php');
 
 $access->check_feature('feature_wiki');
@@ -28,7 +28,7 @@ if (!isset($_REQUEST["page"])) {
 	$smarty->assign_by_ref('page', $_REQUEST["page"]);
 }
 
-$auto_query_args = array('page', 'oldver', 'newver', 'compare', 'diff_style', 'show_translation_history', 'show_all_versions', 'history_offset', 'paginate', 'history_pagesize');
+$auto_query_args = array('page', 'oldver', 'newver', 'diff_style', 'paginate', 'history_offset');
 
 // Now check permissions to access this page
 if (!isset($_REQUEST["source"])) {
@@ -57,24 +57,16 @@ if (isset($_REQUEST['preview'], $_REQUEST['flaggedrev'], $_REQUEST['page']) && $
 	}
 
 	if ($targetFlag) {
-		global $flaggedrevisionlib; require_once 'lib/wiki/flaggedrevisionlib.php';
+		$flaggedrevisionlib = TikiLib::lib('flaggedrevision');
 
 		$flaggedrevisionlib->flag_revision($info['pageName'], $targetVersion, 'moderation', $targetFlag);
 	}
 }
 
 $smarty->assign_by_ref('info', $info);
-// If the page doesn't exist then display an error
-//check_page_exits($page);
-if (isset($_REQUEST["delete"]) && isset($_REQUEST["hist"]) && $info["flag"] != 'L') {
-	check_ticket('page-history');
-	foreach (array_keys($_REQUEST["hist"]) as $version) {
-		$histlib->remove_version($_REQUEST["page"], $version);
-	}
-}
+
 if ($prefs['feature_contribution'] == 'y') {
-	global $contributionlib;
-	include_once ('lib/contribution/contributionlib.php');
+	$contributionlib = TikiLib::lib('contribution');
 	$contributions = $contributionlib->get_assigned_contributions($page, 'wiki page');
 	$smarty->assign_by_ref('contributions', $contributions);
 	if ($prefs['feature_contributor_wiki'] == 'y') {
@@ -95,9 +87,12 @@ $smarty->assign('history_offset', $history_offset);
 
 if (isset($_REQUEST['history_pagesize']) && $paginate) {
 	$history_pagesize = $_REQUEST['history_pagesize'];
+} else if (isset($_SESSION['history_pagesize'])) {
+	$history_pagesize = $_SESSION['history_pagesize'];
 } else {
 	$history_pagesize = $prefs['maxRecords'];
 }
+$_SESSION['history_pagesize'] = $history_pagesize;
 $smarty->assign('history_pagesize', $history_pagesize);
 
 // fetch page history, but omit the actual page content (to save memory)
@@ -105,7 +100,7 @@ $history = $histlib->get_page_history($page, false, $history_offset, $paginate ?
 $smarty->assign('history_cant', $histlib->get_nb_history($page) - 1);
 
 if ($prefs['flaggedrev_approval'] == 'y') {
-	global $flaggedrevisionlib; require_once 'lib/wiki/flaggedrevisionlib.php';
+	$flaggedrevisionlib = TikiLib::lib('flaggedrevision');
 
 	if ($flaggedrevisionlib->page_requires_approval($page)) {
 		$approved_versions = $flaggedrevisionlib->get_versions_with($page, 'moderation', 'OK');
@@ -128,23 +123,34 @@ if ($prefs['flaggedrev_approval'] == 'y') {
 }
 
 if (!isset($_REQUEST['show_all_versions'])) {
-	$_REQUEST['show_all_versions'] = "y";
+	$_SESSION['show_all_versions'] = isset($_SESSION['show_all_versions']) ? $_SESSION['show_all_versions'] : 'y';
+} else {
+	$_SESSION['show_all_versions'] = $_REQUEST['show_all_versions'];
 }
+
 $sessions = array();
 if (count($history) > 0) {
 	$lastuser = '';		// calculate edit session info
 	$lasttime = 0;		// secs
 	$idletime = 1800; 	// max gap between edits in sessions 30 mins? Maybe should use a pref?
 	for ($i = 0, $cnt = count($history); $i < $cnt; $i++) {
-
-		if ($history[$i]['user'] != $lastuser || $lasttime - $history[$i]['lastModif'] > $idletime) {
+		if ((isset($history[$i]['user']) && $history[$i]['user'] != $lastuser) || (isset($history[$i]['lastModif']) && $lasttime - $history[$i]['lastModif'] > $idletime)) {
 			$sessions[] = $history[$i];
 			//$history[$i]['session'] = $history[$i]['version'];
 		} else if (count($sessions) > 0) {
 			$history[$i]['session'] = $sessions[count($sessions)-1]['version'];
 		}
-		$lastuser = $history[$i]['user'];
-		$lasttime = $history[$i]['lastModif'];
+		if(isset($history[$i]['user'])){
+			$lastuser = $history[$i]['user'];
+		}
+		else {
+			$lastuser = '';
+		}
+		if(isset($history[$i]['lastModif'])){
+			$lasttime = $history[$i]['lastModif'];
+		} else {
+			$lasttime = 0;
+		}
 	}
 	$csesh = count($sessions) + 1;
 	foreach ($history as &$h) {	// move ending 'version' into starting 'session'
@@ -157,7 +163,7 @@ if (count($history) > 0) {
 			$h['session'] = '';
 		}
 	}
-	if ($_REQUEST['show_all_versions'] == "n") {
+	if ($_SESSION['show_all_versions'] == "n") {
 		for ($i = 0, $cnt = count($history); $i < $cnt; $i++) {	// remove versions inside sessions
 			if (!empty($history[$i]['session']) && $i < $cnt - 1) {
 				$seshend = $history[$i]['session'];
@@ -174,7 +180,7 @@ if (count($history) > 0) {
 		}
 	}
 }
-$smarty->assign('show_all_versions', $_REQUEST['show_all_versions']);
+$smarty->assign('show_all_versions', $_SESSION['show_all_versions']);
 $history_versions = array();
 $history_sessions = array();
 reset($history);
@@ -184,7 +190,7 @@ foreach ($history as &$h) {	// as $h has been used by reference before it needs 
 }
 $history_versions = array_reverse($history_versions);
 $history_sessions = array_reverse($history_sessions);
-$history_versions[] = $info["version"];	// current is last one
+$history_versions[] = (int) $info['version'];	// current is last one
 $history_sessions[] = 0;
 $smarty->assign_by_ref('history', $history);
 
@@ -207,7 +213,7 @@ if (isset($_REQUEST['bothver_idx'])) {
 	}
 	$_REQUEST['oldver_idx'] = $_REQUEST['bothver_idx'] - 1;
 	$_REQUEST['newver_idx'] = $_REQUEST['bothver_idx'];
-	if ($_REQUEST['show_all_versions'] == 'n' && !empty($history_sessions[$_REQUEST['bothver_idx']])) {
+	if ($_SESSION['show_all_versions'] == 'n' && !empty($history_sessions[$_REQUEST['bothver_idx']])) {
 		$_REQUEST['oldver_idx'] = $_REQUEST['bothver_idx'];
 	}
 }
@@ -228,7 +234,7 @@ if (isset($_REQUEST['newver_idx'])) {
 }
 if (isset($_REQUEST['oldver_idx'])) {
 	$oldver = $history_versions[$_REQUEST['oldver_idx']];
-	if ($_REQUEST['show_all_versions'] == 'n' && !empty($history_sessions[$_REQUEST['oldver_idx']])) {
+	if ($_SESSION['show_all_versions'] == 'n' && !empty($history_sessions[$_REQUEST['oldver_idx']])) {
 		$oldver = $history_sessions[$_REQUEST['oldver_idx']];
 	}
 } else {
@@ -247,6 +253,9 @@ if (isset($_REQUEST['oldver_idx'])) {
 if ($_REQUEST['oldver_idx'] + 1 == $_REQUEST['newver_idx']) {
 	$_REQUEST['bothver_idx'] = $_REQUEST['newver_idx'];
 }
+$_REQUEST['oldver'] = $oldver;
+$_REQUEST['newver'] = $newver;
+
 // source view
 if (isset($_REQUEST['source_idx'])) {
 	$source = $history_versions[$_REQUEST['source_idx']];
@@ -302,14 +311,14 @@ if (isset($preview)) {
 	if ($preview == '' && isset($rversion)) {
 		$preview = $rversion;
 	}
-	if ($preview == $info["version"] || $preview == 0) {
-		$previewd = $tikilib->parse_data($info["data"], array('preview_mode' => true, 'is_html' => $info['is_html']));
+	if ($preview == $info['version'] || $preview == 0) {
+        $previewd = (new WikiLibOutput($info, $info['data'], array('preview_mode' => true, 'is_html' => $info['is_html'])))->parsedValue;
 		$smarty->assign('previewd', $previewd);
 		$smarty->assign('preview', $info['version']);
 	} else {
 		$version = $histlib->get_version($page, $preview);
 		if ($version) {
-			$previewd = $tikilib->parse_data($version["data"], array('preview_mode' => true, 'is_html' => $version['is_html']));
+            $previewd = (new WikiLibOutput($version, $version['data'], array('preview_mode' => true, 'is_html' => $version['is_html'])))->parsedValue;
 			$smarty->assign('previewd', $previewd);
 			$smarty->assign('preview', $preview);
 		}
@@ -329,7 +338,7 @@ if (isset($preview)) {
 	$smarty->assign('current', 0);
 }
 if ($prefs['feature_multilingual'] == 'y' && isset($_REQUEST['show_translation_history'])) {
-	include_once ("lib/multilingual/multilinguallib.php");
+	$multilinguallib = TikiLib::lib('multilingual');
 	$smarty->assign('show_translation_history', 1);
 	$sources = $multilinguallib->getSourceHistory($info['page_id']);
 	$targets = $multilinguallib->getTargetHistory($info['page_id']);
@@ -350,8 +359,9 @@ if (!isset($newver)) {
 	$newver = 0;
 }
 if ($prefs['feature_multilingual'] == 'y') {
-	include_once ("lib/multilingual/multilinguallib.php");
-	$languages = $tikilib->list_languages();
+	$multilinguallib = TikiLib::lib('multilingual');
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages();
 	$smarty->assign_by_ref('languages', $languages);
 	if (isset($_REQUEST["update_translation"])) {
 		// Update translation button clicked. Forward request to edit page of translation.
@@ -382,7 +392,8 @@ if ($prefs['feature_multilingual'] == 'y') {
 	}
 }
 $current_version = $info["version"];
-$not_comparing = empty($_REQUEST['compare']) ? 'true' : 'false';
+$comparing = isset($_GET['newver']) || isset($_GET['oldver']);
+$not_comparing = $comparing ? 'false' : 'true';
 
 $headerlib->add_jq_onready(
 <<<JS
@@ -412,8 +423,8 @@ if (\$("input[name=newver][checked=checked]").length) {
 }
 JS
 );
-if (isset($_REQUEST["compare"])) {
-	histlib_helper_setup_diff($page, $oldver, $newver);
+if ($comparing) {
+	histlib_helper_setup_diff($page, $oldver, $newver, $_REQUEST['diff_style']);
 
 	if (isset($approved_versions)) {
 		$smarty->assign('flaggedrev_compare_approve', ! in_array($newver, $approved_versions));
@@ -432,7 +443,7 @@ if (isset($_REQUEST['nohistory'])) {
 	$smarty->assign('noHistory', true);
 }
 
-ask_ticket('page-history');
+$smarty->assign('editable', TikiLib::lib('wiki')->is_editable($page, $user, $info));
 
 TikiLib::events()->trigger(
 	'tiki.wiki.view',

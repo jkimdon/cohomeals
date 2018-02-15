@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-trackerhelp.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-trackerhelp.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -41,11 +41,11 @@ function module_trackerhelp_info()
  */
 function module_trackerhelp($mod_reference, &$module_params)
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$default = array('height' => 4, 'cols' => 23);
 	$module_params = array_merge($default, $module_params);
 	if (!empty($_REQUEST['trackerhelp'])) {
-		global $trklib; include_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		$trackerId = $trklib->get_tracker_by_name($_REQUEST['trackerhelp_name']);
 		if (empty($trackerId)) {
 			$tracker_info = $trklib->get_tracker($_REQUEST['trackerhelp_name']);

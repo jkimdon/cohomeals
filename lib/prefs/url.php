@@ -1,15 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: url.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: url.php 63592 2017-08-18 05:00:30Z drsassafras $
 
 function prefs_url_list()
 {
 	return array(
 		'url_after_validation' => array(
-			'name' => tra('URL a user is redirected to after account validation'),
+			'name' => tra('URL the user is redirected to after account validation'),
+			'description' => tra('The default page a Registered user sees after account validation is tiki-information.php?msg=Account validated successfully.'),
 			'hint' => tra('Default').': tiki-information.php?msg='.tra('Account validated successfully.'),
 			'type' => 'text',
 			'dependencies' => array(
@@ -18,9 +19,16 @@ function prefs_url_list()
 			'default' => '',
 		),
 		'url_anonymous_page_not_found' => array(
-			'name' => tra('URL an anonymous is redirected when page not found'),
+			'name' => tra('The URL that the anonymous user is redirected to when a page is not found'),
 			'type' => 'text',
 			'default' => '',
+		),
+		'url_only_ascii' => array(
+			'name' => tra('Use Only ASCII in SEFURLs'),
+			'description' => tra('Do not use accented characters in short (search engine friendly) URLs'),
+			'type' => 'flag',
+			'perspective' => false,
+			'default' => 'n',
 		),
 	);
 }

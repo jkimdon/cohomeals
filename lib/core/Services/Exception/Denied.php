@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Denied.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Denied.php 60201 2016-11-08 09:52:00Z kroky6 $
 
 class Services_Exception_Denied extends Services_Exception
 {
@@ -14,6 +14,29 @@ class Services_Exception_Denied extends Services_Exception
 		}
 
 		parent::__construct($message, 403);
+	}
+
+	public static function checkAuth()
+	{
+		if (empty($GLOBALS['user'])) {
+			throw new self(tr('Authentication required'));
+		}
+	}
+
+	public static function checkGlobal($perm)
+	{
+		$perms = Perms::get();
+		if (! $perms->$perm) {
+			throw new self(tr('Permission denied'));
+		}
+	}
+
+	public static function checkObject($perm, $type, $object)
+	{
+		$perms = Perms::get($type, $object);
+		if (! $perms->$perm) {
+			throw new self(tr('Permission denied'));
+		}
 	}
 }
 

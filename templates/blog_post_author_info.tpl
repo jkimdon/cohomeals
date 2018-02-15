@@ -1,15 +1,13 @@
-{* $Id: blog_post_author_info.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+{* $Id: blog_post_author_info.tpl 58675 2016-05-23 17:50:57Z jonnybradley $ *}
 <div class="author_info">
-	{if $blog_data.use_author eq 'y' || $blog_data.add_date eq 'y'}
-		{tr}Published {/tr}
-	{/if}
-	{if $blog_data.use_author eq 'y'}
-		{tr}by{/tr} {$post_info.user|userlink} 
-	{/if}
-	{if $blog_data.add_date eq 'y'}
-		{tr}on{/tr} {$post_info.created|tiki_short_date}
-	{/if}
 	{if $blog_data.show_avatar eq 'y'}
 		{$post_info.avatar}
+	{/if}
+	{if $blog_data.use_author eq 'y'}
+		{icon name="user" iclass="tips" ititle=":{tr}Published By{/tr}"}
+		{$post_info.user|userlink}
+	{/if}
+	{if $blog_data.add_date eq 'y'}
+		<span style="font-size: 80%">{icon name="clock-o" iclass="tips" ititle=":{tr}Publish Date{/tr}"}</span> {$post_info.created|tiki_long_date}
 	{/if}
 </div>

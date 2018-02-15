@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: messu-compose.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: messu-compose.php 59300 2016-07-28 14:04:22Z giograf $
 
 $section = 'user_messages';
 require_once ('tiki-setup.php');
-include_once ('lib/messu/messulib.php');
+$messulib = TikiLib::lib('message');
 $access->check_user($user);
 $access->check_feature('feature_messages');
 $access->check_permission('tiki_p_messages');
@@ -145,8 +145,11 @@ if (isset($_REQUEST['send'])) {
 	if (count($users) > 0) {
 		$users_formatted = array();
 		foreach ($users as $rawuser)
+			if ($prefs['user_selector_realnames_messu'] == 'y') {
+					$rawuser = $userlib->clean_user($rawuser, ! $check_user_show_realnames, $login_fallback);
+				}
 			$users_formatted[] = htmlspecialchars($rawuser);
-		$message.= tra("Message has been sent to: ") . implode(',', $users_formatted) . "<br />";
+        $message.= tra("Message has been sent to: ") . implode(',  ', $users) . "<br />";
 	} else {
 		$message.= tra('ERROR: No valid users to send the message');
 		$smarty->assign('message', $message);
@@ -209,10 +212,13 @@ if (isset($_REQUEST['send'])) {
 		// 										//
 		//////////////////////////////////////////////////////////////////////////////////
 		if ($result) {
-			if ($prefs['feature_score'] == 'y') {
-				$tikilib->score_event($user, 'message_send');
-				$tikilib->score_event($a_user, 'message_receive');
-			}
+			TikiLib::events()->trigger('tiki.user.message',
+				array(
+					'type' => 'user',
+					'object' => $a_user,
+					'user' => $user,
+				)
+			);
 			// if this is a reply flag the original messages replied to
 			if ($_REQUEST['replyto_hash'] <> '') {
 				$messulib->mark_replied($a_user, $_REQUEST['replyto_hash']);

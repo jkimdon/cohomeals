@@ -1,6 +1,6 @@
-{* $Id: tiki-register.tpl 42536 2012-08-06 15:06:36Z robertplummer $ *}
+{* $Id: tiki-register.tpl 56565 2015-10-25 03:30:35Z lindonb $ *}
 {title adminpage='login'}{tr}Registration{/tr}{/title}
-{if $showmsg eq 'y'}
+{if !empty($showmsg) && $showmsg eq 'y'}
 	<div class="simplebox highlight">
 		{$msg|nl2br}
 	</div>

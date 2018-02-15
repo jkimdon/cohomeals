@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CacheClearCommand.php 45724 2013-04-26 17:33:23Z changi67 $
+// $Id: CacheClearCommand.php 60091 2016-10-31 09:01:14Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -23,7 +23,8 @@ class CacheClearCommand extends Command
 			->addArgument(
 				'cache',
 				InputArgument::OPTIONAL,
-				'Type of cache to clear (public, private, templates, modules)'
+				'Type of cache to clear (public, private, templates, modules, all)',
+				'all'
 			)
 			->addOption(
 				'all',
@@ -41,17 +42,28 @@ class CacheClearCommand extends Command
 		$cachelib = \TikiLib::lib('cache');
 
 		if ($all) {
+			$output->writeln('Clearing all caches');
 			$cachelib->empty_cache();
+
+			// Also rebuild admin index
+			\TikiLib::lib('prefs')->rebuildIndex();
 		} else {
 			switch ($type) {
 			case 'public':
+				$output->writeln('Clearing public caches');
 				return $cachelib->empty_cache('temp_public');
 			case 'private':
+				$output->writeln('Clearing private caches');
 				return $cachelib->empty_cache('temp_cache');
 			case 'templates':
+				$output->writeln('Clearing template caches');
 				return $cachelib->empty_cache('templates_c');
 			case 'modules':
+				$output->writeln('Clearing module caches');
 				return $cachelib->empty_cache('modules_cache');
+			case 'all':
+				$output->writeln('Clearing all caches');
+				return $cachelib->empty_cache();
 			case '':
 				return $output->writeln('Missing parameter.');
 			default:

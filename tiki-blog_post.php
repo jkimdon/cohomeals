@@ -2,17 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-blog_post.php 46283 2013-06-11 12:05:13Z jonnybradley $
+// $Id: tiki-blog_post.php 63615 2017-08-21 22:05:20Z pom2ter $
 
 $section = 'blogs';
 require_once ('tiki-setup.php');
-include_once ('lib/categories/categlib.php');
-include_once ('lib/blogs/bloglib.php');
-include_once ('lib/wiki/editlib.php');
+$categlib = TikiLib::lib('categ');
+$bloglib = TikiLib::lib('blog');
+$editlib = TikiLib::lib('edit');
 
 $access->check_feature('feature_blogs');
 
@@ -66,7 +66,7 @@ $smarty->assign('blogId', $blogId);
 $smarty->assign('postId', $postId);
 
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 if (isset($_REQUEST["publish_Hour"])) {
@@ -80,11 +80,12 @@ if (isset($_REQUEST["publish_Hour"])) {
 }
 
 if ($prefs['feature_freetags'] == 'y') {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 
 	if ($prefs['feature_multilingual'] == 'y') {
 		$languages = array();
-		$languages = $tikilib->list_languages();
+		$langLib = TikiLib::lib('language');
+		$languages = $langLib->list_languages();
 		$smarty->assign_by_ref('languages', $languages);
 		$smarty->assign('blog', 'y');
 	}
@@ -98,7 +99,7 @@ if (isset($_REQUEST['cancel'])) {
 // Exit edit mode (with javascript)
 $smarty->assign('referer', !empty($_REQUEST['referer']) ? $_REQUEST['referer'] : (empty($_SERVER['HTTP_REFERER']) ? 'tiki-view_blog.php?blogId=' . $blogId : $_SERVER['HTTP_REFERER']));
 
-if (isset($_REQUEST['remove_image'])) {
+if (isset($_REQUEST['remove_image']) && $access->checkOrigin()) {
 	$access->check_authenticity();
 	$bloglib->remove_post_image($_REQUEST['remove_image']);
 }
@@ -118,7 +119,7 @@ if ($postId > 0) {
 
 	$smarty->assign('post_info', $data);
 	$smarty->assign('data', $data['data']);
-	$smarty->assign('parsed_data', $tikilib->parse_data($data['data'], array('is_html' => $is_wysiwyg)));
+	$smarty->assign('parsed_data', TikiLib::lib('parser')->parse_data($data['data'], array('is_html' => $is_wysiwyg)));
 	$smarty->assign('blogpriv', $data['priv']);
 
 	check_ticket('blog');
@@ -180,7 +181,7 @@ if (isset($_REQUEST["preview"])) {
 	$post_info = array();
 	$parserlib = TikiLib::lib('parser');
 	$parsed_data = $parserlib->apply_postedit_handlers($edit_data);
-	$parsed_data = $tikilib->parse_data($parsed_data, array('is_html' => $is_wysiwyg));
+	$parsed_data = TikiLib::lib('parser')->parse_data($parsed_data, array('is_html' => $is_wysiwyg));
 	$smarty->assign('data', $edit_data);
 	$post_info['parsed_data'] = $parsed_data;
 
@@ -189,6 +190,7 @@ if (isset($_REQUEST["preview"])) {
 	$post_info['user'] = isset($data) ? $data['user'] : $user;
 	$post_info['created'] = $publishDate;
 	$post_info['avatar'] = isset($data) ? $data['avatar'] : '';
+	$post_info['postId'] = $postId;
 
 	if ($prefs['feature_freetags'] == 'y' && isset($_REQUEST['freetag_string'])) {
 		$tags = $freetaglib->dumb_parse_tags($_REQUEST['freetag_string']);
@@ -208,8 +210,8 @@ if (isset($_REQUEST['save']) && $prefs['feature_contribution'] == 'y' && $prefs[
 	$contribution_needed = false;
 }
 
-if (isset($_REQUEST['save']) && !$contribution_needed) {
-	include_once ("lib/imagegals/imagegallib.php");
+if (isset($_REQUEST['save']) && !$contribution_needed && $access->checkOrigin()) {
+	$imagegallib = TikiLib::lib('imagegal');
 	$smarty->assign('individual', 'n');
 
 	$edit_data = $imagegallib->capture_images($edit_data);
@@ -250,7 +252,7 @@ if (isset($_REQUEST['save']) && !$contribution_needed) {
 
 if ($contribution_needed) {
 	$smarty->assign('title', $_REQUEST["title"]);
-	$smarty->assign('parsed_data', $tikilib->parse_data($_REQUEST['data'], array('is_html' => $is_wysiwyg)));
+	$smarty->assign('parsed_data', TikiLib::lib('parser')->parse_data($_REQUEST['data'], array('is_html' => $is_wysiwyg)));
 	$smarty->assign('data', $_REQUEST['data']);
 	if ($prefs['feature_freetags'] == 'y') {
 		$smarty->assign('taglist', $_REQUEST["freetag_string"]);

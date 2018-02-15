@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ldap.php 51310 2014-05-15 15:15:18Z luciash $
+// $Id: ldap.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 /*
  *  Class that adds LDAP Authentication to Tiki and aids Tiki to get User/Group Information
@@ -59,10 +59,10 @@ class TikiLdapLib
 	public function __construct($options)
 	{
 		// debug setting
-		global $logslib;
+		$logslib = TikiLib::lib('logs');
 		if (isset($options['debug']) && ($options['debug']===true || $options['debug']=='y' )&& ($logslib instanceof LogsLib)) {
 			$this->options['debug'] = true;
-			$this->logslib = &$logslib;
+			$this->logslib = $logslib;
 		}
 		// Configure the connection
 
@@ -489,7 +489,7 @@ class TikiLdapLib
 	}
 
 	/**
-	 * Return the value of the attribue past in param
+	 * Return the value of the attribute past in param
 	 * @param string $name The name of the attribute
 	 * @return mixed
 	 * @throw Exception

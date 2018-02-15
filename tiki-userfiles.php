@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-userfiles.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-userfiles.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'mytiki';
 
@@ -68,7 +68,7 @@ for ($i = 0; $i < 5; $i++) {
 		$name = $_FILES["userfile$i"]['name'];
 		$type = $_FILES["userfile$i"]['type'];
 		if ($quota + $size > $limit) {
-			$smarty->assign('msg', tra('Cannot upload this file not enough quota'));
+			$smarty->assign('msg', tra('Cannot upload this file. The storage quota would be exceeded'));
 			$smarty->display("error.tpl");
 			die;
 		}

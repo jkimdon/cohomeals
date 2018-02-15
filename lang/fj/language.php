@@ -2,7 +2,6 @@
 
 
 $lang = array(
-"None" => "None",
 "Arabic" => "Vaka Arapea",
 "Catalan" => "Catalan",
 "Simplified Chinese" => "Vaka Jaina",
@@ -114,6 +113,7 @@ $lang = array(
 "Nicaragua" => "Nicaragua",
 "Nigeria" => "Nigeria",
 "Niue" => "Niue",
+"None" => "None",
 "Norway" => "Norway",
 "Other" => "Other",
 "Pakistan" => "Pakistan",
@@ -162,7 +162,6 @@ $lang = array(
 "Zimbabwe" => "Zimbabwe",
 "Re:" => "Tale:",
 "You must supply all the information, including title and year." => "E dodonu mo solia kece mai na i tukutuku wili kina na yabaki kei na i ulutaga.",
-"You do not have permission to use this feature" => "E sega ni tiko vei iko na dodonu mo vakayagataka oqo",
 "Articles" => "Veiulutaga",
 "Cannot upload this file - maximum upload size exceeded" => "O sa na sega ni rawa ni vakacuruma na file oqori, e sa rui sivia na kena levu",
 "Cannot write to this file" => "O na sega ni veisautaka na file oqo",
@@ -171,14 +170,14 @@ $lang = array(
 "Continue" => "Tomana",
 "Relevance" => "Veiganiti",
 "Modified" => "Sa veisautaki",
-"Most relevant pages" => "Na tabana e veiganiti",
+"Most-relevant pages" => "Na tabana e veiganiti",
 "Topic date" => "Tikinisiga ni Ulutuga",
 "Forums last posts" => "Na otioti ni ",
 "character(s) too long - please edit it." => "sa rui sivia na i wiliwili ni vosa - kerea mo vakalekalekataka.",
+"You do not have permission to use this feature" => "E sega ni tiko vei iko na dodonu mo vakayagataka oqo",
 "This script cannot be called directly" => "Na veivosa oqo e na sega ni kacivi rawarawa",
-"By:" => "Nei:",
-"3d browser" => "3D browser",
 "List articles" => "Vakaraitaka na veiulutaga",
-"The uploaded file ist not recognized as a image" => "The uploaded file is not recognized as an image",
-"No url indicated" => "No URL indicated",
+"By:" => "Nei:",
+"The uploaded file is not recognized as a image" => "The uploaded file is not recognized as an image",
+"No URL indicated" => "No URL indicated",
 );

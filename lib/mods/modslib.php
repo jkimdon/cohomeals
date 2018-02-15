@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modslib.php 50467 2014-03-24 12:04:18Z jonnybradley $
+// $Id: modslib.php 58662 2016-05-22 00:42:20Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -29,7 +29,7 @@ class TikiMod
      * @param $type
      * @param bool $name
      */
-    function TikiMod($type, $name=FALSE)
+    function __construct($type, $name=FALSE)
 	{
 		if ($name === FALSE) { // $type is a modname
 			$this->modname=$type;
@@ -53,7 +53,8 @@ class TikiMod
      */
     function isnewerthan($mod)
 	{
-		if (ModsLib::revision_compare($this->revision, $mod->revision) > 0)
+		$modslib = new ModsLib();
+		if ($modslib->revision_compare($this->revision, $mod->revision) > 0)
 			return TRUE;
 	}
 
@@ -81,9 +82,9 @@ class TikiModAvailable extends TikiMod
      * @param $type
      * @param bool $name
      */
-    function TikiModAvailable($type, $name=FALSE)
+    function __construct($type, $name=FALSE)
 	{
-		$this->TikiMod($type, $name);
+		parent::__construct($type, $name);
 	}
 
 	/* convert $this mod as a line viewable in files like 00_list.txt */
@@ -203,9 +204,9 @@ class TikiModInfo extends TikiModAvailable
      * @param $type
      * @param bool $name
      */
-    function TikiModInfo($type, $name=FALSE)
+    function __construct($type, $name=FALSE)
 	{
-		$this->TikiModAvailable($type, $name);
+		parent::__construct($type, $name);
 	}
 
 	/* Import all datas from the .info.txt file */
@@ -432,9 +433,9 @@ class TikiModDepend extends TikiMod
      * @param $type
      * @param bool $name
      */
-    function TikiModDepend($type, $name=FALSE)
+    function __construct($type, $name=FALSE)
 	{
-		$this->TikiMod($type, $name);
+		parent::__construct($type, $name);
 	}
 
     /**
@@ -460,32 +461,33 @@ class TikiModDepend extends TikiMod
 	{
 		if ($mod->modname != $this->modname) return FALSE;
 		if (!is_array($this->tests)) return TRUE;
+		$modslib = new ModsLib();
 		foreach ($this->tests as $test) {
 			switch($test['test']) {
 			case '=':
-				if (ModsLib::revision_compare($mod->revision, $test['revision']) != 0) {
+				if ($modslib->revision_compare($mod->revision, $test['revision']) != 0) {
 					return FALSE;
 				}
 				break;
 			case '<':
-				if (ModsLib::revision_compare($mod->revision, $test['revision']) != -1) {
+				if ($modslib->revision_compare($mod->revision, $test['revision']) != -1) {
 					return FALSE;
 				}
 				break;
 			case '>':
-				if (ModsLib::revision_compare($mod->revision, $test['revision']) != 1) {
+				if ($modslib->revision_compare($mod->revision, $test['revision']) != 1) {
 					return FALSE;
 				}
 				break;
 			case '<=':
 			case '=<':
-				if (ModsLib::revision_compare($mod->revision, $test['revision']) > 0) {
+				if ($modslib->revision_compare($mod->revision, $test['revision']) > 0) {
 					return FALSE;
 				}
 				break;
 			case '>=':
 			case '=>':
-				if (ModsLib::revision_compare($mod->revision, $test['revision']) < 0) {
+				if ($modslib->revision_compare($mod->revision, $test['revision']) < 0) {
 					return FALSE;
 				}
 				break;
@@ -1173,7 +1175,7 @@ class ModsLib
 		if (is_array($info->configuration) and count($info->configuration)) {
 			$conf = $info->readconf($path);
 			if ($conf === false) {
-				global $smarty;
+				$smarty = TikiLib::lib('smarty');
 				$conf=array('_SERVER' => $_SERVER);
 				if (is_array($info->configuration_help) and count($info->configuration_help)) {
 					$smarty->assign('help', implode("<br />\n", $info->configuration_help));

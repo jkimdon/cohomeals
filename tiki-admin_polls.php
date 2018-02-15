@@ -2,24 +2,22 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_polls.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_polls.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/polls/polllib.php');
-if (!isset($polllib)) {
-	$polllib = new PollLib;
-}
 $access->check_feature('feature_polls');
 $access->check_permission('tiki_p_admin_polls');
+
+$polllib = TikiLib::lib('poll');
 
 $auto_query_args = array('pollId', 'sort_mode', 'offset', 'find');
 
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 if (!isset($_REQUEST["pollId"])) {
@@ -42,7 +40,7 @@ if (isset($_REQUEST["remove"])) {
 	$access->check_authenticity();
 	$polllib->remove_poll($_REQUEST["remove"]);
 }
-if (isset($_REQUEST["save"])) {
+if (isset($_REQUEST["save"]) || isset($_REQUEST["add"])) {
 	check_ticket('admin-polls');
 	//Convert 12-hour clock hours to 24-hour scale to compute time
 	if (!empty($_REQUEST['Time_Meridian'])) {
@@ -73,10 +71,8 @@ if (isset($_REQUEST["save"])) {
 	include_once ("categorize.php");
 }
 if (isset($_REQUEST['addPoll']) && !empty($_REQUEST['poll_template']) && !empty($_REQUEST['pages'])) {
-	global $wikilib;
-	include_once ('lib/wiki/wikilib.php');
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$wikilib = TikiLib::lib('wiki');
+	$categlib = TikiLib::lib('categ');
 	$cat_type = 'wiki page';
 	foreach ($_REQUEST['pages'] as $cat_objid) {
 		if (!$catObjectId = $categlib->is_categorized($cat_type, $cat_objid)) {

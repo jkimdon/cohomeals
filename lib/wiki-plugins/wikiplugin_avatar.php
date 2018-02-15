@@ -1,31 +1,37 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_avatar.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_avatar.php 63428 2017-08-01 13:59:06Z jonnybradley $
 
 function wikiplugin_avatar_info()
 {
 	return array(
-		'name' => tra('Avatar'),
+		'name' => tra('Profile picture'),
 		'documentation' => 'PluginAvatar',
-		'description' => tra('Display a user\'s avatar'),
+		'description' => tra('Display a user\'s profile picture'),
 		'prefs' => array('wikiplugin_avatar'),
 		'body' => tra('username'),
-		'icon' => 'img/icons/user.png',
+		'iconname' => 'user',
+		'introduced' => 1,
+		'format' => 'html',
 		'params' => array(
 			'page' => array(
 				'required' => false,
 				'name' => tra('Page'),
-				'description' => tra('The wiki page the avatar will link to. If empty and the user\'s information is public, then the avatar will link automatically the that user\'s user information page'),
+				'description' => tra('The wiki page the profile picture will link to. If empty and the user\'s
+					information is public, then the profile picture will link automatically the that user\'s user
+					information page'),
+				'since' => '1',
 				'default' => '',
 				'profile_reference' => 'wiki_page',
 			),
 			'float' => array(
 				'required' => false,
 				'name' => tra('Float'),
-				'description' => tra('Align the avatar on the page'),
+				'description' => tra('Align the profile picture on the page'),
+				'since' => '1',
 				'filter' => 'word',
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -35,9 +41,10 @@ function wikiplugin_avatar_info()
 			),
 			'fullsize' => array(
 				'required' => false,
-				'name' => tra('Show fullsize File Gallery image'),
-				'description' => tra('If fullsize images are stored in the File Gallery, show the full size one.'),
+				'name' => tra('Full Size'),
+				'description' => tra('If full-size images are stored in the file gallery, show the full-size image.'),
 				'default' => 'n',
+				'since' => '10.0',
 			),
 		),
 	);
@@ -45,7 +52,9 @@ function wikiplugin_avatar_info()
 
 function wikiplugin_avatar($data, $params)
 {
-	global $tikilib, $userlib, $prefs, $user;
+	global $prefs, $user;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	extract($params, EXTR_SKIP);
 

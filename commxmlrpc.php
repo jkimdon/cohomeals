@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: commxmlrpc.php 45575 2013-04-18 15:51:49Z lphuberdeau $
+// $Id: commxmlrpc.php 57974 2016-03-17 20:11:05Z jonnybradley $
 
 include_once("tiki-setup.php");
 include_once ('lib/commcenter/commlib.php');
@@ -29,8 +29,11 @@ $s = new XML_RPC_Server($map);
  */
 function sendStructurePage($params)
 {
-	global $tikilib, $userlib, $commlib, $prefs;
-	include_once ('lib/structures/structlib.php');
+	global $commlib, $prefs;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$structlib = TikiLib::lib('struct');
+
 	$site = $params->getParam(0); $site = $site->scalarval();
 	$user = $params->getParam(1); $user = $user->scalarval();
 	$pass = $params->getParam(2); $pass = $pass->scalarval();
@@ -72,7 +75,9 @@ function sendStructurePage($params)
 function sendPage($params)
 {
 	// Get the page and store it in received_pages
-	global $tikilib, $userlib, $commlib, $prefs;
+	global $commlib, $prefs;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	$pp = $params->getParam(0);
 	$site = $pp->scalarval();
@@ -116,7 +121,9 @@ function sendPage($params)
 function sendArticle($params)
 {
 	// Get the page and store it in received_pages
-	global $tikilib, $userlib, $commlib, $prefs;
+	global $commlib, $prefs;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	$pp = $params->getParam(0);
 	$site = $pp->scalarval();

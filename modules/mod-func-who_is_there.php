@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-who_is_there.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-who_is_there.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -29,7 +29,11 @@ function module_who_is_there_info()
 			'cluster' => array(
 				'name' => tra('Cluster Mode'),
 				'description' => tra('If set to "1", separate users based on which host/server they logged on.')
-			)
+			),
+			'silent' => array(
+				'name' => tra('Silent Mode'),
+				'description' => tra('If set to "1" hides the module, which allows another "who is there" module to include users that should not see it.')
+			),
 		)
 	);
 }
@@ -40,8 +44,8 @@ function module_who_is_there_info()
  */
 function module_who_is_there($mod_reference, $module_params)
 {
-	global $tikilib, $smarty;
-
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 	$count = !isset($module_params['content']) || $module_params['content'] != 'list';
 	$list = !isset($module_params['content']) || $module_params['content'] != 'count';
 	$smarty->assign('count', $count);

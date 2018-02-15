@@ -1,20 +1,26 @@
-{* $Id: tracker_actions.tpl 40273 2012-03-20 19:18:59Z chealer $ *}
+{* $Id: tracker_actions.tpl 60518 2016-12-04 15:40:28Z jonnybradley $ *}
 {* navbar buttons at the top of the tracker pages *}
+<div class="btn-group">
 
 {if $tiki_p_admin_trackers eq 'y' and !empty($trackerId)}
-	{button href="tiki-list_trackers.php?trackerId=$trackerId&show=mod" _text="{tr}Edit This Tracker{/tr}"}	
-	{button href="tiki-admin_tracker_fields.php?trackerId=$trackerId" _text="{tr}Edit Fields{/tr}"}
+	<a class="btn btn-default" href="{bootstrap_modal controller=tracker action=replace trackerId=$trackerId}">
+		{icon name="settings"} {tr}Properties{/tr}
+	</a>
+	<a class="btn btn-default" href="tiki-admin_tracker_fields.php?trackerId={$trackerId|escape}">
+		{icon name="th-list"} {tr}Fields{/tr}
+	</a>
 {/if}
 
 {if $tiki_p_list_trackers eq 'y'}
-	{button href="tiki-list_trackers.php" _text="{tr}Trackers{/tr}"}
+	<a class="btn btn-default" href="{if $prefs.feature_sefurl eq 'y'}trackers{else}tiki-list_trackers.php{/if}">
+		{icon name="trackers"} {tr}Trackers{/tr}
+	</a>
 {/if}
 
-{if !empty($trackerId) and $tiki_p_create_tracker_items eq 'y' and $prefs.feature_tabs ne 'y'}
-	{button href="tiki-view_tracker.php?trackerId=$trackerId#content2" _text="{tr}Create Item{/tr}"}
+{if !empty($trackerId) and $tiki_p_view_trackers eq 'y' && (empty($showitems) || $showitems !== 'n')}
+	<a class="btn btn-default" href="{$trackerId|sefurl:"tracker"}">
+		{icon name="list"} {tr}Items{/tr}
+	</a>
 {/if}
 
-{if !empty($trackerId) and $tiki_p_view_trackers eq 'y'}
-	{button href="tiki-view_tracker.php?trackerId=$trackerId" _text="{tr}View Items{/tr}"}
-{/if}
-
+</div>

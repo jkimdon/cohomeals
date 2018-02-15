@@ -1,4 +1,4 @@
-{* $Id: mod-domain_password.tpl 50655 2014-04-03 17:45:39Z arildb $ *}
+{* $Id: mod-domain_password.tpl 58787 2016-06-05 13:59:28Z lindonb $ *}
 {tikimodule error=$module_params.error title=$tpl_module_title name="domain_password" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {literal}
 	<script type="text/javascript">
@@ -22,17 +22,6 @@
 				<td class="pwddom_domain_name">{$domain}</td>
 			{/if}
 		</tr>
-		{if !empty($errors[{$dompwdCount}])}
-			<tr>
-				<td colspan="2">
-					<span id="error">
-						{foreach from=$errors[{$dompwdCount}] item=error}
-							{$error|escape}<br>
-						{/foreach}
-					</span>
-				</td>
-			</tr>
-		{/if}
 		{if !empty($user)}
 			<tr>
 				<td>{tr}User{/tr}</td>
@@ -66,7 +55,7 @@
 	</table>
 </form>
 {if !empty($result[{$dompwdCount}])}
-	<span id="error">
+	<span id="error" class="alert-warning">
 		{$result[{$dompwdCount}]}
 	</span>
 {/if}

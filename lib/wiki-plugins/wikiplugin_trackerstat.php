@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_trackerstat.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_trackerstat.php 61411 2017-02-27 15:43:08Z kroky6 $
 
 function wikiplugin_trackerstat_info()
 {
@@ -13,20 +13,24 @@ function wikiplugin_trackerstat_info()
 		'description' => tra('Display statistics about a tracker.'),
 		'prefs' => array( 'feature_trackers', 'wikiplugin_trackerstat' ),
 		'body' => tra('Title'),
-		'icon' => 'img/icons/calculator.png',
+		'iconname' => 'chart',
+		'introduced' => 2,
 		'params' => array(
 			'trackerId' => array(
 				'required' => true,
 				'name' => tra('Tracker ID'),
 				'description' => tra('Numeric value representing the tracker ID'),
+				'since' => '2.0',
 				'filter' => 'digits',
 				'default' => '',
 				'profile_reference' => 'tracker',
 			),
 			'fields' => array(
-				'required' => true,
+				'required' => false,
 				'name' => tra('Fields'),
-				'description' => tra('Colon-separated list of field IDs to be displayed. Example: 2:4:5'),
+				'description' => tra('Colon-separated list of field IDs to be displayed. Example:')
+					. ' <code>2:4:5</code>' . tra('. ') . tra('Leave it empty to display all fields from this tracker.'),
+				'since' => '2.0',
 				'default' => '',
 				'separator' => ':',
 				'profile_reference' => 'tracker_field',
@@ -35,6 +39,7 @@ function wikiplugin_trackerstat_info()
                 'required' => false,
                 'name' => tra('Show Count'),
                 'description' => tra('Choose whether to show the count of votes each option received (shown by default)'),
+	            'since' => '10.3',
                 'filter' => 'alpha',
                 'default' => 'y',
                 'options' => array(
@@ -46,7 +51,9 @@ function wikiplugin_trackerstat_info()
 			'show_percent' => array(
 				'required' => false,
 				'name' => tra('Show Percentage'),
-				'description' => tra('Choose whether to show the percentage of the vote each option received (not shown by default)'),
+				'description' => tra('Choose whether to show the percentage of the vote each option received (not shown
+					by default)'),
+				'since' => '2.0',
 				'filter' => 'alpha',
 				'default' => 'n',
 				'options' => array(
@@ -58,7 +65,9 @@ function wikiplugin_trackerstat_info()
 			'show_bar' => array(
 				'required' => false,
 				'name' => tra('Show Bar'),
-				'description' => tra('Choose whether to show a bar representing the number of votes each option received (not shown by default)'),
+				'description' => tra('Choose whether to show a bar representing the number of votes each option received
+					(not shown by default)'),
+				'since' => '2.0',
 				'filter' => 'alpha',
 				'default' => 'n',
 				'options' => array(
@@ -71,6 +80,7 @@ function wikiplugin_trackerstat_info()
 				'required' => false,
 				'name' => tra('Status Filter'),
 				'description' => tra('Only show items matching certain status filters'),
+				'since' => '2.0',
 				'filter' => 'alpha',
 				'default' => 'o',
 				'options' => array(
@@ -87,7 +97,8 @@ function wikiplugin_trackerstat_info()
 			'show_link' => array(
 				'required' => false,
 				'name' => tra('Show Link'),
-				'description' => tra('Show link to tiki-view_tracker'),
+				'description' => tra('Add a link to the tracker'),
+				'since' => '3.0',
 				'filter' => 'alpha',
 				'default' => 'n',
 				'options' => array(
@@ -99,10 +110,12 @@ function wikiplugin_trackerstat_info()
 			'show_lastmodif' => array(
 				'required' => false,
 				'name' => tra('Last Modification Date'),
-				'description' => tra('Show last modification date of a tracker. Set to y to use site setting or use PHP\s format (www.php.net/strftime).'),
+				'description' => tr('Show last modification date of a tracker. Set to Yes (%0) to use site setting for
+					the short date format or use PHP\'s format (www.php.net/strftime). Example:',
+					'<code>y</code>', '<code>%A %d of %B, %Y</code>'),
+				'since' => '5.0',
 				'filter' => 'text',
 				'default' => '',
-				'accepted' => tra('y to use the site setting for short date format. Otherwise, use PHP format (www.php.net/strftime), Example: "%A %d of %B, %Y"'),
 			)
 		)
 	);
@@ -110,8 +123,10 @@ function wikiplugin_trackerstat_info()
 
 function wikiplugin_trackerstat($data, $params)
 {
-	global $smarty, $prefs, $tiki_p_admin_trackers, $trklib, $tikilib;
-	include_once('lib/trackers/trackerlib.php');
+	global $prefs, $tiki_p_admin_trackers;
+	$trklib = TikiLib::lib('trk');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 	extract($params, EXTR_SKIP);
 
 	if ($prefs['feature_trackers'] != 'y' || !isset($trackerId) || !($tracker_info = $trklib->get_tracker($trackerId))) {
@@ -204,7 +219,7 @@ function wikiplugin_trackerstat($data, $params)
 			continue;
 		}
 		if ($allFields['data'][$i]['type'] == 'e') {
-			global $categlib; include_once('lib/categories/categlib.php');
+			$categlib = TikiLib::lib('categ');
 			$parent = (int) $allFields['data'][$i]['options']; // FIXME: Lazy access to the first option. Only works when a field only has its first option set.
 			if ($parent > 0) {
 				$filter = array('identifier'=>$parent, 'type'=>'children');
@@ -253,7 +268,7 @@ function wikiplugin_trackerstat($data, $params)
 				$userValues = $trklib->get_filtered_item_values($allFields['data'][$iIp]['fieldId'], $tikilib->get_ip_address(), $allFields['data'][$i]['fieldId']);
 			}
 			
-			$allValues = $trklib->get_all_items($trackerId, $fieldId, $status, $allFields);
+			$allValues = $trklib->get_all_items($trackerId, $fieldId, $status);
 			$j = -1;
 			foreach ($allValues as $value) {
 				$value = trim($value);
@@ -271,9 +286,8 @@ function wikiplugin_trackerstat($data, $params)
 			}
 		}
 		if (isset($average)) {
-			$total = $trklib->get_nb_items($trackerId);
 			for (; $j >= 0; --$j) {
-				$v[$j]['average'] = 100*$v[$j]['count']/$total;
+				$v[$j]['average'] = 100*$v[$j]['count']/array_sum(array_map(function($v){ return $v['count']; }, $v));
 				if ($tracker_info['showStatus'] == 'y') {
 					$v[$j]['href'] .= "&amp;status=$status";
 				}

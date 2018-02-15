@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.self_link.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: block.self_link.php 59393 2016-08-09 00:39:46Z lindonb $
 
 /**
  * Smarty plugin
@@ -23,11 +23,14 @@
  *   _class : CSS class to use for the A tag
  *   _template : (see smarty query function 'template' param)
  *   _htmlelement : (see smarty query function 'htmlelement' param)
- *   _icon : name of the icon to use (e.g. 'page_edit', 'cross', ...)
+ *   _icon : file name of the icon to use (e.g. 'page_edit', 'cross', ...) - only works with legacy icons
+ *   _icon_name : name of the icon to use in order to use iconsets
  *   _icon_class : CSS class to use for the icon's IMG tag
+ *   _icon_size : size of icon when _icon_name is used
  *   _menu_text : (see smarty icon function)
  *   _menu_icon : (see smarty icon function)
  *   _title : tooltip to display when the mouse is over the link. Use $content when _icon is used.
+ *   _text : show text as part of the link (for instance, after the icon for a menu item)
  *   _alt : alt attribute for the icon's IMG tag (use _title if _alt is not specified).
  *   _script : specify another script than the current one (this disable AJAX for this link when the current script is different).
  *   _on* : specify values of on* (e.g. onclick) HTML attributes used for javascript events
@@ -106,11 +109,16 @@ function smarty_block_self_link($params, $content, $smarty, &$repeat = false)
 				}
 			}
 
-			if ( isset($params['_icon']) ) {
-				if ( ! isset($params['_title']) && $content != '' ) $params['_title'] = $content;
+			if ( isset($params['_icon']) || isset($params['_icon_name'])) {
+				if (! isset($params['_title']) && $content != '' && (!isset($params['_rel']) ||
+						strpos($params['_rel'], 'box') === false)) $params['_title'] = $content;
 				$smarty->loadPlugin('smarty_function_icon');
-
-				$icon_params = array('_id' => $params['_icon'], '_type' => $default_icon_type);
+				if (isset($params['_icon'])) {
+					$icon_params['_id'] = $params['_icon'];
+				} else {
+					$icon_params['name'] = $params['_icon_name'];
+				}
+				$icon_params['_type'] = $default_icon_type;
 				if ( isset($params['_alt']) ) {
 					$icon_params['alt'] = $params['_alt'];
 				} elseif ( isset($params['_title']) ) {
@@ -125,17 +133,31 @@ function smarty_block_self_link($params, $content, $smarty, &$repeat = false)
 				}
 				if ( isset($params['_menu_icon']) ) $icon_params['_menu_icon'] = $params['_menu_icon'];
 				if ( isset($params['_icon_class']) ) $icon_params['class'] = $params['_icon_class'];
+				if ( isset($params['_icon_size']) ) $icon_params['size'] = $params['_icon_size'];
 
 				if ( isset($params['_width']) ) $icon_params['width'] = $params['_width'];
 				if ( isset($params['_height']) ) $icon_params['height'] = $params['_height'];
 
 				$content = smarty_function_icon($icon_params, $smarty);
+
+				if (isset($params['_text'])) {
+					$content .= ' ' . $params['_text'];
+				}
 			}
 
 			$link = ( !empty($params['_class']) ? 'class="'.$params['_class'].'" ' : '' )
 				. ( !empty($params['_style']) ? 'style="' . $params['_style'] . '" ' : '' )
-				. ( !empty($params['_title']) ? 'title="' . str_replace('"', '\"', $params['_title']) . '" ' : '' )
-				. ( !empty($params['_rel']) ? 'rel="' . str_replace('"', '\"', $params['_rel']) . '" ' : '' );
+				. ( !empty($params['_title']) ? 'title="' . str_replace('"', '\"', $params['_title']) . '" ' : '' );
+			if (!empty($params['_rel'])) {
+				if (strpos($params['_rel'], 'box') !== false) {
+					$rel = 'data-box="box" ';
+				} else {
+					$rel = 'rel="' . str_replace('"', '\"', $params['_rel']) . '" ';
+				}
+			} else {
+				$rel = '';
+			}
+			$link .= $rel;
 			foreach ( $params as $k => $v ) {
 				if ( strlen($k) > 3 && substr($k, 0, 3) == '_on' && !empty($v) ) {
 					$link .= htmlentities(substr($k, 1)).'="'.$v.'" '; // $v should be already htmlentitized in the template

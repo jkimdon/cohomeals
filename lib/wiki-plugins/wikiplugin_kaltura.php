@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_kaltura.php 50695 2014-04-06 18:27:54Z jonnybradley $
+// $Id: wikiplugin_kaltura.php 58809 2016-06-06 19:19:16Z jonnybradley $
 
 function wikiplugin_kaltura_info()
 {
@@ -28,20 +28,24 @@ function wikiplugin_kaltura_info()
 		'description' => tra('Display a video created through the Kaltura feature'),
 		'prefs' => array('wikiplugin_kaltura', 'feature_kaltura'),
 		'format' => 'html',
-		'icon' => 'img/icons/film_edit.png',
+		'iconname' => 'video',
+		'introduced' => 4,
 		'params' => array(
 			'id' => array(
 				'required' => false,
 				'name' => tra('Kaltura Entry ID'),
-				'description' => tra('Kaltura ID of the video to be displayed, or leave empty to show a button to allow users to add a new one.'),
+				'description' => tra('Kaltura ID of the video to be displayed, or leave empty to show a button to allow
+					users to add a new one.'),
+				'since' => '4.0',
 				'tags' => array('basic'),
 				'area' => 'kaltura_uploader_id',
 				'type' => 'kaltura',
-				'icon' => 'img/icons/film_add.png',
+				'iconname' => 'video',
 			),
 			'player_id' => array(
 				'name' => tra('Kaltura Video Player ID'),
 				'description' => tra('Kaltura Dynamic Player (KDP) user interface configuration ID'),
+				'since' => '10.0',
 				'type' => empty($players) ? 'text' : 'list',
 				'options' => $players,
 				'size' => 20,
@@ -51,21 +55,24 @@ function wikiplugin_kaltura_info()
 			'width' => array(
 				'required' => false,
 				'name' => tra('Width'),
-				'description' => tra('Width of the player in pixels'),
+				'description' => tra('Width of the player in pixels or percent'),
+				'since' => '10.0',
 				'default' => 595,
-				'filter' => 'int',
+				'filter' => 'text',
 			),
 			'height' => array(
 				'required' => false,
 				'name' => tra('Height'),
-				'description' => tra('Height of the player in pixels'),
+				'description' => tra('Height of the player in pixels or percent'),
+				'since' => '10.0',
 				'default' => 365,
-				'filter' => 'int',
+				'filter' => 'text',
 			),
 			'align' => array(
 				'required' => false,
 				'name' => tra('Align'),
 				'description' => tra('Alignment of the player'),
+				'since' => '10.0',
 				'default' => '',
 				'filter' => 'word',
 				'options' => array(
@@ -79,6 +86,7 @@ function wikiplugin_kaltura_info()
 				'required' => false,
 				'name' => tra('Float'),
 				'description' => tra('Alignment of the player using CSS float'),
+				'since' => '10.0',
 				'default' => '',
 				'filter' => 'word',
 				'options' => array(
@@ -91,13 +99,15 @@ function wikiplugin_kaltura_info()
 				'required' => false,
 				'name' => tra('Add Media Button Label'),
 				'description' => tra('Text to display on button for adding new media.'),
+				'since' => '10.0',
 				'default' => tra('Add media'),
 			),
 			'type' => array(
 				'required' => false,
-				'name' => tra('Player type'),
-				'description' => tra('"kdp" or "html5"'),
-				'default' => 'kdp',
+				'name' => tra('Player Type'),
+				'description' => tra('Set player type'),
+				'since' => '11.0',
+				'default' => 'html5',
 				'filter' => 'word',
 				'options' => array(
 					array('text' => tra('KDP'), 'value' => 'kdp'),
@@ -177,9 +187,9 @@ REG
 			);
 
 		} else if (!empty($user)) {
-			$html = '<span class="error">' . tra('Media id or permission to upload video is required') . '</span>';
+			$html = '<span class="alert-warning">' . tra('Media ID or permission to upload video is required') . '</span>';
 		} else {
-			$html = '<span class="error">' . tra('Log in to upload video') . '</span>';
+			$html = '<span class="alert-warning">' . tra('Log in to upload video') . '</span>';
 		}
 
 		return $html;
@@ -202,7 +212,7 @@ REG
 				$params['height'] = $player['height'];
 			}
 		} else {
-			return '<span class="error">' . tra('Player not found') . '</span>';
+			return '<span class="alert-warning">' . tra('Player not found') . '</span>';
 		}
 	}
 
@@ -238,7 +248,7 @@ REG
 		}
 
 		TikiLib::lib('header')
-			->add_jsfile("{$prefs['kaltura_kServiceUrl']}/p/{$prefs['kaltura_partnerId']}/sp/{$prefs['kaltura_partnerId']}00{$embedIframeJs}/uiconf_id/{$params['player_id']}/partner_id/{$prefs['kaltura_partnerId']}")
+			->add_jsfile_cdn("{$prefs['kaltura_kServiceUrl']}/p/{$prefs['kaltura_partnerId']}/sp/{$prefs['kaltura_partnerId']}00{$embedIframeJs}/uiconf_id/{$params['player_id']}/partner_id/{$prefs['kaltura_partnerId']}")
 			->add_jq_onready(
 				"
 mw.setConfig('Kaltura.LeadWithHTML5', $leadWithHTML5);
@@ -261,7 +271,13 @@ kWidget.embed({
 	}
 });"
 			);
-		return "<div id='kaltura_player$instance' style='width:{$params['width']}px;height:{$params['height']}px;$style'></div>";
+		if (is_numeric($params['width'])) {
+			$params['width'] .= 'px';
+		}
+		if (is_numeric($params['height'])) {
+			$params['height'] .= 'px';
+		}
+		return "<div id='kaltura_player$instance' style='width:{$params['width']};height:{$params['height']};$style'></div>";
 
 	} elseif ($params['type'] === 'kdp') {
 

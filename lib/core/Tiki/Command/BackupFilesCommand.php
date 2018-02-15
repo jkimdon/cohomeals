@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BackupFilesCommand.php 49834 2014-02-11 22:13:14Z arildb $
+// $Id: BackupFilesCommand.php 59944 2016-10-09 18:23:05Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -25,6 +25,11 @@ class BackupFilesCommand extends Command
 				InputArgument::REQUIRED,	
 				'Path to save backup (relative to console.php, or absolute)' 
 			)
+			->addArgument(
+				'dateFormat',
+				InputArgument::OPTIONAL,
+				'Format to use for the date part of the backup file. Defaults to "Y-m-d_H-i-s" and uses the PHP date function format'
+			)
 			->addOption(
 				'storageonly',
 				null,
@@ -37,7 +42,7 @@ class BackupFilesCommand extends Command
 				InputOption::VALUE_NONE,
 				'Backup only the main directory (ignore linked file gallery folders etc...)'
 			);
-	}	
+	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
@@ -57,6 +62,11 @@ class BackupFilesCommand extends Command
 		if (! is_readable($local)) {
 			$output->writeln('<error>Error: "' . $local . '" not readable.</error>');
 			return;
+		}
+
+		$dateFormat = $input->getArgument('dateFormat');
+		if (! $dateFormat) {
+			$dateFormat = 'Y-m-d_H-i-s';
 		}
 
 		require $local;
@@ -107,7 +117,7 @@ class BackupFilesCommand extends Command
 			return;
 		}
 
-		$tarLocation = $path . '/' . $dbs_tiki . '_' . date( 'Y-m-d_H:i:s' ) . '.tar.bz2';
+		$tarLocation = $path . '/' . $dbs_tiki . '_' . date( $dateFormat ) . '.tar.bz2';
 		$tar = escapeshellarg( $tarLocation );
 		$command = "tar -cjf $tar $source";
 		exec( $command );

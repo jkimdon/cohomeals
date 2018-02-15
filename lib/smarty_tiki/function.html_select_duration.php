@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.html_select_duration.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: function.html_select_duration.php 58058 2016-03-23 13:28:30Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -28,10 +28,10 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function smarty_function_html_select_duration($params, $smarty)
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->loadPlugin('smarty_function_html_options');
 	$html_result = '';
-	$default = array('prefix'=>'Duration_', 'default_unit'=>'week', 'default'=>'', 'default_value'=>'');
+	$default = array('prefix'=>'Duration_', 'default_unit'=>'week', 'default'=>'', 'default_value'=>'', 'id'=>'');
 	$params = array_merge($default, $params);
 	$values = array(31536000, 2628000, 604800, 86400, 3600, 60);
 	$output = array(tra('Year'), tra('Month'), tra('Week'), tra('Day'), tra('Hour'), tra('Minute'));
@@ -50,13 +50,15 @@ function smarty_function_html_select_duration($params, $smarty)
 	} else {
 		$selected = 604800;
 	}
-	$html_result .= '<input name="'.$params['prefix'].'" type="text" size="5" value="'.$params['default'].'" />';
+	$id = !empty($params['id']) ? ' id="' . $params['id'] . '" ' : '';
+	$html_result .= '<div class="row"><div class="col-sm-5">';
+	$html_result .= '<input ' . $id . 'name="'.$params['prefix'].'" type="text" value="'.$params['default'].'" class="form-control"></div>';
 	if (strstr($params['prefix'], '[]')) {
 		$prefix = str_replace('[]', '_unit[]', $params['prefix']);
 	} else {
 		$prefix = $params['prefix'].'_unit';
 	}
-	$html_result .= '<select name="'.$prefix.'">';
+	$html_result .= '<div class="col-sm-7"><select name="'.$prefix.'" class="form-control">';
 
 	$html_result .= smarty_function_html_options(
 		array(
@@ -67,7 +69,7 @@ function smarty_function_html_select_duration($params, $smarty)
 		$smarty
 	);
 
-	$html_result .= '</select>';
+	$html_result .= '</select></div></div>';
 	return $html_result;
 }
 

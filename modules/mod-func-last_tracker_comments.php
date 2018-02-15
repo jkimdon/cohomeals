@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_tracker_comments.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-last_tracker_comments.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -44,14 +44,13 @@ function module_last_tracker_comments_info()
  */
 function module_last_tracker_comments($mod_reference, $module_params)
 {
-	global $prefs, $smarty;
-	
+	global $prefs;
+	$smarty = TikiLib::lib('smarty');
 	$trackerId = isset($module_params["trackerId"]) ? $module_params["trackerId"] : 0;
 	
 	$itemId = isset($module_params["itemId"]) ? $module_params["itemId"] : 0;
 
-	global $trklib;
-	require_once ('lib/trackers/trackerlib.php');
+	$trklib = TikiLib::lib('trk');
 		
 	$ranking = $trklib->list_last_comments($trackerId, $itemId, 0, $mod_reference["rows"]);
 	$smarty->assign('modLastModifComments', isset($ranking['data']) ? $ranking["data"] : array());

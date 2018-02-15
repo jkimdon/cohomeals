@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Blog.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Blog.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 {
@@ -42,8 +42,7 @@ class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 
 	function _install()
 	{
-		global $bloglib;
-		if ( ! $bloglib ) require_once 'lib/blogs/bloglib.php';
+		$bloglib = TikiLib::lib('blog');
 
 		$data = $this->getData();
 

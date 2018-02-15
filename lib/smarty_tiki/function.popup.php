@@ -1,14 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.popup.php 49131 2013-12-17 16:07:28Z sept_7 $
+// $Id: function.popup.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 /**
  * Smarty plugin for Tiki using jQuery ClueTip instead of OverLib
  */
-
 
 /**
  * Smarty {popup} function plugin
@@ -21,101 +20,110 @@
  * @author   Jonny Bradley, replacing Smarty original (by Monte Ohrt <monte at ohrt dot com>)
  * @param    array
  * @param    Smarty
- * @return   string now formatted to use cluetips natively
+ * @return   string now formatted to use popover natively
  *
  * params still relevant:
  *
  *     text        Required: the text/html to display in the popup window
- *     trigger     'onMouseOver' or 'onClick' (onMouseOver default)
- *     sticky      false/true
+ *     trigger     'onClick' and native bootstrap params: 'click', 'hover', 'focus', 'manual' ('hover' default)
+ *     sticky      false/true - this is currently an alias for trigger['click'] which is wrong. 
+ *     							Sticky should define whether the popup should stay until clicked, not how it is triggered.
  *     width       in pixels?
  *     fullhtml
+ *     delay       number of miliseconds to delay showing or hiding of popover. If just one number, then it will apply to both
+ *                 show and hide, or use "500|1000" to have a 500 ms show delay and a 1000 ms hide delay
  */
 function smarty_function_popup($params, $smarty)
 {
-	$options = array();
-	$body = '';
-	$title = '';
+	$options = array(
+		'data-toggle' => 'popover',
+		'data-container' => 'body',
+		'data-trigger' => 'hover focus',
+		'data-content' => '',
+	);
 
 	foreach ($params as $key => $value) {
 		switch ($key) {
 			case 'text':
-				$body = $value;
+				$options['data-content'] = $value;
 				break;
 			case 'trigger':
 				switch ($value) {
+					// is this legacy? should not be used anywhere
 					case 'onclick':
 					case 'onClick':
-						$options['activation'] = 'click';
+						$options['data-trigger'] = 'click';
+						break;
+					// support native bootstrap params - could be moved to default but not sure whether it breaks something
+					case 'hover focus':
+					case 'focus hover':
+					case 'click':
+					case 'hover':
+					case 'focus':
+					case 'manual':
+						$options['data-trigger'] = $value;
 						break;
 					default:
 						break;
 				}
 				break;
 			case 'caption':
-				$title = $value;
+				$options['title'] = $value;
 				break;
-
 			case 'width':
 			case 'height':
 				$options[$key] = $value;
 				break;
 			case 'sticky':
-				$options[$key] = !empty($value);
-				$options['mouseOutClose'] = false;
+				$options['data-trigger'] = 'click';
 				break;
 			case 'fullhtml':
-				$options['escapeTitle'] = true;
-				$options['cluetipClass'] = 'fullhtml';
+				$options['data-html'] = true;
 				break;
 			case 'background':
-				$options['showTitle'] = false;
-				$options['cluetipClass'] = 'fullhtml';
 				if (!empty($params['width'])) {
-					$body = '<div style="background-image:url(' . $value . ');width:' . $params['width'] . 'px;height:100%;">' . $body . '</div>';
-					unset($params['width']);
-					unset($options['width']);
+					if (!isset($params["height"])) {
+						$params["height"] = 300;
+					}
+					$options['data-content'] = "<div style='background-image:url(" . $value . ");background-repeat:no-repeat;width:" . $params["width"] . "px;height:" . $params["height"] . "px;'>" . $options['data-content'] . "</div>";
 				} else {
-					$body = '<div style="background-image:url(' . $value . ');width:100%;height:100%;">' . $body . '</div>';
+					$options['data-content'] = "<div style='background-image:url(" . $value . ");width:100%;height:100%;'>" . $options['data-content'] . "</div>";
 				}
+				$options['data-html'] = true;
 				break;
-
-			case 'left':
-			case 'right':
-			case 'center':
-			case 'hauto':
-			case 'vauto':
-			case 'mouseoff':
-				break;
-
-			default:
-				trigger_error("[popup] unknown parameter $key", E_USER_WARNING);
 		}
 	}
 
-	if (empty($title) && empty($body)) {
-		trigger_error("cluetips: attribute 'text' or 'caption' required");
-		return false;
+    if (empty($options['title']) && empty($options['data-content'])) {
+		trigger_error("popover: attribute 'text' or 'caption' required");
+        return false;
 	}
 
-	$body = preg_replace(array('/\\\\r\n/','/\\\\n/','/\\\\r/', '/\\t/'), '', $body);
-	$body = str_replace('\&#039;', '&#039;', $body);	// unescape previous js escapes
-	$body = str_replace('\&quot;', '&quot;', $body);
-	$body = str_replace('&lt;\/', '&lt;/', $body);
+
+	$options['data-content'] = preg_replace(array('/\\\\r\n/','/\\\\n/','/\\\\r/', '/\\t/'), '', $options['data-content']);
+	$options['data-content'] = str_replace('\&#039;', '&#039;', $options['data-content']);	// unescape previous js escapes
+	$options['data-content'] = str_replace('\&quot;', '&quot;', $options['data-content']);
+	$options['data-content'] = str_replace('&lt;\/', '&lt;/', $options['data-content']);
+
 	$retval = '';
-	if (isset($options['activation']) && $options['activation'] !== 'click') {
-		$retval = ' class="tips"';		// adds default ct options including 'hover' activation
+
+	foreach ($options as $k => $v) {
+		$retval .= $k . '=' . json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ' ';
 	}
-	if ($title) {
-		$retval .= ' title="' . $title . '"';
+
+	//handle delay param here since slashes added by the above break the code
+	if (!empty($params['delay'])) {
+		$explode = explode('|', $params['delay']);
+		if (count($explode) == 1) {
+			$delay = (int) $explode[0];
+		} else {
+			$delay = '{"show":"'. (int) $explode[0] . '", "hide":"' . (int) $explode[1] . '"}';
+		}
+		$retval .= ' data-delay=\'' . $delay . '\'';
 	} else {
-		$options['showTitle'] = false;
+		// add a short default close delay so you can hover over the popover
+		$retval .= ' data-delay=\'{"show":"0","hide":"10"}\'';
 	}
-	if ($body) {
-		$retval .= ' data-cluetip-body=\'' . $body . '\'';
-		$options['attribute'] = 'data-cluetip-body';
-	}
-	$retval .= ' data-cluetip-options=\'' . json_encode($options) . '\'';
 
 	return $retval;
 }

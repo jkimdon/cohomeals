@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-top_blog_posters.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-top_blog_posters.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -37,10 +37,11 @@ function module_top_blog_posters_info()
  */
 function module_top_blog_posters($mod_reference, $module_params)
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$cond = null;
-	if (!empty($module_params['blogId']))
+	if (!empty($module_params['blogId'])) {
 		$cond = $module_params['blogId'];
+	}
 	$bloggers =  TikiLib::lib('blog')->top_bloggers($mod_reference['rows'], $cond);
 
 	$smarty->assign_by_ref('modTopBloggers', $bloggers['data']);

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_perspective.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-edit_perspective.php 61507 2017-03-05 17:39:27Z jonnybradley $
 
 $inputConfiguration = array( array(
 	'staticKeyFilters' => array(
@@ -27,11 +27,12 @@ $auto_query_args = array( 'offset', 'id', 'cookietab' );
 $section='admin';
 
 require_once('tiki-setup.php');
-require_once('lib/perspectivelib.php');
+$perspectivelib = TikiLib::lib('perspective');
 
 $access->check_feature(array('feature_perspective', 'feature_jquery_ui'));
 
 $selectedId = 0;
+$selectedPerspectiveInfo = null;
 
 if ( isset( $_REQUEST['id'] ) ) {
 	$selectedId = $_REQUEST['id'];
@@ -49,7 +50,7 @@ if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'remove' && $selecte
 
 // Edit perspective
 if ( isset( $_REQUEST['name'] ) && $selectedId && $objectperms->perspective_edit ) {
-	global $prefslib; require_once 'lib/prefslib.php';
+	$prefslib = TikiLib::lib('prefs');
 	$perspectivelib->replace_perspective($selectedId, $_REQUEST['name']);
 
 	$preferences = $_REQUEST['lm_preference'];
@@ -76,18 +77,27 @@ $smarty->assign('count', $tikilib->getOne('SELECT COUNT(*) FROM tiki_perspective
 
 $perspectives = $perspectivelib->list_perspectives($offset, $maxRecords);
 
-if ( $selectedId ) {
-	$info = $perspectivelib->get_perspective($selectedId);
+foreach($perspectives as $key => $perspective) {
+    $perspectiveInfo = $perspectivelib->get_perspective($perspective['perspectiveId']);
 
-	$smarty->assign('perspective_info', $info);
+    if ($selectedId && $selectedId == $perspective['perspectiveId']) {
+        $selectedPerspectiveInfo = $perspectiveInfo;
+    }
+
+    $perspectives[$key] = array_merge($perspective, $perspectiveInfo);
+}
+
+if ( $selectedId && $selectedPerspectiveInfo) {
+
+	$smarty->assign('perspective_info', $selectedPerspectiveInfo);
 
 	if ( isset( $_REQUEST['criteria'] ) ) {
-		global $prefslib; require_once 'lib/prefslib.php';
+		$prefslib = TikiLib::lib('prefs');
 		require_once 'lib/smarty_tiki/function.preference.php';
 
 		$criteria = $_REQUEST['criteria'];
 		$results = $prefslib->getMatchingPreferences($criteria);
-		$results = array_diff($results, array_keys($info['preferences']));
+		$results = array_diff($results, array_keys($selectedPerspectiveInfo['preferences']));
 
 		foreach ( $results as $name ) {
 			echo smarty_function_preference(array('name' => $name), $smarty);
@@ -97,7 +107,7 @@ if ( $selectedId ) {
 	}
 }
 
-$headerlib->add_cssfile('css/admin.css');		// to display the prefs properly
+$headerlib->add_cssfile('themes/base_files/feature_css/admin.css');		// to display the prefs properly
 
 $headtitle = tra('Perspectives');
 $description = tra('Edit Perspectives');
@@ -106,10 +116,6 @@ $headtitle = breadcrumb_buildHeadTitle($crumbs);
 $smarty->assign('headtitle', $headtitle);
 $smarty->assign('trail', $crumbs);
 
-if (!isset($cookietab)) {
-	$cookietab = '1';
-}
-setcookie('tab', $cookietab);
 
 $smarty->assign('perspectives', $perspectives);
 $smarty->assign('mid', 'tiki-edit_perspective.tpl');

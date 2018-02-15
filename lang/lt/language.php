@@ -16,5 +16,4 @@ $lang = array(
 "Oct." => "Oct.",
 "Nov." => "Nov.",
 "remove" => "Pa&scaron;alinti",
-"edit" => "Taisyti",
 );

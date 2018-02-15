@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-installer.php 50353 2014-03-16 21:05:55Z lindonb $
+// $Id: tiki-installer.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 // To (re-)enable this script the file has to be named tiki-installer.php and the following four lines
 // must start with two '/' and 'stopinstall:'. (Make sure there are no spaces inbetween // and stopinstall: !)
@@ -24,7 +24,12 @@ $inputConfiguration = array(
 			'db' => 'alpha',
 			'dbinfo' => 'alpha',
 			'email_test_cc' => 'digits',
-//			'email_test_to' => '',  //validated later
+			'email_test_to' => 'email',
+			'use_proxy' => 'alpha',
+			'proxy_host' => 'striptags',
+			'proxy_port' => 'digits',
+			'proxy_user' => 'striptags',
+			'proxy_pass' => 'striptags',
 			'error_reporting_adminonly' => 'alpha',
 			'error_reporting_level' => 'int',
 			'feature_switch_ssl_mode' => 'alpha',
@@ -33,7 +38,7 @@ $inputConfiguration = array(
 			'fix_double_encoding' => 'xss',
 			'force_utf8' => 'alpha',
 			'general_settings' => 'alpha',
-//			'host' => '',   //validated later
+			'host' => 'text',
 			'https_login' => 'word',
 			'https_port' => 'digits',
 			'install_step' => 'digits',
@@ -41,15 +46,15 @@ $inputConfiguration = array(
 			'lang' => 'lang',
 			'log_tpl' => 'alpha',
 			'multi' => 'striptags',
-//			'name' => '',   //validated later
-//			'pass' => '',   //validated later
+			'name' => 'text',
+			'pass' => 'text',
 			'perform_mail_test' => 'alpha',
 			'previous_encoding' => 'word',
 			'reset' => 'alpha',
 			'resetdb' => 'alpha',
 			'scratch' => 'word',
 			'sender_email' => 'striptags',
-//			'setdbversion' => '',  //not used as input
+			'setdbversion' => 'text',
 			'smarty_notice_reporting' => 'alpha',
 			'test' => 'alnum',
 			'test2' => 'digits',
@@ -57,15 +62,29 @@ $inputConfiguration = array(
 			'test4' => 'word',
 			'update' => 'word',
 			'useInnoDB' => 'digits',
-//			'user' => '',   //validated later
+			'user' => 'text',
 //			'validPatches' => '',   //paramterized in sql
 		)
 	)
 );
-$inputFilter = DeclFilter::fromConfiguration($inputConfiguration);
-$_GET = $inputFilter->filter($_GET);
-$_POST = $inputFilter->filter($_POST);
-$_REQUEST = array_merge($_GET, $_POST);
+
+$errors = '';
+
+
+try {
+
+	$inputFilter = DeclFilter::fromConfiguration($inputConfiguration);
+	$_GET = $inputFilter->filter($_GET);
+	$_POST = $inputFilter->filter($_POST);
+	$_REQUEST = array_merge($_GET, $_POST);
+
+} catch (Exception $e) {
+
+	$errors .= '<strong>' . $e->getMessage() . '</strong><br>
+Check <a href="tiki-check.php">tiki-check.php</a> to ensure your system is ready for Tiki or refer to <a href="https://doc.tiki.org/Requirements">https://doc.tiki.org/Requirements</a> for more information.
+	';
+	error_and_exit();
+}
 
 require_once('tiki-filter-base.php');
 
@@ -76,6 +95,7 @@ $prefs['smarty_notice_reporting'] = 'n';
 $prefs['smarty_compilation'] = 'always';
 $prefs['smarty_security'] = 'y';
 require_once 'lib/init/initlib.php';
+require_once 'lib/tikilib.php';
 set_error_handler("tiki_error_handling", error_reporting());
 require_once ( 'lib/init/smarty.php');
 require_once ('installer/installlib.php');
@@ -120,7 +140,7 @@ if (empty($_POST['install_step'])) {
 	$install_step = $_POST['install_step'];
 
 	if ($install_step == 3) {	// clear caches after system requirements page
-		global $cachelib; include 'lib/cache/cachelib.php';
+		$cachelib = TikiLib::lib('cache');
 		$cachelib->empty_cache();
 	}
 }
@@ -128,6 +148,10 @@ if (empty($_POST['install_step'])) {
 // define the language to use, either from user-setting or default
 if (!empty($_POST['lang'])) {
 	$language = $prefs['site_language'] = $prefs['language'] = $_POST['lang'];
+	if (Language::isRTL()) {
+		$prefs['feature_bidi'] =  'y';
+		TikiLib::lib('header')->add_cssfile('vendor_bundled/vendor/morteza/bootstrap-rtl/dist/css/bootstrap-rtl.min.css', 99); // 99 is high rank order as it should load after all other css files
+	}
 } else {
 	$language = $prefs['site_language'] = $prefs['language'] = 'en';
 }
@@ -190,6 +214,8 @@ function write_local_php($dbb_tiki, $host_tiki, $user_tiki, $pass_tiki, $dbs_tik
 		if ( ! empty( $client_charset ) ) {
 			$filetowrite .= "\$client_charset='$client_charset';\n";
 		}
+		$filetowrite .= "// \$dbfail_url = '';\n";
+		$filetowrite .= "// \$noroute_url = './';\n";
 		$filetowrite .= "// If you experience text encoding issues after updating (e.g. apostrophes etc showing up as strange characters) \n";
 		$filetowrite .= "// \$client_charset='latin1';\n";
 		$filetowrite .= "// \$client_charset='utf8';\n";
@@ -220,10 +246,8 @@ function create_dirs($domain='')
 		'modules/cache',
 		'temp',
 		'temp/cache',
-		'templates_c',
-		'templates',
-		'styles',
-		'whelp');
+		'temp/templates_c',
+		'templates');
 
 	$ret = "";
 	foreach ($dirs as $dir) {
@@ -505,7 +529,6 @@ function initTikiDB( &$api, &$driver, $host, $user, $pass, $dbname, $client_char
 		}
 	);
 
-	global $tikifeedback;
 	$dbcon = false;
 	try {
 		$dbTiki = $initializer->getConnection(
@@ -518,7 +541,7 @@ function initTikiDB( &$api, &$driver, $host, $user, $pass, $dbname, $client_char
 			)
 		);
 	} catch (Exception $e) {
-		$tikifeedback[] = array( 'num' => 1, 'mes' => $e->getMessage() );
+		Feedback::error($e->getMessage());
 	}
 	$dbcon = ! empty($dbTiki);
 
@@ -536,22 +559,22 @@ function initTikiDB( &$api, &$driver, $host, $user, $pass, $dbname, $client_char
 				)
 			);
 		} catch (Exception $e) {
-			$tikifeedback[] = array( 'num' => 1, 'mes' => $e->getMessage() );
+			Feedback::error($e->getMessage());
 		}
 		$dbcon = ! empty($dbTiki);
 		// First check that suggested database name will not cause issues
 		$dbname_clean = preg_replace('/[^a-z0-9$_-]/', "", $dbname);
 		if ($dbname_clean != $dbname) {
-			$tikifeedback[] = array( 'num' => 1, 'mes'=> tra("Some invalid characters were detected in database name. Please use alphanumeric characters or _ or -.", '', false, array($dbname_clean)) );
+			Feedback::error(tra("Some invalid characters were detected in database name. Please use alphanumeric characters or _ or -.", '', false, [$dbname_clean]));
 			$dbcon = false;
 		} elseif ($dbcon) {
 			$error = '';
 			$sql="CREATE DATABASE IF NOT EXISTS `$dbname_clean` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
 			$dbTiki->queryError($sql, $error);
 			if ( empty($error) ) {
-				$tikifeedback[] = array( 'num' => 0, 'mes'=> tra("Database `%0` was created.", '', false, array($dbname_clean)) );
+				Feedback::success(tra("Database `%0` was created.", '', false, [$dbname_clean]));
 			} else {
-				$tikifeedback[] = array( 'num' => 1, 'mes'=> tra("Database `%0` creation failed. You need to create the database.", '', false, array($dbname_clean)) );
+				Feedback::error(tra("Database `%0` creation failed. You need to create the database.", '', false, [$dbname_clean]));
 			}
 
 			try {
@@ -566,18 +589,49 @@ function initTikiDB( &$api, &$driver, $host, $user, $pass, $dbname, $client_char
 						);
 				$dbcon = ! empty($dbTiki);
 			} catch (Exception $e) {
-				$tikifeedback[] = array( 'num' => 1, 'mes' => $e->getMessage() );
+				Feedback::error($e->getMessage());
 			}
 		} else {
-			$tikifeedback[] = array( 'num' => 1, 'mes'=> tra("Database `%0`. Unable to connect to database.", '', false, array($dbname_clean)) );
+			Feedback::error(tra("Database `%0`. Unable to connect to database.", '', false, [$dbname_clean]));
 		}
 	}
 
 	if (isset($dbTiki)) {
 		TikiDb::set($dbTiki);
 	}
-	
+
 	return $dbcon;
+}
+
+
+/**
+ * Create an user to own created database
+ *
+ * @param $dbTiki  valid connection
+ * @param $user  username for new db user
+ * @param $pass  password for new db user
+ * @param $dbname  database name
+ * @return bool|int
+ */
+function createTikiDBUser(&$dbTiki, $host, $user, $pass, $dbname) {
+
+	if( preg_match('/^(127\.0\.\d{1,3}\.\d{1,3}|localhost)') ) {
+		$host = 'localhost';
+	} else {
+		$host = '%';
+	}
+
+	$pass = addslashes($pass);
+	$sql="GRANT ALL PRIVILEGES ON `$dbname`.* TO `$user`@`$host` IDENTIFIED BY '$pass';";
+	$dbTiki->queryError($sql, $error);
+
+	if ( empty($error) ) {
+		Feedback::success(tra("User `%0` was created.", '', false, [$user]));
+	} else {
+		Feedback::error(tra("User `%0` creation failed.", '', false, [$user]));
+	}
+
+	return empty($error);
 }
 
 /**
@@ -684,6 +738,7 @@ $_SESSION["install-logged-$multi"] = 'y';
 
 // Init smarty
 global $tikidomain;
+$smarty = TikiLib::lib('smarty');
 $smarty->assign('mid', 'tiki-install.tpl');
 $smarty->assign('virt', isset($virt) ? $virt : null);
 $smarty->assign('multi', isset($multi) ? $multi : null);
@@ -701,14 +756,13 @@ if ($max_execution_time != 0) {
 include_once ('lib/setup/twversion.class.php');
 $TWV = new TWVersion();
 $smarty->assign('tiki_version_name', preg_replace('/^(\d+\.\d+)([^\d])/', '\1 \2', $TWV->version));
+$smarty->assign('tiki_version_short', preg_replace('/^(\d+)\..*$/', '\1', $TWV->version));
 
 // Available DB Servers
 $dbservers = array();
 if (function_exists('mysqli_connect'))	$dbservers['mysqli'] = tra('MySQL Improved (mysqli)');
 if (function_exists('mysql_connect'))	$dbservers['mysql'] = tra('MySQL classic (mysql)');
 $smarty->assignByRef('dbservers', $dbservers);
-
-$errors = '';
 
 check_session_save_path();
 
@@ -739,10 +793,11 @@ if (!defined('ADODB_CASE_ASSOC')) { // typo in adodb's driver for sybase? // so 
 	define('ADODB_CASE_ASSOC', 2);
 }
 
-include('lib/tikilib.php');
+require_once('lib/tikilib.php');
 
 // Get list of available languages
-$languages = TikiLib::list_languages(false, null, true);
+$langLib = TikiLib::lib('language');
+$languages = $langLib->list_languages(false, null, true);
 $smarty->assignByRef("languages", $languages);
 
 $logslib = TikiLib::lib('logs');
@@ -852,14 +907,33 @@ if (
 			$client_charset = '';
 		}
 
-		$dbcon = initTikiDB($api_tiki, $_POST['db'], $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['name'],
-			$client_charset, $dbTiki);
+		if(!empty($_POST['create_new_user'])
+			&& !empty($_POST['root_user'])
+			&& !empty($_POST['root_pass'])) {
+
+			$dbcon = initTikiDB( $api_tiki, $_POST['db'], $_POST['host'],
+	 			$_POST['root_user'], $_POST['root_pass'], $_POST['name'],
+				$client_charset, $dbTiki );
+		} else {
+			$dbcon = initTikiDB( $api_tiki, $_POST['db'], $_POST['host'],
+	 			$_POST['user'], $_POST['pass'], $_POST['name'], $client_charset,
+				$dbTiki );
+		}
 
 		if ($dbcon) {
-			write_local_php($_POST['db'], $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['name'],
-				$client_charset);
-			$logslib->add_log('install', 'database credentials updated with hostname=' . $_POST['host'] . '; dbname='
-				. $_POST['name'] .'; dbuser=' . $_POST['user']);
+
+			if(!empty($_POST['create_new_user'])
+				&& !empty($_POST['root_user'])
+				&& !empty($_POST['root_pass'])) {
+
+				createTikiDBUser($dbTiki, $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['name']);
+			}
+			write_local_php($_POST['db'], $_POST['host'], $_POST['user'], $_POST['pass'], $_POST['name'], $client_charset);
+
+			// TODO: it is not possible to add_log if we don't have tables created
+			//$logslib->add_log('install', 'database credentials updated with hostname=' . $_POST['host'] . '; dbname='
+			//	. $_POST['name'] .'; dbuser=' . $_POST['user']);
+
 			include $local;
 			// In case of replication, ignore it during installer.
 			unset($shadow_dbs, $shadow_user, $shadow_pass, $shadow_host);
@@ -868,7 +942,7 @@ if (
 		}
 	} else {
 		$dbcon = false;
-		$tikifeedback[] = array('num'=>1, 'mes'=>tra("No database name specified"));
+		Feedback::error(tra('No database name specified'));
 	}
 }
 // Mark that InnoDB is to be used, if selected
@@ -898,6 +972,12 @@ if ($dbcon) {
 	$smarty->assign('tikidb_oldPerms', $oldPerms);
 
 	if ($install_step == '6' && $has_tiki_db) {
+		if (isset($_POST['install_type']) && $_POST['install_type'] === 'scratch') {
+			require_once('lib/setup/prefs.php');
+			// fix some prefs thwt get reset here
+			$prefs['language'] = $language;
+			$prefs['javascript_enabled'] = null;	// seems the check is for $prefs['javascript_enabled'] == 'n'
+		}
 		update_preferences($prefs);
 		$smarty->assign('admin_email', get_admin_email());
 		$smarty->assign('upgradefix', (empty($dbversion_tiki) || $dbversion_tiki[0] < 4) ? 'y' : 'n');
@@ -940,10 +1020,8 @@ if (
 		$install_type = 'scratch';
 		require_once 'lib/tikilib.php';
 		$tikilib = new TikiLib;
-		require_once 'lib/userslib.php';
-		$userlib = new UsersLib;
-		require_once 'lib/tikidate.php';
-		$tikidate = new TikiDate();
+		$userlib = TikiLib::lib('user');
+		$tikidate = TikiLib::lib('tikidate');
 	}
 
 	if (isset($_POST['update'])) {
@@ -960,10 +1038,54 @@ if (
 	//   - there is already an existing .htaccess (that is not necessarily the one that comes from Tiki),
 	//   - the copy does not work (e.g. due to filesystem permissions)
 	//
-	// TODO: Perform up-to-date check as in the SEFURL admin panel
 	// TODO: Equivalent for IIS
-	if ( strpos($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false && !file_exists('.htaccess') && function_exists('symlink') && !@symlink('_htaccess', '.htaccess') && ! @copy('_htaccess', '.htaccess')) {
-		$smarty->assign('htaccess_error', 'y');
+
+
+	if ($install_step == '6' || $install_step == '7') {
+		if (strpos($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false) {
+			if (!file_exists('.htaccess')) {
+				if (!isset($_REQUEST['htaccess_process'])) {
+
+					$htaccess_options = array('auto' => tra('Automatic'));
+					if (function_exists('symlink')) {
+						$htaccess_options['symlink'] = tra('Make a symlink');
+					}
+					if (function_exists('copy')) {
+						$htaccess_options['copy'] = tra('Make a copy');
+					}
+					$htaccess_options[''] = tra('Do nothing');
+					$smarty->assign('htaccess_options', $htaccess_options);
+				} else {
+
+					$htaccess_feedback = '';
+
+					if ($_REQUEST['htaccess_process'] === 'auto') {
+
+						if (function_exists('symlink') && symlink('_htaccess', '.htaccess')) {
+							$htaccess_feedback = tra('symlink created');
+						} else {
+							copy('_htaccess', '.htaccess');
+							$htaccess_feedback = tra('copy created');
+						}
+
+					} else if ($_REQUEST['htaccess_process'] === 'symlink') {
+						@symlink('_htaccess', '.htaccess');
+						$htaccess_feedback = tra('symlink created');
+					} else if ($_REQUEST['htaccess_process'] === 'copy') {
+						@copy('_htaccess', '.htaccess');
+						$htaccess_feedback = tra('copy created');
+					}
+					if (file_exists('.htaccess')) {
+						$smarty->assign('htaccess_feedback', $htaccess_feedback);
+					} else {
+						$smarty->assign('htaccess_error', 'y');
+					}
+				}
+
+			} else {
+				// TODO: Perform up-to-date check as in the SEFURL admin panel
+			}
+		}
 	}
 }
 
@@ -975,12 +1097,13 @@ if (!isset($install_type)) {
 	}
 }
 
-if ($install_step == '8') {
+if ($install_step == '9') {
 	if (!isset( $_POST['nolockenter'])) {
 		touch('db/'.$tikidomainslash.'lock');
 	}
 
-	global $userlib, $cachelib;
+	$userlib = TikiLib::lib('user');
+	$cachelib = TikiLib::lib('cache');
 	if (session_id()) {
 		session_destroy();
 	}
@@ -989,15 +1112,17 @@ if ($install_step == '8') {
 	if ($install_type == 'scratch') {
 		initialize_prefs(true);
 		TikiLib::lib('unifiedsearch')->rebuild();
-		$u = 'tiki-change_password.php?user=admin&oldpass=admin';
+		$u = 'tiki-change_password.php?user=admin&oldpass=admin&newuser=y';
 	} else {
 		$u = '';
 	}
-	$userlib->user_logout($user, false, $u);	// logs out then redirects to home page or $u
+	if (empty($_REQUEST['multi'])) {
+		$userlib->user_logout($user, false, $u);	// logs out then redirects to home page or $u
+	} else {
+		$access->redirect('http://' . $_REQUEST['multi'] . $tikiroot . $u);		// send to the selected multitiki
+	}
 	exit;
 }
-
-$smarty->assignByRef('tikifeedback', $tikifeedback);
 
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 
@@ -1021,7 +1146,7 @@ if ($install_step == '2') {
 			}
 
 			// check email address format
-			$validator = new Zend_Validate_EmailAddress();
+			$validator = new Zend\Validator\EmailAddress();
 			if (!$validator->isValid($email_test_to)) {
 				$smarty->assign('email_test_err', tra('Email address not valid, test mail not sent'));
 				$email_test_ready = false;
@@ -1106,6 +1231,7 @@ if ( isset($_POST['general_settings']) && $_POST['general_settings'] == 'y' ) {
 		"DELETE FROM `tiki_preferences` WHERE `name` IN " .
 		"('browsertitle', 'sender_email', 'https_login', 'https_port', ".
 		"'feature_switch_ssl_mode', 'feature_show_stay_in_ssl_mode', 'language',".
+		"'use_proxy', 'proxy_host', 'proxy_port', 'proxy_user', 'proxy_pass',".
 		"'error_reporting_level', 'error_reporting_adminonly', 'smarty_notice_reporting', 'log_tpl')"
 	);
 
@@ -1115,6 +1241,12 @@ if ( isset($_POST['general_settings']) && $_POST['general_settings'] == 'y' ) {
 		. " ('https_login', ?),"
 		. " ('https_port', ?),"
 		. " ('error_reporting_level', ?),"
+		. " ('use_proxy', '" . (isset($_POST['use_proxy'])
+			&& $_POST['use_proxy'] == 'on' ? 'y' : 'n') . "'),"
+		. " ('proxy_host', '". $_POST['proxy_host'] . "'),"
+		. " ('proxy_port', '". $_POST['proxy_port'] . "'),"
+		. " ('proxy_user', '". $_POST['proxy_user'] . "'),"
+		. " ('proxy_pass', '". $_POST['proxy_pass'] . "'),"
 		. " ('error_reporting_adminonly', '" . (isset($_POST['error_reporting_adminonly'])
 			&& $_POST['error_reporting_adminonly'] == 'on' ? 'y' : 'n') . "'),"
 		. " ('smarty_notice_reporting', '" . (isset($_POST['smarty_notice_reporting'])
@@ -1143,11 +1275,13 @@ if ( isset($_POST['general_settings']) && $_POST['general_settings'] == 'y' ) {
 }
 
 
-include_once "lib/headerlib.php";
+$headerlib = TikiLib::lib('header');
 $headerlib->add_js("var tiki_cookie_jar=new Array();");
-$headerlib->add_cssfile('styles/fivealive.css');
+$headerlib->add_cssfile('vendor_bundled/vendor/twitter/bootstrap/dist/css/bootstrap.css');
+$headerlib->add_cssfile('vendor_bundled/vendor/fortawesome/font-awesome/css/font-awesome.min.css');
+$headerlib->add_cssfile('themes/base_files/css/tiki_base.css');
 $headerlib->add_jsfile('lib/tiki-js.js');
-$headerlib->add_jsfile_dependancy("vendor/jquery/jquery-min/jquery-$headerlib->jquery_version.min.js");
+$headerlib->add_jsfile_dependancy("vendor_bundled/vendor/components/jquery/jquery.min.js");
 $headerlib->add_jsfile('lib/jquery_tiki/tiki-jquery.js');
 	$js = '
 // JS Object to hold prefs for jq
@@ -1172,6 +1306,7 @@ jqueryTiki.effect_tabs_speed = 400;
 ';
 $headerlib->add_js($js, 100);
 
+$iconset = TikiLib::lib('iconset')->getIconsetForTheme('default', '');
 
 $smarty->assignByRef('headerlib', $headerlib);
 

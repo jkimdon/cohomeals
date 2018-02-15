@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_sort.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_sort.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_sort_info()
 {
@@ -14,13 +14,15 @@ function wikiplugin_sort_info()
 		'prefs' => array( 'wikiplugin_sort' ),
 		'body' => tra('Data to sort, one entry per line.'),
 		'filter' => 'text',
-		'icon' => 'img/icons/table_sort.png',
+		'iconname' => 'sort-desc',
+		'introduced' => 1,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'sort' => array(
 				'required' => false,
 				'name' => tra('Order'),
 				'description' => tra('Set the sort order of lines of content (default is ascending)'),
+				'since' => '1',
 				'filter' => 'alpha',
 				'default' => 'asc',
 				'options' => array(

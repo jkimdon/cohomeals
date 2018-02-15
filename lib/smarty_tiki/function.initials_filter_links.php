@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.initials_filter_links.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: function.initials_filter_links.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -23,7 +23,7 @@ function smarty_function_initials_filter_links($params, $smarty)
 	if ( ! isset($params['_class']) ) $params['_class'] = 'prevnext';
 
 	// Include smarty functions used below
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->loadPlugin('smarty_block_ajax_href');
 	$smarty->loadPlugin('smarty_function_query');
 

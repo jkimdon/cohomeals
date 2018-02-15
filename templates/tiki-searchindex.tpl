@@ -1,4 +1,4 @@
-{* $Id: tiki-searchindex.tpl 48283 2013-10-31 21:16:50Z jonnybradley $ *}
+{* $Id: tiki-searchindex.tpl 48284 2013-10-31 21:26:43Z jonnybradley $ *}
 {extends 'layout_view.tpl'}
 
 {block name=title}

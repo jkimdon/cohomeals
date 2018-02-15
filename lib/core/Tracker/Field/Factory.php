@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Factory.php 48382 2013-11-10 20:49:52Z arildb $
+// $Id: Factory.php 63220 2017-07-09 19:00:54Z jonnybradley $
 
 class Tracker_Field_Factory
 {
@@ -106,7 +106,18 @@ class Tracker_Field_Factory
 	{
 		if (isset($this->infoMap[$type])) {
 			return $this->infoMap[$type];
+		} else {
+			return [];
 		}
+	}
+	
+	/**
+	 * Get a list of field types by their letter type and the corresponding class name
+	 * @Example 'q' => 'Tracker_Field_AutoIncrement', ... 
+	 * @return array letterType => classname
+	 */
+	function getTypeMap() {
+		return $this->typeMap;
 	}
 
 	function getHandler($field_info, $itemData = array())
@@ -123,7 +134,8 @@ class Tracker_Field_Factory
 			global $prefs;
 			foreach ($info['prefs'] as $pref) {
 				if ($prefs[$pref] != 'y') {
-					TikiLib::lib('errorreport')->report(tr('Tracker Field Factory Error: Pref "%0" required for field type "%1"', $pref, $class));
+					Feedback::error(tr('Tracker Field Factory Error: Pref "%0" required for field type "%1"', $pref, 
+						$class), 'session');
 					return null;
 				}
 			}

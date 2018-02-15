@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: zend.php 51211 2014-05-10 09:34:39Z xavidp $
+// $Id: zend.php 63572 2017-08-17 06:01:40Z drsassafras $
 
 function prefs_zend_list()
 {
 	return array(
 		'zend_mail_smtp_server' => array(
-			'name' => tra('SMTP Server'),
+			'name' => tra('SMTP server'),
 			'type' => 'text',
 			'size' => '20',
 			'perspective' => false,
@@ -54,7 +54,8 @@ function prefs_zend_list()
 			'default' => '',
 		),
 		'zend_mail_handler' => array(
-			'name' => tra('Mail Sender'),
+			'name' => tra('Mail sender'),
+			'description' => tra('Specify if Tiki should use Sendmail(the PHP mail() function), SMTP or File (Debug) (to debug email sending by means of storing emails as files on disk at ./temp/Mail_yyyymmddhhmmss_randomstring.tmp ) to send mail notifications.'),
 			'type' => 'list',
 			'options' => array(
 				'sendmail' => tra('Sendmail'),
@@ -84,12 +85,23 @@ function prefs_zend_list()
 			'default' => 'localhost',
 		),
 		'zend_mail_queue' => array(
-			'name' => tra('Mail Delivery'),
-			'description' => tra('When set to Queue will store messages in the database. Requires to use the shell script ./sendmail.php to be run for actual delivery. Only works with SMTP mail.'),
+			'name' => tra('Mail delivery'),
+			'description' => tr('When set to Queue, messages will be stored in the database. Requires using the shell script %0 to be run for actual delivery. Only works with SMTP mail.',
+								'<code>php console.php mail-queue:send</code>'),
 			'type' => 'list',
 			'options' => array(
 				'' => tra('Send immediately'),
 				'y' => tra('Queue'),
+			),
+			'default' => '',
+		),
+		'zend_http_sslverifypeer' => array(
+			'name' => tra('Verify HTTPS certificates of remote servers'),
+			'description' => tra('When set to enforce, the server will fail to connect over HTTPS to a remote server that do not have a SSL certificate that is valid and can be verified against the local list of Certificate Authority (CA)'),
+			'type' => 'list',
+			'options' => array(
+				'' => tra('Do not enforce verification'),
+				'y' => tra('Enforce verification'),
 			),
 			'default' => '',
 		),

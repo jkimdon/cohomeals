@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiVersionTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: TikiVersionTest.php 59625 2016-09-07 18:12:47Z jonnybradley $
 
 
 class TikiVersionTest extends PHPUnit_Framework_TestCase
@@ -190,8 +190,8 @@ O;
 	function upgradeMessages()
 	{
 		return array(
-			array('Version 8.2 is no longer supported. A minor upgrade to 8.4 is required.', new Tiki_Version_Upgrade('8.2', '8.4', true)),
-			array('Version 4.3 is no longer supported. A major upgrade to 9.0 is required.', new Tiki_Version_Upgrade('4.3', '9.0', true)),
+			array('Version 8.2 is no longer supported. A minor upgrade to 8.4 is strongly recommended.', new Tiki_Version_Upgrade('8.2', '8.4', true)),
+			array('Version 4.3 is no longer supported. A major upgrade to 9.0 is strongly recommended.', new Tiki_Version_Upgrade('4.3', '9.0', true)),
 			array('Version 8.4 is still supported. However, a major upgrade to 9.0 is available.', new Tiki_Version_Upgrade('8.4', '9.0', false)),
 		);
 	}

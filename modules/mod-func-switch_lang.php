@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-switch_lang.php 49125 2013-12-17 15:35:53Z sept_7 $
+// $Id: mod-func-switch_lang.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -36,12 +36,15 @@ function module_switch_lang_info()
  */
 function module_switch_lang($mod_reference, $module_params)
 {
-	global $tikilib, $smarty, $prefs;
+	global $prefs;
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 
 	// tiki-setup has already set the $language variable
 	//Create a list of languages
 	$languages = array();
-	$languages = $tikilib->list_languages(false, 'y');
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages(false, 'y');
 	$mode = isset($module_params["mode"]) ? $module_params["mode"] : "droplist";
 	$smarty->assign('mode', $mode);
 	if ($mode == 'flags' || $mode == 'words' || $mode == 'abrv') {

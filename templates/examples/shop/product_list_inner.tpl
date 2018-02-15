@@ -5,8 +5,8 @@
 				<div style="padding-right:0.5em;width:120px;margin:0 auto;">
 					{$img = ','|explode:$row.images|nonp}
 					{if count({$img})}
-						<a class="list-thumb" href="cart+product?itemId={$row.object_id}" title="{$row.title}">
-							<img src="thumbnail{$img[0]}" width="120" height="120" />
+						<a class="list-thumb" href="tiki-index.php?page=cart+product&itemId={$row.object_id}" title="{$row.title}">
+							<img src="tiki-download_file.php?fileId={$img[0]}&thumbnail" width="120" height="120" />
 						</a>
 					{else}
 						<div class="list-nothumb" style="width:120px;height:120px;text-align:center;">
@@ -15,18 +15,18 @@
 					{/if}
 				</div>
 				<div style="padding: 0 .5em;min-height:36px;text-align:center;">
-					<h3 class="list-title"><a href="cart+product?itemId={$row.object_id}">{$row.name}</a></h3>
+					<h3 class="list-title"><a href="tiki-index.php?page=cart+product&itemId={$row.object_id}">{$row.name}</a></h3>
 					<p itemprop="category" class="list-cat">{$row.category}</p>
 				</div>
 				<div style="padding:0 .5em;text-align:center;min-height:69px;">
 					<p style="font-size: 1.1em;"><strong>{$row.price}</strong></p>
 					{if $row.stock|nonp gt 0}
 						{include file="templates/examples/shop/add_to_cart.tpl"}
-						<meta  itemprop="acceptedPaymentMethod" content="http://purl.org/goodrelations/v1#PayPal">
-						<meta  itemprop="availability" content="InStock">
+						<meta itemprop="acceptedPaymentMethod" content="http://www.heppnetz.de/ontologies/goodrelations/v1#PayPal">
+						<meta itemprop="availability" content="InStock">
 					{else}
 						<em>Awaiting stock</em>
-						<meta  itemprop="availability" content="OutOfStock">
+						<meta itemprop="availability" content="OutOfStock">
 					{/if}
 				</div>
 			</li>

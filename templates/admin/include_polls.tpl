@@ -1,49 +1,65 @@
-{remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}To add/remove polls, look for "Polls" under "Admin" on the application menu, or{/tr} <a class="rbox-link" href="tiki-admin_polls.php">{tr}Click Here{/tr}</a>.{/remarksbox}
-
-<form method="post" action="tiki-admin.php?page=polls">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="calprefs" value="{tr}Change settings{/tr}" />
+<form class="form-horizontal" method="post" action="tiki-admin.php?page=polls">
+	{include file='access/include_ticket.tpl'}
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			{if $prefs.feature_polls eq "y" and $tiki_p_admin_polls eq "y"}
+				<a role="link" class="btn btn-link" href="tiki-admin_polls.php" title="{tr}List{/tr}">
+					{icon name="list"} {tr}Polls{/tr}
+				</a>
+			{/if}
+			{if $prefs.feature_surveys eq "y" and $tiki_p_admin_surveys eq "y"}
+				<a role="link" class="btn btn-link" href="tiki-admin_surveys.php" title="{tr}List{/tr}">
+					{icon name="list"} {tr}Surveys{/tr}
+				</a>
+			{/if}
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
 
-	{tabset name="admin_wiki"}
-		{tab name="{tr}Polls{/tr}"}
-			<fieldset class="admin">
-				<legend>{tr}Activate the feature{/tr}</legend>
-				{preference name=feature_polls visible="always"}
-			</fieldset>
+	{tabset name="admin_polls_and_surveys"}
 
-			<fieldset class="admin">
-				<legend>{tr}Plugins{/tr}</legend>
-				{preference name=wikiplugin_poll}
-			</fieldset>
+			{tab name="{tr}Polls{/tr}"}
+				<br>
+				<fieldset>
+					<legend>{tr}Activate the feature{/tr}</legend>
+					{preference name=feature_polls visible="always"}
+				</fieldset>
 
-			<fieldset>
-				<legend>{tr}Settings{/tr}{help url="Polls"}</legend>
-				<input type="hidden" name="pollprefs" />
-				{preference name=feature_poll_anonymous}
-				{preference name=feature_poll_revote}
-				{preference name=feature_poll_comments}
-				<div class="adminoptionboxchild" id="feature_poll_comments_childcontainer">
-					{preference name=poll_comments_per_page}
-					{preference name=poll_comments_default_ordering}
-				</div>	
-				{preference name=poll_list_categories}
-				{preference name=poll_list_objects}
-				{preference name=poll_multiple_per_object}
-			</fieldset>
-		{/tab}
-		{tab name="{tr}Surveys{/tr}"}
-			<fieldset class="admin">
-				<legend>{tr}Activate the feature{/tr}</legend>
-				{preference name=feature_surveys visible="always"}
-			</fieldset>
-			<fieldset>
-				{preference name=poll_surveys_textarea_hidetoolbar}
-			</fieldset>
-		{/tab}
-	{/tabset}	
-	<div class="heading input_submit_container" style="text-align: center">
-		<input type="submit" class="btn btn-default" name="calprefs" value="{tr}Change settings{/tr}" />
-	</div>
+				<fieldset class="table">
+					<legend>{tr}Plugins{/tr}</legend>
+					{preference name=wikiplugin_poll}
+				</fieldset>
+
+				<fieldset>
+					<legend>{tr}Settings{/tr}{help url="Polls"}</legend>
+					<input type="hidden" name="pollprefs" />
+					{preference name=feature_poll_anonymous}
+					{preference name=feature_poll_revote}
+					{preference name=feature_poll_comments}
+					<div class="adminoptionboxchild" id="feature_poll_comments_childcontainer">
+						{preference name=poll_comments_per_page}
+						{preference name=poll_comments_default_ordering}
+					</div>
+					{preference name=poll_list_categories}
+					{preference name=poll_list_objects}
+					{preference name=poll_multiple_per_object}
+					{preference name=poll_percent_decimals}
+				</fieldset>
+			{/tab}
+
+		{if $prefs.feature_surveys eq "y"}
+			{tab name="{tr}Surveys{/tr}"}
+				<br>
+				<fieldset class="table">
+					<legend>{tr}Activate the feature{/tr}</legend>
+					{preference name=feature_surveys visible="always"}
+				</fieldset>
+				<fieldset>
+					{preference name=poll_surveys_textarea_hidetoolbar}
+				</fieldset>
+			{/tab}
+		{/if}
+
+	{/tabset}
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

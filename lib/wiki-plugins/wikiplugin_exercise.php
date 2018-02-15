@@ -1,31 +1,35 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_exercise.php 50841 2014-04-20 22:16:25Z jyhem $
+// $Id: wikiplugin_exercise.php 58008 2016-03-19 22:26:34Z lindonb $
 
 function wikiplugin_exercise_info()
 {
 	return array(
 		'name' => tra('Exercise'),
 		'documentation' => tra('PluginExercise'),
-		'description' => tra('Creates exercises within a wiki page for students to test their new skills. Inline questions and optional answers selections can be defined. A score is given for multiple exercises within a page.'),
+		'description' => tra('Create an exercise/test with questions and grade'),
 		'prefs' => array('wikiplugin_exercise'),
 		'filter' => 'text',
 		'format' => 'html',
-		'tags' => array('basic'),		
+		'iconname' => 'education',
+		'introduced' => 9,
+		'tags' => array('basic'),
 		'params' => array(
 			'answer' => array(
 				'required' => false,
 				'name' => tr('Answer'),
 				'description' => tr('Used inline to specify the right answer to the question and propose an input field.'),
+				'since' => '9.0',
 				'filter' => 'text',
 			),
 			'incorrect' => array(
 				'required' => false,
 				'name' => tr('Incorrect'),
-				'description' => tr('Alternative answers to provide'),
+				'description' => tr('Incorrect answer to suggest. Several incorrect answers can be suggested (separated by "+")'),
+				'since' => '9.0',
 				'filter' => 'text',
 			),
 		),
@@ -200,7 +204,7 @@ JS;
 	return <<<HTML
 <form class="exercise-form" method="get" action="#">
 	<p>$yourScoreIs</p>
-	<input type="submit" value="$checkYourScore"/>
+	<input type="submit" class="btn btn-default btn-sm" value="$checkYourScore"/>
 </form>
 HTML;
 }

@@ -1,17 +1,18 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_objectlink.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_objectlink.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_objectlink_info()
 {
 	return array(
 		'name' => tra('Object Link'),
-		'description' => tra('Displays a link to an object in the system.'),
+		'description' => tra('Display a link to an object'),
 		'prefs' => array('wikiplugin_objectlink'),
-		'icon' => 'img/icons/world_link.png',
+		'iconname' => 'link',
+		'introduced' => 10,
 		'tags' => array( 'basic' ),
 		'format' => 'html',
 		'inline' => true,
@@ -20,12 +21,16 @@ function wikiplugin_objectlink_info()
 				'required' => true,
 				'name' => tr('Type'),
 				'description' => tr('The object type'),
+				'since' => '10.0',
+				'accepted' => 'wiki, user, external, relation_source, relation_target, freetag, trackeritem',
+				'filter' => 'text',
 				'type' => 'text',
 			),
 			'id' => array(
 				'required' => true,
 				'name' => tra('Object ID'),
 				'description' => tra('The item to display'),
+				'since' => '10.0',
 				'filter' => 'text',
 				'profile_reference' => 'type_in_param',
 			),

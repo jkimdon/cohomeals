@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cartlib.php 51339 2014-05-16 16:32:37Z jonnybradley $
+// $Id: cartlib.php 58919 2016-06-15 17:01:25Z jonnybradley $
 
 class CartLib
 {
@@ -413,7 +413,7 @@ class CartLib
 			}
 		}
 		// set refunding in the event of cancellation
-		global $paymentlib; require_once 'lib/payment/paymentlib.php';
+		$paymentlib = TikiLib::lib('payment');
 		$paymentlib->register_behavior($invoice, 'cancel', 'cart_gift_certificate_refund', array( $this->gift_certificate_id, $this->gift_certificate_mode, $this->gift_certificate_amount, $this->gift_certificate_discount));
 	}
 
@@ -502,8 +502,8 @@ class CartLib
 
 	function has_gift_certificate()
 	{
-		global $trklib, $prefs;
-		require_once('lib/trackers/trackerlib.php');
+		global $prefs;
+		$trklib = TikiLib::lib('trk');
 		return ($trklib->get_tracker_by_name($prefs['payment_cart_giftcert_tracker_name']) ? true : false );
 	}
 
@@ -597,6 +597,9 @@ class CartLib
 
 		foreach ( $_SESSION['cart'] as $info ) {
 			$total += floatval($info['quantity']) * floatval($info['price']);
+		}
+		if ($total < 0) {
+			$total = 0;
 		}
 
 		$this->total_no_discount = $total;
@@ -749,9 +752,8 @@ class CartLib
 				if ($currentQuantity == 0) {
 					unset( $_SESSION['cart'][ $code ] );
 				}
-				global $access;
 
-				$this->handle_error(tra('There is not enough inventory left for your request'));
+				$this->handle_error(tra('There is insufficient inventory to meet your request'));
 			}
 
 			if ($currentQuantity > 0) {
@@ -791,13 +793,9 @@ class CartLib
 
 	function request_payment()
 	{
-		global $prefs, $user, $tikilib;
-		global $paymentlib; require_once 'lib/payment/paymentlib.php';
-
-//		if (!$user && $prefs['payment_cart_anonymous'] != 'y') {
-//			$access = TikiLib::lib('access');
-//			$access->redirect( $_SERVER['REQUEST_URI'], tra('Anonymous shopping feature is not enabled. Please log in to shop.') );
-//		}
+		global $prefs, $user;
+		$tikilib = TikiLib::lib('tiki');
+		$paymentlib = TikiLib::lib('payment');
 
 		$total = $this->get_total();
 
@@ -873,7 +871,7 @@ class CartLib
 		}
 		if ($user && $prefs['payment_cart_orders'] == 'y' || !$user && $prefs['payment_cart_anonymous'] == 'y') {
 			if (! $orderprofile) {
-				TikiLib::lib('errorreport')->report(tra('Advanced Shopping Cart setup error: Orders profile missing.'));
+				Feedback::error(tra('Advanced Shopping Cart setup error: Orders profile missing.'), 'session');
 				return false;
 			}
 			$profileinstaller = new Tiki_Profile_Installer();
@@ -936,7 +934,7 @@ class CartLib
 
 			if ( !empty($_SESSION['shopperinfo']['email']) ) {
 				require_once('lib/webmail/tikimaillib.php');
-				global $smarty;
+				$smarty = TikiLib::lib('smarty');
 				$smarty->assign('shopperurl', $shopperurl);
 				$smarty->assign('email_template_ids', $email_template_ids);
 				$mail_subject = $smarty->fetch('mail/cart_order_received_anon_subject.tpl');
@@ -960,7 +958,9 @@ class CartLib
 
 	function process_item($invoice, $total, $info, $userInput, $cartuser, $profileinstaller, $orderitemprofile, $parentQuantity = 0, $parentCode = 0 )
 	{
-		global $user, $userlib, $paymentlib, $prefs, $record_profile_items_created;
+		global $user, $prefs, $record_profile_items_created;
+		$userlib = TikiLib::lib('user');
+		$paymentlib = TikiLib::lib('payment');
 		if ($bundledProducts = $this->get_bundled_products($info['code'])) {
 			foreach ($bundledProducts as $i) {
 				$this->process_item($invoice, $total, $i, $userInput, $cartuser, $profileinstaller, $orderitemprofile, $info['quantity'], $info['code']);
@@ -1064,7 +1064,7 @@ class CartLib
 			$info['hash'] = md5($code.time());
 			$info['code'] = $code;
 			$info['quantity'] = $quantity;
-			$info['price'] = number_format(abs($info['price']), 2, '.', '');
+			$info['price'] = number_format($info['price'], 2, '.', '');
 			$info['inputedprice'] = number_format(abs($childInputedPrice), 2, '.', '');
 
 			if ( ! isset( $info['href'] ) ) {
@@ -1101,8 +1101,7 @@ class CartLib
 		global $prefs;
 		$productTrackerId = $prefs['payment_cart_product_tracker'];
 		$inventoryTypeFieldId = $prefs['payment_cart_inventory_type_field'];
-		global $trklib;
-		require_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		return $trklib->get_item_value($productTrackerId, $productId, $inventoryTypeFieldId);
 	}
 
@@ -1126,8 +1125,7 @@ class CartLib
 		} else {
 			$inventoryFieldId = $inventoryTotalFieldId;
 		}
-		global $trklib;
-		require_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		return $trklib->get_item_value($productTrackerId, $productId, $inventoryFieldId);
 	}
 
@@ -1214,8 +1212,7 @@ class CartLib
 
 	private function modify_tracker_item( $trackerId, $itemId, $trackerFields )
 	{
-		global $trklib;
-		require_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		$tracker_fields_info = $trklib->list_tracker_fields($trackerId);
 		$fieldTypes = array();
 		foreach ($tracker_fields_info['data'] as $t) {
@@ -1317,8 +1314,7 @@ class CartLib
 	function get_missing_user_information_fields( $product_class_id, $type = 'required' )
 	{
 		global $user, $prefs;
-		global $trklib;
-		require_once('lib/trackers/trackerlib.php');
+		$trklib = TikiLib::lib('trk');
 		if ($type == 'required') {
 			$fields_str = $this->get_tracker_value_custom($prefs['payment_cart_productclasses_tracker_name'], 'Required Field IDs', $product_class_id);
 		} else if ($type == 'postpurchase') {
@@ -1371,7 +1367,8 @@ class CartLib
 	function get_group_discount()
 	{
 		// TOTALLY CUSTOM until proper feature is ready
-		global $user, $userlib;
+		global $user;
+		$userlib = TikiLib::lib('user');
 		if (!$user) return 0;
 		$userGroups = $userlib->get_user_groups($user);
 		if (in_array('Shop Free', $userGroups)) {
@@ -1432,7 +1429,4 @@ class CartLib
 		}
 	}
 }
-
-global $cartlib;
-$cartlib = new CartLib;
 

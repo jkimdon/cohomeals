@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UsersTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: UsersTest.php 59666 2016-09-10 17:54:36Z jonnybradley $
 
 class Reports_UsersTest extends TikiDatabaseTestCase
 {
@@ -86,7 +86,11 @@ class Reports_UsersTest extends TikiDatabaseTestCase
 
 	public function testAddUserToDailyReport_shouldCallSave()
 	{
-		$obj = $this->getMock('Reports_Users', array('save'), array(), 'Mock_Reports_Users', false);
+		$obj = $this->getMockBuilder('Reports_Users')
+			->setMethods(['save'])
+			->disableOriginalConstructor()
+			->getMock();
+
 		$obj->expects($this->once())->method('save')->with('test', 'daily', 'detailed', 'html', 0);
 		$obj->addUserToDailyReports(array('user' => 'test'));
 	}

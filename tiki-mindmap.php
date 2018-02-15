@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-mindmap.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-mindmap.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once 'tiki-setup.php';
-require_once 'lib/wiki/wikilib.php';
+$wikilib = TikiLib::lib('wiki');
 $access->check_feature('feature_wiki_mindmap');
 if (!file_exists('files/visorFreemind.swf')) {
 	$smarty->assign('missing', 'files/visorFreemind.swf');
@@ -30,7 +30,7 @@ if (isset($_REQUEST['export'])) { // {{{
      */
     function create_node($dom, $text, $link = true)
 	{
-		global $wikilib;
+		$wikilib = TikiLib::lib('wiki');
 		$node = $dom->createElement('node');
 		$node->setAttribute('TEXT', $text);
 		$node->setAttribute('STYLE', 'bubble');
@@ -49,7 +49,9 @@ if (isset($_REQUEST['export'])) { // {{{
      */
     function populate_node($node, $pageName, $remainingLevels = 3, $pages = array())
 	{
-		global $wikilib, $tikilib, $user;
+		global $user;
+		$wikilib = TikiLib::lib('wiki');
+		$tikilib = TikiLib::lib('tiki');
 		$child = $wikilib->wiki_get_neighbours($pageName);
 		$child = array_diff($child, $pages);
 		foreach ($child as $page) {

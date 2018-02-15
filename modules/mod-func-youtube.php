@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-youtube.php 44846 2013-02-08 15:27:55Z lphuberdeau $
+// $Id: mod-func-youtube.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -53,7 +53,7 @@ function module_youtube_info()
  */
 function module_youtube($mod_reference, $module_params)
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	
 	$data = array(
 		'urls' => array(),
@@ -65,7 +65,7 @@ function module_youtube($mod_reference, $module_params)
 		$ids = explode(',', $module_params['ids']);
 		$data['urls']['gdata'] = array();
 		foreach ($ids as $id) {
-			$data['urls']['gdata'][$id] = Zend_Gdata_YouTube::VIDEO_URI . '/' . $id;
+			$data['urls']['gdata'][$id] = ZendGData\YouTube::VIDEO_URI . '/' . $id;
 			$params = array('movie' => $id);
 			if (isset($module_params['width'])) $params['width'] = $module_params['width'];
 			if (isset($module_params['height'])) $params['height'] = $module_params['height'];

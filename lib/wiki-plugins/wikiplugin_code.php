@@ -1,19 +1,38 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
-// 
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_code.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_code.php 63108 2017-06-28 14:21:30Z chealer $
 
 function wikiplugin_code_info()
 {
+	global $tikipath;
+	$themes = [
+		['text' => tr('default'), 'value' => 'default',],
+	];
+	$themes_folder = rtrim($tikipath, '/') . '/vendor_bundled/vendor/codemirror/codemirror/theme';
+
+	if ( is_dir($themes_folder) ) {
+		foreach ( scandir($themes_folder) as $file ) {
+			$match = null;
+			if ( preg_match('/(.*)(\.css)$/', $file, $match) ) {
+				$themes[] = array(
+					'text' => $match[1],
+					'value' => $match[1]
+				);
+			}
+		}
+	}
+
 	return array(
 		'name' => tra('Code'),
 		'documentation' => 'PluginCode',
-		'description' => tra('Display code syntax with line numbers and color highlights'),
+		'description' => tra('Display code with syntax highlighting and line numbering'),
 		'prefs' => array('wikiplugin_code'),
 		'body' => tra('Code to be displayed'),
-		'icon' => 'img/icons/page_white_code.png',
+		'iconname' => 'code',
+		'introduced' => 1,
 		'filter' => 'rawhtml_unsafe',
 		'format' => 'html',
 		'tags' => array( 'basic' ),
@@ -22,56 +41,76 @@ function wikiplugin_code_info()
 				'required' => false,
 				'name' => tra('Caption'),
 				'description' => tra('Code snippet label.'),
+				'since' => '1',
+				'filter' => 'text',
 			),
 			'wrap' => array(
 				'required' => false,
-				'name' => tra('Word Wrap'),
-				'description' => tra('Enable word wrapping on the code to avoid breaking the layout.'),
+				'name' => tra('Line Wrapping'),
+				'description' => tra('Wrap lines of code which do not fit in the display box\'s width. Enabling avoids overflow or hidden line ends.'),
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => '1'),
 					array('text' => tra('No'), 'value' => '0'),
 				),
-				'default' => 'y'
+				'filter' => 'digits',
+				'default' => '1'
 			),
 			'colors' => array(
 				'required' => false,
 				'name' => tra('Colors'),
-				'description' => tra('Available: php, html, sql, javascript, css, java, c, doxygen, delphi, rsplus...'),
+				'description' => tra('Any supported language listed at http://codemirror.net/mode/'),
+				'since' => '17',
+				'filter' => 'text',
 				'advanced' => false,
 			),
 			'ln' => array(
 				'required' => false,
 				'name' => tra('Line Numbers'),
-				'description' => tra('Show line numbers for each line of code. May not be used with colors unless GeSHI is installed.'),
+				'description' => tra('Show line numbers for each line of code.'),
+				'since' => '1',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => '1'),
 					array('text' => tra('No'), 'value' => '0'),
 				),
+				'filter' => 'digits',
 				'advanced' => true,
 			),
 			'rtl' => array(
 				'required' => false,
 				'name' => tra('Right to Left'),
-				'description' => tra('Switch the text display from left to right to right to left  (left to right by default)'),
+				'description' => tra('Switch the text display from left to right, to right to left (left to right by default)'),
+				'since' => '1',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => '1'),
 					array('text' => tra('No'), 'value' => '0'),
 				),
+				'filter' => 'digits',
 				'advanced' => true,
 			),
 			'mediawiki' => array(
 				'required' => false,
 				'name' => tra('Code Tag'),
 				'description' => tra('Encloses the code in an HTML code tag, for example: &lt;code&gt;user input&lt;code&gt;'),
+				'since' => '8.3',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => '1'),
 					array('text' => tra('No'), 'value' => '0'),
 				),
+				'filter' => 'digits',
+				'default' => '0',
 				'advanced' => true,
+			),
+			'theme' => array(
+				'required' => false,
+				'name' => tra('Theme'),
+				'description' => tra('Any supported theme listed at https://codemirror.net/demo/theme.html'),
+				'since' => '17',
+				'options' => $themes,
+				'filter' => 'text',
 			),
 		),
 	);
@@ -81,15 +120,15 @@ function wikiplugin_code($data, $params)
 {
 	global $prefs;
 	static $code_count;
-	
+
 	$defaults = array(
 		'wrap' => '1',
 		'mediawiki' => '0',
 		'ishtml' => false
 	);
-	
+
 	$params = array_merge($defaults, $params);
-	
+
 	extract($params, EXTR_SKIP);
 	$code = trim($data);
 	if ($mediawiki =='1') {
@@ -101,13 +140,19 @@ function wikiplugin_code($data, $params)
 
 	$id = 'codebox'.++$code_count;
 	$boxid = " id=\"$id\" ";
-	
+
 	$out = $code;
-	
-	if (isset($colors) && $colors == '1') {	// remove old geshi setting as it upsets codemirror
-		unset( $colors );
+
+	if (isset($colors)){
+		if ($colors == '1'){
+			// remove old geshi setting as it upsets codemirror
+			unset( $colors );
+		}else {
+			// codemirror expects language names in lower case
+			$colors = strtolower($colors);
+		}
 	}
-	
+
 	//respect wrap setting when Codemirror is off and set to wrap when Codemirror is on to avoid broken view while
 	//javascript loads
 	if ((isset($prefs['feature_syntax_highlighter']) && $prefs['feature_syntax_highlighter'] == 'y') || $wrap == 1) {
@@ -116,10 +161,17 @@ function wikiplugin_code($data, $params)
 		.' white-space:-pre-wrap;'
 		.' white-space:-o-pre-wrap;'
 		.' word-wrap:break-word;';
+
+		if (!isset($theme) && isset($prefs['feature_syntax_highlighter_theme'])) {
+			$theme = $prefs['feature_syntax_highlighter_theme'];
+		}
 	}
+
+
 
 	$out = (isset($caption) ? '<div class="codecaption">'.$caption.'</div>' : "" )
 		. '<pre class="codelisting" '
+		. (isset($theme) ? ' data-theme="' . $theme . '" ' : '')
 		. (isset($colors) ? ' data-syntax="' . $colors . '" ' : '')
 		. (isset($ln) ? ' data-line-numbers="' . $ln . '" ' : '')
 		. (isset($wrap) ? ' data-wrap="' . $wrap . '" ' : '')
@@ -131,4 +183,3 @@ function wikiplugin_code($data, $params)
 
 	return $out;
 }
-

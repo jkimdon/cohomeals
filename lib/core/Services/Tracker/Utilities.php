@@ -1,32 +1,50 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Utilities.php 52254 2014-08-06 14:50:19Z lphuberdeau $
+// $Id: Utilities.php 62261 2017-04-18 21:15:26Z kroky6 $
 
 class Services_Tracker_Utilities
 {
 	function insertItem($definition, $item)
 	{
-		$newItem = $this->replaceItem($definition, 0, $item['status'], $item['fields']);
+		$newItem = $this->replaceItem($definition, 0, $item['status'], $item['fields'], [
+			'validate' => isset($item['validate']) ? $item['validate'] : true,
+			'skip_categories' => false,
+			'bulk_import' => false,
+		]);
 
 		return $newItem;
 	}
 
 	function updateItem($definition, $item)
 	{
-		return $this->replaceItem($definition, $item['itemId'], $item['status'], $item['fields']);
+		return $this->replaceItem($definition, $item['itemId'], $item['status'], $item['fields'], [
+			'validate' => true,
+			'skip_categories' => false,
+			'bulk_import' => false,
+		]);
 	}
 
 	function resaveItem($itemId)
 	{
 		$tracker = TikiLib::lib('trk')->get_item_info($itemId);
+		if( !$tracker ) {
+			return;
+		}
 		$definition = Tracker_Definition::get($tracker['trackerId']);
-		$this->replaceItem($definition, $itemId, null, array(), false);
+		if( !$definition ) {
+			return;
+		}
+		$this->replaceItem($definition, $itemId, null, array(), [
+			'validate' => false,
+			'skip_categories' => true,
+			'bulk_import' => true,
+		]);
 	}
 
-	private function replaceItem($definition, $itemId, $status, $fieldMap, $validate = true)
+	private function replaceItem($definition, $itemId, $status, $fieldMap, array $options)
 	{
 		$trackerId = $definition->getConfiguration('trackerId');
 		$fields = array();
@@ -66,29 +84,33 @@ class Services_Tracker_Utilities
 		$categorizedFields = $definition->getCategorizedFields();
 		$errors = $trklib->check_field_values(array('data' => $fields), $categorizedFields, $trackerId, $itemId ? $itemId : '');
 
+		if ($options['skip_categories']) {
+			foreach ($categorizedFields as $fieldId) {
+				unset($fields[$fieldId]);
+			}
+		}
+
 		if (count($errors['err_mandatory']) == 0 && count($errors['err_value']) == 0) {
-			$newItem = $trklib->replace_item($trackerId, $itemId, array('data' => $fields), $status, 0, true);
+			$newItem = $trklib->replace_item($trackerId, $itemId, array('data' => $fields), $status, 0, $options['bulk_import']);
 			return $newItem;
-		} elseif (! $validate) {
-			$newItem = $trklib->replace_item($trackerId, $itemId, array('data' => $fields), $status, 0, true);
+		} elseif (! $options['validate']) {
+			$newItem = $trklib->replace_item($trackerId, $itemId, array('data' => $fields), $status, 0, $options['bulk_import']);
 			return $newItem;
 		}
 
-		$errorreportlib = TikiLib::lib('errorreport');
 		if (count($errors['err_mandatory']) > 0) {
 			$names = array();
 			foreach ($errors['err_mandatory'] as $f) {
 				$names[] = $f['name'];
 			}
-
-			$errorreportlib->report(tr('Following mandatory fields are missing: %0', implode(', ', $names)));
+			Feedback::error(tr('The following mandatory fields are missing: %0', implode(', ', $names)), 'session');
 		}
 
 		foreach ($errors['err_value'] as $f) {
 			if (! empty($f['errorMsg'])) {
-				$errorreportlib->report(tr('Invalid value in %0: %1', $f['name'], $f['errorMsg']));
+				Feedback::error(tr('Invalid value in %0: %1', $f['name'], $f['errorMsg']), 'session');
 			} else {
-				$errorreportlib->report(tr('Invalid value in %0', $f['name']));
+				Feedback::error(tr('Invalid value in %0', $f['name']), 'session');
 			}
 		}
 
@@ -220,6 +242,20 @@ class Services_Tracker_Utilities
 		$item = reset($items);
 
 		return $item;
+	}
+	
+	function getTitle($definition, $item)
+	{
+		$parts = [];
+
+		foreach ($definition->getFields() as $field) {
+			if ($field['isMain'] == 'y') {
+				$permName = $field['permName'];
+				$parts[] = $item['fields'][$permName];
+			}
+		}
+
+		return implode(' ', $parts);
 	}
 
 	function processValues($definition, $item)
@@ -471,6 +507,24 @@ EXPORT;
 		$trklib->remove_tracker_item($itemId, true);
 	}
 
+	function removeItemAndReferences($definition, $itemObject, $uncascaded, $replacement) {
+		$tx = TikiDb::get()->begin();
+
+		$itemData = $itemObject->getData();
+		foreach ($definition->getFields() as $field) {
+			$handler = $definition->getFieldFactory()->getHandler($field, $itemData);
+			if (method_exists($handler, 'handleDelete')) {
+				$handler->handleDelete();
+			}
+		}
+
+		TikiLib::lib('trk')->replaceItemReferences($replacement, $uncascaded['itemIds'], $uncascaded['fieldIds']);
+
+		$this->removeItem($itemObject->getId());
+
+		$tx->commit();
+	}
+
 	function removeTracker($trackerId)
 	{
 		$trklib = TikiLib::lib('trk');
@@ -497,6 +551,50 @@ EXPORT;
 		}
 
 		return $newTrackerId;
+	}
+
+	function cloneItem($definition, $itemData) {
+		$transaction = TikiLib::lib('tiki')->begin();
+
+		$id = $this->insertItem($definition, $itemData);
+
+		foreach ($definition->getFields() as $field) {
+			$handler = $definition->getFieldFactory()->getHandler($field, $itemData);
+			if (method_exists($handler, 'handleClone')) {
+				$handler->handleClone();
+			}
+		}
+
+		$itemObject = Tracker_Item::fromId($id);
+
+		foreach (TikiLib::lib('trk')->get_child_items($itemId) as $info) {
+			$childItem = Tracker_Item::fromId($info['itemId']);
+
+			if ($childItem->canView()) {
+				$childItem->asNew();
+				$data = $childItem->getData();
+				$data['fields'][$info['field']] = $id;
+
+				$childDefinition = $childItem->getDefinition();
+
+				// handle specific cloning actions
+
+				foreach ($childDefinition->getFields() as $field) {
+					$handler = $childDefinition->getFieldFactory()->getHandler($field, $data);
+					if (method_exists($handler, 'handleClone')) {
+						$newData = $handler->handleClone();
+						$data['fields'][$field['permName']] = $newData['value'];
+					}
+				}
+
+				$new = $this->insertItem($childDefinition, $data);
+
+			}
+		}
+
+		$transaction->commit();
+
+		return $itemObject;
 	}
 }
 

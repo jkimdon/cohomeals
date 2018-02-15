@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-forum_import.php 50260 2014-03-08 16:02:24Z lindonb $
+// $Id: tiki-forum_import.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 /****************************************************************************
  ** TikiWiki Forum Import Tool v1.00                            12/01/2007 **

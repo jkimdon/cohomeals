@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: newsletter.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: newsletter.php 62150 2017-04-08 23:00:37Z lindonb $
 
 function prefs_newsletter_list()
 {
@@ -19,10 +19,11 @@ function prefs_newsletter_list()
 		),
 		'newsletter_pause_length' => array(
 			'name' => tra('Newsletter pause length'),
-			'description' => tra('Amount of seconds on wait before each batch'),
+			'description' => tra('Number of seconds delay before each batch'),
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
+			'units' => tra('seconds'),
 			'default' => 60,
 		),
 		'newsletter_batch_size' => array(
@@ -31,6 +32,7 @@ function prefs_newsletter_list()
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
+			'units' => tra('emails'),
 			'default' => 5,
 		),
 		'newsletter_external_client' => array(

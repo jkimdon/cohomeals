@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.object_link.php 51992 2014-07-17 17:32:48Z xavidp $
+// $Id: function.object_link.php 62261 2017-04-18 21:15:26Z kroky6 $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -43,8 +43,7 @@ function smarty_function_object_link( $params, $smarty )
 		}
 		global $prefs;
 		if ($prefs['feature_wiki_structure'] === 'y') {
-			global $structlib;
-			include_once ('lib/structures/structlib.php');
+			$structlib = TikiLib::lib('struct');
 			$page_id = $structlib->get_struct_ref_id($title);
 			if ($page_id) {
 				$alias = $structlib->get_page_alias($page_id);
@@ -73,6 +72,13 @@ function smarty_function_object_link( $params, $smarty )
 	case 'trackeritem':
 		$function = 'smarty_function_object_link_trackeritem';
 		break;
+	case 'group':
+		// Nowhere to link, at least, yet.
+		return $object;
+	case 'forumpost':
+	case 'forum post':
+		$function = 'smarty_function_object_link_forumpost';
+		break;
 	default:
 		$function = 'smarty_function_object_link_default';
 		break;
@@ -87,6 +93,7 @@ function smarty_function_object_link_default( $smarty, $object, $title = null, $
 
 	$smarty->loadPlugin('smarty_modifier_sefurl');
 	$smarty->loadPlugin('smarty_modifier_escape');
+	$smarty->loadPlugin('smarty_modifier_addongroupname');
 
 	if (empty($title)) {
 		$title = TikiLib::lib('object')->get_title($type, $object);
@@ -101,6 +108,9 @@ function smarty_function_object_link_default( $smarty, $object, $title = null, $
 		return '';
 	}
 
+	// get add on object title if needed
+	$title = smarty_modifier_addongroupname($title);
+
 	$text = $title;
 	$titleAttribute = '';
 	if ($type == 'wiki page') {
@@ -111,7 +121,7 @@ function smarty_function_object_link_default( $smarty, $object, $title = null, $
 	$escapedText = smarty_modifier_escape($text ? $text : tra('No title specified'));
 
 	if ($url) {
-		$escapedHref = smarty_modifier_escape($url);
+		$escapedHref = smarty_modifier_escape(TikiLib::tikiUrlOpt($url));
 	} else {
 		$escapedHref = smarty_modifier_escape(smarty_modifier_sefurl($object, $type));
 	}
@@ -125,12 +135,23 @@ function smarty_function_object_link_default( $smarty, $object, $title = null, $
 	}
 
 	$metadata = TikiLib::lib('object')->get_metadata($type, $object, $classList);
+
+	if (! empty($params['class'])) {
+		$classList[] = $params['class'];
+	}
+
 	$class = ' class="' . implode(' ', $classList) . '"';
 
 	if (strpos($escapedHref, '://') === false) {
-		$html = '<a href="' . $base_url . $escapedHref . '"' . $class . $titleAttribute . $metadata . '>' . $escapedText . '</a>';
-	} else {
+		//$html = '<a href="' . $base_url . $escapedHref . '"' . $class . $titleAttribute . $metadata . '>' . $escapedText . '</a>';
+		// When the link is created for a tiki page, then we do NOT want the baseurl included, 
+		// because it might be we are using a reverse proxy or a an ssl offloader, or we access from a public fqdn that is not
+		// configured for teh ip adress we run our webserver.
+		// Eaxmple: Fqdn = tiki.mydomain.com -> port forwarding/nat to: 192.168.1.110. 
+		// In this case links should NOT be generated as absolut urls pointing to  192.168.1.110 which would be the part of the baseUrl.
 		$html = '<a href="' . $escapedHref . '"' . $class . $titleAttribute . $metadata . '>' . $escapedText . '</a>';
+	} else {
+		$html = '<a rel="external" href="' . $escapedHref . '"' . $class . $titleAttribute . $metadata . '>' . $escapedText . '</a>';
 	}
 
 	$attributelib = TikiLib::lib('attribute');
@@ -169,16 +190,42 @@ function smarty_function_object_link_default( $smarty, $object, $title = null, $
 
 function smarty_function_object_link_trackeritem( $smarty, $object, $title = null, $type = 'wiki page', $url = null )
 {
+	global $prefs;
 	$pre = null;
 
 	$item = Tracker_Item::fromId($object);
 
-	if ($item && $status = $item->getDisplayedStatus()) {
-		$alt = tr($status);
-		$pre = "<img src=\"img/icons/status_$status.gif\" alt=\"$status\"/>&nbsp;";
+	//Set show status to 'y' by default
+	if (!empty($prefs['tracker_status_in_objectlink'])) {
+		$show_status = $prefs['tracker_status_in_objectlink'];
+	} else {
+		$show_status = 'y';
 	}
 
-	return $pre . smarty_function_object_link_default($smarty, $object, $title, $type, $url);
+	if (($show_status == 'y') && $item && $status = $item->getDisplayedStatus()) {
+		$smarty->loadPlugin('smarty_function_icon');
+		$pre = smarty_function_icon(array(
+			'name' => 'status-' . $status,
+			'iclass' => 'tips',
+			'ititle' =>  ':' . tr($status),
+		), $smarty);
+	}
+
+	if( $item && $item->canView() ) {
+		return $pre . smarty_function_object_link_default($smarty, $object, $title, $type, $url);
+	} else {
+		$smarty->loadPlugin('smarty_modifier_escape');
+		$smarty->loadPlugin('smarty_modifier_addongroupname');
+
+		if (empty($title)) {
+			$title = TikiLib::lib('object')->get_title($type, $object);
+		}
+		
+		// get add on object title if needed
+		$title = smarty_modifier_addongroupname($title);
+		
+		return $pre . smarty_modifier_escape($title);
+	}
 }
 
 function smarty_function_object_link_user( $smarty, $user, $title = null )
@@ -190,8 +237,8 @@ function smarty_function_object_link_user( $smarty, $user, $title = null )
 
 function smarty_function_object_link_external( $smarty, $link_orig, $title = null, $type = null )
 {
-	global $cachelib; require_once 'lib/cache/cachelib.php';
-	global $tikilib;
+	$cachelib = TikiLib::lib('cache');
+	$tikilib = TikiLib::lib('tiki');
 
 	if (substr($link_orig, 0, 4) === 'www.') {
 		$link = 'http://' . $link_orig;
@@ -239,9 +286,9 @@ function smarty_function_object_link_relation_target($smarty, $relationId, $titl
 
 function smarty_function_object_link_relation_end( $smarty, $end, $relationId, $title = null )
 {
-	global $relationlib; require_once 'lib/attributes/relationlib.php';
-	global $attributelib; require_once 'lib/attributes/attributelib.php';
-	global $cachelib; require_once 'lib/cache/cachelib.php';
+	$relationlib = TikiLib::lib('relation');
+	$attributelib = TikiLib::lib('attribute');
+	$cachelib = TikiLib::lib('cache');
 
 	$cacheKey = "$relationId:$end:$title";
 
@@ -283,7 +330,7 @@ function smarty_function_object_link_freetag( $smarty, $tag, $title = null )
 {
 	global $prefs;
 	if ($prefs['feature_freetags'] != 'y') {
-		return tr('freetags disabled');
+		return tr('tags disabled');
 	}
 
 	if (is_numeric($tag)) {
@@ -291,5 +338,20 @@ function smarty_function_object_link_freetag( $smarty, $tag, $title = null )
 	}
 
 	return smarty_function_object_link_default($smarty, $tag, $tag, 'freetag');
+}
+function smarty_function_object_link_forumpost( $smarty, $object, $title = null, $type = 'forumpost', $url = null )
+{
+	$commentslib = TikiLib::lib('comments');
+	$comment = $commentslib->get_comment($object);
+
+	while (empty($comment['title'])) {
+		$parent = $commentslib->get_comment($comment['parentId']);
+		$comment['title'] = $parent['title'];
+		if ($parent['parentId'] == 0) {
+			break;
+		}
+	}
+
+	return "<a href='tiki-view_forum_thread.php?threadId=" . $comment['threadId']. "'>" .$comment['title'] . "</a>";
 }
 

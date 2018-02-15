@@ -2,22 +2,27 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
-//
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
+// 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-change_password.php 51166 2014-05-07 16:00:38Z arildb $
+// $Id: tiki-change_password.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
 		'user' => 'text',
 		'username' => 'text',
 		'pass' => 'none',
-		'pass2' => 'none',
+		'passAgain' => 'none',
 		'oldpass' => 'none',
 	) )
 );
 require_once ('tiki-setup.php');
+
+if (Language::isRTL()) {
+    $prefs['feature_bidi'] =  'y';
+    TikiLib::lib('header')->add_cssfile('vendor_bundled/vendor/morteza/bootstrap-rtl/dist/css/bootstrap-rtl.min.css', 99); // 99 is high rank order as it should load after all other css files
+}
 
 $access->check_feature('change_password');
 
@@ -31,13 +36,17 @@ if (empty($_REQUEST['user']) || !$userlib->user_exists($_REQUEST['user'])) {
 if (!isset($_REQUEST["oldpass"]))
 	$_REQUEST["oldpass"] = '';
 
+if (isset($_REQUEST["newuser"]) && $_REQUEST["newuser"] == 'y') {
+	$smarty->assign('new_user_validation', 'y');
+}
+
 $smarty->assign('userlogin', $_REQUEST["user"]);
 $smarty->assign('oldpass', $_REQUEST["oldpass"]);
 
 if (isset($_REQUEST["change"])) {
 	check_ticket('change-password');
-	// Check that pass and pass2 match, otherwise display error and exit
-	if ($_REQUEST["pass"] != $_REQUEST["pass2"]) {
+	// Check that pass and passAgain match, otherwise display error and exit
+	if ($_REQUEST["pass"] != $_REQUEST["passAgain"]) {
 		$smarty->assign('msg', tra("The passwords do not match"));
 		$smarty->assign('errortype', 'no_redirect_login');
 		$smarty->display("error.tpl");
@@ -70,7 +79,7 @@ if (isset($_REQUEST["change"])) {
 		}
 	}
 	// Check that provided user name could log in with old password, otherwise display error and exit
-	list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_REQUEST["oldpass"], '', '');
+	list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_REQUEST["oldpass"]);
 	if (!$isvalid) {
 		$smarty->assign('msg', tra("Invalid old password"));
 		$smarty->assign('errortype', 'no_redirect_login');
@@ -82,7 +91,7 @@ if (isset($_REQUEST["change"])) {
 			$smarty->assign('msg', tra('Your email could not be validated; make sure you email is correct'));
 			$smarty->assign('errortype', 'no_redirect_login');
 			$smarty->display("error.tpl");
-			die;
+			die;			
 		}
 		$userlib->change_user_email_only($_REQUEST['user'], $_REQUEST['email']);
 	}
@@ -98,15 +107,21 @@ if (isset($_REQUEST["change"])) {
 		$cryptlib->onChangeUserPassword($_REQUEST["oldpass"], $_REQUEST["pass"]);
 	}
 
+	$homePageUrl = $prefs['tikiIndex'];	// set up in lib/setup/default_homepage.php
+
 	// Check if a wizard should be run.
 	// If a wizard is run, it will return to the $url location when it has completed. Thus no code after $wizardlib->onLogin will be executed
 	$wizardlib = TikiLib::lib('wizard');
 	$force = $_REQUEST["user"] == 'admin';
-	$wizardlib->onLogin($user, $prefs['tikiIndex'], $force);
+	$wizardlib->onLogin($user, $homePageUrl, $force);
 
-	// Go to homepage
+	// Go to homepage or url_after_validation
 	$accesslib = TikiLib::lib('access');
-	$accesslib->redirect($prefs['tikiIndex']);
+	if (!empty($prefs['url_after_validation']) && !empty($_REQUEST['new_user_validation'])) {
+		$access->redirect($prefs['url_after_validation']);
+	} else {
+		$accesslib->redirect($homePageUrl);
+	}
 }
 ask_ticket('change-password');
 

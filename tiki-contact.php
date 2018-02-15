@@ -2,16 +2,26 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-contact.php 52439 2014-09-01 20:18:34Z nkoth $
+// $Id: tiki-contact.php 62804 2017-05-29 02:14:33Z drsassafras $
+$inputConfiguration =	[[
+	'staticKeyFilters'	=> [
+		'send'			=> 'word', 		// post
+		'priority'		=> 'int', 		// post
+		'from'			=> 'striptags',	// post
+		'subject'		=> 'striptags',	// post
+		'body'			=> 'xss',		// post
+		'to'			=> 'email',		// post
+	],
+	'catchAllUnset'		=> null
+]];
 
 require_once ('tiki-setup.php');
 
-include_once ('lib/messu/messulib.php');
-include_once ('lib/userprefs/scrambleEmail.php');
+$messulib = TikiLib::lib('message');
 
 // This feature needs both 'feature_contact' and 'feature_messages' to work
 $access->check_feature(array('feature_contact', 'feature_messages'));
@@ -30,26 +40,26 @@ $priority = 3;
 $from = $user ? $user : '';
 $subject = '';
 $body = '';
-if (isset($_REQUEST['send'])) {
-	if (isset($_REQUEST['priority'])) {
-		$priority = $_REQUEST['priority'];
+if (isset($_POST['send'])) {
+	if (isset($_POST['priority'])) {
+		$priority = $_POST['priority'];
 	}
-	if (!$user && validate_email($_REQUEST['from'])) {
+	if (!$user && validate_email($_POST['from'])) {
 		$from =  'tiki-contact.php';
-		$body .= tra('From') . " " . $_REQUEST['from'] . ":\n";
+		$body .= tra('From') . " " . $_POST['from'] . ":\n";
 	}
-	if (isset($_REQUEST['subject'])) {
-		$subject =  $_REQUEST['subject'];
+	if (isset($_POST['subject'])) {
+		$subject =  $_POST['subject'];
 	}
-	if (isset($_REQUEST['body'])) {
-		$body .=  $_REQUEST['body'];
+	if (isset($_POST['body'])) {
+		$body .=  $_POST['body'];
 	}
 }
 
-if (isset($_REQUEST['send'])) {
+if (isset($_POST['send'])) {
 	// Validation:
 	// must have a subject or body non-empty (or both)
-	$hasContent = !empty($_REQUEST['subject']) || !empty($_REQUEST['body']);
+	$hasContent = !empty($_POST['subject']) || !empty($_POST['body']);
 
 	$failsCaptcha = !$user && $prefs['feature_antibot'] == 'y' && !$captchalib->validate();
 	if (!$hasContent || empty($from) || $failsCaptcha) {
@@ -60,16 +70,16 @@ if (isset($_REQUEST['send'])) {
 		} else {
 			$message = $captchalib->getErrors();
 		}
-		$smarty->assign('errorMessage', $message);
+		Feedback::error(['mes' => $message, 'title' => tr('Invalid')]);
 	} else {
 		$access->check_ticket();
 		$body = tr("%0 sent you a message:", $from) . "\n" . $body;
 		$messulib->post_message(
 			$prefs['contact_user'],
 			$from,
-			$_REQUEST['to'],
+			$_POST['to'],
 			'',
-			$_REQUEST['subject'],
+			$_POST['subject'],
 			$body,
 			$priority
 		);
@@ -77,14 +87,14 @@ if (isset($_REQUEST['send'])) {
 		if ($contact_name == '') $contact_name = $prefs['contact_user'];
 		$message = tra('Message sent to'). ': ' . $contact_name . '<br />';
 		$smarty->assign('sent', 1);
-		$smarty->assign('message', $message);
+		Feedback::success($message);
 	}
 }
 
 $email = $userlib->get_user_email($prefs['contact_user']);
 if ($email == '') $email = $userlib->get_admin_email();
 $smarty->assign('email0', $email);
-$email = scrambleEmail($email, $tikilib->get_user_preference('admin', "email is public"));
+$email = TikiMail::scrambleEmail($email, $tikilib->get_user_preference('admin', "email is public"));
 $smarty->assign('email', $email);
 
 $smarty->assign('priority', $priority);

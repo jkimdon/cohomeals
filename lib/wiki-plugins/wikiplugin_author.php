@@ -1,31 +1,34 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_author.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_author.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_author_info()
 {
 	return array(
 		'name' => tra('Author'),
 		'documentation' => 'PluginAuthor',
-		'description' => tra('View author contributions to a wiki page'),
+		'description' => tra('Add popups and color coding that identifies authors'),
 		'prefs' => array('wikiplugin_author'),
 		'body' => tra('text'),
-		'icon' => 'img/icons/text_signature.png',
+		'iconname' => 'pencil',
+		'introduced' => 6,
 		'params' => array(
 			'author' => array(
 				'required' => true,
-				'name' => tra('User Name'),
-				'description' => tra('User name of the user who wrote the text.'),
+				'name' => tra('Username'),
+				'description' => tra('Username of the author of the text.'),
+				'since' => '6.0',
 				'default' => '',
 				'filter' => 'username',
 			),
 			'deleted_by' => array(
 				'required' => false,
 				'name' => tra('Deleted by User'),
-				'description' => tra('User name of the user who deleted the text.'),
+				'description' => tra('Username of the person who deleted the text.'),
+				'since' => '6.0',
 				'default' => '',
 				'filter' => 'username',
 			),
@@ -33,6 +36,7 @@ function wikiplugin_author_info()
 				'required'	=> false,
 				'name'		=> tra('Make Visible'),
 				'description' => tra("Should this author's contribution be visible (default: no)."),
+				'since' => '6.0',
 				'filter' => 'text',
 				'default' => 0,
 				'options' => array(
@@ -45,6 +49,7 @@ function wikiplugin_author_info()
 				'required'	=> false,
 				'name'		=> tra('Show popup with author/deleted by'),
 				'description' => tra('Generate a popup with names of author(s) (default: no).'),
+				'since' => '6.0',
 				'filter' => 'text',
 				'default' => 0,
 				'options' => array(
@@ -59,7 +64,10 @@ function wikiplugin_author_info()
 
 function wikiplugin_author($data, $params)
 {
-	global $smarty, $tikilib, $headerlib;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+
 	global $authors;
 	
 	static $style=0;

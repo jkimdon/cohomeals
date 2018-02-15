@@ -1,11 +1,12 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: bootstrap.php 47853 2013-10-02 14:03:06Z lphuberdeau $
+// $Id: bootstrap.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 define('TIKI_IN_TEST', 1);
+define('TIKI_PATH', realpath(__DIR__ . '/../../'));
 define('CUSTOM_ERROR_LEVEL', defined('E_DEPRECATED') ? E_ALL ^ E_DEPRECATED : E_ALL);
 
 ini_set('display_errors', 'on');
@@ -18,14 +19,14 @@ $paths = array(
 		realpath('../..'),
 		realpath('core'),
 		realpath('../pear'),
-        realpath('../../vendor'),
-        realpath('../../vendor/mikey179/vfsStream/src/main/php'),
+        realpath('../../vendor_bundled/vendor'),
+        realpath('../../vendor_bundled/vendor/mikey179/vfsStream/src/main/php'),
         realpath('../../vendor_extra/pear')
 		);
 
 ini_set('include_path', implode(PATH_SEPARATOR, $paths));
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor_bundled/vendor/autoload.php';
 
 if (!is_file(dirname(__FILE__) . '/local.php')) {
 	die("\nYou need to setup a new database and create a local.php file for the test suite inside " . dirname(__FILE__) . "\n\n");
@@ -78,21 +79,29 @@ if (!$installer->tableExists('tiki_preferences')) {
 } else if ($installer->requiresUpdate()) {
 	echo "Updating Tiki database...\n";
 	$installer->update();
+	if ( count($installer->failures) ) {
+		foreach ( $installer->failures as $key => $error ) {
+			list( $query, $message, $patch ) = $error;
+
+			echo "Error $key in $patch\n\t$query\n\t$message\n\n";
+		}
+		echo 'Exiting, fix database issues and try again.';
+		die;
+	}
 }
 
 $pwd = getcwd();
 chdir(dirname(__FILE__) . '/../..');
-global $smarty;
+$smarty = TikiLib::lib('smarty');
 require_once 'lib/init/smarty.php';
 $smarty->addPluginsDir('../smarty_tiki/');
-require_once 'lib/cache/cachelib.php';
-require_once 'lib/wiki/wikilib.php';
-require_once 'lib/userslib.php';
-require_once 'lib/headerlib.php';
+$cachelib = TikiLib::lib('cache');
+$wikilib = TikiLib::lib('wiki');
+$userlib = TikiLib::lib('user');
+$headerlib = TikiLib::lib('header');
 require_once 'lib/init/tra.php';
-require_once 'lib/tikiaccesslib.php';
+$access = TikiLib::lib('access');
 
-$userlib = new UsersLib;
 $_SESSION = array(
 		'u_info' => array(
 			'login' => null
@@ -104,7 +113,7 @@ require_once(dirname(__FILE__) . '/TikiTestCase.php');
 require_once(dirname(__FILE__) . '/TestableTikiLib.php');
 
 global $systemConfiguration;
-$systemConfiguration = new Zend_Config(
+$systemConfiguration = new Zend\Config\Config(
 	array(
 		'preference' => array(),
 		'rules' => array(),
@@ -115,8 +124,16 @@ $systemConfiguration = new Zend_Config(
 global $user_overrider_prefs, $prefs;
 $user_overrider_prefs = array();
 $prefs['language'] = 'en';
-$prefs['site_language'] = 'en';
 require_once 'lib/setup/prefs.php';
+$prefs['site_language'] = 'en';
+$prefs['zend_mail_handler'] = 'file';
+$prefs['feature_typo_quotes'] = 'n';
+$prefs['feature_typo_approximative_quotes'] = 'n';
+$prefs['feature_typo_dashes_and_ellipses'] = 'n';
+$prefs['feature_typo_smart_nobreak_spaces'] = 'n';
+
+$builder = new Perms_Builder;
+Perms::set($builder->build());
 
 ini_set('display_errors', 'on');
 error_reporting(CUSTOM_ERROR_LEVEL);

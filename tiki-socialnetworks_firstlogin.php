@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-socialnetworks_firstlogin.php 50763 2014-04-11 17:03:42Z jonnybradley $
+// $Id: tiki-socialnetworks_firstlogin.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' =>
@@ -42,10 +42,12 @@ if (isset($_REQUEST["localinfosubmit"])) {
 		$smarty->assign('msg', tra('User already exists'));
 	} elseif (!preg_match('/^[_a-z0-9\.\-]+@[_a-z0-9\.\-]+\.[a-z]{2,4}$/i',
 				($prefs['login_is_email'] !== 'y') ? $_REQUEST['email'] : $_REQUEST['name'])) {
-		$smarty->assign('msg', tra('Email is invalid'));
+		$smarty->assign('msg', tra('The email address is invalid'));
 	} else {
 		$tikilib->set_user_preference($user, 'socialnetworks_user_firstlogin', 'n');
-		$userlib->change_user_email($user, $_REQUEST["email"]);
+		if ($prefs['user_unique_email'] != 'y' || !$userlib->other_user_has_email($user, $_REQUEST['email'])) {
+			$userlib->change_user_email($user, $_REQUEST["email"]);
+		}
 		$userlib->change_login($user, $_REQUEST["name"]);
 		$user = $_REQUEST["name"];
 		$_SESSION[$user_cookie_site] = $user;

@@ -1,13 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_preferences_notifications.php 49756 2014-02-06 11:13:28Z xavidp $
+// $Id: user_preferences_notifications.php 59887 2016-10-04 10:08:40Z xavidp $
 
 require_once('lib/wizard/wizard.php');
-require_once('lib/notifications/notificationlib.php');
-include_once ('lib/userprefs/userprefslib.php');
 
 /**
  * Set up the wysiwyg editor, including inline editing
@@ -32,7 +30,10 @@ class UserWizardPreferencesNotifications extends Wizard
 
 	function onSetupPage ($homepageUrl) 
 	{
-		global	$user, $smarty, $tikilib, $prefs; 
+		global	$user, $prefs; 
+
+		$tikilib = TikiLib::lib('tiki');
+		$smarty = TikiLib::lib('smarty');
 
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
@@ -51,17 +52,22 @@ class UserWizardPreferencesNotifications extends Wizard
 		$smarty->assign('user_blog_watch_editor', $tikilib->get_user_preference($user, 'user_blog_watch_editor'));
 		$smarty->assign('user_tracker_watch_editor', $tikilib->get_user_preference($user, 'user_tracker_watch_editor'));
 		$smarty->assign('user_comment_watch_editor', $tikilib->get_user_preference($user, 'user_comment_watch_editor'));
+		$smarty->assign('user_category_watch_editor', $tikilib->get_user_preference($user, 'user_category_watch_editor'));
 
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_preferences_notifications.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
-		
 		return $showPage;		
+	}
+
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_preferences_notifications.tpl';
+		return $wizardTemplate;
 	}
 
 	function onContinue ($homepageUrl) 
 	{
-		global $tikilib, $user, $prefs;
+		global $user, $prefs;
+
+		$tikilib = TikiLib::lib('tiki');
 		
 		// Run the parent first
 		parent::onContinue($homepageUrl);
@@ -100,6 +106,12 @@ class UserWizardPreferencesNotifications extends Wizard
 			$tikilib->set_user_preference($user, 'user_comment_watch_editor', 'y');
 		} else {
 			$tikilib->set_user_preference($user, 'user_comment_watch_editor', 'n');
+		}
+
+		if (isset($_REQUEST['user_category_watch_editor']) && $_REQUEST['user_category_watch_editor'] == 'on') {
+			$tikilib->set_user_preference($user, 'user_category_watch_editor', 'y');
+		} else {
+			$tikilib->set_user_preference($user, 'user_category_watch_editor', 'n');
 		}
 
 	}

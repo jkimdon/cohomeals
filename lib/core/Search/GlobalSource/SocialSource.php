@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SocialSource.php 47366 2013-09-06 13:15:03Z lphuberdeau $
+// $Id: SocialSource.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Search_GlobalSource_SocialSource implements Search_GlobalSource_Interface
 {
@@ -34,7 +34,7 @@ class Search_GlobalSource_SocialSource implements Search_GlobalSource_Interface
 		$groups = array();
 		$followers = array();
 
-		foreach ($this->getUsers($data) as $user) {
+		foreach ($this->getUsers($data, $objectType, $objectId) as $user) {
 			$groups = array_merge($groups, $this->userlib->get_user_groups_inclusion($user));
 			$userfollowers = $this->getFollowers($user);
 			if (is_array($userfollowers)) {
@@ -50,7 +50,7 @@ class Search_GlobalSource_SocialSource implements Search_GlobalSource_Interface
 		);
 	}
 
-	private function getUsers($data)
+	private function getUsers($data, $objectType, $objectId)
 	{
 		$users = array();
 		if (isset($data['contributors'])) {
@@ -59,6 +59,10 @@ class Search_GlobalSource_SocialSource implements Search_GlobalSource_Interface
 
 		if (isset($data['user'])) {
 			$users[] = $this->read($data['user']);
+		}
+
+		if ($objectType == 'user') {
+			$users[] = $objectId;
 		}
 
 		return $users;

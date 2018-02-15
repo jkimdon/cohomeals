@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TypeFactory.php 46982 2013-08-03 18:29:06Z lphuberdeau $
+// $Id: TypeFactory.php 60381 2016-11-23 10:56:42Z jonnybradley $
 
 class Search_Lucene_TypeFactory implements Search_Type_Factory_Interface
 {
@@ -34,12 +34,29 @@ class Search_Lucene_TypeFactory implements Search_Type_Factory_Interface
 
 	function numeric($value)
 	{
-		return new Search_Type_Whole((float) $value);
+		return new Search_Type_Numeric($value);
 	}
 
 	function multivalue($values)
 	{
 		return new Search_Type_MultivalueText((array) $values);
+	}
+
+	/* Not supported in Lucene indexes - use elasticsearch*/
+	function object($values)
+	{
+		return null;
+	}
+	/* Not supported in Lucene indexes - use elasticsearch */
+	function nested($values)
+	{
+		return null;
+	}
+
+	/* Not supported in Lucene indexes - use elasticsearch */
+	function geopoint($values)
+	{
+		return null;
 	}
 
 	function sortable($value)

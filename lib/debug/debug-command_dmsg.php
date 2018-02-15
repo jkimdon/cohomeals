@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_dmsg.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: debug-command_dmsg.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 /**
  * \brief 'debugger command' to show user messages in tab
@@ -22,7 +22,7 @@ class DbgCmd_DebugMessages extends DebuggerCommand
 	/// Function to create interface part of command: return ["button name"] = <html code>
 	function draw_interface()
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 
 		global $debugger;
 		$smarty->assign_by_ref('messages', $debugger->dmsgs);

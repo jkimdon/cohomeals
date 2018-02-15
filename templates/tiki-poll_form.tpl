@@ -5,8 +5,8 @@
 		{tr}This poll is closed{/tr}
 	{/remarksbox}
 {else}
-	<div class="cbox">
-	<div class="cbox-data">
+	<div class="panel panel-default">
+	<div class="panel-body">
 	{include file='tiki-poll.tpl'}
 	</div>
 	</div>

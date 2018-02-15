@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: prefilter.log_tpl.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: prefilter.log_tpl.php 61823 2017-03-22 19:48:40Z chealer $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -14,10 +14,25 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function smarty_prefilter_log_tpl($source, $smarty)
 {
 	global $prefs;
-
-	if ($prefs['log_tpl'] != 'y' || $smarty->template_resource == 'evaluated template' ||
-			in_array($smarty->template_resource, array('tiki.tpl', 'error.tpl'))) {	// suppress log comment for templates that generate a DOCTYPE which must be output first
+	if ($prefs['log_tpl'] != 'y') {
 		return $source;
 	}
-	return '<!-- TPL: ' . $smarty->_current_file . ' -->' . $source . '<!-- /TPL: ' . $smarty->_current_file . ' -->';
+
+	$resource = $smarty->template_resource;
+
+	// Refrain from logging for some templates
+	if (
+			strpos($resource, 'eval:') === 0 || // Evaluated templates 
+			strpos($resource, 'mail/') !== false // email tpls
+			) {
+		return $source;
+	}
+	
+	// The opening comment cannot be inserted before the DOCTYPE in HTML documents; put it right after.
+	$commentedSource = preg_replace('/^<!DOCTYPE .*>/i', '$0' . '<!-- TPL: ' . $resource . ' -->', $source, 1, $replacements);
+	if ($replacements) {
+		return $commentedSource . '<!-- /TPL: ' . $resource . ' -->';
+	}
+	
+	return '<!-- TPL: ' . $resource . ' -->' . $source . '<!-- /TPL: ' . $resource . ' -->';
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Index.php 48006 2013-10-12 19:23:48Z jonnybradley $
+// $Id: Index.php 63860 2017-09-18 14:11:14Z kroky6 $
 
 class Search_MySql_Index implements Search_Index_Interface
 {
@@ -50,6 +50,8 @@ class Search_MySql_Index implements Search_Index_Interface
 	{
 		if ($value instanceof Search_Type_Whole) {
 			$this->table->ensureHasField($name, 'TEXT');
+		} elseif ($value instanceof Search_Type_Numeric) {
+			$this->table->ensureHasField($name, 'FLOAT');
 		} elseif ($value instanceof Search_Type_PlainShortText) {
 			$this->table->ensureHasField($name, 'TEXT');
 		} elseif ($value instanceof Search_Type_PlainText) {
@@ -92,25 +94,30 @@ class Search_MySql_Index implements Search_Index_Interface
 				$this->table->expr($condition),
 			);
 
-			$scoreField = null;
+			$scoreFields = [];
 			$indexes = $this->builder->getRequiredIndexes();
 			foreach ($indexes as $index) {
 				$this->table->ensureHasIndex($index['field'], $index['type']);
 
-				if (! $scoreField && $index['type'] == 'fulltext') {
-					$scoreField = $index['field'];
+				if (! in_array($index, $scoreFields) && $index['type'] == 'fulltext') {
+					$scoreFields[] = $index;
 				}
 			}
 
 			$this->table->flush();
 
-			$order = $this->getOrderClause($query, (bool) $scoreField);
+			$order = $this->getOrderClause($query, (bool) $scoreFields);
 
 			$selectFields = $this->table->all();
 
-			if ($scoreField) {
+			if ($scoreFields) {
 				$str = $this->db->qstr(implode(' ', $words));
-				$selectFields['score'] = $this->table->expr("ROUND(MATCH(`$scoreField`) AGAINST ($str),2)");
+				$scoreCalc = '';
+				foreach($scoreFields as $field) {
+					$scoreCalc .= $scoreCalc ? ' + ' : '';
+					$scoreCalc .= "ROUND(MATCH(`{$field['field']}`) AGAINST ($str),2) * {$field['weight']}";
+				}
+				$selectFields['score'] = $this->table->expr($scoreCalc);
 			}
 			$count = $this->table->fetchCount($conditions);
 			$entries = $this->table->fetchAll($selectFields, $conditions, $resultCount, $resultStart, $order);
@@ -120,8 +127,24 @@ class Search_MySql_Index implements Search_Index_Interface
 
 			return $resultSet;
 		} catch (Search_MySql_QueryException $e) {
+			Feedback::error($e->getMessage());
 			$resultSet = new Search_ResultSet(array(), 0, $resultStart, $resultCount);
 			return $resultSet;
+		}
+	}
+
+	function scroll(Search_Query_Interface $query)
+	{
+		$perPage = 100;
+		$hasMore = true;
+
+		for ($from = 0; $hasMore; $from += $perPage) {
+			$result = $this->find($query, $from, $perPage);
+			foreach ($result as $row) {
+				yield $row;
+			}
+			
+			$hasMore = $result->hasMore();
 		}
 	}
 
@@ -137,6 +160,8 @@ class Search_MySql_Index implements Search_Index_Interface
 			}
 		}
 
+		$this->table->ensureHasIndex($order->getField(), 'sort');
+
 		if ($order->getMode() == Search_Query_Order::MODE_NUMERIC) {
 			return $this->table->expr("CAST(`{$order->getField()}` as SIGNED) {$order->getOrder()}");
 		} else {
@@ -150,9 +175,9 @@ class Search_MySql_Index implements Search_Index_Interface
 		$factory = new Search_Type_Factory_Direct;
 		$expr->walk(
 			function ($node) use (& $words, $factory) {
-				if ($node instanceof Search_Expr_Token) {
+				if ($node instanceof Search_Expr_Token && $node->getField() !== 'searchable') {
 					$word = $node->getValue($factory)->getValue();
-					if (is_string($word)) {
+					if (is_string($word) && !in_array($word, $words)) {
 						$words[] = $word;
 					}
 				}

@@ -1,7 +1,8 @@
-{* $Id: wikiplugin_events.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
-<table class="table normal">
+{* $Id: wikiplugin_events.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+<div class="table-responsive">
+<table class="table table-condensed table-bordered">
 <tr><th colspan="2">{tr}Upcoming Events{/tr}</th></tr>
-{cycle values="odd,even" print=false}
+
 {foreach from=$events item=event}
 	<tr class="{cycle advance=false}">
 		<td>
@@ -15,13 +16,14 @@
 				{$smarty.capture.start}{if $smarty.capture.start ne $smarty.capture.end}<br>{$smarty.capture.end}{/if}
 			{/if}
 		</td>
-		<td width="100%">
+		<td style=white-space:normal;">
 			<a class="linkmodule" href="tiki-calendar_edit_item.php?viewcalitemId={$event.calitemId}">{$event.name|escape}</a>
 			{if $desc}<br>{$event.parsed}{/if}
 		</td>
 	</tr><!-- {cycle} -->
 {/foreach}
 </table>
+</div>
 {*Pagination *}
 {if !empty($events) && $usePagination ne 'n'}
 	{pagination_links cant=$cant step=$maxEvents offset=$offset}{/pagination_links}

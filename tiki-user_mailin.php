@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_mailin.php 46548 2013-07-04 17:32:24Z arildb $
+// $Id: tiki-user_mailin.php 58748 2016-05-31 23:05:28Z lindonb $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
@@ -17,9 +17,7 @@ $access->check_user($user);
 // Validate current user's permissions
 $access->check_permission(array('tiki_p_send_mailin'));
 
-require_once ('lib/mailin/usermailinlib.php');
-
-$tikifeedback = array();
+$usermailinlib = TikiLib::lib('usermailin');
 
 if ($prefs['feature_wiki_structure'] === 'y') {
 	$structlib = TikiLib::lib('struct');
@@ -52,10 +50,7 @@ if ($prefs['feature_wiki_structure'] === 'y') {
 			
 			// Add new structure route
 			$usermailinlib->add_user_mailin_struct($user, $subj_pattern, $body_pattern, $structure_id, $page_id, $is_active);
-			$tikifeedback[] = array(
-				'num' => 1,
-				'mes' => tra('Mail-in added new structure route')
-			);
+			Feedback::success(tr('Added new structure route'));
 		}
 	}
 	
@@ -63,10 +58,7 @@ if ($prefs['feature_wiki_structure'] === 'y') {
 	if (isset($_REQUEST['delete']) && $_REQUEST['delete'] == 'y') {
 		if (isset($_REQUEST['mailin_struct_id']) && (int)$_REQUEST['mailin_struct_id'] > 0) {
 			$usermailinlib->delete_user_mailin_struct((int)$_REQUEST['mailin_struct_id']);
-			$tikifeedback[] = array(
-				'num' => 1,
-				'mes' => tra('Deleted structure route')
-			);
+			Feedback::success(tr('Deleted structure route'));
 		}
 	}
 	
@@ -101,10 +93,7 @@ if ($prefs['feature_wiki_structure'] === 'y') {
 		$is_active = ($_REQUEST['mailinAct'.$i] == "on") ? 'y' : 'n';
 		
 		$usermailinlib->update_user_mailin_struct($mailin_struct_id, $username, $subj_pattern, $body_pattern, $structure_id, $page_id, $is_active);
-		$tikifeedback[] = array(
-			'num' => 1,
-			'mes' => tra('Updated structure route')
-		);
+		Feedback::success(tra('Updated structure route'));
 	}
 	
 	// Prepare route display
@@ -120,7 +109,6 @@ if ($prefs['feature_wiki_structure'] === 'y') {
 	$smarty->assign('addNewRoute', 'y');
 } 
 
-$smarty->assign_by_ref('tikifeedback', $tikifeedback);
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 $smarty->assign('mid', 'tiki-user_mailin.tpl');

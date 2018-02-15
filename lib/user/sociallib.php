@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: sociallib.php 49234 2013-12-22 21:08:49Z nkoth $
+// $Id: sociallib.php 60254 2016-11-13 22:37:01Z rjsmelo $
 
 class SocialLib
 {
@@ -114,11 +114,11 @@ class SocialLib
 			}
 		}
 
+		$tx->commit();
+
 		require_once('lib/search/refresh-functions.php');
 		refresh_index('user', $user);
 		refresh_index('user', $newFriend);
-
-		$tx->commit();
 
 		return true;
 	}
@@ -160,6 +160,10 @@ class SocialLib
 
 			$tx->commit();
 
+			require_once('lib/search/refresh-functions.php');
+			refresh_index('user', $user);
+			refresh_index('user', $newFriend);
+			
 			return true;
 		}
 

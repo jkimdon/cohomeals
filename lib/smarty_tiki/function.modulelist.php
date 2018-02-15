@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.modulelist.php 48760 2013-11-26 13:06:48Z arildb $
+// $Id: function.modulelist.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 function smarty_function_modulelist($params, $smarty)
 {
@@ -16,9 +16,13 @@ function smarty_function_modulelist($params, $smarty)
 
 	$zone = $params['zone'];
 
-	$class = 'content clearfix modules row';
+	$tag = "div";
+	$class = 'content clearfix modules';
 	if (! empty($params['class'])) {
-		$class = $params['class'];
+		$class .= ' ' . $params['class'];
+		if (strpos($class, 'navbar') !== false) {
+			$tag = 'nav';
+		}
 	}
 
 	$id = $zone . '_modules';
@@ -44,14 +48,9 @@ function smarty_function_modulelist($params, $smarty)
 			)
 		);
 	}
-	if ($prefs['mobile_feature'] === 'y' && $prefs['mobile_mode'] === 'y') {
-		$mobile = ' data-role="collapsible-set" data-theme="' . $prefs['mobile_theme_modules'] . '"';
-	} else {
-		$mobile = '';
-	}
 	return <<<OUT
-<div class="$class" id="$id"$dir$mobile>
+<$tag class="$class" id="$id"$dir>
 	$content
-</div>
+</$tag>
 OUT;
 }

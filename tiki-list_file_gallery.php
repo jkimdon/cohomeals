@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_file_gallery.php 55420 2015-05-12 21:04:54Z eromneg $
+// $Id: tiki-list_file_gallery.php 62687 2017-05-22 18:21:47Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
@@ -17,21 +17,17 @@ $inputConfiguration = array(
 $section = 'file_galleries';
 require_once ('tiki-setup.php');
 $access->check_feature(array('feature_file_galleries', 'feature_jquery_tooltips'));
-include_once ('lib/filegals/filegallib.php');
-include_once ('lib/stats/statslib.php');
+$filegallib = TikiLib::lib('filegal');
+$statslib = TikiLib::lib('stats');
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 }
 
-if ($prefs['feature_file_galleries_templates'] == 'y') {
-	global $templateslib;
-	include_once ('lib/templates/templateslib.php');
-}
+$templateslib = TikiLib::lib('template');
 
 if ($prefs['feature_groupalert'] == 'y') {
-	include_once ('lib/groupalert/groupalertlib.php');
+	$groupalertlib = TikiLib::lib('groupalert');
 }
 
 $auto_query_args = array( 'galleryId'
@@ -147,9 +143,11 @@ $smarty->assign('reindex_file_id', -1);
 $_REQUEST['view'] = isset($_REQUEST['view']) ? $_REQUEST['view'] : $gal_info['default_view'];
 
 // Execute batch actions
+
 if ($tiki_p_admin_file_galleries == 'y' || $tiki_p_remove_files === 'y') {
-	if (isset($_REQUEST['delsel_x'])) {
+	if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'delsel_x') {
 		check_ticket('fgal');
+		$access->check_authenticity(tra('Are you sure you want to remove that file or gallery?'));
 		if (isset($_REQUEST['file'])) {
 			foreach (array_values($_REQUEST['file']) as $file) {
 				if ($info = $filegallib->get_file_info($file)) {
@@ -193,8 +191,9 @@ if ($tiki_p_admin_file_galleries == 'y' || $tiki_p_remove_files === 'y') {
 }
 
 if ($tiki_p_admin_file_galleries == 'y') {
-	if (isset($_REQUEST['defaultsel_x'])) {
+	if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'defaultsel_x') {
 		check_ticket('fgal');
+		$access->check_authenticity(tra('Are you sure you want to reset to the default gallery list view settings?'));
 		if (!empty($_REQUEST['subgal'])) {
 			$filegallib->setDefault(array_values($_REQUEST['subgal']));
 		} else if (!empty($_REQUEST['galleryId'])) {
@@ -203,14 +202,14 @@ if ($tiki_p_admin_file_galleries == 'y') {
 		unset($_REQUEST['view']);
 	}
 
-	if (isset($_REQUEST['refresh_metadata_x'])) {
+	if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'refresh_metadata_x') {
 		foreach (array_values($_REQUEST['file']) as $file) {
 			$filegallib->metadataAction($file, 'refresh');
 		}
 	}
 }
 
-if (isset($_REQUEST['zipsel_x']) && $tiki_p_upload_files == 'y') {
+if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'zipsel_x' && $tiki_p_upload_files == 'y') {
 	check_ticket('fgal');
 	$href = array();
 	if (isset($_REQUEST['file'])) {
@@ -227,7 +226,9 @@ if (isset($_REQUEST['zipsel_x']) && $tiki_p_upload_files == 'y') {
 	die;
 }
 
-if (isset($_REQUEST['permsel_x']) && $tiki_p_assign_perm_file_gallery == 'y') {
+if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'permsel_x'
+	&& $tiki_p_assign_perm_file_gallery == 'y')
+{
 	$perms = $userlib->get_permissions(0, -1, 'permName_asc', '', 'file galleries');
 	$smarty->assign_by_ref('perms', $perms['data']);
 	$groups = $userlib->get_groups(0, -1, 'groupName_asc', '', '', 'n');
@@ -297,7 +298,7 @@ if (!empty($_REQUEST['validate']) && $prefs['feature_file_galleries_save_draft']
 	if ($tiki_p_admin_file_galleries != 'y' && (!$user || $user != $gal_info['user'])) {
 		if ($user != $info['user']) {
 			$smarty->assign('errortype', 401);
-			$smarty->assign('msg', tra('Permission denied you cannot validate files from this gallery'));
+			$smarty->assign('msg', tra("You don't have permission to validate files from this gallery"));
 			$smarty->display('error.tpl');
 			die;
 		}
@@ -619,8 +620,7 @@ if (!empty($_REQUEST['duplicate']) && !empty($_REQUEST['name']) && !empty($_REQU
 	);
 
 	if (isset($_REQUEST['dupCateg']) && $_REQUEST['dupCateg'] == 'on' && $prefs['feature_categories'] == 'y') {
-		global $categlib;
-		include_once ('lib/categories/categlib.php');
+		$categlib = TikiLib::lib('categ');
 		$cats = $categlib->get_object_categories('file gallery', $galleryId);
 		$catObjectId = $categlib->add_categorized_object(
 			'file gallery',
@@ -661,67 +661,6 @@ if (!empty($_REQUEST['removegal'])) {
 	$filegallib->remove_file_gallery($_REQUEST['removegal'], $_REQUEST['removegal']);
 }
 
-// Process upload of a file version
-if (!empty($_FILES)) {
-	check_ticket('fgal');
-	if ($tiki_p_upload_files != 'y' && $tiki_p_admin_file_galleries != 'y') {
-		$smarty->assign('errortype', 401);
-		$smarty->assign('msg', tra('You have permission to upload files but not to this file gallery'));
-		$smarty->display('error.tpl');
-		die;
-	}
-
-	foreach ($_FILES as $k => $v) {
-		$result = $filegallib->handle_file_upload($k, $v);
-
-		if (isset($result['error'])) {
-			$smarty->assign('msg', $result['error']);
-			$smarty->display('error.tpl');
-			exit;
-		}
-
-		if (empty($fileInfo) && !empty($_REQUEST['fileId'])) {
-			$fileInfo = $filegallib->get_file_info($_REQUEST['fileId']);
-		}
-
-		$fileId = $filegallib->replace_file(
-			$fileInfo['fileId'],
-			$fileInfo['name'],
-			$fileInfo['description'],
-			$result['filename'],
-			$result['data'],
-			$result['size'],
-			$result['type'],
-			$user,
-			$result['fhash'],
-			$fileInfo['comment'],
-			$gal_info,
-			true, //replace file
-			$fileInfo['author'],
-			$fileInfo['lastModif'],
-			$fileInfo['lockedby'],
-			null,
-			$result['metadata']
-		);
-
-		if (!$fileId) {
-			// If insert failed and stored on disk
-			if ($result['fhash']) {
-				@unlink($savedir . $result['fhash']);
-			}
-			$smarty->assign('msg', tra('Upload was not successful. Duplicate file content') . ': ' . $v['name']);
-			$smarty->display('error.tpl');
-			die;
-		}
-		$smarty->assign('metarray', json_decode($result['metadata']));
-		$smarty->assign('fileId', $fileId);
-		$smarty->assign('fileChangedMessage', tra('File update was successful') . ': ' . $v['name']);
-		if (isset($_REQUEST['fast']) && $prefs['fgal_asynchronous_indexing'] == 'y') {
-			$smarty->assign('reindex_file_id', $fileId);
-		}
-	}
-}
-
 // Update a file comment
 if (isset($_REQUEST['comment']) && $_REQUEST['comment'] != '' && isset($_REQUEST['fileId']) && $_REQUEST['fileId'] > 0) {
 	$msg = '';
@@ -744,7 +683,7 @@ if (isset($_REQUEST['comment']) && $_REQUEST['comment'] != '' && isset($_REQUEST
 
 // Set display config
 if (!isset($_REQUEST['maxRecords']) || $_REQUEST['maxRecords'] <= 0) {
-	if ($_REQUEST['view'] == 'page' && empty($_REQUEST['fileId'])) {
+	if (isset($_REQUEST['view']) && $_REQUEST['view'] == 'page' && empty($_REQUEST['fileId'])) {
 		$_REQUEST['maxRecords'] = 1;
 	} elseif (isset($gal_info['maxRows']) && $gal_info['maxRows'] > 0) {
 		$_REQUEST['maxRecords'] = $gal_info['maxRows'];
@@ -817,8 +756,7 @@ if ($prefs['feature_categories'] == 'y') {
 
 	// load categories for find
 	if ($prefs['feature_categories'] == 'y' && !isset($_REQUEST['edit_mode'])) {
-		global $categlib;
-		include_once ('lib/categories/categlib.php');
+		$categlib = TikiLib::lib('categ');
 		$categories = $categlib->getCategories();
 		$smarty->assign_by_ref('categories', $categories);
 		$smarty->assign('cat_tree', $categlib->generate_cat_tree($categories, true, $selectedCategories));
@@ -914,7 +852,6 @@ if (isset($_GET['slideshow'])) {
 				$filesrecords = array_values($files['data']);
 				foreach ($filesrecords as $key => $file) {
 					if ($file['fileId'] == $_REQUEST['fileId']) {
-						$smarty->assign('offset', $key);
 						$files['data'] = array($file);
 						$smarty->assign('metarray', json_decode($files['data'][0]['metadata'], true));
 						break;
@@ -938,6 +875,10 @@ if (isset($_GET['slideshow'])) {
 		}
 		$smarty->assign('filescount', $files['cant'] - $subs);
 	}
+	//for page view to get offset in pagination right since subgalleries are not included
+	$subgals = $filegallib->getSubGalleries($_REQUEST['galleryId']);
+	$smarty->assign('subcount', count($subgals) - 1);
+
 	$smarty->assign('mid', 'tiki-list_file_gallery.tpl');
 }
 
@@ -945,7 +886,7 @@ if (isset($_GET['slideshow'])) {
 $smarty->assign('thumbnail_size', $prefs['fgal_thumb_max_size']);
 
 if (isset($_REQUEST['show_details'])) {
-	$show_details = $_REQUEST['show_details'];
+	$show_details = $_REQUEST['show_details'] === 'y' ? 'y' : 'n';
 	setCookieSection('show_details', $show_details);
 } else {
 	$show_details = getCookie('show_details', null, 'n');
@@ -1023,18 +964,19 @@ if ($prefs['feature_file_galleries_templates'] == 'y') {
 $subGalleries = $filegallib->getSubGalleries(( isset($_REQUEST['parentId']) && $galleryId == 0) ? $_REQUEST['parentId'] : $galleryId);
 $smarty->assign('treeRootId', $subGalleries['parentId']);
 
-if ($prefs['fgal_show_explorer'] == 'y' || $prefs['fgal_show_path'] == 'y' || isset($_REQUEST['movesel_x']) || isset($_REQUEST["edit_mode"])) {
+if ($prefs['fgal_show_explorer'] == 'y' || $prefs['fgal_show_path'] == 'y'
+	|| $_REQUEST['fgal_actions'] === 'movesel_x' || isset($_REQUEST["edit_mode"]) || isset($_REQUEST['dup_mode']))
+{
 	$gals = array();
-	// we want to display the entire path so we can tell where we are moving things
-	foreach ( $subGalleries['data'] as $key => &$gal ) {
-	  $tmpPath = $filegallib->get_full_virtual_path( $gal['id'], 'filegal' );
-	  // now get rid of the extraneous initial "/File Galleries/" to make it shorter
-	  $galPath = preg_replace( '~^/File Galleries/~', '', $tmpPath );
-	  $gals[] = array('label' => $galPath, 'id' => $gal['id']);
+	foreach ($subGalleries['data'] as $gal) {
+		$gals[] = array(
+			'label' => $gal['parentName'] . ' > ' . $gal['name'],
+			'id' => $gal['id'],
+			'perms' => $gal['perms'],
+			'public' => $gal['public'],
+			'user' => $gal['user'],
+		);
 	}
-
-	// and sort alphabetically by highest parent gallery to make it usable
-	// We care only about fullpath, id, and perms since that is what is used in tpl
 	sort($gals);
 	$smarty->assign_by_ref('all_galleries', $gals);
 
@@ -1043,6 +985,9 @@ if ($prefs['fgal_show_explorer'] == 'y' || $prefs['fgal_show_path'] == 'y' || is
 		$smarty->assign('gallery_path', $path['HTML']);
 	}
 	$smarty->assign('tree', $filegallib->getTreeHTML($galleryId));
+	if (!empty($_REQUEST['fgal_actions']) && $_REQUEST['fgal_actions'] === 'movesel_x') {
+		$smarty->assign('movesel_x', 'y');
+	}
 }
 
 ask_ticket('fgal');
@@ -1072,12 +1017,12 @@ include_once ('fgal_listing_conf.php');
 
 $find_durations = array();
 if (isset($_REQUEST['view']) && $_REQUEST['view'] == 'admin') {
-	$find_durations[] = array('label' => tra('Not modified since')
+	$find_durations[] = array('label' => tra('Not modified for')
 													, 'prefix' => 'find_lastModif'
 													, 'default' => empty($_REQUEST['find_lastModif'])?'':$_REQUEST['find_lastModif']
 													, 'default_unit' => empty($_REQUEST['find_lastModif_unit']) ? 'week' : $_REQUEST['find_lastModif_unit']
 													);
-	$find_durations[] = array('label' => tra('Not downloaded since')
+	$find_durations[] = array('label' => tra('Not downloaded for')
 													, 'prefix' => 'find_lastDownload'
 													, 'default' => empty($_REQUEST['find_lastDownload']) ? '' : $_REQUEST['find_lastDownload']
 													, 'default_unit' => empty($_REQUEST['find_lastDownload_unit']) ? 'week' : $_REQUEST['find_lastDownload_unit']

@@ -1,16 +1,17 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Abstract.php 45820 2013-05-01 13:02:45Z robertplummer $
+// $Id: Abstract.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
-// File name: Send.php
-// Required path: /lib/core/Feed/ForwardLink
+use Tiki\FileGallery;
+
+// Required path: /lib/core/Feed
 //
 // Programmer: Robert Plummer
 //
-// Purpose: The base class reused in ForwardLink, TextLink and others
+// Purpose: The base class reused in FutureLink, PastLink and others
 
 abstract class Feed_Abstract
 {
@@ -84,7 +85,7 @@ abstract class Feed_Abstract
 	private function open()
 	{
 		if ($this->isFileGal == true) {
-			$contents = FileGallery_File::filename($this->name)->data();
+			$contents = FileGallery\File::filename($this->name)->data();
 		} else {
 			$contents = TikiLib::lib("cache")->getCached($this->name, get_class($this));
 		}
@@ -101,11 +102,13 @@ abstract class Feed_Abstract
 		$contents = json_encode($contents);
 
 		if ($this->isFileGal == true) {
-			FileGallery_File::filename($this->name)
+            //TODO: abstract
+			FileGallery\File::filename($this->name)
 				->setParam('description', '')
 				->replace($contents);
 
 		} else {
+            //TODO: abstract
 			TikiLib::lib("cache")->cacheItem($this->name, $contents, get_class($this));
 		}
 
@@ -132,7 +135,7 @@ abstract class Feed_Abstract
 		global $tikilib;
 
 		if ($this->isFileGal == true) {
-			FileGallery_File::filename($this->name)->delete();
+			FileGallery\File::filename($this->name)->delete();
 		} else {
 			TikiLib::lib("cache")->empty_type_cache(get_class($this));
 		}
@@ -153,14 +156,8 @@ abstract class Feed_Abstract
 		$contents = $this->open();
 
 		if (empty($contents)) {
-			$contents = (object)array(
-				'date' => 0,
-				'type' => $this->type,
-				'entry' => array()
-			);
+			$contents = new Feed_Contents($this->type);
 		}
-
-		$item = (object)$item;
 
 		//this allows us to intercept the contents and do things like check the validity of the content being appended to the contents
 		$this->appendToContents($contents, $item);
@@ -175,12 +172,13 @@ abstract class Feed_Abstract
 		global $tikilib;
 		$contents = $this->getContents();
 
-		$feed = (object)array(
-			'version'=> 	$this->version,
-			'encoding'=> 	$this->encoding, //we get this from the above call to open
-			'feed'=> 		$contents,
-			'origin'=> 		(!empty($origin) ? $origin : $tikilib->tikiUrl() . 'tiki-feed.php'),
-			'type'=>		$this->type
+        //TODO: convert to actual object
+		$feed = new Feed_Container(
+			$this->version,
+			$this->encoding, //we get this from the above call to open
+			$contents,
+            (!empty($origin) ? $origin : $tikilib->tikiUrl() . 'tiki-feed.php'),
+			$this->type
 		);
 
 		return $feed;
@@ -191,7 +189,7 @@ abstract class Feed_Abstract
 		$archives = array();
 
 		if ($this->isFileGal == true) {
-			$file = FileGallery_File::filename($this->name);
+			$file = FileGallery\File::filename($this->name);
 			foreach ($file->listArchives() as $archive) {
 				$archive = $this->open();
 				$archives[$archive->feed->date] = $archive->feed->entry;

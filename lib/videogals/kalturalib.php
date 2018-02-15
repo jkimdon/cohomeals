@@ -1,12 +1,12 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: kalturalib.php 50695 2014-04-06 18:27:54Z jonnybradley $ 
+// $Id: kalturalib.php 58747 2016-05-31 23:00:07Z lindonb $ 
 
 
-require_once ('lib/videogals/KalturaClient.php');
+require_once ('vendor_extra/kaltura/KalturaClient.php');
 
 class KalturaLib
 {
@@ -21,23 +21,11 @@ class KalturaLib
 	
 	function __construct($session_type)
 	{
-		global $prefs, $smarty;
-
-		if (substr($prefs['kaltura_kServiceUrl'], -1) != '/') {
-			$prefs['kaltura_kServiceUrl'] = $prefs['kaltura_kServiceUrl'] . '/';
-			TikiLib::lib('tiki')->set_preference('kaltura_kServiceUrl', $prefs['kaltura_kServiceUrl']);
-		}
-
-		$smarty->assign('kServiceUrl', $prefs['kaltura_kServiceUrl']);
-		
 		$this->sessionType = $session_type;
-
 	}
 
 	public function getSessionKey()
 	{
-		$tikilib = TikiLib::lib('tiki');
-
 		if ($session = $this->storedKey()) {
 			return $session;
 		}
@@ -45,6 +33,8 @@ class KalturaLib
 		if ($this->getClient()) {
 			return $this->storedKey();
 		}
+
+		return '';
 	}
 
 	private function storedKey($key = null)
@@ -63,6 +53,8 @@ class KalturaLib
 				'expiry' => $tikilib->now + 1800, // Keep for half an hour
 			);
 		}
+
+		return $key;
 	}
 
 	private function getConfig()
@@ -91,7 +83,7 @@ class KalturaLib
 					$this->storedKey($session);
 				}
 			} catch (Exception $e) {
-				TikiLib::lib('errorreport')->report($e->getMessage());
+				Feedback::error($e->getMessage(), 'session');
 			}
 		}
 
@@ -145,7 +137,7 @@ class KalturaLib
 		if ($client = $this->getClient()) {
 			$filter = new KalturaUiConfFilter();
 			$filter->objTypeEqual = 1; // 1 denotes Players
-			$filter->orderBy = +createdAt;
+			$filter->orderBy = '-createdAt';
 			$uiConfs = $client->uiConf->listAction($filter);
 			
 			if (is_null($client->error)) {
@@ -166,7 +158,7 @@ class KalturaLib
 			try {
 				$obj = $this->_getPlayersUiConfs()->objects;
 			} catch (Exception $e) {
-				TikiLib::lib('errorreport')->report($e->getMessage());
+				Feedback::error($e->getMessage(), 'session');
 				return array();
 			}
 			$configurations = array();
@@ -226,7 +218,7 @@ class KalturaLib
 						 return $results->id;
 					 }
 				 } catch (Exception $e) {
-					 TikiLib::lib('errorreport')->report($e->getMessage());
+					 Feedback::error($e->getMessage(), 'session');
 				 }
 			 } else {
 				 try {
@@ -239,7 +231,7 @@ class KalturaLib
 						 return '';
 					 }
 				 } catch (Exception $e) {
-					 TikiLib::lib('errorreport')->report($e->getMessage());
+					 Feedback::error($e->getMessage(), 'session');
 				 }
 			}
 		}
@@ -271,7 +263,7 @@ class KalturaLib
 	public function flattenVideo($entryId)
 	{
 		if ($client = $this->getClient()) {
-			return $client->mixing->requestFlattening($entryId, 'flv');
+			return $client->mixing->requestFlattening($entryId, 'flv');	// FIXME this method is no longer supported
 		}
 	}
 
@@ -285,7 +277,7 @@ class KalturaLib
 	public function updateMix($entryId, array $data)
 	{
 		if ($client = $this->getClient()) {
-			$kentry = new KalturaPlayableEntry();
+			$kentry = new KalturaMixEntry();
 			$kentry->name = $data['name'];
 			$kentry->description = $data['description'];
 			$kentry->tags = $data['tags'];
@@ -306,7 +298,7 @@ class KalturaLib
 	public function updateMedia($entryId, array $data)
 	{
 		if ($client = $this->getClient()) {
-			$kentry = new KalturaPlayableEntry();
+			$kentry = new KalturaMediaEntry();
 			$kentry->name = $data['name'];
 			$kentry->description = $data['description'];
 			$kentry->tags = $data['tags'];
@@ -354,7 +346,7 @@ class KalturaLib
 			$kpager->pageIndex = 0;
 			$kpager->pageSize = count($movies);
 
-			$kfilter = new KalturaMixEntryFilter();
+			$kfilter = new KalturaMediaEntryFilter();
 			$kfilter->idIn = implode(',', $movies);
 			
 			$mediaList = array();

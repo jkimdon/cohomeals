@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_pagetabs.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_pagetabs.php 59837 2016-09-28 16:36:57Z jonnybradley $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
@@ -20,14 +20,19 @@ function wikiplugin_pagetabs_info()
 	return array(
 		'name' => tra('Page Tabs'),
 		'documentation' => tra('PluginPageTabs'),
-		'description' => tra('Display page content in a set of tabs'),
+		'description' => tra('Display content of wiki pages in a set of tabs'),
 		'prefs' => array( 'wikiplugin_pagetabs' ),
+		'iconname' => 'copy',
+		'introduced' => 9,
 		'body' => NULL,
 		'params' => array(
 			'pages' => array(
 				'required' => false,
 				'name' => tra('Wiki page names'),
-				'description' => tra('The wiki pages you would like to use in this plugin, optional, separate with pipe "|".  Or a table with the class of "pagetabs" on the main page. On child pages use as a way to redirect to the parent.'),
+				'description' => tr('The wiki pages you would like to use in this plugin, optional, separate with
+					pipe %0|%1. Or a table with the class of "pagetabs" on the main page. On child pages use as a way
+					to redirect to the parent.', '<code>', '</code>'),
+				'since' => '9.0',
 				'default' => '',
 				'separator' => '|',
 				'filter' => 'pagename',
@@ -39,7 +44,11 @@ function wikiplugin_pagetabs_info()
 
 function wikiplugin_pagetabs($data, $params)
 {
-	global $tikilib, $smarty, $headerlib, $user;
+	global $user;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+
 	static $pagetabsindex = 0;
 	++$pagetabsindex;
 	extract($params, EXTR_SKIP);
@@ -108,7 +117,7 @@ function wikiplugin_pagetabs($data, $params)
 								.each(function() {
 									$(this).attr("href", ($(this).attr("href") + "").replace("_raw", ""));
 								})
-								.unbind("click")
+								.off("click")
 								.click(function() {
 									var pageAttr = $(this).attr("href").split("=");
 									if (pageAttr.length < 2) return true;

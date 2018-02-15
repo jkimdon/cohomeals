@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.display.php 46910 2013-07-30 13:15:22Z lphuberdeau $
+// $Id: block.display.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 /**
  * Smarty plugin
@@ -24,7 +24,8 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 
 function smarty_block_display($params, $content, $smarty, &$repeat)
 {
-	global $prefs, $user, $userlib;
+	global $prefs, $user;
+	$userlib = TikiLib::lib('user');
 	
 	if ( $repeat ) return;
 	$ok = true;

@@ -2,17 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-emulate_groups_switch.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-emulate_groups_switch.php 58772 2016-06-02 20:08:51Z jyhem $
 
 require_once('tiki-setup.php');
 
-if (isset($_GET['from'])) {
-	$orig_url = $_GET['from'];
-} elseif (isset($_SERVER['HTTP_REFERER'])) {
+if (isset($_SERVER['HTTP_REFERER'])) {
 	$orig_url = $_SERVER['HTTP_REFERER'];
 } else {
 	$orig_url = $prefs['tikiIndex'];

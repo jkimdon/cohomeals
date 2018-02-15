@@ -2,7 +2,7 @@
  * Javascript translation definition
  * Example to help translation of some English strings in some js files
  * 
- * $Id: $
+ * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
  */
 
 lang = {
@@ -17,7 +17,7 @@ lang = {
 	"Valid User Name" : "Nome de usuário válido",
 	"Passwords match" : "Senhas iguais",
 	"Passwords don't match" : "As senhas não são iguais",
-	"Valid Email" : "E-mail válido",
+	"Valid Email" : "Email válido",
 	"Close" : "Fechar",
 	"Submit" : "Enviar",
 	"Insert" : "Adicionar",
@@ -26,5 +26,5 @@ lang = {
 	"Do not match" : "Diferente",
 	"Advanced options" : "Opções avançadas",
 	"Pick a file." : "Escolha um arquivo",
-	"You appear to be using HTML in your article but have not selected \"Allow full HTML\".\nThis will result in HTML tags being removed.\nDo you want to save your edits anyway?" : "Aparentemente você está usando HTML mas não seleciounou o checkbox \"Usar HTML\".\n Isso significa que as tags HTML serão removidas.\nVocê quer continuar mesmo assim?",
+	"You appear to be using HTML in your article but have not selected \"Allow full HTML\".\nThis will result in HTML tags being removed.\nDo you want to save your edits anyway?" : "Aparentemente você está usando HTML mas não seleciounou o checkbox \"Usar HTML\".\n Isso significa que as tags HTML serão removidas.\nVocê quer continuar mesmo assim?"
 };

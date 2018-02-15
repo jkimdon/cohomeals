@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: notificationlib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: notificationlib.php 59950 2016-10-11 09:18:39Z kroky6 $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -49,7 +49,7 @@ class NotificationLib extends TikiLib
 	function get_mail_events($event, $object)
 	{
 		global $tikilib;
-		require_once('lib/objectlib.php');
+		$objectlib = TikiLib::lib('object');
 		$query = "select * from `tiki_user_watches` where `event`=? and (`object`=? or `object`='*')";
 		$result = $this->query($query, array($event, $object));
 		$ret = array();
@@ -117,7 +117,7 @@ class NotificationLib extends TikiLib
 				'object' => '*'
 		);// Blog comment mail
 		$watches['blog_comment_changes'] = array(
-			'label' => tra('A comment in a blog page is posted or edited') ,
+			'label' => tra('A blog post comment is posted or edited') ,
 			'type' => 'blog',
 			'url' => '',
 			'available' => $prefs['feature_blogs'] == 'y',
@@ -139,14 +139,14 @@ class NotificationLib extends TikiLib
 		);
 
 		$watches['wiki_comment_changes'] = array(
-				'label' => tra('A comment in a wiki page is posted or edited') ,
+				'label' => tra('A wiki page comment is posted or edited') ,
 				'type' => 'wiki page',
 				'url' => '',
 				'available' => $prefs['feature_wiki'] == 'y' && $prefs['feature_wiki_comments'] == 'y'
 		);
 
 		$watches['article_commented'] = array(
-				'label' => tra('A comment in an article is posted or edited') ,
+				'label' => tra('An article comment is posted or edited') ,
 				'type' => 'article',
 				'url' => '',
 				'available' => $prefs['feature_articles'] == 'y' && $prefs['feature_article_comments'] == 'y'
@@ -174,6 +174,13 @@ class NotificationLib extends TikiLib
 				'object' => '*'
 		);
 
+		$watches['thread_comment_replied'] = array(
+				'label' => tra('User\'s comment is replied') ,
+				'type' => 'comment',
+				'url' => '',
+				'object' => '*'
+		);
+
 		foreach ($watches as $key => $watch) {
 			if (array_key_exists('available', $watch) && !$watch['available']) {
 				unset($watches[$key]);
@@ -190,4 +197,3 @@ class NotificationLib extends TikiLib
 
 }
 
-$GLOBALS['notificationlib'] = new NotificationLib;

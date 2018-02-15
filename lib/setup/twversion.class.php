@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: twversion.class.php 55522 2015-05-23 15:13:23Z nkoth $
+// $Id: twversion.class.php 63932 2017-09-21 18:13:27Z jonnybradley $
 
 // Should generally be instantiated from tiki-setup.php
 
@@ -18,17 +18,17 @@ class TWVersion
 	public $star;			// Star being used for this version tree
 	public $svn;			// Is this a Subversion version or a package?
 
-	function TWVersion()
+	function __construct()
 	{
 		// Set the development branch.  Valid are:
 		//   stable   : Represents stable releases.
 		//   unstable : Represents candidate and test/development releases.
-		//   trunk     : Represents next generation development version.
+		//   trunk    : Represents next generation development version.
 		$this->branch 	= 'stable';
 
 		// Set everything else, including defaults.
-		$this->version 	= '12.4';	// needs to have no spaces for releases
-		$this->star	= 'Altair';
+		$this->version 	= '17.1';	// needs to have no spaces for releases
+		$this->star	= 'Zeta Boötis';
 		$this->releases	= array();
 
 		// Check for Subversion or not
@@ -73,7 +73,12 @@ class TWVersion
 				20=>'Herbig Haro',	// 9.x
 				21=>'Sun',			// 10.x
 				22=>'Vega',			// 11.x
-				23=>'Altair'		// 12.x
+				23=>'Altair',		// 12.x
+				24=>'Fomalhaut',	// 13.x
+				25=>'Peony',		// 14.x
+				26=>'Situla',		// 15.x
+				27=>'Tabby\'s',		// 16.x
+				28=>'Zeta Boötis',	// 17.x
 		);
 	}
 
@@ -160,6 +165,8 @@ class TWVersion
 				'6.11',
 				'6.12',
 				'6.13',
+				'6.14',
+				'6.15',
 				'7.0beta1',
 				'7.0beta2',
 				'7.0RC1',
@@ -191,6 +198,8 @@ class TWVersion
 				'9.7',
 				'9.8',
 				'9.9',
+				'9.10',
+				'9.11',
 				'10.0alpha',
 				'10.0beta',
 				'10.0',
@@ -199,9 +208,11 @@ class TWVersion
 				'10.3',
 				'10.4',
 				'10.5',
+				'10.6',
 				'11.0beta',
 				'11.0',
 				'11.1',
+				'11.2',
 				'12.0alpha',
 				'12.0beta',
 				'12.0',
@@ -211,6 +222,38 @@ class TWVersion
 				'12.2',
 				'12.3',
 				'12.4',
+				'12.5',
+				'12.6',
+				'12.7',
+				'12.8',
+				'12.9',
+				'12.10',
+				'12.11',
+				'13.0beta',
+				'13.0',
+				'13.1',
+				'13.2',
+				'14.0beta',
+				'14.0',
+				'14.1',
+				'14.2',
+				'14.3',
+				'14.4',
+				'15.0alpha',
+				'15.0beta',
+				'15.0',
+				'15.1',
+				'15.2',
+				'15.3',
+				'15.4',
+				'16.0beta',
+				'16.0',
+				'16.1',
+				'16.2',
+				'17.0alpha',
+				'17.0beta',
+				'17.0',
+				'17.1',
 			);
 	}
 

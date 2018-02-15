@@ -1,12 +1,20 @@
-{* $Id: admin_auto_toc.tpl 49649 2014-01-30 18:53:37Z xavidp $ *}
+{* $Id: admin_auto_toc.tpl 59321 2016-07-30 06:18:59Z fvtorres $ *}
 
-<div class="adminWizardIconleft"><img src="img/icons/large/wizard_admin48x48.png" alt="{tr}Admin Wizard{/tr}" title="{tr}Admin Wizard{/tr}" /></div><div class="adminWizardIconright"><img src="img/icons/large/wikipages48x48.png" alt="{tr}Set up the language{/tr}" /></div>
-<div class="adminWizardContent">
-<fieldset>
-	<legend>{tr}Auto TOC options{/tr}</legend>
-		{preference name=wiki_inline_auto_toc}
-		{preference name=wiki_inline_toc_pos}
-		<br>
-		<em>{tr}See also{/tr} <a href="http://doc.tiki.org/tiki-index.php?page=Auto+TOC" target="_blank">{tr}Auto TOC{/tr} @ doc.tiki.org</a></em>
-</fieldset>
+<div class="media">
+	<span class="pull-left fa-stack fa-lg margin-right-18em" alt="{tr}Configuration Wizard{/tr}" title="Configuration Wizard">
+		<i class="fa fa-gear fa-stack-2x"></i>
+		<i class="fa fa-rotate-270 fa-magic fa-stack-2x margin-left-9em"></i>
+	</span>
+	{tr}Choose your desired settings below{/tr}</br></br></br>
+	<div class="media-body">
+		{icon name="file-text-o" size=3 iclass="pull-right"}
+		<fieldset>
+			<legend>{tr}Auto TOC options{/tr}</legend>
+			{preference name=wiki_inline_auto_toc}
+			{preference name=wiki_toc_pos}
+			{preference name=wiki_toc_offset}
+			<br>
+			<em>{tr}See also{/tr} <a href="http://doc.tiki.org/tiki-index.php?page=Auto+TOC" target="_blank">{tr}Auto TOC{/tr} @ doc.tiki.org</a></em>
+		</fieldset>
+	</div>
 </div>

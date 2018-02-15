@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-calendar_new.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-calendar_new.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -86,11 +86,11 @@ function module_calendar_new_info()
  */
 function module_calendar_new($mod_reference, $module_params)
 {
-	global $prefs, $user, $tiki_p_admin_calendars, $tikilib, $smarty;
-	global $calendarlib; include_once('lib/calendar/calendarlib.php');
-	global $userlib; include_once('lib/userslib.php');
-//	Note: calendar css file now loaded in tiki-modules.php
-//	global $headerlib; $headerlib->add_cssfile('css/calendar.css', 20);
+	global $prefs, $user, $tiki_p_admin_calendars;
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+	$calendarlib = TikiLib::lib('calendar');
+	$userlib = TikiLib::lib('user');
 	global $calendarViewMode, $focusdate;
 	$default = array('viewnavbar' => 'y', 'viewmodelink' => 'week', 'showaction' => 'y', 'linkall' => 'n');
 	$module_params = array_merge($default, $module_params);

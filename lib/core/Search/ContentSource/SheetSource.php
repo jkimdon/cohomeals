@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SheetSource.php 45204 2013-03-19 19:03:08Z jonnybradley $
+// $Id: SheetSource.php 59189 2016-07-14 17:27:41Z jonnybradley $
 
 class Search_ContentSource_SheetSource implements Search_ContentSource_Interface
 {
@@ -24,6 +24,10 @@ class Search_ContentSource_SheetSource implements Search_ContentSource_Interface
 		$sheetlib = TikiLib::lib('sheet');
 
 		$info = $sheetlib->get_sheet_info($objectId);
+
+		if (! $info) {
+			return false;
+		}
 
 		$values = $this->db->table('tiki_sheet_values');
 		$contributors = $values->fetchColumn(

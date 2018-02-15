@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-timesheet.php 45610 2013-04-19 21:44:53Z jonnybradley $
+// $Id: tiki-timesheet.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 require_once('tiki-setup.php');
 $access->check_feature(array('feature_time_sheet','feature_trackers'));
@@ -58,9 +58,9 @@ if (isset($projectList)) {
 TikiLib::lib("sheet")->setup_jquery_sheet();
 
 $headerlib = TikiLib::lib("header")
-	->add_cssfile("vendor/jquery/jtrack/css/jtrack.css")
-	->add_jsfile("vendor/jquery/jtrack/js/domcached-0.1-jquery.js")
-	->add_jsfile("vendor/jquery/jtrack/js/jtrack.js")
+	->add_cssfile("vendor_bundled/vendor/jquery/jtrack/css/jtrack.css")
+	->add_jsfile("vendor_bundled/vendor/jquery/jtrack/js/domcached-0.1-jquery.js")
+	->add_jsfile("vendor_bundled/vendor/jquery/jtrack/js/jtrack.js")
 	->add_jq_onready(
 		"jTask.init();
 
@@ -87,7 +87,7 @@ $headerlib = TikiLib::lib("header")
 		var jS = $('#timesheetSpreadsheet').getSheet();
 		if (jS) {
 			$('#timesheetSpreadsheet')
-				.unbind('visible')
+				.off('visible')
 				.visible(function() {
 					jS.openSheet(table);
 				});
@@ -118,7 +118,7 @@ $headerlib = TikiLib::lib("header")
 	});
 
 	$('#timeSheetCommit').click(function() {
-		$('#timeSheetTabs').modal(tr('Committing...'));
+		$('#timeSheetTabs').tikiModal(tr('Committing...'));
 		var stack = [];
 		$.getJSON('tiki-timesheet.php?save', function(inputs) {
 			for (var namespace in $.DOMCached.getStorage()) {
@@ -143,7 +143,7 @@ $headerlib = TikiLib::lib("header")
 						}
 					})
 					.error(function() {
-						$('#timeSheetTabs').modal();
+						$('#timeSheetTabs').tikiModal();
 						alert(tr('Could not save'));
 					});
 					return false;

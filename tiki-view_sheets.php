@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_sheets.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-view_sheets.php 61690 2017-03-14 18:03:48Z jonnybradley $
 
 $section = 'sheet';
 $tiki_sheet_div_style = '';
@@ -50,7 +50,7 @@ if (!$sheetlib->user_can_view($_REQUEST['sheetId'])) {
 	die;
 }
 
-$smarty->assign('page', $_REQUEST['page']);
+$smarty->assign('page', isset($_REQUEST['page']) ? $_REQUEST['page'] : '');
 $smarty->assign('objectperms', $objectperms);
 
 if (isset($_REQUEST['height'])) {
@@ -120,7 +120,7 @@ if (isset($_REQUEST['s']) && !empty($_REQUEST['s']) ) { //save
 		$smarty->assign('msg', tra('Permission denied'));
 		die;
 	}
-	$access->check_authenticity(tra('Are you sure you want to rollback this spreadsheet?'));
+	$access->check_authenticity(tra('Are you sure you want to roll back this spreadsheet?'));
 	$id = $sheetlib->rollback_sheet($_REQUEST['sheetId'], $_REQUEST['readdate']);
 	if ($id) {
 		header('Location: tiki-view_sheets.php?sheetId=' . $id);
@@ -155,7 +155,7 @@ if ( isset($_REQUEST['relate']) && isset($_REQUEST['trackerId']) ) {
 		$smarty->assign('msg', tra('File removed'));
 	}
 } elseif ( isset($_REQUEST['fileId']) ) {
-	include_once('lib/filegals/filegallib.php');
+	$filegallib = TikiLib::lib('filegal');
 	$access->check_feature('feature_file_galleries');
 	$fileInfo = $filegallib->get_file_info($_REQUEST['fileId']);
 	$handler = new TikiSheetCSVHandler($fileInfo);
@@ -179,18 +179,18 @@ if ( isset($_REQUEST['relate']) && isset($_REQUEST['trackerId']) ) {
 	$grid->import($handler);
 
 	//ensure that sheet isn't being edited, then parse values if needed
-	if ( $_REQUEST['parse'] != 'edit' ) {
+//	if ( $_REQUEST['parse'] != 'edit' ) {
 		$grid->parseValues = true;
-	} else {
-		$grid->parseValues = false;
-	}
+//	} else {
+//		$grid->parseValues = false;
+//	}
 
 	$smarty->assign('parseValues', $grid->parseValues);
 
-	$tableHtml[0] = $grid->getTableHtml(true, $_REQUEST['readdate']);
+	$tableHtml[0] = $grid->getTableHtml(true, isset($_REQUEST['readdate']) ? $_REQUEST['readdate'] : null);
 
-	if (strlen($relatedTrackersAsHtml) > 0) {
-		$tableHtml[0] = $tableHtml[0] . $relatedTrackersAsHtml;
+	if (!empty($relatedTrackersAsHtml)) {
+		$tableHtml[0] .= $relatedTrackersAsHtml;
 	}
 }
 
@@ -213,14 +213,15 @@ if (!empty($_REQUEST['parse']) && $_REQUEST['parse'] == 'edit') {
 
 $headerlib->add_jq_onready(
 	'$.sheet.tikiOptions = $.extend($.sheet.tikiOptions, {
-					menu: $("#sheetMenu").clone().html()
+					menuLeft: $("#sheetMenu").clone().html()
 				});
 
 				jST = $("div.tiki_sheet")
+				    .height(window.innerHeight * 0.8)
 					.sheet($.sheet.tikiOptions);
 
-				jST.id = "'.$_REQUEST['sheetId'].'";
-				jST.file = "'.$_REQUEST['file'].'";
+				jST.id = "' . ($_REQUEST['sheetId'] * 1) . '";
+				jST.file = "' . ( isset($fileInfo) ? 'true' : 'false' ) .'";
 
 				$.sheet.link.setupUI();
 				$.sheet.readyState();
@@ -255,21 +256,24 @@ $headerlib->add_jq_onready(
 					});'
 );
 
+$serviceLib = TikiLib::lib('service');
 $smarty->assign('semUser', '');
 if ($prefs['feature_warn_on_edit'] == 'y') {
-	if ($tikilib->semaphore_is_set($_REQUEST['sheetId'], $prefs['warn_on_edit_time'] * 60, 'sheet')
-			&& ($semUser = $tikilib->get_semaphore_user($_REQUEST['sheetId'], 'sheet')) != $user
+	if ($serviceLib->internal('semaphore', 'is_set', ['object_id' => $_REQUEST['sheetId'], 'object_type' => 'sheet']) &&
+		($semUser = $serviceLib->internal('semaphore', 'get_user', ['object_id' => $_REQUEST['sheetId'], 'object_type' => 'sheet'])) !== $user
 	) {
 		$editconflict = 'y';
 		$smarty->assign('semUser', $semUser);
 	} else {
 		$editconflict = 'n';
 	}
-	if ($_REQUEST['parse'] == 'edit') {
-		$_SESSION['edit_lock_sheet' . $_REQUEST['sheetId']] = $tikilib->semaphore_set($_REQUEST['sheetId'], 'sheet');
-	} elseif (isset($_SESSION['edit_lock_sheet' . $_REQUEST['sheetId']])) {
-		$tikilib->semaphore_unset($_REQUEST['sheetId'], $_SESSION['edit_lock_sheet' . $_REQUEST['sheetId']]);
-		unset($_SESSION['edit_lock_sheet' . $_REQUEST['sheetId']]);
+	if ($_REQUEST['parse'] == 'edit' && $editconflict === 'n') {
+		$serviceLib->internal('semaphore', 'set', ['object_id' => $_REQUEST['sheetId'], 'object_type' => 'sheet']);
+	} else {
+		$serviceLib->internal('semaphore', 'unset', [
+			'object_id' => $_REQUEST['sheetId'],
+			'object_type' => 'sheet',
+		]);
 	}
 } else {
 		$editconflict = 'n';

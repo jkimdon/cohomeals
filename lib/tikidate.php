@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikidate.php 52207 2014-07-31 20:49:01Z nkoth $
+// $Id: tikidate.php 60897 2017-01-14 11:57:45Z luciash $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -24,16 +24,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
  */
 class TikiDate
 {
-	var $trad = array(
+	public $trad = array(
 					'January','February','March','April','May','June','July','August','September','October','November','December',
 					'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec',
 					'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday',
 					'Mon','Tue','Wed','Thu','Fri','Sat','Sun','of'
 	);
 
-	var $translated_trad = array();
-	var $date;
-	var	$translation_array = array (
+	public $translated_trad = array();
+	public $date;
+	public $translation_array = array (
 				'%a' => 'D',
 				'%A' => 'l',
 				'%b' => 'M',
@@ -50,7 +50,6 @@ class TikiDate
 				'%i' => 'h',
 				'%I' => 'h',
 				'%j' => 'z',
-				'%l' => 'g',
 				'%m' => 'm',
 				'%M' => 'i',
 				'%o' => 'P',
@@ -70,7 +69,7 @@ class TikiDate
 				'%W' => 'W',
 				'%y' => 'y',
 				'%Y' => 'Y',
-				'%Z' => 'T'
+				'%Z' => 'T',
 	);
 
 	public static $deprecated_tz = array(
@@ -91,6 +90,9 @@ class TikiDate
 		'Japan',
 		'Kwajalein',
 		'Libya',
+		'localtime',	// because PHP Fatal error was observed in Apache2 logfile
+				// not mentioned here: https://bugs.php.net/bug.php?id=66985
+		'leap-seconds.list', // same here
 		'MST7MDT',
 		'Navajo',
 		'NZ-CHAT',
@@ -107,22 +109,19 @@ class TikiDate
 	/**
 	 * Default constructor
 	 */
-	function TikiDate()
+	function __construct()
 	{
 
-		if (function_exists('date_default_timezone_set')) {			// function not available < PHP 5.1
-
-			if (isset($_SERVER['TZ']) && !empty($_SERVER['TZ'])) {	// apache - can be set in .htaccess
-				$tz = $_SERVER['TZ'];
-			} else if (ini_get('date.timezone')) {					// set in php.ini
-				$tz = ini_get('date.timezone');
-			} else if (getenv('TZ')) {								// system env setting
-				$tz = getenv('TZ');
-			} else {
-				$tz = 'UTC';
-			}
-			date_default_timezone_set($tz);
+		if (isset($_SERVER['TZ']) && !empty($_SERVER['TZ'])) {	// apache - can be set in .htaccess
+			$tz = $_SERVER['TZ'];
+		} else if (ini_get('date.timezone')) {					// set in php.ini
+			$tz = ini_get('date.timezone');
+		} else if (getenv('TZ')) {								// system env setting
+			$tz = getenv('TZ');
+		} else {
+			$tz = 'UTC';
 		}
+		date_default_timezone_set($tz);
 
 		$this->date = new DateTime();	// was: DateTime(date("Y-m-d H:i:s Z"))
 										// the Z (timezone) param was causing an error
@@ -150,6 +149,15 @@ class TikiDate
 			$tz[$tz_id]['offset'] = $tmp * 1000;
 		}
 		return $tz;
+	}
+
+	static function tzServerOffset( $display_tz = null ) {
+		if ( !$display_tz ) {
+			$display_tz = 'UTC';
+		}
+		$tz = new DateTimeZone($display_tz);
+		$d = new DateTime('now', $tz);
+		return $tz->getOffset($d);
 	}
 
     /**
@@ -195,7 +203,7 @@ class TikiDate
 		// replace POSIX GMT relative tz with ISO signs
 		if (strpos($return, 'GMT+') !== false) {
 			$return = str_replace('GMT+', 'GMT-', $return);
-		} else if (strpos($return, 'GMT-') !== false) {
+		} else {
 			$return = str_replace('GMT-', 'GMT+', $return);
 		}
 
@@ -388,13 +396,14 @@ class TikiDate
 	}
 
 	/**
-	 * Checks that the string is either a timezone identifier or an abbreviation.
+	 * Checks that the string is a timezone identifier (Note: timezone abbreviations
+	 * are not always valid timezones and don't handle daylight saving correctly). 
 	 * display_timezone can be manually set to an identifier in preferences but
 	 * will be an [uppercase] abbreviation if auto-detected by JavaScript.
 	 */
 	static function TimezoneIsValidId($id)
 	{
-		return in_array(strtolower($id), self::getTimezoneAbbreviations()) || in_array($id, self::getTimezoneIdentifiers());
+		return in_array($id, self::getTimezoneIdentifiers());
 	}
 
 	static function getTimezoneAbbreviations()

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Kaltura.php 45134 2013-03-15 18:47:02Z changi67 $
+// $Id: Kaltura.php 58576 2016-05-10 12:31:41Z jonnybradley $
 
 /**
  * Handler class for kaltura video integration
@@ -18,12 +18,22 @@ class Tracker_Field_Kaltura extends Tracker_Field_Abstract implements Tracker_Fi
 		return array(
 			'kaltura' => array(
 				'name' => tr('Kaltura Video'),
-				'description' => tr('Displays a series of attached kaltura videos.'),
+				'description' => tr('Displays a series of attached Kaltura videos.'),
 				'help' => 'Kaltura',
 				'prefs' => array('trackerfield_kaltura', 'feature_kaltura', 'wikiplugin_kaltura'),
 				'tags' => array('advanced'),
 				'default' => 'n',
 				'params' => array(
+					'displayParams' => array(
+						'name' => tr('Display parameters'),
+						'description' => tr('URL-encoded parameters used in the {kaltura} plugin, for example,.') . ' "width=800&height=600"',
+						'filter' => 'text',
+					),
+					'displayParamsForLists' => array(
+						'name' => tr('Display parameters for lists'),
+						'description' => tr('URL-encoded parameters used in the {kaltura} plugin, for example,.') . ' "width=240&height=80"',
+						'filter' => 'text',
+					),
 				),
 			),
 		);
@@ -31,8 +41,12 @@ class Tracker_Field_Kaltura extends Tracker_Field_Abstract implements Tracker_Fi
 
 	function getFieldData(array $requestData = array())
 	{
-		if (isset($requestData[$this->getInsertId()])) {
-			$value = implode(',', $requestData[$this->getInsertId()]);
+		$insertId = $this->getInsertId();
+
+		if (isset($requestData[$insertId])) {
+			$value = implode(',', $requestData[$insertId]);
+		} else if (!empty($requestData['old_' . $insertId])) {    // all entries removed
+			$value = '';
 		} else {
 			$value = $this->getValue();
 		}
@@ -69,13 +83,27 @@ class Tracker_Field_Kaltura extends Tracker_Field_Abstract implements Tracker_Fi
 
 	function renderOutput($context = array())
 	{
-		return $this->renderTemplate(
-			'trackeroutput/kaltura.tpl',
-			$context,
-			array(
-				'movieIds' => array_filter(explode(',', $this->getValue())),
-			)
-		);
+		if ($context['list_mode'] === 'y') {
+			$otherParams = $this->getOption('displayParamsForLists', []);
+		} else {
+			$otherParams = $this->getOption('displayParams', []);
+		}
+
+		if ($otherParams) {
+			parse_str($otherParams, $otherParams);
+		}
+
+		include_once 'lib/wiki-plugins/wikiplugin_kaltura.php';
+
+		$movieIds = array_filter(explode(',', $this->getValue()));
+		$output = '';
+
+		foreach( $movieIds as $id ) {
+			$params = array_merge($otherParams, ['id' => $id]);
+			$output .= wikiplugin_kaltura('', $params);
+		}
+
+		return $output;
 	}
 
 	function importRemote($value)

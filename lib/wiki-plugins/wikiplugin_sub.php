@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_sub.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_sub.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_sub_info()
 {
@@ -13,7 +13,8 @@ function wikiplugin_sub_info()
 		'description' => tra('Apply subscript font to text'),
 		'prefs' => array( 'wikiplugin_sub' ),
 		'body' => tra('text'),
-		'icon' => 'img/icons/text_subscript.png',
+		'iconname' => 'subscript',
+		'introduced' => 1,
 		'tags' => array( 'basic' ),
 		'params' => array(
 		),
@@ -22,8 +23,5 @@ function wikiplugin_sub_info()
 
 function wikiplugin_sub($data, $params)
 {
-	global $tikilib;
-
-	extract($params, EXTR_SKIP);
 	return "<sub>$data</sub>";
 }

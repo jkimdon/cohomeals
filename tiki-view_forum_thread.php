@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_forum_thread.php 52815 2014-10-10 14:11:43Z jonnybradley $
+// $Id: tiki-view_forum_thread.php 60443 2016-11-27 05:13:54Z lindonb $
 
 $section = 'forums';
 require_once ('tiki-setup.php');
@@ -48,14 +48,14 @@ $pageCache = Tiki_PageCache::create()
 	->addKeys($_REQUEST, array( 'locale', 'forumId', 'comments_parentId' ))
 	->checkMeta(
 		'forum-page-output-meta-time', array(
-			'forumId'           => @$_REQUEST['forumId'],
-			'comments_parentId' => @$_REQUEST['comments_parentId']
+			'forumId'           => $jitRequest->forumId->int(),
+			'comments_parentId' => $jitRequest->comments_parentId->int(),
 		)
 	)
 	->applyCache();
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib; include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 }
 if (!isset($_REQUEST['topics_offset'])) {
 	$_REQUEST['topics_offset'] = 0;
@@ -65,6 +65,15 @@ if (!isset($_REQUEST['topics_sort_mode']) || empty($_REQUEST['topics_sort_mode']
 } else {
 	$smarty->assign('topics_sort_mode_param', '&amp;topics_sort_mode=' . $_REQUEST['topics_sort_mode']);
 }
+if ( !empty($_REQUEST['thread_sort_mode']) ) {
+	$thread_sort_mode = $_REQUEST['thread_sort_mode'];
+} elseif ( !empty($forum_info['threadOrdering']) ) {
+	$thread_sort_mode = $forum_info['threadOrdering'];
+} else {
+	$thread_sort_mode = 'commentDate_asc';
+}
+$smarty->assign_by_ref('thread_sort_mode', $thread_sort_mode);
+
 if (!isset($_REQUEST['topics_find'])) {
 	$_REQUEST['topics_find'] = '';
 }
@@ -77,6 +86,37 @@ if (isset($_REQUEST["quote"]) && $_REQUEST["quote"]) {
 	$quote = 0;
 }
 $smarty->assign('quote', $quote);
+
+//Set time control to 0 if not set
+if (!isset($_REQUEST['time_control'])) {
+	$_REQUEST['time_control'] = 0;
+}
+$commentslib->set_time_control($_REQUEST['time_control']);
+/* If the forum is flat (no sub-threads), check to see if the requested post is
+the original post for the thread (ie. if it's the root of the thread). If not,
+change the request to fetch its parent's thread and then find the location of the
+originally requested post*/
+if ( $forum_info['is_flat'] == 'y') {
+	if (empty($thread_info)){
+		//need to get thread info to find out if it's the root of the thread
+		$thread_info = $commentslib->get_comment($_REQUEST["threadId"]);
+	}
+	// if it's not the root, ie. not 0, then start the fetch the thread via the root post
+	if ($thread_info['parentId'] > 0) {
+		$anchored_post = $_REQUEST['threadId'];
+		$root_thread_id = $thread_info['parentId'];
+		//gets the position/page offset of the requested post within the parent
+		$resPos = $commentslib->get_comment_position($anchored_post,$root_thread_id,$thread_sort_mode,$forum_info['commentsPerPage']);
+		//find the needed comments_offset to set to the right page
+		$_REQUEST['comments_offset'] = $resPos['page_offset'] * $forum_info['commentsPerPage'];
+		//note the #thread anchor added at the end of the URL to fetch the specific post
+		$url = "tiki-view_forum_thread.php?forumId=" . $_REQUEST['forumId'] . "&comments_parentId=" . $root_thread_id . "&comments_offset=" . $_REQUEST['comments_offset'] . "#threadId=".$anchored_post;
+		header('location: ' . $url);
+		die;
+	}
+}
+
+
 $comments_parentId = $_REQUEST["comments_parentId"];
 if (isset($_REQUEST["openpost"])) {
 	$smarty->assign('openpost', 'y');
@@ -150,27 +190,6 @@ if ($threads[0]['threadId'] != $_REQUEST['comments_parentId']) {
 }
 
 if ($tiki_p_admin_forum == 'y') {
-	if (isset($_REQUEST['delsel'])) {
-		if (isset($_REQUEST['forumthread'])) {
-			check_ticket('view-forum');
-			foreach (array_values($_REQUEST['forumthread']) as $thread) {
-				$commentslib->remove_comment($thread);
-				$commentslib->register_remove_post($_REQUEST['forumId'], $_REQUEST['comments_parentId']);
-			}
-		}
-	}
-	if (isset($_REQUEST['remove_attachment'])) {
-		$access->check_authenticity(tra('Are you sure you want to remove that attachment?'));
-		$commentslib->remove_thread_attachment($_REQUEST['remove_attachment']);
-	}
-	if (isset($_REQUEST['movesel'])) {
-		if (isset($_REQUEST['forumthread'])) {
-			check_ticket('view-forum');
-			foreach (array_values($_REQUEST['forumthread']) as $thread) {
-				$commentslib->set_parent($thread, $_REQUEST['moveto']);
-			}
-		}
-	}
 	if ($prefs['feature_forum_topics_archiving'] == 'y' && isset($_REQUEST['archive']) && isset($_REQUEST['comments_parentId'])) {
 		check_ticket('view-forum');
 		if ($_REQUEST['archive'] == 'y') {
@@ -199,18 +218,37 @@ if (isset($_REQUEST['post_reported'])) {
 $smarty->assign_by_ref('forum_info', $forum_info);
 $thread_info = $commentslib->get_comment($_REQUEST["comments_parentId"], null, $forum_info);
 
-if ($prefs['feature_score'] == 'y' && $user != $thread_info['userName']) {
-	$score_user = $_SESSION['u_info']['login'];
+if ($user != $thread_info['userName']) {
 	$score_id = $thread_info["threadId"];
-	$tikilib->score_event($score_user, 'forum_post_read', $_REQUEST["comments_parentId"]);
-	$tikilib->score_event($thread_info['userName'], 'forum_post_is_read', "$score_user:$score_id");
+
+	TikiLib::events()->trigger('tiki.forumpost.view',
+		array(
+			'type' => 'forum post',
+			'object' => $score_id,
+			'author' => $thread_info['userName'],
+			'user' => $GLOBALS['user'],
+		)
+	);
 }
 
 if (empty($thread_info)) {
-	$smarty->assign('msg', tra("Incorrect thread"));
-	$smarty->display("error.tpl");
-	die;
+	$forumId = '';
+	//thread might be missing due to a successful delete of a post
+	if (!empty($_SESSION['tikifeedback'][0]['deleted_forumId'])) {
+		$forumId = $_SESSION['tikifeedback'][0]['deleted_forumId'];
+	} elseif (!empty($_REQUEST['forumId'])) {
+		$forumId = $_REQUEST['forumId'];
+		Feedback::error(tr('Thread %0 does not exist.', $comments_parentId));
+	}
+	if (!empty($forumId)) {
+		TikiLib::lib('access')->redirect('tiki-view_forum.php?forumId=' . $forumId);
+	} else {
+		$smarty->assign('msg', tr('Thread %0 does not exist.', $comments_parentId));
+		$smarty->display("error.tpl");
+		die;
+	}
 }
+
 if (!empty($thread_info['parentId'])) {
 	$thread_info['topic'] = $commentslib->get_comment($thread_info['parentId'], null, $forum_info);
 }
@@ -221,8 +259,6 @@ if ($tiki_p_admin_forum != 'y' && $thread_info['locked'] == 'y') {
 
 $smarty->assign_by_ref('thread_info', $thread_info);
 $comments_per_page = $forum_info['commentsPerPage'];
-$thread_sort_mode = $forum_info['threadOrdering'];
-$smarty->assign_by_ref('thread_sort_mode', $thread_sort_mode);
 $thread_style = $forum_info['threadStyle'];
 $comments_vars = array(
 	'forumId'
@@ -297,6 +333,8 @@ if ($tiki_p_admin_forum == 'y' || $prefs['feature_forum_quickjump'] == 'y') {
 if ($tiki_p_admin_forum == 'y') {
 	$topics = $commentslib->get_forum_topics($_REQUEST['forumId'], 0, 200, 'commentDate_desc');
 	$smarty->assign_by_ref('topics', $topics);
+	$comms = array_column($topics, 'title', 'threadId');
+	$smarty->assign('topics_encoded', json_encode($comms));
 }
 $smarty->assign('unread', 0);
 if ($user && $prefs['feature_messages'] == 'y' && $tiki_p_messages == 'y') {
@@ -313,10 +351,6 @@ if ($prefs['feature_freetags'] == 'y') {
 	$tags = $freetaglib->get_tags_on_object($cat_objid, $cat_type);
 	$smarty->assign('freetags', $tags);
 }
-if (isset($_SESSION['feedbacks'])) {
-	$smarty->assign('feedbacks', $_SESSION['feedbacks']);
-	unset($_SESSION['feedbacks']);
-}
 $defaultRows = $prefs['default_rows_textarea_forumthread'];
 $smarty->assign('forum_mode', 'y');
 
@@ -325,8 +359,7 @@ if ($prefs['feature_actionlog'] == 'y') {
 }
 ask_ticket('view-forum');
 if ($prefs['feature_forum_parse'] == 'y') {
-	global $wikilib;
-	include_once ('lib/wiki/wikilib.php');
+	$wikilib = TikiLib::lib('wiki');
 	$plugins = $wikilib->list_plugins(true, 'editpost2');
 	$smarty->assign_by_ref('plugins', $plugins);
 }
@@ -357,17 +390,20 @@ if (isset($_REQUEST['display'])) {
 	if ($_REQUEST['display'] == 'pdf') {
 		require_once 'lib/pdflib.php';
 		$generator = new PdfGenerator();
-		$pdf = $generator->getPdf('tiki-view_forum_thread.php', array('display' => 'print', 'comments_parentId' => $_REQUEST['comments_parentId'], 'forumId' => $_REQUEST['forumId']));
-
-		header('Cache-Control: private, must-revalidate');
-		header('Pragma: private');
-		header("Content-Description: File Transfer");
-		header('Content-disposition: attachment; filename="'. $thread_info['title'] . '.pdf"');
-		header("Content-Type: application/pdf");
-		header("Content-Transfer-Encoding: binary");
-		header('Content-Length: '. strlen($pdf));
-		echo $pdf;
-
+		if (!empty($generator->error)) {
+			Feedback::error($generator->error, 'session');
+			$access->redirect($_SERVER['HTTP_REFERER']);
+		} else {
+			$pdf = $generator->getPdf('tiki-view_forum_thread.php', array('display' => 'print', 'comments_parentId' => $_REQUEST['comments_parentId'], 'forumId' => $_REQUEST['forumId']));
+			header('Cache-Control: private, must-revalidate');
+			header('Pragma: private');
+			header("Content-Description: File Transfer");
+			header('Content-disposition: attachment; filename="'. $thread_info['title'] . '.pdf"');
+			header("Content-Type: application/pdf");
+			header("Content-Transfer-Encoding: binary");
+			header('Content-Length: '. strlen($pdf));
+			echo $pdf;
+		}
 	} else {
 		$smarty->display('tiki-print.tpl');
 	}

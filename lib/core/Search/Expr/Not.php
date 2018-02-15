@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Not.php 45448 2013-04-12 14:13:00Z lphuberdeau $
+// $Id: Not.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 class Search_Expr_Not implements Search_Expr_Interface
 {
@@ -13,6 +13,11 @@ class Search_Expr_Not implements Search_Expr_Interface
 	function __construct($expression)
 	{
 		$this->expression = $expression;
+	}
+
+	function __clone()
+	{
+		$this->expression = clone $this->expression;
 	}
 
 	function setType($type)

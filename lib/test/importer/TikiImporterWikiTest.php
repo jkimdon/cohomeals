@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiImporterWikiTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: TikiImporterWikiTest.php 59662 2016-09-10 16:02:15Z jonnybradley $
 
 require_once(dirname(__FILE__) . '/tikiimporter_testcase.php');
 require_once(dirname(__FILE__) . '/../../importer/tikiimporter_wiki.php');
@@ -17,7 +17,9 @@ class TikiImporter_Wiki_Test extends TikiImporter_TestCase
 	
 	public function testImportShouldCallMethodsToStartImportProcess()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('validateInput', 'parseData', 'insertData'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('validateInput', 'parseData', 'insertData'))
+		   ->getMock();
 	   $obj->expects($this->once())->method('validateInput');
 	   $obj->expects($this->once())->method('parseData');
 	   $obj->expects($this->once())->method('insertData');
@@ -28,7 +30,9 @@ class TikiImporter_Wiki_Test extends TikiImporter_TestCase
 
 	public function testImportShouldSetInstanceProperties()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('validateInput', 'parseData', 'insertData'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('validateInput', 'parseData', 'insertData'))
+		   ->getMock();
 	   $_POST['alreadyExistentPageName'] = 'override';
 	   $_POST['wikiRevisions'] = 100;
 
@@ -48,7 +52,9 @@ class TikiImporter_Wiki_Test extends TikiImporter_TestCase
 	public function testImportShouldSetSessionVariables()
 	{
 	   $expectedImportFeedback = array('importedPages' => 10, 'totalPages' => '13');
-	   $obj = $this->getMock('TikiImporter_Wiki', array('validateInput', 'parseData', 'insertData', 'saveAndDisplayLog'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('validateInput', 'parseData', 'insertData', 'saveAndDisplayLog'))
+		   ->getMock();
 	   $obj->expects($this->once())->method('validateInput'); 
 	   $obj->expects($this->once())->method('parseData');
 	   $obj->expects($this->once())->method('insertData')->will($this->returnValue($expectedImportFeedback));
@@ -63,23 +69,29 @@ class TikiImporter_Wiki_Test extends TikiImporter_TestCase
 
 	public function testInsertDataCallInsertPageFourTimes()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('insertPage'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('insertPage'))
+		   ->getMock();
 	   $obj->expects($this->exactly(4))->method('insertPage');
-	   $parsedData = array(1, 2, 3, 4);
+	   $parsedData = [['name' => '1'],['name' => '2'],['name' => '3'],['name' => '4'],];
 	   $obj->insertData($parsedData);
 	}
 
 	public function testInsertDataCallInsertPageOnceWithProperParam()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('insertPage'));
-	   $obj->expects($this->once())->method('insertPage')->with('pageArray');
-	   $parsedData = array('pageArray');
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('insertPage'))
+		   ->getMock();
+	   $obj->expects($this->once())->method('insertPage')->with(['name' => '1']);
+	   $parsedData = [['name' => '1'],];
 	   $obj->insertData($parsedData);
 	}
 
 	public function testInsertDataShouldNotCallInsertPage()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('insertPage'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('insertPage'))
+		   ->getMock();
 	   $obj->expects($this->never())->method('insertPage');
 	   $parsedData = array();
 	   $obj->insertData($parsedData);
@@ -87,7 +99,9 @@ class TikiImporter_Wiki_Test extends TikiImporter_TestCase
 
 	public function testInsertDataShouldReturnCountData()
 	{
-	   $obj = $this->getMock('TikiImporter_Wiki', array('insertPage'));
+	   $obj = $this->getMockBuilder('TikiImporter_Wiki')
+		   ->setMethods( array('insertPage'))
+		   ->getMock();
 	   $obj->expects($this->exactly(6))->method('insertPage')->will($this->onConsecutiveCalls(true, true, false, true, false, true));
 
 	   $parsedData = array(1, 2, 3, 4, 5, 6);
@@ -105,7 +119,9 @@ class TikiImporter_Wiki_InsertPage_Test extends TikiImporter_TestCase
 	{
 	   require_once(dirname(__FILE__) . '/fixtures/mediawiki_page_as_array.php');
 	   global $tikilib;
-	   $tikilib = $this->getMock('TikiLib', array('create_page', 'update_page', 'page_exists', 'remove_all_versions'));
+	   $tikilib = $this->getMockBuilder('TikiLib')
+		   ->setMethods( array('create_page', 'update_page', 'page_exists', 'remove_all_versions'))
+		   ->getMock();
 	   $this->obj = new TikiImporter_Wiki_Mediawiki;
 	   $this->obj->revisionsNumber = 0;
 	}

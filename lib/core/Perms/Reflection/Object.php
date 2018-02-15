@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Object.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Object.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 class Perms_Reflection_Object implements Perms_Reflection_Container
 {
@@ -20,19 +20,19 @@ class Perms_Reflection_Object implements Perms_Reflection_Container
 
 	function add( $group, $permission )
 	{
-		global $userlib;
+		$userlib = TikiLib::lib('user');
 		$userlib->assign_object_permission($group, $this->object, $this->type, $permission);
 	}
 
 	function remove( $group, $permission )
 	{
-		global $userlib;
+		$userlib = TikiLib::lib('user');
 		$userlib->remove_object_permission($group, $this->object, $this->type, $permission);
 	}
 
 	function getDirectPermissions()
 	{
-		global $userlib;
+		$userlib = TikiLib::lib('user');
 		$set = new Perms_Reflection_PermissionSet;
 
 		$permissions = $userlib->get_object_permissions($this->object, $this->type);
@@ -75,7 +75,7 @@ class Perms_Reflection_Object implements Perms_Reflection_Container
 
 	private function getCategories()
 	{
-		global $categlib; require_once 'lib/categories/categlib.php';
+		$categlib = TikiLib::lib('categ');
 
 		return $categlib->get_object_categories($this->type, $this->object);
 	}

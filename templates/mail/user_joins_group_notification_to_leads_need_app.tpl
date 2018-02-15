@@ -1,7 +1,7 @@
-{tr}You are getting this email because you are a group leader of group{/tr} - {$mail_group}
+{* $Id: user_joins_group_notification_to_leads_need_app.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}{tr}You are getting this email because you are a leader{/tr} - {$prefs.mail_template_custom_text}{$mail_group}
 <br/>
-{$mail_real} ({$mail_user}) {tr}joined group{/tr} - {$mail_group}
+{$mail_real} ({$mail_user}) {tr}joined{/tr} - {$mail_group}
 <br/>
-{tr}The user needs to be approved before he is admitted to the group.{/tr}
+{tr}The user needs to be approved before he is admitted.{/tr}
 <br/>
-<a href="{$mail_machine}/{$admin_url}">{tr}Click here to manage the members of your group.{/tr}</a>
+<a href="{$mail_machine}/{$mail_url}">{tr}Click here to manage members.{/tr}</a>

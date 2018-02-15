@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_blog.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-edit_blog.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section = 'blogs';
 require_once ('tiki-setup.php');
-include_once ('lib/blogs/bloglib.php');
+$bloglib = TikiLib::lib('blog');
 
 $access->check_feature('feature_blogs');
 $access->check_permission('tiki_p_create_blogs');
@@ -40,7 +40,7 @@ $smarty->assign('allow_comments', 'y');
 $smarty->assign('show_avatar', 'n');
 $smarty->assign('show_related', 'n');
 $smarty->assign('related_max', 5);
-$smarty->assign('maxPosts', 10);
+$smarty->assign('maxPosts', 25);
 $smarty->assign('use_excerpt', 'n');
 $smarty->assign('creator', $user);
 

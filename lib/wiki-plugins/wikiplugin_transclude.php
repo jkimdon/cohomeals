@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_transclude.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_transclude.php 61395 2017-02-25 04:29:34Z drsassafras $
 
 function wikiplugin_transclude_info()
 {
@@ -14,13 +14,16 @@ function wikiplugin_transclude_info()
 		'prefs' => array('wikiplugin_transclude', 'feature_wiki'),
 		'extraparams' => true,
 		'defaultfilter' => 'text',
-		'icon' => 'img/icons/page_copy.png',
+		'iconname' => 'copy',
+		'introduced' => 6,
 		'params' => array(
 			'page' => array(
 				'required' => true,
 				'name' => tra('Page Name'),
 				'description' => tra('Name of the wiki page to use as a template for the values.'),
+				'since' => '6.0',
 				'default' => '',
+				'filter' => 'pagename',
 				'profile_reference' => 'wiki_page',
 			),
 		),
@@ -61,7 +64,7 @@ function wikiplugin_transclude( $data, $params )
 
 	if ( $info = $tikilib->get_page_info($page) ) {
 		$parts = preg_split('/%%%text%%%/', $info['data']);
-		$data = $tikilib->parse_data($data);
+		$data = TikiLib::lib('parser')->parse_data($data);
                 $pass = $parts[0] . $data . $parts[1];
 		return preg_replace_callback(
 			'/%%%([A-z0-9]+)%%%/',

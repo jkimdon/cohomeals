@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SmartyTemplate.php 50232 2014-03-06 17:46:17Z jonnybradley $
+// $Id: SmartyTemplate.php 59367 2016-08-04 17:25:45Z nkoth $
 
 class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_Interface
 {
@@ -45,21 +45,7 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 
 	function renderEntries(Search_ResultSet $entries)
 	{
-		global $tikipath;
-		$smarty = new Smarty;
-		$smarty->setCompileDir($tikipath . 'templates_c');
-		$smarty->setTemplateDir(null);
-		$smarty->setTemplateDir(dirname($this->templateFile));
-		$smarty->setPluginsDir(
-			array(
-				$tikipath . TIKI_SMARTY_DIR,	// the directory order must be like this to overload a plugin
-				SMARTY_DIR . 'plugins',
-			)
-		);
-
-		$secpol = new Tiki_Security_Policy($smarty);
-		$secpol->secure_dir[] = dirname($this->templateFile);
-		$smarty->enableSecurity($secpol);
+		$smarty = new Smarty_Tiki;
 
 		if ( $this->changeDelimiters ) {
 			$smarty->left_delimiter = '{{';
@@ -70,6 +56,9 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 			$smarty->assign($key, $value);
 		}
 
+		$smarty->assign('base_url', $GLOBALS['base_url']);
+		$smarty->assign('prefs', $GLOBALS['prefs']);
+		$smarty->assign('user', $GLOBALS['user']);
 		$smarty->assign('results', $entries);
 		$smarty->assign(
 			'facets',
@@ -90,6 +79,13 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 		$smarty->assign('offsetplusone', $entries->getOffset() + 1);
 		$smarty->assign('offsetplusmaxRecords', $entries->getOffset() + $entries->getMaxRecords());
 		$smarty->assign('maxRecords', $entries->getMaxRecords());
+		$smarty->assign('id', $entries->getId());
+		$smarty->assign('tsOn', $entries->getTsOn());
+		$tsettings = $entries->getTsSettings();
+		if (is_array($tsettings)) {
+			$smarty->assign('tstotals', $tsettings['math']['totals']);
+			$smarty->assign('tscols', $tsettings['columns']);
+		}
 
 		return $smarty->fetch($this->templateFile);
 	}

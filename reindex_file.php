@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: reindex_file.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: reindex_file.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 // This script will send a 1x1 transparent gif image, close connection and reindex the file corresponding to the id url argument
 // The goal is to process reindexation in a background job for which the user won't have to wait
@@ -25,7 +25,7 @@ if ( ($id = (int)$_GET['id']) > 0 ) {
 		&& $prefs['search_refresh_index_mode'] == 'normal'
 		&& $prefs['fgal_asynchronous_indexing'] == 'y'
 	) {
-		require_once('lib/filegals/filegallib.php');
+		$filegallib = TikiLib::lib('filegal');
 		require_once('lib/search/refresh-functions.php');
 
 		$info = $filegallib->get_file_info($id);

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Order.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Order.php 60512 2016-12-02 10:08:21Z jonnybradley $
 
 class Search_Query_Order
 {
@@ -12,6 +12,7 @@ class Search_Query_Order
 
 	const MODE_NUMERIC = 'numeric';
 	const MODE_TEXT = 'text';
+	const MODE_DISTANCE = 'distance';
 
 	const ORDER_ASC = 'asc';
 	const ORDER_DESC = 'desc';
@@ -19,12 +20,14 @@ class Search_Query_Order
 	private $field;
 	private $mode;
 	private $order;
+	private $arguments;
 
-	function __construct($field, $mode, $order)
+	function __construct($field, $mode, $order, array $arguments = [])
 	{
 		$this->field = $field;
 		$this->mode = $mode;
 		$this->order = $order;
+		$this->arguments = $arguments;
 	}
 
 	function getField()
@@ -40,6 +43,11 @@ class Search_Query_Order
 	function getMode()
 	{
 		return $this->mode;
+	}
+
+	function getArguments()
+	{
+		return $this->arguments;
 	}
 
 	public static function getDefault()

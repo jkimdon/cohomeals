@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Perms.php 49082 2013-12-13 21:17:57Z nkoth $
+// $Id: Perms.php 60492 2016-11-30 16:44:53Z jonnybradley $
 
 
 /**
@@ -22,6 +22,11 @@
  *   }
  *
  * Global permissions may be obtained using Perms::get() without a context.
+ * 
+ * Please note that the Perms will now be correct for checking trackeritem
+ * context and permissions assigned to parent tracker. If no trackeritem
+ * specific permissions are set on the object or category level, system will
+ * check parent tracker permissions before continuing to the global level.
  *
  * The facade also provides a convenient way to filter lists based on
  * permissions. Using the method will also used the underlying::bulk()
@@ -81,7 +86,10 @@
  * instances allow to reconfigure the accessors depending on the
  * environment in which they are used. For example, the accessors are
  * configured with the global groups by default. However, they can be
- * replaced to evaluate the permissions for a different user.
+ * replaced to evaluate the permissions for a different user
+ * by creating a new Perms_Context object before accessing the perms,
+ * e.g.
+ * 		$permissionContext = new Perms_Context($aUserName);
  *
  * Each ResolverFactory will generate a hash from the context which
  * represents a unique key to the matching resolver it would provide.
@@ -207,7 +215,7 @@ class Perms
 	 * @param $bulkKey string The key added for each of the objects in bulk
 	 *                        loading.
 	 * @param $data array A list of records.
-	 * @param $dataKey mixed The key to fetch from each record as the object.
+	 * @param $contextMap mixed The key to fetch from each record as the object.
 	 * @param $permission string The permission name to validate on each record.
 	 * @return array What remains of the dataset after filtering.
 	 */
@@ -297,6 +305,11 @@ class Perms
 		$this->groups = $groups;
 	}
 
+	function getGroups()
+	{
+		return $this->groups;
+	}
+
 	function setPrefix($prefix)
 	{
 		$this->prefix = $prefix;
@@ -315,25 +328,26 @@ class Perms
 	private function getResolver(array $context)
 	{
 		$toSet = array();
-		$resolver = null;
+		$finalResolver = false;
 
 		foreach ($this->factories as $factory) {
 			$hash = $factory->getHash($context);
 
-			if (isset($this->hashes[$hash])) {
-				$resolver = $this->hashes[$hash];
-				break;
+			// no hash returned by factory means factory does not support that context
+			if (!$hash) {
+				continue;
+			}
+
+			if( isset($this->hashes[$hash]) ) {
+				$finalResolver = $this->hashes[$hash];
 			} else {
 				$toSet[] = $hash;
+				$finalResolver = $factory->getResolver($context);
 			}
 
-			if ($resolver = $factory->getResolver($context)) {
+			if( $finalResolver ) {
 				break;
 			}
-		}
-
-		if (! $resolver) {
-			$resolver = false;
 		}
 
 		// Limit the amount of hashes preserved to reduce memory consumption
@@ -342,10 +356,10 @@ class Perms
 		}
 
 		foreach ($toSet as $hash) {
-			$this->hashes[$hash] = $resolver;
+			$this->hashes[$hash] = $finalResolver;
 		}
 
-		return $resolver;
+		return $finalResolver;
 	}
 
 	private function loadBulk($baseContext, $bulkKey, $data)

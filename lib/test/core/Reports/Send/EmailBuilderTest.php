@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EmailBuilderTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: EmailBuilderTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
 
 class Reports_Send_EmailBuilderTest extends TikiTestCase
 {
@@ -14,7 +14,7 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 	protected function setUp()
 	{
 		$this->tikilib = $this->getMockBuilder('TikiLib')->getMock();
-		$this->factory = $this->getMock('Reports_Send_EmailBuilder_Factory');
+		$this->factory = $this->createMock('Reports_Send_EmailBuilder_Factory');
 		
 		$this->obj = new Reports_Send_EmailBuilder($this->tikilib, new Reports_Send_EmailBuilder_Factory);
 
@@ -31,7 +31,7 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 		$this->tikilib->expects($this->exactly(2))->method('get_short_datetime')
 			->will($this->returnValue('2011-09-13 11:19'));
 		
-		$calendarlib = $this->getMock('MockCalendarLib', array('get_item'));
+		$calendarlib = $this->createMock(get_class(TikiLib::lib('calendar')));
 		$calendarlib->expects($this->exactly(2))
 			->method('get_item')
 			->will($this->returnValue(array('name' => 'Calendar item name')));
@@ -45,13 +45,13 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 			array(
 				'user' => 'admin',
     			'event' => 'calendar_changed',
-    			'data' => array('event' => 'calendar_changed', 'calitemId' => '2', 'user' => 'admin'),
+    			'data' => array('event' => 'calendar_changed', 'calitemId' => '2', 'user' => 'admin', 'base_url' => 'http://example.com'),
     			'time' => '2011-09-12 20:30:31',
 			),
 			array(
 				'user' => 'admin',
     			'event' => 'calendar_changed',
-    			'data' => array('event' => 'calendar_changed', 'calitemId' => '1', 'user' => 'admin'),
+    			'data' => array('event' => 'calendar_changed', 'calitemId' => '1', 'user' => 'admin', 'base_url' => 'http://example.com'),
     			'time' => '2011-09-13 11:19:31',
 			),
 		);
@@ -66,7 +66,7 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 		$this->tikilib->expects($this->once())->method('get_short_datetime')
 			->will($this->returnValue('2011-09-12 20:30'));
 		
-		$trklib = $this->getMock('MockTrackerLib', array('get_tracker', 'get_isMain_value'));
+		$trklib = $this->createMock(get_class(TikiLib::lib('trk')));
 		$trklib->expects($this->once())->method('get_tracker');
 		$trklib->expects($this->once())
 			->method('get_isMain_value')
@@ -81,7 +81,7 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 			array(
 				'user' => 'admin',
     			'event' => 'tracker_item_comment',
-    			'data' => array('event' => 'tracker_item_comment', 'trackerId' => '2', 'itemId' => '4', 'threadId' => '13', 'user' => 'admin'),
+    			'data' => array('event' => 'tracker_item_comment', 'trackerId' => '2', 'itemId' => '4', 'threadId' => '13', 'user' => 'admin', 'base_url' => 'http://example.com'),
     			'time' => '2011-09-12 20:30:31',
 			),
 		);
@@ -105,7 +105,7 @@ class Reports_Send_EmailBuilderTest extends TikiTestCase
 			),
 		);
 		
-		$categoryChanged = $this->getMock('Reports_Send_EmailBuilder_CategoryChanged');
+		$categoryChanged = $this->createMock('Reports_Send_EmailBuilder_CategoryChanged');
 		$categoryChanged->expects($this->once())->method('getTitle');
 		$categoryChanged->expects($this->once())->method('getOutput');
 		

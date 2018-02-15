@@ -2,15 +2,16 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-export_sheet.php 45204 2013-03-19 19:03:08Z jonnybradley $
+// $Id: tiki-export_sheet.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section = 'sheet';
 require_once ('tiki-setup.php');
 require_once ('lib/sheet/grid.php');
+$sheetlib = TikiLib::lib('sheet');
 $auto_query_args = array(
 	'sheetId',
 	'readdate',

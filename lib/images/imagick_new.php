@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: imagick_new.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: imagick_new.php 62608 2017-05-16 15:15:25Z jonnybradley $
 
 require_once('lib/images/abstract.php');
 
@@ -22,10 +22,11 @@ class Image extends ImageAbstract
 	{
 		if ( $isfile ) {
 			$this->filename = $image;
-			parent::__construct(NULL, false);
+			parent::__construct($image, $isfile);
 		} else {
-			parent::__construct($image, false);
+			parent::__construct($image, $isfile);
 		}
+		$this->format = $format;
 	}
 
 	function _load_data()
@@ -36,6 +37,7 @@ class Image extends ImageAbstract
 				try {
 					$this->data->readImage($this->filename);
 					$this->loaded = true;
+					$this->filename = null;
 				}
 				catch (ImagickException $e) {
 					$this->loaded = true;
@@ -51,6 +53,9 @@ class Image extends ImageAbstract
 				catch (ImagickException $e) {
 					$this->data = null;
 				}
+			}
+			if ($this->data) {
+				$this->data->setImageFormat($this->format);
 			}
 		}
 	}
@@ -83,7 +88,7 @@ class Image extends ImageAbstract
 			$this->_load_data();
 		}
 		if ($this->data) {
-			return parent::resizethumb();
+			parent::resizethumb();
 		}
 	}
 

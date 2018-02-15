@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: morelikethis.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: morelikethis.php 62150 2017-04-08 23:00:37Z lindonb $
 
 function prefs_morelikethis_list()
 {
@@ -12,7 +12,7 @@ function prefs_morelikethis_list()
 		// Used in templates/tiki-admin-include-freetags.tpl
 		'morelikethis_algorithm' => array(
 			'name' => tra('"More Like This" algorithm'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'basic' => tra('Basic'),
@@ -22,8 +22,9 @@ function prefs_morelikethis_list()
 		),
 		'morelikethis_basic_mincommon' => array(
 			'name' => tra('Minimum number of tags in common'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
+			'units' => tra('tags'),
 			'options' => array(
 				'1' => tra('1'),
 				'2' => tra('2'),

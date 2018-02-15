@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-mods_admin.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-mods_admin.php 58748 2016-05-31 23:05:28Z lindonb $
 
 require_once ('tiki-setup.php');
 include_once ('lib/mods/modslib.php');
@@ -22,7 +22,7 @@ if (isset($_REQUEST['save'])) {
 		if (is_dir($_REQUEST['mods_dir'])) {
 			$tikilib->set_preference('mods_dir', $_REQUEST['mods_dir']);
 		} else {
-			$tikifeedback[] = array('num' => 1, 'mes' => "Directory " . $_REQUEST['mods_dir'] . " not found.");
+			Feedback::warning(tr('Directory %0 not found.', $_REQUEST['mods_dir']));
 		}
 	} else {
 		$tikilib->set_preference('mods_dir', 'mods');
@@ -33,7 +33,6 @@ if (isset($_REQUEST['save'])) {
 		$tikilib->set_preference('mods_server', 'http://mods.tiki.org');
 	}
 }
-$smarty->assign('tikifeedback', $tikifeedback);
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 $smarty->assign('mid', 'tiki-mods_admin.tpl');

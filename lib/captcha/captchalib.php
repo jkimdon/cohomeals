@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: captchalib.php 47370 2013-09-06 16:44:14Z jonnybradley $
+// $Id: captchalib.php 61288 2017-02-13 18:02:02Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) != FALSE) {
@@ -12,22 +12,22 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) != FALSE) {
 }
 
 /**
- * A simple class to switch between Zend_Captcha_Image and
- * Zend_Captcha_ReCaptcha based on admin preference
+ * A simple class to switch between Zend\Captcha\Image and
+ * Zend\Captcha\ReCaptcha based on admin preference
  */
 class Captcha
 {
 
 	/**
-	 * The type of the captch ('default' when using Zend_Captcha_Image
-	 * or 'recaptcha' when using Zend_Captcha_ReCaptcha)
+	 * The type of the captch ('default' when using Zend\Captcha\Image
+	 * or 'recaptcha' when using Zend\Captcha\ReCaptcha)
 	 *
 	 * @var string
 	 */
 	public $type = '';
 
 	/**
-	 * An instance of Zend_Captcha_Image or Zend_Captcha_ReCaptcha
+	 * An instance of Zend\Captcha\Image or Zend\Captcha\ReCaptcha
 	 * depending on the value of $this->type
 	 *
 	 * @var object
@@ -36,9 +36,9 @@ class Captcha
 
 	/**
 	 * Class constructor: decides whether to create an instance of
-	 * Zend_Captcha_Image or Zend_Captcha_ReCaptcha
+	 * Zend\Captcha\Image or Zend\Captcha\ReCaptcha or Captcha_Question
 	 *
-	 * @return null
+	 * @param string $type recaptcha|questions|default|dumb
 	 */
 	function __construct( $type = '' )
 	{
@@ -46,7 +46,13 @@ class Captcha
 
 		if (empty($type)) {
 			if ($prefs['recaptcha_enabled'] == 'y' && !empty($prefs['recaptcha_privkey']) && !empty($prefs['recaptcha_pubkey'])) {
-				$type = 'recaptcha';
+				if ($prefs['recaptcha_version'] == '2') {
+					$type = 'recaptcha20';
+				} else {
+					$type = 'recaptcha';
+				}
+			} else if ($prefs['captcha_questions_active'] == 'y' && !empty($prefs['captcha_questions'])) {
+				$type = 'questions';
 			} else if (extension_loaded('gd') && function_exists('imagepng') && function_exists('imageftbbox')) {
 				$type = 'default';
 			} else {
@@ -55,19 +61,43 @@ class Captcha
 		}
 
 		if ($type === 'recaptcha') {
-			$this->captcha = new Zend_Captcha_ReCaptcha(
+			$this->captcha = new Zend\Captcha\ReCaptcha(
+				array(
+					'private_key' => $prefs['recaptcha_privkey'],
+					'public_key' => $prefs['recaptcha_pubkey'],
+				)
+			);
+			$httpClient = TikiLib::lib('tiki')->get_http_client();
+			$this->captcha->getService()->setHttpClient($httpClient);
+
+			$this->captcha->getService()->setOption('theme', isset($prefs['recaptcha_theme']) ? $prefs['recaptcha_theme'] : 'clean');
+
+			$this->captcha->setOption('ssl', true);
+
+			$this->type = $type;
+
+			$this->recaptchaCustomTranslations();
+		} else if ($type === 'recaptcha20') {
+
+			include_once('lib/captcha/Captcha_ReCaptcha20.php');
+
+			$this->captcha = new Captcha_ReCaptcha20(
 				array(
 					'privkey' => $prefs['recaptcha_privkey'],
 					'pubkey' => $prefs['recaptcha_pubkey'],
 					'theme' => isset($prefs['recaptcha_theme']) ? $prefs['recaptcha_theme'] : 'clean',
 				)
 			);
+			$httpClient = TikiLib::lib('tiki')->get_http_client();
+			$this->captcha->getService()->setHttpClient($httpClient);
 
-			$this->type = 'recaptcha';
+			$this->captcha->setOption('ssl', true);
+
+			$this->type = $type;
 
 			$this->recaptchaCustomTranslations();
 		} else if ($type === 'default') {
-			$this->captcha = new Zend_Captcha_Image(
+			$this->captcha = new Zend\Captcha\Image(
 				array(
 					'wordLen' => $prefs['captcha_wordLen'],
 					'timeout' => 600,
@@ -79,8 +109,27 @@ class Captcha
 				)
 			);
 			$this->type = 'default';
+		} else if ($type === 'questions') {
+
+			$this->type = 'questions';
+
+			$questions = array();
+			$lines = explode("\n", $prefs['captcha_questions']);
+
+			foreach ($lines as $line) {
+				$line = explode(':', $line, 2);
+				if (count($line) === 2) {
+					$questions[] = array(trim($line[0]), trim($line[1]));
+				}
+			}
+
+			include_once('lib/captcha/Captcha_Questions.php');
+			$this->captcha = new Captcha_Questions($questions);
+
+
+
 		} else {		// implied $type==='dumb'
-			$this->captcha = new Zend_Captcha_Dumb;
+			$this->captcha = new Zend\Captcha\Dumb;
 			$this->captcha->setWordlen($prefs['captcha_wordLen']);
 			$this->captcha->setLabel(tra('Please type this word backwards'));
 			$this->type = 'dumb';
@@ -92,22 +141,24 @@ class Captcha
 	/**
 	 * Create the default captcha
 	 *
-	 * @return void
+	 * @return string
 	 */
 	function generate()
 	{
+		$key = '';
 		try {
 			$key = $this->captcha->generate();
-			if ($this->type == 'default') {
+			if ($this->type == 'default' || $this->type == 'questions') {
 				// the following needed to keep session active for ajax checking
 				$session = $this->captcha->getSession();
 				$session->setExpirationHops(2, null, true);
 				$this->captcha->setSession($session);
 				$this->captcha->setKeepSession(false);
 			}
-			return $key;
-		} catch (Zend_Exception $e) {
+		} catch (Exception $e) {
+			Feedback::error($e->getMessage());
 		}
+		return $key;
 	}
 
 	/** Return captcha ID
@@ -126,17 +177,32 @@ class Captcha
 	 */
 	function render()
 	{
-		global $access;
+		$access = TikiLib::lib('access');
 		if ($access->is_xml_http_request()) {
-			$params = json_encode($this->captcha->getService()->getOptions());
-			$id = 1;
-			TikiLib::lib('header')->add_js('
+			if ($this->type == 'recaptcha20') {
+				return $this->captcha->renderAjax();
+			} else if ($this->type == 'recaptcha') {
+				$params = json_encode($this->captcha->getService()->getOptions());
+				$id = 1;
+				TikiLib::lib('header')->add_js('
 Recaptcha.create("' . $this->captcha->getPubKey() . '",
 	"captcha' . $id . '",' . $params . '
   );
 ', 100);
-			return '<div id="captcha' . $id . '"></div>';
+				return '<div id="captcha' . $id . '"></div>';
+			} else {
+				return $this->captcha->render();
+			}
 		} else {
+			if ($this->captcha instanceof Captcha_ReCaptcha20) {
+				return $this->captcha->render();
+			} else if ($this->captcha instanceof Zend\Captcha\ReCaptcha){
+				return $this->captcha->getService()->getHtml();
+			} else if ($this->captcha instanceof Zend\Captcha\Dumb){
+				return $this->captcha->getLabel() . ': <b>'
+				. strrev($this->captcha->getWord())
+				. '</b>';
+			}
 			return $this->captcha->render();
 		}
 	}
@@ -152,14 +218,17 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 		if (is_null($input)) {
 			$input = $_REQUEST;
 		}
-		if ($this->type == 'recaptcha') {
-			return $this->captcha->isValid(
-				array(
-					'recaptcha_challenge_field' => $input['recaptcha_challenge_field'],
-					'recaptcha_response_field' => $input['recaptcha_response_field']
-				)
-			);
-		} else {
+		if ($this->type == 'recaptcha' || $this->type == 'recaptcha20') {
+			// Temporary workaround of zend/http client uses arg_separator.output for making POST request body
+			// which fails with Google recaptcha services if used with '&amp;' value
+			// should be fixed in zend/http (pull request submitted)
+			// or remove ini_get('arg_separator.output', '&amp;') we have in tiki code tiki-setup_base.php:31
+			$oldVal = ini_get('arg_separator.output');
+			ini_set('arg_separator.output', '&');
+			$result = $this->captcha->isValid($input);
+			ini_set('arg_separator.output', $oldVal);
+			return $result;
+		}	else {
 			return $this->captcha->isValid($input['captcha']);
 		}
 	}
@@ -171,11 +240,15 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 	 */
 	function getPath()
 	{
-		return $this->captcha->getImgDir() . $this->captcha->getId() . $this->captcha->getSuffix();
+		try {
+			return $this->captcha->getImgDir() . $this->captcha->getId() . $this->captcha->getSuffix();
+		} catch (Exception $e) {
+			Feedback::error($e->getMessage());
+		}
 	}
 
 	/**
-	 * Translate Zend_Captcha_Image, Zend_Captcha_Dumb and Zend_Captcha_ReCaptcha
+	 * Translate Zend\Captcha\Image, Zend\Captcha\Dumb and Zend\Captcha\ReCaptcha
 	 * default error messages
 	 *
 	 * @return void
@@ -183,14 +256,14 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 	function setErrorMessages()
 	{
 		$errors = array(
-			'missingValue' => tra('Empty captcha value'),
+			'missingValue' => tra('Empty CAPTCHA value'),
 			'badCaptcha' => tra('You have mistyped the anti-bot verification code. Please try again.')
 		);
 
-		if ($this->type == 'recaptcha')
-			$errors['errCaptcha'] = tra('Failed to validate captcha');
+		if ($this->type == 'recaptcha' || $this->type == 'recaptcha20')
+			$errors['errCaptcha'] = tra('Failed to validate CAPTCHA');
 		else
-			$errors['missingID'] = tra('Captcha ID field is missing');
+			$errors['missingID'] = tra('CAPTCHA ID field is missing');
 
 		$this->captcha->setMessages($errors);
 	}
@@ -223,13 +296,11 @@ Recaptcha.create("' . $this->captcha->getPubKey() . '",
 				'instructions_audio' => tra('Type what you hear'),
 				'help_btn' => tra('Help'),
 				'play_again' => tra('Play sound again'),
-				'cant_hear_this' => tra('Download sound as MP3'),
+				'cant_hear_this' => tra('Download audio as an MP3 file'),
 				'incorrect_try_again' => tra('Incorrect. Try again.')
 			)
 		);
 	}
 }
 
-global $captchalib;
-$captchalib = new Captcha;
 

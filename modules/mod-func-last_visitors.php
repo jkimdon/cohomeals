@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_visitors.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-last_visitors.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -21,8 +21,8 @@ function module_last_visitors_info()
 		'description' => tra('Displays information about the specified number of users in decreasing order of last login time.'),
 		'params' => array(
 			'showavatars' => array(
-				'name' => tra('Show avatars'),
-				'description' => tra('If set to "y", show user avatars.') . ' ' . tra('Default:') . ' "n"'
+				'name' => tra('Show profile pictures'),
+				'description' => tra('If set to "y", show user profile pictures.') . ' ' . tra('Default:') . ' "n"'
 			),
 			'maxlen' => array(
 				'name' => tra('Maximum length'),
@@ -44,8 +44,8 @@ function module_last_visitors_info()
  */
 function module_last_visitors($mod_reference, $module_params)
 {
-	global $smarty;
-	global $userlib; include_once('lib/userslib.php');
+	$smarty = TikiLib::lib('smarty');
+	$userlib = TikiLib::lib('user');
 
 	$last_visitors = $userlib->get_users(0, $mod_reference["rows"], 'currentLogin_desc');
 	$smarty->assign('modLastVisitors', $last_visitors['data']);

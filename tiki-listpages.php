@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-listpages.php 47747 2013-09-25 18:36:31Z lphuberdeau $
+// $Id: tiki-listpages.php 61036 2017-01-24 01:02:45Z drsassafras $
 
 $section = 'wiki page';
 $section_class = 'tiki_wiki_page manage';	// This will be body class instead of $section
@@ -56,8 +56,7 @@ if (isset($_REQUEST['mapview'])
 }
 
 if ($prefs['feature_multilingual'] == 'y' && isset($_REQUEST['lang']) && isset($_REQUEST['term_srch'])) {
-	global $multilinguallib;
-	include_once ('lib/multilingual/multilinguallib.php');
+	$multilinguallib = TikiLib::lib('multilingual');
 	if (isset($_REQUEST['term_srch'])) {
 		$multilinguallib->storeCurrentTermSearchLanguageInSession($_REQUEST['lang']);
 	}
@@ -72,123 +71,24 @@ if (isset($_REQUEST['hits_link_to_all_languages']) && $_REQUEST['hits_link_to_al
 $smarty->assign('all_langs', $all_langs);
 
 $access->check_feature(array('feature_wiki', 'feature_listPages'));
-$access->check_permission('tiki_p_view');
-/* mass-remove:
-the checkboxes are sent as the array $_REQUEST["checked[]"], values are the wiki-PageNames,
-e.g. $_REQUEST["checked"][3]="HomePage"
-$_REQUEST["submit_mult"] holds the value of the "with selected do..."-option list
-we look if any page's checkbox is on and if remove_pages is selected.
-then we check permission to delete pages.
-if so, we call histlib's method remove_all_versions for all the checked pages.
-*/
-if (!empty($_REQUEST['submit_mult']) && isset($_REQUEST['checked'])) {
-	$action = $_REQUEST['submit_mult'];
-	check_ticket('list-pages');
-	Perms::bulk(array( 'type' => 'wiki page' ), 'object', $_REQUEST['checked']);
 
-	switch ($action) {
-		case 'remove_pages':
-			// Now check permissions to remove the selected pages
-			$access->check_permission('tiki_p_remove');
-			$access->check_authenticity(tr('Are you sure you want to remove the %0 selected pages?', count($_REQUEST['checked'])));
-			foreach ($_REQUEST['checked'] as $check)
-				$tikilib->remove_all_versions($check);
-			break;
-
-		case 'print_pages':
-			$access->check_feature('feature_wiki_multiprint');
-			foreach ($_REQUEST['checked'] as $check) {
-				$access->check_page_exists($check);
-				// Now check permissions to access this page
-				$perms = Perms::get(array( 'type' => 'wiki page', 'object' => $check ));
-				if (! $perms->view ) {
-					$access->display_error($check, tra('You do not have permission to view this page.'), '403');
-				}
-				$access->check_authenticity(tr('Are you sure you want to print the %0 selected pages?', count($_REQUEST['checked'])));
-				$page_info = $tikilib->get_page_info($check);
-				$page_info['parsed'] = $tikilib->parse_data($page_info['data']);
-				$page_info['h'] = 1;
-				$multiprint_pages[] = $page_info;
-			}
-			break;
-
-		case 'export_pdf':
-			$access->check_feature('feature_wiki_multiprint');
-			foreach ($_REQUEST['checked'] as $check) {
-				$access->check_page_exists($check);
-				// Now check permissions to access this page
-				$perms = Perms::get(array( 'type' => 'wiki page', 'object' => $check ));
-				if (! $perms->view ) {
-					$access->display_error($check, tra('You do not have permission to view this page.'), '403');
-				}
-
-				$multiprint_pages[] = $check;
-			}
-
-			header('Location: tiki-print_multi_pages.php?display=pdf&printpages=' . urlencode(serialize($multiprint_pages)));
-			die;
-
-		case 'unlock_pages':
-			$access->check_feature('feature_wiki_usrlock');
-			$access->check_authenticity(tr('Are you sure you want to unlock the %0 selected pages?', count($_REQUEST['checked'])));
-			global $wikilib;
-			include_once ('lib/wiki/wikilib.php');
-			foreach ($_REQUEST['checked'] as $check) {
-				$info = $tikilib->get_page_info($check);
-				if ($info['flag'] == 'L'
-						&& (
-							$globalperms->admin_wiki == 'y'
-							|| ($user && ($user == $info['lockedby']) || (!$info['lockedby'] && $user == $info['user']))
-						)
-				) {
-					$wikilib->unlock_page($check);
-				}
-			}
-			break;
-
-		case 'lock_pages':
-			$access->check_feature('feature_wiki_usrlock');
-			$access->check_authenticity(tr('Are you sure you want to lock the %0 selected pages?', count($_REQUEST['checked'])));
-			global $wikilib;
-			include_once ('lib/wiki/wikilib.php');
-			foreach ($_REQUEST['checked'] as $check) {
-				$info = $tikilib->get_page_info($check);
-				$perms = Perms::get(array( 'type' => 'wiki page', 'object' => $check ));
-				if ( $info['flag'] != 'L' && ( $globalperms->admin_wiki == 'y' || $perms->lock ) ) {
-					$wikilib->lock_page($check);
-				}
-			}
-			break;
-
-		case 'zip':
-			if ($globalperms->admin == 'y') {
-				$access->check_authenticity(tr('Are you sure you want to download a zip of the %0 selected pages?', count($_REQUEST['checked'])));
-				include_once ('lib/wiki/xmllib.php');
-				$xmllib = new XmlLib;
-				$zipFile = 'dump/xml.zip';
-				$config['debug'] = false;
-				if ($xmllib->export_pages($_REQUEST['checked'], null, $zipFile, $config)) {
-					if (!$config['debug']) {
-						header("location: $zipFile");
-						die;
-					}
-				} else {
-					$smarty->assign('error', $xmllib->get_error());
-				}
-			}
-			break;
-
-		case 'title':
-			if ($tiki_p_admin == 'y') {
-				$access->check_authenticity(tr('Are you sure you want to modify the %0 pages?', count($_REQUEST['checked'])).' '.tr('No history will be created.'));
-				foreach ($_REQUEST['checked'] as $check) {
-					$info = $tikilib->get_page_info($check);
-					$info['data'] = "!$check\r\n" . $info['data'];
-					$table = $tikilib->table('tiki_pages');
-					$table->update(array('data' => $info['data']), array('page_id' => $info['page_id']));
-				}
-			}
-			break;
+//add tablesorter sorting and filtering
+$ts = Table_Check::setVars('listpages', true);
+if ($ts['ajax']) {
+	if (!empty($_REQUEST['categPath_ts']) || !empty($_REQUEST['categ_ts'])) {
+		if (!empty($_REQUEST['categPath_ts'])) {
+			$req = $_REQUEST['categPath_ts'];
+		} else {
+			$req = $_REQUEST['categ_ts'];
+		}
+		$pos = strrpos($req, '::');
+		if ($pos !== false) {
+			$catname = substr($req, $pos + 2);
+		} else {
+			$catname = $req;
+		}
+		$categlib = TikiLib::lib('categ');
+		$_REQUEST['categId'] = $categlib->get_category_id($catname);
 	}
 }
 
@@ -264,8 +164,7 @@ if (!empty($multiprint_pages)) {
 		$smarty->assign('findSelectedCategoriesNumber', count($_REQUEST['cat_categories']));
 
 		if (!empty($_REQUEST['category'])) {
-			global $categlib;
-			include_once ('lib/categories/categlib.php');
+			$categlib = TikiLib::lib('categ');
 			$filter['categId'] = $categlib->get_category_id($_REQUEST['category']);
 			$smarty->assign('find_categId', $filter['categId']);
 			$selectedCategories = array((int) $filter['categId']);
@@ -306,7 +205,7 @@ if (!empty($multiprint_pages)) {
 			) {
 				$filter_values['orphan'] = 'structure_orphans';
 			}
-			$filters['orphan']['structure_orphans'] = tra('Pages not in structure');
+			$filters['orphan']['structure_orphans'] = tra('Pages not in a structure');
 		}
 	}
 
@@ -324,7 +223,8 @@ if (!empty($multiprint_pages)) {
 	}
 
 	$smarty->assign('initial', $initial);
-	if (isset($_REQUEST['exact_match'])) {
+	// What a checked checkbox returns is browser dependant. Don't test on the value, just presence
+	if (isset($_REQUEST['exact_match']) ) {
 		$exact_match = true;
 		$smarty->assign('exact_match', 'y');
 	} else {
@@ -379,8 +279,7 @@ if (!empty($multiprint_pages)) {
 		$smarty->assign('prev_offset', -1);
 
 	if ($prefs['feature_categories'] == 'y') {
-		global $categlib;
-		include_once ('lib/categories/categlib.php');
+		$categlib = TikiLib::lib('categ');
 		$categories = $categlib->getCategories();
 		$smarty->assign('notable', 'y');
 		$smarty->assign('cat_tree', $categlib->generate_cat_tree($categories, true, $selectedCategories));
@@ -389,7 +288,8 @@ if (!empty($multiprint_pages)) {
 
 	if ($prefs['feature_multilingual'] == 'y') {
 		$languages = array();
-		$languages = $tikilib->list_languages(false, 'y');
+		$langLib = TikiLib::lib('language');
+		$languages = $langLib->list_languages(false, 'y');
 		$smarty->assign_by_ref('languages', $languages);
 	}
 
@@ -422,23 +322,129 @@ if (!empty($multiprint_pages)) {
 	$smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 
 	// Exact match and single result, go to page directly
-	if ( count($listpages['data']) == 1 ) {
+	if ( count($listpages['data']) == 1 && !$ts['ajax']) {
 		$result = reset($listpages['data']);
 		if ( TikiLib::strtolower($find) == TikiLib::strtolower($result['pageName']) ) {
-			require_once 'lib/wiki/wikilib.php';
+			$wikilib = TikiLib::lib('wiki');
 			header('Location: ' . $wikilib->sefurl($result['pageName'], '', $all_langs));
 			exit;
 		}
 	}
 
+	if ($ts['enabled'] && !$ts['ajax']) {
+		//create dropdown lists for category name and path filters
+		$cnames = array();
+		$cpaths = array();
+		if (isset($categories) && count($categories) > 0) {
+			foreach($categories as $c) {
+				$cnames[] = $c['name'];
+				$cpaths[] = $c['categpath'];
+			}
+		}
+		//set language dropdown showing only languages that pages are actually in
+		if (isset($languages) && count($languages) > 0) {
+			$pagelangs = array_unique($tikilib->table('tiki_pages')->fetchColumn('lang', array()));
+			$pagelangs = array_flip($pagelangs);
+			$langLib = TikiLib::lib('language');
+			$langLib->getLanguages();
+			$temp_langs = array_intersect_key($langmapping, $pagelangs);
+			if (count($temp_langs) > 0) {
+				foreach ($temp_langs as $short => $long) {
+					$ts_langs[$short . '|' . $long[0]] = $long[0];
+				}
+			} else {
+				$ts_langs = array();
+			}
+		} else {
+			$ts_langs = array();
+		}
+		//workaround to set initial sort order until this can be done in tablesorter using sortList with selectors
+		$cols = [
+			//pref => sort_mode
+			'id' => 'page_id',
+			'name' => 'pageName',
+			'hits' => 'hits',
+			'lastmodif' => 'lastModif',
+			'comment' => 'comment',
+			'creator' => 'creator',
+			'user' => 'user',
+			'lastver' => 'version',
+			'status' => 'flag',
+			'versions' => 'version',
+			'links' => 'links',
+			'backlinks' => 'backlinks',
+			'size' => 'page_size',
+		];
+		///replicate column filtering from tiki-listpages_content.tpl for the relevant columns
+		foreach($cols as $pref => $fieldname) {
+			$prefstr = 'wiki_list_' . $pref;
+			if ($prefs[$prefstr] !== 'y') {
+				unset($cols[$pref]);
+			}
+		}
+		$cols = array_values($cols);
+		///add checkbox column
+		$remperm = Perms::get()->remove;
+		if ($remperm || $prefs['feature_wiki_multiprint'] === 'y') {
+			array_unshift($cols, 'checkbox');
+		}
+		if (strpos($sort_mode, '_desc') !== false) {
+			$pos = strlen($sort_mode) - 5;
+			$sortdir = 1;
+		} elseif(strpos($sort_mode, '_asc') !== false) {
+			$pos = strlen($sort_mode) - 4;
+			$sortdir = 0;
+		}
+		///set sort column
+		$sort = substr($sort_mode, 0, $pos);
+		$sortcol = array_search($sort, $cols);
+
+		$settings = array(
+			'id' => $ts['tableid'],
+			'total' 	=> $listpages['cant'],
+			'vars'	=> array(
+				'show_actions' => $show_actions,
+			),
+			'columns'	=> array(
+				'#language'	=> array(
+					'filter' => array(
+						'options' => $ts_langs,
+					),
+				),
+				'#categories'	=> array(
+					'filter' => array(
+						'options' => $cnames,
+					),
+				),
+				'#catpaths'	=> array(
+					'filter' => array(
+						'options' => $cpaths,
+					),
+				),
+			),
+		);
+
+		if ($sortcol !== false) {
+			$settings['sorts']['sortlist']['col'] = $sortcol;
+			$settings['sorts']['sortlist']['dir'] = $sortdir;
+		}
+		Table_Factory::build('TikiListpages', $settings);
+	}
+
 	if ($access->is_serializable_request()) {
 		if (isset($_REQUEST['listonly']) && ($prefs['feature_jquery'] == 'y' && $prefs['feature_jquery_autocomplete'] == 'y')) {
 			$pages = array();
-			foreach ($listpages['data'] as $page) $pages[] = $page['pageName'];
+			foreach ($listpages['data'] as $page) {
+				if (isset($_REQUEST['nonamespace'])) {
+					$pages[] = TikiLib::lib('wiki')->get_without_namespace($page['pageName']);
+				} else {
+					$pages[] = $page['pageName'];
+				}
+			}	
 			$access->output_serialized($pages);
 		} else {
 			$pages = array();
-			require_once 'lib/wiki/wikilib.php';
+			$wikilib = TikiLib::lib('wiki');
 			foreach ($listpages['data'] as $page) {
 				$pages[] = array(
 						'page_id' => $page['page_id'],
@@ -454,14 +460,18 @@ if (!empty($multiprint_pages)) {
 			}
 			require_once 'lib/ointegratelib.php';
 			$response = OIntegrate_Response::create(array('list' => $pages), '1.0');
-			$response->addTemplate('smarty', 'tikiwiki', 'files/templates/listpages/smarty-tikiwiki-1.0-shortlist.txt');
+			$response->addTemplate('smarty', 'tikiwiki', 'templates/smarty-tikiwiki-1.0-shortlist.txt');
 			$response->schemaDocumentation = 'http://dev.tiki.org/WebserviceListpages';
 			$response->send();
 		}
 	} else {
 		// Display the template
-		$smarty->assign('mid', ($listpages_orphans ? 'tiki-orphan_pages.tpl' : 'tiki-listpages.tpl'));
-		$smarty->display('tiki.tpl');
+		if ($ts['ajax']) {
+			$smarty->display($listpages_orphans ? 'tiki-orphan_pages.tpl' : 'tiki-listpages.tpl');
+		} else {
+			$smarty->assign('mid', ($listpages_orphans ? 'tiki-orphan_pages.tpl' : 'tiki-listpages.tpl'));
+			$smarty->display('tiki.tpl');
+		}
 	}
 }
 
@@ -471,8 +481,10 @@ if (!empty($multiprint_pages)) {
  */
 function setLangFilter($filter)
 {
-	global $smarty, $prefs, $multilinguallib;
-	include_once ('lib/multilingual/multilinguallib.php');
+	global $prefs;
+	$multilinguallib = TikiLib::lib('multilingual');
+	$smarty = TikiLib::lib('smarty');
+
 	$lang = $multilinguallib->currentPageSearchLanguage();
 	if (isset($_REQUEST['listonly']) && $prefs['feature_jquery_autocomplete'] == 'y' && strlen($lang) > 2) {
 		$lang = substr($lang, 0, 2);		// for autocomplete - use only language filter, not culture as well
@@ -491,7 +503,8 @@ function setLangFilter($filter)
  */
 function possibly_look_for_page_aliases($query)
 {
-	global $prefs, $smarty, $semanticlib, $_REQUEST;
+	global $prefs;
+	$smarty = TikiLib::lib('smarty');
 
 	$lang = NULL;
 	if (isset($_REQUEST['lang'])) {
@@ -499,8 +512,7 @@ function possibly_look_for_page_aliases($query)
 	}
 
 	if ($prefs['feature_wiki_pagealias'] == 'y' && $query) {
-		global $semanticlib;
-		require_once 'lib/wiki/semanticlib.php';
+		$semanticlib = TikiLib::lib('semantic');
 		$aliases = $semanticlib->getAliasContaining($query, false, $lang);
 		$smarty->assign('aliases', $aliases);
 	} else {
@@ -528,7 +540,8 @@ function possibly_look_for_page_aliases($query)
 
 function set_category_for_new_page_creation()
 {
-	global $_REQUEST, $prefs, $smarty;
+	global $prefs;
+	$smarty = TikiLib::lib('smarty');
 
 	$create_page_with_categId = '';
 	if (isset($_REQUEST['create_page_with_search_category'])) {

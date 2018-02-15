@@ -1,10 +1,10 @@
-{* $Id: tiki-accounting_account_deleted.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}
+{* $Id: tiki-accounting_account_deleted.tpl 54656 2015-03-22 17:54:02Z lindonb $ *}
 {title help="accounting"}
 	{$book.bookName}: {tr}Account{/tr} {$account.accountId} {$account.accountName}
 {/title}
 {if !empty($errors)}
-	<div class="simplebox highlight">
-		{icon _id=exclamation alt="{tr}Error{/tr}" style="vertical-align:middle" align="left"}
+	<div class="alert alert-warning">
+		{icon name='error' alt="{tr}Error{/tr}" style="vertical-align:middle" align="left"}
 		{foreach from=$errors item=m name=errors}
 			{$m}
 			{if !$smarty.foreach.errors.last}<br>{/if}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_regex.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_regex.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_regex_info()
 {
@@ -14,12 +14,15 @@ function wikiplugin_regex_info()
 		'description' => tra('Perform a regular expression search and replace'),
 		'prefs' => array( 'wikiplugin_regex' ),
 		'body' => tra('Each line of content is evaluated separately'),
-		'icon' => 'img/icons/text_replace.png',
+		'iconname' => 'search',
+		'introduced' => 1,
 		'params' => array(
 			'pageName' => array(
 				'required' => true,
 				'name' => tra('Page name'),
-				'description' => tra('Name of page containing search and replace expressions separated by two colons. Example of syntax on that page: /search pattern/::replacement text'),
+				'description' => tra('Name of page containing search and replace expressions separated by two colons.
+					Example of syntax on that page:') . ' <code>/search pattern/::replacement text</code>',
+				'since' => '1',
 				'default' => 'pageName',
 				'profile_reference' => 'wiki_page',
 			),

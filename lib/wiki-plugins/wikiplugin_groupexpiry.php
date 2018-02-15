@@ -1,22 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_groupexpiry.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_groupexpiry.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_groupexpiry_info()
 {
 	return array(
-		'name' => tra('Group Expiry'),
+		'name' => tra('Group Expiration'),
 		'documentation' => 'PluginGroupExpiry',
-		'description' => tra('Show the expiry date of a group membership of the current user'),
+		'description' => tra('Show the expiration date of a group the user belongs to'),
 		'prefs' => array( 'wikiplugin_groupexpiry' ),
-		'icon' => 'img/icons/group_delete.png',
+		'iconname' => 'group',
+		'introduced' => 7,
 		'params' => array(
 			'group' => array(
 				'required' => true,
 				'name' => tra('Group Name'),
+				'description' => tra('The name of an existing group on the site'),
+				'since' => '7.0',
+				'filter' => 'groupname',
 			),
 		),
 	);
@@ -24,7 +28,9 @@ function wikiplugin_groupexpiry_info()
 
 function wikiplugin_groupexpiry($data, $params)
 {
-	global $tikilib, $userlib, $user;
+	global $user;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 	extract($params, EXTR_SKIP);	
 	$groups = $userlib->get_user_groups($user);
 	if (!in_array($group, $groups)) {

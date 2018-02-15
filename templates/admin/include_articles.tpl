@@ -1,96 +1,84 @@
-{* $Id: include_articles.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
-
-{remarksbox type="tip" title="{tr}Tips{/tr}"}
-	{tr}Look under "Articles" on the application menu for links to{/tr} "<a class="rbox-link" href="tiki-admin_topics.php">{tr}Admin topics{/tr}</a>" {tr}and{/tr} "<a class="rbox-link" href="tiki-article_types.php">{tr}Admin types{/tr}</a>".
-	<hr>
-	{tr}Look under "<a href="tiki-admin_rssmodules.php" target="_blank">External Feeds</a>" on the application menu if you are searching for the <a href="https://doc.tiki.org/Article+generator" target="_blank">"Article Generator" on RSS feeds</a>{/tr}.
+{* $Id: include_articles.tpl 62140 2017-04-08 17:04:55Z lindonb $ *}
+{remarksbox type="tip" title="{tr}Tip{/tr}"}
+	{tr}Look under "<a href="tiki-admin_rssmodules.php" target="_blank" class="alert-link">External Feeds</a>" on the application menu if you are searching for the <a href="https://doc.tiki.org/Article+generator" target="_blank" class="alert-link">"Article Generator" on RSS feeds</a>{/tr}.
 {/remarksbox}
-
 {if !empty($msgs)}
-	<div class="simplebox highlight">
-	{foreach from=$msgs item=msg}
-	{$msg}			 
-	{/foreach}
-	</div>
 {/if}
-
-<form method="post" action="tiki-admin.php?page=articles">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="input_submit_container clear" style="text-align: right;">
-		<input type="submit" class="btn btn-default" value="{tr}Change preferences{/tr}" />
+<form role="form" class="form-horizontal" method="post" action="tiki-admin.php?page=articles" enctype="multipart/form-data">
+	{include file='access/include_ticket.tpl'}
+	<div class="t_navbar margin-bottom-md clearfix">
+		<a role="link" class="btn btn-link tips" href="tiki-list_articles.php" title=":{tr}List of articles{/tr}">
+			{icon name="list"} {tr}Articles{/tr}
+		</a>
+		<a role="link" class="btn btn-link tips" href="tiki-article_types.php" title=":{tr}List of article types{/tr}">
+			{icon name="structure"} {tr}Article Types{/tr}
+		</a>
+		<a role="link" class="btn btn-link tips" href="tiki-admin_topics.php" title=":{tr}List of article topics{/tr}">
+			{icon name="flag"} {tr}Article Topics{/tr}
+		</a>
+		{if $prefs.feature_submissions eq "y"}
+			<a role="link" class="btn btn-default btn-sm tips" href="tiki-list_submissions.php" title=":{tr}List{/tr}">
+				{icon name="list"} {tr}Submissions{/tr}
+			</a>
+		{/if}
+		{include file='admin/include_apply_top.tpl'}
 	</div>
-
 	{tabset name="admin_articles"}
 		{tab name="{tr}General Settings{/tr}"}
-			<input type="hidden" name="articlesprefs" />
-
-			<fieldset class="admin">
+			<br>
+			<fieldset>
 				<legend>{tr}Activate the feature{/tr}</legend>
 				{preference name=feature_articles visible="always"}
 			</fieldset>
-
-			<fieldset class="admin">
+			<fieldset class="table">
 				<legend>{tr}Plugins{/tr}</legend>
 				{preference name=wikiplugin_articles}
 				{preference name=wikiplugin_article}
 			</fieldset>
-			
 			{preference name=art_home_title}
 			{preference name=maxArticles}
-
 			<fieldset>
 				<legend>
 					{tr}Features{/tr}{help url="Articles"}
 				</legend>
-
 				{preference name=feature_submissions}
+				{preference name=article_use_new_list_articles}
 				{preference name=article_remembers_creator}
 				{preference name=feature_cms_rankings}
 				{preference name=article_user_rating}
 				<div class="adminoptionboxchild" id="article_user_rating_childcontainer">
 					{preference name=article_user_rating_options}
 				</div>
-
 				{preference name=feature_article_comments}
 				<div class="adminoptionboxchild" id="feature_article_comments_childcontainer">
 					{preference name=article_comments_per_page}
 					{preference name=article_comments_default_ordering}
 				</div>
-
 				{preference name=feature_cms_templates}
-				{preference name=feature_cms_print}
+				<div class="adminoptionboxchild" id="feature_cms_templates_childcontainer">
+					{preference name=lock_content_templates}
+				</div>
 				{preference name=feature_cms_emails}
-
 				{preference name=article_paginate}
 				{preference name=article_custom_attributes}
-
 				{preference name=geo_locate_article}
 				{preference name=feature_sefurl_title_article}
-				
 				{preference name=article_related_articles}
-
-				<input type="hidden" name="articlesfeatures" />
+				{preference name=tracker_article_tracker}
+				<div class="adminoptionboxchild" id="tracker_article_tracker_childcontainer">
+					{preference name=tracker_article_trackerId}
+				</div>
+				{preference name=article_feature_copyrights}
 			</fieldset>
-			
-			<fieldset>
-				<legend>
-					{tr}Article properties{/tr}
-				</legend>
-				<fieldset>
-					<legend>{tr}Default maximum dimensions of custom images{/tr}</legend>
-					<fieldset>
-						<legend>{tr}General (view mode){/tr}</legend>
-						{preference name=article_image_size_x}
-						{preference name=article_image_size_y}
-					</fieldset>
-					<fieldset>
-						<legend>{tr}List mode{/tr}</legend>
-						{preference name=article_default_list_image_size_x}
-						{preference name=article_default_list_image_size_y}
-					</fieldset>
-				</fieldset>
+			<legend>
+				{tr}Custom (Article Own) images setting{/tr}
+			</legend>
+				{preference name=article_image_file_size_max}
+				{preference name=article_image_size_x}
+				{preference name=article_image_size_y}
+				{preference name=article_default_list_image_size_x}
+				{preference name=article_default_list_image_size_y}
 			</fieldset>
-
 			<fieldset>
 				<legend>
 					{tr}Sharing on social networks{/tr}{help url="Social+Networks#Using+ShareThis"}
@@ -100,34 +88,25 @@
 					{preference name=article_sharethis_publisher}
 				</div>
 			</fieldset>
-
 			<fieldset>
 				<legend>{tr}Import CSV file{/tr}</legend>
 				<div class="adminoptionbox">
-					<div class="adminoptionlabel">
-						<label for="csvlist">{tr}Batch upload (CSV file):{/tr}</label>
-						<input type="file" name="csvlist" id="csvlist" /> 
-						<br>
-						<em>{tr}File format: title,authorName,heading,body,lang,user{/tr}....</em>
+					<label for="csvlist" class="control-label col-sm-4">{tr}Batch upload (CSV file){/tr}</label>
+					<div class="col-sm-8">
+						<input type="file" name="csvlist" id="csvlist">
+						<span class="help-block">{tr}File format: title,authorName,heading,body,lang,user{/tr}....</span>
 						<div align="center">
-							<input type="submit" class="btn btn-default" name="import" value="{tr}Import{/tr}" />
+							<input type="submit" class="btn btn-default btn-sm timeout" name="import" value="{tr}Import{/tr}">
 						</div>
 					</div>
 				</div>
 			</fieldset>
 		{/tab}
-
-		{tab name="{tr}Articles Listing{/tr}"}
+		{tab name="{tr}Articles Listing and View{/tr}"}
+			<br>
 			<fieldset>
-				<legend>{tr}List Articles{/tr}</legend>
-				<div class="adminoptionbox">
-					{tr}Select which items to display when listing articles:{/tr} 	  
-					<a class="rbox-link" href="tiki-list_articles.php">tiki-list_articles.php</a>
-				</div>
-				<input type="hidden" name="artlist" />
-
+				<legend>{tr}List articles{/tr}</legend>
 				{preference name=art_sort_mode}
-
 				{preference name=art_list_title}
 				<div class="adminoptionboxchild" id="art_list_title_childcontainer">
 					{preference name=art_list_title_len}
@@ -146,18 +125,16 @@
 				{preference name=art_list_reads}
 				{preference name=art_list_size}
 				{preference name=art_list_img}
-				
+				{preference name=art_list_ispublished}
 				{preference name=gmap_article_list}
 			</fieldset>
 			<fieldset>
-				<legend>{tr}Article View{/tr}</legend>
+				<legend>{tr}Article view{/tr}</legend>
 				{preference name=art_trailer_pos}
 				{preference name=art_header_text_pos}
 			</fieldset>
 		{/tab}
 	{/tabset}
-	<div class="input_submit_container clear" style="text-align: center;">
-		<input type="submit" class="btn btn-default" value="{tr}Change preferences{/tr}" />
-	</div>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>
 

@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: categories.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: categories.php 63505 2017-08-09 17:39:58Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 $access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
 if ($prefs['feature_categories'] == 'y' && $prefs['categories_used_in_tpl'] == 'y') {
-	global $categlib; include_once('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 	// pick up the objectType from cat_type is set or from section
 	if (!empty($section) && !empty($sections) && !empty($sections[$section])) {
 		$here = $sections[$section];
@@ -30,12 +30,16 @@ if ($prefs['feature_categories'] == 'y' && $prefs['categories_used_in_tpl'] == '
 			$objectType = $here['objectType'];
 		}
 	}
-		$objectCategoryIds = array();
+	$objectCategoryIds = array();
+	$objectCategoryIdsNoJail = array();
 	if (!empty($objectType)) {
 		if (isset($here['itemkey']) && isset($_REQUEST[$here['itemkey']]) && isset($here['itemObjectType'])) {
 			$objectCategoryIds = $categlib->get_object_categories($objectType, $_REQUEST[$here['itemkey']]);
 			$objectCategoryIdsNoJail = $categlib->get_object_categories($objectType, $_REQUEST[$here['itemkey']], -1, false);
 		} elseif (isset($here['key']) && isset($_REQUEST[$here['key']])) {
+			if ($objectType === 'wiki page' && $prefs['wiki_url_scheme'] !== 'urlencode') {
+				$key = TikiLib::lib('wiki')->get_page_by_slug($key);
+			}
 			$objectCategoryIds = $categlib->get_object_categories($objectType, $key);
 			$objectCategoryIdsNoJail = $categlib->get_object_categories($objectType, $key, -1, false);
 		}

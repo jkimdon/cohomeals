@@ -1,28 +1,36 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_showreference.php 44448 2013-01-05 21:51:16Z changi67 $
+// $Id: wikiplugin_showreference.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_showreference_info()
 {
 	return array(
 		'name' => tra('Add Bibliography'),
-		'description' => tra('Add bibliography listing in the footer of wiki pages.'),
+		'documentation' => 'PluginShowReference',
+		'description' => tra('Add bibliography listing in the footer of a wiki page'),
 		'format' => 'html',
+		'iconname' => 'list',
+		'introduced' => 10,
 		'prefs' => array('wikiplugin_showreference','feature_references'),
 		'params' => array(
 			'title' => array(
 				'required' => false,
 				'name' => tra('Title'),
-				'description' => tra('Title to be displayed in the bibliography listing. Default title is \'Bibliography\'.'),
+				'description' => tr('Title to be displayed in the bibliography listing. Default is %0Bibliography%1.',
+					'<code>', '</code>'),
+				'since' => '10.0',
 				'default' => 'Bibliography',
+				'filter' => 'text',
 			),
 			'showtitle' => array(
 				'required' => false,
 				'name' => tra('Show Title'),
 				'description' => tra('Show bibliography title. Title is shown by default.'),
+				'since' => '10.0',
+				'filter' => 'word',
 				'options' => array(
 					array('text' => tra(''), 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'yes'),
@@ -33,7 +41,8 @@ function wikiplugin_showreference_info()
 			'hlevel' => array(
 				'required' => false,
 				'name' => tra('Header Tag'),
-				'description' => tra('The html header tag level of the title. If \'none\', no header tag is used. Default: 1'),
+				'description' => tr('The HTML header tag level of the title. Default: %01%1', '<code>', '</code>'),
+				'since' => '10.0',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('0'), 'value' => '0'),
@@ -46,6 +55,7 @@ function wikiplugin_showreference_info()
 					array('text' => tra('7'), 'value' => '7'),
 					array('text' => tra('8'), 'value' => '8'),
 				),
+				'filter' => 'digits',
 				'default' => '',
 			),
 		),

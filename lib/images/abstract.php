@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: abstract.php 51172 2014-05-07 17:37:03Z jonnybradley $
+// $Id: abstract.php 60853 2017-01-11 13:24:22Z jonnybradley $
 
 /**
  *
@@ -259,9 +259,9 @@ class ImageAbstract
 			}
 		}
 
-		$name = "lib/images/icons/$extension.$format";
+		$name = "img/icons/mime/large/$extension.$format";
 		if ( ! file_exists($name) ) {
-			$name = "lib/images/icons/unknown.$format";
+			$name = "img/icons/mime/large/unknown.$format";
 		}
 
 		if ( ! $keep_original && $format != 'svg' ) {
@@ -269,7 +269,9 @@ class ImageAbstract
 			if ( $format != $icon_format ) {
 				$icon->convert($icon_format);
 			}
-			$icon->resize($x, $y);
+			if ($x < $this->_get_width() && $y < $this->_get_height()) {
+				$icon->resize($x, $y);
+			}
 
 			return $icon->display();
 		} else {

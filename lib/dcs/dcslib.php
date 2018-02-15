@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: dcslib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: dcslib.php 60943 2017-01-20 00:12:26Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -48,7 +48,7 @@ class DCSLib extends TikiLib
 		$info = $this->get_page_info($page);
 
 		if ( $prefs['feature_multilingual'] == 'y' ) {
-			global $multilinguallib; require_once 'lib/multilingual/multilinguallib.php';
+			$multilinguallib = TikiLib::lib('multilingual');
 
 			if ( $lang && $info['lang'] && $lang != $info['lang'] ) {
 				$bestLangPageId = $multilinguallib->selectLangObj('wiki page', $info['page_id'], $lang);
@@ -212,7 +212,7 @@ class DCSLib extends TikiLib
 			return '';
 		}
 
-		$x = rand(0, $cant - 1);
+		$x = mt_rand(0, $cant - 1);
 		$query = 'SELECT * FROM `tiki_programmed_content`' . $where;
 		$result = $this->fetchAll($query, $bindvars, 1, $x);
 
@@ -369,4 +369,3 @@ class DCSLib extends TikiLib
 		return $contentId;
 	}
 }
-global $dcslib; $dcslib = new DCSLib;

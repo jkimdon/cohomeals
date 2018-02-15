@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-read_article.php 51009 2014-04-25 16:33:16Z jonnybradley $
+// $Id: tiki-read_article.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'cms';
 require_once ('tiki-setup.php');
-require_once 'lib/articles/artlib.php';
+$artlib = TikiLib::lib('art');
 $access->check_feature('feature_articles');
 if (!isset($_REQUEST["articleId"])) {
 	$smarty->assign('msg', tra("No article indicated"));
@@ -51,17 +51,13 @@ if (isset($_REQUEST['switchlang']) && $_REQUEST['switchlang'] == 'y' && $prefs['
 	die;
 }
 
-global $statslib;
-include_once ('lib/stats/statslib.php');
-global $artlib;
-include_once ('lib/articles/artlib.php');
+$statslib = TikiLib::lib('stats');
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 }
 //This is basicaly a copy of part of the freetag code from tiki-setup.php and should be only there. The problem is that the section name for articles is "cms" and the object name for article in the table tiki_objects is "article". Maybe it is a good idea to use "cms" on tiki_objects instead "article" and then this block of code can be removed. Another solution?
 if ($prefs['feature_freetags'] == 'y') {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 	$here = $sections[$section];
 	if (isset($here['itemkey']) and isset($_REQUEST[$here['itemkey']])) {
 		$tags = $freetaglib->get_tags_on_object($_REQUEST[$here['itemkey']], "article " . $_REQUEST[$here['key']]);
@@ -71,7 +67,6 @@ if ($prefs['feature_freetags'] == 'y') {
 		$tags = array();
 	}
 	$smarty->assign('freetags', $tags);
-	$headerlib->add_cssfile('css/freetags.css');
 }
 $artlib->add_article_hit($_REQUEST["articleId"]);
 $smarty->assign('articleId', $_REQUEST["articleId"]);
@@ -146,7 +141,6 @@ if ( $prefs['article_paginate'] == 'y' ) {
 	$smarty->assign('last_page', $pages);
 	$smarty->assign('pagenum', $_REQUEST['page']);
 	// Put ~pp~, ~np~ and <pre> back. --rlpowell, 24 May 2004
-	$parserlib = TikiLib::lib('parser');
 	$parserlib->replace_preparse($article_data["body"], $preparsed, $noparsed);
 }
 if ($prefs["article_custom_attributes"] == 'y') {
@@ -181,10 +175,10 @@ if ($prefs['feature_theme_control'] == 'y') {
 	include ('tiki-tc.php');
 }
 
-$smarty->assign('parsed_body', $tikilib->parse_data($body, array('is_html' => $artlib->is_html($article_data))));
+$smarty->assign('parsed_body', $parserlib->parse_data($body, array('is_html' => $artlib->is_html($article_data))));
 $smarty->assign(
 	'parsed_heading',
-	$tikilib->parse_data(
+	$parserlib->parse_data(
 		$heading,
 		array(
 			'min_one_paragraph' => true,
@@ -226,7 +220,7 @@ if (isset($is_categorized) && $is_categorized) {
 		}
 	}
 	if ($prefs['feature_categories'] == 'y' && $prefs['category_morelikethis_algorithm'] != '') {
-		global $freetaglib; include_once('lib/freetag/freetaglib.php');
+		$freetaglib = TikiLib::lib('freetag');
 		$category_related_objects = $freetaglib->get_similar('article', $_REQUEST['articleId'], empty($prefs['category_morelikethis_mincommon_max'])? $prefs['maxRecords']: $prefs['category_morelikethis_mincommon_max'], null, 'category');
 		$smarty->assign_by_ref('category_related_objects', $category_related_objects);
 	}
@@ -235,7 +229,7 @@ if (isset($is_categorized) && $is_categorized) {
 }
 
 if ($prefs['feature_multilingual'] == 'y' && $article_data['lang']) {
-	include_once ("lib/multilingual/multilinguallib.php");
+	$multilinguallib = TikiLib::lib('multilingual');
 	$trads = $multilinguallib->getTranslations('article', $article_data['articleId'], $article_data["title"], $article_data['lang']);
 	$smarty->assign('trads', $trads);
 }

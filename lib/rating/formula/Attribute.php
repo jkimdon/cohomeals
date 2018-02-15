@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Attribute.php 50137 2014-02-28 20:00:18Z lphuberdeau $
+// $Id: Attribute.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 class Tiki_Formula_Function_Attribute extends Math_Formula_Function
 {
@@ -30,14 +30,20 @@ class Tiki_Formula_Function_Attribute extends Math_Formula_Function
 			$this->error(tra('Invalid property.'));
 		}
 
-		global $attributelib; require_once 'lib/attributes/attributelib.php';
+		if ($property instanceof Math_Formula_Element) {
+			$property = $this->evaluateChild($property);
+		}
 
 		if ( $type == 'wiki page' && is_numeric($object) ) {
-			global $tikilib;
+			$tikilib = TikiLib::lib('tiki');
 			$object = $tikilib->get_page_name_from_id($object);
 		}
 
+		$attributelib = TikiLib::lib('attribute');
 		$values = $attributelib->get_attributes($type, $object);
+
+		// Attributes are always lowercase
+		$property = strtolower($property);
 
 		if ( isset( $values[$property] ) ) {
 			return $values[$property];

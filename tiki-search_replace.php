@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-search_replace.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-search_replace.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
@@ -21,7 +21,7 @@ $inputConfiguration = array(
 
 require_once ('tiki-setup.php');
 
-include_once ('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 
 $access->check_feature(array('feature_wiki'));
 $access->check_permission(array('tiki_p_admin_wiki'));
@@ -52,8 +52,7 @@ if (!empty($_REQUEST['categId'])) {
 	$smarty->assign('find_categId', '');
 }
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 	$categories = $categlib->getCategories(NULL, true, false);
 	$smarty->assign('categories', $categories);
 }

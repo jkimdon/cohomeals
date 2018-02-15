@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_banner.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_banner.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_banner_info()
 {
@@ -11,20 +11,23 @@ function wikiplugin_banner_info()
 		'name' => tra('Banner'),
 		'documentation' => 'PluginBanner',
 		'description' => tra('Add a banner'),
-		'prefs' => array('wikiplugin_banner'),
-		'icon' => 'img/icons/page_lightning.png',
-		'tags' => array( 'basic' ),		
+		'prefs' => array('wikiplugin_banner', 'feature_banners'),
+		'iconname' => 'bullhorn',
+		'introduced' => 3,
+		'tags' => array( 'basic' ),
 		'params' => array(
 			'zone' => array(
 				'required' => true,
 				'name' => tra('Zone'),
 				'description' => tra('Name of the zone created in Admin > Banners'),
+				'since' => '3.0',
 				'default' => '',
 			),
 			'target' => array(
 				'required' => false,
 				'name' => tra('Target'),
-				'description' => tra('Determines the browser behavior once the banner is clicked'),
+				'description' => tra('Determines the browser behavior when the banner is clicked'),
+				'since' => '3.0',
 				'default' => '',
 				'options' => array(
 					array('text' => '', 'value' => ''), 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IndexCatchUpCommand.php 45724 2013-04-26 17:33:23Z changi67 $
+// $Id: IndexCatchUpCommand.php 58747 2016-05-31 23:00:07Z lindonb $
 
 namespace Tiki\Command;
 
@@ -33,7 +33,6 @@ class IndexCatchUpCommand extends Command
 		$amount = (int) $input->getArgument('amount');
 
 		$unifiedsearchlib = \TikiLib::lib('unifiedsearch');
-		$errlib = \TikiLib::lib('errorreport');
 
 		try {
 			$output->writeln('Started processing queue...');
@@ -43,14 +42,17 @@ class IndexCatchUpCommand extends Command
 			$count = $unifiedsearchlib->getQueueCount();
 
 			$output->writeln('Processing completed. Amount remaining: ' . $count);
-		} catch (Zend_Search_Lucene_Exception $e) {
+		} catch (ZendSearch\Lucene\Exception\ExceptionInterface $e) {
 
 			$msg = tr('Search index could not be updated: %0', $e->getMessage());
-			$errlib->report($msg);
+			\Feedback::error($msg, 'session');
 		}
-
-		foreach ($errlib->get_errors() as $message) {
-			$output->writeln("<error>$message</error>");
+		
+		$errors = \Feedback::get();
+		if (is_array($errors)){
+			foreach ($errors as $message) {
+				$output->writeln("<error>$message</error>");
+			}
 		}
 	}
 }

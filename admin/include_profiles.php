@@ -1,9 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_profiles.php 53626 2015-01-23 17:11:32Z jonnybradley $
+// $Id: include_profiles.php 63819 2017-09-12 16:20:38Z jonnybradley $
+
+use Symfony\Component\Yaml\Yaml;
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -25,178 +27,195 @@ if ($prefs['profile_unapproved'] == 'y') {
 	Tiki_Profile::enableDeveloperMode();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-	check_ticket('admin-inc-profiles');
-	if (isset($_POST['forget'], $_POST['pp'], $_POST['pd'])) {
-		$profile = Tiki_Profile::fromNames($_POST['pd'], $_POST['pp']);
-		$profile->removeSymbols();
-		$data = array();
+if ($access->ticketMatch()) {
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		if (isset($_POST['forget'], $_POST['pp'], $_POST['pd'])) {
+			$profile = Tiki_Profile::fromNames($_POST['pd'], $_POST['pp']);
+			$profile->removeSymbols();
+			$data = array();
 
-		foreach ($_POST as $key => $value) {
-			if ($key != 'url' && $key != 'forget') {
-				$data[str_replace('_', ' ', $key) ] = $value;
+			foreach ($_POST as $key => $value) {
+				if ($key != 'url' && $key != 'forget') {
+					$data[$key] = $value;
+				}
+			}
+			set_time_limit(0);
+
+			$transaction = $tikilib->begin();
+			$installer = new Tiki_Profile_Installer;
+			$installer->setUserData($data);
+			$installer->install($profile);
+			$transaction->commit();
+
+			$profilefeedback = $installer->getFeedback();
+
+			if ($target = $profile->getInstructionPage()) {
+
+				foreach ($profilefeedback as $feedback) {
+					if (strpos($feedback, tra('An error occurred: ')) === 0) {
+						Feedback::error($feedback, 'session');
+					}
+				}
+
+				$wikilib = TikiLib::lib('wiki');
+				$target = $wikilib->sefurl($target);
+				header('Location: ' . $target);
+				exit;
+			} else {
+				if (count($profilefeedback) > 0) {
+					$smarty->assign_by_ref('profilefeedback', $profilefeedback);
+				}
+				// need to reload sources as cache is cleared after install
+				$sources = $list->getSources();
 			}
 		}
-		set_time_limit(0);
 
-		$transaction = $tikilib->begin();
-		$installer = new Tiki_Profile_Installer;
-		$installer->setUserData($data);
-		$installer->install($profile);
-		$transaction->commit();
+		if (isset($_POST['install'], $_POST['pd'], $_POST['pp'])) {
+			$data = array();
 
-		if ($target = $profile->getInstructionPage()) {
-			global $wikilib;
-			require_once 'lib/wiki/wikilib.php';
-			$target = $wikilib->sefurl($target);
-			header('Location: ' . $target);
+			foreach ($_POST as $key => $value) {
+				if ($key != 'url' && $key != 'install') {
+					$data[str_replace('_', ' ', $key) ] = $value;
+				}
+			}
+
+			$installer = new Tiki_Profile_Installer;
+			$installer->setUserData($data);
+			$profile = Tiki_Profile::fromNames($_POST['pd'], $_POST['pp']);
+			$installer->install($profile);
+
+			if (($profile != null) && ($target = $profile->getInstructionPage())) {
+				$wikilib = TikiLib::lib('wiki');
+				$target = $wikilib->sefurl($target);
+				header('Location: ' . $target);
+				exit;
+			} else {
+				$profilefeedback = $installer->getFeedback();
+				if (count($profilefeedback) > 0) {
+					$smarty->assign_by_ref('profilefeedback', $profilefeedback);
+				}
+				// need to reload sources as cache is cleared after install
+				$sources = $list->getSources();
+			}
+		}
+
+		if (isset($_POST['test'], $_POST['profile_tester'], $_POST['profile_tester_name'])) {
+			$test_source = $_POST['profile_tester'];
+			if (strpos($test_source, '{CODE}') === false) {
+				// wrap in CODE tags if none there
+				$test_source = "{CODE(caption=>YAML)}\n$test_source\n{CODE}";
+			}
+			// desanitize the input, prefs etc will filter as required in the profile installer
+			$test_source = str_replace('<x>', '', $test_source);
+
+			$smarty->assign('test_source', $test_source);
+			$smarty->assign('profile_tester_name', $_POST['profile_tester_name']);
+			$profile = Tiki_Profile::fromString($test_source, $_POST['profile_tester_name']);
+			$profile->removeSymbols();
+			$installer = new Tiki_Profile_Installer;
+			$empty_cache = $_REQUEST['empty_cache'];
+			$smarty->assign('empty_cache', $empty_cache);
+
+			$installer->install($profile, $empty_cache);
+
+			if ($target = $profile->getInstructionPage()) {
+				$wikilib = TikiLib::lib('wiki');
+				$target = $wikilib->sefurl($target);
+				header('Location: ' . $target);
+				exit;
+			} else {
+				$profilefeedback = $installer->getFeedback();
+				if (count($profilefeedback) > 0) {
+					$smarty->assign_by_ref('profilefeedback', $profilefeedback);
+				}
+			}
+		} // }}}
+
+		if (isset($_GET['refresh'])) {
+			$toRefresh = (int) $_GET['refresh'];
+			if (isset($sources[$toRefresh])) {
+				echo json_encode(
+					array(
+						'status' => $list->refreshCache($sources[$toRefresh]['url']) ? 'open' : 'closed',
+						'lastupdate' => date('Y-m-d H:i:s') ,
+					)
+				);
+			} else {
+				echo '{}';
+			}
 			exit;
-		} else {
-			if (count($installer->getFeedback()) > 0) {
-				$smarty->assign_by_ref('profilefeedback', $installer->getFeedback());
+		}
+
+		if (isset($_GET['getinfo'], $_GET['pd'], $_GET['pp'])) {
+			$installer = new Tiki_Profile_Installer;
+			$profile = Tiki_Profile::fromNames($_GET['pd'], $_GET['pp']);
+			$error = '';
+
+			// Check if profile is available.
+			// This will not be the case for a misconfigured profile server
+			if (empty($profile)) {
+				$error = "Profile is not available: ".$_GET['pd'].", ". $_GET['pp'];
+			} else {
+
+				$profileData = $profile->getData();
+
+				if (! empty($profileData['error'])) {
+					$error = $profileData['error'];
+				}
 			}
-			// need to reload sources as cache is cleared after install
-			$sources = $list->getSources();
-		}
-	}
 
-	if (isset($_POST['install'], $_POST['pd'], $_POST['pp'])) {
-		$data = array();
 
-		foreach ($_POST as $key => $value) {
-			if ($key != 'url' && $key != 'install') {
-				$data[str_replace('_', ' ', $key) ] = $value;
+			try {
+				if (!empty($error)) {
+					$sequencable = false;
+				} else if (!$deps = $installer->getInstallOrder($profile)) {
+					$deps = $profile->getRequiredProfiles(true);
+					$deps[] = $profile;
+					$sequencable = false;
+				} else {
+					$sequencable = true;
+				}
+			} catch (Exception $e) {
+				$error = $e->getMessage();
+				$sequencable = false;
 			}
-		}
 
-		$installer = new Tiki_Profile_Installer;
-		$installer->setUserData($data);
-		$profile = Tiki_Profile::fromNames($_POST['pd'], $_POST['pp']);
-		$installer->install($profile);
+			$dependencies = array();
+			$userInput = array();
+			$installed = false;
+			$url = '';
+			$feedback = '';
 
-		if (($profile != null) && ($target = $profile->getInstructionPage())) {
-			global $wikilib;
-			require_once 'lib/wiki/wikilib.php';
-			$target = $wikilib->sefurl($target);
-			header('Location: ' . $target);
-			exit;
-		} else {
-			if (count($installer->getFeedback()) > 0) {
-				$smarty->assign_by_ref('profilefeedback', $installer->getFeedback());
+			if ($profile !== false && empty($error)) {
+				foreach ($deps as $d) {
+					$dependencies[] = $d->pageUrl;
+					$userInput = array_merge($userInput, $d->getRequiredInput());
+				}
+
+				$parsed = $parserlib->parse_data($profile->pageContent);
+				$installed = $installer->isInstalled($profile);
+
+				$url =  $profile->url;
+				$feedback = $profile->getFeedback();
 			}
-			// need to reload sources as cache is cleared after install
-			$sources = $list->getSources();
-		}
-	}
-
-	if (isset($_POST['test'], $_POST['profile_tester'], $_POST['profile_tester_name'])) {
-		$test_source = $_POST['profile_tester'];
-		if (strpos($test_source, '{CODE}') === false) {
-			// wrap in CODE tags if none there
-			$test_source = "{CODE(caption=>YAML)}\n$test_source\n{CODE}";
-		}
-		// desanitize the input, prefs etc will filter as required in the profile installer
-		$test_source = str_replace('<x>', '', $test_source);
-
-		$smarty->assign('test_source', $test_source);
-		$smarty->assign('profile_tester_name', $_POST['profile_tester_name']);
-		$profile = Tiki_Profile::fromString($test_source, $_POST['profile_tester_name']);
-		$profile->removeSymbols();
-		$installer = new Tiki_Profile_Installer;
-		$empty_cache = $_REQUEST['empty_cache'];
-		$smarty->assign('empty_cache', $empty_cache);
-
-		$installer->install($profile, $empty_cache);
-
-		if ($target = $profile->getInstructionPage()) {
-			global $wikilib;
-			require_once 'lib/wiki/wikilib.php';
-			$target = $wikilib->sefurl($target);
-			header('Location: ' . $target);
-			exit;
-		} else {
-			if (count($installer->getFeedback()) > 0) {
-				$smarty->assign_by_ref('profilefeedback', $installer->getFeedback());
-			}
-		}
-	} // }}}
-
-	if (isset($_GET['refresh'])) {
-		$toRefresh = (int) $_GET['refresh'];
-		if (isset($sources[$toRefresh])) {
 			echo json_encode(
 				array(
-					'status' => $list->refreshCache($sources[$toRefresh]['url']) ? 'open' : 'closed',
-					'lastupdate' => date('Y-m-d H:i:s') ,
+					'dependencies' => $dependencies,
+					'userInput' => $userInput,
+					'installable' => $sequencable,
+					'error' => $error,
+					'content' => $parsed,
+					'already' => $installed,
+					'url' => $url,
+					'feedback' => $feedback,
 				)
 			);
-		} else {
-			echo '{}';
-		}
-		exit;
+			exit;
+		} // }}}
+
 	}
 
-	if (isset($_GET['getinfo'], $_GET['pd'], $_GET['pp'])) {
-		$installer = new Tiki_Profile_Installer;
-		$profile = Tiki_Profile::fromNames($_GET['pd'], $_GET['pp']);
-		$error = '';
-
-		// Check if profile is available.
-		// This will not be the case for a misconfigured profile server
-		if ($profile === false) {
-			$error = "Profile is not available: ".$_GET['pd'].", ". $_GET['pp'];
-		}
-
-		try {
-			if (!empty($error)) {
-				$sequencable = false;
-			} else if (!$deps = $installer->getInstallOrder($profile)) {
-				$deps = $profile->getRequiredProfiles(true);
-				$deps[] = $profile;
-				$sequencable = false;
-			} else {
-				$sequencable = true;
-			}
-		} catch (Exception $e) {
-			$error = $e->getMessage();
-			$sequencable = false;
-		}
-
-		$dependencies = array();
-		$userInput = array();
-		$installed = false;
-		$url = '';
-		$feedback = '';
-
-		if ($profile !== false) {
-			foreach ($deps as $d) {
-				$dependencies[] = $d->pageUrl;
-				$userInput = array_merge($userInput, $d->getRequiredInput());
-			}
-
-			$parsed = $parserlib->parse_data($profile->pageContent);
-			$installed = $installer->isInstalled($profile);
-
-			$url =  $profile->url;
-			$feedback = $profile->getFeedback();
-		}
-		echo json_encode(
-			array(
-				'dependencies' => $dependencies,
-				'userInput' => $userInput,
-				'installable' => $sequencable,
-				'error' => $error,
-				'content' => $parsed,
-				'already' => $installed,
-				'url' => $url,
-				'feedback' => $feedback,
-			)
-		);
-		exit;
-	} // }}}
-
 }
-
 if (isset($_GET['list'])) {
 	$params = array_merge(
 		array(
@@ -255,48 +274,47 @@ if ($openSources == count($sources)) {
 }
 $smarty->assign('tikiMajorVersion', substr($TWV->version, 0, 2));
 
-global $modlib;
-include_once('lib/modules/modlib.php');
+$modlib = TikiLib::lib('mod');
 $modified = $prefslib->getModifiedPrefsForExport(!empty($_REQUEST['export_show_added']) ? true : false);
 $smarty->assign('modified_list', $modified);
 
 $assigned_modules_for_export = $modlib->getModulesForExport();
 $smarty->assign('modules_for_export', $assigned_modules_for_export);
 
-if (!isset($_REQUEST['export_type'])) {
-	$_REQUEST['export_type'] = 'prefs';
-}
-$smarty->assign('export_type', $_REQUEST['export_type']);
-
-if (isset($_REQUEST['export'])) {
-	if ($_REQUEST['export_type'] === 'prefs') {
-		$export_yaml = Horde_Yaml::dump(
-			array( 'preferences' => $_REQUEST['prefs_to_export'] ),
-			array('indent' => 1, 'wordwrap' => 0)
-		);
-	} else if ($_REQUEST['export_type'] === 'modules') {
-		$modules_to_export = array();
-		foreach ($_REQUEST['modules_to_export'] as $k => $v) {
-			$modules_to_export[] = $assigned_modules_for_export[$k];
-		}
-		$export_yaml = Horde_Yaml::dump(
-			array( 'objects' => $modules_to_export),
-			array('indent' => 1, 'wordwrap' => 0)
-		);
-	} else {
-		$export_yaml = '';		// something went wrong?
+if ($access->ticketMatch()) {
+	if (!isset($_REQUEST['export_type'])) {
+		$_REQUEST['export_type'] = 'prefs';
 	}
+	$smarty->assign('export_type', $_REQUEST['export_type']);
 
-	$export_yaml = preg_replace('/^---\n/', '', $export_yaml);
-	$export_yaml = "{CODE(caption=>YAML,wrap=>0)}\n" . $export_yaml . "{CODE}\n";
+	if (isset($_REQUEST['export'])) {
+		if ($_REQUEST['export_type'] === 'prefs') {
+			$export_yaml = Yaml::dump(
+				array( 'preferences' => $_REQUEST['prefs_to_export'] ),
+				20, 1, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK
+			);
+		} else if ($_REQUEST['export_type'] === 'modules') {
+			$modules_to_export = array();
+			foreach ($_REQUEST['modules_to_export'] as $k => $v) {
+				$modules_to_export[] = $assigned_modules_for_export[$k];
+			}
+			$export_yaml = Yaml::dump(
+				array( 'objects' => $modules_to_export),
+				20, 1, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK
+			);
+		} else {
+			$export_yaml = '';		// something went wrong?
+		}
 
-	include_once 'lib/wiki-plugins/wikiplugin_code.php';
-	$export_yaml = wikiplugin_code($export_yaml, array('caption' => 'Wiki markup', 'colors' => 'tiki' ), null, array());
-	$export_yaml = preg_replace('/~[\/]?np~/', '', $export_yaml);
+		$export_yaml = preg_replace('/^---\n/', '', $export_yaml);
+		$export_yaml = "{CODE(caption=>YAML,wrap=>0)}\n" . $export_yaml . "{CODE}\n";
 
-	$smarty->assign('export_yaml', $export_yaml);
-	$smarty->assign('prefs_to_export', $_REQUEST['prefs_to_export']);
-	$smarty->assign('modules_to_export', $_REQUEST['modules_to_export']);
+		include_once 'lib/wiki-plugins/wikiplugin_code.php';
+		$export_yaml = wikiplugin_code($export_yaml, array('caption' => 'Wiki markup', 'colors' => 'tiki' ), null, array());
+		$export_yaml = preg_replace('/~[\/]?np~/', '', $export_yaml);
+
+		$smarty->assign('export_yaml', $export_yaml);
+		$smarty->assign('prefs_to_export', $_REQUEST['prefs_to_export']);
+		$smarty->assign('modules_to_export', $_REQUEST['modules_to_export']);
+	}
 }
-
-ask_ticket('admin-inc-profiles');

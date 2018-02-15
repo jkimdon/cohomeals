@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Query.php 55356 2015-05-07 15:04:43Z patrick-proulx $
+// $Id: Query.php 60381 2016-11-23 10:56:42Z jonnybradley $
 
 class Search_Query implements Search_Query_Interface
 {
@@ -15,8 +15,11 @@ class Search_Query implements Search_Query_Interface
 	private $weightCalculator = null;
 	private $identifierFields = null;
 
+	private $postFilter;
 	private $subQueries = array();
-	private $facets = array();
+	private $facets = [];
+	private $foreignQueries = [];
+	private $transformations = [];
 
 	function __construct($query = null)
 	{
@@ -25,6 +28,11 @@ class Search_Query implements Search_Query_Interface
 		if ($query) {
 			$this->filterContent($query);
 		}
+	}
+
+	function __clone()
+	{
+		$this->expr = clone $this->expr;
 	}
 
 	function setIdentifierFields(array $fields)
@@ -48,6 +56,11 @@ class Search_Query implements Search_Query_Interface
 	function filterContent($query, $field = 'contents')
 	{
 		$this->addPart($query, 'plaintext', $field);
+	}
+
+	function filterIdentifier($query, $field)
+	{
+		$this->addPart(new Search_Expr_Token($query), 'identifier', $field);
 	}
 
 	function filterType($types)
@@ -93,7 +106,7 @@ class Search_Query implements Search_Query_Interface
 		$this->addPart($query, 'identifier', 'language');
 	}
 
-	function filterPermissions(array $groups)
+	function filterPermissions(array $groups, $user = null)
 	{
 		$tokens = array();
 		foreach ($groups as $group) {
@@ -102,7 +115,13 @@ class Search_Query implements Search_Query_Interface
 
 		$or = new Search_Expr_Or($tokens);
 
-		$this->addPart($or, 'multivalue', 'allowed_groups');
+		if ($user) {
+			$sub = $this->getSubQuery('permissions');
+			$sub->filterMultivalue($or, 'allowed_groups');
+			$sub->filterMultivalue(new Search_Expr_Token($user), 'allowed_users');
+		} else {
+			$this->addPart($or, 'multivalue', 'allowed_groups');
+		}
 	}
 
 	/**
@@ -122,7 +141,7 @@ class Search_Query implements Search_Query_Interface
 			if ($from2) {
 				$from = $from2;
 			} else {
-				TikiLib::lib('errorreport')->report(tra('filterRange: "from" value not parsed'));
+				Feedback::error(tra('filterRange: "from" value not parsed'), 'session');
 			}
 		}
 		if (!is_numeric($to)) {
@@ -130,21 +149,38 @@ class Search_Query implements Search_Query_Interface
 			if ($to2) {
 				$to = $to2;
 			} else {
-				TikiLib::lib('errorreport')->report(tra('filterRange: "to" value not parsed'));
+				Feedback::error(tra('filterRange: "to" value not parsed'), 'session');
 			}
 		}
 
+		/* make the range filter work regardless of ordering - if from > to, swap */
+		if ($to < $from) {
+			$temp = $to;
+			$to = $from;
+			$from = $temp;
+		}
 		$this->addPart(new Search_Expr_Range($from, $to), 'timestamp', $field);
 	}
 
 	function filterTextRange($from, $to, $field = 'title')
 	{
+		/* make the range filter work regardless of ordering - if from > to, swap */
+		if ( strcmp($from, $to) > 0 ) {
+			$temp = $to;
+			$to = $from;
+			$from = $temp;
+		}
 		$this->addPart(new Search_Expr_Range($from, $to), 'plaintext', $field);
 	}
 
 	function filterInitial($initial, $field = 'title')
 	{
 		$this->addPart(new Search_Expr_Initial($initial), 'plaintext', $field);
+	}
+
+	function filterNotInitial($initial, $field = 'title')
+	{
+		$this->addPart(new Search_Expr_Not(new Search_Expr_Initial($initial)), 'plaintext', $field);
 	}
 
 	function filterRelation($query, array $invertable = array())
@@ -155,27 +191,60 @@ class Search_Query implements Search_Query_Interface
 		$this->addPart($query, 'multivalue', 'relations');
 	}
 
-	function filterSimilar($type, $object)
+	function filterSimilar($type, $object, $field = 'contents')
 	{
-		$this->expr->addPart(
-			new Search_Expr_And(
-				array(
-					new Search_Expr_Not(
-						new Search_Expr_And(
-							array(
-								new Search_Expr_Token($type, 'identifier', 'object_type'),
-								new Search_Expr_Token($object, 'identifier', 'object_id'),
-							)
+		$part = new Search_Expr_And(
+			array(
+				new Search_Expr_Not(
+					new Search_Expr_And(
+						array(
+							new Search_Expr_Token($type, 'identifier', 'object_type'),
+							new Search_Expr_Token($object, 'identifier', 'object_id'),
 						)
-					),
-					new Search_Expr_MoreLikeThis($type, $object),
-				)
+					)
+				),
+				$mlt = new Search_Expr_MoreLikeThis($type, $object),
 			)
 		);
+		$mlt->setField($field);
+		$this->expr->addPart($part);
+	}
+
+	function filterSimilarToThese($objects, $content, $field = 'contents')
+	{
+		$excluded = [];
+		foreach ($objects as $object) {
+			$excluded[] = new Search_Expr_And(
+				array(
+					new Search_Expr_Token($object['object_type'], 'identifier', 'object_type'),
+					new Search_Expr_Token($object['object_id'], 'identifier', 'object_id'),
+				)
+			);
+		}
+
+		$mlt = new Search_Expr_MoreLikeThis($content);
+		$mlt->setField($field);
+
+		$part = new Search_Expr_And(
+			array(
+				$mlt,
+				new Search_Expr_Not(new Search_Expr_Or($excluded)),
+			)
+		);
+		$this->expr->addPart($part);
+	}
+
+	function filterDistance($distance, $lat, $lon, $field = 'geo_point')
+	{
+		$this->addPart(new Search_Expr_Distance($distance, $lat, $lon), 'geo_distance', $field);
 	}
 
 	private function addPart($query, $type, $field)
 	{
+		if (is_string($field)) {
+			$field = explode(',', $field);
+		}
+
 		$parts = array();
 		foreach ((array) $field as $f) {
 			$part = $this->parse($query);
@@ -209,6 +278,13 @@ class Search_Query implements Search_Query_Interface
 		}
 	}
 
+	function setCount($count = null)
+	{
+		if ($count) {
+			$this->count = (int) $count;
+		}
+	}
+
 	/**
 	 * Affects the range from a numeric value
 	 * @param $pageNumber int Page number from 1 to n
@@ -235,8 +311,92 @@ class Search_Query implements Search_Query_Interface
 
 	function search(Search_Index_Interface $index)
 	{
+		$this->finalize();
+
+		try {
+			$resultset = $index->find($this, $this->start, $this->count);
+		} catch(Search_Elastic_SortException $e) {
+			//on sort exception, try again without the sort field
+			$this->sortOrder = null;
+			$resultset = $index->find($this, $this->start, $this->count);
+		} catch(Exception $e) {
+			Feedback::error($e->getMessage(), 'session');
+			return Search_ResultSet::create([]);
+		}
+
+		$resultset->applyTransform(function ($entry) {
+			if (! isset($entry['_index']) || ! isset($this->foreignQueries[$entry['_index']])) {
+				foreach ($this->transformations as $trans) {
+					if (is_callable($trans)) {
+						$entry = $trans($entry);
+					}
+				}
+			}
+
+			return $entry;
+		});
+
+		foreach ($this->foreignQueries as $indexName => $query) {
+			$resultset->applyTransform(function ($entry) use ($query, $indexName) {
+				if (isset($entry['_index']) && $entry['_index'] == $indexName) {
+					foreach ($query->transformations as $trans) {
+						if (is_callable($trans)) {
+							$entry = $trans($entry);
+						}
+					}
+				}
+
+				return $entry;
+			});
+		}
+
+		return $resultset;
+	}
+
+	function scroll($index)
+	{
+		$this->finalize();
+		$res = $index->scroll($this);
+
+		foreach ($res as $row) {
+			foreach ($this->transformations as $trans) {
+				if (is_callable($trans)) {
+					$row = $trans($row);
+				}
+			}
+
+			yield $row;
+		}
+	}
+
+	function applyTransform(callable $transform)
+	{
+		$this->transformations[] = $transform;
+	}
+
+	function store($name, $index)
+	{
+		if ($index instanceof Search_Index_QueryRepository) {
+			$this->finalize();
+			$index->store($name, $this->expr);
+			return true;
+		}
+
+		return false;
+	}
+
+	private function finalize()
+	{
 		if ($this->weightCalculator) {
-			$this->expr->walk(array($this->weightCalculator, 'calculate'));
+			$this->expr->walk([$this->weightCalculator, 'calculate']);
+
+			if ($this->postFilter) {
+				$this->postFilter->expr->walk([$this->weightCalculator, 'calculate']);
+			}
+
+			foreach ($this->foreignQueries as $query) {
+				$query->expr->walk([$this->weightCalculator, 'calculate']);
+			}
 		}
 
 		if ($this->identifierFields) {
@@ -248,17 +408,27 @@ class Search_Query implements Search_Query_Interface
 					}
 				}
 			);
-		}
 
-		try {
-			$resultset = $index->find($this, $this->start, $this->count);
-		} catch(Search_Elastic_SortException $e) {
-			//on sort exception, try again without the sort field
-			$this->sortOrder = null;
-			$resultset = $index->find($this, $this->start, $this->count);
-		}
+			if ($this->postFilter) {
+				$this->postFilter->expr->walk(
+					function (Search_Expr_Interface $expr) use ($fields) {
+						if (method_exists($expr, 'getField') && in_array($expr->getField(), $fields)) {
+							$expr->setType('identifier');
+						}
+					}
+				);
+			}
 
-		return $resultset;
+			foreach ($this->foreignQueries as $query) {
+				$query->expr->walk(
+					function (Search_Expr_Interface $expr) use ($fields) {
+						if (method_exists($expr, 'getField') && in_array($expr->getField(), $fields)) {
+							$expr->setType('identifier');
+						}
+					}
+				);
+			}
+		}
 	}
 
 	function getExpr()
@@ -312,6 +482,17 @@ class Search_Query implements Search_Query_Interface
 		return $this->subQueries[$name];
 	}
 
+	function getPostFilter()
+	{
+		if (! $this->postFilter) {
+			$subquery = new self;
+			$this->postFilter = $subquery;
+			$subquery->postFilter = $subquery;
+		}
+
+		return $this->postFilter;
+	}
+
 	function requestFacet(Search_Query_Facet_Interface $facet)
 	{
 		$this->facets[] = $facet;
@@ -320,5 +501,15 @@ class Search_Query implements Search_Query_Interface
 	function getFacets()
 	{
 		return $this->facets;
+	}
+
+	function includeForeign($indexName, Search_Query $query)
+	{
+		$this->foreignQueries[$indexName] = $query;
+	}
+
+	function getForeignQueries()
+	{
+		return $this->foreignQueries;
 	}
 }

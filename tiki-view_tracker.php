@@ -2,24 +2,24 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_tracker.php 50607 2014-04-01 18:09:12Z jonnybradley $
+// $Id: tiki-view_tracker.php 61507 2017-03-05 17:39:27Z jonnybradley $
 
 $section = 'trackers';
 require_once ('tiki-setup.php');
 
 $access->check_feature('feature_trackers');
 
-global $trklib; include_once ('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 if ($prefs['feature_groupalert'] == 'y') {
-	include_once ('lib/groupalert/groupalertlib.php');
+	$groupalertlib = TikiLib::lib('groupalert');
 }
-include_once ('lib/notifications/notificationlib.php');
+$notificationlib = TikiLib::lib('notification');
 if ($prefs['feature_categories'] == 'y') {
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 }
 $auto_query_args = array(
 	'offset',
@@ -49,6 +49,7 @@ if (! $trackerDefinition) {
 }
 
 $tracker_info = $trackerDefinition->getInformation();
+$fields['data'] = array();
 
 $tikilib->get_perm_object($_REQUEST['trackerId'], 'tracker', $tracker_info);
 if (!empty($_REQUEST['show']) && $_REQUEST['show'] == 'view') {
@@ -109,8 +110,8 @@ if ($tracker_info['adminOnlyViewEditItem'] === 'y') {
 }
 
 if ($tiki_p_view_trackers != 'y') {
-	$userCreatorFieldId = $writerfield;
-	$groupCreatorFieldId = $writergroupfield;
+	$userCreatorFieldId = $trackerDefinition->getWriterField();
+	$groupCreatorFieldId = $trackerDefinition->getWriterGroupField();
 	if ($user && !$my and ( (isset($tracker_info['writerCanModify']) and $tracker_info['writerCanModify'] == 'y') or
 							(isset($tracker_info['userCanSeeOwn']) and $tracker_info['userCanSeeOwn'] == 'y'))
 							 and !empty($userCreatorFieldId)) {
@@ -145,7 +146,7 @@ if (isset($_REQUEST['status'])) {
 	$_REQUEST['status'] = 'o';
 }
 foreach ($status_raw as $let => $sta) {
-	if ((isset($$sta['perm']) and $$sta['perm'] == 'y') or ($my or $ours)) {
+	if ((isset(${$sta['perm']}) and ${$sta['perm']} == 'y') or ($my or $ours)) {
 		if (in_array($let, $sts)) {
 			$sta['class'] = 'statuson';
 			$sta['statuslink'] = str_replace($let, '', implode('', $sts));
@@ -205,6 +206,8 @@ $all_descends = false;
 $fieldFactory = $trackerDefinition->getFieldFactory();
 
 $itemObject = Tracker_Item::newItem($_REQUEST['trackerId']);
+
+$ins_fields = array('data' => array());
 
 foreach ($xfields['data'] as $i => $current_field) {
 	$current_field_ins = null;
@@ -278,6 +281,7 @@ if (!empty($_REQUEST['remove'])) {
 	}
 } elseif (isset($_REQUEST["batchaction"]) and $_REQUEST["batchaction"] == 'delete') {
 	check_ticket('view-trackers');
+	$access->check_authenticity(tr('Are you sure you want to delete the selected items?'));
 	$transaction = $tikilib->begin();
 
 	foreach ($_REQUEST['action'] as $batchid) {
@@ -340,7 +344,7 @@ if ($prefs['feature_user_watches'] == 'y' and $tiki_p_watch_trackers == 'y') {
 
 if (isset($_REQUEST["save"])) {
 	if ($itemObject->canModify()) {
-		global $captchalib; include_once 'lib/captcha/captchalib.php';
+		$captchalib = TikiLib::lib('captcha');
 		if (empty($user) && $prefs['feature_antibot'] == 'y' && !$captchalib->validate()) {
 			$smarty->assign('msg', $captchalib->getErrors());
 			$smarty->assign('errortype', 'no_redirect_login');
@@ -444,7 +448,11 @@ if ($my and $writerfield) {
 	if (!empty($_REQUEST['filtervalue_other'])) {
 		$filtervalue = $_REQUEST['filtervalue_other'];
 	}
-	$exactvalue = '';
+	$field = $trackerDefinition->getField($filterfield);
+	if( $field && in_array($field['type'], array('d', 'D', 'R')) )
+		$exactvalue = $filtervalue;
+	else
+		$exactvalue = '';
 }
 $smarty->assign('filtervalue', $filtervalue);
 if (is_array($filtervalue)) {
@@ -514,7 +522,7 @@ if ($tiki_p_export_tracker == 'y') {
 	$smarty->assign_by_ref('trackers', $trackers['data']);
 	include_once ('lib/wiki-plugins/wikiplugin_trackerfilter.php');
 	$formats = '';
-	$filters = wikiplugin_trackerFilter_get_filters($_REQUEST['trackerId'], '', $formats);
+	$filters = wikiplugin_trackerFilter_get_filters($_REQUEST['trackerId'], array(), $formats);
 	$smarty->assign_by_ref('filters', $filters);
 	if (!empty($_REQUEST['displayedFields'])) {
 		if (is_string($_REQUEST['displayedFields'])) {
@@ -527,7 +535,7 @@ if ($tiki_p_export_tracker == 'y') {
 	$smarty->assign('recordsOffset', 1);
 }
 include_once ('tiki-section_options.php');
-$smarty->assign('uses_tabs', 'y');
+
 $smarty->assign('show_filters', 'n');
 if (count($fields['data']) > 0) {
 	foreach ($fields['data'] as $it) {
@@ -542,19 +550,17 @@ if (isset($tracker_info['useRatings']) && $tracker_info['useRatings'] == 'y' && 
 		$items['data'][$f]['my_rate'] = $tikilib->get_user_vote("tracker." . $_REQUEST["trackerId"] . '.' . $items['data'][$f]['itemId'], $user);
 	}
 }
-setcookie('tab', $cookietab);
-$smarty->assign('cookietab', $cookietab);
+
 ask_ticket('view-trackers');
 
 // Generate validation js
 if ($prefs['feature_jquery'] == 'y' && $prefs['feature_jquery_validation'] == 'y') {
-	global $validatorslib;
-	include_once('lib/validatorslib.php');
+	$validatorslib = TikiLib::lib('validators');
 	$validationjs = $validatorslib->generateTrackerValidateJS($fields['data']);
 	$smarty->assign('validationjs', $validationjs);
 }
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 // Display the template

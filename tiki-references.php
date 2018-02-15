@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-references.php 44445 2013-01-05 21:34:38Z changi67 $
+// $Id: tiki-references.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 require_once ('tiki-setup.php');
 $access->check_feature('feature_references');
@@ -14,22 +14,6 @@ $access->check_permission(array('tiki_p_edit_references'), tra('Edit Library Ref
 
 global $dbTiki;
 $referenceslib = TikiLib::lib('references');
-
-$tiki_p_use_references = $referenceslib->get_permission('tiki_p_use_references');
-$tiki_p_edit_references = $referenceslib->get_permission('tiki_p_edit_references');
-
-if (isset($tiki_p_edit_references) && $tiki_p_edit_references == 'y') {
-	$edit_references = 1;
-} else {
-	$edit_references = 0;
-}
-
-if (!$edit_references) {
-	$smarty->assign('msg', tra('You do not have permissions to view this page.'));
-	$smarty->display('error.tpl');
-	die;
-}
-
 
 $smarty->assign('page', $_REQUEST["page"]);
 $page = $_REQUEST['page'];
@@ -62,7 +46,7 @@ if (isset($_REQUEST['addreference'])) {
 	}
 
 	if (count($errors) < 1) {
-		$id = $referenceslib->add_lib_reference(
+		$id = $referenceslib->add_reference(
 			$ref_biblio_code,
 			$ref_author,
 			$ref_title,
@@ -95,7 +79,7 @@ if (isset($_REQUEST['editreference'])) {
 	}
 
 	if (count($errors) < 1) {
-		$referenceslib->edit_libReference(
+		$referenceslib->edit_reference(
 			$ref_id,
 			$ref_biblio_code,
 			$ref_author,
@@ -120,7 +104,7 @@ if (isset($_REQUEST['editreference'])) {
 if (isset($_REQUEST['action']) && isset($ref_id)) {
 	if ($_REQUEST['action'] == 'delete') {
 		$access->check_authenticity();
-		$referenceslib->remove_libReference($ref_id);
+		$referenceslib->remove_reference($ref_id);
 	}
 }
 

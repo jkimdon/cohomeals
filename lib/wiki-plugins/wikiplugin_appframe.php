@@ -1,41 +1,45 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_appframe.php 50366 2014-03-17 18:38:33Z jonnybradley $
+// $Id: wikiplugin_appframe.php 60616 2016-12-12 19:04:45Z jonnybradley $
 
 function wikiplugin_appframe_info()
 {
 	return array(
 		'name' => tra('Application Frame'),
-		'description' => tra('Creates a frame to assemble custom applications in. Components in the frame will be various wiki pages and modules.'),
+		'description' => tra('Create a frame in which to assemble custom applications'),
 		'prefs' => array('wikiplugin_appframe'),
 		'format' => 'html',
-		'introduced' => 9,
 		'documentation' => 'PluginAppFrame',
+		'iconname' => 'merge',
 		'filter' => 'wikicontent',
+		'introduced' => 9,
 		'body' => tr('Application layout'),
 		'params' => array(
 			'min' => array(
 				'required' => false,
-				'name' => tr('Minimal height'),
+				'name' => tr('Minimum height'),
 				'description' => tr('Prevent the frame from becoming any shorter than the specified size.'),
 				'default' => 300,
 				'filter' => 'int',
+				'since' => '9.0',
 			),
 			'max' => array(
 				'required' => false,
-				'name' => tr('Maximal height'),
+				'name' => tr('Maximum height'),
 				'description' => tr('Prevent the frame from becoming any higher than the specified size.'),
 				'default' => -1,
 				'filter' => 'int',
+				'since' => '10.0',
 			),
 			'hideleft' => array(
 				'requred' => false,
 				'name' => tr('Hide left column'),
 				'description' => tr('Hide the left column when the application frame is in use to provide more space to the application.'),
 				'default' => 'n',
+				'since' => '9.0',
 				'options' => array(
 					array('value' => 'n', 'text' => tr('No')),
 					array('value' => 'y', 'text' => tr('Yes')),
@@ -46,6 +50,7 @@ function wikiplugin_appframe_info()
 				'name' => tr('Hide right column'),
 				'description' => tr('Hide the right column when the application frame is in use to provide more space to the application.'),
 				'default' => 'n',
+				'since' => '9.0',
 				'options' => array(
 					array('value' => 'n', 'text' => tr('No')),
 					array('value' => 'y', 'text' => tr('Yes')),
@@ -54,8 +59,9 @@ function wikiplugin_appframe_info()
 			'fullpage' => array(
 				'required' => false,
 				'name' => tr('Full page'),
-				'description' => tr('Occupy the complete content area of the page.'),
+				'description' => tr('Completely fill the content area of the page.'),
 				'default' => 'n',
+				'since' => '9.0',
 				'options' => array(
 					array('value' => 'n', 'text' => tr('No')),
 					array('value' => 'y', 'text' => tr('Yes')),
@@ -64,8 +70,9 @@ function wikiplugin_appframe_info()
 			'absolute' => array(
 				'required' => false,
 				'name' => tr('Absolute Position'),
-				'description' => tr('Position the app frame to use absolute position and really use all available space.'),
+				'description' => tr('Use all available space for the application frame (by means of CSS absolute positioning).'),
 				'default' => 'n',
+				'since' => '9.0',
 				'options' => array(
 					array('value' => 'n', 'text' => tr('No')),
 					array('value' => 'y', 'text' => tr('Yes')),
@@ -77,12 +84,14 @@ function wikiplugin_appframe_info()
 				'description' => tr('When using absolute mode, leave some space for the header at the top.'),
 				'default' => 0,
 				'filter' => 'int',
+				'since' => '9.0',
 			),
 			'fullscreen' => array(
 				'required' => false,
 				'name' => tr('Full screen'),
-				'description' => tr('Occupy the complete page.'),
+				'description' => tr('Fill the complete page.'),
 				'default' => 'n',
+				'since' => '10.0',
 				'options' => array(
 					array('value' => 'n', 'text' => tr('No')),
 					array('value' => 'y', 'text' => tr('Yes')),
@@ -111,19 +120,11 @@ function wikiplugin_appframe($data, $params)
 	$headerlib = TikiLib::lib('header');
 
 	if (isset($params['hideleft']) && $params['hideleft'] == 'y') {
-		$headerlib->add_js(
-<<<JS
-hideCol('col2','left', 'col1');
-JS
-);
+		$headerlib->add_js('$("body").addClass("hide_zone_left");');
 	}
 
 	if (isset($params['hideright']) && $params['hideright'] == 'y') {
-		$headerlib->add_js(
-<<<JS
-hideCol('col3','right', 'col1');
-JS
-);
+		$headerlib->add_js('$("body").addClass("hide_zone_right");');
 	}
 
 	$headerlib->add_js(
@@ -142,9 +143,9 @@ $(window).resize(function () {
 	} else {
 		appframe.height(0);
 
-		centerHeader = $('#appframe').position().top - $('#tiki-center').position().top;
+		centerHeader = $('#appframe').position().top - $('#col1').position().top;
 		surplus = $('#show-errors-button').height();
-		footerSize = $('#footer').height() + $('#tiki-center').height() - centerHeader + surplus;
+		footerSize = $('#footer').height() + $('#col1').height() - centerHeader + surplus;
 		target = viewportHeight - appframe.position().top - footerSize;
 
 		var min = $minHeight;
@@ -208,15 +209,15 @@ $('#appframe .anchor').each(function () {
 });
 
 if ($fullPage) {
-	$('#role_main').append($('#appframe'));
-	$('#role_main').children().not($('#appframe')).remove();
+	$('#top').append($('#appframe'));
+	$('#top').children().not($('#appframe')).remove();
 }
 
 if ($fullscreen) {
 	$('.header_outer').hide();
 	$('#topbar_modules').hide();
 	$('#footer').hide();
-	$('#error_report').hide();
+	$('#tikifeedback').hide();
 	$('.share').hide();
 	$('.tellafriend').hide();
 }

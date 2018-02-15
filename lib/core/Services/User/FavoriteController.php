@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FavoriteController.php 47593 2013-09-20 21:35:41Z nkoth $
+// $Id: FavoriteController.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Services_User_FavoriteController
 {
@@ -67,7 +67,7 @@ class Services_User_FavoriteController
 				$relationId = $relationlib->add_relation('tiki.user.favorite', 'user', $user, $type, $object);
 				$relations[$relationId] = "$type:$object";
 
-				$this->handleScore($type, $object);
+				$item_user = $this->getItemUser($type, $object);
 
 				TikiLib::events()->trigger(
 					'tiki.social.favorite.add',
@@ -76,6 +76,7 @@ class Services_User_FavoriteController
 						'object' => $object,
 						'parentobject' => $parentobject,
 						'user' => $user,
+						'item_user' => $item_user,
 					)
 				);
 			}
@@ -111,13 +112,9 @@ class Services_User_FavoriteController
 		}
 	}
 
-	private function handleScore($type, $object)
+	private function getItemUser($type, $object)
 	{
-		global $user, $prefs;
-
-		if ($prefs['feature_score'] != 'y') {
-			return;
-		}
+		global $user;
 
 		$item_user = null;
 
@@ -133,12 +130,7 @@ class Services_User_FavoriteController
 			$item_user = $res['author'];
 		}
 
-		$tikilib = TikiLib::lib('tiki');
-		$tikilib->score_event($user, 'item_favorited', "$type:$object");
-
-		if ($item_user) {
-			$tikilib->score_event($item_user, 'item_is_favorited', "$user:$type:$object");
-		}
+		return $item_user;
 	}
 }
 

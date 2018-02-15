@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: renderer_inline.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: renderer_inline.php 60583 2016-12-09 11:38:08Z jonnybradley $
 
 /**
  * "Inline" diff renderer.
@@ -14,12 +14,12 @@
  * @package Text_Diff
  */
 
-require "renderer_sidebyside.php";
+require_once "renderer_sidebyside.php";
 
 class Text_Diff_Renderer_inline extends Text_Diff_Renderer_sidebyside
 {
 
-    function Text_Diff_Renderer_inline($context_lines = 4, $words = 1)
+    function __construct($context_lines = 4, $words = 1)
     {
         $this->_leading_context_lines = $context_lines;
         $this->_trailing_context_lines = $context_lines;

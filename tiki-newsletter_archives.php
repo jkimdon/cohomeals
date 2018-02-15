@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-newsletter_archives.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-newsletter_archives.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
 include_once ('lib/newsletters/nllib.php');
@@ -82,7 +82,8 @@ $smarty->assign('url', "tiki-newsletter_archives.php");
 if (isset($_REQUEST['editionId'])) {
 	foreach ($channels['data'] as $edition) {
 		if ($edition['editionId'] == $_REQUEST['editionId']) {
-			$edition["dataparsed"] = $tikilib->parse_data($edition["data"]);
+			$is_html = $edition['wysiwyg'] === 'y' && $prefs['wysiwyg_htmltowiki'] !== 'y'; // parse as html if wysiwyg and not htmltowiki
+			$edition["dataparsed"] = TikiLib::lib('parser')->parse_data($edition["data"], array('is_html' => $is_html));
 			$smarty->assign_by_ref('edition', $edition);
 			break;
 		}

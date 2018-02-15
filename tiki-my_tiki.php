@@ -2,17 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-my_tiki.php 46727 2013-07-19 11:47:04Z jonnybradley $
+// $Id: tiki-my_tiki.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 include_once ('lib/tasks/tasklib.php');
-//get_strings tra('MyTiki Home');
+//get_strings tra('My Account Home');
 $access->check_user($user);
 $userwatch = $user;
 if (isset($_REQUEST["view_user"])) {
@@ -46,7 +46,7 @@ if ($prefs['feature_wiki'] == 'y') {
 if ($prefs['feature_blogs'] == 'y') {
 	$mytiki_blogs = $tikilib->get_user_preference($user, 'mytiki_blogs', 'y');
 	if ($mytiki_blogs == 'y') {
-		require_once('lib/blogs/bloglib.php');
+		$bloglib = TikiLib::lib('blog');
 		$user_blogs = $bloglib->list_user_blogs($userwatch, false);
 		$smarty->assign_by_ref('user_blogs', $user_blogs);
 		$smarty->assign('mytiki_blogs', 'y');
@@ -100,10 +100,9 @@ if ($prefs['feature_tasks'] == 'y') {
 if ($prefs['feature_messages'] == 'y' && $tiki_p_messages == 'y') {
 	$mytiki_msgs = $tikilib->get_user_preference($user, 'mytiki_msgs', 'y');
 	if ($mytiki_msgs == 'y') {
-		include_once ('lib/messu/messulib.php');
 		$unread = $tikilib->user_unread_messages($userwatch);
 		$smarty->assign_by_ref('unread', $unread);
-		$msgs = $messulib->list_user_messages($user, 0, -1, 'date_desc', '', 'isRead', 'n', '', 'messages');
+		$msgs = TikiLib::lib('message')->list_user_messages($user, 0, -1, 'date_desc', '', 'isRead', 'n', '', 'messages');
 		$smarty->assign_by_ref('msgs', $msgs['data']);
 		$smarty->assign('mytiki_msgs', 'y');
 	}
@@ -111,7 +110,7 @@ if ($prefs['feature_messages'] == 'y' && $tiki_p_messages == 'y') {
 if ($prefs['feature_articles'] == 'y') {
 	$mytiki_articles = $tikilib->get_user_preference($user, 'mytiki_articles', 'y');
 	if ($mytiki_articles == 'y') {
-		include_once ('lib/articles/artlib.php');
+		$artlib = TikiLib::lib('art');
 		$user_articles = $artlib->get_user_articles($userwatch, -1);
 		$smarty->assign_by_ref('user_articles', $user_articles);
 		$smarty->assign('mytiki_articles', 'y');

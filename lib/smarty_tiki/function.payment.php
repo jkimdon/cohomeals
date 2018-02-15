@@ -1,16 +1,18 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.payment.php 49764 2014-02-06 14:02:50Z lphuberdeau $
+// $Id: function.payment.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 // @param numeric $id: id of the payment
 // @params url $returnurl: optional return url
 function smarty_function_payment( $params, $smarty )
 {
-	global $tikilib, $prefs, $userlib, $user, $globalperms;
-	global $paymentlib; require_once 'lib/payment/paymentlib.php';
+	global $prefs, $user, $globalperms;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$paymentlib = TikiLib::lib('payment');
 	$invoice = (int) $params['id'];
 
 	$objectperms = Perms::get('payment', $invoice);
@@ -39,13 +41,22 @@ function smarty_function_payment( $params, $smarty )
 				$info['state'] == 'past' &&
 				$prefs['payment_user_only_his_own_past'] != 'y'
 			) ||
-			$theguy
+			$theguy ||
+			$objectperms->payment_admin ||
+			(
+				(
+					$info['state'] == 'outstanding' ||
+					$info['state'] == 'overdue'
+				) &&
+				$info['userId'] == '-1' &&
+				$prefs['payment_anonymous_allowed'] == 'y'
+			)
 		)
 	) {
 		if ($prefs['payment_system'] == 'cclite' && isset($_POST['cclite_payment_amount']) && $_POST['cclite_payment_amount'] == $info['amount_remaining']) {
-			global $access, $cclitelib, $cartlib;
-			require_once 'lib/payment/cclitelib.php';
-			require_once 'lib/payment/cartlib.php';
+			global $cclitelib; require_once 'lib/payment/cclitelib.php';
+			$access = TikiLib::lib('access');
+			$cartlib = TikiLib::lib('cart');
 
 			//$access->check_authenticity( tr('Transfer currency? %0 %1?', $info['amount'], $info['currency'] ));
 
@@ -73,7 +84,7 @@ function smarty_function_payment( $params, $smarty )
 				$smarty->assign('ccresult', $result);
 				$smarty->assign('ccresult_ok', $result);
 			} else {
-				$smarty->assign('ccresult', tr('Payment sent but verification not currently available. (Work in progress)'));
+				$smarty->assign('ccresult', tr('Payment was sent but verification is not currently available (this feature is a work in progress)'));
 			}
 		} else if ( $prefs['payment_system'] == 'tikicredits') {
 			require_once 'lib/payment/creditspaylib.php';
@@ -87,20 +98,31 @@ function smarty_function_payment( $params, $smarty )
 
 		if (!empty($smarty->tpl_vars['returnurl']->value)) {
 			$returl = $smarty->tpl_vars['returnurl'];
-			$info['returnurl'] = preg_match('|^https?://|', $returl) ? $returl : $tikilib->tikiUrl($returl);
+			$info['returnurl'] = TikiLib::tikiUrl($returl);
 		}
 
 		if (!empty($params['returnurl']) && empty($result)) {
-			$info['url'] = preg_match('|^https?://|', $params['returnurl']) ? $params['returnurl'] : $tikilib->tikiUrl($params['returnurl']);
+			$info['url'] = TikiLib::tikiUrl($params['returnurl']);
 			$info['url'] .= (strstr($params['returnurl'], '.php?') || !strstr($params['returnurl'], '.php')? '&':'?') . "invoice=$invoice";
 		}
 		$smarty->assign('payment_info', $info);
-		$smarty->assign('payment_detail', $tikilib->parse_data(htmlspecialchars($info['detail'])));
+		$smarty->assign('payment_detail', TikiLib::lib('parser')->parse_data(htmlspecialchars($info['detail'])));
 
 		$smarty_cache_id = $smarty_compile_id = $prefs['language'] . md5('tiki-payment-single.tpl');
 		return $smarty->fetch('tiki-payment-single.tpl', $smarty_cache_id, $smarty_compile_id);
 
 	} else {
-		return tra('This invoice does not exist or is in limited access.');
+		$smarty->loadPlugin('smarty_block_remarksbox');
+		$repeat = false;
+
+		return smarty_block_remarksbox(
+			[
+				'type' => 'warning',
+				'title' => tra('Payment error'),
+			],
+			tra('This invoice does not exist or access to it is restricted.'),
+			$smarty,
+			$repeat
+		);
 	}
 }

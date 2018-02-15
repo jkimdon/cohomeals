@@ -1,19 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiSeleniumTestCase.php 44728 2013-02-02 23:56:29Z arildb $
+// $Id: TikiSeleniumTestCase.php 58382 2016-04-20 08:59:56Z jonnybradley $
 
 /*
  * Parent class of all Selenium test cases.
  */
 
-require_once 'PHPUnit/Extensions/SeleniumTestCase.php';
-require_once 'TikiAcceptanceTestDBRestorer.php';
 
-
-class TikiSeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
+class TikiSeleniumTestCase extends PHPUnit_Extensions_Selenium2TestCase
 {
 	protected $backupGlobals = FALSE;
 	var $current_test_db; 

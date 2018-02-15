@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: autosave.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: autosave.php 57972 2016-03-17 20:09:51Z jonnybradley $
 
 // This script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -15,7 +15,7 @@ class AutoSaveLib
 {
 	function __construct()
 	{
-		global $access;
+		$access = TikiLib::lib('access');
 
 		$access->check_feature(array('feature_ajax', 'ajax_autosave'));
 	}

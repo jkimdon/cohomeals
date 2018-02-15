@@ -2,16 +2,16 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-download_item_attachment.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: tiki-download_item_attachment.php 60051 2016-10-25 09:18:17Z kroky6 $
 
 $force_no_compression = true;
 require_once ('tiki-setup.php');
 
-include_once ('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 
 if (empty($_REQUEST['attId']) && !empty($_REQUEST['itemId']) && !empty($_REQUEST['fieldId'])) {
 	$_REQUEST['attId'] = $trklib->get_item_value(0, $_REQUEST['itemId'], $_REQUEST['fieldId']);
@@ -30,10 +30,10 @@ if (empty($info)) {
 	die;
 }
 $itemInfo = $trklib->get_tracker_item($info["itemId"]);
-$itemUser = $trklib->get_item_creator($itemInfo['trackerId'], $itemInfo['itemId']);
+$itemUsers = $trklib->get_item_creators($itemInfo['trackerId'], $itemInfo['itemId']);
 
 if (isset($info['user']) && $info['user'] == $user) {
-} elseif (!empty($itemUser) && $user == $itemUser) {
+} elseif (!empty($itemUsers) && in_array($user, $itemUsers)) {
 } elseif ((isset($itemInfo['status']) and $itemInfo['status'] == 'p' && !$tikilib->user_has_perm_on_object($user, $itemInfo['trackerId'], 'tracker', 'tiki_p_view_trackers_pending'))
 	||  (isset($itemInfo['status']) and $itemInfo['status'] == 'c' && !$tikilib->user_has_perm_on_object($user, $itemInfo['trackerId'], 'tracker', 'tiki_p_view_trackers_closed'))
 	||  ($tiki_p_admin_trackers != 'y' && !$tikilib->user_has_perm_on_object($user, $itemInfo['trackerId'], 'tracker', 'tiki_p_view_trackers'))

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: web_config 48830 2013-11-29 17:21:21Z arildb $ [This line is used to check that this configuration file is up to date. Do not edit this line and leave it as the second line.] -->
+<!-- $Id: web_config 60631 2016-12-13 14:47:35Z kroky6 $ [This line is used to check that this configuration file is up to date. Do not edit this line and leave it as the second line.] -->
 <!-- DEVELOPERS: This configuration must be kept synchronized with the configuration for other Web servers. See http://dev.tiki.org/Operating+System+independence#Keep_web.config_and_.htaccess_synchronized -->
 
 <configuration>
@@ -11,15 +11,39 @@
         <add value="index.php" />
       </files>
     </defaultDocument>
+    <httpProtocol>
+     <customHeaders>
+       <add name="access-control-allow-origin" value="*" />
+       <add name="access-control-allow-headers" value="content-type" />
+     </customHeaders>
+    </httpProtocol>
 	<security>
 		<requestFiltering allowDoubleEscaping="True">
 			<!-- IIS 7 has a default 30MB limit. Use this value by default -->
 			<!-- requestLimits maxAllowedContentLength="30000000" / -->
+			<denyUrlSequences>
+				<add sequence="changelog.txt" />
+				<add sequence="_htaccess" />
+			</denyUrlSequences>
+			<fileExtensions>
+				<add fileExtension=".bak" allowed="false" />
+				<add fileExtension=".inc" allowed="false" />
+				<add fileExtension=".lib" allowed="false" />
+				<add fileExtension=".sh" allowed="false" />
+				<add fileExtension=".tpl" allowed="false" />
+				<add fileExtension=".sql" allowed="false" />
+			</fileExtensions>
 		</requestFiltering>
 	</security>
+    <staticContent>
+    	<remove fileExtension=".woff" /> <!-- In case IIS already has this mime type -->
+   		<mimeMap fileExtension=".woff" mimeType="application/x-font-woff" />
+    	<remove fileExtension=".woff2" /> <!-- In case IIS already has this mime type -->
+   		<mimeMap fileExtension=".woff2" mimeType="application/font-woff2" />   	
+   	</staticContent>
 	<rewrite>
 		<rules>
-		<!--# $Id: web_config 48830 2013-11-29 17:21:21Z arildb $ [This line is used to check that this configuration file is up to date. Do not edit this line and leave it as the first line.]-->
+		<!--# $Id: web_config 60631 2016-12-13 14:47:35Z kroky6 $ [This line is used to check that this configuration file is up to date. Do not edit this line and leave it as the first line.]-->
 		<!--# These are suggested configuration directives for use with Tiki.-->
 		<!--# They enhance security and permit clean URLs.-->
 		<!--# In your Tiki instance, visit tiki-admin.php?page=sefurl to make Tiki use clean URLs in generated links.-->
@@ -93,6 +117,10 @@
 		<!--#php_value include_path "." -->
 		<!--# some features like assigning perms to a group with a name containing a quote will not work without this-->
 		<!--#php_flag magic_quotes_gpc off-->
+		<!--# Set a timezone (needed for dates and times to work properly in PHP)-->
+		<!--#php_value date.timezone "America/New_York"-->
+		<!--# Set a character set-->
+		<!--#php_value default_charset utf-8-->
 		<!--# You may need to uncomment and fix the RewriteBase value below to suit your installation. e.g. if your Tiki is not installed directly in the web root.-->
 		<!--# And if you get errors like "The requested URL /absolutepath/tiki-index.php was not found on this server",-->
 		<!--# RewriteBase   /tiki-->

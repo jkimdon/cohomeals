@@ -1,17 +1,18 @@
-{* $Id: tiki-sqllog.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
+{* $Id: tiki-sqllog.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
 {title admpage="general"}{tr}Log SQL{/tr}{/title}
 
 {if $prefs.log_sql ne 'y'}
 	{remarksbox type="warning" title="{tr}Notice{/tr}"}{tr}This feature is disabled{/tr}<br>{tr}You will not see the latest queries.{/tr}{/remarksbox}
 {/if}
 
-<div class="navbar">
-	{button href="?clean=y" _text="{tr}Clean{/tr}"}
+<div class="t_navbar">
+	{button href="?clean=y" class="btn btn-default" _text="{tr}Clean{/tr}"}
 </div>
 
 {include file='find.tpl' find_show_num_rows='y'}
 
-<table class="table normal">
+<div class="table-responsive">
+<table class="table">
 	<tr>
 		<th>{self_link _sort_arg='sort_mode' _sort_field='created'}{tr}Created{/tr}{/self_link}</th>
 		<th>{self_link _sort_arg='sort_mode' _sort_field='sql1'}{tr}Query{/tr}{/self_link}</th>
@@ -29,4 +30,6 @@
 		</tr>
 	{/foreach}
 </table>
+</div>
+
 {pagination_links cant=$cant step=$numrows offset=$offset}{/pagination_links}

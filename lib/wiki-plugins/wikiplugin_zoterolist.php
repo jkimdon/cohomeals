@@ -1,20 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_zoterolist.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_zoterolist.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_zoterolist_info()
 {
 	return array(
 		'name' => tra('Zotero Reference List'),
-		'description' => tra('Produces the complete reference list from the Zotero server.'),
+		'description' => tra('Display the complete reference list from a Zotero server'),
 		'prefs' => array('zotero_enabled', 'wikiplugin_zoterolist'),
+		'iconname' => 'bookmark',
+		'introduced' => 7,
 		'params' => array(
 			'tag' => array(
 				'name' => tra('Tag'),
 				'description' => tra('Provide the list of references with a given tag.'),
+				'since' => '7.0',
 				'required' => true,
 				'filter' => 'alnum',
 			),

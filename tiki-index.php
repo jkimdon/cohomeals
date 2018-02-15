@@ -3,10 +3,10 @@
  * Tiki's entry point.
  *
  * @package Tiki
- * @copyright (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
+ * @copyright (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
-// $Id: tiki-index.php 52037 2014-07-19 20:36:47Z nkoth $
+// $Id: tiki-index.php 61014 2017-01-22 00:17:03Z lindonb $
 
 require_once ('check_composer_exists.php');
 
@@ -42,15 +42,16 @@ $section = 'wiki page';
 $isHomePage = (!isset($_REQUEST['page']));
 require_once('tiki-setup.php');
 
-require_once('lib/multilingual/multilinguallib.php');
+$multilinguallib = TikiLib::lib('multilingual');
 
 if ( $prefs['feature_wiki_structure'] == 'y' ) {
-	include_once('lib/structures/structlib.php');
+	$structlib = TikiLib::lib('struct');
 }
 
-include_once('lib/wiki/wikilib.php');
-include_once('lib/stats/statslib.php');
+$wikilib = TikiLib::lib('wiki');
+$statslib = TikiLib::lib('stats');
 require_once ('lib/wiki/renderlib.php');
+require_once('lib/debug/Tracer.php');
 
 $auto_query_args = array(
 				'page',
@@ -68,10 +69,7 @@ $auto_query_args = array(
 );
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 if (!empty($_REQUEST['machine_translate_to_lang'])) {
@@ -89,7 +87,7 @@ if (!isset($_SESSION['thedate'])) {
 }
 
 // Check if a WS is active
-global $perspectivelib; require_once 'lib/perspectivelib.php';
+$perspectivelib = TikiLib::lib('perspective');
 $activeWS = $perspectivelib->get_current_perspective(null);
 
 // If there's a WS active and the WS has a homepage, then load the WS homepage
@@ -107,8 +105,8 @@ if (isset($_REQUEST['page_id'])) {
 }
 
 if ((!isset($_REQUEST['page']) || $_REQUEST['page'] == '') and !isset($_REQUEST['page_ref_id'])) {
-	if ($objectperms->view) {
-		$access->display_error($page, tra('You do not have permission to view this page.'), '401');
+	if ($globalperms->view) {
+		$access->display_error('', tra('You do not have permission to view this page.'), '401');
 	} else {
 		$access->display_error('', tra('No name indicated for wiki page'));
 	}
@@ -154,7 +152,7 @@ if ( $prefs['feature_wiki_structure'] == 'y' ) {
 			array( 'type' => 'wiki page' ),
 			'object',
 			$structs,
-			array( 'object' => 'permName' ),
+			array( 'object' => 'pageName' ),
 			'view'
 		);
 
@@ -186,10 +184,23 @@ if (!empty($page_ref_id)) {
 }
 
 $page = $_REQUEST['page'];
+if ($prefs['wiki_url_scheme'] !== 'urlencode') {
+	$page = TikiLib::lib('wiki')->get_page_by_slug($page);
+}
 $smarty->assign_by_ref('page', $page);
 
 $cat_type = 'wiki page';
 $cat_objid = $page;
+
+if ($prefs['tracker_wikirelation_redirectpage'] == 'y' && !isset($_REQUEST['admin'])) {
+	$relatedItems = TikiLib::lib('relation')->get_object_ids_with_relations_from( 'wiki page', $page, 'tiki.wiki.linkeditem' );
+	$relatedItem = reset($relatedItems);
+	if ($relatedItem) {
+		$url = 'tiki-view_tracker_item.php?itemId=' . $relatedItem;
+		include_once('tiki-sefurl.php');
+		header('location: '. filter_out_sefurl($url, 'trackeritem'));
+	}
+}
 
 // Inline Ckeditor editor
 if ($prefs['wysiwyg_inline_editing'] == 'y' && $page &&
@@ -202,6 +213,8 @@ if ($prefs['wysiwyg_inline_editing'] == 'y' && $page &&
 	setCookieSection('wysiwyg_inline_edit', 0, 'preview');	// kill cookie if pref off or no perms
 }
 
+$page = $_REQUEST['page'] = $wikilib->get_page_by_slug($page);
+
 // Process page display options
 $wikilib->processPageDisplayOptions();
 
@@ -213,17 +226,10 @@ if ( isset($_REQUEST['fullscreen']) ) {
 }
 $smarty->assign('fullscreen', $fullscreen);
 
-if ( function_exists('utf8_encode') ) {
-	$pagename_utf8 = utf8_encode($page);
-	if ( $page != $pagename_utf8 && ! $tikilib->page_exists($page) && $tikilib->page_exists($pagename_utf8) ) {
-		$page = $_REQUEST['page'] = $pagename_utf8;
-	}
-}
-
 if (!$info || isset($_REQUEST['date']) || isset($_REQUEST['version'])) {
 	if ($prefs['feature_wiki_use_date'] == 'y' && isset($_REQUEST['date'])) {
 		// Date is required
-		include_once ('lib/wiki/histlib.php');
+		$histlib = TikiLib::lib('hist');
 
 		try {
 			$page_view_date = $histlib->get_view_date($_REQUEST['date']);
@@ -244,7 +250,7 @@ if (!$info || isset($_REQUEST['date']) || isset($_REQUEST['version'])) {
 
 	if ($prefs['feature_wiki_use_date'] == 'y' && isset($_REQUEST['version'])) {
 		// Version is required
-		include_once ('lib/wiki/histlib.php');
+		$histlib = TikiLib::lib('hist');
 
 		try {
 			$info = $histlib->get_page_info($page, $_REQUEST['version']);
@@ -286,6 +292,7 @@ if (empty($info) && !($user && $prefs['feature_wiki_userpage'] == 'y' && strcase
 	if (!$isprefixed && !empty($prefs['url_anonymous_page_not_found']) && empty($user)) {
 		$access->redirect($prefs['url_anonymous_page_not_found']);
 	}
+
 	if ($user && $prefs['feature_wiki_userpage'] == 'y' && strcasecmp($prefs['feature_wiki_userpage_prefix'], $page) == 0) {
 		$url = 'tiki-index.php?page='.$prefs['feature_wiki_userpage_prefix'].$user;
 		if ($prefs['feature_sefurl'] == 'y') {
@@ -307,7 +314,6 @@ if (empty($info) && !($user && $prefs['feature_wiki_userpage'] == 'y' && strcase
 
 	/* if we have exactly one match, redirect to it */
 	if (isset($newPage) && !$isUserPage) {
-		$url = $wikilib->sefurl($newPage);
 
 		// Process prefix alias with itemId append for pretty tracker pages
 		$prefixes = explode(',', $prefs['wiki_prefixalias_tokens']);
@@ -318,10 +324,7 @@ if (empty($info) && !($user && $prefs['feature_wiki_userpage'] == 'y' && strcase
 				if (!ctype_digit($suffix) && $suffix) {
 					// allow escaped numerics as text
 					$suffix = stripslashes($suffix);
-					global $semanticlib;
-					if (!is_object($semanticlib)) {
-						require_once 'lib/wiki/semanticlib.php';
-					}
+					$semanticlib = TikiLib::lib('semantic');
 					$items = $semanticlib->getItemsFromTracker($newPage, $suffix);
 					if (count($items) > 1) {
 						$msg = tra('There is more than one item in the tracker with this title');
@@ -334,30 +337,43 @@ if (empty($info) && !($user && $prefs['feature_wiki_userpage'] == 'y' && strcase
 					} else if (count($items)) {
 						$suffix = $items[0];
 					} else {
-						$msg = tra('There are no items in the tracker with this title');
-						$smarty->assign('msg', $msg);
-						$smarty->display('error.tpl');
-						die;
+						// check for a number then the item title
+						$suffix = preg_replace('/(\d+).*/', '$1', $suffix);
+
+						if (!$suffix) {
+							$msg = tra('There are no items in the tracker with this title');
+							$smarty->assign('msg', $msg);
+							$smarty->display('error.tpl');
+							die;
+						}
 					}
 				}
 				if (ctype_digit($suffix)) {
-					if ($prefs['feature_sefurl'] == 'y') {
-						$url = $url . '?itemId=' . $suffix;
-					} else {
-						$url = $url . '&itemId=' . $suffix;
-					}
+					$_REQUEST['itemId'] = $suffix;
+					$_REQUEST['page'] = $newPage;
+					$_GET['itemId'] = $suffix;	// \ParserLib::parse_wiki_argvariable uses $_GET
+					$_GET['page'] = $newPage;
+					$smarty->assign('canonical_ending', urlencode(trim(substr($page, strlen($newPage)))));
+					$page = $newPage;
+					$info = $tikilib->get_page_info($_REQUEST['page']);
+					$statslib->stats_hit($suffix, 'trackeritem');
+					unset($_REQUEST['sort_mode']); // prevent invalid sort_mode when coming from tracker listing to cause search fatal error in any LIST plugins
 				}
 			}
 		}
-		$access->redirect($url);
+		// $info not found in prefixes but $newPage and $url was found so just a plain alias
+		if (!$info) {
+			$url = $wikilib->sefurl($newPage);
+			$access->redirect($base_url . $url, '', 301);	// permanent redirect
+		}
 	} else {
 		$likepages = array_unique(array_merge($likepages, $referencedPages));
-	}
 
-	$smarty->assign_by_ref('likepages', $likepages);
-	$smarty->assign('create', $isUserPage? 'n': 'y');
-	$smarty->assign('filter', array('content' => $page,));
-	$access->display_error($page, tra('Page cannot be found'), '404');
+		$smarty->assign_by_ref('likepages', $likepages);
+		$smarty->assign('create', $isUserPage? 'n': 'y');
+		$smarty->assign('filter', array('content' => $page,));
+		$access->display_error($page, tra('Page cannot be found'), '404');
+	}
 }
 
 if ( empty($info)
@@ -400,7 +416,7 @@ $page = $info['pageName'];
 //}
 
 if (isset($_REQUEST['approve'], $_REQUEST['revision']) && $_REQUEST['revision'] <= $info['version']) {
-	global $flaggedrevisionlib; require_once 'lib/wiki/flaggedrevisionlib.php';
+	$flaggedrevisionlib = TikiLib::lib('flaggedrevision');
 
 	if ($flaggedrevisionlib->page_requires_approval($page)) {
 		$perms = Perms::get('wiki page', $page);
@@ -419,12 +435,6 @@ if ($prefs['flaggedrev_approval'] == 'y' && isset($_REQUEST['latest']) && $objec
 	$pageRenderer->forceLatest();
 }
 
-if ($prefs['mobile_mode'] === 'y') {
-	$cache_mobile_mode = array('mobile_mode' => $prefs['mobile_mode']);
-} else {
-	$cache_mobile_mode = array();
-}
-
 $pageCache = Tiki_PageCache::create()
 	->disableForRegistered()
 	->onlyForGet()
@@ -433,7 +443,6 @@ $pageCache = Tiki_PageCache::create()
 	->addValue('page', $page)
 	->addValue('locale', $prefs['language'])
 	->addKeys($_GET, array_keys($_GET))
-	->addKeys($cache_mobile_mode, array_keys($cache_mobile_mode))
 	->checkMeta('wiki-page-output-meta-timestamp', array('page' => $page,))
 	->applyCache();
 
@@ -475,39 +484,8 @@ if (!in_array($page, $_SESSION['breadCrumb'])) {
 	array_push($_SESSION['breadCrumb'], $page);
 }
 
-
 // Now increment page hits since we are visiting this page
-if ($prefs['count_admin_pvs'] == 'y' || $user!='admin') {
-	$tikilib->add_hit($page);
-}
-
-// Check if we have to perform an action for this page
-// for example lock/unlock
-if ( $objectperms->admin_wiki
-		|| ($user and $objectperms->lock and ($prefs['feature_wiki_usrlock'] == 'y'))
-) {
-	if ( isset($_REQUEST['action']) ) {
-		check_ticket('index');
-		if ( $_REQUEST['action'] == 'lock' ) {
-			$wikilib->lock_page($page);
-			$pageRenderer->setInfo('flag', 'L');
-			$info['flag'] = 'L';
-		}
-	}
-}
-
-if ( $objectperms->admin_wiki
-		|| ($user and ($user == $info['user']) and $objectperms->lock and ($prefs['feature_wiki_usrlock'] == 'y'))
-) {
-	if ( isset($_REQUEST['action']) ) {
-		check_ticket('index');
-		if ( $_REQUEST['action'] == 'unlock' ) {
-			$wikilib->unlock_page($page);
-			$pageRenderer->setInfo('flag', 'U');
-			$info['flag'] = 'U';
-		}
-	}
-}
+$tikilib->add_hit($page);
 
 // Save to notepad if user wants to
 if ( $user
@@ -532,7 +510,7 @@ if ( isset($_REQUEST['undo']) ) {
 			$info = $tikilib->get_page_info($page);
 			$pageRenderer->setInfos($info);
 		} else {
-			TikiLib::lib('errorreport')->report(tra('Nothing to undo'));
+			Feedback::note(tra('There is nothing to undo.'));
 		}
 	}
 }
@@ -546,15 +524,6 @@ include_once('tiki-section_options.php');
 
 if ( isset($_REQUEST['pagenum']) && $_REQUEST['pagenum'] > 0 ) {
 	$pageRenderer->setPageNumber((int) $_REQUEST['pagenum']);
-}
-
-$just_saved = false;
-if (isset($_SESSION['saved_msg']) && $_SESSION['saved_msg'] == $info['pageName'] && $info['user'] == $user ) {
-	// Generate the 'Page has been saved...' message
-	require_once('lib/smarty_tiki/modifier.userlink.php');
-	$smarty->assign('saved_msg', sprintf(tra('Page saved (version %d).'), $info['version']));
-	unset($_SESSION['saved_msg']);
-	$just_saved = true;
 }
 
 if ( $prefs['feature_wiki_attachments'] == 'y' && $prefs['feature_use_fgal_for_wiki_attachments'] != 'y' ) {
@@ -678,14 +647,30 @@ if (!empty($_REQUEST['machine_translate_to_lang'])) {
 TikiLib::events()->trigger(
 	'tiki.wiki.view',
 	array_merge(
+		(is_array($info) ? $info : array()),
 		array(
 			'type' => 'wiki page',
 			'object' => $page,
 			'user' => $GLOBALS['user'],
-		),
-		(is_array($info) ? $info : array())
+		)
 	)
 );
+
+if ( $prefs['feature_forums'] && $prefs['feature_wiki_discuss'] == 'y' && $prefs['wiki_discuss_visibility'] == 'above' ) {
+	include_once ('lib/comments/commentslib.php');
+	$commentslib = new Comments($dbTiki);
+	$comments_data = tra('Use this thread to discuss the page:') . " [tiki-index.php?page=".rawurlencode($page)."|$page]";
+	$threadId = $commentslib->check_for_topic($page, $comments_data);
+	$comments_coms = $commentslib->get_forum_topics($prefs['wiki_forum_id'],0,-1);
+	$discuss_replies_cant = 0;
+	foreach( $comments_coms as $topic ) {
+		if ( $topic['threadId'] == $threadId ) {
+			$discuss_replies_cant = $topic['replies'];
+			break;
+		}
+	}
+	$smarty->assign('discuss_replies_cant', $discuss_replies_cant);
+}
 
 $smarty->assign('info', $info);
 $smarty->assign('mid', 'tiki-show_page.tpl');
@@ -746,7 +731,9 @@ function translate_text($text, $sourceLang, $targetLang)
  */
 function make_sure_machine_translation_is_enabled()
 {
-	global $access, $_REQUEST, $prefs;
+	global $prefs;
+
+	$access = TikiLib::lib('access');
 	if ($prefs['feature_machine_translation'] != 'y' || $prefs['lang_machine_translate_wiki' != 'y']) {
 		$error_msg = tra('You have requested that this page be machine translated:') .
 						' <b>' .

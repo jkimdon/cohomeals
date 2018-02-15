@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: polllib_shared.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: polllib_shared.php 60943 2017-01-20 00:12:26Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -101,7 +101,7 @@ class PollLibShared extends TikiLib
 		elseif (count($ret) == 1)
 			return $ret[0]['pollId'];
 		else {
-			$bid = rand(0, count($ret) - 1);
+			$bid = mt_rand(0, count($ret) - 1);
 			return $ret[$bid]['pollId'];
 		}
 	}
@@ -362,7 +362,7 @@ class PollLibShared extends TikiLib
      */
     function get_poll_categories($pollId)
 	{
-		global $categlib; include_once('lib/categories/categlib.php');
+		$categlib = TikiLib::lib('categ');
 
 		$query = "select tco.`categId`, tc.`name`" .
 							" from `tiki_poll_objects` tpo, `tiki_category_objects` tco, `tiki_categories` tc" .
@@ -421,6 +421,12 @@ class PollLibShared extends TikiLib
 	 */
 	function options_percent(&$poll_info, &$options)
 	{
+		global $prefs;
+		if (!empty($prefs['poll_percent_decimals'])) {
+			$percent_decimals = 2;
+		} else {
+			$percent_decimals = $prefs['poll_percent_decimals'];
+		}
 		$poll_info['votes'] = 0;
 		$total = 0;
 		$isNum = true; // try to find if it is a numeric poll with a title like +1, -2, 1 point...
@@ -433,7 +439,7 @@ class PollLibShared extends TikiLib
 			if ($option['votes'] == 0) {
 				$percent = 0;
 			} else {
-				$percent = number_format($option['votes'] * 100 / $poll_info['votes'], 2);
+				$percent = number_format($option['votes'] * 100 / $poll_info['votes'], $percent_decimals);
 				if ($isNum) {
 					if (preg_match('/^([+-]?[0-9]+).*/', $option['title'], $matches)) {
 						$total += $option['votes'] * $matches[1];

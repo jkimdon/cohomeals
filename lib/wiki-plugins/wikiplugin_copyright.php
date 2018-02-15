@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_copyright.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_copyright.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 require_once ("lib/copyrights/copyrightslib.php");
 
@@ -14,8 +14,10 @@ function wikiplugin_copyright_info()
 		'documentation' => 'PluginCopyright',
 		'description' => tra('Insert copyright notices'),
 		'prefs' => array( 'wiki_feature_copyrights', 'wikiplugin_copyright' ),
-		'body' => tra('Pattern to display the copyright in. May contain ~title~, ~year~, ~authors~ and ~holder~.'),
-		'icon' => 'img/icons/shield.png',
+		'body' => tr('Pattern for display of the copyright information. May contain %0~title~%1, %0~year~%1, %0~authors~%1 and %0~holder~%1.',
+			'<code>', '</code>'),
+		'iconname' => 'copyright',
+		'introduced' => 1,
 		'params' => array(
 		),
 	);

@@ -1,16 +1,19 @@
-{* $Id: include_performance.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
+{* $Id: include_performance.tpl 63800 2017-09-09 07:06:04Z drsassafras $ *}
 
-{remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Please see the <a class='rbox-link' target='tikihelp' href='http://dev.tiki.org/Performance'>Performance page</a> on Tiki's developer site.{/tr}{/remarksbox}
+{remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Please see the <a class='alert-link' target='tikihelp' href='http://dev.tiki.org/Performance'>Performance page</a> on Tiki's developer site.{/tr}{/remarksbox}
 
-<form class="admin" id="performance" name="performance" action="tiki-admin.php?page=performance" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="heading input_submit_container" style="text-align: right">
-		<input type="submit" class="btn btn-default" name="performance" value="{tr}Apply{/tr}" />
-		<input type="reset" class="btn btn-warning" name="performancereset" value="{tr}Reset{/tr}" />
+<form class="admin form-horizontal" id="performance" name="performance" action="tiki-admin.php?page=performance" method="post">
+	{include file='access/include_ticket.tpl'}
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
-{tabset}
+
+	{tabset}
 
 		{tab name="{tr}Performance{/tr}"}
+			<br>
 			{preference name=tiki_minify_javascript}
 			<div class="adminoptionboxchild" id="tiki_minify_javascript_childcontainer">
 				{preference name=tiki_minify_late_js_files}
@@ -37,7 +40,7 @@
 			{preference name=users_serve_avatar_static}
 
 			<fieldset>
-				<legend>{tr}PHP Settings{/tr}</legend>
+				<legend>{tr}PHP settings{/tr}</legend>
 				<p>{tr}Some PHP.INI settings that can increase performance{/tr}</p>
 				<div class="adminoptionboxchild">
 					<p>
@@ -52,8 +55,9 @@
 				</div>
 			</fieldset>
 		{/tab}
-		
+
 		{tab name="{tr}Bytecode Cache{/tr}"}
+			<br>
 			{if $opcode_cache}
 				<p>{tr _0=$opcode_cache}Using <strong>%0</strong>. These stats affect all PHP applications running on the server.{/tr}</p>
 
@@ -63,18 +67,18 @@
 
 				<p>
 					<table style="width=520px;border: 0px;text-align:center">
-					<tr>
-					<td><img src="{$memory_graph|escape}" width="250" height="100"></td>
-					<td><img src="{$hits_graph|escape}" width="250" height="100"></td>
-					</tr>
-					<tr>
-					<td style="width=260px">
-					{tr}Memory Used{/tr}: {$opcode_stats.memory_used * 100}% - {tr}Available{/tr}: {$opcode_stats.memory_avail * 100}%
-					</td>
-					<td style="width=260px">
-					{tr}Cache Hits{/tr}: {$opcode_stats.hit_hit * 100}% - {tr}Misses{/tr}: {$opcode_stats.hit_miss * 100}%
-					</td>
-					</tr>
+						<tr>
+							<td><img src="{$memory_graph|escape}" width="250" height="100"></td>
+							<td><img src="{$hits_graph|escape}" width="250" height="100"></td>
+						</tr>
+						<tr>
+							<td style="width=260px">
+								{tr}Memory Used{/tr}: {$opcode_stats.memory_used * 100}% - {tr}Available{/tr}: {$opcode_stats.memory_avail * 100}%
+							</td>
+							<td style="width=260px">
+								{tr}Cache Hits{/tr}: {$opcode_stats.hit_hit * 100}% - {tr}Misses{/tr}: {$opcode_stats.hit_miss * 100}%
+							</td>
+						</tr>
 					</table>
 					<hr>
 				</p>
@@ -110,21 +114,26 @@
 				{tr}Bytecode cache is not used. Using a bytecode cache (OPcache, APC, XCache, WinCache) is highly recommended for production environments.{/tr}
 			{/if}
 		{/tab}
-		
+
 		{tab name="{tr}Wiki{/tr}"}
+			<br>
 			{preference name=wiki_cache}
 			{preference name=feature_wiki_icache}
 			{preference name=wiki_ranking_reload_probability}
 		{/tab}
 
 		{tab name="{tr}Database{/tr}"}
-				{preference name=log_sql}
-				<div class="adminoptionboxchild" id="log_sql_childcontainer">
-					{preference name=log_sql_perf_min}
-				</div>
-			{/tab}
-		
+			<br>
+			{preference name=log_sql}
+			<div class="adminoptionboxchild" id="log_sql_childcontainer">
+				{preference name=log_sql_perf_min}
+			</div>
+			{preference name=feature_search_show_forbidden_obj}
+			{preference name=feature_search_show_forbidden_cat}
+		{/tab}
+
 		{tab name="{tr}Memcache{/tr}"}
+			<br>
 			{preference name=memcache_enabled}
 			<div class="adminoptionboxchild" id="memcache_enabled_childcontainer">
 				{preference name=memcache_compress}
@@ -138,17 +147,24 @@
 		{/tab}
 
 		{tab name="{tr}Plugins{/tr}"}
+			<br>
 			{preference name=wikiplugin_snarf_cache}
 		{/tab}
 
-		{tab name="{tr}Major slow down{/tr}"}
-			{remarksbox type="note" title="{tr}Major slow down{/tr}"}{tr}These are reported to slow down Tiki. If you have a high-volume site, you may want to deactivate them{/tr}
+		{tab name="{tr}Major Slowdown{/tr}"}
+			<br>
+			{remarksbox type="note" title="{tr}Major slowdown{/tr}"}
+				{tr}These are reported to slow down Tiki. If you have a high-volume site, you may want to deactivate them{/tr}
 			{/remarksbox}
 			{preference name=wikiplugin_sharethis}
 			{preference name=log_sql}
 			{preference name=log_mail}
 			{preference name=log_tpl}
 			{preference name=category_browse_count_objects}
+			{preference name=feature_actionlog_bytes}
+			{preference name=search_parsed_snippet}
+			{preference name="unified_lucene_highlight"}
+			{preference name=unified_parse_results}
 			{preference name=error_reporting_level}
 			{remarksbox type="tip" title="{tr}Tip{/tr}"}
 				{tr}Many search options impact performance. Please see <a href="tiki-admin.php?page=search">Search admin panel</a>.{/tr}
@@ -156,29 +172,29 @@
 		{/tab}
 
 		{tab name="{tr}Sessions{/tr}"}
-				{preference name=session_silent}
-				{preference name=tiki_cachecontrol_nosession}
+			<br>
+			{preference name=session_silent}
+			{preference name=tiki_cachecontrol_nosession}
 		{/tab}
 
 		{tab name="{tr}Newsletter{/tr}"}
+			<br>
 			{preference name=newsletter_throttle}
 			<div class="adminoptionboxchild" id="newsletter_throttle_childcontainer">
 				{preference name=newsletter_pause_length}
 				{preference name=newsletter_batch_size}
 			</div>
 		{/tab}
-		
-		{tab name="{tr}Time and Memory limits{/tr}"}
-				{preference name=allocate_memory_tracker_export_items}
-				{preference name=allocate_time_tracker_export_items}
-				{preference name=allocate_time_tracker_clear_items}
-				{preference name="allocate_memory_unified_rebuild"}
-				{preference name="allocate_time_unified_rebuild"}				
-		{/tab}		
-		
-{/tabset}
-		
-	<div class="input_submit_container" style="margin-top: 5px; text-align: center">
-		<input type="submit" class="btn btn-default" name="performance" value="{tr}Apply{/tr}" />
-	</div>
+
+		{tab name="{tr}Time and Memory Limits{/tr}"}
+			<br>
+			{preference name=allocate_memory_tracker_export_items}
+			{preference name=allocate_time_tracker_export_items}
+			{preference name=allocate_time_tracker_clear_items}
+			{preference name="allocate_memory_unified_rebuild"}
+			{preference name="allocate_time_unified_rebuild"}
+		{/tab}
+
+	{/tabset}
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

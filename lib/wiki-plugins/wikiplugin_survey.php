@@ -1,24 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_survey.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_survey.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_survey_info()
 {
 	return array(
 		'name' => tra('Survey'),
 		'documentation' => 'PluginSurvey',
-		'description' => tra('Display a survey'),
+		'description' => tra('Embed a survey'),
 		'prefs' => array( 'feature_surveys', 'wikiplugin_survey' ),
 		'body' => '',
-		'icon' => 'img/icons/green_question.png',
+		'iconname' => 'thumbs-up',
+		'introduced' => 3,
 		'params' => array(
 			'id' => array(
 				'required' => true,
 				'name' => tra('Id'),
-				'description' => tra('Id'),
+				'description' => tra('Id of the survey set up by the administrator'),
+				'since' => '3.0',
 				'filter' => 'digits',
 				'default' => '',
 				'profile_reference' => 'survey',
@@ -27,13 +29,16 @@ function wikiplugin_survey_info()
 				'required' => false,
 				'name' => tra('Page'),
 				'description' => tra('Wiki Page to redirect the user after his vote'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => 'tiki-list_surveys.php',
 				'profile_reference' => 'wiki_page',
 			),
 			'lang' => array(
 				'required' => false,
 				'name' => tra('Language'),
-				'description' => tra('Language'),
+				'description' => tra('Language for the survey'),
+				'since' => '3.0',
 				'filter' => 'alpha',
 				'default' => '',
 			),
@@ -82,7 +87,7 @@ function wikiplugin_survey($data, $params)
 
 	$survey_info = $srvlib->get_survey($params['id']);
 
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('surveyId', $params['id']);
 	$smarty->assign('survey_info', $survey_info);
 	$smarty->assign('questions', $questions['data']);

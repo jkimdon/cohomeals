@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TestFactory.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: TestFactory.php 60550 2016-12-06 15:42:20Z kroky6 $
 
 /**
  * Factory used in test cases to test fallbacks.
@@ -34,7 +34,7 @@ class Perms_ResolverFactory_TestFactory implements Perms_ResolverFactory
 			}
 		}
 
-		return implode(':', $parts);
+		return 'test:'.implode(':', $parts);
 	}
 
 	function getResolver( array $context )

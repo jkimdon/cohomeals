@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: creditslib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: creditslib.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 // TODO: product_id is meant for storing some information about the product
 // purchased that led to the credits being added.
@@ -105,7 +105,8 @@ class CreditsLib extends TikiLib
 		// Handle level-type credits in a different manner
 		// Level of used amount stored in user preferences
 		// Total used (flow) from credits table
-		global $tikilib, $userlib;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
 		$info = $userlib->get_userid_info($userId);
 
 		$creditTypes = $this->getCreditTypes();
@@ -242,7 +243,8 @@ class CreditsLib extends TikiLib
 			}
 
 			if ( $credits[$creditType]['remain'] > 0 ) {
-				global $tikilib, $userlib;
+				$userlib = TikiLib::lib('user');
+				$tikilib = TikiLib::lib('tiki');
 				$info = $userlib->get_userid_info($userId);
 
 				// Expense all credits if not enough
@@ -314,7 +316,8 @@ class CreditsLib extends TikiLib
 			return false;
 		}
 
-		global $tikilib, $userlib;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
 		$info = $userlib->get_userid_info($userId);
 
 		$prefName = "credits_level_" . $creditType;
@@ -454,4 +457,3 @@ class CreditsLib extends TikiLib
 	}
 
 }
-$creditslib = new CreditsLib;

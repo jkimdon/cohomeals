@@ -1,96 +1,108 @@
-{* $Id: include_payment.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
-<form action="tiki-admin.php?page=payment" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="navbar">
-		{button href="tiki-payment.php" _text="{tr}Payments{/tr}"}
-		<input type="submit" class="btn btn-default" name="paymentprefs" value="{tr}Change settings{/tr}" style="float:right;" />
+{* $Id: include_payment.tpl 62771 2017-05-27 13:17:44Z rjsmelo $ *}
+<form class="form-horizontal" action="tiki-admin.php?page=payment" method="post">
+	{include file='access/include_ticket.tpl'}
+	<div class="row">
+		<div class="form-group col-lg-12 clearfix">
+			<a role="link" class="btn btn-link" href="tiki-payment.php" title="{tr}List{/tr}">
+				{icon name="list"} {tr}Payments{/tr}
+			</a>
+			{include file='admin/include_apply_top.tpl'}
+		</div>
 	</div>
+
 	{if $prefs.payment_feature neq "y"}
-		<fieldset class="admin">
+		<fieldset class="table">
 			<legend>{tr}Activate the feature{/tr}</legend>
 			{preference name=payment_feature visible="always"}
 		</fieldset>
 	{/if}
 	{tabset}
 		{tab name="{tr}Payment{/tr}"}
+			<br>
 			{remarksbox title="{tr}Choose payment system{/tr}"}
 				{tr}You can use only one payment method: PayPal or Cclite or Tiki User Credits{/tr}<br>
 				{tr}PayPal is working at the moment. See PayPal.com{/tr}<br>
-				{tr}Cclite: Community currency accounting for local exchange trading systems (LETS). See {/tr}<a href="http://sourceforge.net/projects/cclite/">{tr}sourceforge.net{/tr}</a><br>
+				{tr}Cclite: Community currency accounting for local exchange trading systems (LETS). See {/tr}<a class="alert-link" href="http://sourceforge.net/projects/cclite/">{tr}sourceforge.net{/tr}</a><br>
 				{tr}Tiki User Credits: Requires this other feature to be configured{/tr}
 			{/remarksbox}
 
 			<div class="adminoptionboxchild" id="payment_feature_childcontainer">
-				<fieldset class="admin">
+				<fieldset class="table">
 					{preference name=payment_system}
 					{preference name=payment_currency}
 					{preference name=payment_default_delay}
 					{preference name=payment_manual}
 					{preference name=payment_user_only_his_own}
 					{preference name=payment_user_only_his_own_past}
+					{preference name=payment_anonymous_allowed}
 				</fieldset>
-				<div id="payment_systems">
-					<h2 style="padding-left:25px">{tr}PayPal{/tr}</h2>
-					<div class="admin payment">
-						{preference name=payment_paypal_business}
+				{accordion}
+					{accordion_group title="{tr}PayPal{/tr}"}
+						<div class="admin payment">
+							{preference name=payment_paypal_business}
+							{preference name=payment_paypal_password}
+							{preference name=payment_paypal_signature}
 
-						<div class="adminoptionboxchild">
-							{preference name=payment_paypal_environment}
-							{preference name=payment_paypal_ipn}
+							<div class="adminoptionboxchild">
+								{preference name=payment_paypal_environment}
+								{preference name=payment_paypal_ipn}
+								{preference name=payment_paypal_pdt}
+								{preference name=payment_paypal_pdt_token}
+								{preference name=payment_paypal_pdt_redirect}
+							</div>
+							{preference name=payment_invoice_prefix}
 						</div>
-						{preference name=payment_invoice_prefix}
-					</div>
-					<h2 style="padding-left:25px">{tr}Israel Post{/tr}</h2>
- 					<div class="admin payment">
-						{preference name=payment_israelpost_environment}
-						{preference name=payment_israelpost_business_id}
-						{preference name=payment_israelpost_api_password}
-						{preference name=payment_israelpost_request_preauth}
-					</div>
-					<h2 style="padding-left:25px">{tr}Cclite{/tr}</h2>
-					<div class="admin payment">
-						{remarksbox title="{tr}Experimental{/tr}" type="warning" icon="bricks"}
-							{tr}Cclite is for creating and managing alternative or complementary trading currencies and groups{/tr}
-							{tr}Work in progress since Tiki 6{/tr}
-						{/remarksbox}
-						{preference name=payment_cclite_registries}
-						{preference name=payment_cclite_currencies}
-						<div class="adminoptionboxchild">
-							{preference name=payment_cclite_gateway}
-							{preference name=payment_cclite_merchant_user}
-							{preference name=payment_cclite_merchant_key}
-							{preference name=payment_cclite_mode}
-							{preference name=payment_cclite_hashing_algorithm}
-							{preference name=payment_cclite_notify}
+					{/accordion_group}
+					{accordion_group title="{tr}Israel Post payment module{/tr}"}
+						<div class="admin payment">
+							{preference name=payment_israelpost_environment}
+							{preference name=payment_israelpost_business_id}
+							{preference name=payment_israelpost_api_password}
+							{preference name=payment_israelpost_request_preauth}
 						</div>
-					</div>
-					<h2 style="padding-left:25px">{tr}Tiki User Credits{/tr}</h2>
-					<div class="admin payment">
-						{preference name=payment_tikicredits_types}
-						{preference name=payment_tikicredits_xcrates}
-					</div>
-				</div>
-				{jq}if ($.ui) {
-	var idx = $("select[name=payment_system]").prop("selectedIndex");
-	$("#payment_systems").tiki("accordion", {heading: "h2"});
-	if (idx > 0) { $("#payment_systems").accordion("option", "active", idx); }
-}{/jq}
+					{/accordion_group}
+					{accordion_group title="{tr}Cclite{/tr}"}
+						<div class="admin payment">
+							{remarksbox title="{tr}Experimental{/tr}" type="warning" icon="bricks"}
+								{tr}Cclite is for creating and managing alternative or complementary trading currencies and groups{/tr}
+								{tr}Work in progress since Tiki 6{/tr}
+							{/remarksbox}
+							{preference name=payment_cclite_registries}
+							{preference name=payment_cclite_currencies}
+							<div class="adminoptionboxchild">
+								{preference name=payment_cclite_gateway}
+								{preference name=payment_cclite_merchant_user}
+								{preference name=payment_cclite_merchant_key}
+								{preference name=payment_cclite_mode}
+								{preference name=payment_cclite_hashing_algorithm}
+								{preference name=payment_cclite_notify}
+							</div>
+						</div>
+					{/accordion_group}
+					{accordion_group title="{tr}Tiki user credits{/tr}"}
+						<div class="admin payment">
+							{preference name=payment_tikicredits_types}
+							{preference name=payment_tikicredits_xcrates}
+						</div>
+					{/accordion_group}
+				{/accordion}
 			</div>
 		{/tab}
 		{tab name="{tr}Advanced Shopping Cart{/tr}"}
+			<br>
 			<fieldset>
-				<label>{tr}Cart Settings{/tr}</label>
+				<label>{tr}Cart settings{/tr}</label>
 				{preference name=payment_cart_heading}
 			</fieldset>
 			<fieldset>
-				<legend>{tr}Advanced Cart Tracker Names Setup{/tr}</legend>
+				<legend>{tr}Advanced cart tracker names setup{/tr}</legend>
 				{preference name=payment_cart_product_tracker_name}
 				{preference name=payment_cart_orders_tracker_name}
 				{preference name=payment_cart_orderitems_tracker_name}
 				{preference name=payment_cart_productclasses_tracker_name}
 			</fieldset>
 			<fieldset>
-				<legend>{tr}Products Tracker Setup{/tr}</legend>
+				<legend>{tr}Products tracker setup{/tr}</legend>
 				{remarksbox title="{tr}Choose payment system{/tr}"}
 					{tr}Depending on which feature you are using, you may need some or all of the following fields to be setup{/tr}
 				{/remarksbox}
@@ -108,9 +120,9 @@
 			<fieldset>
 				<legend>{tr}Features{/tr}</legend>
 				{preference name=payment_cart_inventory}
-					<div class="adminoptionboxchild" id="payment_cart_inventory_childcontainer">
+				<div class="adminoptionboxchild" id="payment_cart_inventory_childcontainer">
 					{preference name=payment_cart_inventoryhold_expiry}
-					</div>
+				</div>
 				{preference name=payment_cart_bundles}
 				{preference name=payment_cart_orders}
 				<div class="adminoptionboxchild" id="payment_cart_orders_childcontainer">
@@ -145,8 +157,9 @@
 		{/tab}
 
 		{tab name="{tr}Plugins{/tr}"}
+			<br>
 
-			<fieldset class="admin">
+			<fieldset class="table">
 				<legend>{tr}Plugins{/tr}</legend>
 				{preference name=wikiplugin_addtocart}
 				{preference name=wikiplugin_adjustinventory}
@@ -161,6 +174,7 @@
 		{/tab}
 
 		{tab name="{tr}Shipping{/tr}"}
+			<br>
 			{preference name=shipping_service}
 
 			{preference name=shipping_fedex_enable}
@@ -177,10 +191,8 @@
 				{preference name=shipping_ups_username}
 				{preference name=shipping_ups_password}
 			</div>
-				{preference name=shipping_custom_provider}
+			{preference name=shipping_custom_provider}
 		{/tab}
 	{/tabset}
-	<div class="heading input_submit_container" style="text-align: center">
-		<input type="submit" class="btn btn-default" name="paymentprefs" value="{tr}Change settings{/tr}" />
-	</div>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

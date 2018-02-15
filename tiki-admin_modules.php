@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2017 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_modules.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: tiki-admin_modules.php 63915 2017-09-21 15:30:59Z luciash $
 
 $inputConfiguration = array(
 		array(
@@ -115,7 +115,7 @@ if (isset($_REQUEST['edit_assign']) || isset($_REQUEST['preview'])) {	// will be
 }
 
 if (!empty($_REQUEST['unassign'])) {
-	check_ticket('admin-modules');
+	$access->check_authenticity(tr('Are you sure you want to unassign this module?'));
 	$info = $modlib->get_assigned_module($_REQUEST['unassign']);
 	$modlib->unassign_module($_REQUEST['unassign']);
 	$logslib->add_log('adminmodules', 'unassigned module ' . $info['name']);
@@ -164,12 +164,21 @@ if (isset($_REQUEST['um_update'])) {
 		$smarty->display('error.tpl');
 		die;
 	}
-	check_ticket('admin-modules');
+	if ($_REQUEST['um_update'] === tr('Create')) {
+		$access->check_authenticity(
+			tr('Are you sure you want to create this module?') . ' ("' . $_REQUEST['um_name'] . '")'
+		);
+	} else {
+		$access->check_authenticity(
+			tr('Are you sure you want to modify this module?') . ' ("' . $_REQUEST['um_name'] . '")'
+		);
+	}
 	$_REQUEST['um_update'] = urldecode($_REQUEST['um_update']);
 	$smarty->assign_by_ref('um_name', $_REQUEST['um_name']);
 	$smarty->assign_by_ref('um_title', $_REQUEST['um_title']);
 	$smarty->assign_by_ref('um_data', $_REQUEST['um_data']);
 	$smarty->assign_by_ref('um_parse', $_REQUEST['um_parse']);
+
 	$modlib->replace_user_module($_REQUEST['um_name'], $_REQUEST['um_title'], $_REQUEST['um_data'], $_REQUEST['um_parse']);
 	$logslib->add_log('adminmodules', 'changed custom module ' . $_REQUEST['um_name']);
 }
@@ -216,12 +225,11 @@ if (isset($_REQUEST['preview'])) {
 	if ($modlib->is_user_module($_REQUEST['assign_name'])) {
 		$info = $modlib->get_user_module($_REQUEST['assign_name']);
 		$smarty->assign_by_ref('user_title', $info['title']);
-		if ($info['parse'] == 'y') {
-			$parse_data = $tikilib->parse_data($info['data'], array('is_html' => true, 'suppress_icons' => true));
-			$smarty->assign_by_ref('user_data', $parse_data);
-		} else {
-			$smarty->assign_by_ref('user_data', $info['data']);
-		}
+
+        $infoParsed = $modlib->parse($info);
+
+        $smarty->assign_by_ref('user_data', $infoParsed['data']);
+
 		try {
 			$data = $smarty->fetch('modules/user_module.tpl');
 		} catch (Exception $e) {
@@ -291,7 +299,7 @@ if (isset($_REQUEST['preview'])) {
 }
 
 if (isset($_REQUEST['assign'])) {
-	check_ticket('admin-modules');
+	$access->check_authenticity(tr('Are you sure you want to assign this module?'));
 	$assign_name = urldecode($_REQUEST['assign_name']);
 	$smarty->assign_by_ref('assign_name', $assign_name);
 	$smarty->assign_by_ref('assign_position', $_REQUEST['assign_position']);
@@ -471,7 +479,7 @@ $headerlib->add_css(
 	' }'
 );
 
-$headerlib->add_cssfile('css/admin.css');
+$headerlib->add_cssfile('themes/base_files/feature_css/admin.css');
 $headerlib->add_jsfile('lib/modules/tiki-admin_modules.js');
 
 $sameurl_elements = array('offset', 'sort_mode', 'where', 'find');

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: faqlib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: faqlib.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -231,7 +231,7 @@ class FaqLib extends TikiLib
 	{
 		global $prefs, $user;
 
-		if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
+		if (StatsLib::is_stats_hit()) {
 			$query = "update `tiki_faqs` set `hits`=`hits`+1 where `faqId`=?";
 
 			$result = $this->query($query, array($faqId));
@@ -324,7 +324,7 @@ class FaqLib extends TikiLib
 		$ret = array();
 
 		while ($res = $result->fetchRow()) {
-			$res['parsed'] = $this->parse_data($res['answer']);
+			$res['parsed'] = TikiLib::lib('parser')->parse_data($res['answer']);
 
 			$ret[] = $res;
 		}
@@ -372,4 +372,3 @@ class FaqLib extends TikiLib
 		return $res;
 	}
 }
-$faqlib = new FaqLib;

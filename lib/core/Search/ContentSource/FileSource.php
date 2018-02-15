@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FileSource.php 46031 2013-05-24 14:52:48Z lphuberdeau $
+// $Id: FileSource.php 60235 2016-11-10 17:01:58Z nkoth $
 
 class Search_ContentSource_FileSource implements Search_ContentSource_Interface, Tiki_Profile_Writer_ReferenceProvider
 {
@@ -41,14 +41,25 @@ class Search_ContentSource_FileSource implements Search_ContentSource_Interface,
 
 		$file = $filegallib->get_file_info($objectId, true, false);
 
+		if (! $file) {
+			return false;
+		}
+
+		if (!empty($file['name'])) {
+			// Many files when uploaded have underscore in the file name and makes search difficult
+			$file['name'] = str_replace('_', ' ', $file['name']);
+		}
+
 		$data = array(
 			'title' => $typeFactory->sortable(empty($file['name'])?$file['filename']:$file['name']),
 			'language' => $typeFactory->identifier('unknown'),
+			'creation_date' => $typeFactory->timestamp($file['created']),
 			'modification_date' => $typeFactory->timestamp($file['lastModif']),
 			'contributors' => $typeFactory->multivalue(array_unique(array($file['author'], $file['user'], $file['lastModifUser']))),
 			'description' => $typeFactory->plaintext($file['description']),
 			'filename' => $typeFactory->identifier($file['filename']),
 			'filetype' => $typeFactory->sortable(preg_replace('/^([\w-]+)\/([\w-]+).*$/', '$1/$2', $file['filetype'])),
+			'filesize' => $typeFactory->plaintext($file['filesize']),
 
 			'gallery_id' => $typeFactory->identifier($file['galleryId']),
 			'file_comment' => $typeFactory->plaintext($file['comment']),
@@ -67,11 +78,13 @@ class Search_ContentSource_FileSource implements Search_ContentSource_Interface,
 		return array(
 			'title',
 			'language',
+			'creation_date',
 			'modification_date',
 			'contributors',
 			'description',
 			'filename',
 			'filetype',
+			'filesize',
 
 			'gallery_id',
 			'file_comment',

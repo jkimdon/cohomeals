@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FinderController.php 51014 2014-04-26 13:32:28Z jonnybradley $
+// $Id: FinderController.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
-include_once "vendor_extra/elfinder/php/elFinderConnector.class.php";
-include_once "vendor_extra/elfinder/php/elFinder.class.php";
-include_once "vendor_extra/elfinder/php/elFinderVolumeDriver.class.php";
+include_once "vendor_bundled/vendor/studio-42/elfinder/php/elFinderConnector.class.php";
+include_once "vendor_bundled/vendor/studio-42/elfinder/php/elFinder.class.php";
+include_once "vendor_bundled/vendor/studio-42/elfinder/php/elFinderVolumeDriver.class.php";
 
 include_once 'lib/jquery_tiki/elfinder/elFinderVolumeTikiFiles.class.php';
 include_once 'lib/jquery_tiki/elfinder/tikiElFinder.php';
@@ -93,7 +93,7 @@ class Services_File_FinderController
 		if ($startGallery) {
 			$gal_info = TikiLib::lib('filegal')->get_file_gallery_info($startGallery);
 			if (!$gal_info) {
-				TikiLib::lib('errorreport')->report(tr('Gallery ID %0 not found', $startGallery));
+				Feedback::error(tr('Gallery ID %0 not found', $startGallery), 'session');
 				$startGallery = $prefs['fgal_root_id'];
 			}
 		}
@@ -167,10 +167,14 @@ class Services_File_FinderController
 		$elFinder = new tikiElFinder($opts);
 		$connector = new elFinderConnector($elFinder);
 
+		$filegallib = TikiLib::lib('filegal');
 		if ($input->cmd->text() === 'tikiFileFromHash') {	// intercept tiki only commands
 			$fileId = $elFinder->realpath($input->hash->text());
-			$filegallib = TikiLib::lib('filegal');
-			$info = $filegallib->get_file(str_replace('f_', '', $fileId));
+			if (strpos($fileId, 'f_') !== false) {
+				$info = $filegallib->get_file(str_replace('f_', '', $fileId));
+			} else {
+				$info = $filegallib->get_file_gallery(str_replace('d_', '', $fileId));
+			}
 			$params = array();
 			if ($input->filegals_manager->text()) {
 				$params['filegals_manager'] = $input->filegals_manager->text();
@@ -181,6 +185,37 @@ class Services_File_FinderController
 			$info['wiki_syntax'] = $filegallib->getWikiSyntax($info['galleryId'], $info, $params);
 			$info['data'] = '';	// binary data makes JSON fall over
 			return $info;
+		} else if ($input->cmd->text() === 'file') {
+
+			// intercept download command and use tiki-download_file so the mime type and extension is correct
+			$fileId = $elFinder->realpath($input->target->text());
+			if (strpos($fileId, 'f_') !== false) {
+				global $base_url;
+
+				$fileId = str_replace('f_', '', $fileId);
+				$display = '';
+
+				$url = $base_url . 'tiki-download_file.php?fileId=' . $fileId;
+
+				if (! $input->download->int()) {	// images can be displayed
+
+					$info = $filegallib->get_file($fileId);
+
+					if (strpos($info['filetype'], 'image/') !== false) {
+
+						$url .= '&display';
+
+					} else if ($prefs['fgal_viewerjs_feature'] === 'y' &&
+							($info['filetype'] === 'application/pdf' or
+									strpos($info['filetype'], 'application/vnd.oasis.opendocument.') !== false)) {
+
+						$url = \ZendOpenId\OpenId::absoluteUrl($prefs['fgal_viewerjs_uri']) . '#' . $url;
+					}
+				}
+
+				TikiLib::lib('access')->redirect($url);
+				return array();
+			}
 		}
 
 		// elfinder needs "raw" $_GET or $_POST
@@ -208,6 +243,7 @@ class Services_File_FinderController
 	 */
 	function elFinderAccess($attr, $path, $data, $volume)
 	{
+		global $prefs;
 
 		$ar = explode('_', $path);
 		$visible = true;		// for now
@@ -233,7 +269,7 @@ class Services_File_FinderController
 		switch($attr) {
 			case 'read':
 				if ($isgal) {
-					return $visible && $perms['tiki_p_view_file_gallery'] === 'y';
+					return $visible && ($perms['tiki_p_view_file_gallery'] === 'y' || $id == $prefs['fgal_root_id']);
 				} else {
 					return $visible && $perms['tiki_p_download_files'] === 'y';
 				}

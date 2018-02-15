@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FieldQueryBuilder.php 47282 2013-08-26 15:51:50Z changi67 $
+// $Id: FieldQueryBuilder.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 use Search_Expr_Token as Token;
 use Search_Expr_And as AndX;

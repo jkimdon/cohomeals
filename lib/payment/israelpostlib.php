@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: israelpostlib.php 51201 2014-05-09 16:53:50Z lphuberdeau $
+// $Id: israelpostlib.php 57966 2016-03-17 20:05:33Z jonnybradley $
 
 class IsraelPostLib
 {
@@ -122,7 +122,7 @@ class IsraelPostLib
 		global $prefs;
 		
 		$wsdl = $prefs['payment_israelpost_environment'] . 'GetGenericStatus?wsdl';
-		$client = new Zend_Soap_Client($wsdl, array(
+		$client = new Zend\Soap\Client($wsdl, array(
 			'soap_version' => SOAP_1_1,
 		));
 

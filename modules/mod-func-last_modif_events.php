@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_modif_events.php 47089 2013-08-15 16:45:52Z lphuberdeau $
+// $Id: mod-func-last_modif_events.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -46,8 +46,8 @@ function module_last_modif_events_info()
  */
 function module_last_modif_events($mod_reference, $module_params)
 {
-	global $smarty;
-	global $calendarlib; include_once ('lib/calendar/calendarlib.php');
+	$smarty = TikiLib::lib('smarty');
+	$calendarlib = TikiLib::lib('calendar');
 	
 	$events = $calendarlib->last_modif_events($mod_reference["rows"], isset($module_params["calendarId"]) ? $module_params["calendarId"] : 0);
 	

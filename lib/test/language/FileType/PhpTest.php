@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PhpTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: PhpTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
 
 require_once('lib/language/FileType.php');
 require_once('lib/language/FileType/Php.php');
@@ -23,14 +23,14 @@ class Language_FileType_PhpTest extends TikiTestCase
 		$strings = array(
 			'Features',
 			'Enable/disable Tiki features here, but configure them elsewhere',
-			"Show user\'s real name instead of login in autocomplete selector in trackers feature",
+			"Show user\'s real name instead of log-in name in the autocomplete selector in trackers",
 			'General preferences and settings',
 		);
 		
 		$expectedResult = array(
 			'Features',
 			'Enable/disable Tiki features here, but configure them elsewhere',
-			"Show user's real name instead of login in autocomplete selector in trackers feature",
+			"Show user's real name instead of log-in name in the autocomplete selector in trackers",
 			'General preferences and settings',
 		);
 

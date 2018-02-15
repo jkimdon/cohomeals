@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_ftp.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_ftp.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_ftp_info()
 {
@@ -13,31 +13,41 @@ function wikiplugin_ftp_info()
 		'description' => tra('Create a button for downloading a file from an FTP server'),
 		'prefs' => array( 'wikiplugin_ftp' ),
 		'validate' => 'all',
-		'body' => tra('file name'),
-		'icon' => 'img/icons/application_put.png',
+		'body' => tra('File name on the server'),
+		'iconname' => 'upload',
+		'introduced' => 3,
 		'params' => array(
 			'server' => array(
 				'required' => true,
 				'name' => tra('Server Name'),
-				'description' => tra('Name of the server where the FTP account is housed. Example: ') . 'ftp.myserver.com',
+				'description' => tra('Name of the server for the FTP account. Example: ')
+					. '<code>ftp.myserver.com</code>',
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => ''
 			),
 			'user' => array(
 				'required' => true,
-				'name' => tra('User Name'),
-				'description' => tra('User name needed to access the FTP account'),
+				'name' => tra('Username'),
+				'description' => tra('Username for the FTP account'),
+				'since' => '3.0',
+				'filter' => 'username',
 				'default' => ''
 			),
 			'password' =>array(
 				'required' => true,
 				'name' => tra('Password'),
-				'description' => tra('Password needed to access the FTP account'),
+				'description' => tra('Password for the FTP account'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => ''
 			),
 			'title' =>array(
 				'required' => false,
 				'name' => tra('Download Button Label'),
 				'description' => tra('Label for the FTP download button'),
+				'since' => '3.0',
+				'filter' => 'text',
 				'default' => ''
 			)
 		),
@@ -46,7 +56,6 @@ function wikiplugin_ftp_info()
 
 function wikiplugin_ftp($data, $params)
 {
-	global $smarty;
 	extract($params, EXTR_SKIP);
 	if (empty($server) || empty($user) || empty($password)) {
 		return tra('missing parameters');
@@ -78,6 +87,7 @@ function wikiplugin_ftp($data, $params)
 		die;
 
 	} else {
+		$smarty = TikiLib::lib('smarty');
 		if (isset($title)) {
 			$smarty->assign('ftptitle', $title);
 		}

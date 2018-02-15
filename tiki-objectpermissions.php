@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-objectpermissions.php 47988 2013-10-11 18:31:02Z jonnybradley $
+// $Id: tiki-objectpermissions.php 63872 2017-09-19 14:52:59Z jonnybradley $
 
 include_once ('tiki-setup.php');
 if (!empty($_REQUEST['objectType']) && $_REQUEST['objectType'] != 'global') {
@@ -99,8 +99,7 @@ if ( $restrictions = perms_get_restrictions() ) {
 }
 
 if ($_REQUEST['objectType'] == 'wiki page') {
-	global $structlib;
-	include_once ('lib/structures/structlib.php');
+	$structlib = TikiLib::lib('struct');
 	$pageInfoTree = $structlib->s_get_structure_pages($structlib->get_struct_ref_id($_REQUEST['objectId']));
 	if (count($pageInfoTree) > 1) {
 		$smarty->assign('inStructure', 'y');
@@ -113,12 +112,12 @@ if ($_REQUEST['objectType'] == 'wiki page') {
 			$permissionApplier->addObject($sub);
 		}
 	}
-	global $cachelib; include_once('lib/cache/cachelib.php');
+	$cachelib = TikiLib::lib('cache');
 	$cachelib->empty_type_cache('menu_'); $cachelib->empty_type_cache('structure_');
 }
 
 if ( $_REQUEST['objectType'] == 'category' && isset($_REQUEST['propagate_category']) ) {
-	global $categlib; require_once 'lib/categories/categlib.php';
+	$categlib = TikiLib::lib('categ');
 	$descendants = $categlib->get_category_descendants($_REQUEST['objectId']);
 
 	foreach ( $descendants as $child ) {
@@ -185,7 +184,7 @@ if (isset($_REQUEST['group'])) {
 
 // Process the form to assign a new permission to this object
 if (isset($_REQUEST['assign']) && !isset($_REQUEST['quick_perms'])) {
-	check_ticket('object-perms');
+	$access->check_authenticity(tr('Are you sure you want to modify permissions?'));
 	if (isset($_REQUEST['perm']) && !empty($_REQUEST['perm'])) {
 		foreach ($_REQUEST['perm'] as $group => $gperms) {
 			foreach ($gperms as $perm) {
@@ -198,12 +197,57 @@ if (isset($_REQUEST['assign']) && !isset($_REQUEST['quick_perms'])) {
 			}
 		}
 	}
-
 	$newPermissions = get_assign_permissions();
 	$permissionApplier->apply($newPermissions);
 	if (isset($_REQUEST['group'])) {
 		$smarty->assign('groupName', $_REQUEST['group']);
 	}
+
+	//identify permissions changed for feedback message
+	$newPerms = $_REQUEST['perm'];
+	$oldPerms = $_REQUEST['old_perm'];
+	$groupNames = array_unique(array_merge(array_keys($newPerms), array_keys($oldPerms)));
+	$changed = [];
+	foreach ($groupNames as $groupName) {
+		$newPerms[$groupName] = !isset($newPerms[$groupName]) ? [] : $newPerms[$groupName];
+		$oldPerms[$groupName] = !isset($oldPerms[$groupName]) ? [] : $oldPerms[$groupName];
+		$changed['added'][$groupName] = array_diff($newPerms[$groupName], $oldPerms[$groupName]);
+		$changed['deleted'][$groupName] = array_diff($oldPerms[$groupName], $newPerms[$groupName]);
+	}
+	if (in_array('tiki_p_admin', $changed['deleted']['Admins'])) {
+		unset($changed['deleted']['Admins'][array_search('tiki_p_admin', $changed['deleted']['Admins'])]);
+	}
+
+	//clean up array of changed permissions and indicate section for feedback
+	$permInfo = $userlib->get_enabled_permissions();
+	$changeCount = 0;
+	foreach ($changed as $directionName => $directionInfo) {
+		foreach ($directionInfo as $groupName => $groupInfo) {
+			if (empty($groupInfo)) {
+				unset($changed[$directionName][$groupName]);
+			} else {
+				foreach ($groupInfo as $no => $p) {
+					$changed[$directionName][$groupName][$no] = $p . ' (' . $permInfo[$p]['type'] . ')';
+					$changeCount++;
+				}
+			}
+		}
+		if (empty($changed[$directionName])) {
+			unset($changed[$directionName]);
+		}
+	}
+	if ($changeCount > 0) {
+		Feedback::add(['type' => $_REQUEST['permType'],
+			'mes' => $changed,
+			'objname' => $_REQUEST['objectName'],
+			'objid' => $_REQUEST['objectId'],
+			'objtype' => $_REQUEST['objectType'],
+			'count' => $changeCount,
+			'tpl' => 'perm']);
+	} else {
+		Feedback::note(tr('No permissions were changed'));
+	}
+
 }
 
 if (isset($_REQUEST['remove'])) {
@@ -232,7 +276,7 @@ if (!empty($_SESSION['perms_clipboard'])) {
 	);
 
 	if (isset($_REQUEST['paste'])) {
-		$access->check_authenticity(tra('Are you sure you want paste the copied permissions onto this object?'));
+		$access->check_authenticity(tra('Are you sure you want to paste the copied permissions into this object?'));
 		unset($_SESSION['perms_clipboard']);
 
 		$set = new Perms_Reflection_PermissionSet;
@@ -250,6 +294,10 @@ if (!empty($_SESSION['perms_clipboard'])) {
 
 }
 
+// Prepare display
+// Get the individual object permissions if any
+$displayedPermissions = get_displayed_permissions();
+
 //Quickperms apply {{{
 //Test to map permissions of ile galleries into read write admin admin levels.
 if ( $prefs['feature_quick_object_perms'] == 'y' ) {
@@ -261,16 +309,28 @@ if ( $prefs['feature_quick_object_perms'] == 'y' ) {
 		$quickperms->configure($type, $data['data']);
 	}
 
+	$groupNames = array();
+	foreach ($groups['data'] as $key=>$group) {
+		$groupNames[] = $group['groupName'];
+	}
+
+	$map = $quickperms->getAppliedPermissions($displayedPermissions, $groupNames);
+
+	foreach ($groups['data'] as $key=>$group) {
+		$groups['data'][$key]['groupSumm'] = $map[ $group['groupName'] ];
+	}
+
 	if (isset($_REQUEST['assign']) && isset($_REQUEST['quick_perms'])) {
-		check_ticket('object-perms');
+		$access->check_authenticity(tr('Are you sure you want to modify permissions?'));
 
 		$groups = $userlib->get_groups(0, -1, 'groupName_asc', '', '', 'n');
 
 		$userInput = array();
 		foreach ($groups['data'] as $group) {
-			if (isset($_REQUEST['perm_' . $group['groupName']])) {
+			$groupNameEncoded = rawurlencode($group['groupName']);
+			if (isset($_REQUEST['perm_' . $groupNameEncoded])) {
 				$group = $group['groupName'];
-				$permission = $_REQUEST['perm_' . $group];
+				$permission = $_REQUEST['perm_' . $groupNameEncoded];
 
 				$userInput[$group] = $permission;
 			}
@@ -278,15 +338,13 @@ if ( $prefs['feature_quick_object_perms'] == 'y' ) {
 
 		$current = $currentObject->getDirectPermissions();
 		$newPermissions = $quickperms->getPermissions($current, $userInput);
+		if (! $newPermissions->has('Admins', 'tiki_p_admin')) {
+			$newPermissions->add('Admins', 'tiki_p_admin');
+		}
 		$permissionApplier->apply($newPermissions);
+		$access->redirect($_SERVER['REQUEST_URI']);
 	}
 }
-// }}}
-
-// Prepare display
-// Get the individual object permissions if any
-
-$displayedPermissions = get_displayed_permissions();
 
 if (isset($_REQUEST['used_groups'])) {
 	$group_filter = array();
@@ -304,31 +362,6 @@ if (isset($_REQUEST['used_groups'])) {
 	$cookietab = 1;
 }
 
-// Quick perms load {{{
-//Quickperm groups stuff
-if ( $prefs['feature_quick_object_perms'] == 'y' ) {
-	$groupNames = array();
-	foreach ($groups['data'] as $key=>$group) {
-		$groupNames[] = $group['groupName'];
-	}
-
-	$qperms = quickperms_get_data();
-	$smarty->assign('quickperms', $qperms);
-	$quickperms = new Perms_Reflection_Quick;
-
-	foreach ( $qperms as $type => $data ) {
-		$quickperms->configure($type, $data['data']);
-	}
-
-	$displayedPermissions = get_displayed_permissions();
-	$map = $quickperms->getAppliedPermissions($displayedPermissions, $groupNames);
-
-	foreach ($groups['data'] as $key=>$group) {
-		$groups['data'][$key]['groupSumm'] = $map[ $group['groupName'] ];
-	}
-}
-
-//Quickperm END }}}
 
 // get groupNames etc - TODO: jb will tidy...
 //$checkboxInfo = array();
@@ -525,8 +558,6 @@ $("table.objectperms input[type=checkbox]").change(function () {
 
 $headerlib->add_jq_onready($js);
 
-ask_ticket('object-perms');
-
 // setup smarty remarks flags
 
 // Display the template
@@ -652,7 +683,7 @@ function quickperms_get_filegal()
  */
 function quickperms_get_generic()
 {
-	global $userlib;
+	$userlib = TikiLib::lib('user');
 
 	$databaseperms = $userlib->get_permissions(0, -1, 'permName_asc', '', $_REQUEST['permType'], '', true);
 	foreach ($databaseperms['data'] as $perm) {
@@ -673,7 +704,7 @@ function quickperms_get_generic()
 	if (!isset($quickperms_['editors']))
 		$quickperms_['editors'] = array();
 	if (!isset($quickperms_['admin']))
-	$quickperms_['admin'] = array();
+		$quickperms_['admin'] = array();
 
 	$perms = array();
 	$perms['basic']['name'] = 'basic';
@@ -707,7 +738,7 @@ function quickperms_get_generic()
  */
 function perms_get_restrictions()
 {
-	global $userlib;
+	$userlib = TikiLib::lib('user');
 	$perms = Perms::get();
 
 	if ( $perms->admin_objects ) {
@@ -735,7 +766,8 @@ function perms_get_restrictions()
  */
 function get_displayed_permissions()
 {
-	global $objectFactory, $smarty;
+	global $objectFactory;
+	$smarty = TikiLib::lib('smarty');
 
 	$currentObject = $objectFactory->get($_REQUEST['objectType'], $_REQUEST['objectId']);
 	$displayedPermissions = $currentObject->getDirectPermissions();

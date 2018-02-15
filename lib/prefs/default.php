@@ -1,16 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: default.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: default.php 63794 2017-09-09 04:10:09Z drsassafras $
 
 function prefs_default_list()
 {
+
+	$calendarlib = TikiLib::lib('calendar');
+	$cals = $calendarlib->list_calendars();
+	if (array_key_exists('data', $cals)) {
+		$cals = array_column($cals['data'], 'name', 'calendarId');
+	} else {
+		$cals = [];
+	}
+
+
 	return array(
 		'default_mail_charset' => array(
-			'name' => tra('Default charset for sending mail'),
-			'description' => tra('Default charset for sending mail'),
+			'name' => tra('Default character set for sending mail'),
+			'description' => tra('Specify the character encoding used by Tiki when sending mail notifications.'),
 			'type' => 'list',
 			'options' => array(
 				'utf-8' => tra('utf-8'),
@@ -20,14 +30,12 @@ function prefs_default_list()
 		),
 		'default_map' => array(
 			'name' => tra('default mapfile'),
-            'description' => tra(''),
 			'type' => 'text',
 			'size' => '50',
 			'default' => '',
 		),
 		'default_wiki_diff_style' => array(
 			'name' => tra('Default diff style'),
-            'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'old' => tra('Only with last version'),
@@ -47,39 +55,42 @@ function prefs_default_list()
 		),
 		'default_rows_textarea_wiki' => array(
 			'name' => tra('Wiki'),
-            'description' => tra(''),
 			'type' => 'text',
 			'size' => '3',
-			'shorthint' => tra('rows'),
+			'units' => tra('rows'),
 			'filter' => 'digits',
 			'default' => '20',
 		),
 		'default_rows_textarea_comment' => array(
-			'name' => tra('Default number of rows for comment box'),
-            'description' => tra(''),
+			'name' => tra('Comment box'),
 			'type' => 'text',
+			'description' => tr('Size (height) of the comment text area.'),
 			'size' => '3',
-			'shorthint' => tra('rows'),
+			'units' => tra('rows'),
 			'filter' => 'digits',
 			'default' => '6',
 		),
 		'default_rows_textarea_forum' => array(
 			'name' => tra('Forum'),
-            'description' => tra(''),
 			'type' => 'text',
 			'size' => '3',
-			'shorthint' => tra('rows'),
+			'units' => tra('rows'),
 			'filter' => 'digits',
 			'default' => '20',
 		),
 		'default_rows_textarea_forumthread' => array(
 			'name' => tra('Forum reply'),
-            'description' => tra(''),
 			'type' => 'text',
 			'size' => '3',
-			'shorthint' => tra('rows'),
+			'units' => tra('rows'),
 			'filter' => 'digits',
 			'default' => '10',
 		),
+		'default_calendars' => [
+			'name' => tra('Select default calendars to display'),
+			'type' => 'multicheckbox',
+			'options' => $cals,
+			'default' => [],
+		],
 	);
 }

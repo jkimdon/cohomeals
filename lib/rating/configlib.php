@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: configlib.php 48170 2013-10-24 18:17:31Z lphuberdeau $
+// $Id: configlib.php 57965 2016-03-17 20:04:49Z jonnybradley $
 
 class RatingConfigLib extends TikiDb_Bridge
 {
@@ -110,7 +110,4 @@ class RatingConfigLib extends TikiDb_Bridge
 		);
 	}
 }
-
-global $ratingconfiglib;
-$ratingconfiglib = new RatingConfigLib;
 

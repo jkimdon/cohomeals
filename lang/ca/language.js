@@ -2,7 +2,7 @@
  * Javascript translation definition
  * Example in Catalan
  * 
- * $Id: language.js 46278 2013-06-11 10:43:36Z jonnybradley $
+ * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
  */
 
 lang = {

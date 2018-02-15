@@ -2,17 +2,17 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-index_raw.php 50583 2014-03-31 06:03:29Z luciash $
+// $Id: tiki-index_raw.php 61839 2017-03-24 10:49:44Z luciash $
 
 $section = 'wiki page';
 require_once ('tiki-setup.php');
 
-include_once ('lib/structures/structlib.php');
-include_once ('lib/wiki/wikilib.php');
+$structlib = TikiLib::lib('struct');
+$wikilib = TikiLib::lib('wiki');
 
 if ($prefs['feature_wiki'] != 'y') {
 	$smarty->assign('msg', tra("This feature is disabled").": feature_wiki");
@@ -78,9 +78,7 @@ if (!in_array($page, $_SESSION["breadCrumb"])) {
 }
 
 // Now increment page hits since we are visiting this page
-if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
-	$tikilib->add_hit($page);
-}
+$tikilib->add_hit($page);
 
 // Verify lock status
 if ($info["flag"] == 'L') {
@@ -111,7 +109,6 @@ $pageRenderer->runSetups();
 ask_ticket('index-raw');
 
 // Display the Index Template
-$smarty->assign('dblclickedit', 'y');
 
 // If the url has the param "download", ask the browser to download it (instead of displaying it)
 if ( isset($_REQUEST['download']) && $_REQUEST['download'] !== 'n' ) {
@@ -121,7 +118,12 @@ if ( isset($_REQUEST['download']) && $_REQUEST['download'] !== 'n' ) {
 		$filename = $page;
 	}
 	$filename = str_replace(array('?',"'",'"',':','/','\\'), '_', $filename);	// clean some bad chars
-	header("Content-type: text/plain; charset=utf-8");
+	// add &css to the URL to transfer it as text/css mime type
+	if ( isset($_REQUEST['css']) && $_REQUEST['css'] !== 'n' ) {
+		header("Content-type: text/css; charset=utf-8");
+	} else {
+		header("Content-type: text/plain; charset=utf-8");
+	}
 	header("Content-Disposition: attachment; filename=\"$filename\"");
 }
 

@@ -1,33 +1,38 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_poll.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_poll.php 59390 2016-08-08 17:47:36Z nkoth $
 
 function wikiplugin_poll_info()
 {
 	return array(
 		'name' => tra('Poll'),
 		'documentation' => 'PluginPoll',
-		'description' => tra('Display a poll'),
+		'description' => tra('Embed a poll'),
 		'prefs' => array( 'feature_polls', 'wikiplugin_poll' ),
-		'body' => tra('Title'),
-		'icon' => 'img/icons/thumb_up.png',
+		'body' => tra('Title of the poll'),
+		'iconname' => 'thumbs-up',
+		'introduced' => 1,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'pollId' => array(
 				'required' => true,
 				'name' => tra('Poll'),
 				'description' => tra('Numeric value representing the poll ID'),
+				'since' => '1',
 				'default' => '',
+				'filter' => 'digits',
 				'profile_reference' => 'poll',
 			),
 			'showtitle' => array(
 				'required' => false,
 				'name' => tra('Show Title'),
 				'description' => tra('Show poll title (shown by default).'),
+				'since' => '5.0',
 				'default' => 'y',
+				'filter' => 'alpha',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
 					array('text' => tra('Yes'), 'value' => 'y'), 
@@ -37,16 +42,29 @@ function wikiplugin_poll_info()
 			'showresult' => array(
 				'required' => false,
 				'name' => tra('Show result'),
-				'description' => 'link|voted|always',
-				'filter' => 'alpha',
+				'description' => tr('Set how results of the poll will be shown (default is %0link%1)', '<code>', '</code>'),
+				'since' => '7.0',
+				'filter' => 'word',
 				'default' => 'link',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Link'), 'value' => 'link'),
+					array('text' => tra('Voted'), 'value' => 'voted'),
+					array('text' => tra('Always'), 'value' => 'always'),
+				)
 			),
 			'showtotal' => array(
 				'required' => false,
 				'name' => tra('Show total votes'),
-				'description' => 'y|n',
+				'description' => tr('Set to No (%0n%1) to not show votes. Default is Yes (%0y%1).', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'alpha',
 				'default' => 'y',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'y'),
+					array('text' => tra('No'), 'value' => 'n')
+				)
 			),
 		),
 	);
@@ -54,7 +72,13 @@ function wikiplugin_poll_info()
 
 function wikiplugin_poll($data, $params)
 {
-	global $smarty, $polllib, $trklib, $tikilib, $dbTiki, $userlib, $tiki_p_admin, $prefs, $_REQUEST, $user;
+	global $tiki_p_admin, $prefs, $user;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$polllib = TikiLib::lib('poll');
+	$smarty = TikiLib::lib('smarty');
+	$trklib = TikiLib::lib('trk');
+
 	$default = array('showtitle' => 'y', 'showresult' => 'link', 'showtotal' => 'y');
 	$params = array_merge($default, $params);
 
@@ -63,19 +87,20 @@ function wikiplugin_poll($data, $params)
 	if (!isset($pollId)) {
 	    return WikiParser_PluginOutput::argumentError(array('pollId'));
 	}
-	global $polllib;include_once ('lib/polls/polllib.php');
+	$polllib = TikiLib::lib('poll');
 
 
     $poll_info = $polllib->get_poll($pollId);
     $options = $polllib->list_poll_options($pollId);
 
 	$hasVoted = $tikilib->user_has_voted($user, 'poll' . $pollId);
+	$userVote = $tikilib->get_user_vote('poll' . $pollId, $user);
 	$ret = '';
 	$smarty->assign_by_ref('showresult', $showresult);
 	$smarty->assign_by_ref('showtotal', $showtotal);
 	$smarty->assign_by_ref('hasVoted', $hasVoted);
 	$smarty->assign_by_ref('showtitle', $showtitle);
-	if (!$hasVoted || $prefs['feature_poll_revote'] == 'y') {
+	if ($poll_info['active'] != 'x' && (!$hasVoted || $prefs['feature_poll_revote'] == 'y')) {
 		$smarty->assign_by_ref('menu_info', $poll_info);
 		$smarty->assign_by_ref('channels', $options);
 		$smarty->assign_by_ref('poll_title', $data);
@@ -89,6 +114,7 @@ function wikiplugin_poll($data, $params)
 		$total = $polllib->options_percent($poll_info, $options);
 		$poll_info['options'] = $options;
 		$smarty->assign_by_ref('poll_info', $poll_info);
+		$smarty->assign_by_ref('user_vote', $userVote);
 		$ret .= $smarty->fetch('tiki-poll_results_bar.tpl');
 	}
 	return '~np~'.$ret.'~/np~';

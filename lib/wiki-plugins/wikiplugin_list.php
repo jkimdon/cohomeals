@@ -1,32 +1,54 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_list.php 48301 2013-11-01 15:08:12Z nkoth $
+// $Id: wikiplugin_list.php 61766 2017-03-19 16:36:04Z jonnybradley $
 
 function wikiplugin_list_info()
 {
 	return array(
 		'name' => tra('List'),
 		'documentation' => 'PluginList',
-		'description' => tra('Create lists of Tiki objects based on custom search criteria and formatting'),
+		'description' => tra('Search for, list, and filter all types of items and display custom formatted results'),
 		'prefs' => array('wikiplugin_list', 'feature_search'),
 		'body' => tra('List configuration information'),
 		'filter' => 'wikicontent',
 		'profile_reference' => 'search_plugin_content',
-		'icon' => 'img/icons/text_list_bullets.png',
+		'iconname' => 'list',
+		'introduced' => 7,
 		'tags' => array( 'basic' ),
 		'params' => array(
+			'searchable_only' => array(
+				'required' => false,
+				'name' => tra('Searchable Only Results'),
+				'description' => tra('Only include results marked as searchable in the index.'),
+				'filter' => 'digits',
+				'default' => '1',
+			),
 		),
 	);
 }
 
 function wikiplugin_list($data, $params)
 {
+	global $prefs;
+
+	static $i;
+	$i++;
+
+	if ($prefs['wikiplugin_list_gui'] === 'y') {
+		TikiLib::lib('header')
+			->add_jsfile('lib/jquery_tiki/pluginedit_list.js')
+			->add_jsfile('vendor_bundled/vendor/jquery/plugins/nestedsortable/jquery.ui.nestedSortable.js');
+	}
+
 	$unifiedsearchlib = TikiLib::lib('unifiedsearch');
 
 	$query = new Search_Query;
+	if (!isset($params['searchable_only']) || $params['searchable_only'] == 1) {
+		$query->filterIdentifier('y', 'searchable');
+	}
 	$unifiedsearchlib->initQuery($query);
 
 	$matches = WikiParser_PluginMatcher::match($data);
@@ -34,9 +56,15 @@ function wikiplugin_list($data, $params)
 	$builder = new Search_Query_WikiBuilder($query);
 	$builder->enableAggregate();
 	$builder->apply($matches);
+	$tsret = $builder->applyTablesorter($matches);
+	if (!empty($tsret['max']) || !empty($_GET['numrows'])) {
+		$max = !empty($_GET['numrows']) ? $_GET['numrows'] : $tsret['max'];
+		$builder->wpquery_pagination_max($query, $max);
+	}
+	$paginationArguments = $builder->getPaginationArguments();
 
-	if (!empty($_REQUEST['sort_mode'])) {
-		$query->setOrder($_REQUEST['sort_mode']);
+	if (!empty($_REQUEST[$paginationArguments['sort_arg']])) {
+		$query->setOrder($_REQUEST[$paginationArguments['sort_arg']]);
 	}
 
 	if (! $index = $unifiedsearchlib->getIndex()) {
@@ -44,8 +72,8 @@ function wikiplugin_list($data, $params)
 	}
 
 	$result = $query->search($index);
+	$result->setId('wplist-' . $i);
 
-	$paginationArguments = $builder->getPaginationArguments();
 
 	$resultBuilder = new Search_ResultSet_WikiBuilder($result);
 	$resultBuilder->setPaginationArguments($paginationArguments);
@@ -53,12 +81,17 @@ function wikiplugin_list($data, $params)
 
 	$builder = new Search_Formatter_Builder;
 	$builder->setPaginationArguments($paginationArguments);
+	$builder->setId('wplist-' . $i);
+	$builder->setCount($result->count());
+	$builder->setTsOn($tsret['tsOn']);
 	$builder->apply($matches);
 
+	$result->setTsSettings($builder->getTsSettings());
+
 	$formatter = $builder->getFormatter();
-	$formatter->setDataSource($unifiedsearchlib->getDataSource());
+
+	$result->setTsOn($tsret['tsOn']);
 	$out = $formatter->format($result);
 
 	return $out;
 }
-

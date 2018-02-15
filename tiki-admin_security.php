@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_security.php 50359 2014-03-16 23:16:08Z lindonb $
+// $Id: tiki-admin_security.php 61095 2017-01-28 09:42:55Z drsassafras $
 
 require_once ('tiki-setup.php');
 // do we need it?
-require_once ('lib/admin/adminlib.php');
+$adminlib = TikiLib::lib('admin');
 $access->check_permission('tiki_p_admin');
 
 // tikiwiki preferences check
@@ -45,7 +45,7 @@ if ($prefs['wikiplugin_regex'] == 'y') {
 	$tikisettings['wikiplugin_regex'] = array(
 		'risk' => tra('unsafe') ,
 		'setting' => tra('Enabled') ,
-		'message' => tra('The "Regex Wikiplugin" is activated. It can be used by wiki editors to create any html via regex replacement.')
+		'message' => tra('The "Regex Wikiplugin" is activated. It can be used by wiki editors to create any HTML via regex replacement.')
 	);
 }
 if ($prefs['wikiplugin_lsdir'] == 'y') {
@@ -118,13 +118,6 @@ if ($prefs['wikiplugin_sql'] == 'y') {
 		'message' => tra('The "SQL Wikiplugin" is activated. It can be used by wiki editors to execute SQL commands.')
 	);
 }
-if ($prefs['feature_clear_passwords'] == 'y') {
-	$tikisettings['feature_clear_passwords'] = array(
-		'risk' => tra('unsafe') ,
-		'setting' => tra('Enabled') ,
-		'message' => tra('Store passwords in plain text is activated. You should never set this unless you know what you are doing.')
-	);
-}
 if ($prefs['https_login'] != 'required') {
 	$tikisettings['https_login'] = array(
 		'risk' => tra('risky') ,
@@ -135,7 +128,7 @@ if ($prefs['https_login'] != 'required') {
 
 // Check if any of the mail-in accounts uses "Allow anonymous access"
 if ($prefs['feature_mailin'] == 'y') {
-	require_once('lib/mailin/mailinlib.php');
+	$mailinlib = TikiLib::lib('mailin');
 	$accs = $mailinlib->list_active_mailin_accounts(0, -1, 'account_desc', '');
 	
 	// Check anonymous access
@@ -206,6 +199,19 @@ if (!file_exists('db/'.$tikidomainslash.'lock')) {
 	);
 }
 
+$fmap = [
+	'good' => ['icon' => 'ok', 'class' => 'success'],
+	'safe' => ['icon' => 'ok', 'class' => 'success'],
+	'bad' => ['icon' => 'ban', 'class' => 'danger'],
+	'unsafe' => ['icon' => 'ban', 'class' => 'danger'],
+	'risky' => ['icon' => 'warning', 'class' => 'warning'],
+	'ugly' => ['icon' => 'warning', 'class' => 'warning'],
+	'info' => ['icon' => 'information', 'class' => 'info'],
+	'unknown' => ['icon' => 'help', 'class' => 'muted'],
+];
+$smarty->assign('fmap', $fmap);
+
+
 ksort($tikisettings);
 $smarty->assign_by_ref('tikisettings', $tikisettings);
 // array for severity in tiki_secdb table. This can go into a extra table if
@@ -242,7 +248,7 @@ function md5_check_dir($dir, &$result)
 	while (false !== ($e = $d->read())) {
 		$entry = $dir . '/' . $e;
 		if (is_dir($entry)) {
-			if ($e != '..' && $e != '.' && $entry != './templates_c') { // do not descend and no checking of templates_c since the file based md5 database would grow to big
+			if ($e != '..' && $e != '.' && $entry != './temp/templates_c' && $entry != './temp') { // do not descend and no checking of templates_c since the file based md5 database would grow to big
 				md5_check_dir($entry, $result);
 			}
 		} else if (preg_match('/\.(sql|css|tpl|js|php)$/', $e)) {
@@ -306,6 +312,7 @@ if (isset($_REQUEST['check_files'])) {
 	require_once ('lib/setup/twversion.class.php');
 	$version = new TWVersion();
 	$tiki_versions = $version->tikiVersions();
+	$tiki_versions[] = $version->version;
 	$result = array();
 	md5_check_dir(".", $result);
 	$smarty->assign('filecheck', true);

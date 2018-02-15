@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_validated_faq_questions.php 50834 2014-04-19 02:41:58Z jyhem $
+// $Id: mod-func-last_validated_faq_questions.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -44,8 +44,9 @@ function module_last_validated_faq_questions_info()
  */
 function module_last_validated_faq_questions($mod_reference, $module_params)
 {
-	global $tikilib, $smarty;
-	global $faqlib; include_once('lib/faqs/faqlib.php');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+	$faqlib = TikiLib::lib('faq');
 	$def = array('faqId'=>0, 'truncate'=>20);
 	$module_params = array_merge($def, $module_params);
 	$ranking = $faqlib->list_faq_questions($module_params['faqId'], 0, $mod_reference['rows'], 'created_desc', '');

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-tell_a_friend.php 44763 2013-02-04 18:34:29Z lphuberdeau $
+// $Id: tiki-tell_a_friend.php 58749 2016-06-01 01:39:05Z lindonb $
 
 require_once ('tiki-setup.php');
 // To include a link in your tpl do
@@ -58,7 +58,7 @@ if (isset($_REQUEST['send'])) {
 		$emails[] = $email;
 	}
 	foreach ($emails as $email) {
-		include_once ('lib/registration/registrationlib.php');
+		$registrationlib = TikiLib::lib('registration');
 		if (function_exists('validate_email')) {
 			$ok = validate_email($email, $prefs['validateEmail']);
 		} else {
@@ -67,7 +67,7 @@ if (isset($_REQUEST['send'])) {
 		}
 		if (!$ok) {
 			if (isset($_REQUEST['report']) && $_REQUEST['report'] == 'y') $errors[] = tra("The mail can't be sent. Contact the administrator");
-			else $errors[] = tra('One of the email addresses you typed is invalid') . ': ' . $email;
+			else $errors[] = tra('One of the email addresses that was input is invalid') . ': ' . $email;
 		}
 	}
 	if (empty($_REQUEST['email'])) {
@@ -124,7 +124,7 @@ if (isset($_REQUEST['send'])) {
 			$errors = tra("The mail can't be sent. Contact the administrator");
 		}
 	}
-	$smarty->assign_by_ref('errors', $errors);
+	Feedback::error(['mes' => $errors]);
 	$smarty->assign('errortype', 'no_redirect_login');
 } else {
 	$smarty->assign_by_ref('name', $user);

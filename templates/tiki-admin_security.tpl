@@ -1,4 +1,5 @@
-{title help="Security+Admin" admpage="security"}{tr}Security Admin{/tr}{/title}
+{* $Id: tiki-admin_security.tpl 62659 2017-05-19 14:48:00Z drsassafras $ *}
+{title help="Security Admin" admpage="security"}{tr}Security Admin{/tr}{/title}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}To <a class="rbox-link" target="tikihelp" href="http://security.tiki.org/tiki-contact.php">report any security issues</a>.{/tr}
@@ -6,69 +7,66 @@
 {/remarksbox}
 
 <h2>{tr}Tiki settings{/tr}</h2>
-<table class="table normal">
-	<tr>
-		<th>{tr}Tiki variable{/tr}</th>
-		<th>{tr}Setting{/tr}</th>
-		<th>{tr}Risk Factor{/tr}</th>
-		<th>{tr}Explanation{/tr}</th>
-	</tr>
-	{cycle values="even,odd" print=false}
-	{foreach from=$tikisettings key=key item=item}
-		<tr class="{cycle}">
-			<td class="text">{$key}</td>
-			<td class="text">{$item.setting}</td>
-			<td class="text">
-				{if $item.risk eq 'safe'}
-					{icon _id=accept alt="$item.risk" style="vertical-align:middle"}
-				{elseif $item.risk eq 'risky'}
-					{icon _id=exclamation alt="$item.risk" style="vertical-align:middle"}
-				{elseif $item.risk eq 'unsafe'}
-					{icon _id=exclamation alt="$item.risk" style="vertical-align:middle"}
-				{elseif $item.risk eq 'unknown'}
-					{icon _id=error alt="$item.risk" style="vertical-align:middle"}
-				{/if}
-				{$item.risk}
-			</td>
-			<td class="text">{$item.message}</td>
+<div class="table-responsive secsetting-table">
+	<table class="table table-striped table-hover">
+		<tr>
+			<th>{tr}Tiki variable{/tr}</th>
+			<th>{tr}Setting{/tr}</th>
+			<th>{tr}Risk Factor{/tr}</th>
+			<th>{tr}Explanation{/tr}</th>
 		</tr>
-	{/foreach}
-	{if !$tikisettings}
-		{norecords _colspan=4}
-	{/if}
-</table>
 
+		{foreach from=$tikisettings key=key item=item}
+			<tr>
+				<td class="text">{$key}</td>
+				<td class="text">{$item.setting}</td>
+				<td class="text">
+					<span class="text-{$fmap[$item.risk]['class']}">
+						{icon name="{$fmap[$item.risk]['icon']}"} {$item.risk}
+					</span>
+				<td class="text">{$item.message}</td>
+			</tr>
+		{/foreach}
+		{if !$tikisettings}
+			{norecords _colspan=4}
+		{/if}
+	</table>
+</div>
 {tr}About WikiPlugins and security: Make sure to only grant the "tiki_p_plugin_approve" permission to trusted editors.{/tr} {tr}You can deactivate risky plugins at (<a href="tiki-admin.php?page=textarea">tiki-admin.php?page=textarea</a>).{/tr} {tr}You can approve plugin use at <a href="tiki-plugins.php">tiki-plugins.php</a>.{/tr}
 
 <br>
 <h2>{tr}Security checks{/tr}</h2>
 <div>
-	<a href="tiki-admin_security.php?check_files">{tr}Check all tiki files{/tr}</a>
+	<a href="tiki-admin_security.php?check_files" class="btn btn-default">{tr}Check all tiki files{/tr}</a>
 	<br>
-	{tr}Note, that this can take a very long time. You should check your max_execution_time setting in php.ini.{/tr}
+	{remarksbox type="tip" title="{tr}Info{/tr}"}
+		{tr}Note, that this can take a very long time. You should check your max_execution_time setting in php.ini.{/tr}
+	{/remarksbox}
 	<br>
 	<br>
 </div>
+
 {if $filecheck}
-	{cycle values="even,odd" print=false}
-	<table class="table normal">
-		<tr>
-			<th colspan="2">{tr}File checks{/tr}</th>
-		</tr>
-		<tr>
-			<th>{tr}Filename{/tr}</th>
-			<th>{tr}State{/tr}</th>
-		</tr>
-		{foreach from=$tikifiles key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item}</td>
+	<div class="table-responsive secfile-table">
+		<table class="table table-striped table-hover">
+			<tr>
+				<th colspan="2">{tr}File checks{/tr}</th>
 			</tr>
-		{/foreach}
-	</table>
+			<tr>
+				<th>{tr}Filename{/tr}</th>
+				<th>{tr}State{/tr}</th>
+			</tr>
+			{foreach from=$tikifiles key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item}</td>
+				</tr>
+			{/foreach}
+		</table>
+	</div>
 {/if}
 
-<a href="tiki-admin_security.php?check_file_permissions">{tr}Check file permissions{/tr}</a>
+<a href="tiki-admin_security.php?check_file_permissions" class="btn btn-default">{tr}Check file permissions{/tr}</a>
 
 {remarksbox type="tip" title="{tr}Info{/tr}"}
 	{tr}Note, that this can take a very long time. You should check your max_execution_time setting in php.ini.{/tr}
@@ -80,153 +78,120 @@
 
 
 {if $permcheck}
-	<table class="table normal">
-		<tr>
-			<th rowspan="2">{tr}Filename{/tr}</th>
-			<th rowspan="2">{tr}type{/tr}</th>
-			<th colspan="2">{tr}owner{/tr}</th>
-			<th colspan="3">{tr}special{/tr}</th>
-			<th colspan="3">{tr}user{/tr}</th>
-			<th colspan="3">{tr}group{/tr}</th>
-			<th colspan="3">{tr}other{/tr}</th>
-		</tr>
-		<tr>
-			<th>{tr}uid{/tr}</th>
-			<th>{tr}gid{/tr}</th>
-			<th>{tr}suid{/tr}</th>
-			<th>{tr}sgid{/tr}</th>
-			<th>{tr}sticky{/tr}</th>
-			<th>{tr}r{/tr}</th>
-			<th>{tr}w{/tr}</th>
-			<th>{tr}x{/tr}</th>
-			<th>{tr}r{/tr}</th>
-			<th>{tr}w{/tr}</th>
-			<th>{tr}x{/tr}</th>
-			<th>{tr}r{/tr}</th>
-			<th>{tr}w{/tr}</th>
-			<th>{tr}x{/tr}</th>
-		</tr>
-		<tr>
-			<th colspan="16">{tr}Set User ID (suid) files{/tr}</th>
-		</tr>
-		{cycle values="even,odd" print=false}
-		{foreach from=$suid key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item.t}</td>
-				<td class="text">{$item.u}</td>
-				<td class="text">{$item.g}</td>
-				<td class="text">{$item.suid|truex}</td>
-				<td class="text">{$item.sgid|truex}</td>
-				<td class="text">{$item.sticky|truex}</td>
-				<td class="text">{$item.ur|truex}</td>
-				<td class="text">{$item.uw|truex}</td>
-				<td class="text">{$item.ux|truex}</td>
-				<td class="text">{$item.gr|truex}</td>
-				<td class="text">{$item.gw|truex}</td>
-				<td class="text">{$item.gx|truex}</td>
-				<td class="text">{$item.or|truex}</td>
-				<td class="text">{$item.ow|truex}</td>
-				<td class="text">{$item.ox|truex}</td>
+	<div class="table-responsive secperm-table">
+		<table class="table table-striped table-hover">
+			<tr>
+				<th>{tr}Filename{/tr}</th>
+				<th>{tr}type{/tr}</th>
+				<th colspan="2">{tr}owner{/tr}</th>
+				<th colspan="3">{tr}special{/tr}</th>
+				<th>{tr}user{/tr}</th>
+				<th>{tr}group{/tr}</th>
+				<th>{tr}other{/tr}</th>
 			</tr>
-		{/foreach}
+			<tr>
+				<th colspan="2">&#160;</th>
+				<th>{tr}uid{/tr}</th>
+				<th>{tr}gid{/tr}</th>
+				<th>{tr}suid{/tr}</th>
+				<th>{tr}sgid{/tr}</th>
+				<th>{tr}sticky{/tr}</th>
+				<th>{tr}r{/tr}{tr}w{/tr}{tr}x{/tr}</th>
+				<th>{tr}r{/tr}{tr}w{/tr}{tr}x{/tr}</th>
+				<th>{tr}r{/tr}{tr}w{/tr}{tr}x{/tr}</th>
+			</tr>
+			<tr>
+				<th colspan="16">{tr}Set User ID (suid) files{/tr}</th>
+			</tr>
 
-		<tr>
-			<th colspan="16">{tr}World writable files or directories{/tr}</th>
-		</tr>
-		{foreach from=$worldwritable key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item.t}</td>
-				<td class="text">{$item.u}</td>
-				<td class="text">{$item.g}</td>
-				<td class="text">{$item.suid|truex}</td>
-				<td class="text">{$item.sgid|truex}</td>
-				<td class="text">{$item.sticky|truex}</td>
-				<td class="text">{$item.ur|truex}</td>
-				<td class="text">{$item.uw|truex}</td>
-				<td class="text">{$item.ux|truex}</td>
-				<td class="text">{$item.gr|truex}</td>
-				<td class="text">{$item.gw|truex}</td>
-				<td class="text">{$item.gx|truex}</td>
-				<td class="text">{$item.or|truex}</td>
-				<td class="text">{$item.ow|truex}</td>
-				<td class="text">{$item.ox|truex}</td>
-			</tr>
-		{/foreach}
+			{foreach from=$suid key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item.t}</td>
+					<td class="text">{$item.u}</td>
+					<td class="text">{$item.g}</td>
+					<td class="text">{$item.suid|truex}</td>
+					<td class="text">{$item.sgid|truex}</td>
+					<td class="text">{$item.sticky|truex}</td>
+					<td class="text">{$item.ur|truex}{$item.uw|truex}{$item.ux|truex}</td>
+					<td class="text">{$item.gr|truex}{$item.gw|truex}{$item.gx|truex}</td>
+					<td class="text">{$item.or|truex}{$item.ow|truex}{$item.ox|truex}</td>
+				</tr>
+			{/foreach}
 
-		<tr>
-			<th colspan="16">{tr}Files or directories the Webserver can write to{/tr}</th>
-		</tr>
-		{foreach from=$apachewritable key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item.t}</td>
-				<td class="text">{$item.u}</td>
-				<td class="text">{$item.g}</td>
-				<td class="text">{$item.suid|truex}</td>
-				<td class="text">{$item.sgid|truex}</td>
-				<td class="text">{$item.sticky|truex}</td>
-				<td class="text">{$item.ur|truex}</td>
-				<td class="text">{$item.uw|truex}</td>
-				<td class="text">{$item.ux|truex}</td>
-				<td class="text">{$item.gr|truex}</td>
-				<td class="text">{$item.gw|truex}</td>
-				<td class="text">{$item.gx|truex}</td>
-				<td class="text">{$item.or|truex}</td>
-				<td class="text">{$item.ow|truex}</td>
-				<td class="text">{$item.ox|truex}</td>
+			<tr>
+				<th colspan="16">{tr}World writable files or directories{/tr}</th>
 			</tr>
-		{/foreach}
+			{foreach from=$worldwritable key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item.t}</td>
+					<td class="text">{$item.u}</td>
+					<td class="text">{$item.g}</td>
+					<td class="text">{$item.suid|truex}</td>
+					<td class="text">{$item.sgid|truex}</td>
+					<td class="text">{$item.sticky|truex}</td>
+					<td class="text">{$item.ur|truex}{$item.uw|truex}{$item.ux|truex}</td>
+					<td class="text">{$item.gr|truex}{$item.gw|truex}{$item.gx|truex}</td>
+					<td class="text">{$item.or|truex}{$item.ow|truex}{$item.ox|truex}</td>
+				</tr>
+			{/foreach}
 
-		<tr class="{cycle}">
-			<th colspan="16">{tr}Strange Inodes (not file, not link, not directory){/tr}</th>
-		</tr>
-		{foreach from=$strangeinode key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item.t}</td>
-				<td class="text">{$item.u}</td>
-				<td class="text">{$item.g}</td>
-				<td class="text">{$item.suid|truex}</td>
-				<td class="text">{$item.sgid|truex}</td>
-				<td class="text">{$item.sticky|truex}</td>
-				<td class="text">{$item.ur|truex}</td>
-				<td class="text">{$item.uw|truex}</td>
-				<td class="text">{$item.ux|truex}</td>
-				<td class="text">{$item.gr|truex}</td>
-				<td class="text">{$item.gw|truex}</td>
-				<td class="text">{$item.gx|truex}</td>
-				<td class="text">{$item.or|truex}</td>
-				<td class="text">{$item.ow|truex}</td>
-				<td class="text">{$item.ox|truex}</td>
+			<tr>
+				<th colspan="16">{tr}Files or directories the Webserver can write to{/tr}</th>
 			</tr>
-		{/foreach}
+			{foreach from=$apachewritable key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item.t}</td>
+					<td class="text">{$item.u}</td>
+					<td class="text">{$item.g}</td>
+					<td class="text">{$item.suid|truex}</td>
+					<td class="text">{$item.sgid|truex}</td>
+					<td class="text">{$item.sticky|truex}</td>
+					<td class="text">{$item.ur|truex}{$item.uw|truex}{$item.ux|truex}</td>
+					<td class="text">{$item.gr|truex}{$item.gw|truex}{$item.gx|truex}</td>
+					<td class="text">{$item.or|truex}{$item.ow|truex}{$item.ox|truex}</td>
+				</tr>
+			{/foreach}
 
-		<tr class="{cycle}">
-			<th colspan="16">{tr}Executable files{/tr}</th>
-		</tr>
-		{foreach from=$executable key=key item=item}
-			<tr class="{cycle}">
-				<td class="text">{$key}</td>
-				<td class="text">{$item.t}</td>
-				<td class="text">{$item.u}</td>
-				<td class="text">{$item.g}</td>
-				<td class="text">{$item.suid|truex}</td>
-				<td class="text">{$item.sgid|truex}</td>
-				<td class="text">{$item.sticky|truex}</td>
-				<td class="text">{$item.ur|truex}</td>
-				<td class="text">{$item.uw|truex}</td>
-				<td class="text">{$item.ux|truex}</td>
-				<td class="text">{$item.gr|truex}</td>
-				<td class="text">{$item.gw|truex}</td>
-				<td class="text">{$item.gx|truex}</td>
-				<td class="text">{$item.or|truex}</td>
-				<td class="text">{$item.ow|truex}</td>
-				<td class="text">{$item.ox|truex}</td>
+			<tr>
+				<th colspan="16">{tr}Strange Inodes (not file, not link, not directory){/tr}</th>
 			</tr>
-		{/foreach}
-	</table>
+			{foreach from=$strangeinode key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item.t}</td>
+					<td class="text">{$item.u}</td>
+					<td class="text">{$item.g}</td>
+					<td class="text">{$item.suid|truex}</td>
+					<td class="text">{$item.sgid|truex}</td>
+					<td class="text">{$item.sticky|truex}</td>
+					<td class="text">{$item.ur|truex}{$item.uw|truex}{$item.ux|truex}</td>
+					<td class="text">{$item.gr|truex}{$item.gw|truex}{$item.gx|truex}</td>
+					<td class="text">{$item.or|truex}{$item.ow|truex}{$item.ox|truex}</td>
+				</tr>
+			{/foreach}
+
+			<tr>
+				<th colspan="16">{tr}Executable files{/tr}</th>
+			</tr>
+			{foreach from=$executable key=key item=item}
+				<tr>
+					<td class="url">{$key}</td>
+					<td class="text">{$item.t}</td>
+					<td class="text">{$item.u}</td>
+					<td class="text">{$item.g}</td>
+					<td class="text">{$item.suid|truex}</td>
+					<td class="text">{$item.sgid|truex}</td>
+					<td class="text">{$item.sticky|truex}</td>
+					<td class="text">{$item.ur|truex}{$item.uw|truex}{$item.ux|truex}</td>
+					<td class="text">{$item.gr|truex}{$item.gw|truex}{$item.gx|truex}</td>
+					<td class="text">{$item.or|truex}{$item.ow|truex}{$item.ox|truex}</td>
+				</tr>
+			{/foreach}
+		</table>
+	</div>
 
 	{remarksbox type="tip" title="{tr}Info{/tr}"}
 		{tr}What to do with these check results?{/tr}
@@ -237,11 +202,11 @@
 		<br>
 		{tr}World writable files or directories{/tr}
 		<br>
-		{tr}In some environments where you cannot get root or have no other possibilities, it is unavoidable to let your webserver write to some tiki directories like "templates_c" or "temp". In any other case this is not needed. A bug in a script or other users could easily put malicious scripts on your webspace or upload illegal content.{/tr}
+		{tr}In some environments where you cannot get root or have no other possibilities, it is unavoidable to let your webserver write to some tiki directories like or "temp". In any other case this is not needed. A bug in a script or other users could easily put malicious scripts on your webspace or upload illegal content.{/tr}
 		<br>
 		{tr}Files or directories the Webserver can write to{/tr}
 		<br>
-		{tr}The risk is almost the same in shared hosting environments without proper privilege separation (suexec wrappers). The webserver has to be able to write to some directories like "templates_c" or "temp". Review the tiki install guide for further information.{/tr}
+		{tr}The risk is almost the same in shared hosting environments without proper privilege separation (suexec wrappers). The webserver has to be able to write to some directories like "temp". Review the tiki install guide for further information.{/tr}
 		<br>
 		{tr}Strange Inodes (not file, not link, not directory){/tr}
 		<br>

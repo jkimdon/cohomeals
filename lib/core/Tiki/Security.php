@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Security.php 47280 2013-08-26 14:53:40Z lphuberdeau $
+// $Id: Security.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 class Tiki_Security
 {
@@ -37,7 +37,10 @@ class Tiki_Security
 			return null;
 		}
 
-		$decoded = json_decode($string, true);
+		if (! $decoded = json_decode($string, true)) {
+			return null;
+		}
+
 		$hash = $this->getHash($decoded['data']);
 
 		if ($hash === $decoded['hash']) {

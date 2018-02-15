@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Builder.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Builder.php 60316 2016-11-18 15:56:38Z kroky6 $
 
 class Perms_Builder
 {
@@ -82,11 +82,17 @@ class Perms_Builder
 	private function getFactories()
 	{
 		$factories = array(
-			new Perms_ResolverFactory_ObjectFactory,
+			new Perms_ResolverFactory_ObjectFactory
 		);
 
 		if ($this->categories) {
 			$factories[] = new Perms_ResolverFactory_CategoryFactory;
+		}
+
+		$factories[] = new Perms_ResolverFactory_ObjectFactory('parent');
+
+		if ($this->categories) {
+			$factories[] = new Perms_ResolverFactory_CategoryFactory('parent');
 		}
 
 		$factories[] = new Perms_ResolverFactory_GlobalFactory;

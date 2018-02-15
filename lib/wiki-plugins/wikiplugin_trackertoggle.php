@@ -1,22 +1,25 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_trackertoggle.php 49368 2014-01-13 13:55:45Z jonnybradley $
+// $Id: wikiplugin_trackertoggle.php 58747 2016-05-31 23:00:07Z lindonb $
 
 function wikiplugin_trackertoggle_info()
 {
 	return array(
 		'name' => tra('Tracker Toggle'),
 		'documentation' => 'PluginTrackerToggle',
-		'description' => tra('Toggle element display on a field value'),
+		'description' => tra('Show or hide tracker content'),
+		'iconname' => 'trackers',
+		'introduced' => 7,
 		'prefs' => array('wikiplugin_trackertoggle', 'feature_jquery', 'feature_trackers'),
 		'params' => array(
 			'fieldId' => array(
 				'required' => true,
 				'name' => tra('Field ID'),
 				'description' => tra('Numeric value representing the field ID tested.'),
+				'since' => '7.0',
 				'filter' => 'digits',
 				'profile_reference' => 'tracker_field',
 			),
@@ -24,25 +27,35 @@ function wikiplugin_trackertoggle_info()
 				'required' => true,
 				'name' => tra('Value'),
 				'description' => tra('Value to compare against.'),
+				'since' => '7.0',
 				'filter' => 'text',
 			),
 			'visible' => array(
 				'required' => false,
-				'name' => tra('Element visibility'),
-				'description' => 'y|n' . tra('If y, is visible when the field has the value.'),
+				'name' => tra('Element Visibility'),
+				'description' => tra('Set whether visible when the field has the value.'),
+				'since' => '7.0',
 				'filter' => 'alpha',
-				'default' => 'n'
+				'default' => 'n',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'y'),
+					array('text' => tra('No'), 'value' => 'n')
+				)
 			),
 			'id' => array(
 				'required' => true,
 				'name' => tra('ID'),
-				'description' => tra('Html ID of the element that is toggled'),
+				'description' => tra('HTML id of the element that is toggled'),
+				'since' => '7.0',
 				'filter' => 'text',
 			),
 			'itemId' => array(
 				'required' => false,
 				'name' => tra('Item ID'),
-				'description' => tra('Use the field of specific item. The URL param itemId is used if this parameter is not set.'),
+				'description' => tra('Use the field of specific item. The URL param itemId is used if this parameter
+					is not set.'),
+				'since' => '7.0',
 				'filter' => 'digits',
 				'default' => 0,
 				'profile_reference' => 'tracker_item',
@@ -58,18 +71,18 @@ function wikiplugin_trackertoggle($data, $params)
 	extract($params, EXTR_SKIP);
 
 	if (empty($fieldId)) {
-		TikiLib::lib('errorreport')->report(tr('trackertoggle: Param fieldId is required.'));
+		Feedback::error(tr('trackertoggle: Param fieldId is required.'));
 	}
 	$field = TikiLib::lib('trk')->get_tracker_field($fieldId);
 	if (empty($field)) {
-		TikiLib::lib('errorreport')->report(tr('trackertoggle: Param fieldId field %0 does not exsist.', $fieldId));
+		Feedback::error(tr('trackertoggle: Param fieldId field %0 does not exsist.', $fieldId));
 	}
 
 	if (!isset($value)) {
-		TikiLib::lib('errorreport')->report(tr('trackertoggle: Param value is required'));
+		Feedback::error(tr('trackertoggle: Param value is required'));
 	}
 	if (empty($id)) {
-		TikiLib::lib('errorreport')->report(tr('trackertoggle: Param id is required'));
+		Feedback::error(tr('trackertoggle: Param id is required'));
 	}
 
 	if (empty($itemId) && !empty($_REQUEST['itemId'])) {

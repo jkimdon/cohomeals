@@ -1,27 +1,26 @@
-{* $Id: tiki-information.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}
+{* $Id: tiki-information.tpl 53327 2014-12-21 14:06:31Z jyhem $ *}
 <div id="tiki-center">
-<br>
-<div class="cbox">
-	 <div class="cbox-title">
-	 {tr}Information{/tr}
-	 </div>
+	<br>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			{tr}Information{/tr}
+		</div>
 
-	<div class="simplebox highlight">
-	{if is_array($msg)}
-		{foreach from=$msg item=line}
-	 		{$line|escape}<br>
-	 	{/foreach}
-	{else}
-		{$msg|escape}
-	{/if}
+		<div class="alert alert-warning">
+			{if is_array($msg)}
+				{foreach from=$msg item=line}
+					{$line|escape}<br>
+				{/foreach}
+			{else}
+				{$msg|escape}
+			{/if}
+		</div>
+
+		<p>
+			{if $show_history_back_link eq 'y'}
+				<a href="javascript:history.back()" class="linkmenu">{tr}Go back{/tr}</a><br><br>
+			{/if}
+			&nbsp;<a href="{$prefs.tikiIndex}" class="linkmenu">{tr}Return to home page{/tr}</a>
+		</p>
 	</div>
-
-	<p>
-
-	{if $show_history_back_link eq 'y'}
-		<a href="javascript:history.back()" class="linkmenu">{tr}Go back{/tr}</a><br><br>
-	{/if}
-	 &nbsp;<a href="{$prefs.tikiIndex}" class="linkmenu">{tr}Return to home page{/tr}</a>
-	</p>
-</div>
 </div>

@@ -1,23 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Dropdown.php 54963 2015-04-06 11:34:20Z xavidp $
+// $Id: Dropdown.php 61214 2017-02-03 19:04:00Z kroky6 $
 
 /**
  * Handler class for dropdown
  * 
- * Letter key: ~d~ ~D~
+ * Letter key: ~d~ ~D~ ~R~ ~M~
  *
  */
-class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Search_FacetProvider_Interface
+class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Search_FacetProvider_Interface, Tracker_Field_Exportable, Tracker_Field_Filterable
 {
 	public static function getTypes()
 	{
 		return array(
 			'd' => array(
-				'name' => tr('Drop Down'),
+				'name' => tr('Dropdown'),
 				'description' => tr('Allows users to select only from a specified set of options'),
 				'help' => 'Drop Down - Radio Tracker Field',
 				'prefs' => array('trackerfield_dropdown'),
@@ -26,7 +26,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				'params' => array(
 					'options' => array(
 						'name' => tr('Option'),
-						'description' => tr('An option, if containing an equal sign, the prior part will be used as the value while the later as the label'),
+						'description' => tr('If an option contains an equal sign, the part before the equal sign will be used as the value, and the second part as the label'),
 						'filter' => 'text',
 						'count' => '*',
 						'legacy_index' => 0,
@@ -34,7 +34,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				),
 			),
 			'D' => array(
-				'name' => tr('Drop Down with Other field'),
+				'name' => tr('Dropdown selector with "Other" field'),
 				'description' => tr('Allows users to select from a specified set of options or to enter an alternate option'),
 				'help' => 'Drop Down - Radio Tracker Field',
 				'prefs' => array('trackerfield_dropdownother'),
@@ -43,7 +43,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				'params' => array(
 					'options' => array(
 						'name' => tr('Option'),
-						'description' => tr('An option, if containing an equal sign, the prior part will be used as the value while the later as the label. It is recommended to add an "other" option.'),
+						'description' => tr('If an option contains an equal sign, the part before the equal sign will be used as the value, and the second part as the label. You need to add an "other" option (in lowercase, or with "other=Other").'),
 						'filter' => 'text',
 						'count' => '*',
 						'legacy_index' => 0,
@@ -60,7 +60,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				'params' => array(
 					'options' => array(
 						'name' => tr('Option'),
-						'description' => tr('An option, if containing an equal sign, the prior part will be used as the value while the later as the label'),
+						'description' => tr('If an option contains an equal sign, the part before the equal sign will be used as the value, and the second part as the label'),
 						'filter' => 'text',
 						'count' => '*',
 						'legacy_index' => 0,
@@ -77,7 +77,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				'params' => array(
 					'options' => array(
 						'name' => tr('Option'),
-						'description' => tr('An option, if containing an equal sign, the prior part will be used as the value while the later as the label'),
+						'description' => tr('If an option contains an equal sign, the part before the equal sign will be used as the value, and the second part as the label'),
 						'filter' => 'text',
 						'count' => '*',
 						'legacy_index' => 0,
@@ -88,7 +88,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 						'default' => '',
 						'filter' => 'alpha',
 						'options' => array(
-							'' => tr('Multiple-selection check-boxes'),
+							'' => tr('Multiple-selection checkboxes'),
 							'm' => tr('List box'),
 						),
 					),
@@ -119,7 +119,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 
 		return array(
 			'value' => $value,
-			'selected' => explode(',', $value),
+			'selected' => $value === '' ? array() : explode(',', $value),
 			'possibilities' => $this->getPossibilities(),
 		);
 	}
@@ -131,7 +131,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 
 	function renderInnerOutput($context = array())
 	{
-		if ($context['list_mode'] === 'csv') {
+		if (!empty($context['list_mode']) && $context['list_mode'] === 'csv') {
 			return implode(', ', $this->getConfiguration('selected'));
 		} else {
 			$labels = array_map(array($this, 'getValueLabel'), $this->getConfiguration('selected'));
@@ -141,7 +141,7 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 
 	private function getValueLabel($value)
 	{
-		$possibilities = $this->getConfiguration('possibilities');
+		$possibilities = $this->getPossibilities();
 		if (isset($possibilities[$value])) {
 			return $possibilities[$value];
 		} else {
@@ -254,6 +254,90 @@ class Tracker_Field_Dropdown extends Tracker_Field_Abstract implements Tracker_F
 				->setLabel($this->getConfiguration('name'))
 				->setRenderMap($this->getPossibilities())
 		);
+	}
+
+	function getTabularSchema()
+	{
+		$schema = new Tracker\Tabular\Schema($this->getTrackerDefinition());
+
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+
+		$possibilities = $this->getPossibilities();
+		$invert = array_flip($possibilities);
+
+		$schema->addNew($permName, 'code')
+			->setLabel($name)
+			->setRenderTransform(function ($value) {
+				return $value;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = $value;
+			})
+			;
+
+		$schema->addNew($permName, 'text')
+			->setLabel($name)
+			->addIncompatibility($permName, 'code')
+			->addQuerySource('text', "tracker_field_{$permName}_text")
+			->setRenderTransform(function ($value, $extra) use ($possibilities) {
+				if (isset($possibilities[$value])) {
+					return $possibilities[$value];
+				}
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName, $invert) {
+				if (isset($invert[$value])) {
+					$info['fields'][$permName] = $invert[$value];
+				}
+			})
+			;
+
+		return $schema;
+	}
+
+	function getFilterCollection()
+	{
+		$filters = new Tracker\Filter\Collection($this->getTrackerDefinition());
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+		$baseKey = $this->getBaseKey();
+
+		$possibilities = $this->getPossibilities();
+		$possibilities['-Blank (no data)-'] = tr('-Blank (no data)-');
+
+		$filters->addNew($permName, 'dropdown')
+			->setLabel($name)
+			->setControl(new Tracker\Filter\Control\DropDown("tf_{$permName}_dd", $possibilities))
+			->setApplyCondition(function ($control, Search_Query $query) use ($baseKey) {
+				$value = $control->getValue();
+
+				if ($value === '-Blank (no data)-') {
+					$query->filterIdentifier('', $baseKey.'_text');
+				} elseif ($value) {
+					$query->filterIdentifier($value, $baseKey);
+				}
+			});
+
+		$filters->addNew($permName, 'multiselect')
+			->setLabel($name)
+			->setControl(new Tracker\Filter\Control\MultiSelect("tf_{$permName}_ms", $possibilities))
+			->setApplyCondition(function ($control, Search_Query $query) use ($permName, $baseKey) {
+				$values = $control->getValues();
+
+				if (! empty($values)) {
+					$sub = $query->getSubQuery("ms_$permName");
+
+					foreach ($values as $v) {
+						if ($v === '-Blank (no data)-') {
+							$sub->filterIdentifier('', $baseKey.'_text');
+						} elseif ($v) {
+							$sub->filterContent((string) $v, $baseKey);
+						}
+					}
+				}
+			});
+
+		return $filters;
 	}
 }
 

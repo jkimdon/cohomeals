@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.sefurl.php 49624 2014-01-29 16:16:53Z jonnybradley $
+// $Id: modifier.sefurl.php 58453 2016-04-25 18:05:53Z jonnybradley $
 
 // Translate only if feature_multilingual is on
 
@@ -15,8 +15,10 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 
 function smarty_modifier_sefurl($source, $type='wiki', $with_next = '', $all_langs='', $with_title='y', $title='' )
 {
-	global $prefs, $tikilib, $wikilib, $smarty;
-	require_once('lib/wiki/wikilib.php');
+	global $prefs;
+	$wikilib = TikiLib::lib('wiki');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 
 	$sefurl = $prefs['feature_sefurl'] == 'y';
 
@@ -31,7 +33,7 @@ function smarty_modifier_sefurl($source, $type='wiki', $with_next = '', $all_lan
 	}
 	switch ($type) {
 		case 'wiki':
-			return $wikilib->sefurl($source, $with_next, $all_langs);
+			return TikiLib::tikiUrlOpt($wikilib->sefurl($source, $with_next, $all_langs));
 
 		case 'blog':
 			$href = $sefurl ? "blog$source" : "tiki-view_blog.php?blogId=$source";
@@ -88,12 +90,12 @@ function smarty_modifier_sefurl($source, $type='wiki', $with_next = '', $all_lan
 
 		case 'trackeritem':
 			$replacementpage = '';
-			if ($prefs["feature_sefurl_tracker_prefixalias"] == 'y') {
+			if ($prefs["feature_sefurl_tracker_prefixalias"] == 'y' && $prefs['tracker_prefixalias_on_links'] == 'y') {
 				$trklib = TikiLib::lib('trk');
 				$replacementpage = $trklib->get_trackeritem_pagealias($source);
 			}
 			if ($replacementpage) {
-				return $wikilib->sefurl($replacementpage, $with_next, $all_langs);
+				return TikiLib::tikiUrlOpt($wikilib->sefurl($replacementpage, $with_next, $all_langs));
 			} else {
 				$href = 'tiki-view_tracker_item.php?itemId='. $source;
 			}
@@ -109,6 +111,7 @@ function smarty_modifier_sefurl($source, $type='wiki', $with_next = '', $all_lan
 
 		case 'filegallery':
 		case 'file gallery':
+			$type = 'file gallery';
 			$href = 'tiki-list_file_gallery.php?galleryId='.$source;
 			break;
 
@@ -141,19 +144,23 @@ function smarty_modifier_sefurl($source, $type='wiki', $with_next = '', $all_lan
 			$href = "tiki-newsletters.php?nlId=" . urlencode($source);
 			break;
 
+		case 'survey':
+			$href = "tiki-take_survey.php?surveyId=" . urlencode($source);
+			break;
+
 		default:
 			$href = $source;
 			break;
 	}
 
-	if ($with_next && $with_title != 'y') {
+	if ($with_next && ($with_title != 'y' || $prefs['feature_sefurl'] !== 'y')) {
 		$href .= '&amp;';
 	}
 
 	if ($prefs['feature_sefurl'] == 'y' && $smarty) {
 		include_once('tiki-sefurl.php');
-		return filter_out_sefurl($href, $type, $title, $with_next, $with_title);
+		return TikiLib::tikiUrlOpt(filter_out_sefurl($href, $type, $title, $with_next, $with_title));
 	} else {
-		return $href;
+		return TikiLib::tikiUrlOpt($href);
 	}
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 48463 2013-11-16 18:39:09Z nkoth $
+// $Id: Controller.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Services_ShowTikiOrg_Controller
 {
@@ -22,6 +22,7 @@ class Services_ShowTikiOrg_Controller
 		$fieldId = $input->fieldId->int();
 		$command = $input->command->word();
 		$svntag = $input->svntag->text();
+		$creator = $input->username->text();
 
 		$item = Tracker_Item::fromId($id);
 		if (!$item->canViewField($fieldId)) {
@@ -102,6 +103,8 @@ class Services_ShowTikiOrg_Controller
 		}
 
 		if (!empty($command)) {
+			global $user;
+
 			if (($command == 'update' || $command == 'reset' || $command == 'destroy') && !TikiLib::lib('user')->user_has_permission($user, 'tiki_p_admin') && $user != $creator) {
 				throw new Services_Exception_Denied;
 			}

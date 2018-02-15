@@ -1,27 +1,29 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_slideshow.php 50412 2014-03-21 13:55:17Z luciash $
+// $Id: wikiplugin_slideshow.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 function wikiplugin_slideshow_info()
 {
 	return array(
 		'name' => tra('Slideshow'),
 		'documentation' => 'Slideshow',
-		'description' => tra('Configure a slideshow. Extends the existing wiki page slideshow with notes & styles.'),
+		'description' => tra('Create a slideshow from the content of a wiki page'),
 		'prefs' => array( 'wikiplugin_slideshow', 'feature_slideshow' ),
-		'body' => tra('Slideshow notes - Separate with "/////"'),
-		'icon' => 'img/icons/images.png',
+		'body' => tr('Slideshow notes - Separate with %0', '<code>/////</code>'),
+		'iconname' => 'tv',
+		'introduced' => 7,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'theme' => array(
 				'required' => false,
 				'name' => tra('Theme'),
-				'description' => tra('The theme you want to use for the slideshow, default will be what you choose from the admin panel under Look and Feel for jQuery UI'),
+				'description' => tra('The theme you want to use for the slideshow, default will be what you choose from
+					the admin panel under Look and Feel for jQuery UI'),
 				'filter' => 'text',
-				'default' => tra('Tiki jQuery UI Theme'),
+				'default' => tra('Tiki jQuery UI theme'),
 				'since' => '7.0',
 				'options' => array(
 					array('text' => tra('None') . ' (' . tra('styled by current theme') . ')', 'value' => 'none'),
@@ -54,24 +56,25 @@ function wikiplugin_slideshow_info()
 			),
 			'backgroundurl' => array(
 				'required' => false,
-				'name' => tra('Background Url Location'),
-				'description' => tra('URL of the background image to use in your slideshow, overrides backgroundcolor'),
+				'name' => tra('Background URL location'),
+				'description' => tr('URL of the background image to use in your slideshow, overrides %0',
+					'<code>backgroundcolor</code>'),
 				'filter' => 'url',
-				'accepted' => tra('Valid url'),
+				'accepted' => tra('Valid URL'),
 				'default' => '',
 				'since' => '7.0',
 			),
 			'backgroundcolor' => array(
 				'required' => false,
 				'name' => tra('Background Color'),
-				'description' => tra('Background color to use in your slideshow, default '),
+				'description' => tr('Background color used in the slideshow, default %0', '<code>#0087BB</code>'),
 				'default' => '#0087BB',
 				'since' => '7.0'
 			),
 			'class' => array(
 				'required' => false,
 				'name' => tra('CSS Class'),
-				'description' => tra('Apply custom CSS class to the containing div.'),
+				'description' => tra('Apply custom CSS class to the containing div element'),
 				'filter' => 'text',
 				'accepted' => tra('Any valid CSS class'),
 				'default' => '',
@@ -79,8 +82,8 @@ function wikiplugin_slideshow_info()
 			),
 			'headerfontcolor' => array(
 				'required' => false,
-				'name' => tra('Header font color'),
-				'description' => tra('Apply a color to the headers of your slideshow'),
+				'name' => tra('Header Text Color'),
+				'description' => tra('Apply a font color to the header text'),
 				'filter' => 'text',
 				'accepted' => tra('Any HTML color'),
 				'default' => '#56D0FF',
@@ -88,16 +91,16 @@ function wikiplugin_slideshow_info()
 			),
 			'headerbackgroundcolor' => array(
 				'required' => false,
-				'name' => tra('Header background color'),
-				'description' => tra('Apply a color to the headers of your slideshow'),
+				'name' => tra('Header Background Color'),
+				'description' => tra('Apply a background color to the header'),
 				'filter' => 'text',
 				'accepted' => tra('Any HTML color'),
 				'since' => '7.0',
 			),
 			'slidefontcolor' => array(
 				'required' => false,
-				'name' => tra('Slide font color'),
-				'description' => tra('Apply a color to the slides of your slideshow'),
+				'name' => tra('Slide Text Color'),
+				'description' => tra('Apply a font color to the slides'),
 				'filter' => 'text',
 				'accepted' => tra('Any HTML color'),
 				'default' => '#EEFAFF',
@@ -105,8 +108,8 @@ function wikiplugin_slideshow_info()
 			),
 			'listitemhighlightcolor' => array(
 				'required' => false,
-				'name' => tra('Line Item highlight color'),
-				'description' => tra('Apply a color to the line item when mouse over'),
+				'name' => tra('Highlight Color'),
+				'description' => tra('Apply a color to the text upon mouseover'),
 				'filter' => 'text',
 				'accepted' => tra('Any HTML color'),
 				'default' => '',
@@ -115,9 +118,9 @@ function wikiplugin_slideshow_info()
 			'slideseconds' => array(
 				'required' => false,
 				'name' => tra('Slide Seconds'),
-				'description' => tra('How many seconds a slide will be open while playing, overridden when slideduration is set.'),
+				'description' => tr('How many seconds a slide will be open while playing, overridden when %0 is set',
+					'<code>slideduration</code>'),
 				'filter' => 'digits',
-				'accepted' => tra('Second count'),
 				'default' => '15',
 				'since' => '7.0'
 			),
@@ -126,18 +129,18 @@ function wikiplugin_slideshow_info()
 				'name' => tra('Slide Milliseconds'),
 				'description' => tra('How many milliseconds a slide will be open while playing'),
 				'filter' => 'digits',
-				'accepted' => tra('Second count'),
 				'default' => '15000',
 				'since' => '9.0'
 			),
 			'textside' => array(
 				'required' => false,
 				'name' => tra('Text Side'),
-				'description' => tra('The side on which you would like to display text if there are images that are resized or present'),
-				'filter' => 'text',
+				'description' => tra('The side on which text will be displayed when images are present'),
+				'filter' => 'word',
 				'default' => tra('Left'),
 				'since' => '7.0',
 				'options' => array(
+					array('text' => '', 'value' => ''),
 					array('text' => tra('Left'), 'value' => 'left'),
 					array('text' => tra('Right'), 'value' => 'right'),
 				),
@@ -148,9 +151,10 @@ function wikiplugin_slideshow_info()
 
 function wikiplugin_slideshow($data, $params)
 {
-	global $dbTiki, $tiki_p_admin, $prefs, $user, $page, $tikilib, $smarty;
+	global $tiki_p_admin, $prefs, $user, $page;
 	extract($params, EXTR_SKIP);
-
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 	$theme = (isset($theme) ? $theme : 'default');
 	$themeName = '';
 
@@ -185,7 +189,7 @@ function wikiplugin_slideshow($data, $params)
 		$notesHtml .= '<span class="s5-note">'.$note.'</span>';
 	}
 
-	global $headerlib;
+	$headerlib = TikiLib::lib('header');
 
 	$headerlib->add_js(
 		"window.slideshowSettings = {
@@ -212,7 +216,7 @@ function wikiplugin_slideshow($data, $params)
 			listItemHighlightColor: '$listitemhighlightcolor',
 			textSide: '$textside',
 			themeName: '$themeName',
-			basePath: 'vendor/jquery/jquery-s5/'
+			basePath: 'vendor_bundled/vendor/jquery/jquery-s5/'
 		};"
 	);
 

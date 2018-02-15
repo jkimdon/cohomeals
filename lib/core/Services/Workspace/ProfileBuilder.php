@@ -1,9 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ProfileBuilder.php 45962 2013-05-16 13:18:52Z lphuberdeau $
+// $Id: ProfileBuilder.php 60792 2017-01-05 14:41:05Z kroky6 $
+
+use Symfony\Component\Yaml\Yaml;
 
 class Services_Workspace_ProfileBuilder
 {
@@ -129,7 +131,7 @@ class Services_Workspace_ProfileBuilder
 			}
 		);
 
-		$yaml = Horde_Yaml::dump($data);
+		$yaml = Yaml::dump($data, 20, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
 		return <<<SYNTAX
 
 ^The following profile was auto-generated. It may hurt your eyes when you try reading it.^

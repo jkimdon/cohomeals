@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 53790 2015-02-05 09:23:03Z luciash $
+// $Id: Controller.php 61082 2017-01-26 15:56:08Z kroky6 $
 
 class Services_ActivityStream_Controller
 {
@@ -53,14 +53,13 @@ class Services_ActivityStream_Controller
 		$resultBuilder->apply($matches);
 
 		try {
-			$plugin = new Search_Formatter_Plugin_SmartyTemplate('templates/activity/activitystream.tpl');
+			$plugin = new Search_Formatter_Plugin_SmartyTemplate('activity/activitystream.tpl');
 			$plugin->setFields(array(
 				'like_list' => true,
 				'user_groups' => true,
 				'contributors' => true,
 			));
-			$formatter = new Search_Formatter($plugin);
-			$formatter->setDataSource($this->lib->getDataSource());
+			$formatter = Search_Formatter_Factory::newFormatter($plugin);
 			$out = $formatter->format($result);
 		} catch (SmartyException $e) {
 			throw new Services_Exception_NotAvailable($e->getMessage());

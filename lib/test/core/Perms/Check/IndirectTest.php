@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IndirectTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: IndirectTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
 
 /**
  * @group unit
@@ -16,7 +16,7 @@ class Perms_Check_IndirectTest extends TikiTestCase
 	{
 		$indirect = new Perms_Check_Indirect(array('view' => 'admin_wiki',));
 
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->never())
 			->method('check');
 
@@ -27,7 +27,7 @@ class Perms_Check_IndirectTest extends TikiTestCase
 	{
 		$indirect = new Perms_Check_Indirect(array('view' => 'admin_wiki',));
 
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->once())
 			->method('check')
 			->with($this->equalTo('admin_wiki'), $this->equalTo(array('Admins', 'Anonymous')))
@@ -40,7 +40,7 @@ class Perms_Check_IndirectTest extends TikiTestCase
 	{
 		$indirect = new Perms_Check_Indirect(array('view' => 'admin_wiki',));
 
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->once())
 			->method('check')
 			->with($this->equalTo('admin_wiki'), $this->equalTo(array('Admins', 'Anonymous')))

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_tabs.php 50834 2014-04-19 02:41:58Z jyhem $
+// $Id: wikiplugin_tabs.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 function wikiplugin_tabs_info()
 {
@@ -12,29 +12,38 @@ function wikiplugin_tabs_info()
 		'documentation' => 'PluginTabs',
 		'description' => tra('Arrange content in tabs'),
 		'prefs' => array( 'wikiplugin_tabs' ),
-		'body' => tra('Tabs content separated by /////'),
-		'icon' => 'img/icons/tab_edit.png',
+		'body' => tra('Tabs content, separated by "/////"'),
+		'iconname' => 'th-large',
+		'introduced' => 4,
 		'filter' => 'wikicontent',
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'name' => array(
 				'required' => false,
 				'name' => tra('Tabset Name'),
-				'description' => tra('Unique tabset name (if you want it to remember its last state). Ex: user_profile_tabs'),
+				'description' => tr('Unique tabset name (if you want the last state to be remembered). Example:')
+					. '<code>user_profile_tabs</code>',
+				'since' => '4.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'tabs' => array(
 				'required' => true,
 				'name' => tra('Tab Titles'),
-				'description' => tra('Pipe separated list of tab titles. Ex: tab 1|tab 2|tab 3'),
+				'description' => tra('Pipe-separated list of tab titles. Example:') . '<code>tab 1|tab 2|tab 3</code>',
+				'since' => '4.0',
+				'filter' => 'text',
 				'default' => '',
 			),
 			'toggle' => array(
 				'required' => false,
 				'name' => tra('Toggle Tabs'),
-				'description' => tra('Allow toggling from tabs to no tabs view'),
+				'description' => tra('Allow toggling between tabs and no-tabs view'),
+				'since' => '8.0',
 				'default' => 'y',
+				'filter' => 'alpha',
 				'options' => array (
+					array('text' => '', 'value' => ''),
 					array('value' => 'y' , 'text' => tra('Yes')),
 					array('value' => 'n', 'text' => tra('No')),
 				),
@@ -43,8 +52,11 @@ function wikiplugin_tabs_info()
 				'required' => false,
 				'name' => tra('Inside Pretty Tracker'),
 				'description' => tra('Parse pretty tracker variables within tabs'),
+				'since' => '8.0',
 				'default' => 'n',
+				'filter' => 'alpha',
 				'options' => array (
+					array('text' => '', 'value' => ''),
 					array('value' => 'n', 'text' => tra('No')),
 					array('value' => 'y' , 'text' => tra('Yes')),
 				),
@@ -55,7 +67,7 @@ function wikiplugin_tabs_info()
 
 function wikiplugin_tabs($data, $params)
 {
-	global $tikilib, $smarty;
+	$tikilib = TikiLib::lib('tiki');
 	if (!empty($params['name'])) {
 		$tabsetname = $params['name'];
 	} else {
@@ -78,13 +90,13 @@ function wikiplugin_tabs($data, $params)
 	if (!empty($params['tabs'])) {
 		$tabs = explode('|', $params['tabs']);
 	} else {
-		return "''".tra("No tab title specified. At least one has to be set to make the tabs appear.")."''";
+		return "''".tra("No tab title specified. At least one must be specified in order for the tabs to appear.")."''";
 	}
 	if (!empty($data)) {
-		$data = $tikilib->parse_data($data, array('suppress_icons' => true, 'inside_pretty' => $inside_pretty));
+		$data = TikiLib::lib('parser')->parse_data($data, array('suppress_icons' => true, 'inside_pretty' => $inside_pretty));
 		$tabData = explode('/////', $data);
 	}
-	
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('tabsetname', $tabsetname);
 	$smarty->assign_by_ref('tabs', $tabs);
 	$smarty->assign('toggle', $toggle);

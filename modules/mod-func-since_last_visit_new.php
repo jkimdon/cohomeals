@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-since_last_visit_new.php 54726 2015-03-24 11:57:30Z jonnybradley $
+// $Id: mod-func-since_last_visit_new.php 62611 2017-05-16 15:50:57Z jyhem $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -18,7 +18,7 @@ function module_since_last_visit_new_info()
 {
 	return array(
 		'name' => tra('Since Last Visit'),
-		'description' => tra('Displays to logged in users new or updated objects since a point in time, by default their last login date and time.'),
+		'description' => tra('Displays to logged-in users new or updated objects since a point in time, by default their last login date and time.'),
 		'params' => array(
 			'showuser' => array(
 				'name' => tra('Show users'),
@@ -41,8 +41,8 @@ function module_since_last_visit_new_info()
 				'description' => tra('If set to "y", fold automatically sections and show only the title (user has to click on each section in order to see the details of modifications).') . ' ' . tra('Default:') . ' "n"'
 			),
 			'use_jquery_ui' => array(
-				'name' => tra('Use jQuery presentation'),
-				'description' => tra('If set to "y", use jQuery to show the result.') . ' ' . tra('Default:') . ' "n"'
+				'name' => tra('Use tabbed presentation'),
+				'description' => tra('If set to "y", use Bootstrap tabs to show the result.') . ' ' . tra('Default:') . ' "n"'
 			),
 			'daysAtLeast' => array(
 				'name' => tra('Minimum timespan'),
@@ -67,8 +67,8 @@ function module_since_last_visit_new_info()
  */
 function module_since_last_visit_new($mod_reference, $params = null)
 {
-	global $smarty, $user; $tikilib;
-
+	global $user;
+	$smarty = TikiLib::lib('smarty');
 	include_once('tiki-sefurl.php');
 
 	if (!$user) {
@@ -101,7 +101,9 @@ function module_since_last_visit_new($mod_reference, $params = null)
 
 	$resultCount = $mod_reference['rows'];
 
-	global $tikilib, $userlib, $prefs;
+	global $prefs;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 	$smarty->loadPlugin('smarty_modifier_username');
 
 	$ret = array();
@@ -110,8 +112,8 @@ function module_since_last_visit_new($mod_reference, $params = null)
 	}
 
 	if ((empty($params['calendar_focus']) || $params['calendar_focus'] != 'ignore')
-			&& strpos($_SERVER['SCRIPT_NAME'], 'tiki-calendar.php')
-			&& isset($_REQUEST['todate']) && $_REQUEST['todate']
+			&& strpos($_SERVER['SCRIPT_NAME'], 'tiki-calendar.php') !== false
+			&& ! empty($_REQUEST['todate'])
 	) {
 		$last = $_REQUEST['todate'];
 		$_SESSION['slvn_last_login'] = $last;
@@ -185,13 +187,26 @@ function module_since_last_visit_new($mod_reference, $params = null)
 				$perm = 'tiki_p_view';
 				break;
 
-			default:
+			default:		// note trackeritem needs more complex perms checking due to status and ownership
 				$perm = 'tiki_p_read_comments';
 				break;
 		}
 
 		if ($res['approved'] == 'n' || $res['archived'] == 'y') {
 			$visible = $userlib->user_has_perm_on_object($user, $res['object'], $res['objectType'], 'tiki_p_admin_comments');
+
+		} else if ($res['objectType'] === 'trackeritem') {
+			$item = Tracker_Item::fromId($res['object']);
+			$visible = $item->canView();
+		} else if ($res['objectType'] == 'blog post') {
+			$visible = FALSE;
+			// Only show new comments related to posts the user is allowed to see
+			if ($userlib->user_has_perm_on_object($user, $res['object'], $res['objectType'], 'tiki_p_read_comments')) {
+				// Only show new comments related to posts in blogs the user is allowed to see
+				$query = 'select `blogId` from `tiki_blog_posts` where `postId`=? ';
+				$blogId = $tikilib->getOne($query, (int) $res['object']);
+				$visible = $userlib->user_has_perm_on_object($user, $blogId, 'blog', 'tiki_p_read_blog');
+			}
 		} else {
 			$visible = !isset($perm) || $userlib->user_has_perm_on_object($user, $res['object'], $res['objectType'], $perm);
 		}
@@ -205,6 +220,8 @@ function module_since_last_visit_new($mod_reference, $params = null)
 			}
 
 			$count++;
+		}else{
+			unset($ret['items']['comments']['list'][$count]);
 		}
 	}
 	$ret['items']['comments']['count'] = $count;
@@ -230,7 +247,7 @@ function module_since_last_visit_new($mod_reference, $params = null)
 				$ret['items']['posts']['list'][$count]['href']
 					= 'tiki-view_forum_thread.php?forumId=' . $res['object'] . '&comments_parentId=';
 				if ($res['parentId']) {
-					$ret['items']['posts']['list'][$count]['href'].=$res['parentId'].'#threadId'.$res['threadId'];
+					$ret['items']['posts']['list'][$count]['href'].=$res['parentId'].'#threadId='.$res['threadId'];
 				} else {
 					$ret['items']['posts']['list'][$count]['href'].=$res['threadId'];
 				}
@@ -255,10 +272,11 @@ function module_since_last_visit_new($mod_reference, $params = null)
 		$query = 'select `pageName`, `user`, `lastModif` from `tiki_pages` where `lastModif`>? order by `lastModif` desc';
 		$result = $tikilib->query($query, array((int) $last), $resultCount);
 
+		$smarty->loadPlugin('smarty_modifier_sefurl');
 		$count = 0;
 		while ($res = $result->fetchRow()) {
 			if ($userlib->user_has_perm_on_object($user, $res['pageName'], 'wiki page', 'tiki_p_view')) {
-				$ret['items']['pages']['list'][$count]['href']  = filter_out_sefurl('tiki-index.php?page=' . urlencode($res['pageName']));;
+				$ret['items']['pages']['list'][$count]['href']  = smarty_modifier_sefurl($res['pageName']);
 				$ret['items']['pages']['list'][$count]['title'] = $tikilib->get_short_datetime($res['lastModif']) .' '. tra('by') .' '. smarty_modifier_username($res['user']);
 				$ret['items']['pages']['list'][$count]['label'] = $res['pageName'];
 				$count++;
@@ -489,8 +507,7 @@ function module_since_last_visit_new($mod_reference, $params = null)
 		$count = 0;
 		$counta = array();
 		$tracker_name = array();
-		global $cachelib;
-		require_once('lib/cache/cachelib.php');
+		$cachelib = TikiLib::lib('cache');
 		while ($res = $result->fetchRow()) {
 			if ($userlib->user_has_perm_on_object($user, $res['trackerId'], 'tracker', 'tiki_p_view_trackers')) {
 				// Initialize tracker counter if needed.
@@ -548,8 +565,7 @@ function module_since_last_visit_new($mod_reference, $params = null)
 
 		$count = 0;
 		$countb = array();
-		global $cachelib;
-		require_once('lib/cache/cachelib.php');
+		$cachelib = TikiLib::lib('cache');
 
 		while ($res = $result->fetchRow()) {
 			if ($userlib->user_has_perm_on_object($user, $res['trackerId'], 'tracker', 'tiki_p_view_trackers')) {

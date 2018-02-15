@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_stat.tpl 35178 2011-07-02 11:44:28Z gta74 $ *}
+{* $Id: wikiplugin_stat.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
 {tabset name='stat' toggle='n'}
 	{foreach from=$stat key=when item=typeStat}
 		{capture name='tabtitle'}
@@ -10,11 +10,11 @@
 			{elseif $when eq 'month'}{tr}Month{/tr}
 			{elseif $when eq 'lastyear'}{tr}Last Year{/tr}
 			{elseif $when eq 'year'}{tr}Year{/tr}{/if}
-		{/capture}	
+		{/capture}
 		{tab name=$smarty.capture.tabtitle}
-			 <ul>
+			<ul>
 			{foreach from=$typeStat key=type item=list}
-				{foreach from=$list key=what item=nb} 
+				{foreach from=$list key=what item=nb}
 					<li>{$what}: {$nb}</li>
 				{/foreach}
 			{/foreach}

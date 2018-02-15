@@ -2,25 +2,22 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-index_p.php 50583 2014-03-31 06:03:29Z luciash $
+// $Id: tiki-index_p.php 61450 2017-03-02 03:18:18Z drsassafras $
 
 $section = 'wiki page';
 require_once('tiki-setup.php');
-include_once('lib/structures/structlib.php');
+$structlib = TikiLib::lib('struct');
 
-include_once('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 
 $parserlib = TikiLib::lib('parser');
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 $access->check_feature('feature_wiki');
@@ -85,9 +82,7 @@ if (!in_array($page, $_SESSION["breadCrumb"])) {
 }
 
 // Now increment page hits since we are visiting this page
-if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
-	$tikilib->add_hit($page);
-}
+$tikilib->add_hit($page);
 
 $smarty->assign('page_user', $info['user']);
 

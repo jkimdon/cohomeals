@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: xmp.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: xmp.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -96,7 +96,7 @@ class Xmp
 				}
 			}
 			//now we can process fields
-			$filter   = new Zend_Filter_Word_CamelCaseToSeparator();
+			$filter   = new Zend\Filter\Word\CamelCaseToSeparator();
 			foreach ($xmparray as $group => $fields) {
 				foreach ($fields as $name => $field) {
 					if (isset($this->specs[$group][$name])) {
@@ -301,7 +301,7 @@ class Xmp
 								//in case a list item (li) has children - images tested so far don't seem to have this
 								//situation, so untested
 								$xmparray[$nodeitem->prefix][$nodeitem->localName] =
-									$nodeitem->xmpDomToArray($nodeitem->childNodes);
+									$this->xmpDomToArray($nodeitem->childNodes);
 							}
 						//fields like ['exif']['Flash'] go here, ie multiple items but not a list (li) inside of
 						//another element (like Seq, Bag or Alt)

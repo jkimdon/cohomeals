@@ -1,15 +1,17 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Manager.php 46592 2013-07-08 15:06:13Z lphuberdeau $
+// $Id: Manager.php 58553 2016-05-09 03:14:59Z nkoth $
 
 class Tiki_Event_Manager
 {
 	private $eventRegistry = array();
 	private $priorities = array();
 	private $currentPriority = false;
+	private $counter = 0;
+	private $eventLog = array();
 
 	function reset()
 	{
@@ -54,6 +56,8 @@ class Tiki_Event_Manager
 
 	function trigger($eventName, array $arguments = array())
 	{
+		$arguments['EVENT_ID'] = ++$this->counter;
+
 		$priorities = array_unique($this->priorities);
 		sort($priorities);
 		$this->priorities = $priorities;
@@ -105,6 +109,29 @@ class Tiki_Event_Manager
 			'nodes' => array_values(array_unique($nodes)),
 			'edges' => $edges,
 		);
+	}
+
+	/**
+	 * Adds an event and its arguments into an event log in this object
+	 * that will eventually be pushed out to the web server log.
+	 * Needs to be activated via setting TIKI_HEADER_REPORT_EVENTS as a
+	 * server environment variable
+	 */
+	function logEvent($event, $args)
+	{
+		$eventKey = str_replace(".", "_", $event);
+		$this->eventLog[$eventKey] = $args;
+	}
+
+	/**
+	 * Gets the log of events that have been triggered for the purposer
+	 * of pushing out to the web server log.
+	 * Needs to be activated via setting TIKI_HEADER_REPORT_EVENTS as a
+	 * server environment variable
+	 */
+	function getEventLog()
+	{
+		return $this->eventLog;
 	}
 }
 

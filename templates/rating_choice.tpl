@@ -1,4 +1,4 @@
-{* $Id: rating_choice.tpl 51186 2014-05-08 16:43:20Z xavidp $ *}
+{* $Id: rating_choice.tpl 50153 2014-03-02 11:03:49Z xavidp $ *}
 <span class="ratingChoice">
 	{if $prefs.rating_smileys eq 'y'}
 		{foreach from=$rating_options item=v key=i}

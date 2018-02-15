@@ -1,10 +1,10 @@
 #! /bin/sh
 
-# (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+# (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 #
 # All Rights Reserved. See copyright.txt for details and a complete list of authors.
 # Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-# $Id: setup.sh 51371 2014-05-18 14:23:23Z fmg-sf $
+# $Id: setup.sh 62939 2017-06-07 22:09:43Z jyhem $
 
 # This file sets permissions and creates relevant folders for Tiki.
 #
@@ -20,6 +20,13 @@ DEBUG_UNIX=0 # production mode
 #DEBUG_UNIX=1 # debugging mode
 DEBUG_PREFIX='D>'
 ECHOFLAG=1 # one empty line before printing used options in debugging mode
+PATCHCOMPOSERFLAG="0" # patch composer.phar to avoid the warnings
+                      # unfortunately, this file checks its own signature
+                      # and thus does not allow modifications
+# log composer instead of screen out# log composer instead of screen outputput
+LOGCOMPOSERFLAG="0" # default for composer output 
+TIKI_COMPOSER_INSTALL_LOG=tiki-composer-install.log
+TIKI_COMPOSER_SELF_UPDATE_LOG=tiki-composer-self-update.log
 
 # part 1 - preliminaries
 # ----------------------
@@ -153,11 +160,15 @@ usage: $0 [<switches>] ${POSSIBLE_COMMANDS}
 -u user      owner of files (default: $AUSER)
 -g group     group of files (default: $AGROUP)
 -v virtuals  list of virtuals (for multitiki, example: "www1 www2")
--n           not interactive mode
+-p php       alternate PHP command (default: php)
+-n           not prompt for user and group, assume current
 -d off|on    disable|enable debugging mode (override script default)
+-q           quiet (workaround to silence composer, e.g. in cron scripts)
 
 There are some other commands recommended for advanced users only.
 More documentation about this: https://doc.tiki.org/Permission+Check
+
+Example: sh `basename $0` -n fix
 EOF
 }
 
@@ -173,18 +184,30 @@ set_debug() {
 OPT_AUSER=
 OPT_AGROUP=
 OPT_VIRTUALS=
-OPT_NOTINTERACTIVE=
+OPT_PHPCLI=
+OPT_USE_CURRENT_USER_GROUP=
+OPT_QUIET=
 
-while getopts "hu:g:v:nd:" OPTION; do
+while getopts "hu:g:v:p:nd:q" OPTION; do
 	case $OPTION in
 		h) usage ; exit 0 ;;
 		u) OPT_AUSER=$OPTARG ;;
 		g) OPT_AGROUP=$OPTARG ;;
 		v) OPT_VIRTUALS=$OPTARG ;;
-		n) OPT_NOTINTERACTIVE=1 ;;
+		p) OPT_PHPCLI=$OPTARG ;;
+		n) OPT_USE_CURRENT_USER_GROUP=1 ;;
 		d) set_debug ;;
+		q) OPT_QUIET="-q" ;;
 		?) usage ; exit 1 ;;
 	esac
+	if [ -n "$OPT_PHPCLI" ]; then
+		PHPCLI=`which "${OPT_PHPCLI}"`
+		if [ ! -n "$PHPCLI" ]; then
+			echo "PHP command: ${OPT_PHPCLI} not found. Please provide an existing command."
+			exit 1
+		fi
+		#echo "PHP command: ${PHPCLI}"
+	fi
 	if [ ${DEBUG} = '1' ] ; then
 		if [ ${ECHOFLAG} = '1' ] ; then
 			ECHOFLAG=0
@@ -260,8 +283,8 @@ check_distribution
 # part 3 - default and writable subdirs
 # -------------------------------------
 
-DIR_LIST_DEFAULT="admin css db doc dump files img installer lang lib maps modules permissioncheck styles temp templates templates_c tests tiki_tests vendor vendor_extra whelp"
-DIR_LIST_WRITABLE="db dump img/wiki img/wiki_up img/trackers modules/cache temp temp/cache temp/public templates_c templates styles maps whelp mods files tiki_tests/tests temp/unified-index"
+DIR_LIST_DEFAULT="addons admin db doc dump files img installer lang lib modules permissioncheck storage temp templates tests themes tiki_tests vendor vendor_extra whelp"
+DIR_LIST_WRITABLE="db dump img/wiki img/wiki_up img/trackers modules/cache storage storage/public temp temp/cache temp/public temp/templates_c templates themes whelp mods files tiki_tests/tests temp/unified-index"
 DIRS=${DIR_LIST_WRITABLE}
 
 # part 4 - several functions
@@ -371,8 +394,8 @@ set_permission_dirs_special_write() {
 		if [ -d ${WRITABLE} ] ; then
 			if [ ${DEBUG} = '1' ] ; then
 				echo ${DEBUG_PREFIX}
-				echo ${DEBUG_PREFIX} ${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;
-				echo ${DEBUG_PREFIX} ${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;
+				echo ${DEBUG_PREFIX} "${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;"
+				echo ${DEBUG_PREFIX} "${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;"
 			fi
 			${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;
 			${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;
@@ -488,16 +511,41 @@ exists()
 
 composer_core()
 {
-	if [ ! -f temp/composer.phar ];
+	if [ -f temp/composer.phar ];
+	then
+		# todo : if exists php;
+		if [ ${LOGCOMPOSERFLAG} = "0" ] ; then
+			"${PHPCLI}" temp/composer.phar self-update --working-dir vendor_bundled "$OPT_QUIET"
+			RETURNVAL=$?
+		fi
+		if [ ${LOGCOMPOSERFLAG} = "1" ] ; then
+			"${PHPCLI}" temp/composer.phar self-update --working-dir vendor_bundled "$OPT_QUIET" > ${TIKI_COMPOSER_SELF_UPDATE_LOG}
+			RETURNVAL=$?
+		fi
+		if [ ${RETURNVAL} -eq 0 ];
+		then
+			NEED_NEW_COMPOSER="0"
+		else
+			echo "Composer self-update failed. Reinstalling composer"
+			NEED_NEW_COMPOSER="1"
+		fi
+		# remove previous container.php in case of incompatibility
+		rm -f temp/cache/container.php
+	else
+		NEED_NEW_COMPOSER="1"
+	fi
+
+	if [ ${NEED_NEW_COMPOSER} = "1" ];
 	then
 		if exists curl;
 		then
 			curl -s https://getcomposer.org/installer | php -- --install-dir=temp
 		else
+			# todo : if exists php;
 			php -r "eval('?>'.file_get_contents('https://getcomposer.org/installer'));" -- --install-dir=temp
 		fi
-	else
-		php temp/composer.phar self-update
+		# if PATCHCOMPOSERFLAG then modify temp/composer.phar to avoid the warnings
+		# this hack is not yet possible because of a self signature check in temp/composer.phar
 	fi
 
 	if [ ! -f temp/composer.phar ];
@@ -511,21 +559,57 @@ composer_core()
 	fi
 
 	N=0
+	# todo : move "if exists php;" to function composer
 	if exists php;
 	then
-		until php -dmemory_limit=-1 temp/composer.phar install --prefer-dist
-		# setting memory_limit here prevents suhosin ALERT - script tried to increase memory_limit to 536870912 bytes
-		do
-			if [ $N -eq 7 ];
-			then
-				#exit
-				return
-			else
-				echo "Composer failed, retrying in 5 seconds, for a few times. Hit Ctrl-C to cancel."
-				sleep 5
-			fi
-			N=$((N+1))
-		done
+		if [ ${LOGCOMPOSERFLAG} = "0" ] ; then
+			#until php -dmemory_limit=-1 temp/composer.phar install --working-dir vendor_bundled --prefer-dist --no-dev
+			until "${PHPCLI}" -dmemory_limit=-1 temp/composer.phar install --working-dir vendor_bundled --prefer-dist --no-dev 2>&1 | sed '/Warning: Ambiguous class resolution/d'
+			# setting memory_limit here prevents suhosin ALERT - script tried to increase memory_limit to 536870912 bytes
+			do
+				if [ $N -eq 7 ];
+				then
+					#exit
+					return
+				else
+					echo "Composer failed, retrying in 5 seconds, for a few times. Hit Ctrl-C to cancel."
+					sleep 5
+				fi
+				N=$((N+1))
+			done
+		fi
+		if [ ${LOGCOMPOSERFLAG} = "1" ] ; then
+			until "${PHPCLI}" -dmemory_limit=-1 temp/composer.phar install --working-dir vendor_bundled --prefer-dist --no-dev > ${TIKI_COMPOSER_INSTALL_LOG}
+			# setting memory_limit here prevents suhosin ALERT - script tried to increase memory_limit to 536870912 bytes
+			do
+				if [ $N -eq 7 ];
+				then
+					#exit
+					return
+				else
+					echo "Composer failed, retrying in 5 seconds, for a few times. Hit Ctrl-C to cancel."
+					sleep 5
+				fi
+				N=$((N+1))
+			done
+		fi
+		if [ ${LOGCOMPOSERFLAG} = "2" ] ; then
+			echo "Suppress output lines with 'Warning: Ambiguous class resolution'\n..."
+			#until php -dmemory_limit=-1 temp/composer.phar install --working-dir vendor_bundled --prefer-dist --no-dev | sed '/Warning: Ambiguous class resolution/d'
+			until "${PHPCLI}" -dmemory_limit=-1 temp/composer.phar install --working-dir vendor_bundled --prefer-dist --no-dev
+			# setting memory_limit here prevents suhosin ALERT - script tried to increase memory_limit to 536870912 bytes
+			do
+				if [ $N -eq 7 ];
+				then
+					#exit
+					return
+				else
+					echo "Composer failed, retrying in 5 seconds, for a few times. Hit Ctrl-C to cancel."
+					sleep 5
+				fi
+				N=$((N+1))
+			done
+		fi
 	fi
 	#exit
 	return
@@ -533,19 +617,38 @@ composer_core()
 
 composer()
 {
+	# todo : if exists php;
 	# insert php cli version check here
 	# http://dev.tiki.org/item4721
 	PHP_OPTION="--version"
-	REQUIRED_PHP_VERSION=53 # minimal version PHP 5.3 but no decimal seperator, no floating point data
+	REQUIRED_PHP_VERSION=56 # minimal version PHP 5.6 but no decimal seperator, no floating point data
 	#${PHPCLI} ${PHP_OPTION}
-	LOCAL_PHP_VERSION=`${PHPCLI} ${PHP_OPTION} | ${GREP} ^PHP | ${CUT} -c5,7`
+	LOCAL_PHP_VERSION=`"${PHPCLI}" ${PHP_OPTION} | ${GREP} ^PHP | ${CUT} -c5,7`
 	#echo ${LOCAL_PHP_VERSION}
-	if [ "${LOCAL_PHP_VERSION}" -ge "${REQUIRED_PHP_VERSION}" ] ; then
-		echo "local PHP version ${LOCAL_PHP_VERSION} >= required PHP version ${REQUIRED_PHP_VERSION} - good"
-		composer_core
+	LIKELY_ALTERNATE_PHP_CLI="php56 php5.6 php5.6-cli" # These have been known to exist on some hosting platforms
+	if [ "${LOCAL_PHP_VERSION}" -lt "${REQUIRED_PHP_VERSION}" ] ; then
+		echo "Wrong PHP version: php${LOCAL_PHP_VERSION} < required PHP version.  A version >= php${REQUIRED_PHP_VERSION} is necessary."
+		echo "Searching for typically named alternative PHP version ..."
+		for phptry in $LIKELY_ALTERNATE_PHP_CLI; do
+			PHPTRY=`which $phptry`
+			#echo "debug: $PHPTRY"
+			if [ -n "${PHPTRY}" ]; then
+				echo "... correct PHP version ${phptry} detected and used"
+				PHPCLI="${PHPTRY}"
+				PHPCLIFOUND="y"
+				break
+			fi
+		done
+		if [ ! -n "${PHPCLIFOUND}" ]; then
+			echo "... no alternative php version found." 
+			echo "Please provide an alternative PHP version with the -p option."
+			echo "Example: sh `basename $0` -p php${REQUIRED_PHP_VERSION}."
+			echo "You can use the command-line command 'php[TAB][TAB]' to find out available versions."
+			exit 1
+		fi
 	else
-		echo "wrong PHP version ${LOCAL_PHP_VERSION} but >= ${REQUIRED_PHP_VERSION} necessary"
-		exit 1
+		echo "Local PHP version >= required PHP version ${REQUIRED_PHP_VERSION} - good"
+		composer_core
 	fi
 }
 
@@ -556,14 +659,14 @@ command_fix() {
 	if [ "$USER" = 'root' ]; then
 		if [ -n "$OPT_AUSER" ]; then
 			AUSER=$OPT_AUSER
-		elif [ -z "$OPT_NOTINTERACTIVE" ]; then
+		elif [ -z "$OPT_USE_CURRENT_USER_GROUP" ]; then
 			read -p "User [$AUSER]: " REPLY
 			if [ -n "$REPLY" ]; then
 				AUSER=$REPLY
 			fi
 		fi
 	else
-		if [ -z "$OPT_NOTINTERACTIVE" ]; then
+		if [ -z "$OPT_USE_CURRENT_USER_GROUP" ]; then
 			echo "You are not root or you are on a shared hosting account. You can now:
 
 1- ctrl-c to break now.
@@ -582,7 +685,7 @@ what to answer, just press enter to each question (to use default value)"
 
 	if [ -n "$OPT_AGROUP" ]; then
 		AGROUP=$OPT_AGROUP
-	elif [ -z "$OPT_NOTINTERACTIVE" ]; then
+	elif [ -z "$OPT_USE_CURRENT_USER_GROUP" ]; then
 		read -p "> Group [$AGROUP]: " REPLY
 		if [ -n "$REPLY" ]; then
 			AGROUP=$REPLY
@@ -592,7 +695,7 @@ what to answer, just press enter to each question (to use default value)"
 	touch db/virtuals.inc
 	if [ -n "$OPT_VIRTUALS" ]; then
 		VIRTUALS=$OPT_VIRTUALS
-	elif [ -n "$OPT_NOTINTERACTIVE" ]; then
+	elif [ -n "$OPT_USE_CURRENT_USER_GROUP" ]; then
 		VIRTUALS=$(cat db/virtuals.inc)
 	else
 		read -p "> Multi [$(cat -s db/virtuals.inc | tr '\n' ' ')]: " VIRTUALS
@@ -675,7 +778,7 @@ what to answer, just press enter to each question (to use default value)"
 
 	echo " done."
 
-	if [ -n "$OPT_NOTINTERACTIVE" ]; then
+	if [ -n "$OPT_USE_CURRENT_USER_GROUP" ]; then
 		composer
 	fi
 }
@@ -689,7 +792,7 @@ command_open() {
 	if [ "$USER" = 'root' ]; then
 		if [ -n "$OPT_AUSER" ]; then
 			AUSER=$OPT_AUSER
-		elif [ -z "$OPT_NOTINTERACTIVE" ]; then
+		elif [ -z "$OPT_USE_CURRENT_USER_GROUP" ]; then
 			read -p "User [$AUSER]: " REPLY
 			if [ -n "$REPLY" ]; then
 				AUSER=$REPLY
@@ -704,7 +807,7 @@ command_open() {
 
 	echo " done"
 
-	if [ -n "$OPT_NOTINTERACTIVE" ]; then
+	if [ -n "$OPT_USE_CURRENT_USER_GROUP" ]; then
 		composer
 	fi
 }
@@ -778,7 +881,7 @@ special_dirs_set_permissions_files() {
 		if [ -d ${WRITABLE} ] ; then
 			if [ ${DEBUG} = '1' ] ; then
 				echo ${DEBUG_PREFIX}
-				echo ${DEBUG_PREFIX} ${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;
+				echo ${DEBUG_PREFIX} "${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;"
 			fi
 			${FIND} ${WRITABLE} -type f -exec ${CHMOD} ${MODEL_PERMS_WRITE_FILES} {} \;
 		fi
@@ -790,7 +893,7 @@ special_dirs_set_permissions_subdirs() {
 		if [ -d ${WRITABLE} ] ; then
 			if [ ${DEBUG} = '1' ] ; then
 				echo ${DEBUG_PREFIX}
-				echo ${DEBUG_PREFIX} ${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;
+				echo ${DEBUG_PREFIX} "${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;"
 			fi
 			${FIND} ${WRITABLE} -type d -exec ${CHMOD} ${MODEL_PERMS_WRITE_SUBDIRS} {} \;
 		fi
@@ -901,7 +1004,9 @@ tiki_setup_default_menu() {
 
 Composer: If you are installing via a released Tiki package (zip, tar.gz, tar.bz2, 7z), you can and should skip using Composer. If you are installing and upgrading via SVN, you need to run Composer after 'svn checkout' and 'svn upgrade'. More info at https://dev.tiki.org/Composer
   
- c run composer and exit (recommended to be done first)
+ c run composer (log output on screen, not all warnings) and exit (recommended to be done first)
+ L run composer (log output to logfile) and exit (recommended to be done first)
+ V run composer (verbose log output on screen) and exit (recommended to be done first)
 
 For all Tiki instances (via SVN or via a released package):
 
@@ -959,8 +1064,10 @@ tiki_setup_default() {
 			S)	WHAT=${OLDWHAT} ; clear ;;
 			f)	WHAT=$WHAT_NEXT_AFTER_f ; command_fix ;;
 			o)	WHAT=${DEFAULT_WHAT} ; command_open ;;
-			c)	WHAT=$WHAT_NEXT_AFTER_c ; composer ;;
-			C)	WHAT=$WHAT_NEXT_AFTER_c ; composer ;;
+			c)	WHAT=$WHAT_NEXT_AFTER_c ; LOGCOMPOSERFLAG="0" ; composer ;;
+			C)	WHAT=$WHAT_NEXT_AFTER_c ; LOGCOMPOSERFLAG="0" ; composer ;;
+			L)	WHAT=$WHAT_NEXT_AFTER_c ; LOGCOMPOSERFLAG="1" ; composer ;;
+			V)	WHAT=$WHAT_NEXT_AFTER_c ; LOGCOMPOSERFLAG="2" ; composer ;;
 			q)	echo ""; exit ;;
 			Q)	echo ""; exit ;;
 			x)	echo ""; exit ;;

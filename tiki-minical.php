@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minical.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-minical.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'calendar';
 require_once ('tiki-setup.php');
@@ -156,7 +156,7 @@ if ($_REQUEST['view'] == 'list') {
 $upcoming = $minicallib->minical_list_events_from_date($user, 0, $minical_upcoming, 'start_asc', '', $pdate_h);
 $smarty->assign('upcoming', $upcoming['data']);
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 $hours = range(0, 23);

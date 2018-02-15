@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_tracker.php 51146 2014-05-04 19:13:18Z xavidp $
+// $Id: user_tracker.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 require_once('lib/wizard/wizard.php');
 
@@ -30,7 +30,11 @@ class UserWizardUserTracker extends Wizard
 
 	function onSetupPage ($homepageUrl) 
 	{
-		global	$user, $smarty, $tikilib, $prefs, $registrationlib, $userlib; 
+		global $user, $prefs;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
+		$smarty = TikiLib::lib('smarty');
+		$registrationlib = TikiLib::lib('registration');
 
 		$trklib = TikiLib::lib('trk');
 
@@ -49,7 +53,6 @@ class UserWizardUserTracker extends Wizard
 			return;
 		}
 		
-		include_once('lib/registration/registrationlib.php');
 		$smarty->assignByRef('merged_prefs', $registrationlib->merged_prefs);
 		
 		
@@ -120,25 +123,26 @@ class UserWizardUserTracker extends Wizard
 			}
 			
 		}
-
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_tracker.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
 		
 		return $showPage;		
 	}
 
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_tracker.tpl';
+		return $wizardTemplate;
+	}
+
 	function onContinue ($homepageUrl) 
 	{
-		global $tikilib, $user, $prefs, $registrationlib, $userlib; 
-
+		global $user, $prefs;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
+		$registrationlib = TikiLib::lib('registration');
 		$trklib = TikiLib::lib('trk');
 
 		// Run the parent first
 		parent::onContinue($homepageUrl);
-		
-		include_once('lib/registration/registrationlib.php');
-		
 		
 		//get custom fields
 		$customfields = $registrationlib->get_customfields();

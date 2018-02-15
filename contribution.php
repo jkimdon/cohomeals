@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: contribution.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: contribution.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 // the script uses the var $_REQUEST['contributions'] = the list of selected contributions to preselect the contributions
 //						$contributionItemId = the commentId if the object exists and you want to preselect  the comment contribuions
@@ -19,7 +19,7 @@ $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 global $prefs;
 
 if ($prefs['feature_contribution'] == 'y') {
-	global $contributionlib; include_once('lib/contribution/contributionlib.php');
+	$contributionlib = TikiLib::lib('contribution');
 	$contributions = $contributionlib->list_contributions();
 	if (!empty($_REQUEST['contributions'])) {
 		for ($i = $contributions['cant'] - 1; $i >= 0; -- $i) {
@@ -51,6 +51,10 @@ if ($prefs['feature_contribution'] == 'y') {
 
 	if ($prefs['feature_contributor_wiki'] == 'y' && !empty($section) && $section == 'wiki page') {
 		$users = $userlib->list_all_users();
+
+		include_once('lib/smarty_tiki/modifier.username.php');
+		$users = array_map('smarty_modifier_username', $users);
+
 		$smarty->assign_by_ref('users', $users);
 		if (!empty($_REQUEST['contributors'])) {
 			$smarty->assign_by_ref('contributors', $_REQUEST['contributors']);

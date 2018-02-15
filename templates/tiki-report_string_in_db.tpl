@@ -1,8 +1,8 @@
-{* $Id: tiki-report_string_in_db.tpl 50266 2014-03-08 19:35:00Z lindonb $ *}
-<h1>Occurences of string in database</h1>
+{* $Id: tiki-report_string_in_db.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+<h1 class="pagetitle">Occurences of string in database</h1>
 
 <form action="tiki-report_string_in_db.php" method="post">
-<input type="text" name="string_in_db_search" size="60" /> <input type="submit" class="btn btn-default" value="Search" />
+<input type="text" name="string_in_db_search" size="60" /> <input type="submit" class="btn btn-default btn-sm" value="Search" />
 </form>
 <hr/>
 {if isset($errorMsg)}
@@ -38,7 +38,7 @@
 	{/if}
 
 	{if isset($tableHeaders)}
-	<table class="table normal">
+	<table class="table">
 		<tr>
 		{foreach from=$tableHeaders item=hdr}
 			<th>{$hdr}</th>

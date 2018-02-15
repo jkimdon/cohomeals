@@ -1,11 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ResultSet.php 47775 2013-09-28 02:40:34Z nkoth $
+// $Id: ResultSet.php 58770 2016-06-02 16:34:23Z patrick-proulx $
 
-class Search_ResultSet extends ArrayObject
+class Search_ResultSet extends ArrayObject implements JsonSerializable
 {
 	private $count;
 	private $estimate;
@@ -14,6 +14,9 @@ class Search_ResultSet extends ArrayObject
 
 	private $highlightHelper;
 	private $filters = array();
+	private $id;
+	private $tsOn;
+	private $tsettings;
 
 	public static function create($list)
 	{
@@ -32,6 +35,7 @@ class Search_ResultSet extends ArrayObject
 		$this->estimate = $count;
 		$this->offset = $offset;
 		$this->maxRecords = $maxRecords;
+		$this->checkNestedObjectPerms();
 	}
 
 	function replaceEntries($list)
@@ -40,11 +44,15 @@ class Search_ResultSet extends ArrayObject
 		$return->estimate = $this->estimate;
 		$return->filters = $this->filters;
 		$return->highlightHelper = $this->highlightHelper;
+		$return->id = $this->id;
+		$return->tsOn = $this->tsOn;
+		$return->count = $this->count;
+		$return->tsettings = $this->tsettings;
 
 		return $return;
 	}
 
-	function setHighlightHelper(Zend_Filter_Interface $helper)
+	function setHighlightHelper(Zend\Filter\FilterInterface $helper)
 	{
 		$this->highlightHelper = $helper;
 	}
@@ -52,6 +60,36 @@ class Search_ResultSet extends ArrayObject
 	function setEstimate($estimate)
 	{
 		$this->estimate = (int) $estimate;
+	}
+
+	function setId($id)
+	{
+		$this->id = $id;
+	}
+
+	function getId()
+	{
+		return $this->id;
+	}
+
+	function setTsOn($tsOn)
+	{
+		$this->tsOn = $tsOn;
+	}
+
+	function setTsSettings($tsettings)
+	{
+		$this->tsettings = $tsettings;
+	}
+
+	function getTsOn()
+	{
+		return $this->tsOn;
+	}
+
+	function getTsSettings()
+	{
+		return $this->tsettings;
 	}
 
 	function getEstimate()
@@ -92,11 +130,16 @@ class Search_ResultSet extends ArrayObject
 				 && $key != 'parent_object_type'
 				 && $key != 'parent_object_id'
 				 && $key != 'relevance'
+				 && $key != 'score'
 				 && $key != 'url'
 			     && $key != 'title'
+			     && $key != 'title_initial'
+			     && $key != 'title_firstword'
+			     && $key != 'description'
 				 && ! empty($value) // Skip empty
 				 && ! is_array($value) // Skip arrays, multivalues fields are not human readable
-				 && ! preg_match('/token[a-z]{8,}/', $value)
+				 && ! preg_match('/token[a-z]{8,}/', $value)	// tokens
+				 && ! preg_match('/\d{4}-\d{2}-\d{2} \d{2}\:\d{2}\:\d{2}/', $value)	// dates
 				 && ! preg_match('/^[\w-]+$/', $value)) { // Skip anything that looks like a single token
 					$text .= "\n$value";
 				}
@@ -156,6 +199,44 @@ class Search_ResultSet extends ArrayObject
 		}
 
 		$this->exchangeArray($out);
+	}
+
+	function applyTransform(callable $transform)
+	{
+		foreach ($this as & $entry) {
+			$entry = $transform($entry);
+		}
+	}
+	/**  When relations have indexed relation objects, remove them from the resultset if user doesn't have
+	 * proper permissions */
+	function checkNestedObjectPerms(){
+		global $user;
+		$user_groups = array_keys(TikiLib::lib('user')->get_user_groups_inclusion($user));
+		if (empty($user_groups)) {
+			$user_groups = ['Anonymous'];
+		}
+		foreach($this as &$item){//for each element in resultset
+			if (isset($item['relation_objects'])){
+				foreach ($item['relation_objects'] as $key => $obj) {
+					$in_group = array_intersect($obj->allowed_groups,$user_groups);
+					$in_user = in_array($user, $obj->allowed_users);
+					if (!$in_group && !$in_user){
+						unset($item['relation_objects'][$key]);
+					}
+				}
+				$item['relation_objects'] = array_values($item['relation_objects']); //rebase keys
+			}
+		}
+	}
+
+	function jsonSerialize()
+	{
+		return [
+			'count' => $this->count,
+			'offset' => $this->offset,
+			'maxRecords' => $this->maxRecords,
+			'result' => array_values($this->getArrayCopy()),
+		];
 	}
 }
 

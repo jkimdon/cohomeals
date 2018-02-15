@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: logsquerylib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: logsquerylib.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -107,7 +107,7 @@ class LogsQueryLib
 
 	static function listTypes()
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 		$result = array();
 
 		foreach ($tikilib->fetchAll("SELECT objectType FROM tiki_actionlog GROUP By objectType") as $row) {
@@ -119,7 +119,7 @@ class LogsQueryLib
 
 	static function listActions()
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 		$result = array();
 
 		foreach ($tikilib->fetchAll("SELECT action FROM tiki_actionlog GROUP By action") as $row) {
@@ -201,7 +201,7 @@ class LogsQueryLib
 
 	function countByDateFilterId($ids = array())
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 
 		$this->countByDate();
 
@@ -219,7 +219,7 @@ class LogsQueryLib
 
 	function countUsersFilterId($ids = array())
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 
 		$this->groupType = "";
 
@@ -238,7 +238,7 @@ class LogsQueryLib
 
 	function countUsersIPFilterId($ids = array())
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 
 		$this->groupType = "";
 
@@ -255,7 +255,7 @@ class LogsQueryLib
 
 	function fetchAll()
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 
 		if (empty($this->type))
 			return array();
@@ -312,4 +312,3 @@ class LogsQueryLib
 	}
 }
 
-$logsqrylib = new LogsQueryLib;

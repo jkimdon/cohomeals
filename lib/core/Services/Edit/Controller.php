@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 51304 2014-05-15 14:23:50Z jonnybradley $
+// $Id: Controller.php 63926 2017-09-21 17:51:04Z jonnybradley $
 
 /**
  * Class Services_Edit_Controller
@@ -42,27 +42,31 @@ class Services_Edit_Controller
 	{
 		global $user;
 
-		$pageName = $input->page->text();
-		$info = TikiLib::lib('tiki')->get_page_info($pageName);
-		$data = $input->data->none();
+		Services_Exception_Disabled::check('wysiwyg_inline_editing');
 
-		// Check if HTML format is allowed
-		if ($info['is_html']) {
-			// Save as HTML
-			$edit_data = TikiLib::lib('edit')->partialParseWysiwygToWiki($data);
-			$is_html= '1';
-		} else {
-			// Convert HTML to wiki and save as wiki
-			$edit_data = TikiLib::lib('edit')->parseToWiki($data);
-			$is_html= null;
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+			$pageName = $input->page->text();
+			$info = TikiLib::lib('tiki')->get_page_info($pageName);
+			$data = $input->data->none();
+
+			// Check if HTML format is allowed
+			if ($info['is_html']) {
+				// Save as HTML
+				$edit_data = TikiLib::lib('edit')->partialParseWysiwygToWiki($data);
+				$is_html = '1';
+			} else {
+				// Convert HTML to wiki and save as wiki
+				$edit_data = TikiLib::lib('edit')->parseToWiki($data);
+				$is_html = null;
+			}
+
+			$edit_comment = tra('Inline editor update');
+			$res = TikiLib::lib('tiki')->update_page($pageName, $edit_data, $edit_comment, $user, $_SERVER['REMOTE_ADDR']);
+
+			return array(
+				'data' => $res,
+			);
 		}
-
-		$edit_comment = tra('Inline editor update');
-		$res = TikiLib::lib('tiki')->update_page($pageName, $edit_data, $edit_comment, $user, $_SERVER['REMOTE_ADDR']);
-
-		return array(
-			'data' => $res,
-		);
 	}
 
 	function action_preview($input)
@@ -80,7 +84,7 @@ class Services_Edit_Controller
 
 		$page = $autoSaveIdParts[2];	// plugins use global $page for approval
 
-		if (!Perms::get('wiki page', $page)->edit || $user != $tikilib->get_semaphore_user($page)) {
+		if (!Perms::get('wiki page', $page)->edit || $user != TikiLib::lib('service')->internal('semaphore', 'get_user', ['object_id' => $page, 'check' => 1])) {
 			return '';
 		}
 
@@ -111,6 +115,7 @@ class Services_Edit_Controller
 
 			$smarty->assign('inPage', $input->inPage->int() ? true : false);
 
+			$parserlib = TikiLib::lib('parser');
 			if ($input->inPage->int()) {
 				$diffstyle = $input->diff_style->text();
 				if (!$diffstyle) {	// use previously set diff_style
@@ -146,16 +151,17 @@ class Services_Edit_Controller
 						$diffnew = $data;
 					}
 					if ($diffstyle === 'htmldiff') {
-						$diffnew = $tikilib->parse_data($diffnew, $options);
-						$diffold = $tikilib->parse_data($diffold, $options);
+						$diffnew = $parserlib->parse_data($diffnew, $options);
+						$diffold = $parserlib->parse_data($diffold, $options);
 					}
 					$data = diff2($diffold, $diffnew, $diffstyle);
 					$smarty->assign_by_ref('diffdata', $data);
 
-					$smarty->assign('translation_mode', 'y');
+					$smarty->assign('translation_mode', 'y');	// disables the headings etc
+					$smarty->assign('show_version_info', 'n');	// disables the headings etc
 					$data = $smarty->fetch('pagehistory.tpl');
 				} else {
-					$data = $tikilib->parse_data($data, $options);
+					$data = $parserlib->parse_data($data, $options);
 				}
 				$parsed = $data;
 
@@ -166,11 +172,11 @@ function get_new_preview() {
 	$("body").css("opacity", 0.6);
 	location.reload(true);
 }
-$(window).load(function(){
+$(window).on("load", function(){
 	if (typeof opener != "undefined") {
 		opener.ajaxPreviewWindow = this;
 	}
-}).unload(function(){
+}).on("unload", function(){
 	if (typeof opener.ajaxPreviewWindow != "undefined") {
 		opener.ajaxPreviewWindow = null;
 	}
@@ -178,9 +184,8 @@ $(window).load(function(){
 '
 				);
 				$smarty->assign('headtitle', tra('Preview'));
-				$data = '<div id="c1c2"><div id="wrapper"><div id="col1"><div id="tiki-center" class="wikitext">';
+				$data = '<div class="container"><div class="row row-middle"><div class="col-sm-12"><div class="wikitext">';
 				if (TikiLib::lib('autosave')->has_autosave($input->editor_id->text(), $input->autoSaveId->text())) {
-					$parserlib = TikiLib::lib('parser');
 					$data .= $parserlib->parse_data(
 						$editlib->partialParseWysiwygToWiki(
 							TikiLib::lib('autosave')->get_autosave($input->editor_id->text(), $input->autoSaveId->text())
@@ -200,11 +205,11 @@ $(window).load(function(){
 				$_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';	// to fool Services_Broker into putputting full page
 			}
 
-			if ($prefs['feature_wiki_footnotes']) {
+			if ($prefs['feature_wiki_footnotes'] === 'y') {
 
 				$footnote = $input->footnote->text();
 				if ($footnote) {
-					$footnote = $tikilib->parse_data($footnote);
+					$footnote = $parserlib->parse_data($footnote);
 				} else {
 					$footnote = $wikilib->get_footnote($user, $page);
 				}
@@ -214,4 +219,106 @@ $(window).load(function(){
 		}
 	}
 
+    public static function page_editable($autoSaveId = null, &$page = null)
+    {
+        global $user;
+        $tikilib = TikiLib::lib('tiki');
+
+        if ($autoSaveId !== null) {
+            $autoSaveIdParts = explode(':', $autoSaveId);	// user, section, object id
+            foreach ($autoSaveIdParts as & $part) {
+                $part = urldecode($part);
+            }
+
+            $page = $autoSaveIdParts[2];	// plugins use global $page for approval
+        }
+
+        if (!Perms::get('wiki page', $page)->edit || $user != TikiLib::lib('service')->internal('semaphore', 'get_user', ['object_id' => $page, 'check' => 1])
+		) {
+            return false;
+        }
+
+        return true;
+    }
+
+	public function action_help($input)
+	{
+		global $prefs;
+
+		$smarty = TikiLib::lib('smarty');
+
+		$help_sections = [];
+
+		if ($input->wiki->int()) {
+			$help_sections[] = [
+				'id' => 'wiki-help',
+				'title' => tr('Syntax Help'),
+				'content' => $smarty->fetch('tiki-edit_help.tpl'),
+			];
+		}
+
+		if ($input->wysiwyg->int()) {
+			$help_sections[] = [
+				'id' => 'wysiwyg-help',
+				'title' => tr('WYSIWYG Help'),
+				'content' => $smarty->fetch('tiki-edit_help_wysiwyg.tpl'),
+			];
+		}
+
+		if ($input->plugins->int()) {
+			$areaId = $input->areaId->word();
+			$wikilib = TikiLib::lib('wiki');
+			$plugins = $wikilib->list_plugins(true, $areaId);
+
+			$smarty->assign('plugins', $plugins);
+			$help_sections[] = [
+				'id' => 'plugin-help',
+				'title' => tr('Plugin Help'),
+				'content' => $smarty->fetch('tiki-edit_help_plugins.tpl'),
+			];
+
+			if ($prefs['wikiplugin_list_gui'] === 'y') {
+				TikiLib::lib('header')
+					->add_jsfile('lib/jquery_tiki/pluginedit_list.js')
+					->add_jsfile('vendor_bundled/vendor/jquery/plugins/nestedsortable/jquery.ui.nestedSortable.js');
+			}
+
+		}
+
+		if ($input->sheet->int()) {
+			$help_sections[] = [
+				'id' => 'sheet-help',
+				'title' => tr('Spreadsheet Help'),
+				'content' => $smarty->fetch('tiki-edit_help_sheet.tpl'),
+			];
+		}
+
+		return array(
+			'title' => tr('Edit Help'),
+			'help_sections' => $help_sections,
+		);
+	}
+
+	function action_inline_dialog($input)
+	{
+		$smarty = TikiLib::lib('smarty');
+		$smarty->loadPlugin('smarty_function_service_inline');
+
+		$display = [];
+		foreach ($input->fields as $field) {
+			$html = smarty_function_service_inline($field->fetch->text(), $smarty);
+			$display[] = [
+				'label' => $field->label->text(),
+				'field' => new Tiki_Render_Editable($html, [
+					'layout' => 'dialog',
+					'object_store_url' => $field->store->text(),
+				]),
+			];
+		}
+
+		return [
+			'title' => tr('Edit'),
+			'fields' => $display,
+		];
+	}
 }

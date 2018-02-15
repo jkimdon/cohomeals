@@ -1,6 +1,6 @@
 <?php
 
-global $access;
+$access = TikiLib::lib('access');
 $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 
 
@@ -22,7 +22,7 @@ $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 // | Based on OLE::Storage_Lite by Kawai, Takanori                        |
 // +----------------------------------------------------------------------+
 //
-// $Id: ole.php 45662 2013-04-21 20:56:31Z lphuberdeau $
+// $Id: ole.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 
 /**
@@ -61,7 +61,7 @@ class OLE extends PEAR
     * Remember to use ampersand when creating an OLE object ($my_ole =& new OLE();)
     * @access public
     */
-    function OLE()
+    function __construct()
     {
         $this->_list = array();
     }

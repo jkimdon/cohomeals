@@ -1,4 +1,4 @@
-# $Id: tiki_1.9to2.0.sql 43291 2012-10-05 00:49:18Z marclaporte $
+# $Id: tiki_1.9to2.0.sql 49263 2013-12-29 03:37:54Z chibaguy $
 
 #
 # If you are using Tiki 3.x or later, this script will automatically be run by the installer when it detects that your data is from pre 3.x
@@ -204,7 +204,7 @@ CREATE INDEX login ON users_users (login);
 #2005-12-15 amette - Freetag permissions and menu item
 INSERT INTO users_permissions (permName, permDesc, level, type) VALUES ('tiki_p_view_freetags', 'Can browse freetags', 'basic', 'freetags');
 INSERT INTO users_permissions (permName, permDesc, level, type) VALUES ('tiki_p_freetags_tag', 'Can tag objects', 'registered', 'freetags');
-DELETE FROM `tiki_menu_options` WHERE menuId='42' and type='o' and name='Freetags' and url='tiki-browse_freetags.php' and position='27' and perm='tiki_p_view_freetags' and groupname='' ;
+DELETE FROM `tiki_menu_options` WHERE menuId='42' and type='o' and name='Tags' and url='tiki-browse_freetags.php' and position='27' and perm='tiki_p_view_freetags' and groupname='' ;
 INSERT INTO tiki_menu_options (menuId,type,name,url,position,section,perm,groupname) VALUES (42,'o','Freetags','tiki-browse_freetags.php',27,'feature_freetags','tiki_p_view_freetags','');
 
 #2005-12-16 lfagundes

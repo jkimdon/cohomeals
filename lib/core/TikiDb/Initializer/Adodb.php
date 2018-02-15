@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Adodb.php 46307 2013-06-13 16:51:25Z lphuberdeau $
+// $Id: Adodb.php 61122 2017-01-29 19:24:39Z rjsmelo $
 
 if (! defined('ADODB_FORCE_NULLS')) define('ADODB_FORCE_NULLS', 1);
 if (! defined('ADODB_ASSOC_CASE')) define('ADODB_ASSOC_CASE', 2);
@@ -26,7 +26,7 @@ class TikiDb_Initializer_Adodb
 
 		// Set the Client Charset
 		if ($credentials['charset']) {
-			@ $dbTiki->Execute("SET CHARACTER SET $client_charset");
+			@ $dbTiki->Execute("SET CHARACTER SET " . $credentials['charset']);
 		}
 
 		return new TikiDb_Adodb($dbTiki);

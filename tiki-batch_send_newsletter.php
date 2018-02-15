@@ -2,11 +2,18 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-batch_send_newsletter.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: tiki-batch_send_newsletter.php 62757 2017-05-26 01:39:56Z drsassafras $
+
+$inputConfiguration = [[
+	'staticKeyFilters'	=> [
+		'editionId'		=> 'int',
+	]],[
+	'catchAllUnset' => null
+	]];
 
 include('tiki-setup.php');
 
@@ -16,7 +23,9 @@ if (php_sapi_name() != 'cli') {
 	$access->check_permission('tiki_p_send_newsletters');
 }
 
-global $nllib; include_once('lib/newsletters/nllib.php');
+global $nllib;
+
+include_once('lib/newsletters/nllib.php');
 
 function display_usage() 
 {
@@ -34,7 +43,7 @@ error_reporting(E_ALL);
 
 $request = new Tiki_Request();
 
-$editionId = $request->getProperty('editionId'); 
+$editionId = $request->getProperty('editionId');
 
 if (empty($editionId)) {
 	display_usage();

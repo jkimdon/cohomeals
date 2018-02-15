@@ -1,10 +1,17 @@
+{extends 'layout_view.tpl'}
+
+{block name="title"}
+	{title}{$title|escape}{/title}
+{/block}
+
+{block name="content"}
 {if $errMsg}
-	{remarksbox title='{tr}Vimeo Setup Error{/tr}' type='error'}
+	{remarksbox title="{tr}Vimeo Setup Error{/tr}" type='error'}
 		<p>{$errMsg}</p>
 	{/remarksbox}
 	{$disabled=true}
 {else}
-	{remarksbox title='{tr}Vimeo Info{/tr}' type='info'}
+	{remarksbox title="{tr}Vimeo Info{/tr}" type='info'}
 		<p>{tr _0=$availableMB}Available space: %0 megabytes{/tr}</p>
 		{if $availableSD eq '0'}<p>{tr}No standard definition uploads available currently{/tr}</p>{/if}
 		{if $availableHD eq '0'}<p>{tr}No high definition uploads available currently{/tr}</p>{/if}
@@ -14,7 +21,7 @@
 	{/if}
 {/if}
 <form class="simple no-ajax vimeo_upload" id="form{$ticket.id|escape}" target="vimeo{$ticket.id|escape}"
-			method="post" action="{$ticket.endpoint|escape}" enctype="multipart/form-data"
+			method="post" action="{$ticket.endpoint_secure|escape}" enctype="multipart/form-data"
 			data-verify-action="{service controller=vimeo action=complete}">
 	<label>
 		{tr}Title{/tr}
@@ -26,7 +33,7 @@
 	</label>
 	<input type="hidden" name="ticket_id" value="{$ticket.id|escape}"/>
 	<input type="hidden" name="chunk_id" value="0"/>
-	<input type="submit" value="Upload"{if $disabled} disabled="disabled"{/if}/>
+	<input type="submit" class="btn btn-default btn-sm" value="Upload"{if $disabled} disabled="disabled"{/if}/>
 </form>
 <iframe style="display: none;" id="vimeo{$ticket.id|escape}" name="vimeo{$ticket.id|escape}" src="about:blank">
 </iframe>
@@ -41,7 +48,7 @@
 	var $title = $('input[name=title]', $form);
 
 	$form.submit(function(){
-		$(this).modal(tr("Uploading..."));
+		$(this).parents(".ui-dialog").tikiModal(tr("Uploading..."));
 		return true;
 	});
 
@@ -60,7 +67,7 @@
 			}
 			$file.val("");	// empty file value so it doesn't get added twice (mainly in webkit)
 			$.post($.service('vimeo', 'complete'), updata, function(data) {
-				$form.modal();
+				$form.parents(".ui-dialog").tikiModal();
 				if (data.err) {
 					alert("Upload Error:\n" + data.err);
 				} else {
@@ -69,9 +76,12 @@
 			}, 'json')
 			.error(function (e) {
 				alert(tr("An error occurred uploading your video.") + "\n" + e.statusText + " (" + e.status + ")");
-				$form.modal();
+				$form.parents(".ui-dialog").tikiModal();
 				$(".vimeo_upload").trigger("vimeo_uploaded", [{}]);	// get vimeo_uploaded to close the dialog
 			});
+		} else {
+			$form.parents(".ui-dialog").tikiModal();
 		}
 	});
 {/jq}
+{/block}

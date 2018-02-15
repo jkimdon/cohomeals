@@ -1,4 +1,4 @@
-{* $Id: tiki-print.tpl 44973 2013-02-25 16:21:36Z luciash $ *}<!DOCTYPE html>
+{* $Id: tiki-print.tpl 52645 2014-09-26 14:40:18Z jonnybradley $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}"{if !empty($page_id)} id="print_page_{$page_id}"{/if}>
 	<head>
 {include file='header.tpl'}
@@ -12,10 +12,5 @@
 		</div>
 
 {include file='footer.tpl'}
-<!-- Put JS at the end -->
-{if $headerlib}
-	{$headerlib->output_js_files()}
-	{$headerlib->output_js()}
-{/if}
 	</body>
 </html>

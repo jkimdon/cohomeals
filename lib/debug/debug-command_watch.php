@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_watch.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: debug-command_watch.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 /**
  * \brief Watch command for debugger
@@ -20,7 +20,7 @@ class DbgCmd_Watch extends DebuggerCommand
 	var $watches;
 
 	/// Restore watches list at construction time
-	function DbgCmd_Watch()
+	function __construct()
 	{
 		global $user;
 
@@ -144,7 +144,7 @@ class DbgCmd_Watch extends DebuggerCommand
 			);
 
 		//
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		$smarty->assign_by_ref('watchlist', $result);
 		return $smarty->fetch("debug/tiki-debug_watch_tab.tpl");
 	}
@@ -152,7 +152,7 @@ class DbgCmd_Watch extends DebuggerCommand
 	///
 	function value_of_smarty_var($v)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 
 		$result = '';
 

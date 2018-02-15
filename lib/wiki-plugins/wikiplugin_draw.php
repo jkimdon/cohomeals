@@ -1,24 +1,25 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_draw.php 48519 2013-11-18 03:02:13Z nkoth $
+// $Id: wikiplugin_draw.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_draw_info()
 {
 	return array(
 		'name' => tra('Draw'),
 		'documentation' => 'PluginDraw',
-		'description' => tra('Display or create an image from TikiDraw that is stored into the File Gallery'),
+		'description' => tra('Embed a drawing in a page'),
 		'prefs' => array( 'feature_draw' , 'wikiplugin_draw'),
-		'icon' => 'img/icons/shape_square_edit.png',
+		'iconname' => 'edit',
 		'tags' => array( 'basic' ),
+		'introduced' => 7.1,
 		'params' => array(
 			'id' => array(
 				'required' => false,
 				'name' => tra('Drawing ID'),
-				'description' => tra('Internal ID of the file id'),
+				'description' => tra('Internal ID of the file ID'),
 				'filter' => 'digits',
 				'accepted' => ' ID number',
 				'default' => '',
@@ -28,8 +29,9 @@ function wikiplugin_draw_info()
 			'width' => array(
 				'required' => false,
 				'name' => tra('Width'),
-				'description' => tra('Width in pixels or percentage. Default value is page width. e.g. "200px" or "100%"'),
-				'filter' => 'striptags',
+				'description' => tr('Width in pixels or percentage. Default value is page width, for example, %0 or %1',
+					'<code>200px</code>', '<code>100%</code>'),
+				'filter' => 'text',
 				'accepted' => 'Number of pixels followed by \'px\' or percent followed by % (e.g. "200px" or "100%").',
 				'default' => 'Image width',
 				'since' => '7.1'
@@ -38,7 +40,7 @@ function wikiplugin_draw_info()
 				'required' => false,
 				'name' => tra('Height'),
 				'description' => tra('Height in pixels or percentage. Default value is complete drawing height.'),
-				'filter' => 'striptags',
+				'filter' => 'text',
 				'accepted' => 'Number of pixels followed by \'px\' or percent followed by % (e.g. "200px" or "100%").',
 				'default' => 'Image height',
 				'since' => '7.1'
@@ -46,11 +48,11 @@ function wikiplugin_draw_info()
 			'archive' => array(
 				'required' => false,
 				'name' => tra('Force Display Archive'),
-				'description' => tra('The latest revision of file is automatically shown, by setting archive to y, it bypasses this check and shows the archive rather than the latest revision'),
-				'filter' => 'striptags',
-				'accepted' => 'y or n',
+				'description' => tr('The latest revision of file is automatically shown, by setting archive to Yes (%0),
+				it bypasses this check and shows the archive rather than the latest revision', '<code>y</code>'),
+				'filter' => 'alpha',
 				'default' => 'n',
-				'since' => '8',
+				'since' => '8.0',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
@@ -63,8 +65,13 @@ function wikiplugin_draw_info()
 
 function wikiplugin_draw($data, $params)
 {
-	global $dbTiki, $tiki_p_edit, $tiki_p_admin,$tiki_p_upload_files, $prefs, $user, $page, $tikilib, $smarty, $headerlib, $globalperms;
-	global $filegallib; include_once ('lib/filegals/filegallib.php');
+	global $tiki_p_edit, $tiki_p_admin, $tiki_p_upload_files, $prefs, $user, $page;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
+	$filegallib = TikiLib::lib('filegal');
+	$globalperms = Perms::get();
+
 	extract(array_merge($params, array()), EXTR_SKIP);
 
 	static $drawIndex = 0;
@@ -126,7 +133,7 @@ JQ
 		~np~
 		<form id="newDraw$drawIndex" method="get" action="tiki-edit_draw.php">
 			<p>
-				<input type="submit" name="label" value="$label" class="newSvgButton" />$in
+				<input type="submit" class="btn btn-default btn-sm" name="label" value="$label" class="newSvgButton" />$in
 				<select name="galleryId">
 					$galHtml
 				</select>
@@ -157,18 +164,19 @@ EOF;
 		if ($globalperms->view_file_gallery != 'y') return "";
 
 		$label = tra('Edit SVG Image');
-		$ret = '<div type="image/svg+xml" class="svgImage pluginImg' . $fileInfo['fileId'] . '" style="' .
+		$ret = '<div type="image/svg+xml" class="svgImage pluginImg table-responsive' . $fileInfo['fileId'] . '" style="' .
 			(isset($height) ? "height: $height;" : "" ).
 			(isset($width) ? "width: $width;" : "" )
 		. '">' . $fileInfo['data'] . '</div>';
 
 		if ($globalperms->upload_files == 'y') {
+			$smarty->loadPlugin('smarty_function_icon');
+			$editicon = smarty_function_icon(['name' => 'edit'], $smarty);
 			$ret .= "<a href='tiki-edit_draw.php?fileId=$id&page=$page&index=$drawIndex&label=$label" .
 				(isset($width) ? "&width=$width" : "") . (isset($height) ? "&height=$height" : "") .
 				"' onclick='return $(this).ajaxEditDraw();'  title='Edit: ".$fileInfo['filename'].
-				"' data-fileid='".$fileInfo['fileId']."' data-galleryid='".$fileInfo['galleryId']."'>
-					<img src='img/icons/page_edit.png' alt='$label' width='16' height='16' title='$label' class='icon'/>
-				</a>";
+				"' data-fileid='".$fileInfo['fileId']."' data-galleryid='".$fileInfo['galleryId']."'>" .
+				$editicon . "</a>";
 		}
 
 

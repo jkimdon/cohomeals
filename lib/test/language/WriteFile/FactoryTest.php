@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FactoryTest.php 47779 2013-09-28 10:59:45Z alain_desilets $
+// $Id: FactoryTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
 
 require_once('lib/language/Exception.php');
 require_once('lib/language/WriteFile/Factory.php');

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TrackerField.php 50399 2014-03-20 14:47:41Z lphuberdeau $
+// $Id: TrackerField.php 60694 2016-12-16 20:39:47Z kroky6 $
 
 class Tiki_Profile_InstallHandler_TrackerField extends Tiki_Profile_InstallHandler
 {
@@ -105,6 +105,7 @@ class Tiki_Profile_InstallHandler_TrackerField extends Tiki_Profile_InstallHandl
 					'public' => 'n',
 					'admin_only' => 'y',
 					'admin_editable' => 'p',
+					'admin_editable_after' => 'a',
 					'creator_editable' => 'c',
 					'immutable' => 'i',
 				)
@@ -127,6 +128,8 @@ class Tiki_Profile_InstallHandler_TrackerField extends Tiki_Profile_InstallHandl
 			'public' => 'isPublic',
 			'mandatory' => 'isMandatory',
 			'multilingual' => 'isMultilingual',
+			'visby' => 'visibleBy',
+			'editby' => 'editableBy',
 			'validation' => 'validation',
 			'validation_param' => 'validationParam',
 			'validation_message' => 'validationMessage',
@@ -166,6 +169,10 @@ class Tiki_Profile_InstallHandler_TrackerField extends Tiki_Profile_InstallHandl
 		$trklib = TikiLib::lib('trk');
 
 		$fieldId = $trklib->get_field_id($data['tracker'], $data['name']);
+
+		if (! $fieldId && isset($data['permname'])) {
+			$fieldId = $trklib->get_field_id($data['tracker'], $data['name'], 'permName');
+		}
 
 		$factory = new Tracker_Field_Factory;
 		$fieldInfo = $factory->getFieldInfo($data['type']);
@@ -258,6 +265,8 @@ class Tiki_Profile_InstallHandler_TrackerField extends Tiki_Profile_InstallHandl
 				} elseif (!empty($conversions[$optionKey])) {
 					$reverseVal = $conversions[$optionKey]->reverse($value);
 					$data[$optionKey] = $reverseVal;
+				} elseif( $optionKey == 'description' ) {
+					$data[$optionKey] = $writer->getReference('wiki_content', $value);
 				} else {
 					$data[$optionKey] = $value;
 				}

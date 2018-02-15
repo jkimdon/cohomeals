@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_invite.php 46638 2013-07-12 14:52:39Z lphuberdeau $
+// $Id: wikiplugin_invite.php 58788 2016-06-05 15:05:06Z lindonb $
 
 function wikiplugin_invite_info()
 {
@@ -11,24 +11,32 @@ function wikiplugin_invite_info()
 		'name' => tra('Invite'),
 		'documentation' => 'PluginInvite',
 		'description' => tra('Invite a user to join your groups'),
-		'prefs' => array( 'wikiplugin_invite' ),
+		'prefs' => array( 'wikiplugin_invite', 'feature_invite' ),
 		'body' => tra('Confirmation message after posting form'),
-		'icon' => 'img/icons/group.png',
+		'iconname' => 'share',
+		'introduced' => 4,
 		'params' => array(
 			'including' => array(
 				'required' => false,
 				'name' => tra('Including Group'),
 				'description' => tra('Will list only the groups that include this group'),
+				'since' => '4.0',
+				'filter' => 'groupname',
 			),
 			'defaultgroup' => array(
 				'required' => false,
 				'name' => tra('Default Group'),
 				'description' => tra('Dropdown list will show this group by default'),
+				'since' => '4.0',
+				'filter' => 'groupname',
 			),
 			'itemId' => array(
 				'required' => false,
 				'name' => tra('Item ID'),
-				'description' => tra('Dropdown list will show the group related to this item ID (in group selector or creator field) by default'),
+				'description' => tra('Dropdown list will show the group related to this item ID (in group selector or
+					creator field) by default'),
+				'since' => '4.0',
+				'filter' => 'text',
 				'profile_reference' => 'tracker_item',
 			),
 		)
@@ -36,7 +44,10 @@ function wikiplugin_invite_info()
 }
 function wikiplugin_invite( $data, $params)
 {
-	global $prefs, $tikilib, $userlib, $user, $smarty, $tiki_p_invite_to_my_groups;
+	global $prefs, $user, $tiki_p_invite_to_my_groups;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 
 	if ($tiki_p_invite_to_my_groups != 'y') {
 		return;
@@ -51,10 +62,9 @@ function wikiplugin_invite( $data, $params)
 		}
 	}
 	$errors = array();
-	$feedbacks = array();
 	if (isset($_REQUEST['invite'])) {
 		if (empty($_REQUEST['email'])) {
-			$errors[] = tra('Following mandatory fields are missing').' '.tra('Email address');
+			$errors[] = tra('The following mandatory fields are missing').' '.tra('Email address');
 		}
 		if (!validate_email($_REQUEST['email'])) {
 			$errors[] = tra('Invalid Email').' '.$_REQUEST['email'];
@@ -72,7 +82,12 @@ function wikiplugin_invite( $data, $params)
 				$new_user = true;
 				$password =  'toto';//$tikilib->genPass();
 				$codedPassword = md5($password);
-				$userlib->add_user($email, $password, $email, $password, true, NULL);
+				if ($prefs['login_autogenerate'] == 'y') {
+					$uname = '';
+				} else {
+					$uname = $email;
+				}
+				$uname = $userlib->add_user($uname, $password, $email, $password, true, NULL);
 				$smarty->assign('codedPassword', $codedPassword);
 				$invite = $email;
 			} else {
@@ -82,7 +97,7 @@ function wikiplugin_invite( $data, $params)
 			$smarty->assign_by_ref('invite', $invite);
 			if (!empty($_REQUEST['groups'])) {
 				foreach ($_REQUEST['groups'] as $group) {
-					$userlib->assign_user_to_group($invite, $group);
+					$userlib->assign_user_to_group($uname, $group);
 					$invitedGroups[] = $userlib->get_group_info($group);
 				}
 			}
@@ -103,7 +118,7 @@ function wikiplugin_invite( $data, $params)
 
 			return $data;
 		} else {
-			$smarty->assign_by_ref('errors', $errors);
+			Feedback::error(['mes' => $errors]);
 			$smarty->assign_by_ref('email', $_REQUEST['email']);
 			if (!empty($_REQUEST['groups'])) $smarty->assign_by_ref('groups', $_REQUEST['groups']);
 			if (!empty($_REQUEST['message'])) $smarty->assign_by_ref('message', $_REQUEST['message']);
@@ -114,7 +129,7 @@ function wikiplugin_invite( $data, $params)
 	}
 	if (!empty($params['itemId'])) {
 		$item = Tracker_Item::fromId($params['itemId']);
-		$params['defaultgroup'] = $item->getItemGroupOwner();
+		$params['defaultgroup'] = $item->getOwnerGroup();
 	}
 	$smarty->assign_by_ref('params', $params);
 	$smarty->assign_by_ref('userGroups', $userGroups);

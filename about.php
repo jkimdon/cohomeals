@@ -3,10 +3,10 @@
  * About Tiki
  *
  * @package TikiWiki
- * @copyright (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
+ * @copyright (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
-// $Id: about.php 44453 2013-01-07 05:25:02Z kstingel $
+// $Id: about.php 57974 2016-03-17 20:11:05Z jonnybradley $
 
 /*
   this page is used as doxygen output mainpage,

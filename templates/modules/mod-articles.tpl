@@ -1,4 +1,4 @@
-{* $Id: mod-articles.tpl 47507 2013-09-16 13:52:16Z chibaguy $ *}
+{* $Id: mod-articles.tpl 62117 2017-04-06 16:45:08Z drsassafras $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="articles" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	{if $show_rating_selector eq 'y'}
@@ -14,7 +14,7 @@
 					<option {if $smarty.section.rt_val.index eq $max_rating}selected{/if}>{$smarty.section.rt_val.index}</option>
 				{/section}
 			</select>
-			<input type="submit" class="btn btn-default" value="{tr}Go{/tr}">
+			<input type="submit" class="btn btn-default btn-sm" value="{tr}Go{/tr}">
 		</form>
 	{/if}
 	{modules_list list=$modArticles nonums=$nonums}
@@ -22,11 +22,11 @@
 			<li>
 				{if isset($module_params.img)}
 					<div class="image">
-						<img alt="" src="article_image.php?{if $modArticles[ix].hasImage eq 'y'}id={$modArticles[ix].articleId}{elseif $modArticles[ix].topicId}image_type=topic&amp;id={$modArticles[ix].topicId}{/if}" width="{$module_params.img}">
+						<img src="article_image.php?{if $modArticles[ix].hasImage eq 'y'}id={$modArticles[ix].articleId}{elseif $modArticles[ix].topicId}image_type=topic&amp;id={$modArticles[ix].topicId}{/if}" width="{$module_params.img}">
 					</div>
 				{/if}
-				<a class="linkmodule" href="{if $absurl == 'y'}{$base_url}{/if}{$modArticles[ix].articleId|sefurl:article}" title="{$modArticles[ix].created|tiki_short_date}, {tr}by{/tr} {$modArticles[ix].author|escape}">
-					{$modArticles[ix].title|escape}{if $showcreated eq 'y'} <span class="date">({$modArticles[ix].created|tiki_short_date})</span>{/if}{if $showpubl eq 'y'} <span class="date">({$modArticles[ix].publishDate|tiki_short_date})</span>{/if}
+				<a class="linkmodule" href="{if $absurl == 'y'}{$base_url}{/if}{$modArticles[ix].articleId|sefurl:article}" title="{$modArticles[ix].created|tiki_short_date:'n'}, {tr}by{/tr} {$modArticles[ix].author|escape}">
+					{$modArticles[ix].title|escape}{if $showcreated eq 'y'} <span class="date">({$modArticles[ix].created|tiki_short_date:'n'})</span>{/if}{if $showpubl eq 'y'} <span class="date">({$modArticles[ix].publishDate|tiki_short_date})</span>{/if}
 				</a>
 			</li>
 		{/section}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_attributes.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_attributes.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_attributes_info()
 {
@@ -14,7 +14,8 @@ function wikiplugin_attributes_info()
 		'prefs' => array( 'wikiplugin_attributes' ),
 		'extraparams' => true,
 		'defaultfilter' => 'text',
-		'icon' => 'img/icons/page_gear.png',
+		'iconname' => 'cog',
+		'introduced' => 6,
 		'params' => array(
 		),
 	);
@@ -22,7 +23,7 @@ function wikiplugin_attributes_info()
 
 function wikiplugin_attributes_save( $context, $data, $params ) 
 {
-	global $attributelib; require_once 'lib/attributes/attributelib.php';
+	$attributelib = TikiLib::lib('attribute');
 
 	foreach ( $params as $key => $value ) {
 		$key = str_replace('_', '.', $key);

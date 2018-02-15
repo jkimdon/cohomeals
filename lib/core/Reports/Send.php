@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Send.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: Send.php 59644 2016-09-08 19:21:58Z jonnybradley $
 
 /**
  * Send e-mail reports to users with changes in Tiki
@@ -68,7 +68,7 @@ class Reports_Send
 			$this->tikiPrefs['browsertitle'],
 			TikiLib::date_format($this->tikiPrefs['short_date_format'], $this->dt->format('U'))
 		);
-		if (!is_array($reportCache)) {
+		if (empty($reportCache)) {
 			$subject .= tr('(no changes)');
 		} elseif (count($reportCache) == 1) {
 			$subject .= tr('(1 change)');

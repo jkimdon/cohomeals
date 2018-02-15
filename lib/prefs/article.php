@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: article.php 51948 2014-07-14 10:40:28Z xavidp $
+// $Id: article.php 63679 2017-08-28 01:13:12Z drsassafras $
 
 function prefs_article_list()
 {
@@ -13,7 +13,7 @@ function prefs_article_list()
 		'points_desc' => tra('Points'),
 	);
 
-	global $prefslib;
+	$prefslib = TikiLib::lib('prefs');
 	$advanced_columns = $prefslib->getExtraSortColumns();
 
 	foreach ( $advanced_columns as $key => $label ) {
@@ -24,15 +24,16 @@ function prefs_article_list()
 	return array(
 		'article_comments_per_page' => array(
 			'name' => tra('Default number per page'),
-            'description' => tra('set the number of comments per page (default = 10)'),
+			'description' => tra('Sets the number of comments per page.'),
 			'type' => 'text',
 			'size' => '5',
 			'filter' => 'digits',
+			'units' => tra('comments'),
 			'default' => 10,
 		),
 		'article_comments_default_ordering' => array(
 			'name' => tra('Default Ordering'),
-            'description' => tra('sets the default ordering filter for comments (default = points_desc)'),
+			'description' => tra('Sets the default ordering filter for comments.'),
 			'type' => 'list',
 			'options' => $comment_sort_orders,
 			'default' => 'points_desc',
@@ -44,7 +45,7 @@ function prefs_article_list()
 			'default' => 'n',
 		),
 		'article_remembers_creator' => array(
-			'name' => tra('Article creator remains article owner.'),
+			'name' => tra('Article creator remains article owner'),
 			'description' => tra('Last article editor does not automatically become author (owner).'),
 			'type' => 'flag',
 			'default' => 'n',
@@ -53,6 +54,7 @@ function prefs_article_list()
 			'name' => tra('User ratings on articles'),
 			'description' => tra('Allows users to rate the articles.'),
 			'type' => 'flag',
+			'hint' => tr('Permissions involved: %0. Also, when configuring articles, "Admin Types > Comment can rate article" needs to be set.', 'rate_article, ratings_view_results'),
 			'default' => 'n',
 		),
 		'article_user_rating_options' => array(
@@ -65,62 +67,91 @@ function prefs_article_list()
 		),
 		'article_image_size_x' => array(
 			'name' => tra('Default maximum width for custom article images'),
-            'description' => tra('sets the maximum width for article images'),
+			'description' => tra('Sets the maximum width of article image'),
 			'type' => 'text',
 			'size' => 3,
 			'filter' => 'int',
-			'hint' => tra('Number of pixels, 0 for no maximum'),
+			'units' => tra('pixels'),
+			'hint' => tra('"0" for no maximum'),
 			'default' => '0',
 		),
 		'article_image_size_y' => array(
 			'name' => tra('Default maximum height for custom article images'),
-            'description' => tra('sets the maximum height for article images'),
+			'description' => tra('Sets the maximum height of article images'),
 			'type' => 'text',
 			'size' => 3,
 			'filter' => 'int',
-			'hint' => tra('Number of pixels, 0 for no maximum') ,
+			'units' => tra('pixels'),
+			'hint' => tra('"0" for no maximum') ,
 			'default' => '0',
 		),
 		'article_default_list_image_size_x' => array(
 			'name' => tra('Default maximum width for custom article images in list mode (on View Articles)'),
-            'description' => tra('sets the default maximum width for custom article images in list mode (on View Articles)'),
+			'description' => tra('Sets the default maximum width of custom article images in list mode (on View Articles page)'),
 			'type' => 'text',
 			'size' => 3,
 			'filter' => 'int',
-			'hint' => tra('Number of pixels, 0 to fallback to the view mode maximum'),
+			'units' => tra('pixels'),
+			'hint' => tra('"0" to default to the view mode maximum'),
 			'default' => '0',
 		),
 		'article_default_list_image_size_y' => array(
-			'name' => tra('Default maximum height for custom article images in list mode (on View Articles)'),
-            'description' => tra('sets the default maximum height for custom article images in list mode (on View Articles)'),
+			'name' => tra('Default maximum height of custom article images in list mode (on View Articles page)'),
+			'description' => tra('Sets the default maximum height of custom article images in list mode (on View Articles page)'),
 			'type' => 'text',
 			'size' => 3,
 			'filter' => 'int',
-			'hint' => tra('Number of pixels, 0 to fallback to the view mode maximum'),
+			'units' => tra('pixels'),
+			'hint' => tra('"0" to default to the view mode maximum'),
 			'default' => '0',
+		),
+		'article_image_file_size_max' => array(
+			'name' => tra('Image article maximum file size'),
+			'description' => tra('Maximum size for an Image Article. Article images are stored in the database so it should remain low.'),
+			'type' => 'text',
+			'size' => '10',
+			'filter' => 'digits',
+			'units' => tra('kilobytes'),
+			'default' => 500000,
 		),
 		'article_custom_attributes' => array(
 			'name' => tra('Custom attributes for article types'),
-			'description' => tra('Allow additional custom fields for article types'),
+			'description' => tra('Enable additional custom fields for article types'),
 			'type' => 'flag',
 			'default' => 'y',
 		),
 		'article_sharethis_publisher' => array(
 			'name' => tra('Your ShareThis publisher identifier (optional)'),
-            'description' => tra('set to define your ShareThis publisher identifier'),
+			'description' => tra('Set to define your ShareThis publisher identifier'),
 			'type' => 'text',
 			'size' => '40',
-            'hint' => tra('record your ShareThis publisher ID'),
+			'hint' => tra('record your ShareThis publisher ID'),
 			'default' => '',
 		),
 		'article_related_articles' => array(
 			'name' => tr('Related articles'),
-			'description' => tr('Display a list of related articles at the bottom of the article page'),
+			'description' => tr('Display a list of related articles at the bottom of an article page'),
 			'type' => 'flag',
 			'default' => 'n',
 			'dependencies' => array(
 				'feature_freetags',
 			),
+		),
+		'article_use_new_list_articles' => array(
+			'name' => tr('Use new articles'),
+			'description' => tr('Uses the new article lists using CustomSearch rather than the DB'),
+			'type' => 'flag',
+			'default' => 'n',
+			'tags' => array('experimental'),
+		),
+		'article_feature_copyrights' => array(
+			'name' => tra('Article copyright'),
+			'description' => tra('Enables adding of copyright information for articles'),
+			'type' => 'flag',
+			'dependencies' => array(
+				'feature_articles',
+			),
+			'default' => 'n',
 		),
 	);
 }

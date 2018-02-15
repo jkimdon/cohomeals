@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_system.php 48638 2013-11-21 16:59:40Z jonnybradley $
+// $Id: tiki-admin_system.php 61234 2017-02-07 08:27:25Z drsassafras $
 
 require_once ('tiki-setup.php');
 $access->check_permission(array('tiki_p_clean_cache'));
@@ -14,16 +14,30 @@ $access->check_permission(array('tiki_p_clean_cache'));
 $done = '';
 $output = '';
 $buf = '';
-global $cachelib;
-include_once ('lib/cache/cachelib.php');
+$cachelib = TikiLib::lib('cache');
 if (isset($_GET['do'])) {
 	$cachelib->empty_cache($_GET['do']);
 	if ($_GET['do'] === 'all') {
-		// seems combination of clearing prefs and public now messes up the page, so reload (tiki 11)
+
+		// Also rebuild admin index
+		TikiLib::lib('prefs')->rebuildIndex();
+
+		// also rebuild plugin prefdoc current version
+		if (file_exists('storage/prefsdoc/state.json'))
+			unlink('storage/prefsdoc/state.json');
+
+		// seems combination of clearing prefs and public now messes up the page, so reload
 		include_once('lib/setup/prefs.php');
 		initialize_prefs();
+		if ($prefs['mobile_feature'] === 'y') {
+			include('lib/setup/mobile.php');
+		}
 		include('lib/setup/javascript.php');
-		include('lib/setup/mobile.php');
+		include('lib/setup/theme.php');
+	}
+	// codemirror modes are created in /temp/public -- need to restore them 
+	if ($_GET['do'] === 'temp_public') {
+		include('lib/setup/javascript.php');
 	}
 }
 if (isset($_GET['compiletemplates'])) {
@@ -40,8 +54,9 @@ if (!empty($_REQUEST['clean'])) {
 }
 $smarty->assign('lostGroups', $userlib->get_lost_groups());
 $languages = array();
-$languages = $tikilib->list_languages();
-$templates_c = $cachelib->count_cache_files("templates_c/$tikidomain");
+$langLib = TikiLib::lib('language');
+$languages = $langLib->list_languages();
+$templates_c = $cachelib->count_cache_files("temp/templates_c/$tikidomain");
 $smarty->assign('templates_c', $templates_c);
 $tempcache = $cachelib->count_cache_files("temp/cache/$tikidomain");
 $smarty->assign('tempcache', $tempcache);
@@ -52,9 +67,9 @@ $smarty->assign('modules', $modules);
 $templates = array();
 foreach ($languages as $clang) {
 	if ($smarty->use_sub_dirs) { // was if (is_dir("templates_c/$tikidomain/")) ppl with tikidomains should test. redflo
-		$templates[$clang["value"]] = $cachelib->count_cache_files("templates_c/$tikidomain/" . $clang["value"] . "/");
+		$templates[$clang["value"]] = $cachelib->count_cache_files("temp/templates_c/$tikidomain/" . $clang["value"] . "/");
 	} else {
-		$templates[$clang["value"]] = $cachelib->count_cache_files("templates_c/", $tikidomain . $clang["value"]);
+		$templates[$clang["value"]] = $cachelib->count_cache_files("temp/templates_c/", $tikidomain . $clang["value"]);
 	}
 }
 $smarty->assign_by_ref('templates', $templates);
@@ -79,9 +94,6 @@ if ($prefs['feature_wiki'] == 'y') {
 	if ($prefs['feature_create_webhelp'] == 'y') $dirs[] = 'whelp';
 	$dirs[] = 'img/wiki';
 	$dirs[] = 'img/wiki_up';
-}
-if ($prefs['feature_maps'] && !empty($prefs['map_path'])) {
-	$dirs[] = $prefs['map_path'];
 }
 $dirs = array_unique($dirs);
 $dirsExist = array();

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: comments.php 52815 2014-10-10 14:11:43Z jonnybradley $
+// $Id: comments.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 // $start_time = microtime(true);
 
@@ -22,7 +22,10 @@
 //this script may only be included - so its better to err & die if called directly.
 //smarty is not there - we need setup
 require_once('tiki-setup.php');
-global $access, $tikilib, $headerlib;
+$access = TikiLib::lib('access');
+$tikilib = TikiLib::lib('tiki');
+$headerlib = TikiLib::lib('header');
+
 $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 
 /*
@@ -173,25 +176,23 @@ if ( isset($_REQUEST['comments_objectId']) && $_REQUEST['comments_objectId'] == 
 	$forum_info = $commentslib->get_forum($_REQUEST['forumId']);
 	$threadId = $commentslib->post_in_forum($forum_info, $_REQUEST, $feedbacks, $errors);
 	if (!empty($threadId) && empty($errors)) {
-		$url = "tiki-view_forum_thread.php?forumId=" . $_REQUEST['forumId'] . "&comments_parentId=" . $_REQUEST['comments_parentId'];
+		$url = "tiki-view_forum_thread.php?forumId=" . $_REQUEST['forumId'] . "&comments_parentId=" . $_REQUEST['comments_parentId'] . "&threadId=" . $threadId;
 		if (!empty($_REQUEST['comments_threshold'])) {
-			$url .= "&amp;comments_threshold=".$_REQUEST['comments_threshold'];
+			$url .= "&comments_threshold=".$_REQUEST['comments_threshold'];
 		}
 		if (!empty($_REQUEST['comments_offset'])) {
-			$url .= "&amp;comments_offset=".$_REQUEST['comments_offset'];
+			$url .= "&comments_offset=".$_REQUEST['comments_offset'];
 		}
 		if (!empty($_REQUEST['comments_per_page'])) {
-			$url .= "&amp;comments_per_page=".$_REQUEST['comments_per_page'];
+			$url .= "&comments_per_page=".$_REQUEST['comments_per_page'];
 		}
 		if (!empty($_REQUEST['thread_style'])) {
-			$url .= "&amp;thread_style=".$_REQUEST['thread_style'];
+			$url .= "&thread_style=".$_REQUEST['thread_style'];
 		}
 		if (!empty($_REQUEST['thread_sort_mode'])) {
-			$url .= "&amp;thread_sort_mode=".$_REQUEST['thread_sort_mode'];
+			$url .= "&thread_sort_mode=".$_REQUEST['thread_sort_mode'];
 		}
-		if (!empty($feedbacks)) {
-			$_SESSION['feedbacks'] = $feedbacks;
-		}
+		$url .= "#threadId=".$threadId; //place anchor on newly created message
 
 		//Watches
 		if ( $prefs['feature_user_watches'] == 'y') {
@@ -205,10 +206,12 @@ if ( isset($_REQUEST['comments_objectId']) && $_REQUEST['comments_objectId'] == 
 		header('location: ' . $url);
 		die;
 	}
-
-	$smarty->assign_by_ref('errors', $errors);
-	$smarty->assign_by_ref('feedbacks', $feedbacks);
-
+	if (!empty($errors)) {
+		Feedback::warning(['mes' => $errors]);
+	}
+	if (!empty($feedbacks)) {
+		Feedback::note(['mes' => $feedbacks]);
+	}
 	if ( isset( $pageCache ) ) {
 		$pageCache->invalidate();
 	}
@@ -237,16 +240,20 @@ if ($_REQUEST["comments_threadId"] > 0) {
 
 	$comment_info = $commentslib->get_comment($_REQUEST["comments_reply_threadId"]);
 
-	if ( $comment_info['parentId'] > 0 && $forum_info['is_flat'] == 'y' ) {
+	global $prefs;
+
+	if ( $prefs['feature_forum_allow_flat_forum_quotes'] != 'y' && $comment_info['parentId'] > 0 && $forum_info['is_flat'] == 'y' ) {
 		$smarty->assign('msg', tra("This forum is flat and doesn't allow replies to other replies"));
 		$smarty->display("error.tpl");
 		die;
 	}
 
-	global $prefs;
 	if ( $comment_info["data"] != ''  ) {
 		if ( ($prefs['feature_forum_parse'] == 'y' || $prefs['section_comments_parse'] == 'y') && $prefs['feature_use_quoteplugin'] == 'y' ) {
-			$comment_info["data"] = "\n{QUOTE(replyto=>" . $comment_info["userName"] . ")}" . $comment_info["data"] . '{QUOTE}';
+			if ($prefs['forum_quote_prevent_nesting'] == 'y') {
+				$comment_info["data"] = trim(preg_replace("/{QUOTE\(.*?\)}(.|\n)*?{QUOTE}/", "", $comment_info["data"])); //strip quotes to prevent nesting
+			}
+			$comment_info["data"] = "\n{QUOTE(thread_id=>" . $_REQUEST["comments_reply_threadId"] . ")}" . $comment_info["data"] . '{QUOTE}';
 		} else {
 			$comment_info["data"] = preg_replace('/\n/', "\n> ", $comment_info["data"]);
 			$comment_info["data"] = "\n> " . $comment_info["data"];
@@ -284,6 +291,7 @@ if (isset($_REQUEST["comments_previewComment"]) || isset($_REQUEST["comments_pos
 	$comment_preview = array();
 
 	$comment_preview['title'] = $_REQUEST["comments_title"];
+	$comment_preview['userName'] = $user;
 
 	$comment_preview['parsed'] = $commentslib->parse_comment_data(strip_tags($_REQUEST["comments_data"]));
 	$comment_preview['rating'] = $_REQUEST["comment_rating"];

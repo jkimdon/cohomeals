@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_zotero.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_zotero.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_zotero_info()
 {
@@ -11,22 +11,30 @@ function wikiplugin_zotero_info()
 		'name' => tra('Zotero Citation'),
 		'description' => tra('Retrieves and includes a Zotero reference in the page.'),
 		'prefs' => array('zotero_enabled', 'wikiplugin_zotero', 'wikiplugin_footnote'),
+		'iconname' => 'bookmark',
+		'introduced' => 7,
 		'params' => array(
 			'key' => array(
 				'name' => tra('Reference Key'),
-				'description' => tra('Unique reference for the group associated to the site. Can be retrieved from the Zotero Bibliography module.'),
+				'description' => tra('Unique reference for the group associated to the site. Can be retrieved from the
+					Zotero Bibliography module.'),
 				'required' => false,
+				'since' => '7.0',
 				'filter' => 'alnum',
 			),
 			'tag' => array(
 				'name' => tra('Reference Tag'),
-				'description' => tra('Uses the first result using the specified tag. Useful when the tag mechanism is coerced into creating unique human memorizable keys.'),
+				'description' => tra('Uses the first result using the specified tag. Useful when the tag mechanism is
+					coerced into creating unique human memorizable keys.'),
+				'since' => '7.0',
 				'required' => false,
 				'filter' => 'alnum',
 			),
 			'note' => array(
 				'name' => tra('Note'),
-				'description' => tra('Append a note to the reference for additional information, like page numbers or other sub-references.'),
+				'description' => tra('Append a note to the reference for additional information, like page numbers or
+					other sub-references.'),
+				'since' => '7.0',
 				'required' => false,
 				'filter' => 'text',
 			),

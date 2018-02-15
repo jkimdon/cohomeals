@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-list_trackers.php 45841 2013-05-02 11:58:48Z lphuberdeau $
+// $Id: tiki-list_trackers.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section = 'trackers';
 require_once ('tiki-setup.php');
-include_once ('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 $access->check_feature('feature_trackers');
 $auto_query_args = array('sort_mode', 'offset', 'find');
 
@@ -76,5 +76,4 @@ $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 include_once ('tiki-section_options.php');
 
 // Display the template
-$smarty->assign('mid', 'tiki-list_trackers.tpl');
-$smarty->display("tiki.tpl");
+$smarty->display("tiki-list_trackers.tpl");

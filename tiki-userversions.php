@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-userversions.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-userversions.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/histlib.php');
+$histlib = TikiLib::lib('hist');
 
 $access->check_feature('feature_wiki');
 $access->check_permission('tiki_p_admin');
@@ -29,7 +29,7 @@ $smarty->assign_by_ref('ruser', $_REQUEST["ruser"]);
 $smarty->assign('preview', false);
 if (isset($_REQUEST["preview"])) {
 	$version = $histlib->get_version($_REQUEST["page"], $_REQUEST["version"]);
-	$version["data"] = $tikilib->parse_data($version["data"]);
+	$version["data"] = TikiLib::lib('parser')->parse_data($version["data"]);
 	if ($version) {
 		$smarty->assign_by_ref('preview', $version);
 		$smarty->assign_by_ref('version', $_REQUEST["version"]);

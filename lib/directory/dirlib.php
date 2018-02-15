@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: dirlib.php 50173 2014-03-03 03:36:04Z lindonb $
+// $Id: dirlib.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 // \todo extract HTML from here !!
 
@@ -104,7 +104,7 @@ class DirLib extends TikiLib
 		if ($count < $cant) $cant = $count;
 		$ret = array();
 		while (count($ret) < $cant) {
-			$x = rand(0, $count);
+			$x = mt_rand(0, $count);
 			if (!in_array($x, $ret)) {
 				$ret[] = $x;
 			}
@@ -227,7 +227,7 @@ class DirLib extends TikiLib
 
 		while ($res = $result->fetchRow()) {
 			$res["cats"] = $this->dir_get_site_categories($res["siteId"]);
-			$res["description"] = $this->parse_data($res["description"]);
+			$res["description"] = TikiLib::lib('parser')->parse_data($res["description"]);
 			$ret[] = $res;
 		}
 		$retval = array();
@@ -716,7 +716,7 @@ class DirLib extends TikiLib
     function dir_add_site_hit($siteId)
 	{
 		global $prefs, $user;
-		if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
+		if (StatsLib::is_stats_hit()) {
 			$query = "update `tiki_directory_sites` set `hits`=`hits`+1 where `siteId`=?";
 			$this->query($query, array((int)$siteId));
 		}
@@ -728,7 +728,7 @@ class DirLib extends TikiLib
     function dir_add_category_hit($categId)
 	{
 		global $prefs, $user;
-		if ($prefs['count_admin_pvs'] == 'y' || $user != 'admin') {
+		if (StatsLib::is_stats_hit()) {
 			$query = "update `tiki_directory_categories` set `hits`=`hits`+1 where `categId`=?";
 			$this->query($query, array((int)$categId));
 		}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Categorylist.php 46946 2013-08-01 07:48:39Z citadelrock $
+// $Id: Categorylist.php 60806 2017-01-06 20:34:20Z kroky6 $
 
 class Search_Formatter_ValueFormatter_Categorylist extends Search_Formatter_ValueFormatter_Abstract
 {
@@ -31,18 +31,35 @@ class Search_Formatter_ValueFormatter_Categorylist extends Search_Formatter_Valu
 		if (isset($arguments['separator'])) {
 			$this->separator = $arguments['separator'];
 		}
+		
+		if (isset($arguments['levelSeparator'])) {
+			$this->levelSeparator = $arguments['levelSeparator'];
+		} else {
+			$this->levelSeparator = ":";
+		}
+
+		if (isset($arguments['useFullPath'])) {
+			$this->useFullPath = $arguments['useFullPath'];
+		} else {
+			$this->useFullPath = "n";
+		}
 	}
 
 	function render($name, $value, array $entry)
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		$smarty->loadPlugin('smarty_function_object_link');
 
 		$arr = TikiLib::lib('categ')->getCategories();
 		$list = '';
+
+		// if coming from category field _text version
+		if( !is_array($value) ) {
+			$value = explode(' ', $value);
+		}
 		
 		foreach ($arr as $arx) {
-			$myArr[$arx['categId']] = Array('parentId' => $arx['parentId'],'name' => $arx['name']);
+			$myArr[$arx['categId']] = Array('parentId' => $arx['parentId'],'name' => $arx['name'], 'tepath' => $arx['tepath']);
 		}
 
 		if ($this->singleList == 'y') {
@@ -53,19 +70,39 @@ class Search_Formatter_ValueFormatter_Categorylist extends Search_Formatter_Valu
 				}
 
 				$p_info = $myArr[$ar];
-				if ( ($this->requiredParents=='all' || in_array($p_info['parentId'], $this->requiredParents)) && !in_array($p_info['parentId'], $this->excludeParents)) {
-					$params = array('type' => 'category', 'id' => $ar);
-					$link = smarty_function_object_link($params, $smarty);
+
+				$showCat = $this->shouldShow($p_info['tepath']);
+
+				if ($showCat) {
+					if ($this->useFullPath == 'y'){
+						$foundRoot = false;
+						$printedPath = "";
+						foreach ($p_info['tepath'] as $key=>$value) {
+							if ($foundRoot || $this->requiredParents == "all") {
+								$params = array('type' => 'category', 'id' => $key);
+								$link = smarty_function_object_link($params, $smarty);
+								if (empty($printedPath)) {
+									$printedPath = $link;
+								} else {
+									$printedPath .= $this->levelSeparator . $link;
+								}
+							} elseif (in_array($key, $this->requiredParents)) {
+								$foundRoot = true;
+							}
+						}
+					} else {
+						$printedPath = $p_info['name'];
+					}
 
 					if (!empty($this->separator)) {
-						$list .= $link . $this->separator;
+						$list .= $printedPath. $this->separator;
 					} else {
 						if (empty($list)) {
 							$list = "<ul class=\"categoryLinks\">";
 						}
-						$list .= ' <li>' . $link . "</li>";
+						$list .= ' <li>' . $printedPath . "</li>";
 					}
-					
+
 				}
 			}
 			if (!empty($this->separator)) {
@@ -84,8 +121,10 @@ class Search_Formatter_ValueFormatter_Categorylist extends Search_Formatter_Valu
 
 				$p_info = $myArr[$ar];
 
-				if ( ($this->requiredParents=='all' || in_array($p_info['parentId'], $this->requiredParents)) && !in_array($p_info['parentId'], $this->excludeParents)) {
-					$parent[$p_info['parentId']][] = $ar; 	
+				$showCat = $this->shouldShow($p_info['parentId']);
+
+				if ($showCat) {
+					$parent[$p_info['parentId']][] = $ar;
 				}
 			}			
 				
@@ -113,6 +152,31 @@ class Search_Formatter_ValueFormatter_Categorylist extends Search_Formatter_Valu
 				}
 			}
 		}
-		return '{HTML()}' . $list . '{HTML}';
+		return '~np~' . $list . '~/np~';
+	}
+
+	private function shouldShow($categoryPath) {
+		//if it's not an array, it's simply an id
+		if (!is_array($categoryPath)) {
+			//set category path as an array with its only item as the id for both key and value.
+			$categoryPath = array($categoryPath => $categoryPath);
+		}
+
+		$showCat = false;
+		if ($this->requiredParents=='all') {
+			$showCat = true;
+		}
+		foreach ($categoryPath as $key=>$val){
+			if (in_array($key, $this->requiredParents)) {
+				$showCat = true;
+			}
+		}
+		foreach ($categoryPath as $key=>$val){
+			if (in_array($key, $this->excludeParents)) {
+				$showCat = false;
+			}
+		}
+
+		return $showCat;
 	}
 }

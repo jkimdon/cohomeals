@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-plugins.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-plugins.php 63094 2017-06-27 11:18:36Z jonnybradley $
 
 require_once 'tiki-setup.php';
 $access->check_feature('wiki_validate_plugin');
@@ -38,6 +38,12 @@ if (isset($_REQUEST['refresh'])) {
 
 	$temp = serialize($headerlib);	// cache headerlib so we can remove all js etc added by plugins
 
+	// disable redirect plugin etc
+	$access->preventRedirect(true);
+	// try to avoid timeouts
+	$old_max_execution_time = ini_get('max_execution_time');
+	$time_limit = new Tiki_TimeLimit(0);
+
 	foreach ($pages['data'] as $apage) {
 		$page = $apage['pageName'];
 		$parserlib->setOptions(
@@ -48,6 +54,9 @@ if (isset($_REQUEST['refresh'])) {
 		);
 		$parserlib->parse_first($apage['data'], $pre, $no);
 	}
+
+	ini_set('max_execution_time', $old_max_execution_time);
+	$access->preventRedirect(false);
 
 	$headerlib = unserialize($temp);
 	unset($temp);

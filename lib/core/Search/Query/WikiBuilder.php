@@ -1,18 +1,19 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiBuilder.php 54236 2015-03-04 16:45:06Z jonnybradley $
+// $Id: WikiBuilder.php 62427 2017-05-02 14:32:25Z kroky6 $
 
 class Search_Query_WikiBuilder
 {
 	private $query;
+	private $input;
 	private $paginationArguments;
 	private $aggregate = false;
 	private $boost = 1;
 
-	function __construct(Search_Query $query)
+	function __construct(Search_Query $query, $input = null)
 	{
 		global $prefs;
 		if (!empty($prefs['maxRecords'])) {
@@ -22,8 +23,10 @@ class Search_Query_WikiBuilder
 		}
 
 		$this->query = $query;
+		$this->input = ( $input ?: new JitFilter(@$_REQUEST) );
 		$this->paginationArguments = array(
 			'offset_arg' => 'offset',
+			'sort_arg' => 'sort_mode',
 			'max' => $max,
 		);
 	}
@@ -45,13 +48,7 @@ class Search_Query_WikiBuilder
 			$name = $match->getName();
 			$arguments = $argumentParser->parse($match->getArguments());
 
-			foreach ($arguments as $key => $value) {
-				$function = "wpquery_{$name}_{$key}";
-
-				if (method_exists($this, $function)) {
-					call_user_func(array($this, $function), $this->query, $value, $arguments);
-				}
-			}
+			$this->addQueryArgument($name, $arguments);
 		}
 
 		$offsetArg = $this->paginationArguments['offset_arg'];
@@ -63,6 +60,17 @@ class Search_Query_WikiBuilder
 		}
 	}
 
+	function addQueryArgument($name, $arguments)
+	{
+		foreach ($arguments as $key => $value) {
+			$function = "wpquery_{$name}_{$key}";
+
+			if (method_exists($this, $function)) {
+				call_user_func(array($this, $function), $this->query, $value, $arguments);
+			}
+		}
+	}
+
 	function getPaginationArguments()
 	{
 		return $this->paginationArguments;
@@ -71,6 +79,16 @@ class Search_Query_WikiBuilder
 	function wpquery_list_max($query, $value)
 	{
 		$this->paginationArguments['max'] = max(1, (int) $value);
+	}
+
+	function wpquery_filter_editable($query, $editableType, array $arguments) {
+		$fields = $this->get_fields_from_arguments($arguments);
+		foreach ($fields as $fieldName) {
+			$fieldName = str_replace('tracker_field_', '', $fieldName);
+			$filter = Tracker\Filter\Collection::getFilter($fieldName, $editableType);
+			$filter->applyInput($this->input);
+			$filter->applyCondition($query);
+		}
 	}
 
 	function wpquery_filter_type($query, $value)
@@ -119,13 +137,14 @@ class Search_Query_WikiBuilder
 
 	function wpquery_filter_content($query, $value, array $arguments)
 	{
-		if (isset($arguments['field'])) {
-			$fields = explode(',', $arguments['field']);
-		} else {
-			$fields = TikiLib::lib('tiki')->get_preference('unified_default_content', array('contents'), true);
-		}
-
+		$fields = $this->get_fields_from_arguments($arguments);
 		$query->filterContent($value, $fields);
+	}
+
+	function wpquery_filter_exact($query, $value, array $arguments)
+	{
+		$fields = $this->get_fields_from_arguments($arguments);
+		$query->filterIdentifier($value, $fields);
 	}
 
 	function wpquery_filter_language($query, $value)
@@ -136,10 +155,22 @@ class Search_Query_WikiBuilder
 	function wpquery_filter_relation($query, $value, $arguments)
 	{
 		if (! isset($arguments['qualifier'], $arguments['objecttype'])) {
-			TikiLib::lib('errorreport')->report(tr('Missing objectype or qualifier for relation filter.'));
+			Feedback::error(tr('Missing objectype or qualifier for relation filter.'), 'session');
 		}
 
-		$token = (string) new Search_Query_Relation($arguments['qualifier'], $arguments['objecttype'], $value);
+		/* custom mani for OR operation in relation filter */
+		$qualifiers = explode(' OR ', $arguments['qualifier']);
+		if(count($qualifiers) > 1) {
+			$token = '';
+			foreach ($qualifiers as $key => $qualifier) {
+				$token .= (string) new Search_Query_Relation($qualifier, $arguments['objecttype'], $value);
+				if(count($qualifiers) != ($key + 1)) {
+					$token .= " OR ";
+				}
+			}
+		} else {
+			$token = (string) new Search_Query_Relation($arguments['qualifier'], $arguments['objecttype'], $value);
+		}
 		$query->filterRelation($token);
 	}
 
@@ -150,11 +181,14 @@ class Search_Query_WikiBuilder
 
 	function wpquery_filter_range($query, $value, array $arguments)
 	{
-		if ($arguments['from'] == 'now') {
-			$arguments['from'] = TikiLib::lib('tiki')->now;
+		if( isset($arguments['from']) && !is_numeric($arguments['from']) ) {
+			$arguments['from'] = strtotime($arguments['from']);
 		}
-		if ($arguments['to'] == 'now') {
-			$arguments['to'] = TikiLib::lib('tiki')->now;
+		if( isset($arguments['to']) && !is_numeric($arguments['to']) ) {
+			$arguments['to'] = strtotime($arguments['to']);
+		}
+		if( isset($arguments['gap']) && !is_numeric($arguments['gap']) ) {
+			$arguments['gap'] = strtotime($arguments['gap']) - time();
 		}
 		if (! isset($arguments['from']) && isset($arguments['to'], $arguments['gap'])) {
 			$arguments['from'] = $arguments['to'] - $arguments['gap'];
@@ -163,7 +197,7 @@ class Search_Query_WikiBuilder
 			$arguments['to'] = $arguments['from'] + $arguments['gap'];
 		}
 		if (! isset($arguments['from'], $arguments['to'])) {
-			TikiLib::lib('errorreport')->report(tr('Missing from or to for range filter.'));
+			Feedback::error(tr('The range filter is missing \"from\" or \"to\".'), 'session');
 		}
 		$query->filterRange($arguments['from'], $arguments['to'], $value);
 	}
@@ -171,7 +205,7 @@ class Search_Query_WikiBuilder
 	function wpquery_filter_textrange($query, $value, array $arguments)
 	{
 		if (! isset($arguments['from'], $arguments['to'])) {
-			TikiLib::lib('errorreport')->report(tr('Missing from or to for range filter.'));
+			Feedback::error(tr('The range filter is missing \"from\" or \"to\".'), 'session');
 		}
 		$query->filterTextRange($arguments['from'], $arguments['to'], $value);
 	}
@@ -215,6 +249,16 @@ class Search_Query_WikiBuilder
 			);
 		}
 
+		if (in_array('addongroups', $types)) {
+			$api = new TikiAddons_Api_Group;
+			$cats = $api->getOrganicGroupCatsForUser($targetUser);
+			if (empty($cats)) {
+				$subquery->filterCategory('impossible');
+			} else {
+				$subquery->filterCategory(implode(' ', $cats));
+			}
+		}
+
 		if (in_array('follow', $types)) {
 			$subquery->filterMultivalue($targetUser, 'user_followers');
 		}
@@ -229,6 +273,14 @@ class Search_Query_WikiBuilder
 		if (in_array('stream_low', $types)) {
 			$subquery->filterMultivalue("low$userId", 'stream');
 		}
+	}
+
+	function wpquery_filter_distance($query, $value, array $arguments)
+	{
+		if (! isset($arguments['distance'], $arguments['lat'], $arguments['lon'])) {
+			Feedback::error(tr('The distance filter is missing \"distance\", \"lat\" or \"lon\".'), 'session');
+		}
+		$query->filterDistance($value, $arguments['lat'], $arguments['lon']);
 	}
 
 	function wpquery_sort_mode($query, $value, array $arguments)
@@ -251,6 +303,21 @@ class Search_Query_WikiBuilder
 			} else {
 				return;
 			}
+		} else if ($value === 'distance') {
+			if (isset($arguments['lat'], $arguments['lon'])) {
+
+				$arguments = array_merge([	// defaults
+					'order' => 'asc',
+					'unit' => 'km',
+					'distance_type' => 'sloppy_arc',
+				], $arguments);
+
+				$value = new Search_Query_Order('geo_point', 'distance', $arguments['order'], $arguments);
+
+			} else {
+				Feedback::error(tr('Distance sort: Missing lat or lon arguments'), 'session');
+				return;
+			}
 		}
 		$query->setOrder($value);
 	}
@@ -270,6 +337,16 @@ class Search_Query_WikiBuilder
 		$this->paginationArguments['offset_arg'] = $value;
 	}
 
+	function wpquery_pagination_sort_jsvar($query, $value)
+	{
+		$this->paginationArguments['sort_jsvar'] = $value;
+	}
+
+	function wpquery_pagination_sort_arg($query, $value)
+	{
+		$this->paginationArguments['sort_arg'] = $value;
+	}
+
 	function wpquery_pagination_max($query, $value)
 	{
 		$this->paginationArguments['max'] = (int) $value;
@@ -285,6 +362,133 @@ class Search_Query_WikiBuilder
 	function isNextPossible()
 	{
 		return $this->boost == 1;
+	}
+
+	function applyTablesorter(WikiParser_PluginMatcher $matches, $hasactions = false)
+	{
+		$ret = ['max' => false, 'tsOn' => false];
+		$parser = new WikiParser_PluginArgumentParser;
+		$args = [];
+		$tsc = [];
+		$tsenabled = Table_Check::isEnabled();
+
+		foreach ($matches as $match) {
+			$name = $match->getName();
+			if ($name == 'tablesorter') {
+				$tsargs = $parser->parse($match->getArguments());
+				$ajax = !empty($tsargs['server']) && $tsargs['server'] === 'y';
+				$ret['tsOn'] = Table_Check::isEnabled($ajax);
+				if (!$ret['tsOn']) {
+					Feedback::error(tra('List plugin: Feature "jQuery Sortable Tables" (tablesorter) is not enabled'));
+					return $ret;
+				}
+				if (isset($tsargs['tsortcolumns'])) {
+					$tsc = Table_Check::parseParam($tsargs['tsortcolumns']);
+				}
+				if (isset($tsargs['tspaginate'])) {
+					$tsp = Table_Check::parseParam($tsargs['tspaginate']);
+					if (isset($tsp[0]['max']) && $ajax) {
+						$ret['max'] = (int) $tsp[0]['max'];
+					}
+				}
+			} elseif ($name == 'column') {
+				$args[] = $parser->parse($match->getArguments());
+			} elseif ($name == 'format' && $tsenabled) {
+				// if fields have been "formatted" then get the original field name to filter on
+				$formatArgs = $parser->parse($match->getArguments());
+
+				$subPlugins = WikiParser_PluginMatcher::match($match->getBody());
+				foreach ($subPlugins as $subPlugin) {
+					if ($subPlugin->getName() === 'display') {
+						$displayArgs = $parser->parse($subPlugin->getArguments());
+						foreach($args as & $arg) {
+							if ($arg['field'] === $formatArgs['name']) {
+								$arg['field'] = $displayArgs['name'];
+								if (isset($displayArgs['format']) && $displayArgs['format'] === 'trackerrender') {
+									// this works for many field types, ItemLink, Drowdown, CountrySelector etc but not all (categories notably)
+									$arg['field'] .= '_text';
+								}
+								break;
+							}
+						}
+						break;	// will only work with the first display subplugin
+					}
+				}
+			}
+		}
+
+		if (Table_Check::isSort()) {
+			foreach ($_GET['sort'] as $key => $dir) {
+				if( $hasactions ) {
+					$type = $tsc[$key]['type'];
+					$field = @$args[$key-1]['field'];
+				} else {
+					$type = $tsc[$key]['type'];
+					$field = $args[$key]['field'];
+				}
+				if( !$field )
+					continue;
+				$n = '';
+				switch ($type) {
+					case 'digit':
+					case 'currency':
+					case 'percent':
+					case 'time':
+					case strpos($type, 'date') !== false:
+						$n = 'n';
+						break;
+				}
+				$this->query->setOrder($field . '_' . $n . Table_Check::$dir[$dir]);
+			}
+		}
+
+		if (Table_Check::isFilter()) {
+			foreach ($_GET['filter'] as $key => $filter) {
+				if( $hasactions ) {
+					$type = $tsc[$key]['type'];
+					$field = @$args[$key-1]['field'];
+				} else {
+					$type = $tsc[$key]['type'];
+					$field = $args[$key]['field'];
+				}
+				if( !$field )
+					continue;
+				switch ($type) {
+					case 'digit':
+					case strpos($type, 'date') !== false:
+						$from = 0; $to = 0;
+						$timestamps = explode(' - ', $filter);
+						if (count($timestamps) === 2) {
+							$from = $timestamps[0] / 1000;
+							$to = $timestamps[1] / 1000;
+						} else if (strpos($filter, '>=') === 0) {
+							$from = substr($filter, 2) / 1000;
+							$to = 'now';
+						} else if (strpos($filter, '<=') === 0) {
+							$from = '0000-00-00';
+							$to = substr($filter, 2) / 1000;
+						}
+						if ($from && $to) {
+							$this->query->filterRange($from, $to);
+							break;
+						}	// else fall through to default
+					default:
+						$this->query->filterContent($filter, $field);
+						break;
+				}
+			}
+		}
+
+		return $ret;
+	}
+
+	private function get_fields_from_arguments($arguments){
+		if (isset($arguments['field'])) {
+			$fields = explode(',', $arguments['field']);
+		} else {
+			$fields = TikiLib::lib('tiki')->get_preference('unified_default_content', array('contents'), true);
+		}
+		return $fields;
 	}
 }
 

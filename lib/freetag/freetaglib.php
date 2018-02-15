@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: freetaglib.php 47806 2013-09-30 19:24:22Z jyhem $
+// $Id: freetaglib.php 63152 2017-07-03 09:59:41Z jonnybradley $
 
 /**
  * FreetagLib is based in Freetag library. Code was translated to Tiki style and
@@ -119,7 +119,7 @@ class FreetagLib extends ObjectLib
 	 * @param int (Optional) - The number of results per page to show. Defaults to 100.
 	 * @param int (Optional) - The unique ID of the 'user' who tagged the object.
 	 *
-	 * @return An array of Object ID numbers that reference your original objects.
+	 * @return array|bool of Object ID numbers that reference your original objects.
 	 */
 	function get_objects_with_tag($tag, $type = '', $user = '', $offset = 0, $maxRecords = -1, $sort_mode = 'created_desc', $find = '')
 	{
@@ -184,7 +184,7 @@ class FreetagLib extends ObjectLib
 	 * @param string $find
 	 * @param string $broaden
 	 * @access public
-	 * @return An array of Object ID numbers that reference your original objects
+	 * @return array|bool of Object ID numbers that reference your original objects
 	 *
 	 * Notes by nkoth:
 	 * 1. The reason why using two queries here is because we can't get one query to work
@@ -204,8 +204,7 @@ class FreetagLib extends ObjectLib
 
 																		)
 	{
-
-		global $tiki_p_admin, $user, $smarty, $prefs;
+		global $tiki_p_admin, $user, $prefs;
 		$objectIds = explode(':',$objectId);
 		if (!isset($tagArray) || !is_array($tagArray)) {
 			return false;
@@ -328,6 +327,8 @@ class FreetagLib extends ObjectLib
 				if (!empty($objectId) && !in_array($post_info['blogId'],$objectIds) ) {
 				} elseif ($tiki_p_admin == 'y' || $this->user_has_perm_on_object($user, $post_info['blogId'], 'blog', 'tiki_p_read_blog')) {
 					$ok = true;
+					$row['parent_object_id'] = $post_info['blogId'];
+					$row['parent_object_type'] = 'blog';
 				}
 			} elseif ($tiki_p_admin == 'y') {
                                 $ok = true;
@@ -337,7 +338,7 @@ class FreetagLib extends ObjectLib
 			if ($ok) {
 				global $tikilib;
 				if ( ! empty( $row['description'] ) ) {
-					$row['description'] = $tikilib->parse_data($row['description'], array('absolute_links' => true));
+					$row['description'] = TikiLib::lib('parser')->parse_data($row['description'], array('absolute_links' => true));
 				}
 				if ($prefs['feature_sefurl'] == 'y') {
 					include_once('tiki-sefurl.php');
@@ -1291,7 +1292,7 @@ class FreetagLib extends ObjectLib
 							. " INNER JOIN `tiki_objects` ob ON ob.`objectId` = fb.`$objectColumn` "
 							. $join_tiki_pages
 							. ' WHERE ' . $mid
-							. ' GROUP BY ob.`itemId`'
+							. ' GROUP BY ob.`itemId`, ob.`name`, ob.`href`'
 							. ' HAVING cnt >= ?'
 							. ' ORDER BY cnt DESC, RAND()'
 							;
@@ -1307,7 +1308,7 @@ class FreetagLib extends ObjectLib
 							. " INNER JOIN $table fc ON fb.`$column` = fc.`$column` "
 							. $join_tiki_pages
 							. ' WHERE ' . $mid
-							. ' GROUP BY ob.`itemId`'
+							. ' GROUP BY ob.`itemId`, ob.`name`, ob.`href`'
 							. ' HAVING having_cnt >= ?'
 							. ' ORDER BY sort_cnt DESC, RAND()'
 							;
@@ -1463,7 +1464,8 @@ class FreetagLib extends ObjectLib
 	 */
 	function set_tag_language( $tagId, $lang )
 	{
-		if ( ! $this->is_valid_language($lang) )
+		$langLib = TikiLib::lib('language');
+		if ( ! $langLib->is_valid_language($lang) )
 			return;
 
 		$result = $this->query(
@@ -1491,7 +1493,7 @@ class FreetagLib extends ObjectLib
 			$result = $this->query(
 				'SELECT objectId'
 				. ' FROM tiki_freetagged_objects'
-				. ' WHERE tagId IN($equivStr) AND objectId IN(SELECT objectId'
+				. ' WHERE tagId IN(' . $equivStr . ') AND objectId IN(SELECT objectId'
 				. ' FROM tiki_freetagged_objects WHERE tagId = ?)',
 				array($master)
 			);
@@ -1533,9 +1535,7 @@ class FreetagLib extends ObjectLib
 	 */
 	function translate_tag( $srcLang, $srcTagId, $dstLang, $content )
 	{
-		global $multilinguallib;
-		if ( !$multilinguallib )
-			die('Internal error: Multilingual library not imported.');
+		$multilinguallib = TikiLib::lib('multilingual');
 
 		if ( empty( $content ) )
 			return;
@@ -1636,7 +1636,7 @@ class FreetagLib extends ObjectLib
 	}
 
     /**
-     * @return Zend_Tag_Cloud
+     * @return Zend\Tag\Cloud
      */
     function get_cloud()
 	{
@@ -1647,8 +1647,7 @@ class FreetagLib extends ObjectLib
 			$row['params'] = array('url' => $row['tagId']);
 		}
 
-		return new Zend_Tag_Cloud(array('tags' => $result));
+		return new Zend\Tag\Cloud(array('tags' => $result));
 	}
 }
 
-$freetaglib = new FreetagLib;

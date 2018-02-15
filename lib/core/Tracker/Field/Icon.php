@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Icon.php 53196 2014-11-26 13:07:08Z jonnybradley $
+// $Id: Icon.php 60912 2017-01-16 18:45:57Z jonnybradley $
 
 class Tracker_Field_Icon extends Tracker_Field_Abstract
 {
@@ -32,11 +32,21 @@ class Tracker_Field_Icon extends Tracker_Field_Abstract
 						'legacy_index' => 1,
 					),
 					'maxIcons' => array(
-						'name' => tr('Max Icons'),
+						'name' => tr('Maximum Icons'),
 						'description' => tr('Number of icons to display in each gallery (default 120).'),
 						'filter' => 'int',
 						'default' => 120,
 						'legacy_index' => 2,
+					),
+					'update' => array(
+						'name' => tr('Update icon event'),
+						'type' => 'list',
+						'description' => tr('Allow update during re-indexing. Selection of indexing is useful for changing the default icon for all items.'),
+						'filter' => 'word',
+						'options' => array(
+							'save' => tr('Save'),
+							'index' => tr('Indexing'),
+						),
 					),
 				),
 			),
@@ -136,12 +146,12 @@ class Tracker_Field_Icon extends Tracker_Field_Abstract
 	{
 		$definition = Tracker_Definition::get($args['trackerId']);
 
-		if ($fieldId = $definition->getIconField()) {
+		if ($definition && $fieldId = $definition->getIconField()) {
 			$value = isset($args['values'][$fieldId]) ? $args['values'][$fieldId] : null;
 
 			if (! empty($value) && isset($_SERVER['REQUEST_METHOD'])) {	// leave URLs alone when run from a shell command
-				$tikilib = TikiLib::lib('tiki');
-				$value = $tikilib->tikiUrl($value);
+				$value = TikiLib::lib('tiki')->tikiUrl($value);
+				$value = TikiLib::makeAbsoluteLinkRelative($value);
 			}
 
 			$attributelib = TikiLib::lib('attribute');
@@ -151,6 +161,21 @@ class Tracker_Field_Icon extends Tracker_Field_Abstract
 
 	function getDocumentPart(Search_Type_Factory_Interface $typeFactory)
 	{
+		if ('index' == $this->getOption('update')) {
+			$value = $this->getValue();
+			if (empty($value)) {
+				$value = $this->getOption('default');	// value is often "" but default in getValue checks for isset
+			}
+			self::updateIcon([
+				'trackerId' => $this->getConfiguration('trackerId'),
+				'type' => 'trackeritem',
+				'object' => $this->getItemId(),
+				'values' => [
+					$this->getConfiguration('fieldId') => $value,
+				],
+			]);
+		}
+
 		$baseKey = $this->getBaseKey();
 		return array(
 			$baseKey => $typeFactory->identifier($this->getValue()),

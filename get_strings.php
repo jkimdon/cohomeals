@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: get_strings.php 46345 2013-06-15 20:52:03Z changi67 $
+// $Id: get_strings.php 63609 2017-08-21 00:22:45Z drsassafras $
 
 /**
  * Update lang/xx/language.php files
@@ -56,9 +56,9 @@ if ($request->hasProperty('outputFiles')) {
 
 $excludeDirs = array(
 	'dump' , 'img', 'lang',
-	 'vendor', 'vendor_extra',
-	 'lib/test',	'temp',
-	'temp/cache',	'templates_c',
+	'vendor_bundled', 'vendor', 'vendor_extra', 'vendor_custom',
+	 'lib/test',	'temp', 'whelp',
+	'storage',	'tiki_tests', 'doc'
 );
 
 $includeFiles = array(

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ParserTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ParserTest.php 59666 2016-09-10 17:54:36Z jonnybradley $
 
 class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 {
@@ -25,13 +25,27 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 	{
 		$result = $this->parser->parse('"hello world" test again');
 		$this->assertEquals(
-			new Search_Expr_Or(
-				array(
-					new Search_Expr_Token('hello world'),
+			new Search_Expr_ImplicitPhrase([
+				new Search_Expr_ExplicitPhrase('hello world'),
+				new Search_Expr_ImplicitPhrase([
 					new Search_Expr_Token('test'),
 					new Search_Expr_Token('again'),
-				)
-			),
+				]),
+			]),
+			$result
+		);
+	}
+
+	function testMultipleSimpleWords()
+	{
+		$result = $this->parser->parse('hello world test again');
+		$this->assertEquals(
+			new Search_Expr_ImplicitPhrase([
+				new Search_Expr_Token('hello'),
+				new Search_Expr_Token('world'),
+				new Search_Expr_Token('test'),
+				new Search_Expr_Token('again'),
+			]),
 			$result
 		);
 	}
@@ -40,12 +54,10 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 	{
 		$result = $this->parser->parse('(test again)');
 		$this->assertEquals(
-			new Search_Expr_Or(
-				array(
-					new Search_Expr_Token('test'),
-					new Search_Expr_Token('again'),
-				)
-			),
+			new Search_Expr_ImplicitPhrase([
+				new Search_Expr_Token('test'),
+				new Search_Expr_Token('again'),
+			]),
 			$result
 		);
 	}
@@ -54,27 +66,19 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 	{
 		$result = $this->parser->parse('(hello (bob roger)) (test again)');
 		$this->assertEquals(
-			new Search_Expr_Or(
-				array(
-					new Search_Expr_Or(
-						array(
-							new Search_Expr_Token('hello'),
-							new Search_Expr_Or(
-								array(
-									new Search_Expr_Token('bob'),
-									new Search_Expr_Token('roger'),
-								)
-							),
-						)
-					),
-					new Search_Expr_Or(
-						array(
-							new Search_Expr_Token('test'),
-							new Search_Expr_Token('again'),
-						)
-					),
-				)
-			),
+			new Search_Expr_ImplicitPhrase([
+				new Search_Expr_ImplicitPhrase([
+					new Search_Expr_Token('hello'),
+					new Search_Expr_ImplicitPhrase([
+						new Search_Expr_Token('bob'),
+						new Search_Expr_Token('roger'),
+					]),
+				]),
+				new Search_Expr_ImplicitPhrase([
+					new Search_Expr_Token('test'),
+					new Search_Expr_Token('again'),
+				]),
+			]),
 			$result
 		);
 	}
@@ -180,7 +184,7 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 			new Search_Expr_And(
 				array(
 					$this->parser->parse('bob'),
-					$this->parser->parse('test again'),
+					$this->parser->parse('test OR again'),
 				)
 			),
 			$result
@@ -192,12 +196,10 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 		$result = $this->parser->parse('bob AND test again');
 
 		$this->assertEquals(
-			new Search_Expr_Or(
-				array(
-					$this->parser->parse('bob AND test'),
-					$this->parser->parse('again'),
-				)
-			),
+			new Search_Expr_ImplicitPhrase([
+				$this->parser->parse('bob AND test'),
+				$this->parser->parse('again'),
+			]),
 			$result
 		);
 	}
@@ -210,7 +212,7 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 			new Search_Expr_And(
 				array(
 					$this->parser->parse('bob'),
-					new Search_Expr_Not($this->parser->parse('roger OR alphonse')),
+					new Search_Expr_Not($this->parser->parse('roger alphonse')),
 				)
 			),
 			$result
@@ -242,7 +244,15 @@ class Search_Expr_ParserTest extends PHPUnit_Framework_TestCase
 	{
 		$result = $this->parser->parse('hello and (not )');
 
-		$this->assertEquals($this->parser->parse('hello and ()'), $result);
+		$this->assertEquals(
+			new Search_Expr_And([
+				new Search_Expr_Token('hello'),
+				new Search_Expr_Not(
+					new Search_Expr_Token('')
+				),
+			]),
+			$result
+		);
 	}
 }
 

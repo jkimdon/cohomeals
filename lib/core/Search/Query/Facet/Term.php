@@ -1,15 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Term.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: Term.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Search_Query_Facet_Term implements Search_Query_Facet_Interface
 {
 	private $field;
 	private $renderCallback;
 	private $operator = 'or';
+	private $count;
 
 	static function fromField($field)
 	{
@@ -30,6 +31,17 @@ class Search_Query_Facet_Term implements Search_Query_Facet_Interface
 	function getField()
 	{
 		return $this->field;
+	}
+
+	function getCount()
+	{
+		return $this->count;
+	}
+
+	function setCount($count)
+	{
+		$this->count = $count;
+		return $this;
 	}
 
 	function getLabel()

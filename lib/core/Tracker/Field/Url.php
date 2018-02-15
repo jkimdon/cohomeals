@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Url.php 49200 2013-12-20 17:07:54Z lphuberdeau $
+// $Id: Url.php 62031 2017-04-02 15:56:17Z drsassafras $
 
 /**
  * Handler class for url fields:
  *
  * - url key ~L~
  */
-class Tracker_Field_Url extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable
+class Tracker_Field_Url extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Tracker_Field_Exportable
 {
 	public static function getTypes()
 	{
@@ -77,7 +77,7 @@ class Tracker_Field_Url extends Tracker_Field_Abstract implements Tracker_Field_
 				$smarty
 			);
 		} elseif ($this->getOption('linkToURL') == 0) { // URL as link
-			$parsedUrl = trim(str_replace('<br />', '', TikiLib::lib('tiki')->parse_data($url)));
+			$parsedUrl = trim(str_replace('<br />', '', TikiLib::lib('parser')->parse_data($url)));
 			if ($parsedUrl != $url) {
 				return $parsedUrl;
 			}
@@ -133,5 +133,25 @@ class Tracker_Field_Url extends Tracker_Field_Abstract implements Tracker_Field_
 	{
 		return $info;
 	}
+
+	function getTabularSchema()
+	{
+		$schema = new Tracker\Tabular\Schema($this->getTrackerDefinition());
+
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+
+		$schema->addNew($permName, 'default')
+			->setLabel($name)
+			->setRenderTransform(function ($value) {
+				return $value;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = $value;
+			});
+
+		return $schema;
+	}
+
 }
 

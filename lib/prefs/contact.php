@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: contact.php 46033 2013-05-24 16:26:55Z lphuberdeau $
+// $Id: contact.php 57966 2016-03-17 20:05:33Z jonnybradley $
 
 function prefs_contact_list()
 {
@@ -20,8 +20,8 @@ function prefs_contact_list()
 			'tags' => array('basic'),			
 		),
 		'contact_priority_onoff' => array(
-			'name' => tra('Display Contact Priority'),
-			'description' => tra('Display Contact Priority option'),
+			'name' => tra('Display contact priority'),
+			'description' => tra('Display contact priority option'),
 			'type' => 'flag',
 			'help' => 'Contact+us',
 			'dependencies' => array(
@@ -32,7 +32,7 @@ function prefs_contact_list()
 		),
 		'contact_user' => array(
 			'name' => tra('Contact user'),
-			'description' => tra('the user to Contact'),
+			'description' => tra('User to contact'),
 			'type' => 'text',
 			'size' => 40,
 			'dependencies' => array(

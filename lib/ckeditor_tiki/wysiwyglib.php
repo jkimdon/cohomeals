@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wysiwyglib.php 52028 2014-07-19 14:37:15Z jonnybradley $
+// $Id: wysiwyglib.php 61891 2017-03-27 11:55:26Z jonnybradley $
 
 /*
  * Shared functions for tiki implementation of nkeditor (v3.6.2)
@@ -47,8 +47,8 @@ class WYSIWYGLib
 
 		$headerlib = TikiLib::lib('header');
 
-		$headerlib->add_js_config('window.CKEDITOR_BASEPATH = "'. $tikiroot . 'vendor/ckeditor/ckeditor/";')
-			->add_jsfile('vendor/ckeditor/ckeditor/ckeditor.js', 0, true)
+		$headerlib->add_js_config('window.CKEDITOR_BASEPATH = "'. $tikiroot . 'vendor_bundled/vendor/ckeditor/ckeditor/";')
+			->add_jsfile('vendor_bundled/vendor/ckeditor/ckeditor/ckeditor.js', true)
 			->add_js('window.CKEDITOR.config._TikiRoot = "'.$tikiroot.'";', 1);
 
 		// Inline editing config
@@ -111,26 +111,17 @@ window.CKEDITOR.config.toolbar = ' .$cktools.';
 
 	function setUpEditor($is_html, $dom_id, $params = array(), $auto_save_referrer = '', $full_page = true)
 	{
-        static $notallreadyloaded =true;
-
 		global $tikiroot, $prefs;
 		$headerlib = TikiLib::lib('header');
 
 		$headerlib->add_js('window.CKEDITOR.config.extraPlugins = "' . $prefs['wysiwyg_extra_plugins'] . '";');
-        if ($notallreadyloaded) {
-			$headerlib->add_js_config('window.CKEDITOR_BASEPATH = "'. $tikiroot . 'vendor/ckeditor/ckeditor/";')
-				//// for js debugging - copy _source from ckeditor distribution to libs/ckeditor to use
-				//// note, this breaks ajax page load via wikitopline edit icon
-				->add_jsfile('vendor/ckeditor/ckeditor/ckeditor.js', 0, true)
-				->add_js('window.CKEDITOR.config._TikiRoot = "'.$tikiroot.'";', 1);
+		$headerlib->add_js_config('window.CKEDITOR_BASEPATH = "'. $tikiroot . 'vendor_bundled/vendor/ckeditor/ckeditor/";')
+			//// for js debugging - copy _source from ckeditor distribution to libs/ckeditor to use
+			//// note, this breaks ajax page load via wikitopline edit icon
+			->add_jsfile('vendor_bundled/vendor/ckeditor/ckeditor/ckeditor.js', true)
+			->add_js('window.CKEDITOR.config._TikiRoot = "'.$tikiroot.'";', 1);
 
-			$headerlib->add_js(
-				'window.CKEDITOR.config.extraPlugins += (window.CKEDITOR.config.extraPlugins ? ",divarea" : "divarea" );',
-				5
-			);
-		}
-
-		if ($notallreadyloaded && $full_page) {
+		if ($full_page) {
 			$headerlib->add_jsfile('lib/ckeditor_tiki/tikilink_dialog.js');
 			$headerlib->add_js(
 				'window.CKEDITOR.config.extraPlugins += (window.CKEDITOR.config.extraPlugins ? ",tikiplugin" : "tikiplugin" );
@@ -139,7 +130,7 @@ window.CKEDITOR.config.toolbar = ' .$cktools.';
 			);
 			$headerlib->add_css('.ui-front {z-index: 9999;}');	// so the plugin edit dialogs show up
 		}
-		if ($notallreadyloaded && !$is_html && $full_page) {
+		if (!$is_html && $full_page) {
 			$headerlib->add_js(
 				'window.CKEDITOR.config.extraPlugins += (window.CKEDITOR.config.extraPlugins ? ",tikiwiki" : "tikiwiki" );
 				window.CKEDITOR.plugins.addExternal( "tikiwiki", "'.$tikiroot.'lib/ckeditor_tiki/plugins/tikiwiki/");',
@@ -179,7 +170,6 @@ ajaxLoadingShow("'.$dom_id.'");
 		// js to initiate the editor
 		$ckoptions = '{
 	toolbar: ' .$cktools.',
-	language: "'.$prefs['language'].'",
 	customConfig: "",
 	autoSaveSelf: "'.addcslashes($auto_save_referrer, '"').'",		// unique reference for each page set up in ensureReferrer()
 	font_names: "' . trim($prefs['wysiwyg_fonts']) . '",
@@ -187,9 +177,9 @@ ajaxLoadingShow("'.$dom_id.'");
 	stylesSet: "tikistyles:' . $tikiroot . 'lib/ckeditor_tiki/tikistyles.js",
 	templates_files: ["' . $tikiroot . 'lib/ckeditor_tiki/tikitemplates.js"],
 	skin: "' . ($prefs['wysiwyg_toolbar_skin'] != 'default' ? $prefs['wysiwyg_toolbar_skin'] : 'moono') . '",
-	defaultLanguage: "' . $prefs['language'] . '",
+	defaultLanguage: "' . $this->languageMap($prefs['language']) . '",
  	contentsLangDirection: "' . ($prefs['feature_bidi'] === 'y' ? 'rtl' : 'ltr') . '",
-	language: "' . ($prefs['feature_detect_language'] === 'y' ? '' : $prefs['language']) . '"
+	language: "' . ($prefs['feature_detect_language'] === 'y' ? '' : $this->languageMap($prefs['language'])) . '"
 	'. (empty($params['rows']) ? ',height: "' . (empty($params['height']) ? '400' : $params['height']) . '"' : '') .'
 	, resize_dir: "both"
 	, allowedContent: true
@@ -202,46 +192,75 @@ ajaxLoadingShow("'.$dom_id.'");
 //		}
 //	}
 
-        $notallreadyloaded=false;
 		return $ckoptions;
 	}
 
-	function setUpJisonEditor($is_html, $dom_id, $params = array(), $auto_save_referrer = '', $full_page = true)
+	/** Map between tiki lang codes and ckeditor's (mostly the same)
+	 *
+	 * @param string $lang	Tiki language code
+	 * @return string		mapped language code - defaults to the same if not found
+	 */
+	private function languageMap ($lang)
 	{
-		global $tikiroot, $headerlib;
-		$headerlib
-			->add_cssfile('lib/aloha-editor/css/aloha.css')
-			->add_jsfile('lib/aloha-editor/lib/require.js')
-			->add_jsfile_with_attr(
-				'lib/aloha-editor/lib/aloha.js',
-				array(
-					'data-aloha-plugins' => 'common/ui,
-									common/table,
-									common/list,
-									common/link,
-									common/highlighteditables,
-									common/block,
-									common/undo,
-									common/image,
-									common/paste,
-									common/commands,
-									common/abbr,
-									common/format'
-				)
-			)
-			->add_jq_onready(
-				"Aloha.ready(function() {
-					Aloha.settings.jQuery = jQuery;
-					Aloha.bind( 'aloha-add-markup', function( jEvent, markup ) {
-						markup.attr('data-t', 'b');
-			        });
-					$('#$dom_id').aloha();
-				});",
-				10
-			);
 
-		return "<script>Aloha ={};Aloha.settings = {};Aloha.settings.bundles = {};Aloha.settings.bundles['tiki'] = '../../aloha-editor_tiki/plugins';</script>";
+		$langMap = array(
+			//'ar' => 'ar',			// Arabic = United Arab Emirates - English ok?
+			//'bg' => 'bg',			// Bulgarian
+			//'ca' => 'ca',			// Catalan
+			'cn' => 'zh-cn',		// China - Simplified Chinese
+			//'cs' => 'cs',			// Czech
+			//'cy' => 'cy',			// Welsh
+			//'da' => 'da',			// Danish
+			'de' => 'de',			// Germany - German
+			'en-uk' => 'en-gb',		// United Kingdom - English
+			//'en' => 'en',			// United States - English
+			//'es' => 'es',			// Spain - Spanish
+			//'el' => 'el',			// Greek
+			//'fa' => 'fa',			// Farsi
+			//'fi' => 'fi',			// Finnish
+			'fj' => 'en',			// Fijian	(not supported)
+			//'fr' => 'fr',			// France - French
+			'fy-NL' => 'nl',		// Netherlands - Dutch
+			'gl' => 'es',				// Galician
+			//'he' => 'he',			// Israel - Hebrew
+			//'hr' => 'hr',			// Croatian
+			//'id' => 'id',			// Indonesian
+			//'is' => 'is',			// Icelandic
+			//'it' => 'it',			// Italy - Italian
+			'iu' => 'en',			// Inuktitut	(not supported)
+			'iu-ro' => 'en',		// Inuktitut (Roman)	(not supported)
+			'iu-iq' => 'en',		// Iniunnaqtun	(not supported)
+			//'ja' => 'ja',			// Japan - Japanese
+			//'ko' => 'ko',			// Korean
+			//'hu' => 'hu',			// Hungarian
+			//'lt' => 'lt',			// Lithuanian
+			'nds' => 'de',			// Low German
+			//'nl' => 'nl',			// Netherlands - Dutch
+			//'no' => 'no',			// Norway - Norwegian
+			//'pl' => 'pl',			// Poland - Polish
+			//'pt' => 'pt',			// Portuguese
+			//'pt-br' => 'pt-br',	// Brazil - Portuguese
+			//'ro' => 'ro',			// Romanian
+			'rm' => 'en',			// Romansh	(not supported)
+			//'ru' => 'ru',			// Russia - Russian
+			'sb' => 'en',			// Pijin Solomon	(not supported)
+			//'si' => 'si',			// Sinhala
+			//'sk' => 'sk',			// Slovak
+			//'sl' => 'sl',			// Slovene
+			//'sq' => 'sq',			// Albanian
+			//'sr-latn' => 'sr-latn',	// Serbian Latin
+			//'sv' => 'sv',			// Sweden - Swedish
+			'tv' => 'en',			// Tuvaluansr-latn
+			//'tr' => 'tr',			// Turkey - Turkish
+			'tw' => 'zh',			// Taiwan - Traditional Chinese
+			//'uk' => 'uk',			// Ukrainian
+			//'vi' => 'vi',			// Vietnamese
+		);
+
+		return isset($langMap[$lang]) ? $langMap[$lang] : $lang;
 	}
+
+
 }
 
 global $wysiwyglib;

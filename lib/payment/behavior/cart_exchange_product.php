@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cart_exchange_product.php 44448 2013-01-05 21:51:16Z changi67 $
+// $Id: cart_exchange_product.php 57966 2016-03-17 20:05:33Z jonnybradley $
 
 function payment_behavior_cart_exchange_product( $exchangeorderitemid = 0, $exchangetoproductid = 0 )
 {
@@ -14,8 +14,7 @@ function payment_behavior_cart_exchange_product( $exchangeorderitemid = 0, $exch
 		return false;
 	}
 
-	global $trklib;
-	include_once ('lib/trackers/trackerlib.php');
+	$trklib = TikiLib::lib('trk');
 
 	$orderitemsTrackerId = $prefs['payment_cart_orderitems_tracker'];
 
@@ -68,7 +67,7 @@ function payment_behavior_cart_exchange_product( $exchangeorderitemid = 0, $exch
 	$trklib->replace_item($orderitemsTrackerId, $orderItemId, $ins_fields);
 
 	// Replace inventory for original product
-	global $cartlib; require_once 'lib/payment/cartlib.php';
+	$cartlib = TikiLib::lib('cart');
 	$cartlib->change_inventory($fromproductId, $amountBought);
 
 	return true;

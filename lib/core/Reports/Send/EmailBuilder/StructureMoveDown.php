@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: StructureMoveDown.php 46618 2013-07-10 22:21:55Z arildb $
+// $Id: StructureMoveDown.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 /**
  * Class for structure_move_down events

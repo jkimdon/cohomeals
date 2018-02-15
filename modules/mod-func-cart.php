@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-cart.php 50834 2014-04-19 02:41:58Z jyhem $
+// $Id: mod-func-cart.php 58836 2016-06-08 15:27:23Z jonnybradley $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
@@ -91,7 +91,6 @@ function module_cart($mod_reference, & $module_params)
 	}
 
 	if (!empty($module_params['ajax']) && $module_params['ajax'] === 'y') {
-		TikiLib::lib('header')->add_jsfile('lib/payment/cartlib.js');
 		$smarty->assign('json_data', ' data-params=\'' . json_encode(array_filter($module_params)) . '\'');
 	} else {
 		$smarty->assign('json_data', '');
@@ -99,7 +98,7 @@ function module_cart($mod_reference, & $module_params)
 
 	$module_params = array_merge($defaults, $module_params);
 
-	if ($jitRequest->update->text() && $cart = $jitRequest->cart->array()) {
+	if ($jitRequest->update->text() && $cart = $jitRequest->cart->asArray()) {
 		foreach ($cart as $code => $quantity) {
 			$cartlib->update_quantity($code, $quantity);
 		}

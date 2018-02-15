@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ActionStep.php 44501 2013-01-11 13:56:59Z lphuberdeau $
+// $Id: ActionStep.php 60878 2017-01-12 15:16:08Z kroky6 $
 
 class Search_Action_ActionStep implements Search_Action_Step
 {
@@ -67,6 +67,11 @@ class Search_Action_ActionStep implements Search_Action_Step
 		return false;
 	}
 
+	function requiresInput()
+	{
+		return $this->action->requiresInput(new JitFilter($this->definition));
+	}
+
 	private function prepare($entry)
 	{
 		$out = array();
@@ -96,7 +101,7 @@ class Search_Action_ActionStep implements Search_Action_Step
 			}
 
 			if (empty($values) && $isRequired) {
-				return null;
+				throw new Search_Action_Exception(tr('Missing required action parameter or value: %0', $fieldName));
 			} elseif ($requiresArray) {
 				$out[$fieldName] = $values;
 			} else {

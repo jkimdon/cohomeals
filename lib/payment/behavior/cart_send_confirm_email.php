@@ -1,13 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cart_send_confirm_email.php 44763 2013-02-04 18:34:29Z lphuberdeau $
+// $Id: cart_send_confirm_email.php 57966 2016-03-17 20:05:33Z jonnybradley $
 
 function payment_behavior_cart_send_confirm_email( $u, $email_template_ids = array() )
 {
-	global $prefs, $smarty, $userlib;
+	global $prefs;
+	$userlib = TikiLib::lib('user');
+	$smarty = TikiLib::lib('smarty');
 	require_once('lib/webmail/tikimaillib.php');
 	$email = $userlib->get_user_email($u);
 	if (!$email) return false;

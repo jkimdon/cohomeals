@@ -1,24 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_networkcondition.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_networkcondition.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_networkcondition_info()
 {
 	return array(
 		'name' => tr('Network condition'),
 		'documentation' => 'PluginNetworkCondition',
-		'description' => tr('Conditionally display content based on network information.'),
+		'description' => tr('Display content based on the user\'s IP address'),
 		'prefs' => array('wikiplugin_networkcondition'),
-		'icon' => 'img/icons/computer.png',
+		'iconname' => 'computer',
+		'introduced' => 11,
 		'body' => tr('Content to display conditionally.'),
 		'params' => array(
 			'ipv4list' => array(
 				'required' => false,
 				'name' => tra('IPv4 List'),
-				'description' => tra("Comma separated list of IPv4 addresses to match against the visitor's address."),
+				'description' => tra("Comma-separated list of IPv4 addresses to match against the visitor's address."),
+				'since' => '11.0',
 				'default' => '',
 				'filter' => 'text',
 				'separator' => ',',

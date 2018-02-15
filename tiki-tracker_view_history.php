@@ -2,18 +2,18 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-tracker_view_history.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-tracker_view_history.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'trackers';
 require_once ('tiki-setup.php');
 
 $access->check_feature('feature_trackers');
 
-global $trklib; include_once ('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 
 $auto_query_args = array('offset', 'itemId', 'fieldId', 'filter');
 

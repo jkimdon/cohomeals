@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.wiki.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: block.wiki.php 62028 2017-04-02 14:52:01Z jonnybradley $
 /**
  * Smarty plugin
  * @package Smarty
@@ -25,15 +25,14 @@ function smarty_block_wiki($params, $content, $smarty, &$repeat)
 {
 	if ( $repeat ) return;
 
-	global $tikilib;
 	if ( (isset($params['isHtml'])) and ($params['isHtml'] ) ) {
 	  $isHtml = true;
 	} else {
 	  $isHtml = false;
 	}
-	$ret = $tikilib->parse_data($content, array('is_html' => $isHtml));
+	$ret = TikiLib::lib('parser')->parse_data($content, array('is_html' => $isHtml));
 	if (isset($params['line']) && $params['line'] == 1) {
-		$ret = preg_replace('/<br \/>$/', '', $ret);
+		$ret = preg_replace(array('/<br \/>$/', '/[\n\r]*$/'), '', $ret);
 	}
 	return $ret;
 }

@@ -1,18 +1,19 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_rss.php 46138 2013-06-02 18:38:13Z changi67 $
+// $Id: wikiplugin_rss.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_rss_info()
 {
 	return array(
 		'name' => tra('RSS Feed'),
 		'documentation' => 'PluginRSS',
-		'description' => tra('Display items from an RSS feed'),
+		'description' => tra('Display items from one or more RSS feeds'),
 		'prefs' => array( 'wikiplugin_rss' ),
-		'icon' => 'img/icons/rss.png',
+		'iconname' => 'rss',
+		'introduced' => 1,
 		'format' => 'html',
 		'filter' => 'striptags',
 		'tags' => array( 'basic' ),
@@ -22,7 +23,8 @@ function wikiplugin_rss_info()
 				'name' => tra('IDs'),
 				'separator' => ':',
 				'filter' => 'int',
-				'description' => tra('List of feed IDs separated by colons. ex: feedId:feedId2'),
+				'description' => tr('List of feed IDs separated by colons. ex: %0', '<code>feedId:feedId2</code>'),
+				'since' => '1',
 				'default' => '',
 				'profile_reference' => 'rss',
 			),
@@ -31,13 +33,15 @@ function wikiplugin_rss_info()
 				'name' => tra('Result Count'),
 				'filter' => 'int',
 				'description' => tra('Number of results displayed.'),
+				'since' => '1',
 				'default' => 10,
 			),
 			'date' => array(
 				'required' => false,
 				'name' => tra('Date'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Show date of each item (not shown by default)'),
+				'since' => '1',
 				'default' => 0,
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -48,8 +52,9 @@ function wikiplugin_rss_info()
 			'desc' => array(
 				'required' => false,
 				'name' => tra('Description'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Show feed descriptions (not shown by default)'),
+				'since' => '1',
 				'default' => 0,
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -60,8 +65,9 @@ function wikiplugin_rss_info()
 			'author' => array(
 				'required' => false,
 				'name' => tra('Author'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Show authors (not shown by default)'),
+				'since' => '1',
 				'default' => 0,
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -73,14 +79,16 @@ function wikiplugin_rss_info()
 				'required' => false,
 				'name' => tra('Icon'),
 				'filter' => 'url',
-				'description' => tra('Url to a favicon to put before each entry'),
+				'description' => tra('URL to a favicon to put before each entry'),
+				'since' => '5.0',
 				'default' => '',
 			),
 			'showtitle' => array(
 				'required' => false,
 				'name' => tra('Show Title'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Show the title of the feed (shown by default)'),
+				'since' => '6.0',
 				'default' => 1,
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -91,8 +99,9 @@ function wikiplugin_rss_info()
 			'ticker' => array(
 				'required' => false,
 				'name' => tra('Ticker'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Turn static feed display into ticker news like'),
+				'since' => '10.1',
 				'default' => 1,
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -103,8 +112,9 @@ function wikiplugin_rss_info()
 			'desclen' => array(
 				'required' => false,
 				'name' => tra('Description Length'),
-				'filter' => 'int',
+				'filter' => 'digits',
 				'description' => tra('Max characters/length, truncates text to fit design'),
+				'since' => '10.1',
 				'default' => 0,
 			),
 		),
@@ -113,8 +123,7 @@ function wikiplugin_rss_info()
 
 function wikiplugin_rss($data,$params)
 {
-	global $smarty;
-	global $rsslib; require_once 'lib/rss/rsslib.php';
+	$rsslib = TikiLib::lib('rss');
 
 	$params = array_merge(
 		array(
@@ -156,7 +165,7 @@ function wikiplugin_rss($data,$params)
 		}
 	}
 
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('rsstitle', $title);
 	$smarty->assign('items', $items);
 	$smarty->assign('showdate', $params['date'] > 0);

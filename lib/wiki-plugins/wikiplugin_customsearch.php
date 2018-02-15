@@ -1,27 +1,29 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_customsearch.php 53154 2014-11-19 18:27:41Z jonnybradley $
+// $Id: wikiplugin_customsearch.php 63038 2017-06-19 18:02:46Z jonnybradley $
 
 function wikiplugin_customsearch_info()
 {
 	return array(
 		'name' => tra('Custom Search'),
 		'documentation' => 'PluginCustomSearch',
-		'description' => tra('Custom Search Interface that displays results using the LIST plugin'),
-		'prefs' => array('wikiplugin_customsearch', 'wikiplugin_list', 'feature_ajax', 'feature_search'),
+		'description' => tra('Create a custom search form for searching or listing items on the site'),
+		'prefs' => array('wikiplugin_customsearch', 'wikiplugin_list', 'feature_search'),
 		'body' => tra('LIST plugin configuration information'),
 		'filter' => 'wikicontent',
 		'profile_reference' => 'search_plugin_content',
-		'icon' => 'img/icons/text_list_bullets.png',
+		'iconname' => 'search',
+		'introduced' => 8,
 		'tags' => array('advanced'),
 		'params' => array(
 			'wiki' => array(
 				'required' => false,
 				'name' => tra('Template wiki page'),
 				'description' => tra('Wiki page where search user interface template is found'),
+				'since' => '8.0',
 				'filter' => 'pagename',
 				'default' => '',
 				'profile_reference' => 'wiki_page',
@@ -29,52 +31,64 @@ function wikiplugin_customsearch_info()
 			'tpl' => array(
 				'required' => false,
 				'name' => tra('Template file'),
-				'description' => tra('TPL file where search user interface template is found'),
+				'description' => tra('Smarty template (.tpl) file where search user interface template is found'),
+				'since' => '12.2',
 				'default' => '',
 			),
 			'id' => array(
 				'required' => false,
-				'name' => tra('Alphanumeric Unique Identifier for search'),
-				'description' => tra('A unique identifier to distinguish custom searches for storing of previous search criteria entered by users'),
+				'name' => tra('Search Id'),
+				'description' => tra('A unique identifier to distinguish custom searches for storing of previous search
+					criteria entered by users'),
+				'since' => '8.0',
 				'filter' => 'alnum',
-				'default' => '0',
+				'default' => 0,
 			),
 			'autosearchdelay' => array(
 				'required' => false,
-				'name' => tra('Autotrigger AJAX search on criteria change'),
-				'description' => tra('Delay in milliseconds before automatically triggering search after change (0 disables)'),
+				'name' => tra('Search Delay'),
+				'description' => tr('Delay in milliseconds before automatically triggering search after change
+					(%00%1 disables and is the default)', '<code>', '</code>'),
+				'since' => '8.0',
 				'filter' => 'digits',
-				'default' => '0',
+				'default' => 0,
 			),
 			'searchfadediv' => array(
 				'required' => false,
-				'name' => tra('Div to fade when AJAX search in progress'),
-				'description' => tra('The specific ID of the specific div to fade out when AJAX search is in progress, if not set will attempt to fade the whole area or if failing simply show the spinner'),
+				'name' => tra('Fade DIV Id'),
+				'description' => tra('The specific ID of the specific div to fade out when AJAX search is in progress,
+					if not set will attempt to fade the whole area or if failing simply show the spinner'),
+				'since' => '8.0',
 				'filter' => 'text',
 				'default' => '',
 			),
 			'recalllastsearch' => array(
 				'required' => false,
-				'name' => tra('Return users to same search parameters on coming back to the search page after leaving'),
-				'description' => tra('In the same session, return users to same search parameters on coming back to the search page after leaving'),
+				'name' => tra('Recall Last Search'),
+				'description' => tra('In the same session, return users to same search parameters on coming back to the
+					search page after leaving'),
+				'since' => '8.0',
 				'options' => array(
-					array('text' => tra('Yes'), 'value' => '1'),
+					array('text' => tra(''), 'value' => ''),
 					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
 				),
 				'filter' => 'digits',
-				'default' => '0',
+				'default' => 0,
 			),
 			'callbackscript' => array(
 				'required' => false,
-				'name' => tra('Custom JavaScript wiki page'),
-				'description' => tra('The wiki page on which custom JavaScript that is to be executed on return of AJAX results'),
+				'name' => tra('Custom JavaScript Page'),
+				'description' => tra('The wiki page on which custom JavaScript is to be executed on return of Ajax results'),
+				'since' => '8.0',
 				'filter' => 'pagename',
 				'default' => '',
 			),
 			'destdiv' => array(
 				'required' => false,
 				'name' => tra('Destination Div'),
-				'description' => tra('Id of a pre-existing div to contain the search results'),
+				'description' => tra('The id of an existing div to contain the search results'),
+				'since' => '9.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -82,23 +96,79 @@ function wikiplugin_customsearch_info()
 				'required' => false,
 				'name' => tra('Search On Load'),
 				'description' => tra('Execute the search when the page loads (default: Yes)'),
+				'since' => '9.0',
 				'options' => array(
-					array('text' => tra('Yes'), 'value' => '1'),
+					array('text' => tra(''), 'value' => ''),
 					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
 				),
 				'filter' => 'digits',
-				'default' => '1',
+				'default' => 1,
 			),
 			'requireinput' => array(
 				'required' => false,
-				'name' => tra('Require non-empty search text'),
+				'name' => tra('Require Input'),
 				'description' => tra('Require first input field to be filled for search to trigger'),
+				'since' => '12.0',
 				'options' => array(
-					array('text' => tra('Yes'), 'value' => '1'),
+					array('text' => tra(''), 'value' => ''),
 					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
 				),
 				'filter' => 'digits',
-				'default' => '0',
+				'default' => 0,
+			),
+			'forcesortmode' => array(
+				'required' => false,
+				'name' => tra('Force Sort'),
+				'description' => tra('Force the use of specified sort mode in place of search relevance even when there is a text search query'),
+				'since' => '13.0',
+				'options' => array(
+					array('text' => tra(''), 'value' => ''),
+					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
+				),
+				'filter' => 'digits',
+				'default' => 1,
+			),
+			'trimlinefeeds' => array(
+				'required' => false,
+				'name' => tra('Trim Linefeeds'),
+				'description' => tra('Remove the linefeeds added after each input which casues the wiki parser to add extra paragraphs.'),
+				'since' => '14.1',
+				'options' => array(
+					array('text' => tra(''), 'value' => ''),
+					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
+				),
+				'filter' => 'digits',
+				'default' => 0,
+			),
+			'searchable_only' => array(
+				'required' => false,
+				'name' => tra('Searchable Only Results'),
+				'description' => tra('Only include results marked as searchable in the index.'),
+				'since' => '14.1',
+				'options' => array(
+					array('text' => tra(''), 'value' => ''),
+					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
+				),
+				'filter' => 'digits',
+				'default' => 1,
+			),
+			'customsearchjs' => array(
+				'required' => false,
+				'name' => tra('Use custom search JavaScript file'),
+				'description' => tra('Mainly keeps the search state on the URL hash, but also adds some helper functions like easier sorting and page size.'),
+				'since' => '14.1',
+				'options' => array(
+					array('text' => tra(''), 'value' => ''),
+					array('text' => tra('No'), 'value' => '0'),
+					array('text' => tra('Yes'), 'value' => '1'),
+				),
+				'filter' => 'digits',
+				'default' => 0,
 			),
 		),
 	);
@@ -107,29 +177,58 @@ function wikiplugin_customsearch_info()
 function wikiplugin_customsearch($data, $params)
 {
 	global $prefs;
+
+	if ($prefs['javascript_enabled'] !== 'y') {
+		require_once('lib/wiki-plugins/wikiplugin_list.php');
+		$smarty = TikiLib::lib('smarty');
+		$smarty->loadPlugin('smarty_block_remarksbox');
+		$repeat = false;
+
+		$out = smarty_block_remarksbox(
+			[
+				'type' => 'warning',
+				'title' => tr('JavaScript disabled'),
+			],
+			tr('JavaScript is required for this search feature'),
+			$smarty,
+			$repeat);
+
+		return '~np~' . $out . '~/np~' . wikiplugin_list($data, []);
+	}
+
+	static $instance_id = null;
+
 	if (empty($params['wiki']) && empty($params['tpl'])) {
 		return tra('Template is not specified');
 	} elseif (!empty($params['wiki']) && !TikiLib::lib('tiki')->page_exists($params['wiki'])) {
-		return tra('Template page not found');
+		$link = new WikiParser_OutputLink;
+		$link->setIdentifier($params['wiki']);
+		return tra('Template page not found') . ' ' . $link->getHtml();
 	}
+
 	if (isset($params['id'])) {
 		$id = $params['id'];
 	} else {
-		$id = '0';
+		if ($instance_id === null) {
+			$instance_id = 0;
+		} else {
+			$instance_id++;
+		}
+		$id = (string) $instance_id;
 	}
 	if (isset($params['recalllastsearch']) && $params['recalllastsearch'] == 1 && (!isset($_REQUEST['forgetlastsearch']) || $_REQUEST['forgetlastsearch'] != 'y')) {
 		$recalllastsearch = 1;
 	} else {
 		$recalllastsearch = 0;
 	}
-	if (isset($params['searchfadediv'])) {
-		$searchfadediv = $params['searchfadediv'];
-	} else {
-		$searchfadediv = '';
+
+	$defaults = array();
+	$plugininfo = wikiplugin_customsearch_info();
+	foreach ($plugininfo['params'] as $key => $param) {
+		$defaults["$key"] = $param['default'];
 	}
-	if (!isset($params['requireinput'])) {
-		$params['requireinput'] = 0;
-	}
+	$params = array_merge($defaults, $params);
+
 	if (!isset($_REQUEST["offset"])) {
 		$offset = 0;
 	} else {
@@ -150,27 +249,38 @@ function wikiplugin_customsearch($data, $params)
 	} else {
 		$sort_mode = '';
 	}
-	if (!isset($params['searchonload'])) {
-		$params['searchonload'] = 1;
-	}
 
 	$definitionKey = md5($data);
 	$matches = WikiParser_PluginMatcher::match($data);
 	$query = new Search_Query;
+	if (!isset($params['searchable_only']) || $params['searchable_only'] == 1) {
+		$query->filterIdentifier('y', 'searchable');
+	}
 	$builder = new Search_Query_WikiBuilder($query);
 	$builder->apply($matches);
+	$tsret = $builder->applyTablesorter($matches);
+	if (!empty($tsret['max']) || !empty($_GET['numrows'])) {
+		$max = !empty($_GET['numrows']) ? $_GET['numrows'] : $tsret['max'];
+		$builder->wpquery_pagination_max($query, $max);
+	}
+	$paginationArguments = $builder->getPaginationArguments();
 
-	// Use maxRecords set in LIST parameters rather then global default if set. 
+	// Use maxRecords set in LIST parameters rather then global default if set.
 	if (isset($maxDefault) && $maxDefault) {
-		$paginationArgs = $builder->getPaginationArguments();
-		if (!empty($paginationArgs['max'])) {
-			$maxRecords = $paginationArgs['max'];
+		if (!empty($paginationArguments['max'])) {
+			$maxRecords = $paginationArguments['max'];
 		}
 	}
-	
+
+	// setup AJAX pagination
+	$paginationArguments['offset_jsvar'] = "customsearch_$id.offset";
+	$paginationArguments['sort_jsvar'] = "customsearch_$id.sort_mode";
+	$paginationArguments['_onclick'] = "$('#customsearch_$id').submit();return false;";
+
 	$builder = new Search_Formatter_Builder;
-	$builder->apply($matches);
-	$formatter = $builder->getFormatter();
+	$builder->setId('wpcs-' . $id);
+	$builder->setPaginationArguments($paginationArguments);
+	$builder->setTsOn($tsret['tsOn']);
 
 	$facets = new Search_Query_FacetWikiBuilder;
 	$facets->apply($matches);
@@ -180,8 +290,10 @@ function wikiplugin_customsearch($data, $params)
 		$definitionKey, serialize(
 			array(
 				'query' => $query,
-				'formatter' => $formatter,
+				'data' => $data,
+				'builder' => $builder,
 				'facets' => $facets,
+				'tsret' => $tsret,
 			)
 		),
 		'customsearch'
@@ -212,12 +324,13 @@ function wikiplugin_customsearch($data, $params)
 
 	$options = array(
 		'searchfadetext' => tr('Loading...'),
-		'searchfadediv' => $searchfadediv,
+		'searchfadediv' => $params['searchfadediv'],
 		'results' => empty($params['destdiv']) ? "#customsearch_{$id}_results" : "#{$params['destdiv']}",
-		'autosearchdelay' => isset($params['autosearchdelay']) ? max(1500, (int) $params['autosearchdelay']) : 0,
+		'autosearchdelay' => !empty($params['autosearchdelay']) ? max(1500, (int) $params['autosearchdelay']) : 0,
 		'searchonload' => (int) $params['searchonload'],
 		'requireinput' => (bool) $params['requireinput'],
 		'origrequireinput' => (bool) $params['requireinput'],
+		'forcesortmode' => (bool) $params['forcesortmode'],
 	);
 
 	/**
@@ -256,13 +369,18 @@ var customsearch = {
 			selector = '#customsearch_' + cs.id;
 		}
 
-		$(selector).modal(cs.options.searchfadetext);
+		$(selector).tikiModal(cs.options.searchfadetext);
+
+		var resultsTop = $(cs.options.results).offset().top;
+		if( $(window).scrollTop() > resultsTop )
+			$('html, body').animate({scrollTop: resultsTop + 'px'}, 'fast');
 
 		cs._load(function (data) {
-			$(selector).modal();
+			$(selector).tikiModal();
 			$(cs.options.results).html(data);
 			$(document).trigger('pageSearchReady');
 		});
+		cs.store_query = '';
 	}),
 	init: function () {
 		var that = this;
@@ -296,9 +414,11 @@ $('#customsearch_$id').submit(function() {
 });
 
 window.customsearch_$id = customsearch;
+$(document).trigger('formSearchReady');
 ";
 
 	$parser = new WikiParser_PluginArgumentParser;
+	$dr = 0;
 	foreach ($matches as $match) {
 		$name = $match->getName();
 		$arguments = $parser->parse($match->getArguments());
@@ -312,9 +432,9 @@ window.customsearch_$id = customsearch;
 			$match->replaceWith('');
 			continue;
 		}
-		if (!empty($arguments['_field']) && $arguments['_filter'] == 'content') {
+		if (!empty($arguments['_field']) && !empty($arguments['_filter']) && $arguments['_filter'] == 'content') {
 			$filter = $arguments['_field'];
-		} elseif (!empty($arguments['_field']) && $arguments['_filter'] == 'content') {
+		} elseif (empty($arguments['_field']) && !empty($arguments['_filter']) && $arguments['_filter'] == 'content') {
 			$filter = 'content';
 		} else {
 			$filter = '';
@@ -349,7 +469,14 @@ window.customsearch_$id = customsearch;
 			} else {
 				$fieldname = $fieldid;
 			}
-			$match->replaceWith($function($id, $fieldname, $fieldid, $arguments, $default, $script));
+			$html = $function($id, $fieldname, $fieldid, $arguments, $default, $script);
+			if ($params['trimlinefeeds']) {
+				$html = trim($html);
+			}
+			$match->replaceWith($html);
+		}
+		if ($name == 'daterange') {
+			$dr++;
 		}
 	}
 
@@ -358,9 +485,17 @@ window.customsearch_$id = customsearch;
 		$callbackscript_tpl = "wiki:" . $params['callbackscript'];
 		$callbackScript = TikiLib::lib('smarty')->fetch($callbackscript_tpl);
 	}
+	//get iconset icon if daterange is one of the fields
+	if ($dr) {
+		$smarty = TikiLib::lib('smarty');
+		$smarty->loadPlugin('smarty_function_js_insert_icon');
+		$iconinsert = smarty_function_js_insert_icon(['type' => 'jscalendar', 'return' => 'y'], $smarty);
+	} else {
+		$iconinsert = '';
+	}
 
 	global $page;
-	$script .= "
+	$script .= "$('.icon-pdf').parent().click(function(){storeSortTable('#customsearch_" . $id . "_results',$('#customsearch_" . $id . "_results').html())});
 customsearch._load = function (receive) {
 	var datamap = {
 		definition: this.definition,
@@ -368,9 +503,13 @@ customsearch._load = function (receive) {
 		searchid: this.id,
 		offset: customsearch.offset,
 		maxRecords: this.maxRecords,
+		store_query: this.store_query,
 		page: " . json_encode($page) . ",
 		recalllastsearch: $recalllastsearch
 	};
+	if (!customsearch.options.forcesortmode && $('#customsearch_$id').find(':text').val() && $('#customsearch_$id').find(':text').val().indexOf('...') <= 0) {
+		customsearch.sort_mode = 'score_desc';
+	}
 	if (customsearch.sort_mode) {
 		// blank sort_mode is not allowed by Tiki input filter
 		datamap.sort_mode = customsearch.sort_mode;
@@ -383,21 +522,36 @@ customsearch._load = function (receive) {
 		success: function(data) {
 			receive(data);
 			$callbackScript;
+		},
+		error: function ( jqXHR, textStatus, errorThrown ) {
+			var selector = '#' + customsearch.options.searchfadediv;
+			if (customsearch.options.searchfadediv.length <= 1 && $(selector).length === 0) {
+				selector = '#customsearch_' + customsearch.id;
+			}
+			$(selector).tikiModal();
+
+			$('#customsearch_$id').showError(jqXHR)
 		}
 	});
 };
 customsearch.sort_mode = " . json_encode($sort_mode) . ";
 customsearch.offset = $offset;
 customsearch.maxRecords = $maxRecords;
+customsearch.store_query ='';
 customsearch.init();
-";
+$iconinsert";
 
 	TikiLib::lib('header')->add_jq_onready($script);
+
+	if ($params['customsearchjs']) {
+		TikiLib::lib('header')->add_jsfile('lib/jquery_tiki/customsearch.js');
+
+	}
 
 	$out = '<div id="customsearch_' . $id . '_form"><form id="customsearch_' . $id . '">' . $matches->getText() . '</form></div>';
 
 	if (empty($params['destdiv'])) {
-		$out .= '<div id="customsearch_' . $id . '_results"></div>';
+		$out .= '<div id="customsearch_' . $id . '_results" class="customsearch_results"></div>';
 	}
 
 	if (!empty($params['wiki'])) {
@@ -503,10 +657,6 @@ function cs_design_categories($id, $fieldname, $fieldid, $arguments, $default, &
 
 	$cats = TikiLib::lib('categ')->getCategories($filter);
 
-	$element = $document->createElement('select');
-	cs_design_setbasic($element, $fieldid, $fieldname, $arguments);
-	$document->appendChild($element);
-
 	if ($_style == 'checkbox' || $_style == 'radio') {
 		$currentlevel = 0;
 		$orig_fieldid = $fieldid;
@@ -526,14 +676,20 @@ function cs_design_categories($id, $fieldname, $fieldid, $arguments, $default, &
 				$currentlevel = $level;
 			}
 			$li = $document->createElement('li');
+			$li->setAttribute('class', $_style);
 			$ul{$currentlevel}->appendChild($li);
 			$input = $document->createElement('input');
 			$input->setAttribute('type', $_style);
 			cs_design_setbasic($input, $fieldid, $fieldname, $arguments);
 			$input->setAttribute('value', $categId);
-			$li->appendChild($input);
+
+			$labelElement = $document->createElement('label');
 			$label = $document->createTextNode($_categpath ? $c['relativePathString'] : $c['name']);
-			$li->appendChild($label);
+
+			$labelElement->appendChild($input);
+			$labelElement->appendChild($label);
+
+			$li->appendChild($labelElement);
 
 			if ($_style == 'radio') {
 				$radioreset = "$('input[type=radio][name=$fieldname]').each(function() {
@@ -548,9 +704,9 @@ function cs_design_categories($id, $fieldname, $fieldid, $arguments, $default, &
 $('#$fieldid').change(function() {
 	if ($(this).is(':checked')) {
 		var filter = {
-			config = " . json_encode($arguments) . ",
-			name = 'categories',
-			value = $(this).val()
+			config : " . json_encode($arguments) . ",
+			name : 'categories',
+			value : $(this).val()
 		}
 		$radioreset
 		customsearch.add('$fieldid', filter);
@@ -561,13 +717,17 @@ $('#$fieldid').change(function() {
 ";
 
 			if ($default && in_array($c['categId'], (array) $default)) {
-				$element->setAttribute('checked', 'checked');
+				$input->setAttribute('checked', 'checked');
 				$script .= "
 $('#$fieldid').trigger('change');
 ";
 			}
 		}
-	} elseif ($_style == 'select') {
+	}
+	elseif ($_style == 'select') {
+		$element = $document->createElement('select');
+		cs_design_setbasic($element, $fieldid, $fieldname, $arguments);
+		$document->appendChild($element);
 		// leave a blank one in the front
 		if (!isset($arguments['multiple']) && !isset($arguments['size']) || isset($arguments['_firstlabel'])) {
 			if (!empty($arguments['_firstlabel'])) {
@@ -590,7 +750,7 @@ $('#$fieldid').change(function() {
 ";
 
 		foreach ($cats as $c) {
-			$option = $document->createElement('option', $_categpath ? $c['relativePathString'] : $c['name']);
+			$option = $document->createElement('option', $_categpath ? $c['relativePathString'] : str_replace("&","&amp;",$c['name']));
 			$option->setAttribute('value', $c['categId']);
 			$element->appendChild($option);
 			if ($default && in_array($c['categId'], (array) $default)) {
@@ -616,6 +776,8 @@ function cs_design_select($id, $fieldname, $fieldid, $arguments, $default, &$scr
 
 	if (isset($arguments['_labels'])) {
 		$labels = explode(',', $arguments['_labels']);
+	} else {
+		$labels = array();
 	}
 	if (isset($arguments['_options'])) {
 		$options = explode(',', $arguments['_options']);
@@ -628,11 +790,59 @@ function cs_design_select($id, $fieldname, $fieldid, $arguments, $default, &$scr
 	{
 		$definition = Tracker_Definition::get($arguments['_trackerId']);
 		$field = $definition->getFieldFromPermName(str_replace('tracker_field_', '', $arguments['_field']));
-		if ($field['type'] === 'r') {
-			$handler = TikiLib::lib('trk')->get_field_handler($field);
+		$handler = TikiLib::lib('trk')->get_field_handler($field);
+		if ($field['type'] === 'r') {    // Item Link
 			$labels = $handler->getItemList();
 			$options = array_keys($labels);
 			$labels = array_values($labels);
+
+		} else if ($field['type'] === 't') {	// Text field so get all values up to a sensible(?) amount
+
+			global $prefs;
+
+			// turns out using a straight "old fashioned" DISTINCT MySQL query here is the most efficient
+			$result = TikiLib::lib('tiki')->query(
+				'SELECT DISTINCT `value` FROM `tiki_tracker_item_fields` WHERE `fieldId` = ? ORDER BY `value` LIMIT 1000;',
+				$field['fieldId']
+			);
+
+			while ($row = $result->fetchRow()) {
+				$label = $row['value'];
+				if (! in_array($label, $labels)) {
+					$labels[] = $label;
+
+					$label = explode(' ', $label);
+
+					foreach($label as & $word) {
+						if ($prefs['unified_engine'] !== 'mysql') {
+							if (in_array($word, $prefs['unified_stopwords'])) {
+								$word = '';
+							}
+						} else {
+							if (strlen($word) < 4) {	// default mysql fulltext minimum word length TODO find current value for ft_min_word_len
+								$word = '';
+							}
+						}
+					}
+
+					$options[] = implode(' AND ', array_filter($label));
+				}
+			}
+
+		} else if ($field['type'] === 'u') {	// User Selector (only when in dropdown list mode)
+
+			$html = $handler->renderInput();
+			$html = preg_replace('/id=[\'"].*?[\'"]/', 'id="' . $fieldid . '"', $html);
+			$script .= "
+$('#$fieldid').change(function() {
+	customsearch.add('$fieldid', {
+		config: " . json_encode($arguments) . ",
+		name: 'select',
+		value: $(this).val()
+	});
+});
+";
+			return $html;
 		}
 	}
 	if (isset($arguments['_mandatory']) && $arguments['_mandatory'] == 'y') {
@@ -678,7 +888,7 @@ $('#$fieldid').trigger('change');
 		}
 		$element->appendChild($option);
 	}
-	return $document->saveHTML();
+	return '~np~' . $document->saveHTML() . '~/np~';
 }
 
 function cs_design_daterange($id, $fieldname, $fieldid, $arguments, $default, &$script)
@@ -739,6 +949,9 @@ function cs_design_daterange($id, $fieldname, $fieldid, $arguments, $default, &$
 
 	$script .= "
 $('#{$fieldid_from}_dptxt,#{$fieldid_to}_dptxt').change(function() {
+	updateDateRange_$fieldid();
+});
+function updateDateRange_$fieldid() {
 	var from = $('#$fieldid_from').val();
 	var to = $('#$fieldid_to').val();
 	from = from.substr(0,10);to = to.substr(0,10); // prevent trailing 000 from date picker
@@ -747,8 +960,91 @@ $('#{$fieldid_from}_dptxt,#{$fieldid_to}_dptxt').change(function() {
 		name: 'daterange',
 		value: from + ',' + to
 	});
-});
+}
+updateDateRange_$fieldid();
 ";
 
 	return $picker;
+}
+
+function cs_design_distance($id, $fieldname, $fieldid, $arguments, $default, &$script)
+{
+	$document = new DOMDocument;
+	$distanceElement = $document->createElement('input');
+	if (!empty($arguments['id'])) {
+		$arguments['id'] = $fieldid . '_dist';
+	}
+	cs_design_setbasic($distanceElement, $fieldid . '_dist', $fieldname, $arguments);
+	$latElement = $document->createElement('input');
+	if (!empty($arguments['id'])) {
+		$arguments['id'] = $fieldid . '_lat';
+	}
+	cs_design_setbasic($latElement, $fieldid . '_lat', $fieldname, $arguments);
+	$lonElement = $document->createElement('input');
+	if (!empty($arguments['id'])) {
+		$arguments['id'] = $fieldid . '_lon';
+	}
+	cs_design_setbasic($lonElement, $fieldid . '_lon', $fieldname, $arguments);
+
+	if (!empty($default)) {
+		$arguments['default'] = $default;
+	}
+	$script .= "
+(function (id, config, fieldname) {
+	var fields = $('input[name=$fieldname]');
+	fields.change(function() {
+		var filter = {
+			config: config,
+			name: 'distance',
+			value: fields.map(function () {return $(this).val();}).get().join()
+		};
+		customsearch.add($(this).attr('name'), filter);
+	}).change();
+	
+})('$fieldid', " . json_encode($arguments) . ", " . json_encode($fieldname) . ");
+";
+
+	$arguments = new JitFilter($arguments);
+
+	$distanceElement->setAttribute('value', $arguments->_distance->text());
+	$latElement->setAttribute('value', $arguments->_lat->text());
+	$lonElement->setAttribute('value', $arguments->_lon->text());
+
+	$document->appendChild($distanceElement);
+	$document->appendChild($latElement);
+	$document->appendChild($lonElement);
+
+	return $document->saveHTML();
+}
+
+function cs_design_store($id, $fieldname, $fieldid, $arguments, $default, &$script)
+{
+	global $prefs;
+	if ($prefs['storedsearch_enabled'] != 'y') {
+		return;
+	}
+
+	$document = new DOMDocument;
+	$element = $document->createElement('input');
+	$element->setAttribute('type', 'submit');
+	cs_design_setbasic($element, $fieldid, $fieldname, $arguments);
+	$document->appendChild($element);
+
+	$script .= "
+
+$('#$fieldid').click(function() {
+	$(this).serviceDialog({
+		title: $(this).val(),
+		controller: 'search_stored',
+		action: 'select',
+		success: function (data) {
+			customsearch.store_query = data.queryId;
+			customsearch.load();
+		}
+	});
+	return false;
+});
+";
+
+	return $document->saveHTML();
 }

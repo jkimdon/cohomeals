@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-freetag_translate.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-freetag_translate.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
 $access->check_feature(array('feature_freetags','freetags_multilingual','feature_multilingual'));
@@ -23,8 +23,8 @@ if ($cat_type != 'wiki page' && $cat_type != 'article') {
 	die;
 }
 
-include_once "lib/freetag/freetaglib.php";
-include_once "lib/multilingual/multilinguallib.php";
+$freetaglib = TikiLib::lib('freetag');
+$multilinguallib = TikiLib::lib('multilingual');
 
 if ( $cat_objId ) {
 	$info = $tikilib->get_page_info($cat_objId);
@@ -93,8 +93,9 @@ if ( array_key_exists('additional_languages', $_REQUEST)
 	foreach ( $_REQUEST['additional_languages'] as $lang )
 		$used_languages[$lang] = true;
 $used_languages = array_keys($used_languages);
+$langLib = TikiLib::lib('language');
+$allLanguages = $langLib->list_languages();
 
-$allLanguages = $tikilib->list_languages();
 // select roughly readable languages
 $t_used_languages = array();
 foreach ($allLanguages as $al) {

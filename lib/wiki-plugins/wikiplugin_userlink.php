@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_userlink.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_userlink.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_userlink_info()
 {
@@ -12,12 +12,14 @@ function wikiplugin_userlink_info()
 		'documentation' => 'PluginUserlink',
 		'description' => tra('Display a link to a user\'s information page'),
 		'prefs' => array('wikiplugin_userlink'),
-		'icon' => 'img/icons/user_go.png',
-		'params' => array( 
+		'iconname' => 'user',
+		'introduced' => 6,
+		'params' => array(
 			'user' => array(
 				'required' => false,
-				'name' => tra('User Name'),
+				'name' => tra('Username'),
 				'description' => tra('User account name (which can be an email address)'),
+				'since' => '6.0',
 				'filter' => 'xss',
 				'default' => ''
 			),
@@ -27,7 +29,8 @@ function wikiplugin_userlink_info()
 
 function wikiplugin_userlink($data, $params)
 {
-	global $smarty, $user;
+	$smarty = TikiLib::lib('smarty');
+	global $user;
 	$path = 'lib/smarty_tiki/modifier.userlink.php';
 	include_once($path);
 	$func = 'smarty_modifier_userlink';

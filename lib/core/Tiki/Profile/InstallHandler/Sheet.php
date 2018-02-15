@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Sheet.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Sheet.php 61102 2017-01-28 19:18:43Z yonixxx $
 
 class Tiki_Profile_InstallHandler_Sheet extends Tiki_Profile_InstallHandler
 {
@@ -28,43 +28,62 @@ class Tiki_Profile_InstallHandler_Sheet extends Tiki_Profile_InstallHandler
 	function _install()
 	{
 		if ($this->canInstall()) {
-			global $user, $sheetlib;
+			global $user;
+			$sheetlib = TikiLib::lib('sheet');
 			require_once ('lib/sheet/grid.php');
 			
 			//here we convert the array to that of what is acceptable to the sheet lib
-			$parentSheetId = null;
+			$parentSheetId = 0;
 			$sheets = array();
-			$nbsheets = count($this->data);	
+			$nbsheets = count($this->data);
 			for ($sheetI = 0; $sheetI < $nbsheets; $sheetI++) {
-				$title = $this->data[$sheetI]['title'];
-				$title = ($title ? $title : "Untitled - From Profile Import");
-				$nbdatasheetI = count($this->data[$sheetI]);	
+
+				$sheets[$sheetI] = new stdClass();
+				$sheets[$sheetI]->rows = array();
+				$sheets[$sheetI]->metadata = new stdClass();
+				$sheets[$sheetI]->metadata->widths = array();
+
+				$title = (isset($this->data[$sheetI]['title']) && $this->data[$sheetI]['title']) ? $this->data[$sheetI]['title'] : tra("Untitled - From Profile Import");
+
+				$rows = array();
+				if (isset($this->data[$sheetI]['rows'])) {
+					$rows = $this->data[$sheetI]['rows'];
+				} elseif(isset($this->data[$sheetI][0])) {
+					$rows = $this->data[$sheetI];
+					if(isset($rows['title'])){
+						unset($rows['title']);
+					}
+				}
+				$nbdatasheetI = count($rows);
 				for ($r = 0; $r < $nbdatasheetI; $r++) {
-					$nbdatasheetIr = count($this->data[$sheetI][$r]);
+					$nbdatasheetIr = count($rows[$r]);
+					$sheets[$sheetI]->rows[$r]->columns = array();
+
 					for ($c = 0; $c < $nbdatasheetIr; $c++) {
+						$sheets[$sheetI]->rows[$r]->columns[$c] = new stdClass();
+
 						$value = "";
 						$formula = "";
-						$rawValue = $this->data[$sheetI][$r][$c];
+						$rawValue = $rows[$r][$c];
 						 
 						if (substr($rawValue, 0, 1) == "=") {
 							$formula = $rawValue;
 						} else {
 							$value = $rawValue;
 						}
+
+						$sheets[$sheetI]->rows[$r]->columns[$c]->formula = $formula;
+						$sheets[$sheetI]->rows[$r]->columns[$c]->value = $value;
 						
-						$ri = 'r'.$r;
-						$ci = 'c'.$c;
-						
-						$sheets[$sheetI]->data->$ri->$ci->formula = $formula;
-						$sheets[$sheetI]->data->$ri->$ci->value = $value;
-						
-						$sheets[$sheetI]->data->$ri->$ci->width = 1;
-						$sheets[$sheetI]->data->$ri->$ci->height = 1;
+						$sheets[$sheetI]->rows[$r]->columns[$c]->width = 1;
+						$sheets[$sheetI]->rows[$r]->columns[$c]->height = 1;
 					}
 				}
-				
-				$sheets[$sheetI]->metadata->rows = count($this->data[$sheetI]);
-				$sheets[$sheetI]->metadata->columns = count($this->data[$sheetI][0]);
+
+				$sheets[$sheetI]->metadata->widths[] = $nbdatasheetIr;
+				$sheets[$sheetI]->metadata->rows = $nbdatasheetI;
+				$sheets[$sheetI]->metadata->columns = count($rows[0]);
+
 				$id = $sheetlib->replace_sheet(0, $title, "", $user, $parentSheetId);
 				$parentSheetId = ($parentSheetId ? $parentSheetId : $id);
 				

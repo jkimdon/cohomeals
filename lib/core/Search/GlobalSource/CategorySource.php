@@ -1,14 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CategorySource.php 49753 2014-02-05 21:57:47Z lphuberdeau $
+// $Id: CategorySource.php 59555 2016-08-30 13:19:31Z jonnybradley $
 
 class Search_GlobalSource_CategorySource implements Search_GlobalSource_Interface, Tiki_Profile_Writer_ReferenceProvider, Search_FacetProvider_Interface
 {
 	private $categlib;
-	private $parentCategories = array();
 
 	function __construct()
 	{
@@ -85,7 +84,18 @@ class Search_GlobalSource_CategorySource implements Search_GlobalSource_Interfac
 			$categories = array_unique(array_merge($categories, $parentCategories));
 		}
 
-		if (empty($categories)) {
+
+		if ($objectType === 'category') {
+			$parentId = $objectId;
+			$deepcategories = [];
+			while ($parentId = $this->categlib->get_category_parent($parentId)) {
+				$deepcategories[] = $parentId;
+			}
+			if ($deepcategories) {
+				$categories[] = $deepcategories[0];
+			}
+
+		} else if (empty($categories)) {
 			$categories[] = 'orphan';
 			$deepcategories = $categories;
 		} else {
@@ -97,19 +107,17 @@ class Search_GlobalSource_CategorySource implements Search_GlobalSource_Interfac
 			'deep_categories' => $typeFactory->multivalue($deepcategories),
 		);
 
-		$self = $this;
-		$categlib = $this->categlib;
 		foreach ($this->categlib->getCustomFacets() as $rootId) {
 			$filtered = array_filter(
 				$categories,
-				function ($category) use ($rootId, $categlib) {
-					return $categlib->get_category_parent($category) == $rootId;
+				function ($category) use ($rootId) {
+					return $this->categlib->get_category_parent($category) == $rootId;
 				}
 			);
 			$deepfiltered = array_filter(
 				$deepcategories,
-				function ($category) use ($self, $rootId) {
-					return $category != $rootId && $self->hasParent($category, $rootId);
+				function ($category) use ($rootId) {
+					return $category != $rootId && $this->hasParent($category, $rootId);
 				}
 			);
 
@@ -122,32 +130,16 @@ class Search_GlobalSource_CategorySource implements Search_GlobalSource_Interfac
 
 	private function getWithParent($categories)
 	{
-		$full = array();
-
-		foreach ($categories as $category) {
-			$full = array_merge($full, $this->getParents($category));
-		}
-
-		return array_unique($full);
+		return $this->categlib->get_with_parents($categories);
 	}
 
-	private function getParents($categId)
-	{
-		if (! isset($this->parentCategories[$categId])) {
-			$category = $this->categlib->get_category($categId);
-			$this->parentCategories[$categId] = array_keys($category['tepath']);
-		}
-
-		return $this->parentCategories[$categId];
-	}
-
-	function hasParent($category, $parent)
+	private function hasParent($category, $parent)
 	{
 		if ($category == 'orphan') {
 			return false;
 		}
 
-		$parents = $this->getParents($category);
+		$parents = $this->categlib->get_parents($category);
 		return in_array($parent, $parents);
 	}
 }

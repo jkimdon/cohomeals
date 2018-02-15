@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MembershipTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: MembershipTest.php 59640 2016-09-08 18:12:34Z jonnybradley $
 /**
  * @group integration
  */
@@ -15,7 +15,7 @@ class MembershipTest extends TikiTestCase
 	function setUp()
 	{
 		parent::setUp();
-		global $cachelib;
+		$cachelib = TikiLib::lib('cache');
 
 		$this->userlib = new UsersLib();
 
@@ -52,23 +52,38 @@ class MembershipTest extends TikiTestCase
 
 	function testExtendMembership()
 	{
-		$this->markTestIncomplete('Marking this test as incomplete since it is failing and the problem is the test itself and not the code that is being tested. If you are familiar with these test please fix it.');
+		//$this->markTestIncomplete('Marking this test as incomplete since it is failing and the problem is the test itself and not the code that is being tested. If you are familiar with these test please fix it.');
+		$id = $this->userlib->get_user_id('membershiptest_a');
+
+		$expires = $this->userlib->getOne(
+			'SELECT `expire` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
+			array($id)
+		);
+
+		//convert start date to object
+		$rawstartutc = new DateTimeImmutable('@' . $expires);
+		global $prefs;
+		$tz = TikiDate::TimezoneIsValidId($prefs['server_timezone']) ? $prefs['server_timezone'] : 'UTC';
+		$timezone = new DateTimeZone($tz);
+		$startlocal = $rawstartutc->setTimezone($timezone);
+
+		$extendto = $startlocal->modify('+' . 45 * 3 . ' days');
+		$expect = $extendto->getTimestamp();
 
 		$this->userlib->extend_membership('membershiptest_a', 'MembershipTest', 3);
 
-		$expect = $this->userlib->now + 45 * 2 * (3600 * 24);
 
 		$this->assertEquals(
 			$expect,
 			$this->userlib->getOne(
-				'SELECT `created` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
-				array($this->userlib->get_user_id('membershiptest_a'))
+				'SELECT `expire` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
+				array($id)
 			)
 		);
 		$this->assertEquals(
-			$this->userlib->now,
+			$expires,
 			$this->userlib->getOne(
-				'SELECT `created` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
+				'SELECT `expire` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
 				array($this->userlib->get_user_id('membershiptest_b'))
 			)
 		);
@@ -76,21 +91,32 @@ class MembershipTest extends TikiTestCase
 
 	function testExtendExpiredMembership()
 	{
-		$this->markTestIncomplete('Marking this test as incomplete since it is failing and the problem is the test itself and not the code that is being tested. If you are familiar with these test please fix it.');
-
 		$id = $this->userlib->get_user_id('membershiptest_b');
 
-		$this->userlib->query('UPDATE `users_usergroups` SET `created` = `created` - 12*3600 - 45*24*3600 WHERE `userId` = ?', array($id));
+		$expires = $this->userlib->getOne(
+			'SELECT `created` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
+			array($id)
+		);
+
+		//convert start date to object
+		$rawstartutc = new DateTimeImmutable('@' . $expires);
+		global $prefs;
+		$tz = TikiDate::TimezoneIsValidId($prefs['server_timezone']) ? $prefs['server_timezone'] : 'UTC';
+		$timezone = new DateTimeZone($tz);
+		$startlocal = $rawstartutc->setTimezone($timezone);
+
+		$extendto = $startlocal->modify('+' . 45 * 2 . ' days');
+		$expect = $extendto->getTimestamp();
+
+		$this->userlib->query('UPDATE `users_usergroups` SET `expire` = `expire` - 12*3600 - 45*24*3600 WHERE `userId` = ?', array($id));
 
 		$this->userlib->extend_membership('membershiptest_b', 'MembershipTest', 2);
-
-		$expect = $this->userlib->now + 45 * (3600 * 24);
 
 		$this->assertEquals(
 			$expect,
 			$this->userlib->getOne(
-				'SELECT `created` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
-				array($this->userlib->get_user_id('membershiptest_b'))
+				'SELECT `expire` FROM `users_usergroups` WHERE `userId` = ? AND `groupName` = "MembershipTest"',
+				array($id)
 			)
 		);
 	}

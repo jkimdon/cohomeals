@@ -1,16 +1,16 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_result.php 52485 2014-09-10 11:43:22Z jonnybradley $
+// $Id: function.rating_result.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 function smarty_function_rating_result( $params, $smarty )
 {
-	global $prefs, $ratinglib;
-	require_once 'lib/rating/ratinglib.php';
+	global $prefs;
+	$ratinglib = TikiLib::lib('rating');
 	$votings = $ratinglib->votings($params['id'], $params['type']);
-	$smiles = $ratinglib->get_options_smiles($params['type'], $params['id'], true);
+	$smiles = ($prefs['rating_smileys'] == 'y' ? $ratinglib->get_options_smiles($params['type'], $params['id'], true) : null);
 	$tableBody = "";
 
 	if ($prefs['rating_results_detailed'] == 'y') {

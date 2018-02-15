@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-menu.php 48159 2013-10-24 13:54:49Z arildb $
+// $Id: mod-func-menu.php 58058 2016-03-23 13:28:30Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -37,9 +37,29 @@ function module_menu_info()
 				'description' => tra('Direction for menu: horiz or vert (default vert)'),
 				'filter' => 'text',
 			),
+			'bootstrap' => array(
+				'name' => tra('Use Bootstrap menus'),
+				'description' => tra('').' ( y / n )',
+				'default' => 'y',
+			),
+			'navbar_toggle' => array(
+				'name' => tra('Show Navbar Toggle Button'),
+				'description' => tra('Used in Bootstrap navbar menus when viewport is too narrow for menu items').' ( y / n )',
+				'default' => 'y',
+			),
+			'navbar_brand' => array(
+				'name' => tra('The URL of the navbar brand (logo)'),
+				'description' => tra('Used in Bootstrap navbar menus, if there is a Brand logo to be attached to the menu'),
+				'default' => '',
+			),
+			'navbar_class' => array(
+				'name' => tra('CSS class for the menu nav element'),
+				'description' => tra(''),
+				'default' => 'navbar navbar-default',
+			),
 			'css' => array(
 				'name' => tra('CSS/Superfish'),
-				'description' => tra('Use CSS Superfish menu. y|n (default y)'),
+				'description' => tra('Use CSS Superfish menu (if bootstrap = n). y|n (default y)'),
 				'filter' => 'alpha',
 			),
 			'menu_id' => array(
@@ -80,7 +100,12 @@ function module_menu_info()
 				'name' => tra('Show Namespace'),
 				'description' => tra('Show namespace prefix in page names').' ( y / n )',	// Do not translate y/n	
 				'default' => 'y'
-				),
+			),
+			'setSelected' => array(
+				'name' => tra('Set Selected'),
+				'description' => tra('Process all menu items to show currently selected item and other dynamic states. Useful when disabled on very large menus where performance becomes an issue.').' ( y / n )',
+				'default' => 'y'
+			),
 		)
 	);
 }
@@ -91,13 +116,13 @@ function module_menu_info()
  */
 function module_menu($mod_reference, $module_params)
 {
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('module_error', '');
 	if (empty($module_params['id']) && empty($module_params['structureId'])) {
 		$smarty->assign('module_error', tr('One of these parameters has to be set:') . ' ' . tr('Menu') . ', ' . tr('Structure') . '.');
 	}
 	if (!empty($module_params['structureId'])) {
-		global $structlib; include_once('lib/structures/structlib.php');
+		$structlib = TikiLib::lib('struct');
 
 		if (empty($module_params['title'])) {
 			$smarty->assign('tpl_module_title', $module_params['structureId']);

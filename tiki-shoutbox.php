@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-shoutbox.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-shoutbox.php 58749 2016-06-01 01:39:05Z lindonb $
 
 require_once ('tiki-setup.php');
 include_once ('lib/shoutbox/shoutboxlib.php');
@@ -46,7 +46,7 @@ if ($tiki_p_post_shoutbox == 'y') {
 	if (isset($_REQUEST["save"]) && !empty($_REQUEST['message'])) {
 		check_ticket('shoutbox');
 		if (($prefs['feature_antibot'] == 'y' && empty($user)) && !$captchalib->validate()) {
-			$smarty->assign('msg', $captchalib->getErrors());
+			Feedback::error(['mes' => $captchalib->getErrors()]);
 			if (!empty($_REQUEST['message'])) $smarty->assign_by_ref('message', $_REQUEST['message']);
 		} else {
 			$shoutboxlib->replace_shoutbox($_REQUEST['msgId'], $owner, $_REQUEST['message'], ($_REQUEST['tweet']==1));
@@ -83,7 +83,9 @@ if (isset($_REQUEST["get"])) {
  */
 function processShout($formValues, $destDiv = 'mod-shoutbox')
 {	// AJAX_TODO
-	global $shoutboxlib, $user, $smarty, $prefs, $tiki_p_admin_shoutbox;
+	global $user, $prefs, $tiki_p_admin_shoutbox;
+	global $shoutboxlib;
+	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('tweet', $formValues['tweet']);
 	$smarty->assign('facebook', $formValues['facebook']);
 	if (array_key_exists('shout_msg', $formValues) && strlen($formValues['shout_msg']) > 2) {

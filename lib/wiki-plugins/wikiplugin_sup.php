@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_sup.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_sup.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_sup_info()
 {
@@ -13,7 +13,8 @@ function wikiplugin_sup_info()
 		'description' => tra('Apply superscript font to text'),
 		'prefs' => array( 'wikiplugin_sup' ),
 		'body' => tra('text'),
-		'icon' => 'img/icons/text_superscript.png',
+		'iconname' => 'superscript',
+		'introduced' => 2,
 		'filter' => 'wikicontent',
 		'tags' => array( 'basic' ),
 		'params' => array(
@@ -23,8 +24,5 @@ function wikiplugin_sup_info()
 
 function wikiplugin_sup($data, $params)
 {
-	global $tikilib;
-
-	extract($params, EXTR_SKIP);
 	return "<sup>$data</sup>";
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: refresh-functions.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: refresh-functions.php 58747 2016-05-31 23:00:07Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -27,21 +27,20 @@ function refresh_index($object_type, $object_id = null, $process = true)
 		$unified_type = refresh_index_convert_type($object_type);
 
 		try {
-			global $unifiedsearchlib; require_once 'lib/search/searchlib-unified.php';
+			$unifiedsearchlib = TikiLib::lib('unifiedsearch');
 			$unifiedsearchlib->invalidateObject($unified_type, $object_id);
 
 			if ($process) {
 				$unifiedsearchlib->processUpdateQueue();
 			}
 
-		} catch (Zend_Search_Lucene_Exception $e) {
+		} catch (ZendSearch\Lucene\Exception\ExceptionInterface $e) {
 
-			$errlib = TikiLib::lib('errorreport');
 			$message = $e->getMessage();
 			if (empty($message)) {
-				$message = tra('try rebuilding or optimizing the index on the search admin page');
+				$message = tra('Try rebuilding or optimizing the index on the search admin page');
 			}
-			$errlib->report(tr('Search index could not be updated: %0', $message));
+			Feedback::error(tr('Search index could not be updated: %0', $message), 'session');
 		}
 	}
 

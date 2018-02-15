@@ -1,35 +1,39 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_htmlfeedlink.php 54858 2015-03-31 11:05:39Z jonnybradley $
+// $Id: wikiplugin_htmlfeedlink.php 59837 2016-09-28 16:36:57Z jonnybradley $
 
 function wikiplugin_htmlfeedlink_info()
 {
 	return array(
 		'name' => tra('HTML Feed Link'),
 		'documentation' => 'PluginHtmlFeedlink',
-		'description' => tra('Display remote content'),
+		'description' => tra('Receive and display content from another site sent using PluginHTMLFeed'),
 		'prefs' => array( 'feature_wiki', 'wikiplugin_htmlfeedlink', 'feature_htmlfeed' ),
 		'body' => tra('Initial Value'),
-		'icon' => 'img/icons/page_white_code.png',
+		'iconname' => 'link',
 		'filter' => 'rawhtml_unsafe',
 		'tags' => array( 'basic' ),
+		'introduced' => 9,
 		'params' => array(
 			'feed' => array(
 				'required' => false,
-				'name' => tra('Feed location'),
+				'name' => tra('Feed Location'),
 				'description' => tra(''),
+				'since' => '9.0',
 			),
 			'name' => array(
 				'required' => false,
-				'name' => tra('Name of content'),
+				'name' => tra('Content Name'),
 				'description' => tra(''),
+				'since' => '9.0',
 			),
 			'style' => array(
 				'required' => false,
-				'name' => tra('Style of content'),
+				'name' => tra('Content Style'),
+				'since' => '9.0',
 				'options' => array(
 					array('text' => tra('None'), 'value' => ''),
 					array('text' => tra('Highlight'), 'value' => 'highlight'),
@@ -39,6 +43,7 @@ function wikiplugin_htmlfeedlink_info()
 			'type' => array(
 				'required' => false,
 				'name' => tra('HTML Feed Link Type'),
+				'since' => '9.0',
 				'default' => 'replace',
 				'options' => array(
 					array('text' => tra('Replace'), 'value' => 'replace'),
@@ -49,7 +54,8 @@ function wikiplugin_htmlfeedlink_info()
 			),
 			'moderate' => array(
 				'required' => false,
-				'name' => tra('Is the HTML feed moderated'),
+				'name' => tra('Moderated?'),
+				'since' => '9.0',
 				'default' => 'n',
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -61,6 +67,7 @@ function wikiplugin_htmlfeedlink_info()
 				'required' => false,
 				'name' => tra('Date'),
 				'description' => tr('Date of last accepted HTML item, not used if not moderated'),
+				'since' => '9.0',
 				'default' => '',
 			),
 		),
@@ -69,7 +76,10 @@ function wikiplugin_htmlfeedlink_info()
 
 function wikiplugin_htmlfeedlink($data, $params)
 {
-	global $tikilib, $headerlib, $page, $caching;
+	global $page, $caching;
+	$headerlib = TikiLib::lib('header');
+	$tikilib = TikiLib::lib('tiki');
+
 	static $htmlFeedLinkI = 0;
 	++$htmlFeedLinkI;
 
@@ -117,8 +127,8 @@ function wikiplugin_htmlfeedlink($data, $params)
 		}
 
 		$(document)
-			.unbind('plugin_htmlfeedlink_ready')
-			.bind('plugin_htmlfeedlink_ready', function(e) {
+			.off('plugin_htmlfeedlink_ready')
+			.on('plugin_htmlfeedlink_ready', function(e) {
 				var name = $(e.container).find('#param_name input:first');
 				name.hide();
 				var nameSelect = $('<select>')
@@ -169,7 +179,6 @@ function wikiplugin_htmlfeedlink($data, $params)
 			case "":
 			case "replace":
 				$data = "~np~" . $item->data . "~/np~";
-    			break;
 				//moderate isn't yet working
 				if ($moderate == 'y') {
 					if ($same == false) {

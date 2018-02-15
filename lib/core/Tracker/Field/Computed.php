@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Computed.php 46136 2013-06-02 12:12:36Z changi67 $
+// $Id: Computed.php 57968 2016-03-17 20:06:57Z jonnybradley $
 
 /**
  * Handler class for Computed
@@ -23,7 +23,7 @@ class Tracker_Field_Computed extends Tracker_Field_Abstract
 				'prefs' => array('trackerfield_computed'),
 				'tags' => array('advanced'),
 				'default' => 'n',
-				'warning' => tra('This feature is still in place for backwards compatibility. While there are no flaws associated to it, it could be used as a vector for attacks causing a lot of damage. Webservice field or custom JavaScript is recommended instead of this field.'),
+				'warning' => tra('This feature is still in place for backward compatibility. While it has no known flaws, it could be used as a vector for a malicious attack. A webservice field or custom JavaScript is recommended instead of this field.'),
 				'params' => array(
 					'formula' => array(
 						'name' => tr('Formula'),
@@ -33,6 +33,26 @@ class Tracker_Field_Computed extends Tracker_Field_Abstract
 						'legacy_index' => 0,
 						'profile_reference' => array(__CLASS__, 'profileReference'),
 					),
+					'decimals' => array(
+						'name' => tr('Decimal Places'),
+						'description' => tr('Number of decimal places to round to.'),
+						'filter' => 'int',
+						'legacy_index' => 1,
+					),
+					'dec_point' => array(
+						'name' => tr('Decimal separator when displaying data'),
+						'description' => tr('Single character. Use "c" for comma, "d" for dot or "s" for space. The valid decimal separator when inserting numbers may depend on the site language and web browser. See the documentation for more details.'),
+						'filter' => 'text',
+						'default' => '.',
+						'legacy_index' => 2,
+					),
+					'thousands' => array(
+						'name' => tr('Thousand separator when displaying data'),
+						'description' => tr('Single character: use "c" for comma, "d" for dot or "s" for space.  When inserting data, no thousands separator is needed.'),
+						'filter' => 'text',
+						'default' => ',',
+						'legacy_index' => 3,
+					),					
 				),
 			),
 		);

@@ -1,31 +1,35 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_hasbought.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_hasbought.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_hasbought_info()
 {
 	return array(
 		'name' => tra('Has Bought'),
-		'description' => tra('Check if user has bought certain item or if it is in cart'),
+		'description' => tra('Check whether a user has bought an item or added it to the shopping cart'),
 		'documentation' => tra('PluginHasBought'),
 		'prefs' => array('wikiplugin_hasbought', 'payment_feature'),
 		'filter' => 'wikicontent',
+		'iconname' => 'cart',
 		'tags' => array( 'experimental' ),
+		'introduced' => 7,
 		'params' => array(
 			'key' => array(
 				'required' => true,
-				'name' => tra('Session key names to be collected'),
+				'name' => tra('Key Name'),
 				'description' => tra('Key name of passcode to be checked'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 			),
 			'label' => array(
 				'required' => true,
-				'name' => tra('Labels for the key names to be collected'),
+				'name' => tra('Key Labels'),
 				'description' => tra('Label of the key name of passcode to be checked'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -33,6 +37,7 @@ function wikiplugin_hasbought_info()
 				'required' => true,
 				'name' => tra('Tracker ID'),
 				'description' => tra('Tracker from which to get passcode to check against'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'profile_reference' => 'tracker',
@@ -41,6 +46,7 @@ function wikiplugin_hasbought_info()
 				'required' => true,
 				'name' => tra('Field ID'),
 				'description' => tra('Field ID from which to get passcode to check against'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'profile_reference' => 'tracker_field',
@@ -49,6 +55,7 @@ function wikiplugin_hasbought_info()
 				'required' => true,
 				'name' => tra('Item ID'),
 				'description' => tra('Item ID from which to get passcode to check against'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'profile_reference' => 'tracker_item',
@@ -59,16 +66,17 @@ function wikiplugin_hasbought_info()
 
 function wikiplugin_hasticket( $data, $params )
 {
-	global $smarty, $user, $access;
+	global $user;
+	$smarty = TikiLib::lib('smarty');
 	if (empty($params['key']) || empty($params['trackerId']) || empty($params['itemId']) || empty($params['fieldId'])) {
 		return '';
 	}
 	$key = $params['key'];
 	if ( $_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['trackerpasscode'])) {
-		global $access;
 
 		// Check all filled in
 		if (empty($_POST['trackerpasscode'])) {
+			$access = TikiLib::lib('access');
 			$access->redirect($_SERVER['REQUEST_URI'], tr('Please fill in all fields')); 
 			die;
 		}
@@ -80,7 +88,7 @@ function wikiplugin_hasticket( $data, $params )
 		$data = substr($data, 0, strpos($data, '{ELSE}'));
 	}
 	// check code
-	global $trklib; require_once("lib/trackers/trackerlib.php");
+	$trklib = TikiLib::lib('trk');
 	$correctcode = $trklib->get_item_value($params['trackerId'], $params['itemId'], $params['fieldId']);
 	if ($_SESSION['wikiplugin_trackerpasscode'][$key] == $correctcode) {
 		return $data;

@@ -1,23 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: main.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: main.php 61815 2017-03-22 14:50:08Z jyhem $
 
 function prefs_main_list()
 {
 	return array(
 		'main_shadow_start' => array(
 			'name' => tra('Main shadow start'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'textarea',
 			'size' => '2',
 			'default' => '',
 		),
 		'main_shadow_end' => array(
 			'name' => tra('Main shadow end'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'textarea',
 			'size' => '2',
 			'default' => '',

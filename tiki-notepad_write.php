@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-notepad_write.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-notepad_write.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
@@ -24,7 +24,7 @@ if (isset($_REQUEST["noteId"])) {
 	if ($info['parse_mode'] == 'raw') {
 		$info['parsed'] = nl2br(htmlspecialchars($info['data']));
 		$smarty->assign('wysiwyg', 'n');
-	} else $info['parsed'] = $tikilib->parse_data($info['data'], array('is_html' => $is_html));
+	} else $info['parsed'] = TikiLib::lib('parser')->parse_data($info['data'], array('is_html' => $is_html));
 } else {
 	$info = array();
 	$info['name'] = '';

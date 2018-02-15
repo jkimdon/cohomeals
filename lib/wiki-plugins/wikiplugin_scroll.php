@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_scroll.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_scroll.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_scroll_info()
 {
@@ -13,30 +13,34 @@ function wikiplugin_scroll_info()
 		'description' => tra('Show animated text that scrolls up or down'),
 		'prefs' => array('wikiplugin_scroll'),
 		'body' => tra('text'),
-		'icon' => 'img/icons/script.png',
+		'iconname' => 'sort-down',
+		'introduced' => 5,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'width' => array(
 				'required' => true,
 				'name' => tra('Width'),
-				'description' => tra('Width in pixels. Example: 600px.'),
-				'accepted' => tra('Number of pixels followed by "px". Example: 600px.'),
-				'filter' => 'striptags',
+				'description' => tr('Width in pixels. Example: %0.', '<code>600px</code>'),
+				'since' => '5.0',
+				'accepted' => tra('Number of pixels followed by "px".'),
+				'filter' => 'text',
 				'default' => '',
 			),
 			'height' => array(
 				'required' => true,
 				'name' => tra('Height'),
-				'description' => tra('Height in pixels. Example: 450px'),
-				'accepted' => tra('Number of pixels followed by "px". Example: 450px.'),
-				'filter' => 'striptags',
+				'description' => tr('Height in pixels. Example: %0.', '<code>450px</code>'),
+				'since' => '5.0',
+				'accepted' => tra('Number of pixels followed by "px".'),
+				'filter' => 'text',
 				'default' => '',
 			),
 			'speed' => array(
 				'required' => false,
 				'name' => tra('Speed'),
-				'description' => tra('Scroll speed in number of seconds (default is 8 seconds)'),
-				'filter' => 'int',
+				'description' => tr('Scroll speed in number of seconds (default is %0)', '<code>8</code>'),
+				'since' => '5.0',
+				'filter' => 'digits',
 				'default' => 8,
 			),
 		)

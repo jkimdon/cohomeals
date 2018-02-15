@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WriteFile.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: WriteFile.php 63613 2017-08-21 19:17:53Z drsassafras $
 
 require_once('Language.php');
 
@@ -38,7 +38,7 @@ class Language_WriteFile
 	 * @var array
 	 */
 	protected $translations;
-	
+
 	public function __construct(Language_File $parseFile)
 	{
 		$this->parseFile = $parseFile;
@@ -67,8 +67,30 @@ class Language_WriteFile
 		copy($this->filePath, $this->filePath . '.old');
 		
 		$this->translations = $this->parseFile->getTranslations();
-		$entries = $this->mergeStringsWithTranslations($strings, $this->translations);
-		
+
+		$entries = array();
+		foreach ($strings as $string) {
+			if (isset($this->translations[$string['name']])) {
+				$string['translation'] = $this->translations[$string['name']];
+			} else {
+				// Handle punctuations at the end of the string (cf. comments in lib/init/tra.php)
+				// For example, if the string is 'Login:', we put 'Login' for translation instead
+				// (except if we already have an explicit translation for 'Login:', in which case we don't reach this else)
+				$stringLength = strlen($string['name']);
+				$stringLastChar = $string['name'][$stringLength - 1];
+
+				if (in_array($stringLastChar, Language::punctuations) ) {
+					$trimmedString = substr($string['name'], 0, $stringLength - 1);
+					$string['name'] = $trimmedString;
+					if (isset($this->translations[$trimmedString])) {
+						$string['translation'] = $this->translations[$trimmedString];
+					}
+				}
+			}
+			$entries[$string['name']] = $string;
+		}
+
+
 		$handle = fopen($this->tmpFilePath, 'w');
 		
 		if ($handle) {
@@ -94,16 +116,16 @@ class Language_WriteFile
 	protected function fileHeader()
 	{
 		$header = <<<TXT
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 
 // Note for translators about translation of text ending with punctuation
 // 
-// The current list of concerned punctuation can be found in 'lib/init/tra.php'
-// On 2009-03-02, it is: (':', '!', ';', '.', ',', '?')
-// For clarity, we explain here only for colons: ':' but it is the same for the rest
+// The concerned punctuation signs can be found in tra_impl() (in 'lib/init/tra.php').
+// As of 2016-12-04, these are: ':', '!', ';', '.', ',', '?'.
+// For clarity, we explain here only for colons (':'), but it is the same for the rest.
 // 
 // Short version: it is not a problem that string "Login:" has no translation. Only "Login" needs to be translated.
 // 
@@ -121,47 +143,7 @@ TXT;
 		
 		return $header;
 	}
-	
-	/**
-	 * Merge collected strings from source files with translations from
-	 * language.php ignoring translations for strings that are not present
-	 * anymore in the source files.
-	 * 
-	 * @param array $strings English strings collected from source files 
-	 * @param array $translations Translations from language.php file
-	 * @return array
-	 */
-	protected function mergeStringsWithTranslations(array $strings, array $translations)
-	{
-		$punctuations = array(':', '!', ';', '.', ',', '?'); // Modify lib/init/tra.php accordingly
-		
-		$entries = array();
-		
-		foreach ($strings as $string) {
-			if (isset($translations[$string['name']])) {
-				$string['translation'] = $translations[$string['name']];
-			} else {
-				// Handle punctuations at the end of the string (cf. comments in lib/init/tra.php)
-				// For example, if the string is 'Login:', we put 'Login' for translation instead
-				// (except if we already have an explicit translation for 'Login:', in which case we don't reach this else)
-				$stringLength = strlen($string['name']);
-				$stringLastChar = $string['name'][$stringLength - 1];
-				
-				if (in_array($stringLastChar, $punctuations) ) {
-					$trimmedString = substr($string['name'], 0, $stringLength - 1);
-					$string['name'] = $trimmedString;
-					if (isset($translations[$trimmedString])) {
-						$string['translation'] = $translations[$trimmedString]; 
-					}
-				}
-			}
-			
-			$entries[$string['name']] = $string;
-		}
-		
-		return $entries;
-	}
-	
+
 	/**
 	 * Format a pair source and translation as
 	 * a string to be written to a language.php file

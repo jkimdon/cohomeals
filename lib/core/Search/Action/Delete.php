@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Delete.php 47862 2013-10-02 17:23:51Z lphuberdeau $
+// $Id: Delete.php 60878 2017-01-12 15:16:08Z kroky6 $
 
 class Search_Action_Delete implements Search_Action_Action
 {
@@ -20,7 +20,7 @@ class Search_Action_Delete implements Search_Action_Action
 		$object_type = $data->object_type->text();
 
 		if ($object_type != 'file') {
-			return false;
+			throw new Search_Action_Exception(tr('Cannot apply delete action to an object type %0.', $object_type));
 		}
 
 		return true;
@@ -37,7 +37,7 @@ class Search_Action_Delete implements Search_Action_Action
 			$info = $filegallib->get_file_info($fileId);
 
 			if (! $info) {
-				return false;
+				throw new Search_Action_Exception(tr('Cannot find file to delete: %0.', $fileId));
 			}
 
 			$filegallib->remove_file($info);
@@ -48,6 +48,10 @@ class Search_Action_Delete implements Search_Action_Action
 		}
 
 		return true;
+	}
+
+	function requiresInput(JitFilter $data) {
+		return false;
 	}
 }
 

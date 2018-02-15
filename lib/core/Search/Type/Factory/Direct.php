@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Direct.php 46259 2013-06-10 14:41:22Z lphuberdeau $
+// $Id: Direct.php 60381 2016-11-23 10:56:42Z jonnybradley $
 
 class Search_Type_Factory_Direct implements Search_Type_Factory_Interface
 {
@@ -29,12 +29,27 @@ class Search_Type_Factory_Direct implements Search_Type_Factory_Interface
 
 	function numeric($value)
 	{
-		return new Search_Type_Whole((float) $value);
+		return new Search_Type_Numeric($value);
 	}
 
 	function multivalue($values)
 	{
 		return new Search_Type_Whole((array) $values);
+	}
+
+	function object($values)
+	{
+		return new Search_Type_Object($values);
+	}
+
+	function nested($values)
+	{
+		return new Search_Type_Nested($values);
+	}
+
+	function geopoint($values)
+	{
+		return new Search_Type_GeoPoint($values);
 	}
 
 	function sortable($value)

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.html_select_date.php 48061 2013-10-18 16:17:45Z jonnybradley $
+// $Id: function.html_select_date.php 58008 2016-03-19 22:26:34Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -215,11 +215,11 @@ function smarty_function_html_select_date($params, $smarty)
 			//tra('January') tra('February') tra('March') tra('April') tra('May') tra('June')
 			// tra('July') tra('August') tra('September') tra('October') tra('November') tra('December')
 
-			$month_names[$i] = ucfirst(tra(strftime($month_format, mktime(0, 0, 0, $i, 1, 2000))));
+			$month_names[$i] = ucfirst(tra(utf8_encode(strftime($month_format, mktime(0, 0, 0, $i, 1, 2000)))));
 			$month_values[$i] = strftime($month_value_format, mktime(0, 0, 0, $i, 1, 2000));
 		}
 
-		$month_result .= '<select name=';
+		$month_result .= '<select class="form-control date" name=';
 		if (null !== $field_array) {
 			$month_result .= '"' . $field_array . '[' . $prefix . 'Month]"';
 		} else {
@@ -260,7 +260,7 @@ function smarty_function_html_select_date($params, $smarty)
 			$day_values[] = sprintf($day_value_format, $i);
 		}
 
-		$day_result .= '<select name=';
+		$day_result .= '<select class="form-control date" name=';
 		if (null !== $field_array) {
 			$day_result .= '"' . $field_array . '[' . $prefix . 'Day]"';
 		} else {
@@ -316,7 +316,7 @@ function smarty_function_html_select_date($params, $smarty)
 				array_unshift($years, $year_empty);
 				array_unshift($yearvals, '');
 			}
-			$year_result .= '<select name="' . $year_name . '"';
+			$year_result .= '<select class="form-control date" name="' . $year_name . '"';
 			if (null !== $year_size) {
 				$year_result .= ' size="' . $year_size . '"';
 			}

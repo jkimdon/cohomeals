@@ -1,33 +1,35 @@
-{* $Id: tiki-list_integrator_repositories.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
+{* $Id: tiki-list_integrator_repositories.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
 
 {title}{tr}Available Repositories{/tr}{/title}
 
 {if $tiki_p_admin eq 'y'}
-	<div class="navbar">
-		{button href="tiki-admin_integrator.php" _text="{tr}Configure Repositories{/tr}"}
+	<div class="t_navbar">
+		{button href="tiki-admin_integrator.php" class="btn btn-default" _text="{tr}Configure Repositories{/tr}"}
 	</div>
 {/if}
 
 
 {* Table with list of repositories (if array is not empty) *}
 {if count($repositories) gt 0}
-<table class="table normal" id="integrator-repositories">
-  <tr>
-    <th>{tr}Name{/tr}</th>
-    <th>{tr}Description{/tr}</th>
-  </tr>
-  {cycle values="odd,even" print=false}
-  {section name=rep loop=$repositories}
-    <tr class="{cycle}">
-      <td class="text">
-        <a href="tiki-integrator.php?repID={$repositories[rep].repID|escape}">
-          {$repositories[rep].name}
-        </a>
-      </td>
-      <td class="text">{$repositories[rep].description}</td>
-    </tr>
-  {/section}
-</table>
+	<div class="table-responsive">
+		<table class="table" id="integrator-repositories">
+			<tr>
+				<th>{tr}Name{/tr}</th>
+				<th>{tr}Description{/tr}</th>
+			</tr>
+
+			{section name=rep loop=$repositories}
+				<tr>
+					<td class="text">
+						<a href="tiki-integrator.php?repID={$repositories[rep].repID|escape}">
+							{$repositories[rep].name}
+						</a>
+					</td>
+					<td class="text">{$repositories[rep].description}</td>
+				</tr>
+			{/section}
+		</table>
+	</div>
 {else}
 
 {* Here should be panel (let it be style 'info-panel') with info

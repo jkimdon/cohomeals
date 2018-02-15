@@ -1,21 +1,23 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_pref.php 44579 2013-01-21 21:02:43Z luciash $
+// $Id: wikiplugin_pref.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_pref_info()
 {
 	return array(
 		'name' => tra('Preference'),
 		'documentation' => 'PluginPref',
-		'description' => tra('Display contents based on global preferences'),
-		'body' => tra('Wiki text to display if conditions are met. The body may contain {ELSE}. Text after the marker will be displayed if not matching the conditions.'),
+		'description' => tra('Display content based on global preference settings'),
+		'body' => tr('Wiki text to display if conditions are met. The body may contain %0{ELSE}%1. Text after the marker
+			will be displayed if not matching the conditions.', '<code>', '</code>'),
 		'prefs' => array('wikiplugin_pref'),
 		'filter' => 'wikicontent',
 		'extraparams' => true,
-		'icon' => 'img/icons/wrench.png',
+		'iconname' => 'settings',
+		'introduced' => 11,
 		'params' => array(
 		),
 	);

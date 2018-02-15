@@ -1,9 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Writer.php 50135 2014-02-28 19:14:29Z lphuberdeau $
+// $Id: Writer.php 60792 2017-01-05 14:41:05Z kroky6 $
+
+use Symfony\Component\Yaml\Yaml;
 
 class Tiki_Profile_Writer
 {
@@ -18,9 +20,10 @@ class Tiki_Profile_Writer
 		$this->externalWriter = new Tiki_Profile_Writer_ExternalWriter("$directory/$profileName");
 		if (file_exists($this->filePath)) {
 			$content = file_get_contents($this->filePath);
-			$this->data = Horde_Yaml::load($content);
+			$this->data = Yaml::parse($content);
 		} else {
 			$this->data = array(
+				'permissions' => array(),
 				'preferences' => array(),
 				'objects' => array(),
 				'unknown_objects' => array(),
@@ -81,6 +84,13 @@ class Tiki_Profile_Writer
 		return $reference;
 	}
 
+	function addPermissions($groupName, array $data)
+	{
+		$this->addFake('group', $groupName);
+
+		$this->data['permissions'][$groupName] = $data;
+	}
+
 	private function addRawObject($type, $reference, $currentId, $data)
 	{
 		$this->clearObject($type, $currentId);
@@ -109,11 +119,11 @@ class Tiki_Profile_Writer
 
 		// Find the object name property
 		$candidates = array();
-		$currentId = preg_replace('/[^\w]+/', '', strtolower($currentId));
+		$currentId = preg_replace('/[^\w]+/u', '', strtolower($currentId));
 
 		foreach (array('name', 'title') as $key) {
 			if (! empty($data[$key])) {
-				$basename = preg_replace('/\W+/', '_', strtolower($data[$key]));
+				$basename = preg_replace('/\W+/u', '_', strtolower($data[$key]));
 				$candidates[] = $basename;
 				$candidates[] = $type . '_' . $basename;
 				$candidates[] = $type . '_' . $basename . '_' . $currentId;
@@ -150,17 +160,32 @@ class Tiki_Profile_Writer
 	 */
 	function removeUnknown($type, $id, $replacement)
 	{
+		if( !is_array($this->data['unknown_objects']) ) {
+			return;
+		}
 		foreach ($this->data['unknown_objects'] as $key => $entry) {
 			if ($entry['type'] == $type && $entry['id'] == $id) {
 				$token = $entry['token'];
-				array_walk_recursive(
-					$this->data['objects'],
-					function (& $entry) use ($token, $replacement) {
-						if (is_string($entry)) {
-							$entry = str_replace($token, $replacement, $entry);
+				if (is_array($this->data['objects'])) {
+					array_walk_recursive(
+						$this->data['objects'],
+						function (& $entry) use ($token, $replacement) {
+							if (is_string($entry)) {
+								$entry = str_replace($token, $replacement, $entry);
+							}
 						}
-					}
-				);
+					);
+				}
+				if (is_array($this->data['permissions'])) {
+					array_walk_recursive(
+						$this->data['permissions'],
+						function (& $entry) use ($token, $replacement) {
+							if (is_string($entry)) {
+								$entry = str_replace($token, $replacement, $entry);
+							}
+						}
+					);
+				}
 
 				$writer = $this->externalWriter;
 				foreach ($writer->getFiles() as $file => $content) {
@@ -179,13 +204,16 @@ class Tiki_Profile_Writer
 	 */
 	function getUnknownObjects()
 	{
-		return array_map(
-			function ($entry) {
-				unset($entry['token']);
-				return $entry;
-			},
-			$this->data['unknown_objects']
-		);
+		if (is_array($this->data['unknown_objects'])){
+			return array_map(
+				function ($entry) {
+					unset($entry['token']);
+					return $entry;
+				},
+				$this->data['unknown_objects']
+			);
+		}
+		return;
 	}
 
 	/**
@@ -287,9 +315,11 @@ class Tiki_Profile_Writer
 	private function generateTemporaryReference($type, $id)
 	{
 		// Find existing entry for unknown reference
-		foreach ($this->data['unknown_objects'] as $entry) {
-			if ($entry['type'] == $type && $entry['id'] == $id) {
-				return $entry['token'];
+		if( is_array($this->data['unknown_objects']) ) {
+			foreach ($this->data['unknown_objects'] as $entry) {
+				if ($entry['type'] == $type && $entry['id'] == $id) {
+					return $entry['token'];
+				}
 			}
 		}
 
@@ -309,7 +339,7 @@ class Tiki_Profile_Writer
 	 */
 	function save()
 	{
-		file_put_contents($this->filePath, Horde_Yaml::dump($this->quoteArray($this->data)));
+		file_put_contents($this->filePath, Yaml::dump($this->quoteArray($this->data), 20, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
 		$this->externalWriter->apply();
 	}
 
@@ -360,6 +390,6 @@ class Tiki_Profile_Writer
 		$clone = clone $this;
 		$clone->clean();
 
-		return Horde_Yaml::dump($clone->data);
+		return Yaml::dump($clone->data, 20, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
 	}
 }

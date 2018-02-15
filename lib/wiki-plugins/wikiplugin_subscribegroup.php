@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_subscribegroup.php 44849 2013-02-08 18:41:20Z lphuberdeau $
+// $Id: wikiplugin_subscribegroup.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_subscribegroup_info()
 {
@@ -13,91 +13,129 @@ function wikiplugin_subscribegroup_info()
 		'description' => tra('Allow users to subscribe to a group'),
 		'prefs' => array( 'wikiplugin_subscribegroup' ),
 		'body' => tra('text displayed before the button'),
-		'icon' => 'img/icons/group_add.png',
+		'iconname' => 'group',
+		'introduced' => 2,
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'group' => array(
 				'required' => true,
 				'name' => tra('Group Name'),
 				'description' => tra('Group name to subscribe to or unsubscribe from'),
+				'since' => '2.0',
 				'filter' => 'groupname',
 				'default' => ''
 			),
 			'subscribe' => array(
 				'required' => false,
 				'name' => tra('Subscribe Text'),
-				'description' => tra('Subscribe text, containing %s as the placeholder for the group name.'),
+				'description' => tr('Subscribe text, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '2.0',
 				'default' => tra('Subscribe') . '%s',
 			),
 			'unsubscribe' => array(
 				'required' => false,
 				'name' => tra('Unsubscribe Text'),
-				'description' => tra('Unsubscribe text, containing %s as the placeholder for the group name.'),
+				'description' => tr('Unsubscribe text, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '2.0',
 				'default' => tra('Unsubscribe') . '%s'
 			),
 			'subscribe_action' => array(
 				'required' => false,
 				'name' => tra('Subscribe Action'),
-				'description' => tra('Subscribe button label, containing %s as the placeholder for the group name.'),
+				'description' => tr('Subscribe button label, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '2.0',
 				'default' => tra('OK')
 			),
 			'unsubscribe_action' => array(
 				'required' => false,
-				'name' => tra('Unsubscribe Action'),
-				'description' => tra('Unsubscribe button label, containing %s as the placeholder for the group name.'),
+				'name' => tr('Unsubscribe Action'),
+				'description' => tra('Unsubscribe button label, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '2.0',
 				'default' => tra('OK')
 			),
 			'postsubscribe_url' => array(
 				'required' => false,
-				'name' => tra('Postsubscribe URL'),
+				'name' => tra('Post-subscribe URL'),
 				'description' => tra('URL to send the user to after subscribing, if required.'),
+				'since' => '8.0',
 				'filter' => 'url',
 				'default' => ''
 			),
 			'postunsubscribe_url' => array(
 				'required' => false,
-				'name' => tra('Postunsubscribe URL'),
+				'name' => tra('Post-unsubscribe URL'),
 				'description' => tra('URL to send the user to after unsubscribing, if required.'),
+				'since' => '8.0',
 				'filter' => 'url',
 				'default' => ''
 			),
 			'defgroup' => array(
 				'required' => false,
 				'name' => tra('Default Group'),
-				'description' => tra('Make this the default group text, containing %s as the placeholder for the group name..'),
+				'description' => tr('Make this the default group text, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '9.1',
 				'default' => tra('OK')
 			),
 			'undefgroup' => array(
 				'required' => false,
 				'name' => tra('Not Default Group'),
-				'description' => tra('Stop this being default group text, containing %s as the placeholder for the group name..'),
+				'description' => tr('Stop this being default group text, containing %0 as the placeholder for the group name.',
+					'<code>%s</code>'),
+				'since' => '9.1',
 				'default' => tra('OK')
 			),
 			'defgroup_action' => array(
 				'required' => false,
 				'name' => tra('Default Group Action'),
 				'description' => tra('Default group button label. Will subscribe to the group first if not already a member.'),
+				'since' => '9.1',
 				'default' => tra('OK')
 			),
 			'undefgroup_action' => array(
 				'required' => false,
 				'name' => tra('Not Default Group Action'),
 				'description' => tra('Stop this being default group button label. Does not unsubscribe from the group.'),
+				'since' => '9.1',
 				'default' => tra('OK')
 			),
 			'undefgroup_group' => array(
 				'required' => false,
-				'name' => tra('Group To Set When Not Default'),
+				'name' => tra('Second Default'),
 				'description' => tra('Group name to set as default when user stops this group being it.'),
+				'since' => '9.1',
 				'filter' => 'groupname',
 				'default' => 'Registered'
 			),
 			'defgroup_redirect_home' => array(
 				'required' => false,
-				'name' => tra('Go To Default Group Home'),
-				'description' => tra('Redirect to new home page after default group change. (Default y)'),
+				'name' => tra('Redirect'),
+				'description' => tra('Redirect to new home page after default group change. (default is to redirect)'),
+				'since' => '9.1',
 				'filter' => 'alpha',
 				'default' => 'y',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'y'),
+					array('text' => tra('No'), 'value' => 'n')
+				)
+			),
+			'allowLeaveNonUserChoice' => array(
+				'required' => false,
+				'name' => tra('Can Always Leave'),
+				'description' => tra('Always allow leaving a group even if the group settings do not allow user choice.'),
+				'since' => '14.0',
+				'filter' => 'alpha',
+				'default' => 'n',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Yes'), 'value' => 'y'),
+					array('text' => tra('No'), 'value' => 'n')
+				)
 			),
 		),
 	);
@@ -105,7 +143,10 @@ function wikiplugin_subscribegroup_info()
 
 function wikiplugin_subscribegroup($data, $params)
 {
-	global $tiki_p_subscribe_groups, $userlib, $user, $smarty;
+	global $tiki_p_subscribe_groups, $user;
+	$userlib = TikiLib::lib('user');
+	$smarty = TikiLib::lib('smarty');
+
 	static $iSubscribeGroup = 0;
 	++$iSubscribeGroup;
 	if (empty($user)) {
@@ -129,12 +170,19 @@ function wikiplugin_subscribegroup($data, $params)
 	if (!($info = $userlib->get_group_info($group)) || $info['groupName'] != $group) { // must have the right case
 		return tra('Incorrect param');
 	}
-	if ($info['userChoice'] != 'y') {
-		return tra('Permission denied');
+	if (!isset($params['allowLeaveNonUserChoice']) || $params['allowLeaveNonUserChoice'] != 'y') {
+		if ($info['userChoice'] != 'y') {
+			return tra('Permission denied');
+		}
 	}
 
 	$groups = $userlib->get_user_groups_inclusion($user);
 	$current_defgroup = $userlib->get_user_default_group($user);
+
+	if (!$groups[$group] && $params['allowLeaveNonUserChoice'] == 'y') {
+		// Deny anyway if user is not in group even if allowLeaveNonUserChoice is y
+		return tra('Permission denied');
+	}
 
 	if (!empty($_REQUEST['subscribeGroup']) && !empty($_REQUEST['iSubscribeGroup']) && $_REQUEST['iSubscribeGroup'] == $iSubscribeGroup && $_REQUEST['group'] == $group) {
 		if (isset($defgroup) || isset($defgroup_action) || isset($undefgroup) || isset($undefgroup_action)) {
@@ -148,10 +196,10 @@ function wikiplugin_subscribegroup($data, $params)
 				$userlib->set_default_group($user, $group);
 			}
 			if (!empty($params['defgroup_url']) && $params['defgroup_url'] === 'n') {
-				Zend_OpenId::redirect(Zend_OpenId::selfUrl());
+				ZendOpenId\OpenId::redirect(ZendOpenId\OpenId::selfUrl());
 			} else {
 				global $tikiroot;
-				Zend_OpenId::redirect($tikiroot);
+				ZendOpenId\OpenId::redirect($tikiroot);
 			}
 			die;
 		} else if (isset($groups[$group])) {

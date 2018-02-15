@@ -1,6 +1,7 @@
-{* $Id: wikiplugin_trackerstat.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
-<table class="table normal wikiplugin_trackerstat">
-{cycle values="even,odd" print=false}
+{* $Id: wikiplugin_trackerstat.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+<div class="table-responsive">
+<table class="table wikiplugin_trackerstat">
+
 {section name=istat loop=$stats}
 <tr><th colspan="{if $show_bar eq 'y' and $show_percent eq 'y' and $show_count eq 'y'}4{elseif $show_bar eq 'y' and $show_percent eq 'y' and $show_count eq 'n'}3{elseif $show_bar eq 'y' and $show_percent eq 'n' and $show_count eq 'y'}3{elseif $show_bar eq 'n' and $show_percent eq 'y' and $show_count eq 'y'}3{elseif $show_bar eq 'n' and $show_percent eq 'n' and $show_count eq 'y'}2{elseif $show_bar eq 'n' and $show_percent eq 'y' and $show_count eq 'n'}2{elseif $show_bar eq 'y' and $show_percent eq 'n' and $show_count eq 'n'}2{else}1{/if}">{$stats[istat].name|escape}</th>
 </tr>
@@ -19,3 +20,4 @@
 {/foreach}
 {/section}
 </table>
+</div>

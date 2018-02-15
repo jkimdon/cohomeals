@@ -1,24 +1,26 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Controller.php 62088 2017-04-05 15:25:20Z jonnybradley $
 
 class Services_Report_Controller
 {
 	function setUp()
 	{
-		global $prefs;
-		
 	}
 
 	function action_edit($input)
 	{
-		global $tikilib, $access, $headerlib, $reportFullscreen, $index, $values;
+		global $reportFullscreen, $index, $values;
+		$headerlib = TikiLib::lib('header');
+		$tikilib = TikiLib::lib('tiki');
+		$access = TikiLib::lib('access');
+
 		$reportFullscreen = true;
 		$index = $input->index->int();
-		$values = $input->values->string();
+		$values = $input->values->text();
 		
 		include_once 'tiki-edit_report.php';
 	}
@@ -31,9 +33,9 @@ class Services_Report_Controller
 	function action_preview($input)
 	{
 		echo Report_Builder::load($input->type->string())
-			->setValuesFromRequest($input->value->array())
+			->setValuesFromRequest($input->value->asArray())
 			->outputSheet();
-		die;
+		exit;
 	}
 
 	function action_exportcsv($input)
@@ -41,7 +43,7 @@ class Services_Report_Controller
 		echo Report_Builder::load($input->type->string())
 			->setValuesFromRequest(json_decode(urldecode($input->value->string())))
 			->outputCSV(true);
-		die;
+		exit;
 	}
 
 	function action_wikidata($input)
@@ -49,7 +51,7 @@ class Services_Report_Controller
 		echo Report_Builder::load($input->type->string())
 			->setValuesFromRequest($input->value->string())
 			->outputWikiData();
-		die;
+		exit;
 	}
 }
 

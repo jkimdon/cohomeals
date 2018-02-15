@@ -1,10 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cookies.php 49897 2014-02-15 15:48:55Z jonnybradley $
+// $Id: cookies.php 62837 2017-05-31 11:07:05Z drsassafras $
 
+global $access;
+$headerlib = TikiLib::lib('header');
+$smarty = TikiLib::lib('smarty');
 //this script may only be included - so its better to die if called directly.
 $access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
@@ -28,27 +31,17 @@ if ( isset($_SESSION['tiki_cookie_jar']) ) {
 
 $smarty->assign_by_ref('cookie', $_COOKIE);
 
-// fix margins for hidden columns - css (still) doesn't work as it needs to know the "normal" margins FIXME
-if (getCookie('show_col2') == 'n') {
-	if (getCookie('rtl') == 'y') { // check if we are in RTL language mode
-		$headerlib->add_css('#c1c2 #wrapper #col1.marginright { margin-right: 0; }', 100);
-	} else {
-		$headerlib->add_css('#c1c2 #wrapper #col1.marginleft { margin-left: 0; }', 100);
-	}
-}
-if (getCookie('show_col3') == 'n') {
-	if (getCookie('rtl') == 'y') {
-		$headerlib->add_css('#c1c2 #wrapper #col1.marginleft { margin-left: 0; }', 100);
-	} else {
-		$headerlib->add_css('#c1c2 #wrapper #col1.marginright { margin-right: 0; }', 100);
-	}
-}
-
 function getCookie($name, $section = null, $default = null)
 {
-	global $feature_no_cookie;
+	global $feature_no_cookie, $jitCookie;
 
-	if ($feature_no_cookie || (empty($section) && !isset($_COOKIE[$name]) && isset($_SESSION['tiki_cookie_jar'][$name]))) {
+	if (isset($_COOKIE[$name])) {
+		$cookie = $_COOKIE[$name];
+	} elseif(isset($jitCookie[$name])) {
+		$cookie = $jitCookie[$name];
+	}
+
+	if ($feature_no_cookie || (empty($section) && !isset($cookie) && isset($_SESSION['tiki_cookie_jar'][$name]))) {
 		if (isset($_SESSION['tiki_cookie_jar'][$name])) {
 			return $_SESSION['tiki_cookie_jar'][$name];
 		} else {
@@ -63,8 +56,8 @@ function getCookie($name, $section = null, $default = null)
 		} else
 			return $default;
 	} else {
-		if (isset($_COOKIE[$name]))
-			return $_COOKIE[$name];
+		if (isset($cookie))
+			return $cookie;
 		else
 			return $default;
 	}

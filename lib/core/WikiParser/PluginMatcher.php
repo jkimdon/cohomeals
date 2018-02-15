@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PluginMatcher.php 51514 2014-05-28 14:07:00Z lphuberdeau $
+// $Id: PluginMatcher.php 62772 2017-05-27 17:33:15Z jonnybradley $
 
 class WikiParser_PluginMatcher implements Iterator, Countable
 {
@@ -71,13 +71,15 @@ class WikiParser_PluginMatcher implements Iterator, Countable
 
 	function findMatches($start, $end)
 	{
+		global $prefs;
+
 		static $passes;
 
 		if ($this->level === 0) {
 			$passes = 0;
 		}
 
-		if (++$passes > 500) {
+		if (++$passes > $prefs['wikiplugin_maximum_passes']) {
 			return;
 		}
 

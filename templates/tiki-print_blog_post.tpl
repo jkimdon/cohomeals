@@ -1,4 +1,4 @@
-{* $Id: tiki-print_blog_post.tpl 53516 2015-01-16 14:36:09Z luciash $ *}<!DOCTYPE html>
+{* $Id: tiki-print_blog_post.tpl 53513 2015-01-16 14:11:32Z luciash $ *}<!DOCTYPE html>
 <html id="print" lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
 {include file='header.tpl'}

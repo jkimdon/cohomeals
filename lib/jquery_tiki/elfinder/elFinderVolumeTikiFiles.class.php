@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: elFinderVolumeTikiFiles.class.php 53587 2015-01-20 18:38:36Z jonnybradley $
+// $Id: elFinderVolumeTikiFiles.class.php 62067 2017-04-04 09:15:54Z jonnybradley $
 
 /**
  * Started life as copy of elFinderVolumeMySQL.class.php
@@ -300,7 +300,14 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 		} else {
 			$id = isset($row['id']) ? $row['id'] : $row['fileId'];
 			$id = 'f_' . $id;
-			$r['mime'] = $row['filetype'];
+			$filetype = $row['filetype'];
+			// elFinder assigns standard mime types like application/vnd.ms-word to ms doc, we use application/msword etc in tiki for some obscure reason :(
+			if (strpos($filetype, 'application/ms') !== false) {
+				$filetype = str_replace('application/ms', 'application/vnd.ms-', $filetype);
+				$filetype = str_replace('ms--', 'ms-', $filetype);	// in case it was application/ms-word
+			}
+
+			$r['mime'] = $filetype;
 			$r['size'] = $row['filesize'];
 			$row['parentId'] = $row['galleryId'];
 
@@ -779,7 +786,7 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 	 * Return new file path or false.
 	 *
 	 * @param  string  $source  source file path
-	 * @param  string  $target  target dir path
+	 * @param  string  $targetDir  target dir path
 	 * @param  string  $name    file name
 	 * @return string|bool
 	 **/
@@ -819,6 +826,10 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 					array('galleryId' => $srcDirId)
 				);
 				if ($result) {
+					TikiLib::events()->trigger('tiki.filegallery.update', [
+						'type' => 'file gallery',
+						'object' => $srcDirId,
+					]);
 					return 'd_' . $srcDirId;
 				}
 			}
@@ -832,6 +843,10 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 					array('fileId' => $this->pathToId($source))
 				);
 				if ($result) {
+					TikiLib::events()->trigger('tiki.file.update', [
+							'type' => 'file',
+							'object' => $this->pathToId($source),
+					]);
 					return 'f_' . $this->pathToId($source);
 				}
 			}
@@ -901,11 +916,13 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 	 * Create new file and write into it from file pointer.
 	 * Return new file path or false on error.
 	 *
-	 * @param  resource  $fp   file pointer
-	 * @param  string    $dir  target dir path
-	 * @param  string    $name file name
+	 * @param  resource $fp file pointer
+	 * @param  string $dir target dir path
+	 * @param  string $name file name
+	 * @param array $stat	file info
 	 * @return bool|string
-	 **/
+	 * @throws Exception
+	 */
 	protected function _save($fp, $dir, $name, $stat)
 	{
 		$this->clearcache();
@@ -921,11 +938,31 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 		//fclose($fp);
 
 		$galleryId = $this->pathToId($dir);
+		//$image_x=640;
+		//$image_y=480;
 		$fileId = 0;
 
-		$perms = TikiLib::lib('tiki')->get_perm_object($galleryId, 'file gallery', TikiLib::lib('filegal')->get_file_gallery_info($galleryId));
+		// elFinder assigns standard mime types like application/vnd.ms-word to ms doc, we use application/msword etc in tiki for some obscure reason :(
+		if (strpos($stat['mime'], 'application/vnd.ms-') !== false) {
+			$stat['mime'] = str_replace('application/vnd.ms-', 'application/ms', $stat['mime']);
+		} else if ($stat['mime'] === 'unknown') {
+			if (strpos($name, '.h5p') === strlen($name) - 4) {	// cover some Tiki-specific mime types
+				$stat['mime'] = 'application/zip';
+			}
+		}
+        $gal_info=TikiLib::lib('filegal')->get_file_gallery_info($galleryId);
+		
+		$perms = TikiLib::lib('tiki')->get_perm_object($galleryId, 'file gallery', $gal_info);
 		if ($perms['tiki_p_upload_files'] === 'y') {
-
+               //checking if gallery has dimensions restrictions
+			$image_x=$gal_info["image_max_size_x"];
+			$image_y=$gal_info["image_max_size_y"];
+			
+			if(!$image_x)
+			   $image_x=NULL;
+			if(!$image_y) 
+			   $image_y=NULL;  
+			
 			$fileId = $this->filegallib->upload_single_file(
 				array(
 					'galleryId' => $galleryId,
@@ -934,7 +971,10 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 				$name,
 				$size,
 				$stat['mime'],
-				$data
+				$data,
+				'',
+				$image_x,
+				$image_y
 			);
 		}
 
@@ -1100,4 +1140,16 @@ class elFinderVolumeTikiFiles extends elFinderVolumeDriver
 		return false;
 	}
 
+	/**
+	 * Change file mode (chmod)
+	 *
+	 * @param  string $path file path
+	 * @param  string $mode octal string such as '0755'
+	 * @return bool
+	 * @author David Bartle,
+	 **/
+	protected function _chmod($path, $mode)
+	{
+		// Not used in Tiki
+	}
 } // END class

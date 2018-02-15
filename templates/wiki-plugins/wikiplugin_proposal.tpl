@@ -1,4 +1,5 @@
-<table class="table normal">
+<div class="table-responsive">
+<table class="table table-bordered">
 	{if $params.caption}
 		<caption>{$params.caption|escape}</caption>
 	{/if}
@@ -35,7 +36,7 @@
 						<input type="hidden" name="content" value="{$body|escape}">
 						<input type="hidden" name="index" value="{$passes|escape}">
 						<input type="hidden" name="type" value="proposal">
-						<input type="submit" value="{$label|escape}">
+						<input type="submit" class="btn btn-default btn-sm" value="{$label|escape}">
 					</div>
 				</form>
 			</td>
@@ -43,3 +44,4 @@
 		</tr>
 	{/if}
 </table>
+</div>

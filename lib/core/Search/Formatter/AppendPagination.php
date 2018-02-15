@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AppendPagination.php 45186 2013-03-18 15:52:35Z lphuberdeau $
+// $Id: AppendPagination.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 class Search_Formatter_AppendPagination implements Search_Formatter_Plugin_Interface
 {
@@ -33,11 +33,15 @@ class Search_Formatter_AppendPagination implements Search_Formatter_Plugin_Inter
 
 	function renderEntries(Search_ResultSet $entries)
 	{
-		global $smarty;
+		if ($entries->getTsOn()) {
+			return $this->parent->renderEntries($entries);
+		}
+		$smarty = TikiLib::lib('smarty');
 		$smarty->loadPlugin('smarty_block_pagination_links');
 		$arguments = $this->arguments;
 		$arguments['resultset'] = $entries;
-		$pagination = smarty_block_pagination_links($arguments, '', $smarty, $tmp = false);
+		$tmp = false;
+		$pagination = smarty_block_pagination_links($arguments, '', $smarty, $tmp);
 
 		if ($this->getFormat() == Search_Formatter_Plugin_Interface::FORMAT_WIKI) {
 			$pagination = "~np~$pagination~/np~";

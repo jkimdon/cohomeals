@@ -1,14 +1,15 @@
-{* $Id: wikiplugin_groupstat.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
-<table class="table normal">
+{* $Id: wikiplugin_groupstat.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+<div class="table-responsive">
+<table class="table">
 <tr>
 <th>{tr}Group Name{/tr}</th>
 <th>{tr}Number of Users{/tr}</th>
 <th>{tr}Percentage of Total{/tr}</th>
 </tr>
-{cycle values="even,odd" print=false}
+
 {foreach from=$stats item=stat}
 	{if $stat.group ne 'Anonymous' and $stat.group ne 'Registered'}
-		<tr class="{cycle}">
+		<tr>
 		<td>{$stat.group|escape}</td>
 		<td>{$stat.nb}</td>
 		<td>
@@ -24,3 +25,4 @@
 	{/if}
 {/foreach}
 </table>
+</div>

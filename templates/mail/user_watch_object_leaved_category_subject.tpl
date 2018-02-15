@@ -1,1 +1,1 @@
-{tr}An object was removed from category{/tr} {$categoryName}
+{* $Id: user_watch_object_leaved_category_subject.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}{tr}An object was removed from {$prefs.mail_template_custom_text}category{/tr} {$categoryName}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: bannerlib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: bannerlib.php 60348 2016-11-21 16:55:47Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -96,7 +96,7 @@ class BannerLib extends TikiLib
 				break;
 			case 'useFlash':
 				if ($prefs['javascript_enabled'] == 'y') {
-					global $headerlib; include_once('lib/headerlib.php');
+					$headerlib = TikiLib::lib('header');
 					$headerlib->add_jsfile('lib/swfobject/swfobject.js');
 				}
 				$raw = $tikilib->embed_flash(unserialize($res['HTMLData']));
@@ -107,22 +107,16 @@ class BannerLib extends TikiLib
 				$raw
 					= "<div class='banner $class'><a target='$target' href='banner_click.php?id="
 					. $res["bannerId"] . "&amp;url=" . urlencode($res["url"])
-					. "'><img alt='banner' border='0' src=\"banner_image.php?id="
+					. "'><img alt='banner' src=\"banner_image.php?id="
 					. $res["bannerId"] . "\" /></a></div>";
 
 				break;
 
 			case 'useFixedURL':
-				@$fp = fopen($res["fixedURLData"], "r");
-
-				if ($fp) {
-					$raw = '';
-
-					while (!feof($fp)) {
-						$raw .= fread($fp, 4096);
-					}
-					fclose($fp);
-				}
+                $raw
+                    = "<div class='banner $class'><a target='$target' href='banner_click.php?id="
+                    . $res["bannerId"] . "&amp;url=" . urlencode($res["url"]). "'>"
+                    . '<img src="'. $res["fixedURLData"] . '" alt="banner" /></a></div>';
 
 				break;
 
@@ -420,4 +414,3 @@ class BannerLib extends TikiLib
 		return true;
 	}
 }
-global $bannerlib; $bannerlib = new BannerLib;

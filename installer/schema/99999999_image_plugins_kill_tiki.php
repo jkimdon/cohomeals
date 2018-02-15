@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 99999999_image_plugins_kill_tiki.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: 99999999_image_plugins_kill_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
@@ -23,10 +23,14 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function upgrade_99999999_image_plugins_kill_tiki($installer)
 {
-	global $tikilib, $prefs, $tikiroot, $user_overrider_prefs, $tiki_p_trust_input, $smarty, $access, $local_php;	// globals are required here for tiki-setup_base.php
+	global $prefs, $tikiroot, $user_overrider_prefs, $tiki_p_trust_input, $local_php;	// globals are required here for tiki-setup_base.php
+	require_once ('lib/tikilib.php');
+
+	$access = TikiLib::lib('access');
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 
 	require_once ('db/tiki-db.php');
-	require_once ('lib/tikilib.php');
 
 	$tikilib = new TikiLib;
 

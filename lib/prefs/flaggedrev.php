@@ -1,24 +1,24 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: flaggedrev.php 46033 2013-05-24 16:26:55Z lphuberdeau $
+// $Id: flaggedrev.php 62023 2017-04-02 07:10:43Z lindonb $
 
 function prefs_flaggedrev_list()
 {
 	return array(
 		'flaggedrev_approval' => array(
-			'name' => tra('Revision Approval'),
-			'description' => tra('Uses flagged revisions to hide unapproved wiki page revisions from users with lower privileges.'),
+			'name' => tra('Revision approval'),
+			'description' => tra('Uses flagged revisions to hide unapproved wiki page revisions from users without necessary privileges.'),
 			'type' => 'flag',
 			'perspective' => false,
 			'default' => 'n',
 			'help' => 'Flagged Revisions',
 		),
 		'flaggedrev_approval_categories' => array(
-			'name' => tra('Revision Approval Categories'),
-			'description' => tra('List of category IDs on which revision approval is required.'),
+			'name' => tra('Revision approval categories'),
+			'description' => tra('List of category IDs for which revision approval is required.'),
 			'type' => 'text',
 			'filter' => 'int',
 			'separator' => ';',

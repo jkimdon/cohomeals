@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wiki.php 51409 2014-05-19 22:21:32Z nkoth $
+// $Id: wiki.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 $access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
@@ -37,7 +37,7 @@ if (strstr($_SERVER['SCRIPT_NAME'], 'tiki-index.php')
 ) {
 	$check = false;
 	if (!isset($_REQUEST['page']) && !isset($_REQUEST['page_ref_id']) && !isset($_REQUEST['page_id'])) {
-		$_REQUEST['page'] = $userlib->get_user_default_homepage2($user);
+		$_REQUEST['page'] = $userlib->get_user_default_homepage($user);
 		$check = true;
 	}
 
@@ -45,7 +45,7 @@ if (strstr($_SERVER['SCRIPT_NAME'], 'tiki-index.php')
 			&& (isset($_REQUEST['page']) || isset($_REQUEST['page_ref_id']) || isset($_REQUEST['page_id']))
 	) { // perhaps we have to go to an another page
 
-		global $multilinguallib; include_once('lib/multilingual/multilinguallib.php');
+		$multilinguallib = TikiLib::lib('multilingual');
 		if ( $multilinguallib->useBestLanguage()) {
 
 			if (empty($_REQUEST['page_id'])) {
@@ -53,7 +53,7 @@ if (strstr($_SERVER['SCRIPT_NAME'], 'tiki-index.php')
 					$info = $tikilib->get_page_info($_REQUEST['page']);
 					$_REQUEST['page_id'] = $info['page_id'];
 				} elseif (!empty($_REQUEST['page_ref_id'])) {
-					global $structlib; include_once('lib/structures/structlib.php');
+					$structlib = TikiLib::lib('struct');
 					$info = $structlib->s_get_page_info($_REQUEST['page_ref_id']);
 					$_REQUEST['page_id'] = $info['page_id'];
 				}
@@ -72,10 +72,10 @@ if (strstr($_SERVER['SCRIPT_NAME'], 'tiki-index.php')
 	}
 
 	// If the HomePage does not exist, create it
-	if ($check && !$tikilib->page_exists($_REQUEST['page'])) {
+	if ($check && !empty($_REQUEST['page']) && !$tikilib->page_exists($_REQUEST['page'])) {
 
 		$homePageLang = $prefs['language'];
-		$profilesLink = 'tiki-admin.php?profile=&categories%5B%5D=12.x&categories%5B%5D=Featured+profiles' .
+		$profilesLink = 'tiki-admin.php?profile=&categories%5B%5D=15.x&categories%5B%5D=Featured+profiles' .
 										'&repository=http%3a%2f%2fprofiles.tiki.org%2fprofiles&page=profiles&preloadlist=y&list=List#step2';
 
 		// Default HomePage content
@@ -88,34 +88,34 @@ if (strstr($_SERVER['SCRIPT_NAME'], 'tiki-index.php')
 			$homePageContent .= '<h1>' . tr('Congratulations') . "</h1>\n";
 			$homePageContent .= tr('This is the default homepage for your Tiki. If you are seeing this page, your installation was successful.') . "\n\n<br>";
 			$homePageContent .= tr('You can change this page after logging in. Please review the [http://doc.tiki.org/wiki+syntax|wiki syntax] for editing details.') . "\n\n\n<br>";
-			$homePageContent .= '<h2><img src=img/icons/star.png alt=\"Star\" /> '. tr('Get started.') . "</h2>\n";
+			$homePageContent .= '<h2>'. tr('Get started.') . "</h2>\n";
 			$homePageContent .= tr('To begin configuring your site:') . "\n";
 			$homePageContent .= "<ul>\n";
 			$homePageContent .= "<li>".tr('1) Log in with your newly created password.') . "</li>\n";
 			$homePageContent .= "<li>".tr('2) Manually [tiki-admin.php?page=features|Enable specific Tiki features] that you didn\'t enable with the Admin wizard.') . "</li>\n";
 			$homePageContent .= "<li>".tr('3) Run [tiki-admin.php?page=profiles|Tiki Profiles] to quickly get up and running.') . "</li>\n";
 			$homePageContent .= "</ul>\n\n<br>";
-			$homePageContent .= '<h2><img src=img/icons/help.png alt=\"Help\" /> ' . tr('Need help?') . "</h2>\n";
+			$homePageContent .= '<h2>' . tr('Need help?') . "</h2>\n";
 			$homePageContent .= tr('For more information:') . "\n<br>";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Learn+More|Learn more about Tiki].') . "\n<br>";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Help+Others|Get help], including the [http://doc.tiki.org|official documentation] and [http://tiki.org/forums|support forums].') . "\n<br>";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Join+the+community|Join the Tiki community].') . "\n<br>";
+			$homePageContent .= '*' . tr('[https://tiki.org/Introduction|Learn more about Tiki].') . "\n<br>";
+			$homePageContent .= '*' . tr('[https://tiki.org/|Get help], including the [http://doc.tiki.org|official documentation] and [http://tiki.org/forums|support forums].') . "\n<br>";
+			$homePageContent .= '*' . tr('[https://tiki.org/Join|Join the Tiki community].') . "\n<br>";
 		} else {
 			$homePageContent .= '!' . tr('Congratulations') . "\n";
 			$homePageContent .= tr('This is the default homepage for your Tiki. If you are seeing this page, your installation was successful.') . "\n\n";
 			$homePageContent .= tr('You can change this page after logging in. Please review the [http://doc.tiki.org/wiki+syntax|wiki syntax] for editing details.') . "\n\n\n";
-			$homePageContent .= '!!'. tr('{img src=img/icons/star.png alt=\"Star\"} Get started.') . "\n";
+			$homePageContent .= '!!'. tr('Get started.') . "\n";
 			$homePageContent .= tr('To begin configuring your site:') . "\n";
 			$homePageContent .= "{FANCYLIST()}\n";
 			$homePageContent .= tr('1) Log in with your newly created password.') . "\n";
 			$homePageContent .= tr('2) Manually [tiki-admin.php?page=features|Enable specific Tiki features] that you didn\'t enable with the Admin wizard.') . "\n";
 			$homePageContent .= tr('3) Run [tiki-admin.php?page=profiles|Tiki Profiles] to quickly get up and running.') . "\n";
 			$homePageContent .= "{FANCYLIST}\n\n";
-			$homePageContent .= '!!' . tr('{img src=img/icons/help.png alt=\"Help\"} Need help?') . "\n";
+			$homePageContent .= '!!' . tr('Need help?') . "\n";
 			$homePageContent .= tr('For more information:') . "\n";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Learn+More|Learn more about Tiki].') . "\n";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Help+Others|Get help], including the [http://doc.tiki.org|official documentation] and [http://tiki.org/forums|support forums].') . "\n";
-			$homePageContent .= '*' . tr('[http://info.tiki.org/Join+the+community|Join the Tiki community].') . "\n";
+			$homePageContent .= '*' . tr('[https://tiki.org/Introduction|Learn more about Tiki].') . "\n";
+			$homePageContent .= '*' . tr('[https://tiki.org/|Get help], including the [http://doc.tiki.org|official documentation] and [http://tiki.org/forums|support forums].') . "\n";
+			$homePageContent .= '*' . tr('[https://tiki.org/Join|Join the Tiki community].') . "\n";
 		}
 			
 		$tikilib->create_page(

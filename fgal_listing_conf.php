@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: fgal_listing_conf.php 49258 2013-12-25 12:31:33Z arildb $
+// $Id: fgal_listing_conf.php 61772 2017-03-19 20:53:40Z lindonb $
 
 //this script may only be included - so its better to err & die if called directly.
 //smarty is not there - we need setup
@@ -23,18 +23,18 @@ $fgal_listing_conf = array(
 	'description' => array('name' => tra('Description')),
 	'size' => array('name' => tra('Size')),
 	'created' => array('name' => tra('Created').' / '.tra('Uploaded')),
-	'lastModif' => array('name' => tra('Last Modified'), 'key' => 'show_modified'),
+	'lastModif' => array('name' => tra('Last modified'), 'key' => 'show_modified'),
 	'creator' => array('name' => tra('Uploaded by')), //this used to be Creator but updated Nov2010
 	'author' => array('name' => tra('Creator')),  //this used to be Author but updated Nov2010
-	'last_user' => array('name' => tra('Last Modified by')), //this used to be 'Last editor' but updated Nov2010
+	'last_user' => array('name' => tra('Last modified by')), //this used to be 'Last editor' but updated Nov2010
 	'comment' => array('name' => tra('Comment')),
 	'files' => array('name' => tra('Files')),
 	'hits' => array('name' => tra('Hits')),
 	'lastDownload' => array('name' => tra('Last download')),
-	'lockedby' => array('name' => tra('Locked by'), 'icon' => 'lock_gray'),
+	'lockedby' => array('name' => tra('Locked by'), 'icon' => 'lock'),
 	'backlinks' => array('name' => tra('Backlinks')),
-	'deleteAfter' => array('name'=>tra('Delete After')),
-	'share' => array('name'=>tra('Share with')),
+	'deleteAfter' => array('name'=>tra('Delete after')),
+	'share' => array('name'=>tra('Share')),
 	'source' => array('name' => tra('Source')),
 );
 
@@ -64,6 +64,7 @@ if ( isset($gal_info) && isset($gal_info['galleryId']) && isset($gal_info['locka
 	$fgal_listing_conf['lockedby']['value'] = 'n';
 }
 
+$smarty = TikiLib::lib('smarty');
 $smarty->assign_by_ref('fgal_listing_conf', $fgal_listing_conf);
 
 if (isset($section) && $section == 'admin') {
@@ -79,8 +80,7 @@ $fgal_options = array(
 	'show_explorer' => array('name' => tra('Explorer')),
 	'show_path' => array('name' => tra('Path')),
 	'show_slideshow' => array('name' => tra('Slideshow')),
-	'default_view' => array('name' => tra('Default View')),
-	'icon_fileId' => array('name' => tra('Gallery Icon')),
+	'icon_fileId' => array('name' => tra('Gallery icon')),
 );
 
 if (isset($_REQUEST['view']) && $_REQUEST['view'] == 'admin') {
@@ -98,12 +98,9 @@ if (isset($_REQUEST['view']) && $_REQUEST['view'] == 'admin') {
 
 		$k_prefs = 'fgal_'.$k_gal;
 
-		if ( isset($_REQUEST['page']) && $_REQUEST['page'] === 'fgal' ) {
-			// We are in the file gallery admin panel
-			$fgal_options[$k_gal]['value'] = $prefs[$k_prefs];
-		} elseif ( isset($_REQUEST['edit_mode']) ) {
+		if ( isset($_REQUEST['edit_mode']) ) {
 			// We are in the edit file gallery page
-			$fgal_options[$k_gal]['value'] = $gal_info[$k_gal];
+			$fgal_options[$k_gal]['value'] = isset($gal_info[$k_gal]) ? $gal_info[$k_gal] : null;
 		} else {
 			// normal gallery view
 			$fgal_options[$k_gal]['value'] = ( isset($gal_info) && isset($gal_info[$k_gal]) ) ? $gal_info[$k_gal] : isset($prefs[$k_prefs]) ? $prefs[$k_prefs] : null;

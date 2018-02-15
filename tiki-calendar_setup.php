@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-calendar_setup.php 48881 2013-12-02 12:09:05Z jonnybradley $
+// $Id: tiki-calendar_setup.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__))!=FALSE) {
@@ -30,7 +30,7 @@ if ( ! ($prefs['feature_calendar'] == 'y' || $prefs['feature_action_calendar'] =
 	die;
 }
 
-global $calendarlib; include_once('lib/calendar/calendarlib.php');
+$calendarlib = TikiLib::lib('calendar');
 
 $trunc = '40'; // put in a pref, number of chars displayed in cal cells
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiElFinder.php 47230 2013-08-23 14:54:27Z jonnybradley $
+// $Id: tikiElFinder.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 // initially from https://github.com/Studio-42/elFinder/wiki/Adding-file-description-to-Properties-dialog
 

@@ -1,14 +1,7 @@
-{* $Id: wikiplugin_invite.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
-{if $errors}
-	{remarksbox type="feedback"}
-		{foreach from=$errors item=error}
-			{$error|escape}<br>
-		{/foreach}
-	{/remarksbox}
-{/if}
-
+{* $Id: wikiplugin_invite.tpl 58787 2016-06-05 13:59:28Z lindonb $ *}
 <form method="post">
-<table class="table normal invite">
+<div class="table-responsive">
+<table class="table invite">
 <tr>
 	<td>
 		<label for="email">{tr}Email address the person you want to invite{/tr}</label>
@@ -39,7 +32,8 @@
 </tr>
 <tr>
 	<td>&nbsp;</td>
-	<td><input type="submit" name="invite" value="{tr}Invite{/tr}"></td>
+	<td><input type="submit" class="btn btn-default btn-sm" name="invite" value="{tr}Invite{/tr}"></td>
 </tr>
 </table>
+</div>
 </form>

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-mods.php 50467 2014-03-24 12:04:18Z jonnybradley $
+// $Id: tiki-mods.php 58748 2016-05-31 23:05:28Z lindonb $
 
 require_once ('tiki-setup.php');
 include_once ('lib/mods/modslib.php');
@@ -276,7 +276,6 @@ if (isset($_REQUEST['focus'])) {
 }
 $smarty->assign('focus', $focus);
 $smarty->assign('more', $more);
-$smarty->assign('tikifeedback', $feedback);
 $smarty->assign('types', $types);
 $smarty->assign('versions', $versions);
 $smarty->assign('mid', 'tiki-mods.tpl');

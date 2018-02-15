@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 45154 2013-03-16 14:44:21Z jonnybradley $
+// $Id: Controller.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Services_Draw_Controller
 {
@@ -22,7 +22,11 @@ class Services_Draw_Controller
 
 	function action_edit($input)
 	{
-		global $tikilib, $access, $headerlib, $drawFullscreen;
+		global $drawFullscreen;
+		$headerlib = TikiLib::lib('header');
+		$tikilib = TikiLib::lib('tiki');
+		$access = TikiLib::lib('access');
+
 		$drawFullscreen = true;
 		
 		$_REQUEST['fileId'] = $input->fileId->int();

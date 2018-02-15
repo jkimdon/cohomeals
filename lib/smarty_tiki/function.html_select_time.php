@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.html_select_time.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: function.html_select_time.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -44,7 +44,7 @@ function smarty_function_html_select_time($params, $smarty)
 	$display_minutes    = true;
 	$display_seconds    = true;
 	$display_meridian   = true;
-	$use_24_hours       = false;
+	$use_24_hours       = true;
 	$minute_interval    = 1;
 	$second_interval    = 1;
 	$hour_minmax        = '0-23';
@@ -119,7 +119,7 @@ function smarty_function_html_select_time($params, $smarty)
 			$selected = $time == '--' ? $hour_empty : TikiLib::date_format($hour_fmt, $time);
 		}
 
-		$html_result .= '<select name=';
+		$html_result .= '<select class="form-control date" name=';
 
 		if (null !== $field_array) {
 			$html_result .= '"' . $field_array . '[' . $prefix . 'Hour]"';
@@ -201,7 +201,7 @@ function smarty_function_html_select_time($params, $smarty)
 			$selected = '0'.$selected;
 		}
 
-		$html_result .= '<select name=';
+		$html_result .= '<select class="form-control date" name=';
 		if (null !== $field_array) {
 			$html_result .= '"' . $field_array . '[' . $prefix . 'Minute]"';
 		} else {
@@ -247,7 +247,7 @@ function smarty_function_html_select_time($params, $smarty)
 			$selected = $time =='--'?$second_empty:intval(floor(strftime('%S', $time) / $second_interval) * $second_interval);
 		}
 
-		$html_result .= '<select name=';
+		$html_result .= '<select class="form-control date" name=';
 
 		if (null !== $field_array) {
 			$html_result .= '"' . $field_array . '[' . $prefix . 'Second]"';
@@ -282,7 +282,7 @@ function smarty_function_html_select_time($params, $smarty)
 	}
 
 	if (!$use_24_hours) {
-		$html_result .= '<select name=';
+		$html_result .= '<select class="form-control date" name=';
 		if (null !== $field_array) {
 			$html_result .= '"' . $field_array . '[' . $prefix . 'Meridian]"';
 		} else {

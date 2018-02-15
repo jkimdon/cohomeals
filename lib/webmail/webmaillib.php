@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: webmaillib.php 44846 2013-02-08 15:27:55Z lphuberdeau $
+// $Id: webmaillib.php 61330 2017-02-18 15:29:02Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -389,10 +389,11 @@ class WebMailLib extends TikiLib
 	}
 
 	/**
-	 * @param $user			current user
-	 * @param $accountid	can be 0 (uses current account)
-	 * @param $reload		force reload from mail server?
-	 * @return array		of partial message headers
+	 * @param string $user		current user
+	 * @param int $accountid	can be 0 (uses current account)
+	 * @param bool $reload		force reload from mail server?
+	 * @return array			of partial message headers
+	 * @throws Exception
 	 */
 	function refresh_mailbox($user, $accountid, $reload)
 	{
@@ -436,21 +437,21 @@ class WebMailLib extends TikiLib
 			}
 
 			if (!isset($mail)) {
-				return tra('Mailbox uninitialised???');
+				return tra('Is the mailbox not initialised??');
 			}
 
 			$webmail_list = array();
 
 			foreach ($mail as $messageNum => $message) {
 
-				$headers = $message->getHeaders();		// quicker than the Zend accessors?
+				$headers = $message->getHeaders()->toArray();		// quicker than the Zend accessors?
 				$wmail = Array();	// Tiki Webmail row
 
-				$wmail['from'] = $headers['from'];
-				$wmail['to'] = $headers['to'];
-				$wmail['subject'] = $headers['subject'];
-				$wmail['date'] = $headers['date'];
-				$wmail["timestamp"] = strtotime($headers['date']);
+				$wmail['from'] = $headers['From'];
+				$wmail['to'] = $headers['To'];
+				$wmail['subject'] = $headers['Subject'];
+				$wmail['date'] = $headers['Date'];
+				$wmail["timestamp"] = strtotime($headers['Date']);
 
 				$from = preg_split('/[<>]/', $wmail['from'], -1, PREG_SPLIT_NO_EMPTY);
 				$wmail['sender']['name'] = $from[0];
@@ -464,8 +465,8 @@ class WebMailLib extends TikiLib
 				}
 				$wmail['sender']['name'] = htmlspecialchars($wmail['sender']['name']);
 
-				if (!empty($headers['message-id'])) {
-					$wmail['realmsgid'] = preg_replace('/[<>]/', '', $headers['message-id']);
+				if (!empty($headers['Message-ID'])) {
+					$wmail['realmsgid'] = preg_replace('/[<>]/', '', $headers['Message-ID']);
 				} else {
 					$wmail['realmsgid'] = $wmail['timestamp'] . '.' . $wmail['sender']['email'];	// TODO better?
 				}
@@ -501,7 +502,7 @@ class WebMailLib extends TikiLib
 		if (!empty($this->current_account['imap'])) {
 
 			// connecting with Imap
-			return new Zend_Mail_Storage_Imap(
+			return new Zend\Mail\Storage\Imap(
 				array(
 					'host'     => $this->current_account["imap"],
 					'user'     => $this->current_account["username"],
@@ -513,21 +514,21 @@ class WebMailLib extends TikiLib
 		} else if (!empty($this->current_account['mbox'])) {
 
 			// connecting with Mbox locally
-			return new Zend_Mail_Storage_Mbox(
+			return new Zend\Mail\Storage\Mbox(
 				array('filename' => $this->current_account["mbox"])
 			);
 
 		} else if (!empty($this->current_account['maildir'])) {
 
 			// connecting with Maildir locally
-			return new Zend_Mail_Storage_Maildir(
+			return new Zend\Mail\Storage\Maildir(
 				array('dirname' => $this->current_account["mbox"])
 			);
 
 		} else if (!empty($this->current_account['pop'])) {
 
 			// connecting with Pop3
-			return new Zend_Mail_Storage_Pop3(
+			return new Zend\Mail\Storage\Pop3(
 				array(
 					'host'     => $this->current_account["pop"],
 					'user'     => $this->current_account["username"],
@@ -537,7 +538,7 @@ class WebMailLib extends TikiLib
 			);
 		}
 		// not returned yet?
-		throw new Zend_Mail_Storage_Exception('No server to check');
+		throw new Zend\Mail\Storage\Exception\RuntimeException('No server to check');
 	}	// end get_mail_storage()
 
 	/**
@@ -551,12 +552,12 @@ class WebMailLib extends TikiLib
 		// deal with transfer encoding
 		try {	// no headerExists() func a part (why?)
 			$enc = $part->contentTransferEncoding;
-		} catch (Zend_Mail_Exception $e) {
+		} catch (Zend\Mail\Exception\ExceptionInterface $e) {
 			$enc = '';
 		}
 		try {	// no headerExists() func a part (why?)
 			$ct = $part->contentType;
-		} catch (Zend_Mail_Exception $e) {
+		} catch (Zend\Mail\Exception\ExceptionInterface $e) {
 			$ct = '';
 		}
 		try {
@@ -584,7 +585,7 @@ class WebMailLib extends TikiLib
 			if (strtok($ct, ';') == 'text/plain' && !$getAllParts) {
 				return $result;
 			}
-		} catch (Zend_Mail_Exception $e) {
+		} catch (Zend\Mail\Exception\ExceptionInterface $e) {
 			// ignore?
 		}
 		return $result;

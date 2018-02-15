@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mediawiki_page_as_array.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mediawiki_page_as_array.php 57963 2016-03-17 20:03:23Z jonnybradley $
 
 // the expected output of TikiImporter_Wiki_Mediawiki::parseData(), used to test
 // the behavior of the TikiImporter_Wiki::insertPage()

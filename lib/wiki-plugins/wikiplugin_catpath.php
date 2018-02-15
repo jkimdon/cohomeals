@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_catpath.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_catpath.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_catpath_info()
 {
@@ -12,18 +12,22 @@ function wikiplugin_catpath_info()
 		'documentation' => 'PluginCatPath',
 		'description' => tra('Show the full category path for a wiki page'),
 		'prefs' => array( 'feature_categories', 'wikiplugin_catpath' ),
-		'icon' => 'img/icons/sitemap_color.png',
+		'iconname' => 'structure',
+		'introduced' => 1,
 		'params' => array(
 			'divider' => array(
 				'required' => false,
 				'name' => tra('Separator'),
-				'description' => tra('String used to separate the categories in the path. Default character is >.'),
+				'description' => tr('String used to separate the categories in the path. Default character is %0.',
+					'<code>></code>'),
+				'since' => '1',
 				'default' => '>',
 			),
 			'top' => array(
 				'required' => false,
 				'name' => tra('Display Top Category'),
 				'description' => tra('Show the top category as part of the path name (not shown by default)'),
+				'since' => '1',
 				'filter' => 'alpha',
 				'default' => 'no',
 				'options' => array(
@@ -38,11 +42,11 @@ function wikiplugin_catpath_info()
 
 function wikiplugin_catpath($data, $params)
 {
-	global $dbTiki, $smarty, $tikilib, $prefs, $categlib;
+	global $prefs;
 
-	if (!is_object($categlib)) {
-		require_once ("lib/categories/categlib.php");
-	}
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
+	$categlib = TikiLib::lib('categ');
 
 	if ($prefs['feature_categories'] != 'y') {
 		return "<span class='warn'>" . tra("Categories are disabled"). "</span>";

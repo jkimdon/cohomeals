@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: lib-encoding.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: lib-encoding.php 61352 2017-02-22 15:10:52Z jonnybradley $
 
 class Encoding
 {
@@ -13,7 +13,7 @@ class Encoding
     var $_supportedEncodings = 'UTF-8,ISO-8859-1,ISO-8859-15';
 
 	// Class constructor
-	function Encoding ($inputEncoding = 'ISO-8859-1',$outputEncoding = 'UTF-8')
+	function __construct($inputEncoding = 'ISO-8859-1', $outputEncoding = 'UTF-8')
 	{
 
 		// Check if mb_convert_encoding is installed

@@ -17,7 +17,7 @@
 // | Based on OLE::Storage_Lite by Kawai, Takanori                        |
 // +----------------------------------------------------------------------+
 //
-// $Id: pps.php 25061 2010-02-11 13:27:17Z pkdille $
+// $Id: pps.php 61625 2017-03-11 16:37:58Z lindonb $
 
 /**
 * Class for creating PPS's for OLE containers
@@ -114,7 +114,7 @@ class OLE_PPS extends PEAR
     * @param integer $time_2nd A timestamp
     * @param array   $children Array containing children PPS for this PPS
     */
-    function OLE_PPS($No, $name, $type, $prev, $next, $dir, $time_1st, $time_2nd, $data, $children)
+    function __construct($No, $name, $type, $prev, $next, $dir, $time_1st, $time_2nd, $data, $children)
     {
         $this->No      = $No;
         $this->Name    = $name;

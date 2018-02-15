@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: kaltura.php 50563 2014-03-29 14:04:53Z jonnybradley $
+// $Id: kaltura.php 62023 2017-04-02 07:10:43Z lindonb $
 
 function prefs_kaltura_list()
 {
@@ -30,7 +30,7 @@ function prefs_kaltura_list()
 		),
 		'kaltura_secret' => array(
 			'name' => tra('User secret'),
-			'description' => tra('Kaltura partner setting user secret.'),
+			'description' => tra('Kaltura partner-setting user secret.'),
 			'type' => 'text',
 			'size' => 45,
 			'filter' => 'alnum',
@@ -39,7 +39,7 @@ function prefs_kaltura_list()
 		),
 		'kaltura_adminSecret' => array(
 			'name' => tra('Admin secret'),
-			'description' => tra('Kaltura partner setting admin secret.'),
+			'description' => tra('Kaltura partner-setting admin secret.'),
 			'type' => 'text',
 			'size' => 45,
 			'filter' => 'alnum',
@@ -47,7 +47,7 @@ function prefs_kaltura_list()
 			'tags' => array('basic'),
 		),
 		'kaltura_kdpUIConf' => array(
-			'name' => tra('Kaltura Video Player ID'),
+			'name' => tra('Kaltura video player ID'),
 			'description' => tra('Kaltura Dynamic Player (KDP) user interface configuration ID'),
 			'type' => empty($players) ? 'text' : 'list',
 			'options' => $players,
@@ -56,7 +56,7 @@ function prefs_kaltura_list()
 			'tags' => array('basic'),
 		),
 		'kaltura_kdpEditUIConf' => array(
-			'name' => tra('Kaltura Video Player ID (in entry edit mode)'),
+			'name' => tra('Kaltura video player ID (in entry edit mode)'),
 			'description' => tra('Kaltura Dynamic Player (KDP) user interface configuration ID for use when editing. You can use a player which also has an option to select a frame as video thumbnail'),
 			'type' => empty($players) ? 'text' : 'list',
 			'options' => $players,
@@ -65,15 +65,15 @@ function prefs_kaltura_list()
 			'tags' => array('basic'),
 		),
 		'kaltura_kcwUIConf' => array(
-			'name' => tra('KCW UI Configuration ID'),
+			'name' => tra('KCW UI configuration ID'),
 			'description' => tra('Kaltura Configuration Wizard (KCW) user interface configuration ID'),
 			'type' => 'text',
 			'size' => 20,
 			'default' => '',
 		),
 		'kaltura_kServiceUrl' => array(
-			'name' => tra('Kaltura Service URL'),
-			'description' => tra('e.g. https://www.kaltura.com/'),
+			'name' => tra('Kaltura service URL'),
+			'description' => tra('for example, https://www.kaltura.com/'),
 			'type' => 'text',
 			'size' => 40,
 			'default' => 'https://www.kaltura.com/',

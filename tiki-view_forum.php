@@ -2,22 +2,19 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_forum.php 52815 2014-10-10 14:11:43Z jonnybradley $
+// $Id: tiki-view_forum.php 62307 2017-04-24 00:09:18Z lindonb $
 
 $section = 'forums';
 require_once ('tiki-setup.php');
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once ('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 if ($prefs['feature_freetags'] == 'y') {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 }
 
 $access->check_feature('feature_forums');
@@ -60,9 +57,8 @@ $tikilib->get_perm_object($_REQUEST['forumId'], 'forum', $forum_info, true);
 
 // Now if the user is the moderator then give him forum admin privs -. SHOULD BE IN get_perm_object
 if ($tiki_p_admin_forum != 'y' && $user) {
-	if ($forum_info['moderator'] == $user) {
-		$tiki_p_admin_forum = 'y';
-	} elseif (in_array($forum_info['moderator_group'], $userlib->get_user_groups($user))) {
+	if ($commentslib->admin_forum($_REQUEST['forumId']))
+	{
 		$tiki_p_admin_forum = 'y';
 	}
 
@@ -81,7 +77,12 @@ if ($tiki_p_admin_forum != 'y' && $user) {
 
 $access->check_permission(array('tiki_p_forum_read'), '', 'forum', $_REQUEST['forumId']);
 
-$commentslib->forum_add_hit($_REQUEST["forumId"]);
+//add tablesorter sorting and filtering
+$ts = Table_Check::setVars('viewforum' . $_REQUEST['forumId'] . '-', true);
+
+if (!$ts['enabled'] || ($ts['enabled'] && $ts['ajax'])) {
+	$commentslib->forum_add_hit($_REQUEST["forumId"]);
+}
 
 if (isset($_REQUEST['report']) && $tiki_p_forums_report == 'y') {
 	check_ticket('view-forum');
@@ -89,11 +90,12 @@ if (isset($_REQUEST['report']) && $tiki_p_forums_report == 'y') {
 }
 
 if ($tiki_p_admin_forum == 'y') {
+	//don't see where this is used on tiki-view_forum.tpl - it is used on tiki-view_forum_thread.tpl
 	if (isset($_REQUEST['remove_attachment'])) {
 		$access->check_authenticity(tra('Are you sure you want to remove that attachment?'));
 		$commentslib->remove_thread_attachment($_REQUEST['remove_attachment']);
 	}
-
+	//locking the entire forum is not fully implemented - only threads can be locked currently
 	if (isset($_REQUEST['lock']) && isset($_REQUEST['forumId'])) {
 		check_ticket('view-forum');
 		if ($_REQUEST['lock'] == 'y') {
@@ -104,70 +106,6 @@ if ($tiki_p_admin_forum == 'y') {
 			$forum_info['is_locked'] = 'n';
 		}
 	}
-
-	if (isset($_REQUEST['locksel_x'])) {
-		if (isset($_REQUEST['forumtopic'])) {
-			check_ticket('view-forum');
-			foreach (array_values($_REQUEST['forumtopic']) as $topic) {
-				$commentslib->lock_comment($topic);
-			}
-		}
-	}
-
-	if (isset($_REQUEST['unlocksel_x'])) {
-		if (isset($_REQUEST['forumtopic'])) {
-			check_ticket('view-forum');
-			foreach (array_values($_REQUEST['forumtopic']) as $topic) {
-				$commentslib->unlock_comment($topic);
-			}
-		}
-	}
-
-	if (isset($_REQUEST['movesel'])) {
-		if (isset($_REQUEST['forumtopic'])) {
-			foreach (array_values($_REQUEST['forumtopic']) as $topic) {
-				check_ticket('view-forum');
-				// To move a topic you just have to change the object
-				$obj = 'forum:' . $_REQUEST['moveto'];
-				$commentslib->set_comment_object($topic, $obj);
-				// update the stats for the source and destination forums
-				$commentslib->forum_prune($_REQUEST['forumId']);
-				$commentslib->forum_prune($_REQUEST['moveto']);
-			}
-		}
-	}
-
-	if (isset($_REQUEST['mergesel'])) {
-		if (isset($_REQUEST['forumtopic'])) {
-			foreach (array_values($_REQUEST['forumtopic']) as $topic) {
-				check_ticket('view-forum');
-				// To move a topic you just have to change the object
-				if ($topic != $_REQUEST['mergetopic']) {
-					$commentslib->set_parent($topic, $_REQUEST['mergetopic']);
-				}
-			}
-		}
-	}
-
-	if ($prefs['feature_forum_topics_archiving'] && isset($_REQUEST['archive']) && isset($_REQUEST['comments_parentId'])) {
-		check_ticket('view-forum');
-		if ($_REQUEST['archive'] == 'y') {
-			$commentslib->archive_thread($_REQUEST['comments_parentId']);
-		} elseif ($_REQUEST['archive'] == 'n') {
-			$commentslib->unarchive_thread($_REQUEST['comments_parentId']);
-		}
-	}
-
-	if (isset($_REQUEST['delsel_x']) && isset($_REQUEST['forumtopic']) && is_array($_REQUEST['forumtopic'])) {
-		$access->check_authenticity(tra('Are you sure you want to remove these posts?'));
-		foreach ($_REQUEST['forumtopic'] as $topicId) {
-			if (is_numeric($topicId)) {
-				$commentslib->remove_comment($topicId);
-			}
-		}
-		$commentslib->forum_prune($_REQUEST['forumId']);
-	}
-
 }
 
 $smarty->assign_by_ref('forum_info', $forum_info);
@@ -224,8 +162,12 @@ if (isset($_REQUEST['comments_postComment'])) {
 		$cat_objid = $threadId;
 		include_once ('freetag_apply.php');
 	}
-	$smarty->assign_by_ref('errors', $errors);
-	$smarty->assign_by_ref('feedbacks', $feedbacks);
+	if (!empty($errors)) {
+		Feedback::error(['mes' => $errors]);
+	}
+	if (!empty($feedbacks)) {
+		Feedback::success(['mes' => $feedbacks]);
+	}
 }
 
 // Here we send the user to the right thread/topic if it already exists; this
@@ -271,7 +213,7 @@ if (isset($_REQUEST['comments_remove']) && isset($_REQUEST['comments_threadId'])
 		$commentslib->remove_comment($_REQUEST['comments_threadId']);
 		$commentslib->register_remove_post($_REQUEST['forumId'], 0);
 	} else { // user can't edit this post
-		$smarty->assign('msg', tra('You are not permitted to remove someone else\'s post!'));
+		$smarty->assign('msg', tra('You do not have permission to remove someone else\'s post!'));
 		$smarty->assign('errortype', 'no_redirect_login');
 		$smarty->display('error.tpl');
 		die;
@@ -406,6 +348,7 @@ $smarty->assign_by_ref('last_comments', $last_comments);
 $smarty->assign('comments_cant', $comments_cant);
 $comments_maxRecords = $_REQUEST["comments_per_page"];
 $smarty->assign_by_ref('comments_coms', $comments_coms);
+
 $cat_type = 'forum';
 $cat_objid = $_REQUEST["forumId"];
 
@@ -428,13 +371,13 @@ if ($prefs['feature_user_watches'] == 'y') {
 		}
 	}
 
-	if ($user && $watch = $tikilib->user_watches($user, 'forum_post_topic', $_REQUEST['forumId'], 'forum')) {
+	if ($user && $watch = $tikilib->get_user_event_watches($user, 'forum_post_topic', $_REQUEST['forumId'])) {
 		$smarty->assign('user_watching_forum', 'y');
 	} else {
 		$smarty->assign('user_watching_forum', 'n');
 	}
 
-	if ($user && $watch = $tikilib->user_watches($user, 'forum_post_topic_and_thread', $_REQUEST['forumId'], 'forum')) {
+	if ($user && $watch = $tikilib->get_user_event_watches($user, 'forum_post_topic_and_thread', $_REQUEST['forumId'])) {
 		$smarty->assign('user_watching_forum_topic_and_thread', 'y');
 	} else {
 		$smarty->assign('user_watching_forum_topic_and_thread', 'n');
@@ -507,12 +450,35 @@ if ($prefs['feature_contribution'] == 'y') {
 }
 
 if ($prefs['feature_forum_parse'] == 'y') {
-	global $wikilib;
-	include_once ('lib/wiki/wikilib.php');
+	$wikilib = TikiLib::lib('wiki');
 	$plugins = $wikilib->list_plugins(true, 'editpost');
 	$smarty->assign_by_ref('plugins', $plugins);
 }
 
+//initialize tablesorter
+if ($ts['enabled'] && !$ts['ajax']) {
+	//set tablesorter code
+	Table_Factory::build(
+		'TikiViewforum',
+		array(
+			'id' => $ts['tableid'],
+			'total' => $comments_cant,
+			'pager' => array(
+				'max' => $_REQUEST['comments_per_page'],
+			),
+			'ajax' => array(
+				'requiredparams' => array(
+					'forumId' => $_REQUEST['forumId'],
+				),
+			),
+		)
+	);
+}
+
 ask_ticket('view-forum');
-$smarty->assign('mid', 'tiki-view_forum.tpl');
-$smarty->display('tiki.tpl');
+if ($ts['ajax']) {
+	$smarty->display('tiki-view_forum.tpl');
+} else {
+	$smarty->assign('mid', 'tiki-view_forum.tpl');
+	$smarty->display('tiki.tpl');
+}

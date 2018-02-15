@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ForumPostThread.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ForumPostThread.php 58491 2016-04-30 13:37:21Z jonnybradley $
 
 /**
  * Class for forum_post_thread events
@@ -26,7 +26,7 @@ class Reports_Send_EmailBuilder_ForumPostThread extends Reports_Send_EmailBuilde
 		$output = tr(
 			'%0 <a href=%1>replied</a> to the topic %2.',
 			"<u>{$change['data']['user']}</u>",
-			"\"{$base_url}tiki-view_forum_thread.php?forumId={$change['data']['forumId']}&comments_parentId={$change['data']['topicId']}#threadId{$change['data']['threadId']}\"",
+			"\"{$base_url}tiki-view_forum_thread.php?forumId={$change['data']['forumId']}&comments_parentId={$change['data']['topicId']}#threadId={$change['data']['threadId']}\"",
 			"<a href=\"{$base_url}tiki-view_forum_thread.php?comments_parentId={$change['data']['topicId']}&forumId={$change['data']['forumId']}\">{$parent_topic['title']}</a>"
 		);
 

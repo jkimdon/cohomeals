@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 999999991_decode_pages_sources_tiki.php 46536 2013-07-04 12:44:44Z lphuberdeau $
+// $Id: 999999991_decode_pages_sources_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   header("location: index.php");
@@ -30,9 +30,9 @@ function upgrade_999999991_decode_pages_sources_tiki($installer)
 {
 	global $user_overrider_prefs, $systemConfiguration;
 	set_time_limit(60 * 60); // Set maximum execution time to 1 hour since this runs on all pages
-	include_once('tiki-setup_base.php');
-	include_once ('lib/categories/categlib.php');	// needed for cat_jail fn in list_pages()
-	include_once('lib/wiki/wikilib.php');
+	include_once('tiki-setup.php');
+	$categlib = TikiLib::lib('categ');
+	$wikilib = TikiLib::lib('wiki');
 
 	$converter = new convertToTiki9();
 	$converter->convertPages();

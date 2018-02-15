@@ -1,25 +1,29 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_trackeritemcopy.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_trackeritemcopy.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_trackeritemcopy_info()
 {
 	return array(
 		'name' => tra('Copy Tracker Item'),
 		'documentation' => tra('PluginTrackerItemCopy'),
-		'description' => tra('Will not work with category or certain special fields, copies only data from specified fields'),
+		'description' => tra('Copy a tracker item'),
 		'prefs' => array('wikiplugin_trackeritemcopy', 'feature_trackers'),
 		'validate' => 'all',
 		'filter' => 'wikicontent',
+		'iconname' => 'copy',
+		'introduced' => 7,
 		'tags' => array( 'experimental' ),
 		'params' => array(
 			'trackerId' => array(
 				'required' => true,
 				'name' => tra('Tracker ID'),
-				'description' => tra('Tracker from which to copy item, joined tracker ids separated by :'),
+				'description' => tr('Tracker from which to copy item, joined tracker ids separated by %0:%1',
+					'<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => array(':'),
@@ -27,8 +31,10 @@ function wikiplugin_trackeritemcopy_info()
 			),
 			'linkFieldIds' => array(
 				'required' => true,
-				'name' => tra(''),
-				'description' => tra('Fields links that are related to this tracker that you would like to join on, separated by :'),
+				'name' => tra('Link Field IDs'),
+				'description' => tr('Fields links that are related to this tracker that you would like to join on,
+					separated by %0:%1', '<code>', '</code>'),
+				'since' => '8.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => array(':'),
@@ -36,8 +42,10 @@ function wikiplugin_trackeritemcopy_info()
 			),
 			'copyFieldIds' => array(
 				'required' => true,
-				'name' => tra('Field IDs to copy'),
-				'description' => tra('Field IDs to copy old value of, separated by :, joined fields separated by |'),
+				'name' => tra('Copy Field IDs'),
+				'description' => tr('Field IDs to copy old value of, separated by %0:%1, joined fields separated by
+					%0|%1', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => array('|', ':'),
@@ -45,8 +53,10 @@ function wikiplugin_trackeritemcopy_info()
 			),
 			'updateFieldIds' => array(
 				'required' => false,
-				'name' => tra('Field IDs to update values with'),
-				'description' => tra('Field IDs to update with new values specified, separated by :, joined fields separated by |'),
+				'name' => tra('Update Field IDs'),
+				'description' => tr('Field IDs to update with new values specified, separated by %0:%1, joined fields
+					separated by %0|%1', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => array('|', ':'),
@@ -55,7 +65,10 @@ function wikiplugin_trackeritemcopy_info()
 			'updateFieldValues' => array(
 				'required' => false,
 				'name' => tra('New Values'),
-				'description' => tra('New Values to replace for the field IDs specified, separated by :, joined fields separated by |, -randomstring- will generate random string; and f_xx to use value of field xx of itemId'),
+				'description' => tr('New values to replace for the field IDs specified, separated by %0:%1, joined
+					fields separated by %0|%1. %0randomstring%1 will generate random string; and %0f_xx%1 to use value of
+					field xx of itemId', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'separator' => array('|', ':'),
@@ -65,6 +78,7 @@ function wikiplugin_trackeritemcopy_info()
 				'required' => false,
 				'name' => tra('Item ID'),
 				'description' => tra('ID of item to make copy of, otherwise input is asked for'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 				'profile_reference' => 'tracker_item',
@@ -73,6 +87,7 @@ function wikiplugin_trackeritemcopy_info()
 				'required' => false,
 				'name' => tra('Make this number of copies on load'),
 				'description' => tra('Set the number of copies to make on load of plugin automatically'),
+				'since' => '7.0',
 				'filter' => 'int',
 				'default' => ''
 			),
@@ -80,7 +95,9 @@ function wikiplugin_trackeritemcopy_info()
 				'required' => false,
 				'name' => tra('Returns array non-interactively'),
 				'advanced' => true,
-				'description' => tra('If y, returns array of new information instead of displaying results to screen, used in non-interactive mode'),
+				'description' => tr('If Yes (%0y%1), returns array of new information instead of displaying results
+					to screen, used in non-interactive mode', '<code>', '</code>'),
+				'since' => '7.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -90,8 +107,8 @@ function wikiplugin_trackeritemcopy_info()
 
 function wikiplugin_trackeritemcopy( $data, $params )
 {
-	global $smarty;
 	$trklib = TikiLib::lib("trk");
+	$smarty = TikiLib::lib('smarty');
 
 	if (!isset($params["trackerId"]) || !isset($params["copyFieldIds"])) {
 		return tra('Missing mandatory parameters');
@@ -113,9 +130,8 @@ function wikiplugin_trackeritemcopy( $data, $params )
 
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-		function items_copy($trackerId, $updateFieldIds, $updateFieldValues, $copyFieldIds, $itemIds, $linkFieldId, $itemLinkId, $copies)
-		{
-			global $trklib, $_POST;
+		$items_copy = function ($trackerId, $updateFieldIds, $updateFieldValues, $copyFieldIds, $itemIds, $linkFieldId, $itemLinkId, $copies) {
+			$trklib = TikiLib::lib('trk');
 
 			if (is_array($itemIds) == false) $itemIds = array($itemIds);
 
@@ -186,7 +202,7 @@ function wikiplugin_trackeritemcopy( $data, $params )
 				"data" => $newitemsdata,
 				"list" => $newitemslist
 			);
-		}
+		};
 
 		$return_array = array();
 		$itemIds = array();
@@ -227,7 +243,7 @@ function wikiplugin_trackeritemcopy( $data, $params )
 					}
 				}
 
-				$return_array[] = items_copy(
+				$return_array[] = $items_copy(
 					$trackerId[$key],
 					$updateFieldIds[$key],
 					$updateFieldValues[$key],

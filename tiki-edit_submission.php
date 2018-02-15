@@ -2,23 +2,23 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_submission.php 50104 2014-02-26 18:27:59Z xavidp $
+// $Id: tiki-edit_submission.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'cms';
 require_once ('tiki-setup.php');
-include_once ('lib/articles/artlib.php');
+$artlib = TikiLib::lib('art');
 
 if ($prefs['feature_freetags'] == 'y') {
-	include_once('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 }
 
 $access->check_feature('feature_submissions');
 $access->check_permission('tiki_p_submit_article');
-$errors = array();
+$errors = false;
 
 $auto_query_args = array('subId');
 
@@ -50,7 +50,7 @@ if (!empty($_REQUEST['type'])) {
 if (isset($_REQUEST['previewId'])) {
 	$previewId = $_REQUEST['previewId'];
 } else {
-	$previewId = rand();
+	$previewId = mt_rand();
 }
 
 $smarty->assign('subId', $subId);
@@ -61,8 +61,9 @@ $smarty->assign(
 	(isset($_REQUEST['imageIsChanged']) && $_REQUEST['imageIsChanged']=='y') ? 'y' : 'n'
 );
 
+$templateslib = TikiLib::lib('template');
+
 if (isset($_REQUEST['templateId']) && $_REQUEST['templateId'] > 0) {
-	global $templateslib; require_once 'lib/templates/templateslib.php';
 	$template_data = $templateslib->get_template($_REQUEST['templateId'], $prefs['language']);
 	$_REQUEST['preview'] = 1;
 	$_REQUEST['body'] = $template_data['content'];
@@ -76,7 +77,7 @@ $publishDate = $tikilib->now;
 $expireDate = $tikilib->make_time(0, 0, 0, $tikilib->date_format("%m"), $tikilib->date_format("%d"), $tikilib->date_format("%Y") + 1);
 
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 $smarty->assign('arttitle', '');
@@ -106,13 +107,13 @@ $smarty->assign('rating', 7);
 $smarty->assign('edit_data', 'n');
 
 if (isset($_REQUEST['templateId']) && $_REQUEST['templateId'] > 0) {
-	global $templateslib; require_once 'lib/templates/templateslib.php';
 	$template_data = $templateslib->get_template($_REQUEST['templateId'], $prefs['language']);
 	$_REQUEST['preview'] = 1;
 	$_REQUEST['body'] = $template_data['content'];
 }
 
 // If the submissionId is passed then get the submission data
+$parserlib = TikiLib::lib('parser');
 if (isset($_REQUEST['subId'])) {
 	$article_data = $artlib->get_submission($_REQUEST['subId']);
 
@@ -153,8 +154,8 @@ if (isset($_REQUEST['subId'])) {
 
 	$body = $article_data['body'];
 	$heading = $article_data['heading'];
-	$smarty->assign('parsed_body', $tikilib->parse_data($body, array('is_html' => 'y')));
-	$smarty->assign('parsed_heading', $tikilib->parse_data($heading), array('is_html' => 'y'));
+	$smarty->assign('parsed_body', $parserlib->parse_data($body, array('is_html' => 'y')));
+	$smarty->assign('parsed_heading', $parserlib->parse_data($heading), array('is_html' => 'y'));
 }
 if (!empty($_REQUEST['translationOf'])) {
 	$translationOf = $_REQUEST['translationOf'];
@@ -187,7 +188,8 @@ if ((isset($_REQUEST["save"]) || isset($_REQUEST["submitarticle"]))
 			&& $prefs['feature_antibot'] == 'y'
 			&& !$captchalib->validate()
 ) {
-	$errors[] = $captchalib->getErrors();
+	Feedback::error(['mes' => $captchalib->getErrors()]);
+	$errors = true;
 }
 
 $topics = $artlib->list_topics();
@@ -342,8 +344,8 @@ if (isset($_REQUEST['preview']) || !empty($errors)) {
 
 	$smarty->assign('size', strlen($body));
 
-	$parsed_body = $tikilib->parse_data($body, array('is_html' => 'y'));
-	$parsed_heading = $tikilib->parse_data($heading, array('is_html' => 'y'));
+	$parsed_body = $parserlib->parse_data($body, array('is_html' => 'y'));
+	$parsed_heading = $parserlib->parse_data($heading, array('is_html' => 'y'));
 
 	$smarty->assign('parsed_body', $parsed_body);
 	$smarty->assign('parsed_heading', $parsed_heading);
@@ -355,7 +357,7 @@ if (isset($_REQUEST['preview']) || !empty($errors)) {
 // Pro
 if ((isset($_REQUEST['save']) || isset($_REQUEST['submitarticle'])) && empty($errors)) {
 	check_ticket('edit-submission');
-	include_once ('lib/imagegals/imagegallib.php');
+	$imagegallib = TikiLib::lib('imagegal');
 
 	# convert from the displayed 'site' time to UTC time
 	//Convert 12-hour clock hours to 24-hour scale to compute time
@@ -546,8 +548,7 @@ if ($prefs['article_custom_attributes'] == 'y') {
 }
 $smarty->assign_by_ref('types', $types);
 
-if ($prefs['feature_cms_templates'] == 'y' && $tiki_p_use_content_templates == 'y') {
-	global $templateslib; require_once 'lib/templates/templateslib.php';
+if ($prefs['feature_cms_templates'] == 'y') {
 	$templates = $templateslib->list_templates('cms', 0, -1, 'name_asc', '');
 }
 
@@ -555,7 +556,8 @@ $smarty->assign_by_ref('templates', $templates['data']);
 
 if ($prefs['feature_multilingual'] == 'y') {
 	$languages = array();
-	$languages = $tikilib->list_languages();
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages();
 	$smarty->assign_by_ref('languages', $languages);
 }
 
@@ -574,10 +576,9 @@ $smarty->assign('publishDate', $publishDate);
 $smarty->assign('expireDate', $expireDate);
 $smarty->assign('siteTimeZone', $prefs['display_timezone']);
 
-global $wikilib; include_once('lib/wiki/wikilib.php');
+$wikilib = TikiLib::lib('wiki');
 $plugins = $wikilib->list_plugins(true, 'body');
 $smarty->assign_by_ref('plugins', $plugins);
-$smarty->assign('errors', $errors);
 
 $smarty->assign('showtags', 'n');
 $smarty->assign('qtcycle', '');

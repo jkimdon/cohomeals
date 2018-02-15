@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 52114 2014-07-25 19:54:47Z xavidp $
+// $Id: Controller.php 63147 2017-07-02 17:54:41Z jonnybradley $
 
 
 // NOTE : This controller excludes anything related to the comments. Previous code mixed comments and forums
@@ -14,8 +14,16 @@ class Services_Comment_Controller
 {
 	function action_list($input)
 	{
-		$type = $input->type->text();
-		$objectId = $input->objectId->pagename();
+		$type = $input->type->alphaspace();
+		if ($type === 'wiki page') {
+			$objectId = $input->objectId->pagename();
+		} else {
+			$objectId = $input->objectId->digits();
+		}
+
+		if ($objectId !== $input->objectId->none()) {
+			throw new Services_Exception(tr('Invalid %0 ID: %1', $type, $input->objectId->none()), 403);
+		}
 
 		if (! $this->isEnabled($type, $objectId)) {
 			throw new Services_Exception(tr('Comments not allowed on this page.'), 403);
@@ -34,6 +42,7 @@ class Services_Comment_Controller
 		$this->markEditable($comments['data']);
 
 		return array(
+			'title' => tr('Comments'),
 			'comments' => $comments['data'],
 			'type' => $type,
 			'objectId' => $objectId,
@@ -41,12 +50,13 @@ class Services_Comment_Controller
 			'cant' => $comments['cant'],
 			'offset' => $offset,
 			'per_page' => $per_page,
-			'allow_post' => $this->canPost($type, $objectId),
+			'allow_post' => $this->canPost($type, $objectId) && ! $input->hidepost->int(),
 			'allow_remove' => $this->canRemove($type, $objectId),
 			'allow_lock' => $this->canLock($type, $objectId),
 			'allow_unlock' => $this->canUnlock($type, $objectId),
 			'allow_archive' => $this->canArchive($type, $objectId),
 			'allow_moderate' => $this->canModerate($type, $objectId),
+			'allow_vote' => $this->canVote($type, $objectId),
 		);
 	}
 
@@ -57,6 +67,7 @@ class Services_Comment_Controller
 		$type = $input->type->text();
 		$objectId = $input->objectId->pagename();
 		$parentId = $input->parentId->int();
+		$return_url = $input->return_url->url();
 
 		// Check general permissions
 
@@ -81,6 +92,7 @@ class Services_Comment_Controller
 
 		$title = trim($input->title->text());
 		$data = trim($input->data->wikicontent());
+		$watch = $input->watch->text();
 		$contributions = array();
 		$anonymous_name = '';
 		$anonymous_email = '';
@@ -89,7 +101,7 @@ class Services_Comment_Controller
 		if (empty($user) || $prefs['feature_comments_post_as_anonymous'] == 'y') {
 			$anonymous_name = $input->anonymous_name->text();
 			$anonymous_email = $input->anonymous_email->email();
-			$anonymous_website = $input->anonymous_website->website();
+			$anonymous_website = $input->anonymous_website->url();
 		}
 
 		if ($input->post->int()) {
@@ -116,20 +128,17 @@ class Services_Comment_Controller
 			if (empty($user) && $prefs['feature_antibot'] == 'y') {
 				$captchalib = TikiLib::lib('captcha');
 
-				if (! $captchalib->validate(
-					array(
-						'recaptcha_challenge_field' => $input->recaptcha_challenge_field->none(),
-						'recaptcha_response_field' => $input->recaptcha_response_field->none(),
-						'captcha' => $input->captcha->none(),
-					)
-				)
-				) {
+				if (! $captchalib->validate($input->none())) {
 					$errors[] = $captchalib->getErrors();
 				}
 			}
 
 			if ($prefs['comments_notitle'] == 'y') {
 				$title = 'Untitled ' . TikiLib::lib('tiki')->get_long_datetime(TikiLib::lib('tikidate')->getTime());
+			}
+
+			if (count($errors) === 0 &&  $commentslib->check_for_topic($title, $data)){
+				$errors[] = tr('Duplicated comment, there is already another comment with the same text');
 			}
 
 			if (count($errors) === 0) {
@@ -151,6 +160,57 @@ class Services_Comment_Controller
 					$anonymous_email,
 					$anonymous_website
 				);
+				// Set watch if requested
+				if ($prefs['feature_user_watches'] == 'y' && $watch == 'y') {
+					// ensure subcomments are not watched when parent comments are watched
+					// so we don't fill the user_watches table unnecessary
+					$comments_list = $commentslib->get_root_path($threadId);
+					$watch_user = empty($anonymous_email) ? $user : $anonymous_name . ' ' . tra('(not registered)');
+					if( !TikiLib::lib('tiki')->get_user_event_watches($watch_user, 'thread_comment_replied', $comments_list) ) {
+						if ($type == 'wiki page') {
+							$wikilib = TikiLib::lib('wiki');
+							$parent_name = $objectId;
+							$notification_url = $wikilib->sefurl($objectId);
+						} elseif ($type == 'article') {
+							$artlib = TikiLib::lib('art');
+							$parent_name = $artlib->get_title($objectId);
+							$notification_url = 'tiki-read_article.php?articleId='.$objectId;
+						} elseif ($type == 'trackeritem') {
+							$trk = Tikilib::lib('trk');
+							$trackerId = $trk->get_tracker_for_item($objectId);
+							$parent_name = $trk->get_isMain_value($trackerId, $objectId);
+							$notification_url = 'tiki-view_tracker_item.php?itemId='.$objectId;
+						} elseif ($type == 'blog post') {
+							$bloglib = TikiLib::lib('blog');
+							$blog_post = $bloglib->get_post($objectId);
+							$parent_name = $blog_post['title'];
+							$notification_url = 'tiki-view_blog_post.php?postId='.$objectId;
+						} else {
+							$parent_name = '';
+							$notification_url = '';
+						}
+						if (!empty($anonymous_email)) { // Add an anonymous watch, if email address supplied.
+							TikiLib::lib('tiki')->add_user_watch(
+								$anonymous_name . ' ' . tra('(not registered)'),
+								'thread_comment_replied',
+								$threadId,
+								'comment',
+								$parent_name . ':' . $title,
+								$notification_url,
+								$anonymous_email
+							);
+						} elseif ($user) {
+							TikiLib::lib('tiki')->add_user_watch(
+								$user,
+								'thread_comment_replied',
+								$threadId,
+								'comment',
+								$parent_name . ':' . $title,
+								$notification_url
+							);
+						}
+					}
+				}
 
 				$feedback = array();
 
@@ -161,26 +221,33 @@ class Services_Comment_Controller
 				if ($threadId) {
 					$this->rememberCreatedComment($threadId);
 
+					$emailType = '';
 					if ($prefs['wiki_watch_comments'] == 'y' && $type == 'wiki page') {
-						require_once('lib/notifications/notificationemaillib.php');
-						sendCommentNotification('wiki', $objectId, $title, $data);
+						$emailType = 'wiki';
 					} else if ($type == 'article') {
-						require_once('lib/notifications/notificationemaillib.php');
-						sendCommentNotification('article', $objectId, $title, $data);
+						$emailType = 'article';
 					} elseif ($prefs['feature_blogs'] == 'y' && $type == 'blog post') { // Blog comment mail
-						require_once('lib/notifications/notificationemaillib.php');
-						 sendCommentNotification('blog', $objectId, $title, $data);
+						$emailType = 'blog';
 					} elseif ($type == 'trackeritem') {
-						require_once('lib/notifications/notificationemaillib.php');
-						sendCommentNotification('trackeritem', $objectId, $title, $data, $threadId);
+						$emailType = 'trackeritem';
 					}
+					if( $emailType ) {
+						require_once('lib/notifications/notificationemaillib.php');
+						sendCommentNotification($emailType, $objectId, $title, $data, $threadId, $anonymous_name);
+					}
+
+					$access = TikiLib::lib('access');
+					if ($return_url && ! $access->is_xml_http_request()) {
+						$access->redirect($return_url, tr('Your comment was posted.'));
+					}
+					
 
 					return array(
 						'threadId' => $threadId,
 						'parentId' => $parentId,
 						'type' => $type,
 						'objectId' => $objectId,
-						'feedback' => $feedback,						
+						'feedback' => $feedback,
 					);
 				}
 			}
@@ -197,6 +264,7 @@ class Services_Comment_Controller
 			'anonymous_email' => $anonymous_email,
 			'anonymous_website' => $anonymous_website,
 			'errors' => $errors,
+			'return_url' => $return_url,
 		);
 	}
 
@@ -232,6 +300,8 @@ class Services_Comment_Controller
 
 	function action_remove($input)
 	{
+		global $prefs, $user;
+
 		$threadId = $input->threadId->int();
 		$confirmation = $input->confirm->int();
 		$status = '';
@@ -247,6 +317,15 @@ class Services_Comment_Controller
 			if ($confirmation) {
 				$commentslib = TikiLib::lib('comments');
 				$commentslib->remove_comment($threadId);
+
+				if($prefs['feature_user_watches'] && $user) {
+					TikiLib::lib('tiki')->remove_user_watch_object(
+						'thread_comment_replied',
+						$threadId,
+						'comment'
+					);
+				}
+
 				$status = 'DONE';
 			}
 		} else {
@@ -297,7 +376,15 @@ class Services_Comment_Controller
 			$status = 'DONE';
 		}
 
+		if ($mode === 'lock') {
+			$title = tr('Lock comments');
+		} 
+		else {
+			$title = tr('Unlock comments');
+		}
+		
 		return array(
+			'title' => $title,
 			'type' => $type,
 			'objectId' => $objectId,
 			'status' => $status,
@@ -393,39 +480,75 @@ class Services_Comment_Controller
 		return array();
 	}
 
-	private function canView($type, $objectId)
+	public function canView($type, $objectId)
 	{
+		// Note: $perms provides a magic method __get as an accessor for attributes.
+		// I.e. $perms->wiki_view_comments or $perms->tracker_view_comments are returend by that accessor method
+		// and do not exist as a property.
+		// Wether they are true or false depends on the assigned permissions stored in $perms->resolver
+		// for the respective groups.
+		 
 		$perms = $this->getApplicablePermissions($type, $objectId);
 
-		if (! ($perms->read_comments || $perms->post_comments || $perms->edit_comments)) {
-			return false;
-		}
-
 		switch ($type) {
-		case 'wiki page':
-			return $perms->wiki_view_comments;
+			case 'wiki page':
+				return $perms->wiki_view_comments;
+				break;
+			
+			// canPost() requires also view access frontend/template wise. 
+			// So we return also true if post ($perms->comment_tracker_items) is enabled. 
+			case 'trackeritem':
+				return ($perms->tracker_view_comments || $perms->comment_tracker_items);
+				break;
+				
+			
+			// @TODO which $types do use / or should use these permissions?
+			// taken from the prevoius developer: seems that view should be automatically assigned if edit / post is granted.
+			default:
+				if (! ($perms->read_comments || $perms->post_comments || $perms->edit_comments)) {
+					return false;
+				}
+				break;
 		}
 
 		return true;
 	}
 
-	private function canPost($type, $objectId)
+	
+	public function canPost($type, $objectId)
 	{
 		global $prefs;
+		
+		// see comment about $perms in canView().
 
 		$perms = $this->getApplicablePermissions($type, $objectId);
-		if (! $perms->post_comments) {
-			return false;
-		}
 
 		if ($prefs['feature_comments_locking'] == 'y' &&  TikiLib::lib('comments')->is_object_locked("$type:$objectId")) {
 			return false;
 		}
+		
+		switch ($type) {
+					
+			// requires also view access from the front/template part
+			// so we add $perms->comment_tracker_items also to canView()
+			case 'trackeritem':
+				return $perms->comment_tracker_items;
+				break;
+		
+			// @TODO which $types do use / or should use these permissions?
+			default:
+				if (! ($perms->post_comments)) {
+					return false;
+				}
+				break;
+		}
+		
 
 		return true;
 	}
+	
 
-	private function isEnabled($type, $objectId)
+	public function isEnabled($type, $objectId)
 	{
 		global $prefs;
 
@@ -458,7 +581,7 @@ class Services_Comment_Controller
 		case 'article':
 			return $prefs['feature_article_comments'] == 'y';
 		case 'activity':
-			return $prefs['activity_basic_events'] == 'y' || $prefs['activity_custom_events'] == 'y';
+			return $prefs['activity_basic_events'] == 'y' || $prefs['activity_custom_events'] == 'y' || $prefs['monitor_enabled'] == 'y';
 		default:
 			return false;
 		}
@@ -540,6 +663,18 @@ class Services_Comment_Controller
 		return $perms->remove_comments;
 	}
 
+	private function canVote($type, $objectId)
+	{
+		global $prefs;
+
+		if ($prefs['wiki_comments_simple_ratings'] !== 'y') {
+			return false;
+		}
+
+		$perms = $this->getApplicablePermissions($type, $objectId);
+		return $perms->vote_comments || $perms->admin_comments;
+	}
+
 	private function canModerate($type, $objectId)
 	{
 		global $prefs;
@@ -600,7 +735,13 @@ class Services_Comment_Controller
 		switch ($type) {
 		case 'trackeritem':
 			$item = Tracker_Item::fromId($objectId);
-			return $item->getPerms();
+			if ($item) {
+				return $item->getPerms();
+			} else {
+				Feedback::error(tr('Comment permissions: %0 object %1 not found', $type, $objectId));
+				// return global perms
+				return Perms::get();
+			}
 		default:
 			return Perms::get($type, $objectId);
 		}

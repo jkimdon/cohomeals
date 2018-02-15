@@ -2,19 +2,19 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-action_calendar.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-action_calendar.php 57958 2016-03-17 19:59:37Z jonnybradley $
 
 include 'tiki-setup.php';
-include 'lib/calendar/tikicalendarlib.php';
+$tikicalendarlib = TikiLib::lib('tikicalendar');
 $access->check_feature('feature_action_calendar');
 $access->check_permission('tiki_p_view_tiki_calendar');
 //get_strings tra('Tiki Calendar')
 
-$headerlib->add_cssfile('css/calendar.css', 20);
+$headerlib->add_cssfile('themes/base_files/feature_css/calendar.css', 20);
 
 $myurl = 'tiki-action_calendar.php';
 include_once("tiki-calendar_setup.php");

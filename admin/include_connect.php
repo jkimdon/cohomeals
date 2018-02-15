@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_connect.php 51605 2014-06-06 20:12:12Z alexandrequessy $
+// $Id: include_connect.php 61626 2017-03-11 16:39:42Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -11,12 +11,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 	exit;
 }
 
-if (isset($_REQUEST['connectprefs'])) {
-	check_ticket('admin-inc-connect');
-}
-
-ask_ticket('admin-inc-connect');
-global $userlib, $prefs, $base_url, $headerlib, $smarty;
+global $prefs, $base_url;
+$userlib = TikiLib::lib('user');
+$headerlib = TikiLib::lib('header');
+$smarty = TikiLib::lib('smarty');
 
 $headerlib->add_jsfile('lib/jquery_tiki/tiki-connect.js');
 
@@ -57,8 +55,10 @@ if ($prefs['connect_server_mode'] === 'y') {
 		}
 	}
 	$smarty->assign('cserver_search_text', $search_str);
-	$smarty->assignByRef('connect_stats', $connectlib->getReceivedDataStats());
-	$smarty->assignByRef('connect_recent', $connectlib->getMatchingConnections(empty($search_str) ? '*' : $search_str));
+	$receivedDataStats = $connectlib->getReceivedDataStats();
+	$smarty->assignByRef('connect_stats', $receivedDataStats);
+	$matchingConnections = $connectlib->getMatchingConnections(empty($search_str) ? '*' : $search_str);
+	$smarty->assignByRef('connect_recent', $matchingConnections);
 } else {
 	$smarty->assign('connect_stats', null);
 	$smarty->assign('connect_recent', null);

@@ -1,13 +1,12 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_preferences_params.php 49974 2014-02-20 03:40:27Z lindonb $
+// $Id: user_preferences_params.php 60252 2016-11-13 19:07:24Z chealer $
 
 require_once('lib/wizard/wizard.php');
-include_once('lib/userprefs/scrambleEmail.php');
-include_once('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 
 /**
  * Set up the wysiwyg editor, including inline editing
@@ -32,7 +31,10 @@ class UserWizardPreferencesParams extends Wizard
 
 	function onSetupPage ($homepageUrl) 
 	{
-		global	$smarty, $userlib, $tikilib, $user, $prefs, $tiki_p_messages;
+		global	$user, $prefs, $tiki_p_messages;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
+		$smarty = TikiLib::lib('smarty');
 
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
@@ -89,10 +91,8 @@ class UserWizardPreferencesParams extends Wizard
 		
 		$mailCharset = $tikilib->get_user_preference($userwatch, 'mailCharset', $prefs['default_mail_charset']);
 		$smarty->assign('mailCharset', $mailCharset);
-		$user_dbl = $tikilib->get_user_preference($userwatch, 'user_dbl', 'n');
 		$userbreadCrumb = $tikilib->get_user_preference($userwatch, 'userbreadCrumb', $prefs['site_userbreadCrumb']);
 		$smarty->assign('userbreadCrumb', $userbreadCrumb);
-		$smarty->assign('user_dbl', $user_dbl);
 		$display_12hr_clock = $tikilib->get_user_preference($userwatch, 'display_12hr_clock', 'n');
 		$smarty->assign('display_12hr_clock', $display_12hr_clock);
 		$userinfo = $userlib->get_user_info($userwatch);
@@ -101,7 +101,8 @@ class UserWizardPreferencesParams extends Wizard
 		$llist = $tikilib->list_styles();
 		$smarty->assign_by_ref('styles', $llist);
 		$languages = array();
-		$languages = $tikilib->list_languages();
+		$langLib = TikiLib::lib('language');
+		$languages = $langLib->list_languages();
 		$smarty->assign_by_ref('languages', $languages);
 		$user_pages = $tikilib->get_user_pages($userwatch, -1);
 		$smarty->assign_by_ref('user_pages', $user_pages);
@@ -114,7 +115,12 @@ class UserWizardPreferencesParams extends Wizard
 		$smarty->assign_by_ref('user_items', $user_items);
 		$scramblingMethods = array("n", "strtr", "unicode", "x", 'y'); // email_isPublic utilizes 'n'
 		$smarty->assign_by_ref('scramblingMethods', $scramblingMethods);
-		$scramblingEmails = array(tra("no"), scrambleEmail($userinfo['email'], 'strtr'), scrambleEmail($userinfo['email'], 'unicode') . "-" . tra("unicode"), scrambleEmail($userinfo['email'], 'x'), $userinfo['email']);
+		$scramblingEmails = array(
+				tra("no"),
+				TikiMail::scrambleEmail($userinfo['email'], 'strtr'),
+				TikiMail::scrambleEmail($userinfo['email'], 'unicode') . "-" . tra("unicode"),
+				TikiMail::scrambleEmail($userinfo['email'], 'x'), $userinfo['email'],
+			);
 		$smarty->assign_by_ref('scramblingEmails', $scramblingEmails);
 		$mailCharsets = array('utf-8', 'iso-8859-1');
 		$smarty->assign_by_ref('mailCharsets', $mailCharsets);
@@ -145,10 +151,7 @@ class UserWizardPreferencesParams extends Wizard
 		$smarty->assign('timezones', TikiDate::getTimeZoneList());
 		
 		// Time zone data for the user
-		if ($prefs['users_prefs_display_timezone'] == 'Site'
-					|| (isset($user_preferences[$user]['display_timezone'])
-					&& $user_preferences[$user]['display_timezone'] == 'Site')
-		) {
+		if ($prefs['users_prefs_display_timezone'] == 'Site') {
 			$smarty->assign('warning_site_timezone_set', 'y');
 		}
 
@@ -159,13 +162,13 @@ class UserWizardPreferencesParams extends Wizard
 		if ($prefs['feature_wiki'] == 'y' and $prefs['feature_wiki_userpage'] == 'y') {
 			if ($tikilib->page_exists($prefs['feature_wiki_userpage_prefix'] . $user)) $smarty->assign('userPageExists', 'y');
 		}
-		$smarty->assign_by_ref('tikifeedback', $tikifeedback);
-
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_preferences_params.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
-		
 		return true;		
+	}
+
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_preferences_params.tpl';
+		return $wizardTemplate;
 	}
 
 	function onContinue ($homepageUrl) 
@@ -199,7 +202,8 @@ class UserWizardPreferencesParams extends Wizard
 			}
 		}
 		if (isset($_REQUEST["userbreadCrumb"])) $tikilib->set_user_preference($userwatch, 'userbreadCrumb', $_REQUEST["userbreadCrumb"]);
-		if (isset($_REQUEST["language"]) && $tikilib->is_valid_language($_REQUEST['language'])) {
+		$langLib = TikiLib::lib('language');
+		if (isset($_REQUEST["language"]) && $langLib->is_valid_language($_REQUEST['language'])) {
 			if ($tiki_p_admin || $prefs['change_language'] == 'y') {
 				$tikilib->set_user_preference($userwatch, 'language', $_REQUEST["language"]);
 			}
@@ -217,7 +221,8 @@ class UserWizardPreferencesParams extends Wizard
 				$tok = strtok(' ');
 			}
 			$list = array_unique($list);
-			$list = array_filter($list, array($tikilib, 'is_valid_language'));
+			$langLib = TikiLib::lib('language');
+			$list = array_filter($list, array($langLib, 'is_valid_language'));
 			$list = implode(' ', $list);
 			$tikilib->set_user_preference($userwatch, 'read_language', $list);
 		}
@@ -225,11 +230,6 @@ class UserWizardPreferencesParams extends Wizard
 			$tikilib->set_user_preference($userwatch, 'display_timezone', $_REQUEST['display_timezone']);
 		}
 
-		if (isset($_REQUEST['user_dbl']) && $_REQUEST['user_dbl'] == 'on') {
-			$tikilib->set_user_preference($userwatch, 'user_dbl', 'y');
-		} else {
-			$tikilib->set_user_preference($userwatch, 'user_dbl', 'n');
-		}
 		if (isset($_REQUEST['display_12hr_clock']) && $_REQUEST['display_12hr_clock'] == 'on') {
 			$tikilib->set_user_preference($userwatch, 'display_12hr_clock', 'y');
 		} else {

@@ -1,17 +1,21 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: vimeolib.php 47337 2013-09-03 16:58:15Z jonnybradley $
+// $Id: vimeolib.php 58675 2016-05-23 17:50:57Z jonnybradley $
 
 class VimeoLib
 {
 	private $oauth;
 
-	function __construct()
+	/**
+	 * VimeoLib constructor.
+	 * @param OAuthLib $oauthlib
+	 */
+	function __construct($oauthlib)
 	{
-		$this->oauth = TikiLib::lib('oauth');
+		$this->oauth = $oauthlib;
 	}
 
 	function isAuthorized()
@@ -93,6 +97,8 @@ class VimeoLib
 
 	private function callMethod($method, array $arguments = array())
 	{
+		$oldVal = ini_get('arg_separator.output');
+		ini_set('arg_separator.output', '&');
 		$response = $this->oauth->do_request(
 			'vimeo',
 			array(
@@ -106,7 +112,7 @@ class VimeoLib
 				),
 			)
 		);
-
+		ini_set('arg_separator.output', $oldVal);
 		return json_decode($response->getBody(), true);
 	}
 }

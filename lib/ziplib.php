@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ziplib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ziplib.php 59638 2016-09-08 17:03:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -477,7 +477,7 @@ define('ZIP_ENDDIR_MAGIC', "PK\005\006");
 
 class ZipWriter
 {
-	function ZipWriter($comment = '', $zipname = 'archive.zip')
+	function __construct($comment = '', $zipname = 'archive.zip')
 	{
 		$this->comment = $comment;
 
@@ -612,7 +612,7 @@ class ZipWriter
  */
 class ZipReader
 {
-	function ZipReader($zipfile)
+	function __construct($zipfile)
 	{
 		if (!is_string($zipfile))
 			$this->fp = $zipfile; // File already open

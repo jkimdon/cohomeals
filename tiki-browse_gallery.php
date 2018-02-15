@@ -2,24 +2,21 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-browse_gallery.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-browse_gallery.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $section = 'galleries';
 require_once ('tiki-setup.php');
-include_once ("lib/imagegals/imagegallib.php");
-include_once ('lib/stats/statslib.php');
+$imagegallib = TikiLib::lib('imagegal');
+$statslib = TikiLib::lib('stats');
 
 $access->check_feature('feature_galleries');
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once ('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 if ($_REQUEST["galleryId"] == 0 && $tiki_p_admin_galleries != 'y') {
@@ -237,7 +234,7 @@ $newoffset = $offset - $subgals['cant'];
 if ($newoffset < 0) $newoffset=0;
 $images = $imagegallib->get_images($newoffset, $remainingImages, $sort_mode, $find, $_REQUEST["galleryId"]);
 //get categories for each images
-global $objectlib;
+$objectlib = TikiLib::lib('object');
 if ($prefs['feature_categories'] == 'y') {
 	$type = 'image';
 	$arr = array();

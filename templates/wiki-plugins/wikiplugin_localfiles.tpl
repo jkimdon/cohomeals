@@ -1,19 +1,19 @@
-{* $Id: wikiplugin_localfiles.tpl 47795 2013-09-30 14:44:34Z jonnybradley $ *}
+{* $Id: wikiplugin_localfiles.tpl 55923 2015-07-26 15:46:20Z lindonb $ *}
 {strip}
 {if $files|count}
-	<ul  class="localfiles">
+	<ul class="localfiles">
 		{foreach item=file from=$files}
 			<li>
 				{if $isIE}
 					<a href="file:\\\{$file.path|escape}" title="{$file.path|escape}">
 						{if $file.icon}
-							{icon _id=$file.icon}&nbsp;
+							{$file.icon}&nbsp;
 						{/if}
 						{$file.name|escape}
 					</a>
 				{else}
 					{if $file.icon}
-						{icon _id=$file.icon}&nbsp;
+						{$file.icon}&nbsp;
 					{/if}
 					<span>{$file.path|escape}</span>
 				{/if}

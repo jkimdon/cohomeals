@@ -2,20 +2,20 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-calendar_json.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-calendar_json.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 $section = 'calendar';
 require_once ('tiki-setup.php');
 
-include_once ('lib/calendar/calendarlib.php');
-include_once ('lib/categories/categlib.php');
+$calendarlib = TikiLib::lib('calendar');
+$categlib = TikiLib::lib('categ');
 include_once ('lib/newsletters/nllib.php');
 
-$headerlib->add_cssfile('css/calendar.css', 20);
+$headerlib->add_cssfile('themes/base_files/feature_css/calendar.css', 20);
 # perms are
 # 	$tiki_p_view_calendar
 # 	$tiki_p_admin_calendar
@@ -194,11 +194,11 @@ foreach ($listevents as $event) {
 	}
 	$events[] = array ( 'id' => $event['calitemId'],
 											'title' => $event['name'],
-											'description' => !empty($event["description"]) ? $tikilib->parse_data($event["description"], array('is_html' => $prefs['calendar_description_is_html'] === 'y')) : "",
+											'description' => !empty($event["description"]) ? TikiLib::lib('parser')->parse_data($event["description"], array('is_html' => $prefs['calendar_description_is_html'] === 'y')) : "",
 											'url' => $url,
 											'allDay' => $event['allday'] != 0 ,
-											'start' => $event['date_start'],
-											'end' => $event['date_end'],
+											'start' => TikiLib::date_format("c", $event['date_start'], false, 5, false),
+											'end' => TikiLib::date_format("c", $event['date_end'], false, 5, false),
 											'editable' => $event['editable'] === 'y',
 											'color' => '#'.$cals_info['data'][$event['calendarId']]['custombgcolor'],
 											'textColor' => '#'.$cals_info['data'][$event['calendarId']]['customfgcolor']);

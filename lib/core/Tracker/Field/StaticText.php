@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: StaticText.php 45930 2013-05-13 19:57:37Z lphuberdeau $
+// $Id: StaticText.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 /**
  * Handler class for Static text
@@ -32,12 +32,13 @@ class Tracker_Field_StaticText extends Tracker_Field_Abstract implements Tracker
 						'options' => array(
 							0 => tr('Handle line breaks as new lines only'),
 							1 => tr('Wiki Parse'),
+							2 => tr('Wiki Parse with Pretty Tracker replacements'),
 						),
 						'legacy_index' => 0,
 					),
 					'max' => array(
 						'name' => tr('Maximum Length (List)'),
-						'description' => tr('Maximum amount of characters to be displayed in list mode'),
+						'description' => tr('Maximum number of characters to be displayed in list mode'),
 						'filter' => 'int',
 						'legacy_index' => 1,
 					),
@@ -53,7 +54,27 @@ class Tracker_Field_StaticText extends Tracker_Field_Abstract implements Tracker
 		$value = $this->getConfiguration('description');
 
 		if ($this->getOption('wikiparse') == 1) {
-			$value = $tikilib->parse_data($value);
+
+			$value = TikiLib::lib('parser')->parse_data($value);
+
+		} else if ($this->getOption('wikiparse') == 2) {	// do pretty tracker replacements
+
+			$definition = Tracker_Definition::get($this->getConfiguration('trackerId'));
+			$itemData = $this->getItemData();
+
+			preg_match_all('/\{\$f_(\w+)\}/', $value, $matches);
+
+			foreach ($matches[1] as $fieldIdOrName) {
+				$field = $definition->getField($fieldIdOrName);
+				$fieldId = $field['fieldId'];
+
+				if (isset($itemData[$fieldId])) {
+					$fieldValue = $itemData[$field['fieldId']];
+					$value = str_replace(['{$f_' . $fieldId . '}', '{$f_' . $field['permName'] . '}'], $fieldValue, $value);
+				}
+			}
+
+			$value = TikiLib::lib('parser')->parse_data($value);
 		}
 		
 		return array('value' => $value);

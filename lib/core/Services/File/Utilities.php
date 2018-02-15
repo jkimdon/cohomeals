@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Utilities.php 46861 2013-07-26 14:13:39Z lphuberdeau $
+// $Id: Utilities.php 58951 2016-06-21 21:48:04Z amnabilal $
 
 class Services_File_Utilities
 {
@@ -36,10 +36,10 @@ class Services_File_Utilities
 		return $filegallib->get_file_gallery_info($galleryId);
 	}
 
-	function uploadFile($gal_info, $name, $size, $type, $data, $asuser = null)
+	function uploadFile($gal_info, $name, $size, $type, $data, $asuser = null,$image_x=null,$image_y=null)
 	{
 		$filegallib = TikiLib::lib('filegal');
-		return $filegallib->upload_single_file($gal_info, $name, $size, $type, $data, $asuser);
+		return $filegallib->upload_single_file($gal_info, $name, $size, $type, $data, $asuser,$image_x,$image_y);
 	}
 
 	function updateFile($gal_info, $name, $size, $type, $data, $fileId, $asuser = null)

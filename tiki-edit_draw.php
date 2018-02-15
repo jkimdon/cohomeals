@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_draw.php 53683 2015-01-28 19:02:10Z jonnybradley $
+// $Id: tiki-edit_draw.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
@@ -16,9 +16,10 @@ $inputConfiguration = array(
 
 $section = "draw";
 require_once ('tiki-setup.php');
-global $drawFullscreen, $prefs, $headerlib;
+global $drawFullscreen, $prefs;
+$headerlib = TikiLib::lib('header');
 
-include_once ('lib/filegals/filegallib.php');
+$filegallib = TikiLib::lib('filegal');
 
 $access->check_feature('feature_draw');
 $access->check_feature('feature_file_galleries');

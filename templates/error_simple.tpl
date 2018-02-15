@@ -1,4 +1,4 @@
-{* $Id: error_simple.tpl 45006 2013-02-28 14:59:58Z chibaguy $ *}<!DOCTYPE html>
+{* $Id: error_simple.tpl 54656 2015-03-22 17:54:02Z lindonb $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
 		{include file='header.tpl'}
@@ -8,10 +8,10 @@
 			<table dir="rtl" ><tr><td>
 		{/if}
 		<div id="tiki-mid">
-			<div class="cbox">
-				<div class="cbox-title">{icon _id=exclamation alt="{tr}Error{/tr}" style="vertical-align:middle"}{tr}Error{/tr}</div>
-				<div class="cbox-data">
-					{$msg}<br><br>
+			<div class="panel panel-default">
+				<div class="panel-heading">{icon name='error' alt="{tr}Error{/tr}" style="vertical-align:middle"}{tr}Error{/tr}</div>
+				<div class="panel-body">
+					{$msg}
 					<a href="javascript:window.close()" class="linkmenu">{tr}Close Window{/tr}</a><br><br>
 				</div>
 			</div>

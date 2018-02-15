@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-webservices.php 44846 2013-02-08 15:27:55Z lphuberdeau $
+// $Id: tiki-webservices.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 require_once 'tiki-setup.php';
 
@@ -65,12 +65,14 @@ class Tiki_WebServices
 }
 
 if (is_null($_GET['wsdl'])) {
-	$server = new Zend_Soap_Server($_SERVER['SCRIPT_URI'] . '?wsdl');
+	$protocol = isset($_SERVER['HTTPS']) ? 'https' : 'http';
+	$server = new Zend\Soap\Server($protocol . '://' . $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'] . '?wsdl');
 	$server->setClass('Tiki_WebServices');
 	$server->handle();
 
 } else {
-	$wsdl = new Zend_Soap_AutoDiscover();
+	$wsdl = new Zend\Soap\AutoDiscover();
+	$wsdl->setUri($_SERVER['SCRIPT_NAME']);
 	$wsdl->setClass('Tiki_WebServices');
 	$wsdl->handle();
 }

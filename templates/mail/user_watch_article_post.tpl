@@ -1,5 +1,5 @@
-{* $Id: user_watch_article_post.tpl 50199 2014-03-04 10:12:44Z xavidp $ *}
-{if $mail_action eq 'New'}{tr}New article post:{/tr}{/if}{if $mail_action eq 'Edit'}{tr}Edit article post:{/tr}{/if}{if $mail_action eq 'Delete'}{tr}Delete article post:{/tr}{/if} {tr}{$mail_title} by {$mail_user|username} at{/tr} {$mail_date|tiki_short_datetime:"":"n"}
+{* $Id: user_watch_article_post.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}
+{if $mail_action eq 'New'}{tr}New {$prefs.mail_template_custom_text}article post:{/tr}{/if}{if $mail_action eq 'Edit'}{tr}Edit {$prefs.mail_template_custom_text}article post:{/tr}{/if}{if $mail_action eq 'Delete'}{tr}Delete {$prefs.mail_template_custom_text}article post:{/tr}{/if} {tr}{$mail_title} by {$mail_user|username} at{/tr} {$mail_date|tiki_short_datetime:"":"n"}
 
 {if $mail_action neq 'Delete'}{tr}View the article at:{/tr} {$mail_machine_raw}/{$mail_postid|sefurl:article}{/if}
 

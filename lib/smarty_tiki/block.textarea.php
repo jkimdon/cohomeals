@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.textarea.php 48640 2013-11-21 17:23:59Z jonnybradley $
+// $Id: block.textarea.php 62747 2017-05-25 18:14:19Z jonnybradley $
 
 /**
  * Smarty plugin
@@ -31,26 +31,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 
 function smarty_block_textarea($params, $content, $smarty, $repeat)
 {
-    static $included=false;
-	global $prefs, $headerlib, $smarty, $is_html, $tiki_p_admin;
+	global $prefs, $is_html, $tiki_p_admin;
+	$headerlib = TikiLib::lib('header');
 
 	if ( $repeat ) {
 		return;
 	}
-    if (!$included) {
-        $headerlib->add_js(
-            <<<JS
-                function GetCurrentEditorAreaId(ob){
-        var p;
-        p=ob.parentNode;
-        while(p.className != "edit-zone"){p=p.parentNode;}
-        areaid=p.id.substring(10);
-        //alert ("areaid="+areaid);
-        return areaid;
-    }
-JS
-        );
-    }
+
 	// some defaults
 	$params['_toolbars'] = isset($params['_toolbars']) ? $params['_toolbars'] : 'y';
 	if ( $prefs['javascript_enabled'] != 'y') {
@@ -80,7 +67,7 @@ JS
 	$params['name'] = isset($params['name']) ? $params['name'] : 'edit';
 	$params['id'] = isset($params['id']) ? $params['id'] : 'editwiki';
 	$params['area_id'] = isset($params['area_id']) ? $params['area_id'] : $params['id'];	// legacy param for toolbars?
-	$params['class'] = isset($params['class']) ? $params['class'] : 'wikiedit';
+	$params['class'] = isset($params['class']) ? $params['class'] : 'wikiedit form-control';
 	$params['comments'] = isset($params['comments']) ? $params['comments'] : 'n';
 	$params['autosave'] = isset($params['autosave']) ? $params['autosave'] : 'y';
 
@@ -100,11 +87,8 @@ JS
 		global $section;
 		$params['section'] = $section ? $section: 'wiki page';
 	}
-	if ( ! isset($params['style']) && ! isset($params['cols']) ) {
-		$params['style'] = 'width:99%';
-	}
 	$html = '';
-    if (!$included) $html .= '<input type="hidden" name="mode_wysiwyg" value="" /><input type="hidden" name="mode_normal" value="" />';
+    $html .= '<input type="hidden" name="mode_wysiwyg" value="" /><input type="hidden" name="mode_normal" value="" />';
 
 	$auto_save_referrer = '';
 	$auto_save_warning = '';
@@ -115,16 +99,21 @@ JS
 	$editWarning = $prefs['wiki_timeout_warning'] === 'y' && isset($tmp_var) && $tmp_var !== 'sandbox';
 	if ($params['_simple'] === 'n' && $editWarning) {
 		$remrepeat = false;
+		if ($prefs['ajax_autosave'] === 'y' and $section === 'wiki page') {
+			$hint = '<strong>Save</strong> your work to restart the edit session timer';
+		} else {
+			$hint = '<strong>Preview</strong> (if available) or <strong>Save</strong> your work to restart the edit session timer';
+		}
 		$html .= smarty_block_remarksbox(
-			array( 'type'=>'tip', 'title'=>tra('Tip')),
-			tra('This edit session will expire in') .
+			array( 'type'=>'warning', 'title'=>tra('Warning')),
+			'<p>' . tra('This edit session will expire in') .
 			' <span id="edittimeout">' . (ini_get('session.gc_maxlifetime') / 60) .'</span> '. tra('minutes') . '. ' .
-			tra('<strong>Preview</strong> (if available) or <strong>Save</strong> your work to restart the edit session timer'),
+			tra($hint) . '</p>',
 			$smarty,
 			$remrepeat
 		)."\n";
 		if ($prefs['javascript_enabled'] === 'y') {
-			$html = str_replace('<div class="clearfix rbox tip">', '<div class="clearfix rbox tip" style="display:none;">', $html);	// quickfix to stop this box appearing before doc.ready
+			$html = str_replace('<div class="alert alert-warning alert-dismissable">', '<div class="alert alert-warning alert-dismissable" style="display:none;">', $html);	// quickfix to stop this box appearing before doc.ready
 		}
 	}
 
@@ -135,7 +124,6 @@ JS
 
 	if ($prefs['feature_ajax'] == 'y' && $prefs['ajax_autosave'] == 'y' && $params['_simple'] == 'n' && $params['autosave'] == 'y') {
 		// retrieve autosaved content
-		require_once("lib/ajax/autosave.php");
 		$smarty->loadPlugin('smarty_block_self_link');
 		$auto_save_referrer = TikiLib::lib('autosave')->ensureReferrer();
 		if (empty($_REQUEST['autosave'])) {
@@ -167,44 +155,35 @@ JS
 
 		$wysiwyglib = TikiLib::lib('wysiwyg');
 
-		if ($prefs['feature_jison_wiki_parser'] == 'y') {
-			$html .= $wysiwyglib->setUpJisonEditor($params['_is_html'], $as_id, $params, $auto_save_referrer);
-            if (!$included) $html .= '<input name="jisonWyisywg" type="hidden" value="true" />';
-			$html .= '<div class="wikiedit ui-widget-content" name="'.$params['name'].'" id="'.$as_id.'">' . ($content) . '</div>';
+		if (!isset($params['name'])) {
+			$params['name'] = 'edit';
+		}
+
+		$ckoptions = $wysiwyglib->setUpEditor($params['_is_html'], $as_id, $params, $auto_save_referrer);
+
+		$html .= '<input type="hidden" name="wysiwyg" value="y" />';
+		$html .= '<textarea class="wikiedit" name="'.$params['name'].'" id="'.$as_id.'" style="visibility:hidden;';	// missing closing quotes, closed in condition
+
+		if (empty($params['cols'])) {
+			$html .= 'width:100%;'. (empty($params['rows']) ? 'height:500px;' : '') .'"';
 		} else {
-			// set up ckeditor
-			if (!isset($params['name'])) {
-				$params['name'] = 'edit';
-			}
+			$html .= '" cols="'.$params['cols'].'"';
+		}
+		if (!empty($params['rows'])) {
+			$html .= ' rows="'.$params['rows'].'"';
+		}
+		$html .= '>'.htmlspecialchars($content).'</textarea>';
 
-			$ckoptions = $wysiwyglib->setUpEditor($params['_is_html'], $as_id, $params, $auto_save_referrer);
-
-			if (!$included) {
-				$html .= '<input type="hidden" name="wysiwyg" value="y" />';
-			}
-			$html .= '<textarea class="wikiedit" name="'.$params['name'].'" id="'.$as_id.'" style="visibility:hidden;';	// missing closing quotes, closed in condition
-
-			if (empty($params['cols'])) {
-				$html .= 'width:100%;'. (empty($params['rows']) ? 'height:500px;' : '') .'"';
-			} else {
-				$html .= '" cols="'.$params['cols'].'"';
-			}
-			if (!empty($params['rows'])) {
-				$html .= ' rows="'.$params['rows'].'"';
-			}
-			$html .= '>'.htmlspecialchars($content).'</textarea>';
-
-			$headerlib->add_jq_onready(
-				'
+		$headerlib->add_jq_onready(
+			'
 CKEDITOR.replace( "'.$as_id.'",' . $ckoptions . ');
 CKEDITOR.on("instanceReady", function(event) {
-	if (typeof ajaxLoadingHide == "function") { ajaxLoadingHide(); }
-	this.instances.'.$as_id.'.resetDirty();
+if (typeof ajaxLoadingHide == "function") { ajaxLoadingHide(); }
+this.instances.'.$as_id.'.resetDirty();
 });
 ',
-				20
-			);	// after dialog tools init (10)
-		}
+			20
+		);	// after dialog tools init (10)
 
 	} else {
 		// end of if ( $params['_wysiwyg'] == 'y' && $params['_simple'] == 'n')
@@ -212,7 +191,7 @@ CKEDITOR.on("instanceReady", function(event) {
 		// setup for wiki editor
 
 		$params['rows'] = !empty($params['rows']) ? $params['rows'] : 20;
-		$params['cols'] = !empty($params['cols']) ? $params['cols'] : 80;
+//		$params['cols'] = !empty($params['cols']) ? $params['cols'] : 80;
 
 		$textarea_attributes = '';
 		foreach ($params as $k => $v) {
@@ -230,8 +209,7 @@ CKEDITOR.on("instanceReady", function(event) {
 		$smarty->assignByRef('textareadata', $content);
 		$html .= $smarty->fetch('wiki_edit.tpl');
 
-        if (!$included)
-            $html .= "\n".'<input type="hidden" name="wysiwyg" value="n" />';
+		$html .= "\n".'<input type="hidden" name="wysiwyg" value="n" />';
 
 	}	// wiki or wysiwyg
 
@@ -258,14 +236,24 @@ function editTimerTick() {
 
 	if ( edittimeout && seconds <= 300 ) {
 		if ( ! editTimeoutTipIsDisplayed ) {
-			edittimeout.parents('.rbox:first').fadeIn();
-			editTimeoutTipIsDisplayed = true;
+			// ping a lightweight ajax service to keep the session alive
+			$.getJSON(
+				$.service('attribute', 'get'),
+				{attribute: 'tiki.edit.dummy', type: 'dummy', object: 'dummy'},
+				function () {
+					editTimeElapsedSoFar = 0;	// success, reset timer
+				}
+			).fail(function () {
+					// something went wrong, show the warning
+					edittimeout.parents('.alert:first').fadeIn();
+					editTimeoutTipIsDisplayed = true;
+				});
 		}
 		if ( seconds > 0 && seconds % 60 == 0 ) {
 			minutes = seconds / 60;
 			edittimeout.text( minutes );
 		} else if ( seconds <= 0 ) {
-			edittimeout.parents('.rbox-data:first').text('".addslashes(tra('Your edit session has expired'))."');
+			edittimeout.parents('.alert:first p').text('".addslashes(tra('Your edit session has expired'))."');
 		}
 	}
 
@@ -284,7 +272,7 @@ function editTimerTick() {
 
 \$('document').ready( function() {
 	editTimeoutIntervalId = setInterval(editTimerTick, 1000);
-	\$('#edittimeout').parents('.rbox:first').hide();
+	\$('#edittimeout').parents('.alert:first').hide();
 } );
 
 // end edit timeout warnings
@@ -355,34 +343,11 @@ function admintoolbar() {
 }';
 		}
 
-		if ( $prefs['feature_jquery_ui'] == 'y' && $params['_wysiwyg'] != 'y') {
-			// show hidden parent before applying resizable
-			$js_editconfirm .= "
-	var hiddenParents = \$('#$as_id').parents('fieldset:hidden:last');
-
-	if (hiddenParents.length) { hiddenParents.show(); }";
-
-			if (!isset($_REQUEST['fullcalendar'])) {
-				$js_editconfirm .= "
-	if (typeof CodeMirror === 'undefined') { //so as not to conflict with CodeMirror resize
-		\$('#$as_id')
-			.resizable( {
-				minWidth: \$('#$as_id').width(),
-				minHeight: 50
-		});
-	}";
-			}
-			$js_editconfirm .= "
-	if (hiddenParents.length) { hiddenParents.hide(); }
-";
-		}
-
 		if ( $editWarning ) {
 			$headerlib->add_js($js_editlock);
 		}
 		$headerlib->add_js($js_editconfirm);
 	}	// end if ($params['_simple'] == 'n')
-    $included=true;
 
 	return $auto_save_warning.$html;
 }

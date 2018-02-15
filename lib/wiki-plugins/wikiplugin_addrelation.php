@@ -1,26 +1,27 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_addrelation.php 47594 2013-09-20 22:46:07Z nkoth $
+// $Id: wikiplugin_addrelation.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_addrelation_info()
 {
 	return array(
 		'name' => tra('Add Relation'),
-		'description' => tra('Displays a simple button that toggles i.e. adds or removes a pre-specified relation.'),
+		'description' => tra('Provide a button to toggle a pre-specified relation'),
 		'filter' => 'int',
 		'format' => 'html',
 		'validate' => 'all',
 		'prefs' => array('wikiplugin_addrelation'),
 		'introduced' => 8,
+		'iconname' => 'link-external',
 		'documentation' => 'PluginAddRelation',
 		'params' => array(
 			'qualifier' => array(
 				'required' => true,
 				'name' => tra('Qualifier'),
-				'description' => tra('Relation qualifier. Usually a three part string separated by 2 periods.'),
+				'description' => tra('Relation qualifier. Usually a three-part string separated by two periods.'),
 				'filter' => 'attribute_type',
 				'default' => array(),
 				'since' => '8.0',
@@ -28,7 +29,8 @@ function wikiplugin_addrelation_info()
 			'source_object' => array(
 				'required' => false,
 				'name' => tra('Source Object'),
-				'description' => tra('Object identifier as type:itemId to start the relation from, will use the current object if left blank.'),
+				'description' => tr('Object identifier as %0type:itemId%1 to start the relation from, will use the current
+					object if left blank.', '<code>', '</code>'),
 				'filter' => 'text',
 				'default' => null,
 				'since' => '8.0',
@@ -37,7 +39,8 @@ function wikiplugin_addrelation_info()
 			'target_object' => array(
 				'required' => false,
 				'name' => tra('Target Object'),
-				'description' => tra('Object identifier as type:itemId to end the relation to, will use the current object if left blank.'),
+				'description' => tr('Object identifier as %0type:itemId%1 to end the relation to, will use the current
+					object if left blank.', '<code>', '</code>'),
 				'filter' => 'text',
 				'default' => null,
 				'since' => '8.0',
@@ -69,11 +72,19 @@ function wikiplugin_addrelation_info()
 			),
 			'button_id' => array(
 				'required' => false,
-				'name' => tra('Button Id'),
+				'name' => tra('Button ID'),
 				'description' => tra('A unique ID to distinguish the button from others on the page if there is more than one'),
 				'filter' => 'text',
 				'since' => '8.0',
 				'default' => '0',
+			),
+			'button_class' => array(
+				'required' => false,
+				'name' => tra('Set Button Class'),
+				'description' => tra('Class or classes for the Button'),
+				'filter' => 'text',
+				'since' => '8.0',
+				'default' => 'btn btn-default',
 			),
 		),
 	);
@@ -90,7 +101,7 @@ function wikiplugin_addrelation($data, $params)
 	if (isset($params['target_object']) && false !== strpos($params['target_object'], ':')) {
 		list($target_object['type'], $target_object['object']) = explode(':', $params['target_object'], 2);
 	} else {
-		$target_object = current_object(); 
+		$target_object = current_object();
 	}
 	if ($source_object == $target_object) {
 		return tra('Source and target object cannot be the same');
@@ -101,7 +112,7 @@ function wikiplugin_addrelation($data, $params)
 		$qualifier = $params['qualifier'];
 	}
 	if (!empty($params['label_add'])) {
-		$labeladd = $params['label_add'];	
+		$labeladd = $params['label_add'];
 	} else {
 		$labeladd = tra('Add Relation');
 	}
@@ -120,30 +131,21 @@ function wikiplugin_addrelation($data, $params)
 	} else {
 		$id = 'wp_addrelation_0';
 	}
+	if (!empty($params['button_class'])) {
+		$button_class = $params['button_class'];
+	} else {
+		$button_class = "btn btn-default";
+	}
 	$relationlib = TikiLib::lib('relation');
 
 	if (isset($_POST[$id])) {
 		if ($_POST[$id] == 'y') {
-			$relationlib->add_relation($qualifier, $source_object['type'], $source_object['object'], $target_object['type'], $target_object['object']);	
-			$finalEvent = 'tiki.social.relation.add';
+			$relationlib->add_relation($qualifier, $source_object['type'], $source_object['object'], $target_object['type'], $target_object['object']);
 		} elseif ($_POST[$id] == 'n') {
-			$relation_id = $relationlib->add_relation($qualifier, $source_object['type'], $source_object['object'], $target_object['type'], $target_object['object']);
-			$relationlib->remove_relation($relation_id);
-			$finalEvent = 'tiki.social.relation.remove';
+			if ($relation_id = $relationlib->get_relation_id($qualifier, $source_object['type'], $source_object['object'], $target_object['type'], $target_object['object'])) {
+				$relationlib->remove_relation($relation_id);
+			}
 		}
-		TikiLib::events()->trigger($finalEvent,
-			array(
-				'type' => $target_object['type'],
-				'object' => $target_object['object'],
-				'sourcetype' => $source_object['type'],
-				'sourceobject' => $source_object['object'],
-				'relation' => $qualifier,
-				'user' => $user,
-                        )
-		);
-		require_once 'lib/search/refresh-functions.php';
-		refresh_index($source_object['type'], $source_object['object']);
-		refresh_index($target_object['type'], $target_object['object']);
 	}
 	$relationsfromsource = $relationlib->get_relations_from($source_object['type'], $source_object['object'], $qualifier);
 	$relationexists = false;
@@ -160,5 +162,6 @@ function wikiplugin_addrelation($data, $params)
 	$smarty->assign('label_add', $labeladd);
 	$smarty->assign('label_added', $labeladded);
 	$smarty->assign('label_remove', $labelremove);
+	$smarty->assign('button_class', $button_class);
 	return $smarty->fetch('wiki-plugins/wikiplugin_addrelation.tpl');
 }

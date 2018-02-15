@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetTest.php 47279 2013-08-26 14:48:36Z changi67 $
+// $Id: FacetTest.php 59593 2016-09-04 17:03:54Z jonnybradley $
 
 class Search_Elastic_FacetTest extends PHPUnit_Framework_TestCase
 {
@@ -13,7 +13,7 @@ class Search_Elastic_FacetTest extends PHPUnit_Framework_TestCase
 
 		$status = $connection->getStatus();
 		if (! $status->ok) {
-			$this->markTestSkipped('ElasticSearch needs to be available on localhost:9200 for the test to run.');
+			$this->markTestSkipped('Elasticsearch needs to be available on localhost:9200 for the test to run.');
 		}
 
 		$this->index = new Search_Elastic_Index($connection, 'test_index');
@@ -46,8 +46,8 @@ class Search_Elastic_FacetTest extends PHPUnit_Framework_TestCase
 				array(
 					array('value' => 1, 'count' => 3),
 					array('value' => 2, 'count' => 2),
-					array('value' => 'orphan', 'count' => 1),
 					array('value' => 3, 'count' => 1),
+					array('value' => 'orphan', 'count' => 1),
 				)
 			),
 			$values

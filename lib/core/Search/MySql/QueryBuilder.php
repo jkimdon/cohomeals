@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: QueryBuilder.php 47282 2013-08-26 15:51:50Z changi67 $
+// $Id: QueryBuilder.php 63703 2017-08-30 09:01:15Z kroky6 $
 
 use Search_Expr_Token as Token;
 use Search_Expr_And as AndX;
@@ -12,6 +12,7 @@ use Search_Expr_Not as NotX;
 use Search_Expr_Range as Range;
 use Search_Expr_Initial as Initial;
 use Search_Expr_MoreLikeThis as MoreLikeThis;
+use Search_Expr_ImplicitPhrase as ImplicitPhrase;
 
 class Search_MySql_QueryBuilder
 {
@@ -44,13 +45,25 @@ class Search_MySql_QueryBuilder
 	{
 		$exception = null;
 
+		if ($node instanceof ImplicitPhrase) {
+			$node = $node->getBasicOperator();
+		}
+
 		$fields = $this->getFields($node);
+
+		if ($node instanceof Token && count($fields) == 1 && $this->getQuoted($node) === $this->db->qstr('')) {
+			$value = $this->getQuoted($node);
+			$this->requireIndex($node->getField(), 'index', $node->getWeight());
+			return "(`{$node->getField()}` = $value OR `{$node->getField()}` IS NULL)";
+		}
 
 		try {
 			if (! $node instanceof NotX && count($fields) == 1 && $this->isFullText($node)) {
+				// $query contains the token string to compare against $fields[0] in the unified search table
+				// $fields[0] can be i.e  'allowed_users', 'allowed_groups'
 				$query = $this->fieldBuilder->build($node, $this->factory);
 				$str = $this->db->qstr($query);
-				$this->requireIndex($fields[0], 'fulltext');
+				$this->requireIndex($fields[0], 'fulltext', $node->getWeight());
 				$type = $this->fieldBuilder->isInverted()
 					? 'NOT MATCH'
 					: 'MATCH';
@@ -72,27 +85,34 @@ class Search_MySql_QueryBuilder
 		} elseif ($node instanceof NotX) {
 			return 'NOT (' . reset($childNodes) . ')';
 		} elseif ($node instanceof Token) {
-			$value = $this->getQuoted($node);
-			$this->requireIndex($node->getField(), 'index');
-			return "`{$node->getField()}` = $value";
+			$raw = $this->getRaw($node);
+			if (is_numeric($raw) && intval($raw) != $raw) {
+				$from = $this->db->qstr($raw - 0.00001);
+				$to = $this->db->qstr($raw + 0.00001);
+				return "`{$node->getField()}` BETWEEN $from AND $to";
+			} else {
+				$value = $this->getQuoted($node);
+				$this->requireIndex($node->getField(), 'index', $node->getWeight());
+				return "`{$node->getField()}` = $value";
+			}
 		} elseif ($node instanceof Initial) {
 			$value = $this->getQuoted($node, '%');
-			$this->requireIndex($node->getField(), 'index');
+			$this->requireIndex($node->getField(), 'index', $node->getWeight());
 			return "`{$node->getField()}` LIKE $value";
 		} elseif ($node instanceof Range) {
 			$from = $this->getQuoted($node->getToken('from'));
 			$to = $this->getQuoted($node->getToken('to'));
-			$this->requireIndex($node->getField(), 'index');
+			$this->requireIndex($node->getField(), 'index', $node->getWeight());
 			return "`{$node->getField()}` BETWEEN $from AND $to";
 		} else {
 			// Throw initial exception if fallback fails
-			throw $exception ?: new Exception(tr('Feature not supported: ' . get_class($node)));
+			throw $exception ?: new Exception(tr('Feature not supported: %0', get_class($node)));
 		}
 	}
 
-	private function requireIndex($field, $type)
+	private function requireIndex($field, $type, $weight = 1.0)
 	{
-		$this->indexes[$field . $type] = array('field' => $field, 'type' => $type);
+		$this->indexes[$field . $type] = array('field' => $field, 'type' => $type, 'weight' => $weight);
 	}
 
 	private function getFields($node)
@@ -128,8 +148,11 @@ class Search_MySql_QueryBuilder
 
 	private function getQuoted($node, $suffix = '')
 	{
-		$string = $node->getValue($this->factory)->getValue();
+		$string = $this->getRaw($node);
 		return $this->db->qstr($string . $suffix);
 	}
-}
 
+	private function getRaw($node) {
+		return $node->getValue($this->factory)->getValue();
+	}
+}

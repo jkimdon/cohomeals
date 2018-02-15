@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ParseToWiki_ListTest.php 47853 2013-10-02 14:03:06Z lphuberdeau $
+// $Id: ParseToWiki_ListTest.php 59647 2016-09-08 19:45:37Z jonnybradley $
 
 /**
  * @group unit
@@ -12,28 +12,17 @@
 class EditLib_ParseToWiki_ListTest extends TikiTestCase
 {
 
-	private $dir = '';  // the unmodifed directory
 	private $el = null; // the EditLib
-
-
-	function __construct()
-	{
-		$this->dir = getcwd();
-	}
-
 
 	function setUp()
 	{
-		require_once 'lib/wiki/editlib.php';
+		TikiLib::lib('edit');
 		$this->el = new EditLib();
-		chdir($this->dir);
-		chdir('../../'); // the tiki installation directory
 	}
 
 
 	function tearDown()
 	{
-		chdir($this->dir);
 	}
 
 

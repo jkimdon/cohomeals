@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AggregationTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: AggregationTest.php 59648 2016-09-08 20:10:50Z jonnybradley $
 
 require_once 'lib/rating/ratinglib.php';
 
@@ -11,9 +11,11 @@ class Rating_AggregationTest extends TikiTestCase
 {
 	function setUp()
 	{
-		global $user; $user = null;
+		global $user, $testhelpers;
 
-		$tikilib = $this->getMock('TikiLib', array('get_ip_address'));
+		$user = null;
+
+		$tikilib = $this->createMock('TikiLib');
 		$tikilib->expects($this->any())->method('get_ip_address')->will($this->returnValue('127.0.0.1'));
 
 		$testableTikiLib = new TestableTikiLib;
@@ -21,13 +23,17 @@ class Rating_AggregationTest extends TikiTestCase
 
 		parent::setUp();
 		TikiDb::get()->query('DELETE FROM `tiki_user_votings` WHERE `id` LIKE ?', array('test.%'));
+
+		$testhelpers = new TestHelpers();
 	}
 
 	function tearDown()
 	{
-		global $user; $user = null;
+		global $testhelpers, $user; $user = null;
 		parent::tearDown();
 		TikiDb::get()->query('DELETE FROM `tiki_user_votings` WHERE `id` LIKE ?', array('test.%'));
+
+        $testhelpers->reset_all();
 	}
 
 	function testGetGlobalSum()

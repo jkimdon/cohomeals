@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BlogPostSource.php 50827 2014-04-17 11:44:30Z nkoth $
+// $Id: BlogPostSource.php 59189 2016-07-14 17:27:41Z jonnybradley $
 
 class Search_ContentSource_BlogPostSource implements Search_ContentSource_Interface, Tiki_Profile_Writer_ReferenceProvider
 {
@@ -32,9 +32,14 @@ class Search_ContentSource_BlogPostSource implements Search_ContentSource_Interf
 		
 		$post = $bloglib->get_post($objectId);
 
+		if (! $post) {
+			return false;
+		}
+
 		$data = array(
 			'title' => $typeFactory->sortable($post['title']),
 			'language' => $typeFactory->identifier('unknown'),
+			'creation_date' => $typeFactory->timestamp($post['created']),
 			'modification_date' => $typeFactory->timestamp($post['created']),
 			'contributors' => $typeFactory->multivalue(array($post['user'])),
 
@@ -56,6 +61,7 @@ class Search_ContentSource_BlogPostSource implements Search_ContentSource_Interf
 		return array(
 			'title',
 			'language',
+			'creation_date',
 			'modification_date',
 			'contributors',
 

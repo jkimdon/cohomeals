@@ -1,20 +1,21 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_addtocart.php 51740 2014-06-25 16:15:32Z jonnybradley $
+// $Id: wikiplugin_addtocart.php 62501 2017-05-08 23:07:16Z rjsmelo $
 
 function wikiplugin_addtocart_info()
 {
 	return array(
 		'name' => tra('Add to cart'),
 		'documentation' => tra('PluginAddToCart'),
-		'description' => tra('Adds a product to the virtual cart. The cart can be manipulated using the cart module.'),
+		'description' => tra('Add a product to the virtual cart'),
 		'prefs' => array( 'wikiplugin_addtocart', 'payment_feature' ),
 		'filter' => 'wikicontent',
 		'format' => 'html',
-		'icon' => 'img/icons/cart_add.png',
+		'introduced' => 5,
+		'iconname' => 'cart',
 		'tags' => array( 'basic' ),
 		'params' => array(
 			'code' => array(
@@ -22,6 +23,7 @@ function wikiplugin_addtocart_info()
 				'name' => tra('Product code'),
 				'description' => tra('Unique identifier for the product. Two products with the same code will be the same and the information used will be the one of the first in.'),
 				'filter' => 'text',
+				'since' => '5.0',
 				'default' => '',
 			),
 			'description' => array(
@@ -29,54 +31,63 @@ function wikiplugin_addtocart_info()
 				'name' => tra('Description'),
 				'description' => tra('Label for the product in the cart.'),
 				'filter' => 'text',
+				'since' => '5.0',
 				'default' => '',
 			),
 			'producttype' => array(
 				'required' => false,
 				'name' => tra('Product Type'),
-				'description' => tra('The product type that is being sold, which will affect fulfillment, e.g. standard product, gift certificate, event ticket'),
+				'description' => tra('The product type that is being sold, which will affect fulfillment, for example, standard product, gift certificate, event ticket'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'productclass' => array(
 				'required' => false,
 				'name' => tra('Product Class'),
-				'description' => tra('The class the product belongs to, can be used to limit how gift cards are used'),
+				'description' => tra('The class the product belongs to. Can be used to limit how gift cards are used'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'productbundle' => array(
 				'required' => false,
 				'name' => tra('Product Bundle'),
-				'description' => tra('The bundle the product belongs to, can be used to limit how gift cards are used, will automatically add other products in same class to cart'),
+				'description' => tra('The bundle the product belongs to. Can be used to limit how gift cards are used, will automatically add other products in the same class to the cart'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'bundleclass' => array(
 				'required' => false,
 				'name' => tra('Bundle Class'),
-				'description' => tra('The class the bundle belongs to, can be used to limit how gift cards are used'),
+				'description' => tra('The class the bundle belongs to. Can be used to limit how gift cards are used'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'price' => array(
 				'required' => true,
 				'name' => tra('Price'),
 				'description' => tra('The price to charge for the item.'),
 				'filter' => 'text',
+				'since' => '5.0',
 				'default' => '',
 			),
 			'href' => array(
 				'required' => false,
 				'name' => tra('Location'),
-				'description' => tra('URL of the product\'s information. The URL may be relative or absolute (begin with http://).'),
+				'description' => tr('URL of the product\'s information. The URL may be relative or absolute (begin
+					with %0http://%1).', '<code>', '</code>'),
 				'filter' => 'url',
+				'since' => '5.0',
 				'default' => '',
 			),
 			'label' => array(
 				'required' => false,
 				'name' => tra('Button label'),
 				'description' => tra('Text for the submit button. default:') . ' ' . '"' . tra('Add to cart') . '"',
+				'since' => '6.0',
 				'filter' => 'text',
 				'default' => 'Add to cart',
 			),
@@ -86,12 +97,26 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Unique identifier for the event that is associated to the product.'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'autocheckout' => array(
 				'required' => false,
-				'name' => tra('Automatically checkout'),
-				'description' => tra('Automatically checkout for purchase and send user to pay (this is disabled when there is already something in the cart)'),
+				'name' => tra('Automatically check out'),
+				'description' => tra('Automatically check out for purchase and send the user to pay (this is disabled when there is already something in the cart)'),
+				'since' => '7.0',
 				'filter' => 'text',
+				'default' => 'n',
+			),
+			'hidequantity' => array(
+				'required' => false,
+				'name' => tra('Hide Quantity'),
+				'description' => tra('Hide the quantity field so you can create buy now button for a single item, quantity = 1 (not available with the exchange feature)'),
+				'since' => '17.0',
+				'filter' => 'alpha',
+				'options' => array(
+					array('text' => tra('No'), 'value' => 'n'),
+					array('text' => tra('Yes'), 'value' => 'y')
+				),
 				'default' => 'n',
 			),
 			'onbehalf' => array(
@@ -100,6 +125,7 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Allows the selection of user to make purchase on behalf of'),
 				'filter' => 'text',
 				'default' => 'n',
+				'since' => '7',
 			),
 			'forceanon' => array(
 				'required' => false,
@@ -107,6 +133,7 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Add to cart as anonymous shopper even if logged in'),
 				'filter' => 'text',
 				'default' => 'n',
+				'since' => '7.0',
 			),
 			'forwardafterfree' => array(
 				'required' => false,
@@ -114,6 +141,7 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Forward to this URL after free purchase'),
 				'filter' => 'url',
 				'default' => '',
+				'since' => '7.0',
 			),
 			'giftcertificate'=> array(
 				'required' => false,
@@ -121,6 +149,7 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Allows user to add gift certificate from the product view'),
 				'filter' => 'alpha',
 				'default' => 'n',
+				'since' => '7.0',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
@@ -134,12 +163,14 @@ function wikiplugin_addtocart_info()
 				'filter' => 'int',
 				'default' => '',
 				'profile_reference' => 'tracker_item',
+				'since' => '7.0',
 			),
 			'exchangetoproductid' => array(
 				'required' => false,
 				'name' => tra('Product ID to exchange to'),
 				'desctiption' => tra('Used in conjunction with exchange feature'),
 				'filter' => 'int',
+				'since' => '5.0',
 				'default' => '',
 			),
 			'exchangeorderamount' => array(
@@ -148,12 +179,14 @@ function wikiplugin_addtocart_info()
 				'description' => tra('Should normally be set to the amount of products in the order being exchanged'),
 				'filter' => 'int',
 				'default' => 1,
+				'since' => '7.0',
 			),
 			'ajaxaddtocart' => array(
 				'required' => false,
 				'name' => tra('Ajax add to cart feature'),
-				'description' => tra('Attempts to turn ajax for cart on'),
+				'description' => tra('Attempts to turn on Ajax for the cart'),
 				'filter' => 'alpha',
+				'since' => '7.0',
 				'default' => 'n',
 				'options' => array(
 					array('text' => '', 'value' => ''),
@@ -167,6 +200,7 @@ function wikiplugin_addtocart_info()
 				'description' => tra('The weight of the item.'),
 				'filter' => 'text',
 				'default' => '',
+				'since' => '12.1',
 			),
 		),
 	);
@@ -180,8 +214,6 @@ function wikiplugin_addtocart( $data, $params )
 	$userlib = TikiLib::lib('user');
 	$headerlib = TikiLib::lib('header');
 	$cartlib = TikiLib::lib('cart');
-
-	$headerlib->add_jsfile('lib/payment/cartlib.js');
 
 	if ( ! session_id() ) {
 		session_start();
@@ -205,17 +237,18 @@ function wikiplugin_addtocart( $data, $params )
 		$p = trim($p);			// remove some line ends picked up in pretty tracker
 	}
 
-	$params['price'] = preg_replace('/[^\d^\.^,]/', '', $params['price']);
+	$params['price'] = preg_replace('/[^-?\d^\.^,]/', '', $params['price']);
 
 	$smarty->assign('params', $params);
 
-	if (!isset($cartuserlist)) {
-		$cartuserlist = $userlib->get_users_light();
-	}
-	$smarty->assign('cartuserlist', $cartuserlist);
-
 	if ($params['onbehalf'] == 'y' && $globalperms->payment_admin) {
 		$smarty->assign('onbehalf', 'y');
+
+		// Do not load the user list unless it is needed, this light function is not as light as one would expect
+		if (!isset($cartuserlist)) {
+			$cartuserlist = $userlib->get_users_light();
+		}
+		$smarty->assign('cartuserlist', $cartuserlist);
 	}
 
 	if (!empty($params['exchangeorderitemid']) && !empty($params['exchangetoproductid'])) {
@@ -255,12 +288,16 @@ function wikiplugin_addtocart( $data, $params )
 
 			$addedOk = $cartlib->add_to_cart($params, $jitPost);
 
-			global $access, $tikilib, $tikiroot, $prefs;
+			global $tikiroot, $prefs;
+			$access = TikiLib::lib('access');
+			$tikilib = TikiLib::lib('tiki');
+
 			if ($addedOk && $params['autocheckout'] == 'y' && empty($previous_cart_content)) {
 				$invoice = $cartlib->request_payment();
 				if ( $invoice ) {
 					$paymenturl = 'tiki-payment.php?invoice=' . intval($invoice);
 					$paymenturl = $tikilib->httpPrefix(true) . $tikiroot . $paymenturl;
+					$tokenpaymenturl = '';
 					if (!$user || $params['forceanon'] == 'y' && !Perms::get('payment', $invoice)->manual_payment) {
 						// token access needs to be an optional feature
 						// and needs to depend on auth_token_access pref
@@ -268,7 +305,7 @@ function wikiplugin_addtocart( $data, $params )
 						$tokenlib = AuthTokens::build($prefs);
 						$tokenpaymenturl = $tokenlib->includeToken($paymenturl, array('Temporary Shopper','Anonymous'));
 					}
-					if ($globalperms->payment_admin || Perms::get('payment', $invoice)->manual_payment) {
+					if ($globalperms->payment_admin || Perms::get('payment', $invoice)->manual_payment || empty($tokenpaymenturl)) {
 						// if able to do manual payment it means it is admin and don't need token
 						$access->redirect($paymenturl, tr('The order was recorded and is now awaiting payment. Reference number is %0.', $invoice));
 					} else {

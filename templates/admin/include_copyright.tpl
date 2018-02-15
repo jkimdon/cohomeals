@@ -1,36 +1,24 @@
-{* $Id: include_copyright.tpl 55413 2015-05-12 16:38:10Z jonnybradley $ *}
-
-{remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Copyright allows a copyright to be determined for all the objects of tiki{/tr}.{/remarksbox}
-
-<form action="tiki-admin.php?page=copyright" method="post">
-	<input type="hidden" name="ticket" value="{$ticket|escape}">
-	<div class="input_submit_container clear" style="text-align: right;">
-		<input type="submit" class="btn btn-default" value="{tr}Change preferences{/tr}" />
+{* $Id: include_copyright.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Allows a copyright to be determined for various objects{/tr}.{/remarksbox}
+<form role="form" class="form-horizontal" action="tiki-admin.php?page=copyright" method="post">
+	{include file='access/include_ticket.tpl'}
+	<div class="t_navbar margin-bottom-md clearfix">
+		{include file='admin/include_apply_top.tpl'}
 	</div>
-	<input type="hidden" name="setcopyright" />
-	
-	<fieldset class="admin">
+	<fieldset>
 		<legend>{tr}Activate the feature{/tr}</legend>
 		{preference name=feature_copyright visible="always"}
 	</fieldset>
-
-	<fieldset>
-		<legend>{tr}Copyright management{/tr}</legend>
-		{preference name=wikiLicensePage}
-		{preference name=wikiSubmitNotice}
-
-		<div class="adminoptionbox">
-			<div class="adminoptionlabel">{tr}Enable copyright management for:{/tr}</div>
-			<div class="adminoptionboxchild">
-				{preference name=wiki_feature_copyrights}
-				{preference name=articles_feature_copyrights}
-				{preference name=blogs_feature_copyrights}
-				{preference name=faqs_feature_copyrights}
-			</div>
-		</div>
-	</fieldset>
-
-	<div class="input_submit_container clear" style="text-align: center;">
-		<input type="submit" class="btn btn-default" value="{tr}Change preferences{/tr}" />
+	<div class="adminoptionboxchild" id="feature_copyright_childcontainer">
+		<fieldset>
+			<legend>{tr}Features{/tr}</legend>
+			{preference name=wikiLicensePage}
+			{preference name=wikiSubmitNotice}
+			{preference name=wiki_feature_copyrights}
+			{preference name=article_feature_copyrights}
+			{preference name=blog_feature_copyrights}
+			{preference name=faq_feature_copyrights}
+		</fieldset>
 	</div>
+	{include file='admin/include_apply_bottom.tpl'}
 </form>

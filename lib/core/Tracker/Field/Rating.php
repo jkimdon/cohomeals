@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Rating.php 49954 2014-02-18 11:18:32Z xavidp $
+// $Id: Rating.php 61871 2017-03-26 19:33:54Z lindonb $
 
 class Tracker_Field_Rating extends Tracker_Field_Abstract
 {
@@ -12,7 +12,7 @@ class Tracker_Field_Rating extends Tracker_Field_Abstract
 		return array(
 			'STARS' => array(
 				'name' => tr('Rating'),
-				'description' => tr('A rating of the tracker item'),
+				'description' => tr('A rating of the tracker item. Permissions involved: %0', 'tracker_vote_ratings, tracker_revote_ratings, tracker_view_ratings'),
 				'readonly' => true,
 				'help' => 'Rating Tracker Field',
 				'prefs' => array('trackerfield_rating'),
@@ -21,7 +21,7 @@ class Tracker_Field_Rating extends Tracker_Field_Abstract
 				'params' => array(
 					'option' => array(
 						'name' => tr('Option'),
-						'description' => tr('The possible options (comma separated integers) for the rating.'),
+						'description' => tr('The possible options (comma-separated integers) for the rating.'),
 						'filter' => 'int',
 						'count' => '*',
 						'legacy_index' => 0,
@@ -33,13 +33,13 @@ class Tracker_Field_Rating extends Tracker_Field_Abstract
 						'options' => array(
 							'stars' => tr('Stars'),
 							'radio' => tr('Radio Buttons'),
-							'like' => tr('Single Option: e.g. Like'),
+							'like' => tr('Single Option: for example, Like'),
 						),
 						'legacy_index' => 1,
 					),
 					'labels' => array(
 						'name' => tr('Labels'),
-						'description' => tr('The text labels (comma separated) for the possible options.'),
+						'description' => tr('The text labels (comma-separated) for the possible options.'),
 						'filter' => 'text',
 						'count' => '*',
 						'legacy_index' => 2,

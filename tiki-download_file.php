@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-download_file.php 50614 2014-04-02 12:08:44Z jp_eagle $
+// $Id: tiki-download_file.php 62609 2017-05-16 15:16:10Z jonnybradley $
 
 $force_no_compression = true;
 $skip = false;
@@ -38,12 +38,12 @@ if ( isset($_GET['fileId']) && isset($_GET['thumbnail']) && isset($_COOKIE[ sess
 
 if (!$skip) {
 	require_once('tiki-setup.php');
-	include_once('lib/filegals/filegallib.php');
+	$filegallib = TikiLib::lib('filegal');
 	$access->check_feature('feature_file_galleries');
 }
 
 if ($prefs["user_store_file_gallery_picture"] == 'y' && isset($_REQUEST["avatar"])) {
-	require_once ('lib/userprefs/userprefslib.php');
+	$userprefslib = TikiLib::lib('userprefs');
 	if ($user_picture_id = $userprefslib->get_user_picture_id($_REQUEST["avatar"])) {
 		$_REQUEST['fileId'] = $user_picture_id;
 	} elseif (!empty($prefs['user_default_picture_id'])) {
@@ -78,17 +78,21 @@ if (!$skip) {
 	if ( ! is_array($info) ) {
 		$access->display_error(NULL, tra('File has been deleted'), 404);
 	}
-
-	if ( $prefs['auth_token_access'] != 'y' || !$is_token_access ) {
+   if ( $prefs['auth_token_access'] != 'y' || !$is_token_access ) {
 		// Check permissions except if the user comes with a valid Token
 
-		if ( !$zip && $tiki_p_admin_file_galleries != 'y' && !$userlib->user_has_perm_on_object($user, $info['galleryId'], 'file gallery', 'tiki_p_download_files') && !($info['backlinkPerms'] == 'y' && !$filegallib->hasOnlyPrivateBacklinks($info['fileId']))) {
+		if ($tiki_p_admin_file_galleries != 'y' && $info['backlinkPerms'] == 'y' && $filegallib->hasOnlyPrivateBacklinks($info['fileId'])) {
+			if (!$user) $_SESSION['loginfrom'] = $_SERVER['REQUEST_URI'];
+			$access->display_error('', tra('Permission denied'), 401);
+		}
+
+		if ( !$zip && $tiki_p_admin_file_galleries != 'y' && ! $userlib->user_has_perm_on_object($user, $info['galleryId'], 'file gallery', 'tiki_p_download_files')) {
 			if (!$user) $_SESSION['loginfrom'] = $_SERVER['REQUEST_URI'];
 			$access->display_error('', tra('Permission denied'), 401);
 		}
 		if ( isset($_GET['thumbnail']) && is_numeric($_GET['thumbnail'])) { //check also perms on thumb 
 			$info_thumb = $filegallib->get_file($_GET['thumbnail']);
-			if ( !$zip && $tiki_p_admin_file_galleries != 'y' && !$userlib->user_has_perm_on_object($user, $info_thumb['galleryId'], 'file gallery', 'tiki_p_download_files') && !($info['backlinkPerms'] == 'y' && !$filegallib->hasOnlyPrivateBacklinks($info_thumb['fileId']))) {
+			if ( !$zip && $tiki_p_admin_file_galleries != 'y' && ! $userlib->user_has_perm_on_object($user, $info_thumb['galleryId'], 'file gallery', 'tiki_p_download_files')) {
 				if (!$user) $_SESSION['loginfrom'] = $_SERVER['REQUEST_URI'];
 				$access->display_error('', tra('Permission denied'), 401);
 			}
@@ -100,6 +104,8 @@ if (!$skip) {
 			}
 		}
 	}
+  
+  
 }
 
 //if the file is remote, display, and don't cache
@@ -112,8 +118,8 @@ if (isset($attributes['tiki.content.url'])) {
 	session_write_close();
 
 	$client = $tikilib->get_http_client($src);
-	$response = $client->request();
-	header('Content-Type: ' . $response->getHeader('Content-Type'));
+	$response = $client->send();
+	header('Content-Type: ' . $response->getHeaders()->get('Content-Type'));
 	echo $response->getBody();
 	exit();
 }
@@ -121,7 +127,7 @@ if (isset($attributes['tiki.content.url'])) {
 // Add hits ( if download or display only ) + lock if set
 if ( ! isset($_GET['thumbnail']) && ! isset($_GET['icon']) ) {
 
-	require_once('lib/stats/statslib.php');
+	$statslib = TikiLib::lib('stats');
 	$filegallib = TikiLib::lib('filegal');
 	if ( ! $filegallib->add_file_hit($info['fileId']) ) {
 		$access->display_error('', tra('You cannot download this file right now. Your score is low or file limit was reached.'), 401);
@@ -129,13 +135,13 @@ if ( ! isset($_GET['thumbnail']) && ! isset($_GET['icon']) ) {
 	$statslib->stats_hit($info['filename'], 'file', $info['fileId']);
 
 	if ( $prefs['feature_actionlog'] == 'y' ) {
-		global $logslib; require_once('lib/logs/logslib.php');
+		$logslib = TikiLib::lib('logs');
 		$logslib->add_action('Downloaded', $info['galleryId'], 'file gallery', 'fileId='.$info['fileId']);
 	}
 
 	if ( ! empty($_REQUEST['lock']) ) {
 		if (!empty($info['lockedby']) && $info['lockedby'] != $user) {
-			$access->display_error('', tra(sprintf('The file is locked by %s', $info['lockedby'])), 401);
+			$access->display_error('', tra(sprintf('The file has been locked by %s', $info['lockedby'])), 401);
 		}
 		$filegallib->lock_file($info['fileId'], $user);
 	}
@@ -179,12 +185,16 @@ if ( ! empty($info['path']) ) {
 	die;
 }
 
+$scale = 0;
+if (isset($_GET['scale'])) $scale =(float)$_GET['scale'];
+if ($scale >= 1) $scale =0;
+
 // ETag: Entity Tag used for strong cache validation.
-if ( ! isset($_GET['display']) || isset($_GET['x']) || isset($_GET['y']) || isset($_GET['scale']) || isset($_GET['max']) || isset($_GET['format']) ) {
+if ( ! isset($_GET['display']) || isset($_GET['x']) || isset($_GET['y']) || $scale || isset($_GET['max']) || isset($_GET['format']) ) {
   // if image will be modified, emit a different ETag for modifications.
 	$str = isset($_GET['x']) ? $_GET['x'] . 'x' : '';
 	$str .= isset($_GET['y']) ? $_GET['y'] . 'y' : '';
-	$str .= isset($_GET['scale']) ? $_GET['scale'] . 's' : '';
+	$str .= $scale ? $scale . 's' : '';
 	$str .= isset($_GET['max']) ? $_GET['max'] . 'm' : '';
 	$str .= isset($_GET['format']) ? $_GET['format'] . 'f' : '';
 	$etag = '"' . $md5 . '-' . crc32($md5) . '-' . crc32($str) . '"';
@@ -225,8 +235,8 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 	// Cache only thumbnails to avoid DOS attacks
 	$cacheName = '';
 	$cacheType = '';
-	if ( ( isset($_GET['thumbnail']) || isset($_GET['preview']) ) && ! isset($_GET['display']) && ! isset($_GET['icon']) && ! isset($_GET['scale']) && ! isset($_GET['x']) && ! isset($_GET['y']) && ! isset($_GET['format']) && ! isset($_GET['max']) ) {
-		global $cachelib; include_once('lib/cache/cachelib.php');
+	if ( ( isset($_GET['thumbnail']) || isset($_GET['preview']) ) && ! isset($_GET['display']) && ! isset($_GET['icon']) && ! $scale && ! isset($_GET['x']) && ! isset($_GET['y']) && ! isset($_GET['format']) && ! isset($_GET['max']) ) {
+		$cachelib = TikiLib::lib('cache');
 		$cacheName = $md5;
 		$cacheType = ( isset($_GET['thumbnail']) ? 'thumbnail_' : 'preview_' ) . ((int)$_REQUEST['fileId']).'_';
 		$use_cache = true;
@@ -246,7 +256,7 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 	if ($build_content) {
 
 		// Modify the original image if needed
-		if ( ! isset($_GET['display']) || isset($_GET['x']) || isset($_GET['y']) || isset($_GET['scale']) || isset($_GET['max']) || isset($_GET['format']) || isset($_GET['thumbnail']) ) {
+		if ( ! isset($_GET['display']) || isset($_GET['x']) || isset($_GET['y']) || $scale || isset($_GET['max']) || isset($_GET['format']) || isset($_GET['thumbnail']) ) {
 	
 			require_once('lib/images/images.php');
 			if (!class_exists('Image')) die();
@@ -255,7 +265,7 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 			$format = substr($info['filename'], strrpos($info['filename'], '.') + 1);
 	
 			// Fallback to an icon if the format is not supported
-			$tmp = new Image('img/icons/pixel_trans.gif', true, 'gif');	// needed to call non-static Image functions non-statically
+			$tmp = new Image('img/trans.png', true, 'png');	// needed to call non-static Image functions non-statically
 			if ( ! $tmp->is_supported($format) ) {
 				// Is the filename correct? Maybe it doesn't have an extenstion?
 				// Try to determine the format from the filetype too
@@ -291,7 +301,7 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 		
 				if ( ! isset($_GET['icon']) || ( isset($_GET['format']) && $_GET['format'] != $format ) ) {
 					if ( ! empty($info['path']) ) {
-						$image = new Image($prefs['fgal_use_dir'].$info['path'], true);
+						$image = new Image($prefs['fgal_use_dir'].$info['path'], true, $format);
 					} else {
 						$image = new Image($content, false, $format);
 						$content = null; // Explicitely free memory before getting cache
@@ -303,9 +313,9 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 					if ( isset($_GET['x']) || isset($_GET['y']) ) {
 						$image->resize(isset($_GET['x']) ? (int) $_GET['x'] : 0, isset($_GET['y']) ? (int) $_GET['y'] : 0);
 						$resize = true;
-					} elseif ( isset($_GET['scale']) ) {
+					} elseif ($scale ) {
 				 		// We scale if needed
-						$image->scale($_GET['scale']+0);
+						$image->scale($scale);
 						$resize = true;
 					} elseif ( isset($_GET['max']) ) {
 					// We reduce size if length or width is greater that $_GET['max'] if needed
@@ -337,8 +347,8 @@ if ( isset($_GET['preview']) || isset($_GET['thumbnail']) || isset($_GET['displa
 						$image->convert($_GET['format']);
 					} elseif ( isset($_GET['thumbnail']) && $image->format != 'svg') {
 						// Or, if no format is explicitely specified and a thumbnail has to be created, we convert the image to the $thumbnail_format
-						if ($image->format == 'png') {
-							$thumbnail_format = 'png';	// preserves transparency
+						if ($image->format) {
+							$thumbnail_format = $image->format;	// preserves transparency if png or gif
 						}
 						$image->convert($thumbnail_format);
 					}
@@ -388,6 +398,8 @@ $file = basename($info['filename']);
 // If the content has not changed, ask the browser to download it (instead of displaying it)
 if ( ! $content_changed and !isset($_GET['display']) ) {
 	header("Content-Disposition: attachment; filename=\"$file\"");
+} else {
+	header("Content-Disposition: filename=\"$file\"");
 }
 
 if ( !empty($filepath) and !$content_changed ) {

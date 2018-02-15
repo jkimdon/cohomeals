@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.wikiplugin.php 50591 2014-03-31 16:43:33Z jonnybradley $
+// $Id: block.wikiplugin.php 60301 2016-11-17 13:36:10Z kroky6 $
 
 /**
  * Smarty plugin
@@ -24,11 +24,15 @@ function smarty_block_wikiplugin( $params, $content, $smarty, $repeat = false )
 	if ( $repeat ) return '';
 
 	if ( ! isset( $params['_name'] ) ) {
-		return '<div class="error">' . tra('Plugin name not specified.') . '</div>';
+		return '<div class="alert alert-warning">' . tra('Plugin name not specified.') . '</div>';
 	}
 
 	$name = $params['_name'];
 	unset( $params['_name'] );
+
+	if( !empty($params['_compactArguments_']) ) {
+		$params = $params['_compactArguments_'];
+	}
 
 	$parserlib = TikiLib::lib('parser');
 	$out = $parserlib->plugin_execute(

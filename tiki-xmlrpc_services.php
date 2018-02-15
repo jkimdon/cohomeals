@@ -2,14 +2,23 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-xmlrpc_services.php 45575 2013-04-18 15:51:49Z lphuberdeau $
+// $Id: tiki-xmlrpc_services.php 61220 2017-02-06 05:01:56Z chealer $
+
+/**
+ * XML-RPC services
+ * As of 2017-02-06, these services are all related to blogs.
+ * These services implement part of the Blogger XML-RPC API (see https://codex.wordpress.org/XML-RPC_Blogger_API ).
+ * As of 2017-02-06, Blogger currently supports Blogger API version 3 (see https://developers.google.com/blogger/ ), which is no longer based on XML. The API implemented here seems to predate Blogger API version 1 and is presumably no longer supported by Blogger.
+ * One client of Blogger's XML-RPC API is wBloggar... which appears to be very close to death as of 2017-02-06. It may no longer implement this version of the API anyway. Is there any client still implementing this API? Chealer 2017-02-06
+ * See https://doc.tiki.org/XMLRPC
+ */
 
 include_once('tiki-setup.php');
-include_once('lib/blogs/bloglib.php');
+$bloglib = TikiLib::lib('blog');
 
 if ($prefs['feature_xmlrpc'] != 'y') {
 	die;
@@ -23,7 +32,6 @@ $map = array(
 	'blogger.editPost' => array('function' => 'editPost'),
 	'blogger.deletePost' => array('function' => 'deletePost'),
 	'blogger.getRecentPosts' => array('function' => 'getRecentPosts'),
-	'blogger.getUserInfo' => array('function' => 'getUserInfo'),
 	'blogger.getUsersBlogs' => array('function' => 'getUserBlogs')
 );
 
@@ -35,16 +43,16 @@ $s = new XML_RPC_Server($map);
  * @param $permName
  * @return bool
  */
-function check_individual($user, $blogid, $permName)
+function check_individual($user, $blogId, $permName)
 {
-	global $userlib;
+	$userlib = TikiLib::lib('user');
 
 	// If the user is admin he can do everything
 	if ($userlib->user_has_permission($user, 'tiki_p_blog_admin'))
 		return true;
 
 	// If no individual permissions for the object then ok
-	if (!$userlib->object_has_one_permission($blogid, 'blog'))
+	if (!$userlib->object_has_one_permission($blogId, 'blog'))
 		return true;
 
 	// If the object has individual permissions then check
@@ -63,7 +71,8 @@ function check_individual($user, $blogid, $permName)
  */
 function getUserInfo($params)
 {
-	global $tikilib, $userlib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -71,7 +80,7 @@ function getUserInfo($params)
 	$username = $usernamep->scalarval();
 	$passwordp = $params->getParam(2);
 	$password = $passwordp->scalarval();
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 
 	if ($ok) {
 		$myStruct = new XML_RPC_Value(
@@ -99,7 +108,9 @@ function getUserInfo($params)
  */
 function newPost($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -114,8 +125,13 @@ function newPost($params)
 	$passp = $params->getParam(5);
 	$publish = $passp->scalarval();
 
+	// Fix for w.bloggar
+	preg_match('/<title>(.*)</title>/', $content, $title);
+	$title = $title[1];
+	$content = preg_replace('#<title>(.*)</title>#', '', $content);
+
 	// Now check if the user is valid and if the user can post a submission
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 	if (!$ok) {
 		return new XML_RPC_Response(0, 101, 'Invalid username or password');
 	}
@@ -131,7 +147,7 @@ function newPost($params)
 			return new XML_RPC_Response(0, 101, 'User is not allowed to post');
 		}
 
-		require_once('lib/blogs/bloglib.php');
+		$bloglib = TikiLib::lib('blog');
 		$blog_info = $bloglib->get_blog($blogid);
 
 		if ($blog_info['public'] != 'y') {
@@ -142,7 +158,7 @@ function newPost($params)
 	}
 
 	// User ok and can submit then submit the post
-	$id = $bloglib->blog_post($blogid, $content, $username);
+	$id = $bloglib->blog_post($blogid, $content, '', $username, $title);
 
 	return new XML_RPC_Response(new XML_RPC_Value("$id"));
 }
@@ -154,7 +170,9 @@ function newPost($params)
  */
 function editPost($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -169,8 +187,13 @@ function editPost($params)
 	$passp = $params->getParam(5);
 	$publish = $passp->scalarval();
 
+	// Fix for w.bloggar
+	preg_match('/<title>(.*)</title>/', $content, $title);
+	$title = $title[1];
+	$content = preg_replace('#<title>(.*)</title>#', '', $content);
+
 	// Now check if the user is valid and if the user can post a submission
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 	if (!$ok) {
 		return new XML_RPC_Response(0, 101, 'Invalid username or password');
 	}
@@ -200,7 +223,7 @@ function editPost($params)
 		}
 	}
 
-	$id = $bloglib->update_post($postid, $blogid, $content, $username);
+	$id = $bloglib->update_post($postid, $blogid, $content, $username, $title);
 	return new XML_RPC_Response(new XML_RPC_Value(1, 'boolean'));
 }
 
@@ -211,7 +234,9 @@ function editPost($params)
  */
 function deletePost($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -225,7 +250,7 @@ function deletePost($params)
 	$publish = $passp->scalarval();
 
 	// Now check if the user is valid and if the user can post a submission
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 	if (!$ok) {
 		return new XML_RPC_Response(0, 101, 'Invalid username or password');
 	}
@@ -258,7 +283,9 @@ function deletePost($params)
  */
 function getPost($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -270,7 +297,7 @@ function getPost($params)
 	$password = $passwordp->scalarval();
 
 	// Now check if the user is valid and if the user can post a submission
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 	if (!$ok) {
 		return new XML_RPC_Response(0, 101, 'Invalid username or password');
 	}
@@ -300,7 +327,8 @@ function getPost($params)
 		array(
 			'userid' => new XML_RPC_Value($username),
 			'dateCreated' => new XML_RPC_Value($dateCreated, 'dateTime.iso8601'),
-			'content' => new XML_RPC_Value($post_data['data']),
+			// Fix for w.Bloggar
+			'content' => new XML_RPC_Value('<title>' . $post_data['title'] . '</title>' . $post_data['data']),
 			'postid' => new XML_RPC_Value($post_data['postId'])
 		),
 		'struct'
@@ -317,7 +345,9 @@ function getPost($params)
  */
 function getRecentPosts($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -331,7 +361,7 @@ function getRecentPosts($params)
 	$number = $passp->scalarval();
 
 	// Now check if the user is valid and if the user can post a submission
-	list($ok, $username, $e) = $userlib->validate_user($username, $password, '', '');
+	list($ok, $username, $e) = $userlib->validate_user($username, $password);
 	if (!$ok) {
 		return new XML_RPC_Response(0, 101, 'Invalid username or password');
 	}
@@ -364,7 +394,8 @@ function getRecentPosts($params)
 			array(
 				'userid' => new XML_RPC_Value($username),
 				'dateCreated' => new XML_RPC_Value($dateCreated, 'dateTime.iso8601'),
-				'content' => new XML_RPC_Value($post['data']),
+				// Fix for w.Bloggar
+				'content' => new XML_RPC_Value('<title>' . $post['title'] . '</title>' . $post['data']),
 				'postid' => new XML_RPC_Value($post['postId'])
 			),
 			'struct'
@@ -387,7 +418,9 @@ function getRecentPosts($params)
  */
 function getUserBlogs($params)
 {
-	global $tikilib, $userlib, $bloglib;
+	$userlib = TikiLib::lib('user');
+	$tikilib = TikiLib::lib('tiki');
+	$bloglib = TikiLib::lib('blog');
 
 	$appkeyp = $params->getParam(0);
 	$appkey = $appkeyp->scalarval();
@@ -398,7 +431,6 @@ function getUserBlogs($params)
 
 	$arrayVal = array();
 
-	global $bloglib; require_once('lib/blogs/bloglib.php');
 	$blogs = $bloglib->list_user_blogs($username, true);
 	$foo = parse_url($_SERVER['REQUEST_URI']);
 	$foo1 = $tikilib->httpPrefix() . str_replace('xmlrpc', 'tiki-view_blog', $foo['path']);

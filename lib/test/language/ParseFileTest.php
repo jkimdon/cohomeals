@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ParseFileTest.php 47779 2013-09-28 10:59:45Z alain_desilets $
+// $Id: ParseFileTest.php 59661 2016-09-10 15:30:07Z jonnybradley $
 
 require_once('lib/language/File.php');
 
@@ -107,7 +107,11 @@ class Language_FileTest extends TikiTestCase
 			'percentage' =>  42.86,
 		);
 		
-		$obj = $this->getMock('Language_File', array('parse'), array($this->filePath));
+		$obj = $this->getMockBuilder('Language_File')
+					->setMethods(['parse'])
+					->setConstructorArgs([$this->filePath])
+					->getMock();
+
 		$obj->expects($this->never())->method('parse');
 		
 		$reflectionClass = new ReflectionClass($obj);

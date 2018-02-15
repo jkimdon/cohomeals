@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-freetags_current.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-freetags_current.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -18,7 +18,7 @@ function module_freetags_current_info()
 {
 	return array(
 		'name' => tra('Wiki Page Tags'),
-		'description' => tra('Displays current freetags on wiki pages and enables to add tags if permissions allow.'),
+		'description' => tra('Displays current tags on wiki pages and enables adding tags if permissions allow.'),
 		'prefs' => array('feature_freetags'),
 		'params' => array()
 	);
@@ -30,10 +30,9 @@ function module_freetags_current_info()
  */
 function module_freetags_current($mod_reference, $module_params)
 {
-	global $user, $page, $smarty;
-	global $freetaglib;
-
-	include_once 'lib/freetag/freetaglib.php';
+	global $user, $page;
+	$smarty = TikiLib::lib('smarty');
+	$freetaglib = TikiLib::lib('freetag');
 
 	$objectperms = Perms::get(array('type' => 'wiki page', 'object' => $page));
 	if (! empty($page) && $objectperms->view) {
@@ -49,7 +48,7 @@ function module_freetags_current($mod_reference, $module_params)
 			$canTag = false;
 		}
 
-		$smarty->assign('tpl_module_title', tra('Freetags'));
+		$smarty->assign('tpl_module_title', tra('Tags'));
 
 		$currenttags = $freetaglib->get_tags_on_object($page, 'wiki page');
 		if (count($currenttags['data']) || $canTag) {

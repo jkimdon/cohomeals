@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-wizard_user.php 51146 2014-05-04 19:13:18Z xavidp $
+// $Id: tiki-wizard_user.php 60616 2016-12-12 19:04:45Z jonnybradley $
 
 require 'tiki-setup.php';
 
@@ -18,8 +18,8 @@ if ($prefs['feature_wizard_user'] != 'y') {
 }
 $access->check_user($user);
 
-require_once('lib/headerlib.php');
-$headerlib->add_cssfile('css/wizards.css');
+$headerlib = TikiLib::lib('header');
+$headerlib->add_cssfile('themes/base_files/feature_css/wizards.css');
 
 // Hide the display of the preference dependencies in the wizard
 $headerlib->add_css('.pref_dependency{display:none !important;}');
@@ -32,7 +32,9 @@ $accesslib->check_user($user);
 $pages = array();
 
 /// fetch the itemId for the user tracker ------------------------------------
-global	$user, $tikilib, $prefs, $userlib; 
+global $user, $prefs;
+$userlib = TikiLib::lib('user');
+$tikilib = TikiLib::lib('tiki');
 if ($prefs['userTracker'] === 'y') {
 	
 	$trklib = TikiLib::lib('trk');
@@ -113,14 +115,6 @@ foreach ($pages as $page) {
 	$stepNr++;
 }
 $toc .= '</ul>';
-	// Hide the left and right sidebars when the admin wizard is run
-	$headerlib = TikiLib::lib('header');
-	$headerlib->add_js(
-<<<JS
-	hideCol('col2','left', 'col1');
-	hideCol('col3','right', 'col1');
-JS
-);
 
 if ($reqStepNr > 0) {
 	$smarty->assign('wizard_toc', $toc);
@@ -129,5 +123,4 @@ if ($reqStepNr > 0) {
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 
-$smarty->assign('mid', 'tiki-wizard_user.tpl');
-$smarty->display("tiki.tpl");
+$smarty->display('tiki-wizard_user.tpl');

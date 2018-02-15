@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.html_body_attributes.php 45403 2013-04-04 21:28:24Z lphuberdeau $
+// $Id: function.html_body_attributes.php 60360 2016-11-21 18:45:54Z jonnybradley $
 
 /* return the attributes for a standard tiki page body tag
  * jonnyb refactoring for tiki5
@@ -12,19 +12,15 @@
 
 function smarty_function_html_body_attributes($params, $smarty)
 {
-	global $section, $prefs, $cookietab, $page, $smarty, $tiki_p_edit, $section_class, $user;
-	
+	global $section, $prefs, $page, $section_class, $user;
+	$smarty = TikiLib::lib('smarty');
 	$back = '';
 	$onload = '';
-	$class = '';
-	
-	$dblclickedit = $smarty->getTemplateVars('dblclickedit');
-	
-	if (isset($section) && $section == 'wiki page' && $prefs['user_dbl'] == 'y' and $dblclickedit == 'y' and $tiki_p_edit == 'y') {
-		$back .= ' ondblclick="location.href=\'tiki-editpage.php?page=' . rawurlencode($page) . '\';"';
-	}
+	$class = (isset($params['class']) ? $params['class'] : '') . ' tiki ';
 
-	$class .= 'tiki ';
+	//filename of script called (i.e. tiki-index, tiki-user_information, tiki-view_forum, etc), then sanitize chars
+	$script_filename = pathinfo($_SERVER['SCRIPT_NAME'], PATHINFO_FILENAME);
+	$class .= ' ' . filter_var($script_filename, FILTER_SANITIZE_SPECIAL_CHARS, array(FILTER_FLAG_STRIP_LOW,FILTER_FLAG_STRIP_HIGH)) . ' ';
 	
 	if (isset($section_class)) {
 		$class .= $section_class;
@@ -33,6 +29,10 @@ function smarty_function_html_body_attributes($params, $smarty)
 	if ($prefs['feature_fixed_width'] == 'y') {
 		$class .= ' fixed_width ';
 	}
+
+    if ($prefs['site_layout']) {
+        $class .= ' layout_' . $prefs['site_layout'];
+    }
 	
 	if (!empty($_REQUEST['filegals_manager'])) {
 		$class .= ' filegal_popup ';
@@ -40,7 +40,7 @@ function smarty_function_html_body_attributes($params, $smarty)
 		
 	if (isset($_SESSION['fullscreen']) && $_SESSION['fullscreen'] == 'y') {
 		$class .= empty($class) ? ' ' : '';
-		$class .= 'fullscreen';
+		$class .= ' fullscreen';
 	}
 
 	if (isset($prefs['layout_add_body_group_class']) && $prefs['layout_add_body_group_class'] === 'y') {
@@ -54,10 +54,37 @@ function smarty_function_html_body_attributes($params, $smarty)
 		}
 	}
 
-	if ($prefs['feature_perspective'] == 'y' && isset($_SESSION['current_perspective'])) {
+	if ($prefs['feature_perspective'] == 'y' && !empty($_SESSION['current_perspective'])) {
 		$class .= ' perspective' . $_SESSION['current_perspective'];
+		$class .= ' perspective_' . preg_replace("/[^a-z0-9]/", "_", strtolower($_SESSION['current_perspective_name']));
 	}
-	
+
+	if ($categories = $smarty->getTemplateVars('objectCategoryIds')) {
+		foreach ($categories as $cat) {
+			if (in_array($cat, $prefs['categories_add_class_to_body_tag'])) {
+				$class .= ' cat_' . str_replace(' ', '-', TikiLib::lib('categ')->get_category_name($cat));
+			}
+		}
+	}
+
+	if (!empty($page) && $page == $prefs['tikiIndex']) {
+		$class .= ' homepage';
+	}
+
+	if (!empty($pageLang)) {
+		$class .= ' ' . $pageLang;
+	} else {
+		$class .= ' ' . $prefs['language'];
+	}
+
+	if (getCookie('hide_zone_left')) {
+		$class .= ' hide_zone_left';
+	}
+
+	if (getCookie('hide_zone_right')) {
+		$class .= ' hide_zone_right';
+	}
+
 	if (!empty($onload)) {
 		$back .= ' onload="' . $onload . '"';
 	}

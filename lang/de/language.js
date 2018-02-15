@@ -2,7 +2,7 @@
  * Javascript translation definition
  * Example to help translation of some English strings in some js files
  * 
- * $Id: language.js 46618 2013-07-10 22:21:55Z arildb $
+ * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
  */
 
 lang = {
@@ -22,7 +22,6 @@ lang = {
 "Insert" : "Einfügen",
 "Replace" : "Ersetzen",
 "Match" : "Stimmen überein",
-"Passwords match" : "Passwörter stimmen überein",
 "Do not match" : "Stimmen nicht überein",
 "Passwords don't match" : "Passwörter stimmen nicht überein",
 "Advanced options" : "Erweiterte Optionen",

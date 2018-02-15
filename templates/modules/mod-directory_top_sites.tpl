@@ -1,4 +1,4 @@
-{* $Id: mod-directory_top_sites.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+{* $Id: mod-directory_top_sites.tpl 53176 2014-11-21 23:12:16Z jyhem $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="directory_top_sites" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {modules_list list=$modTopdirSites nonums=$nonums}
@@ -11,8 +11,8 @@
 			{if $maxdesc ge '1'}{$modTopdirSites[ix].description|truncate:$maxdesc:"...":"true"}
 			{else}{$modTopdirSites[ix].description|escape}
 			{/if}
-		{/if}	
-			
+		{/if}
+
 		</li>
 	{/section}
 {/modules_list}

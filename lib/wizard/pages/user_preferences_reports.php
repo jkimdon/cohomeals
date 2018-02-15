@@ -1,13 +1,11 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_preferences_reports.php 49756 2014-02-06 11:13:28Z xavidp $
+// $Id: user_preferences_reports.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 require_once('lib/wizard/wizard.php');
-require_once('lib/notifications/notificationlib.php');
-include_once ('lib/userprefs/userprefslib.php');
 
 /**
  * Set up the wysiwyg editor, including inline editing
@@ -39,7 +37,9 @@ class UserWizardPreferencesReports extends Wizard
 
 	function onSetupPage ($homepageUrl) 
 	{
-		global	$user, $smarty, $prefs;
+		global$user, $prefs;
+
+		$smarty = TikiLib::lib('smarty');
 
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
@@ -55,17 +55,19 @@ class UserWizardPreferencesReports extends Wizard
 		$reportsUsers = Reports_Factory::build('Reports_Users');
 		$reportsUsersUser = $reportsUsers->get($user);
 		$smarty->assign_by_ref('report_preferences', $reportsUsersUser);
-
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_preferences_reports.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
 		
 		return $showPage;
 	}
 
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_preferences_reports.tpl';
+		return $wizardTemplate;
+	}
+
 	function onContinue ($homepageUrl) 
 	{
-		global $tikilib, $user, $prefs;
+		global $user, $prefs;
 
 		// Run the parent first
 		parent::onContinue($homepageUrl);

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiimporter_wiki.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tikiimporter_wiki.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 /**
  * Abstract class to provide basic functionalities to wiki importers.
@@ -47,7 +47,7 @@ class TikiImporter_Wiki extends TikiImporter
 								array('name' => 'override', 'label' => tra('Override')),
 								array(
 										'name' => 'appendPrefix',
-										'label' => tra('Append software name as prefix to the page name')
+										'label' => tra('Prepend software name as a prefix to the page name')
 								),
 						)
 				),
@@ -65,7 +65,7 @@ class TikiImporter_Wiki extends TikiImporter
 	 *
 	 * @return void
 	 */
-	function import()
+	function import($filePath = null)
 	{
 		// how many revisions to import for each page
 		if (!empty($_POST['wikiRevisions']) && $_POST['wikiRevisions'] > 0)
@@ -102,7 +102,7 @@ class TikiImporter_Wiki extends TikiImporter
 	 *
 	 * @return array $countData stats about the content that has been imported
 	 */
-	function insertData($parsedData)
+	function insertData($parsedData = null)
 	{
 		$countData = array();
 		$countPages = 0;
@@ -209,7 +209,7 @@ class TikiImporter_Wiki extends TikiImporter
 				$first = false;
 			}
 			if (!empty($rev['categories'])) {
-				global $categlib; include_once('lib/categories/categlib.php');
+				$categlib = TikiLib::lib('categ');
 				foreach ($rev['categories'] as $cat) {
 					$categId = $categlib->get_category_id($cat);
 					if (empty($categId)) {

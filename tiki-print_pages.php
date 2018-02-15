@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-print_pages.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-print_pages.php 61507 2017-03-05 17:39:27Z jonnybradley $
 
 $section = 'wiki page';
 require_once ('tiki-setup.php');
-include_once ('lib/structures/structlib.php');
+$structlib = TikiLib::lib('struct');
 $auto_query_args = array('page_ref_id', 'page', 'find', 'pageName', 'structureId', 'offset', 'printpages', 'printstructures');
 
 $access->check_feature('feature_wiki_multiprint');
@@ -96,7 +96,7 @@ foreach ($printstructures as $page_ref_id) {
 	}
 }
 $smarty->assign_by_ref('printnamestructures', $printnamestructures);
-$smarty->assign('cookietab', $cookietab);
+
 include_once ('tiki-section_options.php');
 ask_ticket('print-pages');
 // disallow robots to index page:

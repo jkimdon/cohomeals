@@ -1,12 +1,21 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetBuilder.php 46273 2013-06-10 19:26:34Z lphuberdeau $
+// $Id: FacetBuilder.php 59593 2016-09-04 17:03:54Z jonnybradley $
 
 class Search_Elastic_FacetBuilder
 {
+	private $count;
+	private $mainKey;
+
+	function __construct($count = 10, $useAggregations = false)
+	{
+		$this->count = $count;
+		$this->mainKey = $useAggregations ? 'aggregations' : 'facets';
+	}
+
 	function build(array $facets)
 	{
 		if (empty($facets)) {
@@ -19,7 +28,7 @@ class Search_Elastic_FacetBuilder
 		}
 
 		return array(
-			'facets' => $out,
+			$this->mainKey => $out,
 		);
 	}
 
@@ -27,6 +36,7 @@ class Search_Elastic_FacetBuilder
 	{
 		return array('terms' => array(
 			'field' => $facet->getField(),
+			'size' => $facet->getCount() ?: $this->count,
 		));
 	}
 }

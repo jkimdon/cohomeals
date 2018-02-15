@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 51265 2014-05-13 12:07:51Z jonnybradley $
+// $Id: Controller.php 61688 2017-03-14 17:03:16Z jonnybradley $
 
 class Services_AutoSave_Controller
 {
@@ -27,7 +27,6 @@ class Services_AutoSave_Controller
 		$res = '';
 
 		if ($this->checkReferrer($referer)) {
-			include_once 'lib/ajax/autosave.php';
 			$res = TikiLib::lib('autosave')->get_autosave($input->editor_id->text(), $referer);
 		}
 
@@ -49,7 +48,6 @@ class Services_AutoSave_Controller
 		$res = '';
 
 		if ($this->checkReferrer($referer)) {
-			include_once 'lib/ajax/autosave.php';
 			$data = $input->data->none();
 			$res = TikiLib::lib('autosave')->auto_save($input->editor_id->text(), $data, $referer);
 		}
@@ -71,7 +69,6 @@ class Services_AutoSave_Controller
 		$referer = $input->referer->text();
 
 		if ($this->checkReferrer($referer)) {
-			include_once 'lib/ajax/autosave.php';
 			TikiLib::lib('autosave')->remove_save($input->editor_id->text(), $referer);
 		}
 
@@ -95,10 +92,23 @@ class Services_AutoSave_Controller
 		if ($referer && count($referer) === 3 && $referer[1] === 'wiki_page') {
 			$page = rawurldecode($referer[2]);	// plugins use global $page for approval
 
-			$isok = Perms::get('wiki page', $page)->edit && $user === TikiLib::lib('tiki')->get_semaphore_user($page);
+			$isok = Perms::get('wiki page', $page)->edit &&
+				$user === TikiLib::lib('service')->internal('semaphore', 'get_user', ['object_id' => $page, 'check' => 1]);
 		}
 
 		return $isok;
+	}
+	//function added to hold current state of fancy table / sorted table for pdf and print version. So when user generates pdf he gets his sorted data not default data in table.
+	function action_storeTable($input){
+	   //write content to file
+	    $tableName=$input->tableName->text();
+	    //$tableHTML=$input->tableHTML->text();
+	   $tableFile=fopen("temp/".$tableName.'_'.session_id().".txt","w");
+	   //fwrite($tableFile,$input->tableHTML->text());
+	   fwrite($tableFile,$input->tableHTML->html());
+	   //create session array to hold temp tables for printing, table original name and file name
+	   chmod($tableFile,0755);
+		
 	}
 }
 

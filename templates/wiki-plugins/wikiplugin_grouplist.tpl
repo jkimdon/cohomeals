@@ -1,5 +1,6 @@
-{* $Id: wikiplugin_grouplist.tpl 33949 2011-04-14 05:13:23Z chealer $ *}
+{* $Id: wikiplugin_grouplist.tpl 52249 2014-08-05 20:25:58Z nkoth $ *}
 {if empty($groups)}
+	&mdash;
 {else}
 	<ul>
 	{foreach from=$groups item=group}

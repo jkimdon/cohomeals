@@ -1,95 +1,92 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin.php 63679 2017-08-28 01:13:12Z drsassafras $
 
 function prefs_wikiplugin_list($partial = false)
 {
-	global $tikilib;
-	
 	$parserlib = TikiLib::lib('parser');
 	
-	// Note that most of these will be disabled by an other feature check.
+	// Note that most of the plugins controlled by the following preferences will be disabled by another feature check. For example, PluginCalendar depends not only on wikiplugin_calendar, but also on feature_calendar.
+	// There is inefficiency in this data structure and the calls to in_array() below. 
+	// PHP 7 TODO: Once we require PHP 7+, this native array should be replaced with Ds\Set.
 	$defaultPlugins = array(
-		'article' => 'y',
-		'articles' => 'y',
-		'attach' => 'y',
-		'author' => 'y',
-		'bigbluebutton' => 'y',
-		'box' => 'y',
-		'calendar' => 'y',
-		'category' => 'y',
-		'catorphans' => 'y',
-		'catpath' => 'y',
-		'center' => 'y',
-		'chart' => 'y',
-		'code' => 'y',
-		'comment' => 'n',
-		'content' => 'y',
-		'copyright' => 'y',
-		'div' => 'y',
-		'dl' => 'y',
-		'draw' => 'y',
-		'events' => 'y',
-		'fade' => 'y',
-		'fancylist' => 'y',
-		'fancytable' => 'y',
-		'favorite' => 'n',
-		'file' => 'y',
-		'files' => 'y',
-		'flash' => 'y',
-		'googlemap' => 'y',
-		'group' => 'y',
-		'html' => 'y',
-		'img' => 'y',
-		'include' => 'y',
-		'invite' => 'y',
-		'kaltura' => 'y',
-		'lang' => 'y',
-		'map' => 'y',
-		'mediaplayer' => 'y',
-		'memberpayment' => 'y',
-		'miniquiz' => 'y',
-		'module' => 'y',
-		'mouseover' => 'y',
-		'now' => 'y',
-		'payment' => 'y',
-		'poll' => 'y',
-		'quote' => 'y',
-		'rcontent' => 'y',
-		'remarksbox' => 'y',
-		'rss' => 'y',
-		'sheet' => 'y',
-		'snarf_cache' => 0,
-		'sort' => 'y',
-		'split' => 'y',
-		'sub' => 'y',
-		'sup' => 'y',
-		'survey' => 'y',
-		'tabs' => 'y',
-		'thumb' => 'y',
-		'toc' => 'y',
-		'topfriends' => 'y',
-		'trackercomments' => 'y',
-		'trackerfilter' => 'y',
-		'trackeritemfield' => 'y',
-		'trackerlist' => 'y',
-		'trackertimeline' => 'y',
-		'tracker' => 'y',
-		'trackerprefill' => 'y',
-		'trackerstat' => 'y',
-		'trackertoggle' => 'y',
-		'trackerif' => 'y',
-		'transclude' => 'y',
-		'translated' => 'y',
-		'twitter' => 'y',
-		'userlink' => 'y',
-		'vimeo' => 'y',	
-		'vote' => 'y',
-		'youtube' => 'y',
-		'zotero' => 'y',
+		'article',
+		'articles',
+		'attach',
+		'author',
+		'bigbluebutton',
+		'box',
+		'calendar',
+		'category',
+		'catorphans',
+		'catpath',
+		'center',
+		'chart',
+		'code',
+		'content',
+		'copyright',
+		'div',
+		'dl',
+		'draw',
+		'events',
+		'fade',
+		'fancylist',
+		'fancytable',
+		'file',
+		'files',
+		'googlemap',
+		'group',
+		'html',
+		'img',
+		'include',
+		'invite',
+		'kaltura',
+		'lang',
+		'list',
+		'map',
+		'mediaplayer',
+		'memberpayment',
+		'miniquiz',
+		'module',
+		'mouseover',
+		'now',
+		'payment',
+		'poll',
+		'quote',
+		'rcontent',
+		'remarksbox',
+		'rss',
+		'sheet',
+		'sort',
+		'split',
+		'sub',
+		'sup',
+		'survey',
+		'tabs',
+		'thumb',
+		'toc',
+		'topfriends',
+		'trackercomments',
+		'trackerfilter',
+		'trackeritemfield',
+		'trackerlist',
+		'trackertimeline',
+		'tracker',
+		'trackerprefill',
+		'trackerstat',
+		'trackertoggle',
+		'trackerif',
+		'transclude',
+		'translated',
+		'twitter',
+		'userlink',
+		'vimeo',	
+		'vote',
+		'youtube',
+		'zotero',
 	);
 
 	if ($partial) {
@@ -114,9 +111,12 @@ function prefs_wikiplugin_list($partial = false)
 		foreach ( $list as $plugin ) {
 			$preference = 'wikiplugin_' . $plugin;
 			$out[$preference] = array(
-				'default' => isset($defaultPlugins[$plugin]) ? 'y' : 'n',
+				'default' => in_array($plugin, $defaultPlugins) ? 'y' : 'n',
 			);
 		}
+		$out['wikiplugin_snarf_cache'] = array('default' => 0);
+		$out['wikiplugin_list_gui'] = array('default' => 'n');
+		$out['wikiplugin_maximum_passes'] = array('default' => 500);
 
 		return $out;
 	}
@@ -134,21 +134,49 @@ function prefs_wikiplugin_list($partial = false)
 			'type' => 'flag',
 			'help' => 'Plugin' . $plugin,
 			'dependencies' => $dependencies,
-			'default' => isset($defaultPlugins[$plugin]) ? 'y' : 'n',
+			'packages_required' => (isset($info['packages_required']) && !empty($info['packages_required'])) ? $info['packages_required'] : array(),
+			'default' => in_array($plugin, $defaultPlugins) ? 'y' : 'n',
 		);
 
 		if (isset($info['tags'])) {
 			$prefs['wikiplugin_' . $plugin]['tags'] = (array) $info['tags'];
 		}
 	}
+	
+	// The wikiplugin_snarf_cache preference does not toggle some SNARFCACHE plugin, but controls the cache time of the SNARF plugin.
 	$prefs['wikiplugin_snarf_cache'] = array(
-		'name' => tra('Global cache time for the plugin snarf in seconds'),
-		'description' => tra('Default cache time for the plugin snarf') . ', ' . tra('0 for no cache'),
+		'name' => tra('Global cache time for the plugin snarf'),
+		'description' => tra('Default cache time for the plugin snarf'),
 		'default' => 0,
+		'shorthint' => tra('0 for no cache'),
 		'dependencies' => array('wikiplugin_snarf'),
 		'filter' => 'int',
+		'units' => tra('seconds'),
 		'type' => 'text'
 	);
+
+	// temporary pref for developpment of the list plugin GUI
+	$prefs['wikiplugin_list_gui'] = [
+		'name' => tr('GUI for the list plugin'),
+		'description' => tr('Experimental GUI for the list plugin in popup plugin edit forms.') . (' ') . tr('(listgui)'),
+		'tags' => ['experimental'],
+		'default' => 'n',
+		'dependencies' => ['wikiplugin_list'],
+		'filter' => 'alpha',
+		'type' => 'flag'
+	];
+
+	$prefs['wikiplugin_maximum_passes'] = [
+		'name' => tr('Maximum plugin parsing passes'),
+		'description' => tr('Affects the number of wiki plugins that can be used. The default of 500 allows for 1 plugin nested seven times, or 44 plugins nested once. A value of 1200 is required for 1 eighth level plugin.'),
+		'default' => 500,
+		'dependencies' => ['feature_wiki'],
+		'filter' => 'digits',
+		'type' => 'text',
+		'units' => tr('passes'),
+		'tags' => ['experimental'],
+		'warning' => tr('Setting this to a higher value than the default of 500 may have performance implications.'),
+	];
 
 	return $prefs;
 }

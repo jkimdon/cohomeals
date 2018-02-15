@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IteratorTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: IteratorTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
 
 /**
  * @group unit
@@ -26,7 +26,7 @@ class JitFilter_IteratorTest extends TikiTestCase
 		);
 
 		$this->array = new JitFilter($this->array);
-		$this->array->setDefaultFilter(new Zend_Filter_StringToUpper);
+		$this->array->setDefaultFilter(new Zend\Filter\StringToUpper);
 	}
 
 	function tearDown()

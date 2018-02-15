@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiTemplate.php 46264 2013-06-10 15:59:36Z lphuberdeau $
+// $Id: WikiTemplate.php 57971 2016-03-17 20:09:05Z jonnybradley $
 
 class Search_Formatter_Plugin_WikiTemplate implements Search_Formatter_Plugin_Interface
 {

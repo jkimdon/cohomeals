@@ -1,4 +1,4 @@
-{* $Id: mod-usergroup_tracker.tpl 34588 2011-05-24 03:18:12Z chealer $ *}
+{* $Id: mod-usergroup_tracker.tpl 55469 2015-05-18 11:55:00Z jonnybradley $ *}
 
 {if $user}
 {if !isset($tpl_module_title)}{assign var=tpl_module_title value="{tr}Login{/tr}"}{/if}
@@ -16,7 +16,7 @@
 
 {if $prefs.groupTracker eq 'y'}
 <div>{tr}Group information:{/tr}</div>
-<div class="box-data">
+<div class="panel-body">
 &nbsp;&nbsp;<a href="tiki-view_tracker_item.php?view=+group" class="linkmodule">{$default_group|escape}</a>
 </div>
 {/if}

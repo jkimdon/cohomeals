@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wizard.php 48893 2013-12-02 16:44:14Z arildb $
+// $Id: wizard.php 62572 2017-05-13 10:06:16Z drsassafras $
 
 /**
  * Wizard is the super class for all wizard pages.
@@ -27,6 +27,11 @@ abstract class Wizard
 	function pageTitle ()
 	{
 		return 'Page title not set';
+	}
+
+	function getTemplate()
+	{
+		return null;
 	}
 
 	/**
@@ -71,7 +76,7 @@ abstract class Wizard
 	 */	
 	function onContinue ($homepageUrl) {
 		// Save the user selection for showing the wizard on login or not
-		$showOnLogin = ( isset($_REQUEST['showOnLogin']) && $_REQUEST['showOnLogin'] == 'on' ) ? 'y' : 'n';
+		$showOnLogin = ( isset($_POST['showOnLogin']) && $_POST['showOnLogin'] == 'on' ) ? 'y' : 'n';
 
 		// Mark the login mode for the wizard
 		$wizardlib = TikiLib::lib('wizard');

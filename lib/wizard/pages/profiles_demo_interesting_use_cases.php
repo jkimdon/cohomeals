@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: profiles_demo_interesting_use_cases.php 51159 2014-05-06 08:09:25Z xavidp $
+// $Id: profiles_demo_interesting_use_cases.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 require_once('lib/wizard/wizard.php');
 
@@ -16,30 +16,32 @@ class ProfilesWizardDemoInterestingUseCases extends Wizard
     {
         return tra('Demo of Interesting Use Cases');
     }
-    function isEditable ()
-    {
-        return false;
-    }
+	function isEditable ()
+	{
+		return false;
+	}
+	
+	function onSetupPage ($homepageUrl) 
+	{
+		global $prefs, $TWV;
+		$smarty = TikiLib::lib('smarty');
+		// Run the parent first
+		parent::onSetupPage($homepageUrl);
 
-    function onSetupPage ($homepageUrl)
-    {
-        global	$smarty, $prefs, $TWV;
+		$smarty->assign('tikiMajorVersion', substr($TWV->version, 0, 2));
+		
+		return true;		
+	}
 
-        // Run the parent first
-        parent::onSetupPage($homepageUrl);
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/profiles_demo_interesting_use_cases.tpl';
+		return $wizardTemplate;
+	}
 
-        $smarty->assign('tikiMajorVersion', substr($TWV->version, 0, 2));
-
-        // Assign the page template
-        $wizardTemplate = 'wizard/profiles_demo_interesting_use_cases.tpl';
-        $smarty->assign('wizardBody', $wizardTemplate);
-
-        return true;
-    }
-
-    function onContinue ($homepageUrl)
-    {
-        // Run the parent first
-        parent::onContinue($homepageUrl);
-    }
+	function onContinue ($homepageUrl) 
+	{
+		// Run the parent first
+		parent::onContinue($homepageUrl);
+	}
 }

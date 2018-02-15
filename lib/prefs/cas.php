@@ -1,51 +1,51 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cas.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: cas.php 63665 2017-08-25 04:16:20Z drsassafras $
 
 function prefs_cas_list()
 {
 	return array(
 		'cas_create_user_tiki' => array(
-			'name' => tra('Create user if not in Tiki'),
-            'description' => tra(''),
+			'name' => tra('Create user if not registered in Tiki'),
 			'type' => 'flag',
+			'description' =>tr('If a user was externally authenticated, but not found in the Tiki user database, Tiki will create an entry in its user database.'),
 			'perspective' => false,
 			'default' => 'n',
 			),
 		'cas_autologin' => array(
 			'name' => tra('Try automatically to connect SSO'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'flag',
 			'perspective' => false,
 			'default' => 'n',
 			),
 		'cas_skip_admin' => array(
 			'name' => tra('Use Tiki authentication for Admin login'),
-            'description' => tra(''),
 			'type' => 'flag',
+			'description' => tra('The user “admin” will be authenticated by <b>only</b> using Tiki’s user database. This option has no effect on users other than “admin”.'),
 			'perspective' => false,
 			'default' => 'n',
 			),
 		'cas_force_logout' => array(
 			'name' => tra('Force CAS log-out when the user logs out from Tiki.'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'flag',
 			'perspective' => false,
 			'default' => 'n',
 			),
 		'cas_show_alternate_login' => array(
-			'name' => tra('Show Alternate Login Method in Header'),
-            'description' => tra(''),
+			'name' => tra('Show alternate log-in method in header'),
+			'description' => tra(''),
 			'type' => 'flag',
 			'perspective' => false,
 			'default' => 'y',
 			),
 		'cas_version' => array(
 			'name' => tra('CAS server version'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'perspective' => false,
 			'options' => array(
@@ -58,7 +58,6 @@ function prefs_cas_list()
 		'cas_hostname' => array(
 			'name' => tra('Hostname'),
 			'description' => tra('Hostname of the CAS server.'),
-            'description' => tra(''),
 			'type' => 'text',
 			'size' => 50,
 			'filter' => 'striptags',
@@ -100,13 +99,13 @@ function prefs_cas_list()
 			'perspective' => false,
 			'options' => array (
 				'0' => tra('Never'),
-				'60' => tra('1 minute'),
-				'120' => tra('2 minutes'),
-				'300' => tra('5 minutes'),
-				'600' => tra('10 minutes'),
-				'900' => tra('15 minutes'),
-				'1800' => tra('30 minutes'),
-				'3600' => tra('1 hour'),
+				'60' => '1 '.tra('minute'),
+				'120' => '2 '.tra('minutes'),
+				'300' => '5 '.tra('minutes'),
+				'600' => '10 '.tra('minutes'),
+				'900' => '15 '.tra('minutes'),
+				'1800' => '30 '.tra('minutes'),
+				'3600' => '1 '.tra('hour'),
 				),
 			'default' => '0',
 			),

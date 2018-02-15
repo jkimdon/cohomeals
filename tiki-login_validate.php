@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-login_validate.php 52063 2014-07-21 23:54:17Z jyhem $
+// $Id: tiki-login_validate.php 58880 2016-06-13 01:20:24Z drsassafras $
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
 		'user' => 'text',
@@ -27,13 +27,13 @@ if (isset($_REQUEST["user"])) {
 			die;
 		} elseif (!empty($_SESSION['last_validation'])) {
 			if ($_SESSION['last_validation']['actpass'] == $_REQUEST["pass"] && $_SESSION['last_validation']['user'] == $_REQUEST["user"]) {
-				list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_SESSION['last_validation']['actpass'], '', '', true);
+				list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_SESSION['last_validation']['actpass'], true);
 			} else {
 				$_SESSION['last_validation'] = null;
 			}
 		}
 		if (!$isvalid) {
-			list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_REQUEST["pass"], '', '', true);
+			list($isvalid, $_REQUEST["user"], $error) = $userlib->validate_user($_REQUEST["user"], $_REQUEST["pass"], true);
 			$_SESSION['last_validation'] = $isvalid ? array('user' => $_REQUEST["user"], 'actpass' => $_REQUEST["pass"]) : null;
 		}
 	} else {
@@ -82,6 +82,8 @@ if ($isvalid) {
 			$smarty->assign('userlogin', $_REQUEST['user']);
 			if ($prefs['login_is_email'] === 'y') {
 				$smarty->assign('email', $_REQUEST['user']);
+			} else {
+				$smarty->assign('email', $info['email']);
 			}
 			$smarty->assign('mid', 'tiki-change_password.tpl');
 			$smarty->display("tiki.tpl");
@@ -113,8 +115,9 @@ if ($isvalid) {
 	if ($error == PASSWORD_INCORRECT) $error = tra("Invalid username or password");
 	else if ($error == USER_NOT_FOUND) $error = tra("Invalid username or password");
 	else if ($error == ACCOUNT_DISABLED) $error = tra("Account requires administrator approval");
-	else if ($error == USER_AMBIGOUS) $error = tra("You must use the right case for your user name");
+	else if ($error == USER_AMBIGOUS) $error = tra("You must use the right case for your username");
 	else if ($error == USER_PREVIOUSLY_VALIDATED) $error = tra('You have already validated your account. Please log in.');
+	else if ($error == EMAIL_AMBIGUOUS) $error = tra("There is more than one user account with this email. Please contact the administrator.");
 	else $error = tra('Invalid username or password');
 	$smarty->assign('errortype', 'no_redirect_login');
 	$smarty->assign('msg', $error);

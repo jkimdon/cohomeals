@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RunnerTest.php 49195 2013-12-20 15:14:34Z lphuberdeau $
+// $Id: RunnerTest.php 59749 2016-09-20 10:49:10Z kroky6 $
 
 class Math_Formula_RunnerTest extends TikiTestCase
 {
@@ -61,6 +61,13 @@ class Math_Formula_RunnerTest extends TikiTestCase
 		$this->assertEquals(3, $this->runner->evaluate());
 	}
 
+	function testSum()
+	{
+		$this->runner->setFormula('(add list)');
+		$this->runner->setVariables(array('list' => array(1,2,3)));
+		$this->assertEquals(6, $this->runner->evaluate());
+	}
+
 	function testMin()
 	{
 		$this->runner->setFormula('(min -10 0 20)');
@@ -84,6 +91,13 @@ class Math_Formula_RunnerTest extends TikiTestCase
 		$this->runner->setFormula('(mul foobar 2)');
 		$this->runner->setVariables(array('foobar' => 2.5,));
 		$this->assertEquals(5, $this->runner->evaluate());
+	}
+
+	function testProductList()
+	{
+		$this->runner->setFormula('(mul list)');
+		$this->runner->setVariables(array('list' => array(2.5,2,4)));
+		$this->assertEquals(20, $this->runner->evaluate());
 	}
 
 	/**
@@ -264,6 +278,22 @@ class Math_Formula_RunnerTest extends TikiTestCase
 		), $this->runner->evaluate());
 	}
 
+	function testSplitWithSingleKey()
+	{
+		$this->runner->setFormula('(split-list (content string) (separator ,) (key id))');
+		$this->runner->setVariables(
+			array(
+				'string' => "214,266,711",
+			)
+		);
+
+		$this->assertEquals(array(
+			array('id' => '214'),
+			array('id' => '266'),
+			array('id' => '711'),
+		), $this->runner->evaluate());
+	}
+
 	function testMapList()
 	{
 		$this->runner->setFormula('(for-each (list list) (formula (mul a b c)))');
@@ -310,6 +340,8 @@ class Math_Formula_RunnerTest extends TikiTestCase
 			array('(str a b)', 'a b'),
 			array('(str (mul 3 2)b)', '6 b'),
 			array('(str Say: (eval a b) !)', 'Say: hello world !'),
+			array('(concat "Say: " a " " b " !")', 'Say: hello world !'),
+			array('(str "Say:" a b "!")', 'Say: a b !'),
 		);
 	}
 }

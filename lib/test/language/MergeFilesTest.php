@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MergeFilesTest.php 47779 2013-09-28 10:59:45Z alain_desilets $
+// $Id: MergeFilesTest.php 59661 2016-09-10 15:30:07Z jonnybradley $
 
 require_once('lib/language/MergeFiles.php');
 
@@ -25,9 +25,16 @@ class Language_MergeFilesTest extends TikiTestCase
 
 		$sourceFilePath = vfsStream::url('root/language_source.php');
 		$targetFilePath = vfsStream::url('root/language_target.php');
-		$this->sourceFileObj = $this->getMock('Language_File', array('parse'), array($sourceFilePath));
-		$this->targetFileObj = $this->getMock('Language_File', array('parse'), array($targetFilePath));
-		
+		$this->sourceFileObj = $this->getMockBuilder('Language_File')
+									->setMethods(['parse'])
+									->setConstructorArgs([$sourceFilePath])
+									->getMock();
+
+		$this->targetFileObj = $this->getMockBuilder('Language_File')
+									->setMethods(['parse'])
+									->setConstructorArgs([$targetFilePath])
+									->getMock();
+
 		$this->obj = new Language_MergeFiles($this->sourceFileObj, $this->targetFileObj);
 	}
 

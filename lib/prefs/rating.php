@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: rating.php 50006 2014-02-21 18:21:19Z xavidp $
+// $Id: rating.php 63589 2017-08-18 03:43:46Z drsassafras $
 
 function prefs_rating_list()
 {
@@ -19,7 +19,7 @@ function prefs_rating_list()
 		),
 		'rating_recalculation' => array(
 			'name' => tra('Rating recalculation mode'),
-			'description' => tra('Determines when and how rating aggregates are recalculated. Depending on the site load, some options may be preferred to others. On large volume sites, it should be done as a cron job. On vote recalculation may be inaccurate if rating calculation depends time.'),
+			'description' => tra('Determines when and how rating aggregates are recalculated. Depending on the site load, some options may be preferred to others. On large-volume sites, it should be done as a cron job. On vote recalculation, there may be inaccuracies if rating calculation is time-dependent.'),
 			'type' => 'list',
 			'options' => array(
 				'vote' => tra('Recalculate on vote'),
@@ -34,6 +34,7 @@ function prefs_rating_list()
 			'name' => tra('Recalculation odds (1 in X)'),
 			'description' => tra('Dice roll performed on every request. When successful, will recalculate a certain number of votes.'),
 			'type' => 'text',
+			'units' => tra('votes'),
 			'size' => 5,
 			'filter' => 'digits',
 			'default' => '100',
@@ -44,11 +45,12 @@ function prefs_rating_list()
 			'type' => 'text',
 			'size' => 5,
 			'filter' => 'digits',
+			'units' => tra('ratings'),
 			'default' => '100',
 		),
 		'rating_smileys' => array(
 			'name' => tr('Smiley Ratings'),
-			'description' => tr('Displays a smiley face for simple ratings system. Only works with 0-11, depending on what you have set. An easier user-interface to use, like emoticons.'),
+			'description' => tr('Displays smiley faces for a simple ratings system with an easy-to-use user interface, similar to emoticons. Works with 0-11 only, depending on the configuration.'),
 			'type' => 'flag',
 			'options' => array(
 				'' => tr('Disabled'),
@@ -66,6 +68,16 @@ function prefs_rating_list()
 			),
 			'default' => ''
 		),
+		'rating_options_reversed' => array(
+			'name' => tr('Reversed Rating Options'),
+			'description' => tr('Displays the ratings options in reverse.'),
+			'type' => 'flag',
+			'options' => array(
+				'' => tr('Disabled'),
+				'y' => tr('Enabled'),
+			),
+			'default' => ''
+		),
 		'rating_results_detailed_percent' => array(
 			'name' => tr('Include percentages in the detailed rating results'),
 			'description' => tr('Include percentages in the detailed rating results. Otherwise, only count numbers and bars are shown.'),
@@ -76,6 +88,12 @@ function prefs_rating_list()
 			),
 			'default' => ''
 		),		
+		'rating_default_options' => array(
+			'name' => tra('Default rating options'),
+			'description' => tra('List of options available.'),
+			'type' => 'text',
+			'default' => "0,1,2,3,4",
+		),
 	);
 }
 

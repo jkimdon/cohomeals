@@ -1,9 +1,9 @@
-{* $Id: wikiplugin_adjustinventory.tpl 47507 2013-09-16 13:52:16Z chibaguy $ *}
+{* $Id: wikiplugin_adjustinventory.tpl 53176 2014-11-21 23:12:16Z jyhem $ *}
 <form method="post" action="{query _type=relative _keepall=y}" style="display: inline;">
 	<input type="hidden" name="code" value="{$code|escape}">
 	{if $add == 'y'}
 		{tr}Add:{/tr}
-		<input type="text" name="add_quantity" value="0" size="4">	
+		<input type="text" name="add_quantity" value="0" size="4">
 		<br>
 	{/if}
 	{if $subtract == 'y'}
@@ -11,6 +11,6 @@
 		<input type="text" name="subtract_quantity" value="0" size="4">
 		<br>
 	{/if}
-	<input type="submit" class="btn btn-default" value="{tr}Apply{/tr}">
+	<input type="submit" class="btn btn-default btn-sm" title="{tr}Apply Changes{/tr}" value="{tr}Apply{/tr}">
 </form>
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_backlinks.php 54718 2015-03-24 08:52:00Z xavidp $
+// $Id: wikiplugin_backlinks.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 require_once "lib/wiki/pluginslib.php";
 
@@ -12,7 +12,7 @@ class WikiPluginBackLinks extends PluginsLib
 	var $expanded_params = array("exclude", "info");
 	function getDefaultArguments()
 	{
-		return array('exclude' => '',
+		return array('exclude' => [],
 				'include_self' => 0,
 				'noheader' => 0,
 				'page' => '[pagename]',
@@ -36,8 +36,8 @@ class WikiPluginBackLinks extends PluginsLib
 
 	function run ($data, $params)
 	{
-		global $wikilib; include_once('lib/wiki/wikilib.php');
-		$exclude = $params['exclude'];
+		$wikilib = TikiLib::lib('wiki');
+		$exclude = isset($params['exclude']) ? $params['exclude'] : [];
 		$params = $this->getParams($params, true);
 		$aInfoPreset = array_keys($this->aInfoPresetNames);
 		extract($params, EXTR_SKIP);
@@ -111,15 +111,18 @@ function wikiplugin_backlinks_info()
 	return array(
 		'name' => tra('Backlinks'),
 		'documentation' => 'PluginBacklinks',
-		'description' => tra('Lists all pages that link to a particular page'),
+		'description' => tra('List all pages that link to a particular page'),
 		'prefs' => array( 'feature_wiki', 'wikiplugin_backlinks' ),
-		'icon' => 'img/icons/link.png',
+		'iconname' => 'backlink',
+		'introduced' => 1,
 		'params' => array(
 			'page' => array(
 				'required' => false,
 				'name' => tra('Page'),
 				'description' => tra('The page links will point to. Default value is the current page.'),
+				'since' => '1',
 				'advanced' => true,
+				'filter' => 'pagename',
 				'default' => '[pagename]',
 				'profile_reference' => 'wiki_page',
 			),
@@ -127,24 +130,31 @@ function wikiplugin_backlinks_info()
 				'required' => false,
 				'name' => tra('Displayed Information'),
 				'description' => tra('Pipe separated list of fields to display. ex: hits|user'),
+				'since' => '1',
 				'advanced' => true,
 				'separator' => '|',
+				'filter' => 'text',
 				'default' => false,
 			),
 			'exclude' => array(
 				'required' => false,
 				'name' => tra('Excluded pages'),
-				'description' => tra('Pipe separated list of pages to be excluded from the listing. ex: HomePage|Sandbox'),
+				'description' => tr('Pipe-separated list of pages to be excluded from the listing, for example:
+					%0HomePage|Sandbox%1', '<code>', '</code>'),
+				'since' => '1',
 				'advanced' => true,
 				'default' => '',
 				'separator' => '|',
+				'filter' => 'pagename',
 				'profile_reference' => 'wiki_page',
 			),
 			'include_self' => array(
 				'required' => false,
 				'name' => tra('Include Self'),
 				'description' => tra('With or without self-link (default is without)'),
+				'since' => '1',
 				'advanced' => true,
+				'filter' => 'digits',
 				'default' => 0,
 				'options' => array(
 					array('text' => '', 'value' => ''), 
@@ -156,6 +166,8 @@ function wikiplugin_backlinks_info()
 				'required' => false,
 				'name' => tra('Header'),
 				'description' => tra('With or without header (default is with header)'),
+				'since' => '1',
+				'filter' => 'digits',
 				'options' => array(
 					array('text' => '', 'value' => ''), 
 					array('text' => tra('With header'), 'value' => '0'), 
@@ -168,6 +180,6 @@ function wikiplugin_backlinks_info()
 
 function wikiplugin_backlinks($data, $params)
 {
-	$plugin = new wikipluginbacklinks();
-	return $plugin->run($data, $params);
+    $plugin = new wikipluginbacklinks();
+    return $plugin->run($data, $params);
 }

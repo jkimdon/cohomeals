@@ -2,14 +2,14 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_tracker_fields.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-admin_tracker_fields.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 
 $access->check_feature('feature_trackers');
 
@@ -53,5 +53,4 @@ ask_ticket('admin-tracker-fields');
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');
 // Display the template
-$smarty->assign('mid', 'tiki-admin_tracker_fields.tpl');
-$smarty->display("tiki.tpl");
+$smarty->display("tiki-admin_tracker_fields.tpl");

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CustomSearchController.php 52455 2014-09-02 22:11:48Z nkoth $
+// $Id: CustomSearchController.php 63763 2017-09-07 16:43:19Z jonnybradley $
 
 // Controller to process requests from the custom search plugin using the list plugin to display results
 // Refactored from customsearch_ajax.php for Tiki
@@ -13,6 +13,7 @@ class Services_Search_CustomSearchController
 {
 	private $textranges = array();
 	private $dateranges = array();
+	private $distances = array();
 
 	function setUp()
 	{
@@ -27,6 +28,7 @@ class Services_Search_CustomSearchController
 
 		$this->textranges = array();
 		$this->dateranges = array();
+		$this->distances = array();
 
 		$cachelib = TikiLib::lib('cache');
 		$definition = $input->definition->word();
@@ -34,13 +36,20 @@ class Services_Search_CustomSearchController
 			throw new Services_Exception(tra('Unfortunately, the search cache has expired. Please reload the page to start over.'));
 		}
 
+		/** @var Search_Query $query */
 		$query = $definition['query'];
-		$formatter = $definition['formatter'];
+		/** @var Search_Formatter_Builder $builder */
+		$builder = $definition['builder'];
+		/** @var Search_Elastic_FacetBuilder $facetsBuilder */
 		$facetsBuilder = $definition['facets'];
 
-		$adddata = json_decode($input->adddata->text(), true);
+		$tsettings = $definition['tsettings'];
+		$tsret = $definition['tsret'];
 
-		$dataappend = array();
+		$matches = WikiParser_PluginMatcher::match($definition['data']);
+		$builder->apply($matches);
+
+		$adddata = json_decode($input->adddata->text(), true);
 
 		$recalllastsearch = $input->recalllastsearch->int() ? true : false;
 
@@ -48,10 +57,6 @@ class Services_Search_CustomSearchController
 		if (empty($id)) {
 			$id = '0';
 		}
-		// setup AJAX pagination
-		$offset_jsvar = "customsearch_$id.offset";
-		$onclick = "$('#customsearch_$id').submit();return false;";
-		$dataappend['pagination'] = "{pagination offset_jsvar=\"$offset_jsvar\" onclick=\"$onclick\"}";
 
 		if ($recalllastsearch && isset($_SESSION["customsearch_$id"])) {
 			unset($_SESSION["customsearch_$id"]);
@@ -100,7 +105,7 @@ class Services_Search_CustomSearchController
 				}
 
 				$filter = 'content'; //default
-				if (isset($config['_filter']) || $name == 'categories' || $name == 'daterange') {
+				if (isset($config['_filter']) || $name == 'categories' || $name == 'daterange' || $name == 'distance') {
 					if ($config['_filter'] == 'language') {
 						$filter = 'language';
 					} elseif ($config['_filter'] == 'type') {
@@ -109,6 +114,12 @@ class Services_Search_CustomSearchController
 						$filter = 'categories';
 					} elseif ($name == 'daterange') {
 						$filter = 'daterange';
+					} elseif ($name == 'distance') {
+						$filter = 'distance';
+						if (! $input->sort_mode->text()) {
+							$config['sort'] = true;
+						}
+
 					}
 				}
 
@@ -125,7 +136,7 @@ class Services_Search_CustomSearchController
 			}
 
 			foreach ($this->textranges as $info) {
-				if (count($info['values']) >= 2) {
+				if (count($info['values']) == 2) {
 					$from = array_shift($info['values']);
 					$to = array_shift($info['values']);
 					$info['query']->filterTextRange($from, $to, $info['config']['_field']);
@@ -133,7 +144,7 @@ class Services_Search_CustomSearchController
 			}
 
 			foreach ($this->dateranges as $info) {
-				if (count($info['values']) >= 2) {
+				if (count($info['values']) == 2) {
 					$from = array_shift($info['values']);
 					$to = array_shift($info['values']);
 					$info['query']->filterRange($from, $to, $info['config']['_field']);
@@ -141,18 +152,41 @@ class Services_Search_CustomSearchController
 			}
 		}
 
+		if ($prefs['storedsearch_enabled'] == 'y' && $queryId = $input->store_query->int()) {
+			// Store prior to adding 
+			$storedsearchlib = TikiLib::lib('storedsearch');
+			$storeResult = $storedsearchlib->storeUserQuery($queryId, $query);
+
+			if (! $storeResult) {
+				throw new Services_Exception('Failed to store the query.', 500);
+			}
+		}
+
 		$unifiedsearchlib = TikiLib::lib('unifiedsearch');
 		$unifiedsearchlib->initQuery($query); // Done after cache because permissions vary
+
+
+		if ($prefs['unified_highlight_results'] === 'y') {
+			$query->applyTransform(
+				new \Search\ResultSet\UrlHighlightTermsTransform(
+					$query->getTerms()
+				)
+			);
+		}
 
 		$facetsBuilder->build($query, $unifiedsearchlib->getFacetProvider());
 
 		$index = $unifiedsearchlib->getIndex();
 		$resultSet = $query->search($index);
 
-		$formatter->setDataSource($unifiedsearchlib->getDataSource());
+		$resultSet->setTsSettings($builder->getTsSettings());
+		$resultSet->setId('wpcs-' . $id);
+		$resultSet->setTsOn($tsret['tsOn']);
+
+		$formatter = $builder->getFormatter();
 		$results = $formatter->format($resultSet);
 
-		$results = TikiLib::lib('tiki')->parse_data($results, array('is_html' => true, 'skipvalidation' => true));
+		$results = TikiLib::lib('parser')->parse_data($results, array('is_html' => true, 'skipvalidation' => true));
 
 		return array('html' => $results);
 	}
@@ -183,6 +217,9 @@ class Services_Search_CustomSearchController
 
 	private function cs_dataappend_content(Search_Query $query, $config, $value)
 	{
+		if ( ( isset($config['_textrange']) || isset($config['_daterange']) ) && ( isset($config['_emptyfrom']) || isset($config['_emptyto']) )  && $value <= '') {
+			$value = isset($config['_emptyfrom']) ? $config['_emptyfrom'] : $config['_emptyto'];
+		}
 		if ($value > '') {
 			if (isset($config['_textrange'])) {
 				$this->cs_handle_textrange($config['_textrange'], $query, $config, $value);
@@ -228,7 +265,25 @@ class Services_Search_CustomSearchController
 			);
 		}
 
-		$this->textranges[$rangeName]['values'][] = $value;
+		if (isset($config['_emptyother']) && isset($config['_emptyfrom'])) {
+			// is "from" value
+			if (count($this->textranges[$rangeName]['values']) == 0) {
+				$this->textranges[$rangeName]['values'][] = $config['_emptyother'];
+			} elseif (count($this->textranges[$rangeName]['values']) == 2) {
+				array_shift($this->textranges[$rangeName]['values']);
+			}
+			array_unshift($this->textranges[$rangeName]['values'], $value);
+		} elseif (isset($config['_emptyother']) && isset($config['_emptyto'])) {
+			// is "to" value
+			if (count($this->textranges[$rangeName]['values']) == 0) {
+				$this->textranges[$rangeName]['values'][] = $config['_emptyother'];
+			} elseif (count($this->textranges[$rangeName]['values']) == 2) {
+				array_pop($this->textranges[$rangeName]['values']);
+			}
+			$this->textranges[$rangeName]['values'][] = $value;
+		} else {
+			$this->textranges[$rangeName]['values'][] = $value;
+		}
 	}
 
 	private function cs_handle_daterange($rangeName, Search_Query $query, $config, $value)
@@ -241,7 +296,25 @@ class Services_Search_CustomSearchController
 			);
 		}
 
-		$this->dateranges[$rangeName]['values'][] = $value;
+		if (isset($config['_emptyother']) && isset($config['_emptyfrom'])) {
+			// is "from" value
+			if (count($this->dateranges[$rangeName]['values']) == 0) {
+				$this->dateranges[$rangeName]['values'][] = $config['_emptyother'];
+			} elseif (count($this->dateranges[$rangeName]['values']) == 2) {
+				array_shift($this->dateranges[$rangeName]['values']);
+			}
+			array_unshift($this->dateranges[$rangeName]['values'], $value);
+		} elseif (isset($config['_emptyother']) && isset($config['_emptyto'])) {
+			// is "to" value
+			if (count($this->dateranges[$rangeName]['values']) == 0) {
+				$this->dateranges[$rangeName]['values'][] = $config['_emptyother'];
+			} elseif (count($this->dateranges[$rangeName]['values']) == 2) {
+				array_pop($this->dateranges[$rangeName]['values']);
+			}
+			$this->dateranges[$rangeName]['values'][] = $value;
+		} else {
+			$this->dateranges[$rangeName]['values'][] = $value;
+		}
 	}
 
 	private function cs_dataappend_categories(Search_Query $query, $config, $value)
@@ -253,7 +326,7 @@ class Services_Search_CustomSearchController
 		} elseif (!isset($config['_style'])) {
 			return;
 		} elseif ($value) {
-			$deep = isset($config['_showdeep']) && $config['_showdeep'] != 'n';
+			$deep = (isset($config['_showdeep']) && $config['_showdeep'] != 'n') || (isset($config['_deep']) && $config['_deep'] != 'n');
 			$query->filterCategory($value, $deep);
 		}
 	}
@@ -270,6 +343,40 @@ class Services_Search_CustomSearchController
 					$field = 'modification_date';
 				}
 				$query->filterRange($from, $to, $field);
+			}
+		}
+	}
+
+	private function cs_dataappend_distance(Search_Query $query, $config, $value)
+	{
+		if ($vals = array_filter(preg_split('/,/', $value))) {	// ignore if dist, lat or lon is missing
+			if (count($vals) == 3) {
+				$distance = $vals[0];
+				$lat = $vals[1];
+				$lon = $vals[2];
+				if (!empty($config['_field'])) {
+					$field = $config['_field'];
+				} else {
+					$field = 'geo_point';
+				}
+				$query->filterDistance($distance, $lat, $lon, $field);
+
+				if (! empty($config['sort']) || ! empty($config['_mode'])) {
+
+					$order = empty($config['_mode']) ? 'asc' : $config['_mode'];
+					$sortOrder = new Search_Query_Order(
+						$field,
+						'distance',
+						$order,
+						[
+							'distance' => $distance,
+							'lat' => $lat,
+							'lon' => $lon,
+						]
+					);
+					$query->setOrder($sortOrder);
+				}
+
 			}
 		}
 	}

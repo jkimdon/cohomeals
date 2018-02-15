@@ -1,32 +1,34 @@
-{* $Id: tiki-search_stats.tpl 47523 2013-09-17 14:39:03Z chibaguy $ *}
+{* $Id: tiki-search_stats.tpl 56906 2015-12-05 12:49:33Z chibaguy $ *}
 
-{title help="SearchStats"}{tr}Search stats{/tr}{/title}
+{title help="SearchStats"}{tr}Search statistics{/tr}{/title}
 
-<div class="navbar">
-	{button href="?clear=1" _text="{tr}Clear Stats{/tr}"}
+<div class="t_navbar">
+	{button href="?clear=1" class="btn btn-default" _text="{tr}Clear Stats{/tr}"}
 </div>
 
 {include file='find.tpl'}
 
-<table class="table normal">
-<tr>
-<!-- term -->
-<th><a href="tiki-search_stats.php?offset={$offset}&amp;sort_mode={if $sort_mode eq 'term_desc'}term_asc{else}term_desc{/if}">{tr}Word{/tr}</a></th>
+<div class="table-responsive">
+	<table class="table">
+		<tr>
+			<!-- term -->
+			<th><a href="tiki-search_stats.php?offset={$offset}&amp;sort_mode={if $sort_mode eq 'term_desc'}term_asc{else}term_desc{/if}">{tr}Word{/tr}</a></th>
 
-<!-- searched -->
-<th>
-<a href="tiki-search_stats.php?offset={$offset}&amp;sort_mode={if $sort_mode eq 'hits_desc'}hits_asc{else}hits_desc{/if}">{tr}Searched{/tr}</a></th>
+			<!-- searched -->
+			<th>
+			<a href="tiki-search_stats.php?offset={$offset}&amp;sort_mode={if $sort_mode eq 'hits_desc'}hits_asc{else}hits_desc{/if}">{tr}Searched{/tr}</a></th>
 
-<!-- How can we increase the number of items displayed on a page? -->
+			<!-- How can we increase the number of items displayed on a page? -->
 
-</tr>
-{cycle values="odd,even" print=false}
-{section name=user loop=$channels}
-  <tr class="{cycle}">
-    <td class="text">{$channels[user].term}</td>
-    <td class="integer">{$channels[user].hits}</td>
-  </tr>
-{/section}
-</table>
+		</tr>
+
+		{section name=user loop=$channels}
+			<tr>
+				<td class="text">{$channels[user].term}</td>
+				<td class="integer">{$channels[user].hits}</td>
+			</tr>
+		{/section}
+	</table>
+</div>
 
 {pagination_links cant=$cant_pages step=$prefs.maxRecords offset=$offset}{/pagination_links}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: messulib.php 52442 2014-09-01 20:25:08Z nkoth $
+// $Id: messulib.php 62577 2017-05-14 00:10:58Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -19,7 +19,9 @@ class Messu extends TikiLib
 	 */
 	function save_sent_message($user, $from, $to, $cc, $subject, $body, $priority, $replyto_hash = '')
 	{
-		global $smarty, $userlib, $prefs;
+		global $prefs;
+		$userlib = TikiLib::lib('user');
+		$smarty = TikiLib::lib('smarty');
 
 		$subject = strip_tags($subject);
 		$body = strip_tags($body, '<a><b><img><i>');
@@ -77,7 +79,9 @@ class Messu extends TikiLib
 	 */
 	function post_message($user, $from, $to, $cc, $subject, $body, $priority, $replyto_hash = '', $replyto_email = '', $bcc_sender = '')
 	{
-		global $smarty, $userlib, $prefs;
+		global $prefs;
+		$userlib = TikiLib::lib('user');
+		$smarty = TikiLib::lib('smarty');
 
 		$subject = strip_tags($subject);
 		$body = strip_tags($body, '<a><b><img><i>');
@@ -122,6 +126,13 @@ class Messu extends TikiLib
 		$machine = $this->httpPrefix(true) . $foo['path'];
 		$machine = str_replace('messu-compose', 'messu-mailbox', $machine);
 		$machine = str_replace('messu-broadcast', 'messu-mailbox', $machine);
+		// For non-sefurl calls, replace tiki-ajax_services with messu-mailbox if
+		// service called is user > send_message
+		if ($foo['query'] == "controller=user&action=send_message") {
+			$machine = str_replace('tiki-ajax_services', 'messu-mailbox', $machine);
+		}
+		//For sefurl service call user > send_message, redirect to messu-mailbox.php
+		$machine = str_replace('tiki-user-send_message', 'messu-mailbox.php', $machine);
 
 		if ($this->get_user_preference($user, 'minPrio', 6) <= $priority) {
 			if (!isset($_SERVER['SERVER_NAME'])) {
@@ -180,8 +191,8 @@ class Messu extends TikiLib
 						return false; //TODO echo $mail->errors;
 					}
 
-				} catch (Zend_Mail_Exception $e) {
-					TikiLib::lib('errorreport')->report($e->getMessage());
+				} catch (Zend\Mail\Exception\ExceptionInterface $e) {
+					Feedback::error($e->getMessage(), 'session');
 					return false;
 				}
 			}
@@ -255,13 +266,21 @@ class Messu extends TikiLib
 	 * Get the number of messages in the users mailbox or mail archive (from
 	 * which depends on $dbsource)
 	 */
-	function count_messages($user, $dbsource = 'messages')
+	function count_messages($user, $dbsource = 'messages', $unreadOnly=false, $newSince=0)
 	{
-		if ($dbsource == '')
+		if ($dbsource == '') {
 			$dbsource = 'messages';
+		}
 
 		$bindvars = array($user);
 		$query_cant = 'select count(*) from `messu_' . $dbsource . '` where `user`=?';
+		if ($unreadOnly == true) {
+			$query_cant .= ' and `isRead`="n"';
+		}
+		if (!empty($newSince)) {
+			$query_cant .= ' and `date` >= ?';
+			$bindvars[] = $newSince;
+		}
 		$cant = $this->getOne($query_cant, $bindvars);
 		return $cant;
 	}
@@ -446,7 +465,7 @@ class Messu extends TikiLib
 		$query = 'select * from `messu_' . $dbsource . '` where `user`=? and `msgId`=?';
 		$result = $this->query($query, $bindvars);
 		$res = $result->fetchRow();
-		$res['parsed'] = $this->parse_data($res['body']);
+		$res['parsed'] = TikiLib::lib('parser')->parse_data($res['body']);
 		$res['len'] = strlen($res['parsed']);
 
 		if (empty($res['subject']))
@@ -464,7 +483,7 @@ class Messu extends TikiLib
 		if ($dbsource == '')
 			$dbsource = 'messages';
 
-		$bindvars[] = array($user);
+		$bindvars[] = $user;
 
 		$mid = '';
 
@@ -493,8 +512,10 @@ class Messu extends TikiLib
 		$query = 'select * from `messu_' . $dbsource . "` where `user`=? $mid";
 
 		$result = $this->query($query, $bindvars);
+		$ret = [];
+
 		while ($res = $result->fetchRow()) {
-			$res['parsed'] = $this->parse_data($res['body']);
+			$res['parsed'] = TikiLib::lib('parser')->parse_data($res['body']);
 			$res['len'] = strlen($res['parsed']);
 			if (empty($res['subject']))
 				$res['subject'] = tra('NONE');
@@ -504,4 +525,3 @@ class Messu extends TikiLib
 	}
 
 }
-$messulib = new Messu;

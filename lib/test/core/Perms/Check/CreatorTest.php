@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CreatorTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: CreatorTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
 
 /**
  * @group unit
@@ -14,7 +14,7 @@ class Perms_Check_CreatorTest extends TikiTestCase
 {
 	function testNoActionTakenWhenNoCreator()
 	{
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->never())
 			->method('check');
 
@@ -24,7 +24,7 @@ class Perms_Check_CreatorTest extends TikiTestCase
 
 	function testNoActionTakenWhenWrongCreator()
 	{
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->never())
 			->method('check');
 
@@ -34,7 +34,7 @@ class Perms_Check_CreatorTest extends TikiTestCase
 
 	function testCallForwarded()
 	{
-		$mock = $this->getMock('Perms_Resolver');
+		$mock = $this->createMock('Perms_Resolver');
 		$mock->expects($this->once())
 			->method('check')
 			->with($this->equalTo('view_own'), $this->equalTo(array('Registered')))

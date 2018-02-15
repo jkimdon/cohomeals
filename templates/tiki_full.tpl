@@ -1,4 +1,4 @@
-{* $Id: tiki_full.tpl 44972 2013-02-25 16:13:14Z luciash $ *}<!DOCTYPE html>
+{* $Id: tiki_full.tpl 53176 2014-11-21 23:12:16Z jyhem $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 	<head>
 {include file='header.tpl'}
@@ -16,19 +16,13 @@
 	<div id="tiki-center">
 		<div id="role_main">
 			{$mid_data}
-			{show_help}
 		</div>
 	</div>
 </div>
-			
+
 {if $prefs.feature_bidi eq 'y'}
 </div>
 {/if}
 {include file='footer.tpl'}
-<!-- Put JS at the end -->
-{if $headerlib}
-	{$headerlib->output_js_files()}
-	{$headerlib->output_js()}
-{/if}
 	</body>
 </html>

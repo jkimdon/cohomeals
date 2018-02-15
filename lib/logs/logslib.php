@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: logslib.php 52332 2014-08-14 17:32:35Z jyhem $
+// $Id: logslib.php 58691 2016-05-25 09:19:14Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -129,7 +129,7 @@ class LogsLib extends TikiLib
 		}
 
 		if ($logCateg) {
-			global $categlib; include_once('lib/categories/categlib.php');
+			$categlib = TikiLib::lib('categ');
 			if ($objectType == 'comment') {
 				preg_match('/type=([^&]*)/', $param, $matches);
 				$categs = $categlib->get_object_categories($matches[1], $object);
@@ -152,7 +152,10 @@ class LogsLib extends TikiLib
 			$logObject = $this->action_must_be_logged($action, $objectType);
 		}
 
-		$logCateg = $prefs['feature_categories'] == 'y'? $this->action_must_be_logged('*', 'category'): false;
+        $logCateg = false;
+        if (isset($prefs['feature_categories']))
+            $logCateg = $prefs['feature_categories'] == 'y'? $this->action_must_be_logged('*', 'category'): false;
+
 		if (!$logObject && !$logCateg) {
 			return 0;
 		}
@@ -185,7 +188,7 @@ class LogsLib extends TikiLib
 		}
 
 		if ($logCateg) {
-			global $categlib; include_once('lib/categories/categlib.php');
+			$categlib = TikiLib::lib('categ');
 			if ($objectType == 'comment') {
 				preg_match('/type=([^&]*)/', $param, $matches);
 				$categs = $categlib->get_object_categories($matches[1], $object);
@@ -270,9 +273,11 @@ class LogsLib extends TikiLib
 
 		// for previous compatibility
 		// the new action are added with a if ($feature..)
-		if ($prefs['feature_actionlog'] != 'y') {
-			return true;
-		}
+        if (isset($prefs['feature_actionlog']))
+            if ($prefs['feature_actionlog'] != 'y') {
+                return true;
+        }
+
 
 		if ( !isset($is_viewed) ) {
 			$logActions = $this->get_all_actionlog_conf();
@@ -384,8 +389,9 @@ class LogsLib extends TikiLib
 			, $end=0, $categId='', $all=false
 			)
 	{
-		global $prefs, $section, $tikilib, $contributionlib;
-		include_once('lib/contribution/contributionlib.php');
+		global $prefs, $section;
+		$tikilib = TikiLib::lib('tiki');
+		$contributionlib = TikiLib::lib('contribution');
 
 		$bindvars = array();
 		$bindvarsU = array();
@@ -502,7 +508,7 @@ class LogsLib extends TikiLib
 			}
 
 			if ($res['objectType'] == 'comment' && empty($res['categId'])) {
-				global $categlib; include_once('lib/categories/categlib.php');
+				$categlib = TikiLib::lib('categ');
 				preg_match('/type=([^&]*)/', $res['comment'], $matches);
 				$categs = $categlib->get_object_categories($matches[1], $res['object']);
 				$i = 0;
@@ -621,7 +627,7 @@ class LogsLib extends TikiLib
 	{
 		if (preg_match('/comments_parentId=([0-9\-+]+)/', $action['comment'], $matches)) {
 			return $matches[1];
-		} elseif (preg_match('/#threadId([0-9\-+]+)/', $action['comment'], $matches)) {
+		} elseif (preg_match('/#threadId=?([0-9\-+]+)/', $action['comment'], $matches)) {
 			return $matches[1];
 		} elseif (preg_match('/sheetId=([0-9]+)/', $action['comment'], $matches)) {
 			return $matches[1];
@@ -684,7 +690,7 @@ class LogsLib extends TikiLib
 
 	function get_stat_contributions_per_group($actions, $selectedGroups)
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 		$statGroups = array();
 		foreach ($actions as $action) {
 			if (!empty($previousAction) &&
@@ -1463,7 +1469,7 @@ class LogsLib extends TikiLib
 	function insert_image($galleryId, $graph, $ext, $title, $period)
 	{
 		global $prefs, $user;
-		global $imagegallib; include_once('lib/imagegals/imagegallib.php');
+		$imagegallib = TikiLib::lib('imagegal');
 
 		$filename = $prefs['tmpDir'] . '/' . md5(rand() . time()) . '.' . $ext;
 		$graph->Stroke($filename);
@@ -1520,10 +1526,10 @@ class LogsLib extends TikiLib
 					break;
 
 				case 'article':
-					global $artlib; require_once 'lib/articles/artlib.php';
 					$action['link'] = 'tiki-read_article.php?articleId='.$action['object'];
 
 					if (!isset($articleNames)) {
+						$artlib = TikiLib::lib('art');
 						$objects = $artlib->list_articles(0, -1, 'title_asc', '', 0, 0, '');
 						$articleNames = array();
 						foreach ($objects['data'] as $object) {
@@ -1569,7 +1575,7 @@ class LogsLib extends TikiLib
 					}
 
 					if (!isset($imageGalleryNames)) {
-						global $imagegallib; include_once('lib/imagegals/imagegallib.php');
+						$imagegallib = TikiLib::lib('imagegal');
 						$objects = $imagegallib->list_galleries(0, -1, 'name_asc', 'admin');
 						foreach ($objects['data'] as $object) {
 							$imageGalleryNames[$object['galleryId']] = $object['name'];
@@ -1589,10 +1595,10 @@ class LogsLib extends TikiLib
 					}
 
 					if (!isset($fileGalleryNames)) {
-						global $filegallib; include_once('lib/filegals/filegallib.php');
+						$filegallib = TikiLib::lib('filegal');
 						$objects = $filegallib->list_file_galleries(0, -1, 'name_asc', 'admin', '', $prefs['fgal_root_id']);
 						foreach ($objects['data'] as $object) {
-							$fileGalleryNames[$object['galleryId']] = $object['name'];
+							$fileGalleryNames[$object['id']] = $object['name'];
 						}
 					}
 
@@ -1626,7 +1632,7 @@ class LogsLib extends TikiLib
 
 				case 'sheet':
 					if (!isset($sheetNames)) {
-						global $sheetlib; include_once('lib/sheet/grid.php');
+						$sheetlib = TikiLib::lib('sheet');
 						$objects = $sheetlib->list_sheets();
 						foreach ($objects['data'] as $object) {
 							$sheetNames[$object['sheetId']] = $object['title'];
@@ -1643,7 +1649,7 @@ class LogsLib extends TikiLib
 				case 'blog':
 
 					if (!isset($blogNames)) {
-						global $bloglib; require_once('lib/blogs/bloglib.php');
+						$bloglib = TikiLib::lib('blog');
 						$objects = $bloglib->list_blogs();
 						foreach ($objects['data'] as $object) {
 							$blogNames[$object['blogId']] = $object['title'];
@@ -1811,4 +1817,3 @@ class LogsLib extends TikiLib
 	}
 }
 
-$logslib = new LogsLib;

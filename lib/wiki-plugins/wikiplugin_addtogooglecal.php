@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_addtogooglecal.php 46007 2013-05-20 18:34:12Z lphuberdeau $
+// $Id: wikiplugin_addtogooglecal.php 57962 2016-03-17 20:02:39Z jonnybradley $
 
 function wikiplugin_addtogooglecal_info()
 {
@@ -13,7 +13,7 @@ function wikiplugin_addtogooglecal_info()
 		'description' => tra('Add a calendar item to a Google calendar'),
 		'prefs' => array('wikiplugin_addtogooglecal'),
 		'introduced' => 6,
-		'icon' => 'img/icons/calendar_add.png',
+		'iconname' => 'calendar',
 		'format' => 'html',
 		'params' => array(
 			'calitemid' => array(
@@ -47,11 +47,9 @@ function wikiplugin_addtogooglecal_info()
 
 function wikiplugin_addtogooglecal($data, $params)
 {
-	global $access, $calendarlib;
+	$access = TikiLib::lib('access');
 	$access->check_feature('feature_calendar');
-	if (!is_object($calendarlib)) {
-		include ('lib/calendar/calendarlib.php');
-	}
+	$calendarlib = TikiLib::lib('calendar');
 	
 	$cal_item_id = $params['calitemid'];
 	$cal_id = $calendarlib->get_calendarid($cal_item_id);

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: installlib.php 48421 2013-11-13 16:45:16Z lphuberdeau $
+// $Id: installlib.php 63145 2017-07-02 16:56:16Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -94,10 +94,25 @@ class Installer extends TikiDb_Bridge
 		}
 
 		$TWV = new TWVersion;
-		$dbversion_tiki = $TWV->getBaseVersion();
+		$dbversion_tiki = $TWV->version;
 
+		// If a Mysql data file exists, use that. Very fast
+		//	If data file is missing or the batch loader is not available, use the single insert method
 		$secdb = dirname(__FILE__) . '/../db/tiki-secdb_' . $dbversion_tiki . '_mysql.sql';
-		if ( file_exists($secdb) ) {
+		$secdbData = dirname(__FILE__) . '/../db/tiki-secdb_' . $dbversion_tiki . '_mysql.data';
+		if ( file_exists($secdbData) ) {
+			// A MySQL datafile exists
+			$truncateTable = true;
+			$rc = $this->runDataFile($secdbData, 'tiki_secdb', $truncateTable);
+			if ($rc == false) {
+				// The batch loader failed
+				if ( file_exists($secdb) ) {
+					// Run single inserts
+					$this->runFile($secdb);
+				}
+			}
+		} else if ( file_exists($secdb) ) {
+			// Run single inserts
 			$this->runFile($secdb);
 		}
 		
@@ -206,7 +221,37 @@ class Installer extends TikiDb_Bridge
 		$tx->commit();
 	}
 
-    /**
+	/**
+	 * Batch insert from a mysql data file
+	 *
+	 * @param $file				MySQL export file
+	 * @param $targetTable		Target table
+	 * @param $clearTable=true	Flag saying if the target table should be truncated or not
+	 * @return bool
+	 */
+	function runDataFile( $file, $targetTable, $clearTable=true ) // {{{
+	{
+		if ( !is_file($file) || !$command = file_get_contents($file) ) {
+			print('Fatal: Cannot open '.$file);
+			exit(1);
+		}
+
+		if ($clearTable == true) {
+			$statement = 'truncate table '.$targetTable;
+			$this->query($statement);
+		}
+
+		// LOAD DATA INFILE doesn't like single \ directory separators. Replace with \\
+		$inFile = str_replace('\\', '\\\\', $file);
+
+		$status = true;
+		$statement = 'LOAD DATA INFILE "'.$inFile.'" INTO TABLE '.$targetTable;
+		if ($this->query($statement) === false) {
+			$status = false;
+		}
+		return $status;
+	}
+		/**
      * @param $file
      * @return bool
      */
@@ -273,11 +318,12 @@ class Installer extends TikiDb_Bridge
 		}
 
 		$files = glob(dirname(__FILE__) . '/schema/*_*.yml');
-		foreach ( $files as $file ) {
-			$filename = basename($file);
-			$this->patches[] = substr($filename, 0, -4);
+		if($files != false){
+			foreach ( $files as $file ) {
+				$filename = basename($file);
+				$this->patches[] = substr($filename, 0, -4);
+			}
 		}
-
 		// Add standalone PHP scripts
 		$files = glob(dirname(__FILE__) . '/schema/*_*.php');
 		foreach ( $files as $file ) {
@@ -340,7 +386,15 @@ class Installer extends TikiDb_Bridge
 	{
 		return count($this->patches) > 0 ;
 	} // }}}
+ function checkInstallerLocked() // {{{
+	{
+		$iniFile = __DIR__ . '/../db/lock';
 
+		
+		if (!is_readable($iniFile)) {
+			return 1;
+		}
+	}
 	private function getBaseImage() // {{{
 	{
 		$iniFile = __DIR__ . '/../db/install.ini';
@@ -400,5 +454,22 @@ class Installer extends TikiDb_Bridge
 			}
 		}
 	} // }}}
-	
+
+	/**
+	 * @param string $prefName
+	 * @param string $oldDefault
+	 */
+	function preservePreferenceDefault($prefName, $oldDefault) {
+
+		if ($this->tableExists('tiki_preferences')) {
+
+			$tiki_preferences = $this->table('tiki_preferences');
+			$hasValue = $tiki_preferences->fetchCount(['name' => $prefName]);
+
+			if (empty($hasValue)) {	// old value not in database so was on default value
+				$tiki_preferences->insert(['name' => $prefName, 'value' => $oldDefault]);
+			}
+		}
+
+	}
 }

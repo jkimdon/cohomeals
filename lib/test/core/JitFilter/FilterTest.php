@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FilterTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: FilterTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 /**
  * @group unit
@@ -26,7 +26,7 @@ class JitFilter_FilterTest extends TikiTestCase
 		);
 
 		$this->array = new JitFilter($this->array);
-		$this->array->setDefaultFilter(new Zend_Filter_Alnum);
+		$this->array->setDefaultFilter(new Zend\I18n\Filter\Alnum);
 	}
 
 	function tearDown()
@@ -49,7 +49,7 @@ class JitFilter_FilterTest extends TikiTestCase
 	{
 		$this->assertEquals('bar123', $this->array['foo']);
 
-		$this->array->replaceFilter('foo', new Zend_Filter_Digits);
+		$this->array->replaceFilter('foo', new Zend\Filter\Digits);
 		$this->assertEquals('123', $this->array['foo']);
 	}
 
@@ -57,9 +57,9 @@ class JitFilter_FilterTest extends TikiTestCase
 	{
 		$this->array->replaceFilters(
 			array(
-				'foo' => new Zend_Filter_Digits,
-				'content' => new Zend_Filter_StripTags,
-				'baz' => array(1 => new Zend_Filter_StringToUpper,),
+				'foo' => new Zend\Filter\Digits,
+				'content' => new Zend\Filter\StripTags,
+				'baz' => array(1 => new Zend\Filter\StringToUpper,),
 			)
 		);
 
@@ -72,9 +72,9 @@ class JitFilter_FilterTest extends TikiTestCase
 	{
 		$this->array->replaceFilters(
 			array(
-				'foo' => new Zend_Filter_Digits,
-				'content' => new Zend_Filter_StripTags,
-				'baz' => new Zend_Filter_StringToUpper,
+				'foo' => new Zend\Filter\Digits,
+				'content' => new Zend\Filter\StripTags,
+				'baz' => new Zend\Filter\StringToUpper,
 			)
 		);
 
@@ -82,11 +82,11 @@ class JitFilter_FilterTest extends TikiTestCase
 		$this->assertEquals('10  5 ', $this->array['content']);
 		$this->assertEquals('WORLD !', $this->array['baz'][1]);
 
-		$this->array->replaceFilter('baz', new Zend_Filter_Alpha);
+		$this->array->replaceFilter('baz', new Zend\I18n\Filter\Alpha);
 		$this->assertEquals('world', $this->array['baz'][1]);
 
 		$this->array->replaceFilters(
-			array('baz' => array(1 => new Zend_Filter_Digits,),)
+			array('baz' => array(1 => new Zend\Filter\Digits,),)
 		);
 
 		$this->assertEquals('hello', $this->array['baz'][0]);

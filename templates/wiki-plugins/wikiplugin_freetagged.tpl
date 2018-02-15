@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_freetagged.tpl 42442 2012-07-23 08:52:22Z chibaguy $ *}
+{* $Id: wikiplugin_freetagged.tpl 54321 2015-03-10 18:35:07Z jyhem $ *}
 
 {if isset($objects) && count($objects) gt 0}
 <ul class="freetagged clearfix">
@@ -9,10 +9,13 @@
 				<em>{$row.description}</em>
 				{$row.img}
 			</p>{/if}
-			{if !empty($row.date)}<footer class="editdate">
+			{if !empty($row.date)}<footer class="help-block editdate">
 				{$row.date|tiki_short_datetime}
 			</footer>{/if}
 		</li>
 	{/foreach}
 </ul>
+{if isset($more) && $more eq 'y'}
+	<a class="freetagged" href="{$moreurl}">{tr}{$moretext|escape}{/tr}…</a>
+{/if}
 {/if}

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.listfilter.php 46962 2013-08-02 17:37:24Z lphuberdeau $
+// $Id: function.listfilter.php 57964 2016-03-17 20:04:05Z jonnybradley $
 
 // this script may only be included - so it's better to die if called directly
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -38,7 +38,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 
 function smarty_function_listfilter($params, $smarty)
 {
-	global $headerlib, $prefs, $listfilter_id;
+	global $prefs, $listfilter_id;
+	$headerlib = TikiLib::lib('header');
+
 	if ($prefs['feature_jquery'] != 'y' || $prefs['javascript_enabled'] != 'y') {
 		return '';
 	} else {
@@ -46,14 +48,14 @@ function smarty_function_listfilter($params, $smarty)
 		$childPrefix = isset($childPrefix) ? $childPrefix : 'child-of-';
 		$exclude = isset($exclude) ? $exclude : '';
 
-		$input = "<label>";
+		$input = ' <div class="form-horizontal"><div class="form-group"><label class="col-sm-2 control-label">';
 
 		if (!isset($prefix)) {
 			$input .= tra("Filter:");
 		} else {
 			$input .= tra($prefix);
 		}
-		$input .= "&nbsp;<input type='text'";
+		$input .= '</label><div class="col-sm-5"><input type="text" class="form-control listfilter"';
 		if (!isset($id)) {
 			if (isset($listfilter_id)) {
 				$listfilter_id++;
@@ -103,31 +105,29 @@ function smarty_function_listfilter($params, $smarty)
 			);
 		}
 
-		$input .= " class='listfilter' />";
-		$input .= "<img src='img/icons/close.png' onclick=\"\$('#$id').val('').focus().keyup();return false;\" class='closeicon' width='16' height='16' style='visibility:hidden;position:relative;right:20px;top:6px;'/>";
-		$input .= "</label>";
+		$input .= "></div><div class='col-sm-5'>";
+		$smartylib = TikiLib::lib('smarty');
+		$smartylib->loadPlugin('smarty_function_icon');
+		$icon = smarty_function_icon(['name' => 'delete'], $smarty);
+		$input .= "<a href='#' onclick=\"\$('#$id').val('').focus().keyup();return false;\" class='closeicon tips' title=':"
+				. tr('Clear fiilter') . "'>$icon</a>";
+		$input .= '</div></div></div>';
 
 		if (!isset($selectors)) $selectors = ".$id table tr";
 
 		$content = "
-\$('#$id').keyup( function() {
+$('#$id').keyup( function() {
 	var criterias = this.value.toLowerCase().split( /\s+/ );
-
-	if (this.value.length) {
-		$(this).next('img.closeicon').css('visibility', '');
-	} else {
-		$(this).next('img.closeicon').css('visibility', 'hidden');
-	}
-	\$('$selectors').each( function() {
-		var text = \$(this).text().toLowerCase();
+	$('$selectors').each( function() {
+		var text = $(this).text().toLowerCase();
 		for( i = 0; criterias.length > i; ++i ) {
 			word = criterias[i];
 			if ( word.length > 0 && text.indexOf( word ) == -1 ) {
-				\$(this).not('$exclude').hide();	// don't search within excluded elements
+				$(this).not('$exclude').hide();	// don't search within excluded elements
 				return;
 			}
 		}
-		\$(this).show();
+		$(this).show();
 	} );
 ";
 		if (!empty($parentSelector)) {

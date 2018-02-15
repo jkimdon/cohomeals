@@ -1,13 +1,14 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.preference.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: function.preference.php 61753 2017-03-19 02:53:09Z lindonb $
 
 function smarty_function_preference( $params, $smarty )
 {
-	global $prefslib, $prefs, $user_overrider_prefs; require_once 'lib/prefslib.php';
+	global $prefs, $user_overrider_prefs;
+	$prefslib = TikiLib::lib('prefs');
 	if ( ! isset( $params['name'] ) ) {
 		return 'Preference name not specified.';
 	}
@@ -38,13 +39,10 @@ function smarty_function_preference( $params, $smarty )
 
 		if ($get_pages) {
 			if (count($info['pages']) > 0) {
-			$pages_string = tra(' (found in ');
 			foreach ($info['pages'] as $pg) {
 				$ct_string = $pg[1] > 1 ? '&amp;cookietab=' . $pg[1] : '';
-				$pages_string .= '<a class="lm_result" href="tiki-admin.php?page=' . $pg[0] . $ct_string . '&amp;highlight=' . $info['preference'] . '">' . $pg[0] . '</a>, ';
+				$pages_string = '<a class="lm_result label label-default" href="tiki-admin.php?page=' . $pg[0] . $ct_string . '&amp;highlight=' . $info['preference'] . '">' . $pg[0] . '</a> ';
 			}
-			$pages_string = substr($pages_string, 0, strlen($pages_string) - 2);
-			$pages_string .= ')';
 			} else {
 				$pages_string = tra('(not found in an admin panel)');
 			}
@@ -62,8 +60,9 @@ function smarty_function_preference( $params, $smarty )
 
 		$smarty->assign('p', $info);
 
-		if ( isset($params['mode']) && $params['mode'] == 'invert' ) {
-			$smarty->assign('mode', 'invert');
+
+		if ( isset($params['mode']) && in_array($params['mode'], ['invert', 'notempty']) ) {
+			$smarty->assign('mode', $params['mode']);
 		} else {
 			$smarty->assign('mode', 'normal');
 		}
@@ -77,7 +76,11 @@ function smarty_function_preference( $params, $smarty )
 			$smarty->assign('syntax', $params['syntax']);
 		}
 
-		return $smarty->fetch('prefs/' . $info['type'] . '.tpl', $params['name']);
+        if (file_exists('templates/prefs/' . $info['type'] . '.tpl')) {
+		    return $smarty->fetch('prefs/' . $info['type'] . '.tpl', $params['name']);
+        } else {
+            return $smarty->fetch('prefs/text.tpl');
+        }
 	} else {
 		$info = array(
 			'value' => tra('Error'),
@@ -88,7 +91,7 @@ function smarty_function_preference( $params, $smarty )
 			'separator' => null,
 		);
 		if (strpos($_SERVER["SCRIPT_NAME"], 'tiki-edit_perspective.php') !== false) {
-			$info['hint'] = tra('Drag this out of the perspective and resave it.');
+			$info['hint'] = tra('Drag this out of the perspective and resave the perspective.');
 		}
 
 		$smarty->assign('p', $info);

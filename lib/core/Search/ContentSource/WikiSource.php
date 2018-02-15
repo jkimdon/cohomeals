@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiSource.php 45925 2013-05-13 16:47:35Z lphuberdeau $
+// $Id: WikiSource.php 59702 2016-09-14 17:31:12Z jonnybradley $
 
 class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 {
@@ -36,6 +36,7 @@ class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 	function getDocument($objectId, Search_Type_Factory_Interface $typeFactory)
 	{
 		$wikilib = TikiLib::lib('wiki');
+		$tikilib = TikiLib::lib('tiki');
 
 		$info = $this->tikilib->get_page_info($objectId, true, true);
 
@@ -48,14 +49,21 @@ class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 			$contributors[] = $info['user'];
 		}
 
+		if ($info['is_html']) {
+			// is_html flag does not get to the type handler, leaving HTML visible in the text provided
+			$info['data'] = $tikilib->strip_tags($info['data']);
+		}
+
 		$data = array(
 			'title' => $typeFactory->sortable($info['pageName']),
 			'language' => $typeFactory->identifier(empty($info['lang']) ? 'unknown' : $info['lang']),
+			'creation_date' => $typeFactory->timestamp($info['created']),
 			'modification_date' => $typeFactory->timestamp($info['lastModif']),
 			'description' => $typeFactory->plaintext($info['description']),
 			'contributors' => $typeFactory->multivalue($contributors),
 
 			'wiki_content' => $typeFactory->wikitext($info['data']),
+			'wiki_keywords' => $typeFactory->plaintext($info['keywords']),
 
 			'view_permission' => $typeFactory->identifier('tiki_p_view'),
 			'url' => $typeFactory->identifier($wikilib->sefurl($info['pageName'])),
@@ -88,6 +96,8 @@ class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 						'view_permission' => $typeFactory->identifier('tiki_p_wiki_view_latest'),
 						'wiki_approval_state' => $typeFactory->identifier('pending'),
 						'url' => $typeFactory->identifier(str_replace('&amp;', '&', $wikilib->sefurl($info['pageName'], true)) . 'latest'),
+						'approved_version' => $typeFactory->numeric((int) $versionInfo['version']),
+						'approved_user' => $typeFactory->identifier($versionInfo['user']),
 					)
 				);
 			}
@@ -113,21 +123,28 @@ class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 	{
 		$fields = array(
 			'title',
-			'hash',
-			'url',
 			'language',
+			'creation_date',
 			'modification_date',
 			'description',
 			'contributors',
 
 			'wiki_content',
-			'wiki_approval_state',
+			'wiki_keywords',
 
 			'view_permission',
+			'hash',
+			'url',
 		);
 
 		if ($this->quantifylib) {
 			$fields[] = 'wiki_uptodateness';
+		}
+
+		if ($this->flaggedrevisionlib) {
+			$fields[] = 'wiki_approval_state';
+			$fields[] = 'approved_version';
+			$fields[] = 'approved_user';
 		}
 
 		return $fields;
@@ -140,6 +157,7 @@ class Search_ContentSource_WikiSource implements Search_ContentSource_Interface
 			'description' => true,
 
 			'wiki_content' => false,
+			'wiki_keywords' => true,
 		);
 	}
 }

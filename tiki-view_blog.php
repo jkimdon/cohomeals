@@ -2,29 +2,26 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_blog.php 51157 2014-05-05 21:35:19Z jyhem $
+// $Id: tiki-view_blog.php 58824 2016-06-07 22:25:14Z rjsmelo $
 
 $section = 'blogs';
 require_once ('tiki-setup.php');
-include_once ('lib/blogs/bloglib.php');
+$bloglib = TikiLib::lib('blog');
 
 $auto_query_args = array(
 	'blogId'
 );
 
 if ($prefs['feature_freetags'] == 'y') {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 }
 
 if ($prefs['feature_categories'] == 'y') {
-	global $categlib;
-	if (!is_object($categlib)) {
-		include_once ('lib/categories/categlib.php');
-	}
+	$categlib = TikiLib::lib('categ');
 }
 
 $access->check_feature('feature_blogs');

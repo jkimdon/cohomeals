@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ConditionsController.php 49604 2014-01-28 17:55:07Z lphuberdeau $
+// $Id: ConditionsController.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 class Services_User_ConditionsController
 {
@@ -73,8 +73,7 @@ class Services_User_ConditionsController
 
 		$pdata = new Tiki_Render_Lazy(
 			function () use ($content, $parse_options) {
-				$wikilib = TikiLib::lib('wiki');
-				return $wikilib->parse_data($content, $parse_options);
+				return TikiLib::lib('parser')->parse_data($content, $parse_options);
 			}
 		);
 
@@ -91,8 +90,10 @@ class Services_User_ConditionsController
 					$this->approveVersion($hash);
 					TikiLib::lib('access')->redirect($origin);
 				} else {
-					TikiLib::lib('errorreport')->report(tr('The terms and conditions were modified while you were reading them.'));
+					Feedback::error(tr('The terms and conditions were modified while you were reading them.'), 'session');
 				}
+			} else {
+				Feedback::error(tr('You are required to approve the terms of use to continue.'), 'session');
 			}
 		}
 
@@ -120,7 +121,7 @@ class Services_User_ConditionsController
 				$this->setBirthDate($user, $inputBirthDate);
 				TikiLib::lib('access')->redirect($origin);
 			} else {
-				TikiLib::lib('errorreport')->report(tr('You are required enter your birth date to continue.'));
+				Feedback::error(tr('You must enter your date of birth to continue.'), 'session');
 			}
 		}
 

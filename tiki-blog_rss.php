@@ -2,16 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-blog_rss.php 45939 2013-05-14 23:08:29Z jyhem $
+// $Id: tiki-blog_rss.php 62028 2017-04-02 14:52:01Z jonnybradley $
 
 require_once ('tiki-setup.php');
-require_once ('lib/tikilib.php');
-require_once ('lib/blogs/bloglib.php');
-require_once ('lib/rss/rsslib.php');
+$bloglib = TikiLib::lib('blog');
+$rsslib = TikiLib::lib('rss');
 
 if ($prefs['feed_blogs'] != 'y' && $prefs['feed_blog'] != 'y') {
 	$errmsg = tra('rss feed disabled');
@@ -51,7 +50,7 @@ if ($output['data'] == 'EMPTY') {
 	$tmp = array();
 	include_once ('tiki-sefurl.php');
 	foreach ($changes['data'] as $data) {
-		$data['data'] = $tikilib->parse_data(
+		$data['data'] = TikiLib::lib('parser')->parse_data(
 			$data['data'],
 			array(
 				'print' => true,

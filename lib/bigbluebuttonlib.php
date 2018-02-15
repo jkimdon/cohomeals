@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: bigbluebuttonlib.php 49043 2013-12-10 10:27:50Z nkoth $
+// $Id: bigbluebuttonlib.php 60943 2017-01-20 00:12:26Z drsassafras $
 
 /**
  *
@@ -42,7 +42,7 @@ class BigBlueButtonLib
      */
     public function getMeetings()
 	{
-		global $cachelib;
+		$cachelib = TikiLib::lib('cache');
 
 		if ( ! $meetings = $cachelib->getSerialized('bbb_meetinglist') ) {
 			$meetings = array();
@@ -122,8 +122,9 @@ class BigBlueButtonLib
      */
     public function createRoom( $room, array $params = array() )
 	{
-		global $tikilib, $cachelib, $prefs;
-
+		global $prefs;
+		$cachelib = TikiLib::lib('cache');
+		$tikilib = TikiLib::lib('tiki');
 		$params = array_merge(
 			array('logout' => $tikilib->tikiUrl(''),),
 			$params
@@ -146,7 +147,7 @@ class BigBlueButtonLib
 		if ( isset($params['voicebridge']) ) {
 			$request['voiceBridge'] = $params['voicebridge'];
 		} else {
-			$request['voiceBridge'] = '7' . rand(0, 9999);
+			$request['voiceBridge'] = '7' . mt_rand(0, 9999);
 		}
 
 		if ( isset($params['logout']) ) {
@@ -198,7 +199,8 @@ class BigBlueButtonLib
 			)
 		);
 
-		$response = $client->request('POST');
+		$client->getRequest()->setMethod(Zend\Http\Request::METHOD_POST);
+		$response = $client->send();
 		$document = $response->getBody();
 
 		$dom = new DOMDocument;
@@ -470,7 +472,4 @@ class BigBlueButtonLib
 		return ($a['startTime'] > $b['startTime']) ? -1 : 1;
 	}
 }
-
-global $bigbluebuttonlib;
-$bigbluebuttonlib = new BigBlueButtonLib;
 

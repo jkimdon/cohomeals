@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: perspectivelib.php 53794 2015-02-05 17:23:56Z jonnybradley $
+// $Id: perspectivelib.php 59610 2016-09-07 07:08:42Z kroky6 $
 
 /**
  * PerspectiveLib
@@ -50,6 +50,7 @@ class PerspectiveLib
 		foreach ( $this->get_domain_map($prefs) as $domain => $perspective ) {
 			if ( $domain == $currentDomain ) {
 				$_SESSION['current_perspective'] = trim($perspective);
+				$_SESSION['current_perspective_name'] = $this->get_perspective_name($_SESSION['current_perspective']);
 				return $perspective;
 			}
 		}
@@ -187,8 +188,10 @@ class PerspectiveLib
 		}
 		if (empty($perspective)) {
 			unset($_SESSION['current_perspective']);
+			unset($_SESSION['current_perspective_name']);
 		} else {
 			$_SESSION['current_perspective'] = $perspective;
+			$_SESSION['current_perspective_name'] = $this->get_perspective_name($_SESSION['current_perspective']);
 		}
 
 	}
@@ -246,7 +249,7 @@ class PerspectiveLib
 	{
 		$this->perspectivePreferences->deleteMultiple(array('perspectiveId' => $perspectiveId));
 
-		global $prefslib; require_once 'lib/prefslib.php';
+		$prefslib = TikiLib::lib('prefs');
 		foreach ( $preferences as $pref => $value ) {
 			$value = $prefslib->formatPreference($pref, array($pref => $value));
 			$this->set_preference($perspectiveId, $pref, $value);
@@ -337,7 +340,16 @@ class PerspectiveLib
 
 		return $db->getOne("SELECT perspectiveId FROM tiki_perspectives WHERE name = ?", array ( $name ));
 	}
+
+	/**
+	 * Returns perspective's name from the Id
+	 *
+	 */
+	function get_perspective_name ( $id )
+	{
+		$db = TikiDb::get();
+
+		return $db->getOne("SELECT name FROM tiki_perspectives WHERE perspectiveId = ?", array ( $id ));
+	}
 }
 
-global $perspectivelib;
-$perspectivelib = new PerspectiveLib;

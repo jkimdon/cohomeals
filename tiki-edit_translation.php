@@ -2,16 +2,18 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_translation.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-edit_translation.php 57957 2016-03-17 19:58:54Z jonnybradley $
 
 require_once('tiki-setup.php');
 
-include_once('lib/multilingual/multilinguallib.php');
+$multilinguallib = TikiLib::lib('multilingual');
 include_once('modules/mod-func-translation.php');
+
+require_once('lib/debug/Tracer.php');
 
 execute_module_translation();
 
@@ -95,7 +97,8 @@ $usedLang = array();
 foreach ( $trads as $trad )
 	$usedLang[] = $trad['lang'];
 
-$rawLangs = $tikilib->list_languages();
+$langLib = TikiLib::lib('language');
+$rawLangs = $langLib->list_languages();
 $languages = array();
 foreach ( $rawLangs as $langInfo )
 	if ( ! in_array($langInfo['value'], $usedLang) )
@@ -104,6 +107,12 @@ $smarty->assign_by_ref('languages', $languages);
 if (count($languages) == 1) {
    $smarty->assign('only_one_language_left', 'y');
 }
+
+if(isset($_REQUEST['target_lang'])){
+	smarty_assign_default_target_lang($langpage, $_REQUEST['target_lang'], $trads, $prefs['read_language']);
+}
+
+smarty_assign_translation_name();
 
 ask_ticket('edit-translation');
 
@@ -116,17 +125,49 @@ $smarty->display("tiki.tpl");
 
 function execute_module_translation() 
 { 
-	global $smarty;
+	$smarty = TikiLib::lib('smarty');
 	$module_reference = array(
 		'name' => 'translation',
-		'params' => '',
+		'params' => array('show_language' => 'n'),
 		'position' => 'r',
 		'ord' => 1,
 		'moduleId' => 0
 	);
 
-	global $modlib; require_once 'lib/modules/modlib.php';	
+	$modlib = TikiLib::lib('mod');
 
 	$out = $modlib->execute_module($module_reference);
 	$smarty->assign('content_of_update_translation_section', $out);
+}
+
+function smarty_assign_default_target_lang($src_lang, $targ_lang_requested, $existing_translations, $user_langs)
+{
+    global $tracer;
+	$multilinguallib = TikiLib::lib('multilingual');
+	$smarty = TikiLib::lib('smarty');
+
+    $default_target_lang = $targ_lang_requested;
+    if (! isset($default_target_lang))
+    {
+
+
+        $collect_lang_callback = function($translation) {return $translation['lang'];};
+        $langs_already_translated = array_map($collect_lang_callback, $existing_translations);
+        $default_target_lang = $multilinguallib->defaultTargetLanguageForNewTranslation($src_lang, $langs_already_translated, $user_langs);
+
+    }
+
+    $smarty->assign('default_target_lang', $default_target_lang);
+}
+
+function smarty_assign_translation_name()
+{
+    $smarty = TikiLib::lib('smarty');
+
+    $translation_name = '';
+    if (isset($_REQUEST['translation_name']))
+    {
+        $translation_name = $_REQUEST['translation_name'];
+    }
+    $smarty->assign('translation_name', $translation_name);
 }

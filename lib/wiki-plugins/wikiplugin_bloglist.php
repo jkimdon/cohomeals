@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_bloglist.php 53770 2015-02-04 18:11:01Z jonnybradley $
+// $Id: wikiplugin_bloglist.php 62347 2017-04-26 11:55:00Z jonnybradley $
 
 function wikiplugin_bloglist_info()
 {
@@ -12,15 +12,17 @@ function wikiplugin_bloglist_info()
 		'documentation' => 'PluginBlogList',
 		'description' => tra('Display posts from a site blog'),
 		'prefs' => array( 'feature_blogs', 'wikiplugin_bloglist' ),
-		'icon' => 'img/icons/text_list_bullets.png',
+		'iconname' => 'list',
+		'introduced' => 1,
 		'params' => array(
 			'Id' => array(
 				'required' => true,
 				'name' => tra('Blog ID'),
-				'description' => tra('The ID number of the blog on the site you wish to list posts from'),
-				'filter' => 'digits',
+				'description' => tra('The ID number of the blog on the site to list posts from. More than one blog can be provided, separated by colon. Example: 1:5. Limitation: if more than one blog is provided, the private posts (drafts) are not shown.'),
+				'filter' => 'striptags',
 				'default' => '',
 				'profile_reference' => 'blog',
+				'since' => '1'
 			),
 			'Items' => array(
 				'required' => false,
@@ -28,18 +30,22 @@ function wikiplugin_bloglist_info()
 				'description' => tra('Maximum number of entries to list (no maximum set by default)'),
 				'filter' => 'digits',
 				'default' => '',
+				'since' => '3.0'
 			),
 			'author' => array(
 				'required' => false,
 				'name' => tra('Author'),
 				'description' => tra('Only display posts created by this user (all posts listed by default)'),
 				'default' => '',
+				'since' => '3.5',
 			),
 			'simpleList' => array(
 				'required' => false,
 				'name' => tra('Simple List'),
-				'description' => tra('Show simple list of date, title and author (default=y) or formatted list of blog posts (n)'),
+				'description' => tra('Show simple list of date, title and author (default) or formatted list of blog
+					posts'),
 				'default' => 'y',
+				'since' => '3.5',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
@@ -48,89 +54,104 @@ function wikiplugin_bloglist_info()
 			),
 			'charCount' => array(
 				'required' => false,
-				'name' => tra('Char Count'),
-				'description' => tra('Number of characters to display if not a simple list. (defaults to all)'),
+				'name' => tra('Character Count'),
+				'description' => tra('Number of characters to display if not a simple list (defaults to all)'),
 				'filter' => 'digits',
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 				'default' => '',
+				'since' => '12.0',
 			),
 			'wordBoundary' => array(
 				'required' => false,
 				'name' => tra('Word Boundary'),
-				'description' => tra('If not a simple list and Char Count is non-zero, then marking this as yes will break on word boundaries only.'),
+				'description' => tra('If not a simple list and Character Count is non-zero, then marking this as yes will
+					break on word boundaries only.'),
 				'default' => 'y',
+				'since' => '12.0',
 				'options' => array(
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n')
 				),
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 			),
 			'ellipsis' => array(
 				'required' => false,
 				'name' => tra('Ellipsis'),
-				'description' => tra('If not a simple list and Char Count is non-zero, then marking this as yes will put ellipsis (...) at end of text (default=y).'),
+				'description' => tra('If not a simple list and Character Count is non-zero, then marking this as yes will
+					put ellipsis (...) at end of text (default).'),
 				'default' => 'y',
+				'since' => '12.0',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n')
 				),
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 			),
 			'more' => array(
 				'required' => false,
 				'name' => tra('More'),
-				'description' => tra('If not a simple list and Char Count is non-zero, then marking this as yes will put a More link to the full entry (default=y).'),
+				'description' => tra('If not a simple list and Character Count is non-zero, then marking this as yes
+					will put a "More" link to the full entry (default).'),
 				'default' => 'y',
+				'since' => '12.0',
 				'options' => array(
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n')
 				),
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 			),
 			'showIcons' => array(
 				'required' => false,
 				'name' => tra('Show Icons'),
-				'description' => tra('If not a simple list marking this as no will prevent the "edit" and "print" type icons from displaying (default=y)'),
+				'description' => tra('If not a simple list, marking this as no will prevent the "edit" and "print" type
+					icons from displaying (default is to show the icons)'),
 				'default' => 'y',
+				'since' => '12.0',
 				'options' => array(
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n')
 				),
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 			),
 			'useExcerpt' => array(
 				'required' => false,
 				'name' => tra('Use Excerpt'),
-				'description' => tra('If the blog has "Use post excerpt" enabled then use excerpts where available') . ' ' . tra('(default=y)'),
+				'description' => tra('If the blog has "Use post excerpt" enabled then use excerpts where available (default)'),
 				'default' => 'y',
+				'since' => '13.2',
 				'options' => array(
 					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n')
 				),
-				'parent' => array('name' => 'simpleList', 'value' => 'n'),
+				'parentparam' => array('name' => 'simpleList', 'value' => 'n'),
 			),
 			'dateStart' => array(
 				'required' => false,
 				'name' => tra('Start Date'),
-				'description' => tra('Earliest date to select posts from.') . ' (YYYY-MM-DD)',
+				'description' => tra('Earliest date to select posts from.') . ' (<code>YYYY-MM-DD</code>)',
 				'filter' => 'date',
 				'default' => '',
+				'since' => '3.5',
 			),
 			'dateEnd' => array(
 				'required' => false,
 				'name' => tra('End Date'),
-				'description' => tra('Latest date to select posts from.') . ' (YYYY-MM-DD)',
+				'description' => tra('Latest date to select posts from.') . ' (<code>YYYY-MM-DD</code>)',
 				'filter' => 'date',
 				'default' => '',
+				'since' => '3.5',
 			),
 			'containerClass' => array(
 				'required' => false,
 				'name' => tra('Container Class'),
-				'description' => tra('CSS Class to add to the container DIV.article. (Default="wikiplugin_bloglist")'),
-				'filter' => 'striptags',
+				'description' => tr('CSS Class to add to the container %0DIV.article%1. (Default=%0wikiplugin_bloglist%1)',
+					'<code>', '</code>'),
+				'filter' => 'text',
 				'default' => 'wikiplugin_bloglist',
+				'accepted' => tra('Valid CSS class'),
+				'since' => '3.5',
 			),
 		),
 	);
@@ -138,12 +159,16 @@ function wikiplugin_bloglist_info()
 
 function wikiplugin_bloglist($data, $params)
 {
-	global $tikilib, $smarty, $user;
+	global $user;
+	$tikilib = TikiLib::lib('tiki');
+	$smarty = TikiLib::lib('smarty');
 
 	if (!isset($params['Id'])) {
-		TikiLib::lib('errorreport')->report(tra('missing blog Id for BLOGLIST plugins'));
+		Feedback::error(tra('Missing blog ID for Bloglist plugin'));
 		return '';
 	}
+	// Sanitize $params['Id'])
+	$params['Id'] = preg_filter('/[^0-9:]*/', '', $params['Id']);
 
 	if (!isset($params['Items'])) $params['Items'] = -1;
 	if (!isset($params['offset'])) $params['offset'] = 0;
@@ -169,12 +194,12 @@ function wikiplugin_bloglist($data, $params)
 	$smarty->assign('container_class', $params['containerClass']);
 
 	if ($params['simpleList'] == 'y') {
-		global $bloglib; require_once('lib/blogs/bloglib.php');
+		$bloglib = TikiLib::lib('blog');
 		$blogItems = $bloglib->list_posts($params['offset'], $params['Items'], $params['sort_mode'], $params['find'], $params['Id'], $params['author'], '', $dateStartTS, $dateEndTS);
 		$smarty->assign_by_ref('blogItems', $blogItems['data']);
 		$template = 'wiki-plugins/wikiplugin_bloglist.tpl';
 	} else {
-		global $bloglib; include_once('lib/blogs/bloglib.php');
+		$bloglib = TikiLib::lib('blog');
 
 		$blogItems = $bloglib->list_blog_posts($params['Id'], false, $params['offset'], $params['Items'], $params['sort_mode'], $params['find'], $dateStartTS, $dateEndTS);
 

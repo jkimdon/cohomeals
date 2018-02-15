@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_banning.php 55449 2015-05-16 18:31:54Z jonnybradley $
+// $Id: tiki-admin_banning.php 58747 2016-05-31 23:00:07Z lindonb $
 
 require_once ('tiki-setup.php');
 include_once ('lib/ban/banlib.php');
@@ -43,9 +43,9 @@ if (isset($_REQUEST["import"]) && isset($_FILES["fileCSV"])) {
 if (isset($_REQUEST['save'])) {
 	check_ticket('admin-banning');
 	if ($_REQUEST['mode'] === 'user' && empty($_REQUEST['userreg'])) {
-		TikiLib::lib('errorreport')->report(tra("Not saved:") . ' ' . tra("Username pattern empty"));
+		Feedback::error(tra("Not saved:") . ' ' . tra("Username pattern empty"));
 	} else if ($_REQUEST['mode'] === 'ip' && $_REQUEST['ip1'] == 255 && $_REQUEST['ip2'] == 255 && $_REQUEST['ip3'] == 255 && $_REQUEST['ip4'] == 255) {
-		TikiLib::lib('errorreport')->report(tra("Not saved:") . ' ' . tra("Default IP pattern still set"));
+		Feedback::error(tra("Not saved:") . ' ' . tra("Default IP pattern still set"));
 	} else {
 
 		$_REQUEST['use_dates'] = isset($_REQUEST['use_dates']) ? 'y' : 'n';
@@ -131,8 +131,7 @@ if (!empty($_REQUEST['mass_ban_ip'])) {
 // Handle case when coming from tiki-admin_actionlog with a list of IPs to ban
 if (!empty($_REQUEST['mass_ban_ip_actionlog'])) {
 	check_ticket('admin-banning');
-	include_once ('lib/logs/logslib.php');
-	$actionslib = new LogsLib;
+	$logslib = TikiLib::lib('logs');
 	$smarty->assign('mass_ban_ip', $_REQUEST['mass_ban_ip_actionlog']);
 	$info['mode'] = 'mass_ban_ip';
 	$info['title'] = tr('Multiple IP Banning');
@@ -140,7 +139,7 @@ if (!empty($_REQUEST['mass_ban_ip_actionlog'])) {
 	$info['date_to'] = $tikilib->now + 365 * 24 * 3600;
 	$banId_list = explode('|', $_REQUEST['mass_ban_ip_actionlog']);
 	foreach ($banId_list as $id) {
-		$ban_actions=$actionslib->get_info_action($id);
+		$ban_actions=$logslib->get_info_action($id);
 		$ban_comments_list[$ban_actions['ip']][$id]['userName'] = $ban_actions['user'];
 	}
 	$smarty->assign_by_ref('ban_comments_list', $ban_comments_list);
@@ -149,8 +148,7 @@ if (!empty($_REQUEST['mass_ban_ip_actionlog'])) {
 // Handle case when coming from tiki-adminusers with a list of IPs to ban
 if (!empty($_REQUEST['mass_ban_ip_users'])) {
 	check_ticket('admin-banning');
-	include_once ('lib/logs/logslib.php');
-	$actionslib = new LogsLib;
+	$logslib = TikiLib::lib('logs');
 	$smarty->assign('mass_ban_ip', $_REQUEST['mass_ban_ip_users']);
 	$info['mode'] = 'mass_ban_ip';
 	$info['title'] = tr('Multiple IP Banning');
@@ -158,7 +156,7 @@ if (!empty($_REQUEST['mass_ban_ip_users'])) {
 	$info['date_to'] = $tikilib->now + 365 * 24 * 3600;
 	$banUsers_list = explode('|', $_REQUEST['mass_ban_ip_users']);
 	foreach ($banUsers_list as $banUser) {
-		$ban_actions=$actionslib->get_user_registration_action($banUser);
+		$ban_actions=$logslib->get_user_registration_action($banUser);
 		$ban_comments_list[$ban_actions['ip']][$banUser]['userName'] = $banUser;
 	}
 	$smarty->assign_by_ref('ban_comments_list', $ban_comments_list);

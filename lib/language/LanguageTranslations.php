@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: LanguageTranslations.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: LanguageTranslations.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -144,7 +144,7 @@ class LanguageTranslations extends TikiDb_Bridge
 			if ($lastStr === FALSE) {
 				// file has no line with "###end###\"=>\"###end###\") marking the end of the array
 				throw new Language_Exception(
-					tr("The file lang/%0/language.php is not well formated. Run get_strings.php?lang=%0 and then try to export the translations again.", $this->lang)
+					tr("The file lang/%0/language.php is not correctly formatted. Run get_strings.php?lang=%0 and then try to export the translations again.", $this->lang)
 				);
 			}
 
@@ -193,7 +193,7 @@ class LanguageTranslations extends TikiDb_Bridge
 
 			return $stats;
 		} else {
-			throw new Exception(sprintf(tra('ERROR: unable to write to lang/%s/language.php'), $this->lang));
+			throw new Exception(sprintf(tra('Error: unable to write to lang/%s/language.php'), $this->lang));
 		}
 	}
 

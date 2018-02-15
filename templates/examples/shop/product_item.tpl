@@ -14,8 +14,8 @@
 			{$img = ','|explode:$row.images|nonp}
 			{if $img}
 				<div class="item-img-outer" style="min-width:360px;min-height:360px;">
-					<a class="item-img" href="display{$img[0]}" title="{$row.title}" rel="[p]box">
-						<img itemprop="image" src="display{$img[0]}?height=350" height="350" />
+					<a class="item-img" href="tiki-download_file.php?fileId={$img[0]}&display" title="{$row.title}" data-box="[p]box">
+						<img itemprop="image" src="tiki-download_file.php?fileId={$img[0]}&display&height=350" height="350" />
 					</a>
 				</div>
 			{else}
@@ -51,10 +51,10 @@
 		<td>
 			{if $row.stock|nonp gt 0}
 				<strong>In stock</strong>
-				<meta  itemprop="availability" content="InStock">
+				<meta itemprop="availability" content="InStock">
 			{else}
 				<em>Awaiting stock</em>
-				<meta  itemprop="availability" content="OutOfStock">
+				<meta itemprop="availability" content="OutOfStock">
 			{/if}
 		</td>
 	</tr>
@@ -64,7 +64,7 @@
 		</th>
 		<td>
 			<strong itemprop="price">{$row.price}</strong>
-			<!-- meta  itemprop="priceCurrency" content="USD" can't access prefs here sadly :(-->
+			<!-- meta itemprop="priceCurrency" content="USD" can't access prefs here sadly :(-->
 		</td>
 	</tr>
 	<tr>
@@ -74,7 +74,7 @@
 		<td>
 			{if $row.stock|nonp gt 0}
 				{include file="templates/examples/shop/add_to_cart.tpl"}
-				<meta  itemprop="acceptedPaymentMethod" content="http://purl.org/goodrelations/v1#PayPal">
+				<meta itemprop="acceptedPaymentMethod" content="http://www.heppnetz.de/ontologies/goodrelations/v1#PayPal">
 			{/if}
 		</td>
 	</tr>
@@ -90,8 +90,8 @@
 		<td colspan="3">
 			{if count($img) > 1}
 				{for $i = 1; $i< count($img); $i++}
-					<a class="item-thumb" href="display{$img[$i]}" title="{$row.name}" rel="[p]box">
-						<img src="thumbnail{$img[$i]}" width="120" height="120" />
+					<a class="item-thumb" href="tiki-download_file.php?fileId={$img[$i]}&display" title="{$row.name}" data-box="[p]box">
+						<img src="tiki-download_file.php?fileId={$img[$i]}&thumbnail" width="120" height="120" />
 					</a>
 				{/for}
 			{/if}

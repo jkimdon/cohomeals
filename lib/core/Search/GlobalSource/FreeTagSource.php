@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FreeTagSource.php 46605 2013-07-08 19:50:53Z lphuberdeau $
+// $Id: FreeTagSource.php 62774 2017-05-27 18:05:53Z jonnybradley $
 
 class Search_GlobalSource_FreeTagSource implements Search_GlobalSource_Interface, Search_FacetProvider_Interface
 {
@@ -46,9 +46,11 @@ class Search_GlobalSource_FreeTagSource implements Search_GlobalSource_Interface
 		$textual = array();
 		$ids = array();
 
-		foreach ($tags['data'] as $entry) {
-			$textual[] = $entry['tag'];
-			$ids[] = $entry['tagId'];
+		if (isset($tags['data'])) {
+			foreach ($tags['data'] as $entry) {
+				$textual[] = $entry['tag'];
+				$ids[] = $entry['tagId'];
+			}
 		}
 
 		return array(

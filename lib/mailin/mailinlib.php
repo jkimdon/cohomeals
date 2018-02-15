@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mailinlib.php 48359 2013-11-07 22:10:43Z arildb $
+// $Id: mailinlib.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -14,8 +14,23 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 /**
  *
  */
-class MailinLib extends TikiLib
+class MailinLib extends TikiDb_Bridge
 {
+	function list_available_types()
+	{
+		$container = TikiInit::getContainer();
+		$list = $container->get('tiki.mailin.providerlist');
+
+		$out = [];
+		foreach ($list->getList() as $provider) {
+			$out[$provider->getType()] = [
+				'name' => $provider->getLabel(),
+				'enabled' => $provider->isEnabled(),
+			];
+		}
+
+		return $out;
+	}
 
     /**
      * @param $offset
@@ -98,13 +113,11 @@ class MailinLib extends TikiLib
     /**
      * @param $accountId
      * @param $account
-     * @param $pop
+	 * @param $protocol
+     * @param $host
      * @param $port
      * @param $username
      * @param $pass
-     * @param $smtp
-     * @param $useAuth
-     * @param $smtpPort
      * @param $type
      * @param $active
      * @param $anonymous
@@ -117,7 +130,7 @@ class MailinLib extends TikiLib
 	*  @param 0 $categoryId
 	* @return bool
 	 */
-	function replace_mailin_account($accountId, $account, $pop, $port, $username, $clearpass, $smtp, $useAuth, $smtpPort, $type, $active, $anonymous, $admin, $attachments, $routing, $article_topicId = NULL, $article_type = NULL, $discard_after=NULL, $show_inlineImages='n', $save_html='y', $categoryId = 0, $namespace='', $respond_email = 'y', $leave_email = 'n')
+	function replace_mailin_account($accountId, $account, $protocol, $host, $port, $username, $clearpass, $type, $active, $anonymous, $admin, $attachments, $routing, $article_topicId = NULL, $article_type = NULL, $discard_after=NULL, $show_inlineImages='n', $save_html='y', $categoryId = 0, $namespace='', $respond_email = 'y', $leave_email = 'n')
 	{
 		// Fix values
 		if ($attachments == null) {
@@ -127,18 +140,39 @@ class MailinLib extends TikiLib
 		// Encrypt password
 		$pass = $this->encryptPassword($clearpass);
 		
+		$data = array(
+			'account' => $account,
+			'protocol' => $protocol,
+			'host' => $host,
+			'port' => (int) $port,
+			'username' => $username,
+			'pass' => $pass,
+			'type' => $type,
+			'active' => $active,
+			'anonymous' => $anonymous,
+			'admin' => $admin,
+			'attachments' => $attachments,
+			'routing' => $routing,
+			'article_topicId' => (int) $article_topicId,
+			'article_type' => $article_type,
+			'discard_after' => $discard_after,
+			'show_inlineImages' => $show_inlineImages,
+			'save_html' => $save_html,
+			'categoryId' => (int) $categoryId,
+			'namespace' => $namespace,
+			'respond_email' => $respond_email,
+			'leave_email' => $leave_email,
+		);
+		$table = $this->table('tiki_mailin_accounts');
 		if ($accountId) {
-			$bindvars = array($account,$pop,(int)$port,(int)$smtpPort,$username,$pass,$smtp,$useAuth,$type,$active,$anonymous,$admin,$attachments,$routing,(int)$article_topicId,$article_type,$discard_after,$show_inlineImages,$save_html,$categoryId, $namespace, $respond_email, $leave_email, (int)$accountId);
-			$query = "update `tiki_mailin_accounts` set `account`=?, `pop`=?, `port`=?, `smtpPort`=?, `username`=?, `pass`=?, `smtp`=?, `useAuth`=?, `type`=?, `active`=?, `anonymous`=?, `admin`=?, `attachments`=?,  `routing`=?, `article_topicId`=?, `article_type`=? , `discard_after`=?, `show_inlineImages`=?, `save_html`=?, `categoryId`=?, `namespace`=?, `respond_email`=?, `leave_email`=? where `accountId`=?";
-			$result = $this->query($query, $bindvars);
+			$table->update($data, [
+				'accountId' => $accountId,
+			]);
+
+			return $accountId;
 		} else {
-			$bindvars = array($account,$pop,(int)$port,(int)$smtpPort,$username,$pass,$smtp,$useAuth,$type,$active,$anonymous,$admin,$attachments,$routing,(int)$article_topicId,$article_type, $show_inlineImages, $save_html, $categoryId, $namespace, $respond_email, $leave_email);
-			$query = "delete from `tiki_mailin_accounts` where `account`=? and `pop`=? and `port`=? and `smtpPort`=? and `username`=? and `pass`=? and `smtp`=? and `useAuth`=? and `type`=? and `active`=? and `anonymous`=? and `admin`=? and `attachments`=? and `routing`=? and `article_topicId`=?, `article_type`=?, `show_inlineImages`=?, `save_html`=?, `categoryId`=?, `namespace`=?, `respond_email`=?, `leave_email`=?";
-			$result = $this->query($query, $bindvars, -1, -1, false);
-			$query = "insert into `tiki_mailin_accounts`(`account`,`pop`,`port`,`smtpPort`,`username`,`pass`,`smtp`,`useAuth`,`type`,`active`,`anonymous`,`admin`,`attachments`,`routing`,`article_topicId`,`article_type`,`show_inlineImages`, `save_html`, `categoryId`, `namespace`, `respond_email`, `leave_email`) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-			$result = $this->query($query, $bindvars);
+			return $table->insert($data);
 		}
-		return true;
 	}
 
     /**
@@ -196,4 +230,3 @@ class MailinLib extends TikiLib
 		return $plaintext;
 	}
 }
-$mailinlib = new MailinLib;

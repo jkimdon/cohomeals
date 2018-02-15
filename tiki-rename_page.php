@@ -2,17 +2,18 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-rename_page.php 49674 2014-02-02 17:18:56Z jonnybradley $
+// $Id: tiki-rename_page.php 62875 2017-06-04 02:33:45Z lindonb $
 
 $section = 'wiki page';
 $section_class = "tiki_wiki_page manage";	// This will be body class instead of $section
 
 require_once ('tiki-setup.php');
-include_once ('lib/wiki/wikilib.php');
+
+$wikilib = TikiLib::lib('wiki');
 
 $access->check_feature('feature_wiki');
 
@@ -34,7 +35,7 @@ if (!($info = $tikilib->get_page_info($page))) {
 // Now check permissions to rename this page
 $access->check_permission(array('view', 'rename'), tr('Rename wiki page'), 'wiki page', $page);
 
-if (isset($_REQUEST["rename"]) || isset($_REQUEST["confirm"])) {
+if ((isset($_REQUEST["rename"]) || isset($_REQUEST["confirm"])) && $access->checkOrigin()) {
 	check_ticket('rename-page');
 	// If the new pagename does match userpage prefix then display an error
 	$newName = isset($_REQUEST["confirm"]) ? $_REQUEST['badname'] : $_REQUEST['newpage'];
@@ -66,14 +67,9 @@ if (isset($_REQUEST["rename"]) || isset($_REQUEST["confirm"])) {
 	}
 
 	if ($result) {
-		global $perspectivelib; require_once 'lib/perspectivelib.php';
+		$perspectivelib = TikiLib::lib('perspective');
 		$perspectivelib->replace_preference('wsHomepage', $page, $newName);
-		if ($prefs['feature_sefurl'] == 'y') {
-			include_once('tiki-sefurl.php');
-			header('location: '. urlencode(filter_out_sefurl("tiki-index.php?page=$newName", 'wiki')));
-		} else {
-			header('location: tiki-index.php?page=' . urlencode($newName));
-		}
+		$access->redirect($wikilib->sefurl($newName));
 	}
 }
 ask_ticket('rename-page');

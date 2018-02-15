@@ -1,29 +1,30 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: smarty.php 47966 2013-10-10 18:43:43Z jonnybradley $
+// $Id: smarty.php 63665 2017-08-25 04:16:20Z drsassafras $
 
 function prefs_smarty_list()
 {
 	return array(
 		'smarty_notice_reporting' => array(
-			'name' => tra('Include smarty notices in PHP error report'),
-			'description' => tra('In most cases, smarty notices can be safely ignored. However, they may be useful in the development process when strange issues occur.'),
+			'name' => tra('Include Smarty notices in the PHP error report'),
+			'hint' => tra('In most cases, Smarty notices can be safely ignored. However, they may be useful in the development process when unexpected issues occur.'),
 			'type' => 'flag',
+			'description' => tr('Tiki will display <a href="https://www.smarty.net">Smarty</a> notices with the PHP error messages.'),
 			'default' => 'n',
 		),
 		'smarty_security' => array(
-			'name' => tra('Smarty Security'),
-			'description' => tra('Do not allow php code in smarty templates.'),
+			'name' => tra('Smarty security'),
+			'description' => tra('Do not allow PHP code in Smarty templates.'),
 			'warning' => tra('You should leave this on unless you know what you are doing.'),
 			'type' => 'flag',
 			'perspective' => false,
 			'default' => 'y',
 		),
 		'smarty_security_modifiers' => array(
-			'name' => tr('Extra smarty modifiers'),
+			'name' => tr('Extra Smarty modifiers'),
 			'description' => tr('Make additional PHP functions available as smarty modifiers. May be needed for custom templates.'),
 			'warning' => tr('There may be security implications. Make sure you know what you are doing.'),
 			'type' => 'text',
@@ -35,7 +36,7 @@ function prefs_smarty_list()
 			),
 		),
 		'smarty_security_functions' => array(
-			'name' => tr('Extra smarty functions'),
+			'name' => tr('Extra Smarty functions'),
 			'description' => tr('Make additional PHP functions available as smarty functions. May be needed for custom templates.'),
 			'warning' => tr('There may be security implications. Make sure you know what you are doing.'),
 			'type' => 'text',
@@ -47,7 +48,7 @@ function prefs_smarty_list()
 			),
 		),
 		'smarty_security_dirs' => array(
-			'name' => tr('Extra smarty directories'),
+			'name' => tr('Extra Smarty directories'),
 			'description' => tr('Make additional dirs available as smarty dirs. May be needed for custom icons (clear temp/cache after changing).'),
 			'warning' => tr('There may be security implications. Make sure you know what you are doing.'),
 			'type' => 'text',
@@ -59,7 +60,7 @@ function prefs_smarty_list()
 			),
 		),
 		'smarty_compilation' => array(
-			'name' => tra('Smarty Compilation'),
+			'name' => tra('Smarty compilation'),
 			'description' => tra('Indicates when the template cache should be refreshed.'),
 			'type' => 'list',
 			'options' => array(
@@ -71,7 +72,7 @@ function prefs_smarty_list()
 		),
 		'smarty_cache_perms' => array(
 			'name' => tra('Smarty cache permissions'),
-			'description' => tra('Permissions smarty writes to templates_c with.'),
+			'description' => tra('Permissions that enable Smarty to write to the templates_c directory.'),
 			'type' => 'list',
 			'options' => array(
 				0644 => tra('User writable (0644)'),

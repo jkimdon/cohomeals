@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: InGroup.php 45930 2013-05-13 19:57:37Z lphuberdeau $
+// $Id: InGroup.php 60051 2016-10-25 09:18:17Z kroky6 $
 
 /**
  * Handler class for InGroup
@@ -18,7 +18,7 @@ class Tracker_Field_InGroup extends Tracker_Field_Abstract
 		return array(
 			'N' => array(
 				'name' => tr('In Group'),
-				'description' => tr('Indicates if the user associated to the item is member of a specified group.'),
+				'description' => tr('Indicates if the user associated with the item is member of a specified group.'),
 				'readonly' => true,
 				'help' => 'In Group Field',				
 				'prefs' => array('trackerfield_ingroup'),
@@ -60,26 +60,31 @@ class Tracker_Field_InGroup extends Tracker_Field_Abstract
 	function renderOutput($context = array())
 	{
 		$trklib = TikiLib::lib('trk');
-		$itemUser = $trklib->get_item_creator($this->getConfiguration('trackerId'), $this->getItemId());
+		$itemUsers = $trklib->get_item_creators($this->getConfiguration('trackerId'), $this->getItemId());
 		
-		if (!empty($itemUser)) {
+		if (!empty($itemUsers)) {
 			if (!isset($trklib->tracker_infocache['users_group'][$this->getOption('groupName')])) {
 				$userlib = TikiLib::lib('user');
 				$trklib->tracker_infocache['users_group'][$this->getOption('groupName')] = $userlib->get_users_created_group($this->getOption('groupName'), null, true);
 			}
-			if (isset($trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser])) {
-				if ($this->getOption('type') == 'date') {
-					$value = $trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser]['created'];
-				} elseif ($this->getOption('type') == 'expire') {
-					$value = $trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser]['expire'];
+			foreach( $itemUsers as $itemUser ) {
+				if (isset($trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser])) {
+					if ($this->getOption('type') == 'date') {
+						$value = $trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser]['created'];
+					} elseif ($this->getOption('type') == 'expire') {
+						$value = $trklib->tracker_infocache['users_group'][$this->getOption('groupName')][$itemUser]['expire'];
+					} else {
+						$value = 'Yes';
+					}
 				} else {
-					$value = 'Yes';
+					if ($this->getOption('type') == 'date' || $this->getOption('type') == 'expire') {
+						$value = '';
+					} else {
+						$value = 'No';
+					}
 				}
-			} else {
-				if ($this->getOption('type') == 'date' || $this->getOption('type') == 'expire') {
-					$value = '';
-				} else {
-					$value = 'No';
+				if( !empty($value) && $value != 'No' ) {
+					break;
 				}
 			}
 		}

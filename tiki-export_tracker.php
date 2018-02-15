@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-export_tracker.php 53142 2014-11-18 17:42:07Z eromneg $
+// $Id: tiki-export_tracker.php 58824 2016-06-07 22:25:14Z rjsmelo $
 
 // still used for export from trackerfilter (only - Tiki 9)
 
@@ -17,7 +17,7 @@ if (!isset($_REQUEST['trackerId'])) {
 	$smarty->display('error.tpl');
 	die;
 }
-include_once('lib/trackers/trackerlib.php');
+$trklib = TikiLib::lib('trk');
 @ini_set('max_execution_time', 0); //will not work in safe_mode is on
 
 $tracker_info = $trklib->get_tracker($_REQUEST['trackerId']);
@@ -77,9 +77,13 @@ foreach ($_REQUEST as $key =>$val) {
 	if (substr($key, 0, 2) == 'f_' && !empty($val) && (!is_array($val) || !empty($val[0]))) {
 		$fieldId = substr($key, 2);
 		$filterFields[] = $fieldId;
-		if (isset($_REQUEST["x_$fieldId"]) && $_REQUEST["x_$fieldId"] == 't' ) {
+		if (isset($_REQUEST["x_$fieldId"]) && ($_REQUEST["x_$fieldId"] == 't' || $_REQUEST["x_$fieldId"] == 'm') ) {
 			$exactValues[] = '';
-			$values[] = urldecode($val);
+			if (is_array($val)){
+				$values[] = $val;
+			} else {
+				$values[] = urldecode($val);
+			}
 		} else {
 			$exactValues[] = urldecode($val);
 			$values[] = '';
@@ -168,7 +172,7 @@ if (!empty($_REQUEST['debug'])) {
 		$tmpCsv = tempnam($prefs['tmpDir'], 'tracker_'.$_REQUEST['trackerId']) . '.csv';
 		/*debug*/$tmpCsv = $prefs['tmpDir'].'/'.'tracker_'.$_REQUEST['trackerId']. '.csv';
 		if (!($fp = fopen($tmpCsv, 'w'))) {
-			$smarty->assign('msg', tra('Can not open the file'). ' '.$tmpCsv);
+			$smarty->assign('msg', tra('The file cannot be opened'). ' '.$tmpCsv);
 			$smarty->display('error.tpl');
 			die;
 		}			
@@ -179,7 +183,7 @@ if (!empty($_REQUEST['debug'])) {
 		}
 		$tmpZip = $prefs['tmpDir'].'/'.$file;
 		if ( !($archive->open($tmpZip, ZIPARCHIVE::OVERWRITE)) ) {
-			$smarty->assign('msg', tra('Can not open the file'). ' '.$prefs['tmpDir'].'/'.$file);
+			$smarty->assign('msg', tra('The file cannot be opened'). ' '.$prefs['tmpDir'].'/'.$file);
 			$smarty->display('error.tpl');
 			die;
 		}

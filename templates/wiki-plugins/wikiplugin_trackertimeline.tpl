@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_trackertimeline.tpl 45011 2013-03-01 06:20:00Z chibaguy $ *}
+{* $Id: wikiplugin_trackertimeline.tpl 53348 2014-12-28 14:49:47Z jyhem $ *}
 {jq notonready=true}
 ttl_showdetails = function( data ) {
 	$.colorbox({
@@ -6,8 +6,8 @@ ttl_showdetails = function( data ) {
 		height: 300,
 		html:	'<h3>' + data.title + '</h3>' +
 				'<p>' + ( data.fstart ) + ' to ' + ( data.fend ) + '</p>'
-			   + '<p>' + ( data.psummary ) + '</p>'
-			   + '<p class="right"><a href="tiki-view_tracker_item.php?itemId=' + escape(data.item) + '">Link</a></p>'
+				+ '<p>' + ( data.psummary ) + '</p>'
+				+ '<p class="text-right"><a href="tiki-view_tracker_item.php?itemId=' + escape(data.item) + '">Link</a></p>'
 	});
 }
 {/jq}

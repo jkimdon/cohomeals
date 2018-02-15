@@ -1,17 +1,17 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: error_reporting.php 47853 2013-10-02 14:03:06Z lphuberdeau $
+// $Id: error_reporting.php 58748 2016-05-31 23:05:28Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
-global $prefs, $smarty, $tiki_p_admin;
+global $prefs, $tiki_p_admin;
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) != FALSE) {
 	header('location: index.php');
 	exit;
 }
-
+$smarty = TikiLib::lib('smarty');
 if ( $prefs['error_reporting_adminonly'] == 'y' and $tiki_p_admin != 'y' ) {
 	$errorReportingLevel = 0;
 } elseif ($prefs['error_reporting_level'] == 2047) {
@@ -41,8 +41,6 @@ if ( $prefs['log_sql'] == 'y' && $api_tiki == 'adodb' ) {
 	global $ADODB_PERF_MIN;
 	$ADODB_PERF_MIN = $prefs['log_sql_perf_min'];
 }
-
-$tikifeedback = array();
 
 // TODO: check this only once per session or only if a feature ask for it
 TikiSetup::check($tikidomain);

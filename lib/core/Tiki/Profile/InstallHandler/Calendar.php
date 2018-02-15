@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Calendar.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Calendar.php 61840 2017-03-24 11:18:18Z kroky6 $
 
 //THIS HANDLER STILL DON'T WORK PROPERLY. USE WITH CAUTION. 
 class Tiki_Profile_InstallHandler_Calendar extends Tiki_Profile_InstallHandler
@@ -17,7 +17,7 @@ class Tiki_Profile_InstallHandler_Calendar extends Tiki_Profile_InstallHandler
 		$this->replaceReferences($data);
 
 		if (!empty($data['name'])) {
-			global $calendarlib; include_once('lib/calendar/calendarlib.php');
+			$calendarlib = TikiLib::lib('calendar');
 			$data['calendarId'] = $calendarlib->get_calendarId_from_name($data['name']);
 		}
 
@@ -54,7 +54,7 @@ class Tiki_Profile_InstallHandler_Calendar extends Tiki_Profile_InstallHandler
 	function _install()
 	{
 		if ($this->canInstall()) {
-			global $calendarlib; if (!$calendarlib) require_once 'lib/calendar/calendarlib.php';
+			$calendarlib = TikiLib::lib('calendar');
 			
 			$calendar = $this->getData();
 			
@@ -67,5 +67,54 @@ class Tiki_Profile_InstallHandler_Calendar extends Tiki_Profile_InstallHandler
 			$id = $calendarlib->set_calendar($calendar['calendarId'], $user, $calendar['name'], $calendar['description'], $customflags, $options);
 			return $id;
 		}
+	}
+
+	public static function export(Tiki_Profile_Writer $writer, $calendarId)
+	{
+		$calendarlib = TikiLib::lib('calendar');
+		$cal = $calendarlib->get_calendar($calendarId);
+		if (!$cal || empty($cal['calendarId']) ) {
+			return false;
+		}
+
+		$customflags = array_intersect_key($cal, array_flip(self::getCustomFlags()));
+		$options = array_diff_key($cal, array_flip(array_merge(
+			array(
+				'calendarId',
+				'name',
+				'description',
+				'user',
+				'created',
+				'lastmodif',
+				'personal'
+			),
+			self::getCustomFlags()
+		)));
+		
+		$writer->addObject(
+			'calendar',
+			$calendarId,
+			array(
+				'name' => $cal['name'],
+				'description' => $cal['description'],
+				'customflags' => $customflags,
+				'options' => $options
+			)
+		);
+
+		return true;
+	}
+
+	private static function getCustomFlags()
+	{
+		return array(
+			'customlocations',
+			'customcategories',
+			'customlanguages',
+			'custompriorities',
+			'customparticipants',
+			'customsubscription',
+			'customstatus'
+		);
 	}
 }

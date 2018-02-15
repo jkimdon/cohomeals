@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: csslib.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: csslib.php 58019 2016-03-20 15:17:21Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -13,6 +13,102 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 
 class cssLib extends TikiLib
 {
+	function list_layouts($theme = null, $theme_option = null)
+	{
+		global $prefs;
+
+		if (empty($theme) && empty($theme_option)){ // if you submit no parameters, return the current theme/theme option
+			if (isset($prefs['site_theme'])) {
+				$theme = $prefs['site_theme'];
+			}
+			if (isset($prefs['theme_option'])) {
+				$theme_option = $prefs['theme_option'];
+			}
+		}
+
+		$themelib = TikiLib::lib('theme');
+
+		$available_layouts = array();
+		foreach (scandir(TIKI_PATH . '/templates/layouts/') as $layoutName) {
+			if ($layoutName[0] != '.' && $layoutName != 'index.php') {
+				$available_layouts[$layoutName] = ucfirst($layoutName);
+			}   
+		}   
+		foreach (TikiAddons::getPaths() as $path) {
+			if (file_exists($path . '/templates/layouts/')) {
+				foreach (scandir($path . '/templates/layouts/') as $layoutName) {
+					if ($layoutName[0] != '.' && $layoutName != 'index.php') {
+						 $available_layouts[$layoutName] = ucfirst($layoutName);
+					}
+				}
+			}
+                }
+
+		$main_theme_path = $themelib->get_theme_path($theme, '', '', 'templates'); // path to the main site theme
+
+		if (file_exists(TIKI_PATH ."/". $main_theme_path . '/layouts/') ){
+			foreach (scandir(TIKI_PATH ."/". $main_theme_path . '/layouts/') as $layoutName) {
+				if ($layoutName[0] != '.' && $layoutName != 'index.php') {
+					$available_layouts[$layoutName] = ucfirst($layoutName);
+				}
+			}
+		}
+
+		if ($theme_option) {
+			$theme_path = $themelib->get_theme_path($theme, $theme_option, '', 'templates'); // path to the site theme options
+
+			if (file_exists(TIKI_PATH ."/". $theme_path . '/layouts/') ) {
+				foreach (scandir(TIKI_PATH . "/" . $theme_path . '/layouts/') as $layoutName) {
+					if ($layoutName[0] != '.' && $layoutName != 'index.php') {
+						$available_layouts[$layoutName] = ucfirst($layoutName);
+					}
+				}
+			}
+		}
+		return $available_layouts;
+	}
+
+	function list_user_selectable_layouts($theme = null, $theme_option = null)
+	{
+		global $prefs;
+
+		if (empty($theme) && empty($theme_option)){ // if you submit no parameters, return the current theme/theme option
+			if (isset($prefs['site_theme'])) {
+				$theme = $prefs['site_theme'];
+			}
+			if (isset($prefs['theme_option'])) {
+				$theme_option = $prefs['theme_option'];
+			}
+		}
+
+		$selectable_layouts = array();
+		$available_layouts = $this->list_layouts($theme,$theme_option);
+
+		foreach ($available_layouts as $layoutName => $layoutLabel) {
+			if ($layoutName == 'mobile'
+				|| $layoutName == 'layout_plain.tpl'
+				|| $layoutName == 'internal'
+			) {
+				// hide layouts that are for internal use only
+				continue;
+			} elseif ($layoutName == 'basic') {
+				$selectable_layouts[$layoutName] = tra('Basic Bootstrap');
+			} elseif ($layoutName == 'classic') {
+				$selectable_layouts[$layoutName] = tra('Classic Tiki (3 containers - header, middle, footer)');
+			} elseif ($layoutName == 'header_middle_footer_containers_3-6-3') {
+				$selectable_layouts[$layoutName] = tra('Wider side columns (3 containers - header, middle, footer)');
+			} elseif ($layoutName == 'social') {
+				$selectable_layouts[$layoutName] = tra('Fixed top navbar 2 (uses site icon + "topbar" module zone)');
+			} elseif ($layoutName == 'fixed_top_modules') {
+				$selectable_layouts[$layoutName] = tra('Fixed top navbar 1 (uses "top" module zone)');
+			} else {
+				$selectable_layouts[$layoutName] = $layoutLabel;
+			} 
+		}
+
+		return $selectable_layouts;		
+	}
+
 	function list_css($path, $recursive = false)
 	{
 		$files = $this->list_files($path, '.css', $recursive);
@@ -44,19 +140,6 @@ class cssLib extends TikiLib
 		closedir($handle);
 		sort($back);
 		return $back;
-	}
-
-	/* nickname = fivealive or Bidi/Bidi */
-	/* write = in multidomain we always write in subdir domain but we read domain/file if exists or file */
-	function get_nickname_path($nickname, $styledir, $write=false)
-	{
-		global $tikidomain;
-		if (!strstr($nickname, '\/') && !empty($tikidomain) && (is_file("$styledir/$tikidomain/$nickname.css") || $write)) {
-			$style = "$styledir/$tikidomain/$nickname.css";
-		} else {
-			$style = "$styledir/$nickname.css";
-		}
-		return $style;
 	}
 
 	function browse_css($path)
@@ -187,4 +270,3 @@ class cssLib extends TikiLib
 		return $version;
 	}
 }
-$csslib = new cssLib;

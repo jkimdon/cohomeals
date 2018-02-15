@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cachelib.php 49945 2014-02-17 16:42:30Z jonnybradley $
+// $Id: cachelib.php 61095 2017-01-28 09:42:55Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -78,13 +78,17 @@ class Cachelib
 	 */
 	function empty_cache( $dir_names = array('all'), $log_section = 'system' )
 	{
-		global $tikidomain, $logslib, $tikilib, $prefs;
+		global $tikidomain, $prefs;
+		$logslib = TikiLib::lib('logs');
+		$tikilib = TikiLib::lib('tiki');
+		
+		$inInstaller = defined('TIKI_IN_INSTALLER');
 
 		if (!is_array($dir_names)) {
 			$dir_names = array($dir_names);
 		}
 		if (in_array('all', $dir_names)) {
-			$this->erase_dir_content("templates_c/$tikidomain");
+			$this->erase_dir_content("temp/templates_c/$tikidomain");
 			$this->erase_dir_content("temp/public/$tikidomain");
 			$this->erase_dir_content("temp/cache/$tikidomain");
 			$this->erase_dir_content("modules/cache/$tikidomain");
@@ -98,36 +102,36 @@ class Cachelib
 			$this->flush_opcode_cache();
 			$this->flush_memcache();
 			$this->invalidate('global_preferences');
-			if (is_object($logslib)) {
+			if (! $inInstaller) {
 				$logslib->add_log($log_section, 'erased all cache content');
 			}
 		}
 		if (in_array('templates_c', $dir_names)) {
-			$this->erase_dir_content("templates_c/$tikidomain");
+			$this->erase_dir_content("temp/templates_c/$tikidomain");
 			$this->flush_opcode_cache();
-			if (is_object($logslib)) {
+			if (! $inInstaller) {
 				$logslib->add_log($log_section, 'erased templates_c content');
 			}
 		}
 		if (in_array('temp_cache', $dir_names)) {
 			$this->erase_dir_content("temp/cache/$tikidomain");
 			// Next case is needed to clean also cached data created through mod PluginR
-			if ($prefs['wikiplugin_rr'] == 'y' OR $prefs['wikiplugin_r'] == 'y') {
+			if ((isset($prefs['wikiplugin_rr']) && $prefs['wikiplugin_rr'] == 'y') OR (isset($prefs['wikiplugin_r']) && $prefs['wikiplugin_r'] == 'y')) {
 				$this->erase_dir_content("temp/cache/$tikidomain/R_*/");
 			}
-			if (is_object($logslib)) {
+			if (! $inInstaller) {
 				$logslib->add_log($log_section, 'erased temp/cache content');
 			}
 		}
 		if (in_array('temp_public', $dir_names)) {
 			$this->erase_dir_content("temp/public/$tikidomain");
-			if (is_object($logslib)) {
+			if (! $inInstaller) {
 				$logslib->add_log($log_section, 'erased temp/public content');
 			}
 		}
 		if (in_array('modules_cache', $dir_names)) {
 			$this->erase_dir_content("modules/cache/$tikidomain");
-			if (is_object($logslib)) {
+			if (! $inInstaller) {
 				$logslib->add_log($log_section, 'erased modules/cache content');
 			}
 		}
@@ -271,7 +275,8 @@ class Cachelib
 
 	function cache_templates($path,$newlang)
 	{
-		global $prefs, $smarty, $tikidomain;
+		global $prefs, $tikidomain;
+		$smarty = TikiLib::lib('smarty');
 
 		$oldlang = $prefs['language'];
 		$prefs['language'] = $newlang;
@@ -437,5 +442,3 @@ class CacheLibNoCache
 	}
 }
 
-global $cachelib;
-$cachelib = new Cachelib();

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-freetag.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: mod-func-freetag.php 57960 2016-03-17 20:01:11Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -18,7 +18,7 @@ function module_freetag_info()
 {
 	return array(
 		'name' => tra('Tags Editor'),
-		'description' => tra('Shows current freetags and enables to add and remove some if permissions allow.'),
+		'description' => tra('Shows current tags and enables adding and removing some if permissions allow.'),
 		'prefs' => array('feature_freetags'),
 		'params' => array()
 	);
@@ -30,8 +30,9 @@ function module_freetag_info()
  */
 function module_freetag($mod_reference, $module_params)
 {
-	global $sections, $section, $modlib;
-	global $smarty;
+	global $sections, $section;
+	$smarty = TikiLib::lib('smarty');
+	$modlib = TikiLib::lib('mod');
 	
 	$globalperms = Perms::get();
 	if ($globalperms->view_freetags && isset($sections[$section])) {

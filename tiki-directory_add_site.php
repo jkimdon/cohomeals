@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-directory_add_site.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-directory_add_site.php 58749 2016-06-01 01:39:05Z lindonb $
 
 $section = 'directory';
 require_once ('tiki-setup.php');
@@ -99,7 +99,7 @@ if (isset($_REQUEST["save"])) {
 		$smarty->assign('save', 'y');
 	} else {
 		$info["isValid"] = 'n';
-		$smarty->assign('msg', $msg);
+		Feedback::warning($msg);
 	}
 	$info = array();
 	$info["name"] = $_REQUEST['name'];

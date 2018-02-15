@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ManipulatorTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ManipulatorTest.php 60529 2016-12-06 11:56:36Z kroky6 $
 
 /**
  * @group unit
@@ -78,7 +78,7 @@ class Category_ManipulatorTest extends TikiTestCase
 			array(
 				new Perms_ResolverFactory_TestFactory(
 					array('type', 'object'),
-					array('wiki page:Hello World' => new Perms_Resolver_Default(false),)
+					array('test:wiki page:Hello World' => new Perms_Resolver_Default(false),)
 				),
 				new Perms_ResolverFactory_StaticFactory('root', new Perms_Resolver_Default(true)),
 			)
@@ -102,7 +102,7 @@ class Category_ManipulatorTest extends TikiTestCase
 			array(
 				new Perms_ResolverFactory_TestFactory(
 					array('type', 'object'),
-					array('category:4' => new Perms_Resolver_Default(false),)
+					array('test:category:4' => new Perms_Resolver_Default(false),)
 				),
 				new Perms_ResolverFactory_StaticFactory('root', new Perms_Resolver_Default(true)),
 			)
@@ -126,7 +126,7 @@ class Category_ManipulatorTest extends TikiTestCase
 			array(
 				new Perms_ResolverFactory_TestFactory(
 					array('type', 'object'),
-					array('category:3' => new Perms_Resolver_Default(false),)
+					array('test:category:3' => new Perms_Resolver_Default(false),)
 				),
 				new Perms_ResolverFactory_StaticFactory('root', new Perms_Resolver_Default(true)),
 			)

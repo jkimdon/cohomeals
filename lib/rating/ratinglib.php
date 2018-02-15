@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ratinglib.php 52446 2014-09-02 11:28:04Z jonnybradley $
+// $Id: ratinglib.php 62594 2017-05-15 15:09:09Z jonnybradley $
 
 class RatingLib extends TikiDb_Bridge
 {
@@ -30,7 +30,7 @@ class RatingLib extends TikiDb_Bridge
 	function get_vote_comment_author( $comment_author, $type, $objectId )
 	{
 		return $this->get_user_vote($comment_author, $type, $objectId);
- 	}
+	}
 
 	function convert_rating_sort( & $sort_mode, $type, $objectKey )
 	{
@@ -141,12 +141,11 @@ class RatingLib extends TikiDb_Bridge
 	function record_user_vote( $user, $type, $objectId, $score, $time = null )
 	{
 		global $tikilib, $prefs;
-
 		if ( ! $this->is_valid($type, $score, $objectId) ) {
-			return false;
+            return false;
 		}
 
-		if ( is_null($time) ) {
+        if ( is_null($time) ) {
 			$time = time();
 		}
 
@@ -155,6 +154,13 @@ class RatingLib extends TikiDb_Bridge
 
 		if ( is_null($token) ) {
 			return false;
+		}
+
+		if (!empty($user)) {
+			$this->query(
+				'DELETE FROM `tiki_user_votings` WHERE `user` = ? AND `id` = ?',
+				array($user, $token)
+			);
 		}
 
 		$this->query(
@@ -180,15 +186,19 @@ class RatingLib extends TikiDb_Bridge
 
 	function is_valid( $type, $value, $objectId )
 	{
-		$options = $this->get_options($type, $objectId);
+		$options = $this->get_options($type, $objectId, false, $hasLabel);
 
-		return in_array($value, $options);
+        if($hasLabel){
+            return array_key_exists($value, $options);
+        }
+		    return in_array($value, $options);
+
 	}
 
-	function get_options( $type, $objectId, $skipOverride = false )
+	function get_options( $type, $objectId, $skipOverride = false, &$hasLabels = false )
 	{
 		$pref = 'rating_default_options';
-
+        $expectedArray = true;
 		switch( $type ) {
 			case 'wiki page':
 				$pref = 'wiki_simple_ratings_options';
@@ -201,39 +211,57 @@ class RatingLib extends TikiDb_Bridge
 				break;
 			case 'forum':
 				$pref = 'wiki_comments_simple_ratings_options';
+                $expectedArray = false;
 				break;
 		}
 
-		global $tikilib;
+		global $tikilib,
+               $prefs;
 
 		$override = $this->get_override($type, $objectId);
 
 		if (!empty($override) && $skipOverride == false) {
+
+            $override = array_filter($override, "is_numeric");
 			return $override;
 		}
 
-		return $tikilib->get_preference($pref, range(1, 5), true);
+        $value = $prefs[$pref];
+
+        if ( is_string($value) && strpos($value, '=') !== false ){
+            $hasLabels = true;
+            // FIXME? No idea what this was supposed to do
+            //$parser = new WikiLingo\Utilities\Parameters\Parser();
+            //$parsedPref = $parser->parse($value);
+            //return $parsedPref;
+        }
+
+		$result = $tikilib->get_preference($pref, range(1, 5), ($expectedArray && is_array($value)));
+
+        if ($expectedArray == true && !is_array($result)) {
+            $result = explode(',', $value);
+        }
+        $result = array_filter($result, "is_numeric");
+        return $result;
 	}
 
 	function set_override($type, $objectId, $value)
 	{
-		global $attributelib;
 		$options = $this->override_array($type);
 
-		$attributelib->set_attribute($type, $objectId, $type.".rating.override", $options[$value - 1]);
+		TikiLib::lib('attribute')->set_attribute($type, $objectId, $type.".rating.override", $options[$value - 1]);
 	}
 
 	function get_override($type, $objectId)
 	{
-		global $attributelib;
-		require_once('lib/attributes/attributelib.php');
-		$attrs = $attributelib->get_attributes($type, $objectId);
-		end($attrs);
-		$key = key($attrs);
-		if (empty($attrs) || empty($attrs[$key])) return;
+		$attributelib = TikiLib::lib('attribute');
+		$override = $attributelib->get_attribute($type, $objectId, $type.'.rating.override');
+		if (empty($override)) {
+			return [];
+		}
 
-		$attr = explode(',', $attrs[$type . '.rating.override']);
-		return $attr;
+		$override = explode(',', $override);
+		return $override;
 	}
 
 
@@ -298,13 +326,13 @@ class RatingLib extends TikiDb_Bridge
 				FROM tiki_user_votings tuv2
 				WHERE tuv2.user = tuv1.user AND tuv1.id = tuv2.id
 			)
-			GROUP BY user
 			ORDER BY time DESC", array($type.$threadId)
 		);
 
 		$votings = array();
 		$voteCount = count($user_votings);
 		$percent = ( $voteCount > 0 ? 100 / $voteCount : 0 );
+        $hasLabels = false;
 
 		foreach ($user_votings as $user_voting) {
 			if (!isset($votings[$user_voting['optionId']])) $votings[$user_voting['optionId']] = 0;
@@ -312,14 +340,23 @@ class RatingLib extends TikiDb_Bridge
 			$votings[$user_voting['optionId']]++;
 		}
 
-		$voteOptionsOverride = $this->get_options($type, $threadId);
+		$voteOptionsOverride = $this->get_options($type, $threadId, false, $hasLabels);
 		ksort($voteOptionsOverride);
 		$voteOptionsGeneral = $this->get_options($type, $threadId, true);
 		ksort($voteOptionsGeneral);
 
-
-		$overrideMin = (int)$voteOptionsOverride[0];
-		$overrideMax = (int)$voteOptionsOverride[count($voteOptionsOverride) - 1];
+        if ($hasLabels){
+            ksort($voteOptionsOverride);
+            $overrideMin = key($voteOptionsOverride);
+            end($voteOptionsOverride);
+            $overrideMax = key($voteOptionsOverride);
+        }
+        else
+        {
+            ksort($voteOptionsOverride);
+            $overrideMin = reset($voteOptionsOverride);
+            $overrideMax = end($voteOptionsOverride);
+        }
 
 		//$generalMin = (int)$voteOptionsGeneral[0];
 		//$generalMax = (int)$voteOptionsGeneral[count($voteOptionsGeneral) - 1];
@@ -406,7 +443,7 @@ class RatingLib extends TikiDb_Bridge
 	function attempt_refresh( $all = false )
 	{
 		global $prefs;
-		if ( 1 == rand(1, $prefs['rating_recalculation_odd']) ) {
+		if ( 1 == mt_rand(1, $prefs['rating_recalculation_odd']) ) {
 			$this->internal_refresh_list($prefs['rating_recalculation_count']);
 		}
 	}
@@ -470,14 +507,14 @@ class RatingLib extends TikiDb_Bridge
 
 	function get_options_smiles($type, $objectId = 0, $sort = false)
 	{
-		$options = $this->get_options($type, $objectId);
+		$options = $this->get_options($type, $objectId, false, $hasLabels);
 		$colors = $this->get_options_smiles_colors();
 
 		$optionsAsKeysSorted = array();
 
 
-		foreach ($options as $option) {
-			$optionsAsKeysSorted[$option] = array();
+		foreach ($options as $key => &$option) {
+			$optionsAsKeysSorted[$key] = array();
 		}
 
 		ksort($optionsAsKeysSorted);
@@ -495,7 +532,7 @@ class RatingLib extends TikiDb_Bridge
 		if ($sort == false) {
 			$result = array();
 			foreach ($options as $key => &$option) {
-				$result[$key] = $optionsAsKeysSorted[$option];
+				$result[$key] = $optionsAsKeysSorted[$key];
 			}
 		} else {
 			$result = $optionsAsKeysSorted;
@@ -509,7 +546,8 @@ class RatingLib extends TikiDb_Bridge
 		$configurations = $this->get_initialized_configurations();
 		$runner = $this->get_runner();
 
-		$list = TikiLib::lib('ratingconfig')->get_expired_object_list($max);
+		$ratingconfiglib = TikiLib::lib('ratingconfig');
+		$list = $ratingconfiglib->get_expired_object_list($max);
 
 		foreach ( $list as $object ) {
 			$this->internal_refresh_rating($object['type'], $object['object'], $runner, $configurations);
@@ -518,7 +556,7 @@ class RatingLib extends TikiDb_Bridge
 
 	private function internal_refresh_rating( $type, $object, $runner, $configurations )
 	{
-		global $ratingconfiglib; require_once 'lib/rating/configlib.php';
+		$ratingconfiglib = TikiLib::lib('ratingconfig');
 		$runner->setVariables(array('type' => $type, 'object-id' => $object));
 
 		foreach ( $configurations as $config ) {

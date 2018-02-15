@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Forum.php 51186 2014-05-08 16:43:20Z xavidp $
+// $Id: Forum.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_Forum extends Tiki_Profile_InstallHandler
 {
@@ -63,8 +63,8 @@ class Tiki_Profile_InstallHandler_Forum extends Tiki_Profile_InstallHandler
 			'enable_topic_smiley' => 'n',
 			'enable_topic_summary' => 'n',
 			'enable_ui_avatar' => 'n',
-            'enable_ui_rating_choice_topic' => 'n',
-            'enable_ui_flag' => 'n',
+			'enable_ui_rating_choice_topic' => 'n',
+			'enable_ui_flag' => 'n',
 			'enable_ui_posts' => 'n',
 			'enable_ui_level' => 'n',
 			'enable_ui_email' => 'n',
@@ -148,8 +148,8 @@ class Tiki_Profile_InstallHandler_Forum extends Tiki_Profile_InstallHandler
 			$data['enable_topic_smiley'],
 			$data['enable_topic_summary'],
 			$data['enable_ui_avatar'],
-            $data['enable_ui_rating_choice_topic'],
-            $data['enable_ui_flag'],
+			$data['enable_ui_rating_choice_topic'],
+			$data['enable_ui_flag'],
 			$data['enable_ui_posts'],
 			$data['enable_ui_level'],
 			$data['enable_ui_email'],
@@ -222,7 +222,7 @@ class Tiki_Profile_InstallHandler_Forum extends Tiki_Profile_InstallHandler
 				'inbound_pop_password' => $info['inbound_pop_password'],
 				'enable_topic_smiley' => $info['topic_smileys'],
 				'enable_ui_avatar' => $info['ui_avatar'],
-                'enable_ui_rating_choice_topic' => $info['ui_rating_choice_topic'],
+				'enable_ui_rating_choice_topic' => $info['ui_rating_choice_topic'],
 				'enable_ui_flag' => $info['ui_flag'],
 				'enable_ui_posts' => $info['ui_posts'],
 				'enable_ui_email' => $info['ui_email'],

@@ -1,15 +1,15 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: freetags.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: freetags.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 $access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
 
 if ( isset($section) and isset($sections[$section])) {
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 	$here = $sections[$section];
 	if ( $tiki_p_freetags_tag == 'y' && isset($_POST['addtags']) && trim($_POST['addtags']) != '' ) {
 		if ( ! isset($user) ) $userid = 0;
@@ -44,7 +44,6 @@ if ( isset($section) and isset($sections[$section])) {
 	}
 
 	$smarty->assign('freetags', $tags);
-	$headerlib->add_cssfile('css/freetags.css');
 
 	if ( $tiki_p_freetags_tag == 'y' && $prefs['freetags_multilingual'] == 'y' ) {
 		$ft_lang = null;

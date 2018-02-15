@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: jquery.php 46147 2013-06-03 13:11:53Z jonnybradley $
+// $Id: jquery.php 61815 2017-03-22 14:50:08Z jyhem $
 
 function prefs_jquery_list($partial = false)
 {
@@ -30,7 +30,7 @@ function prefs_jquery_list($partial = false)
 	return array(
 		'jquery_effect' => array(
 			'name' => tra('Effect for modules'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => $jquery_effect_options,
 			'help' => 'JQuery#Effects',
@@ -39,7 +39,7 @@ function prefs_jquery_list($partial = false)
 		),
 		'jquery_effect_tabs' => array(
 			'name' => tra('Effect for tabs'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => $jquery_effect_options,
 			'help' => 'JQuery#Effects',
@@ -47,7 +47,7 @@ function prefs_jquery_list($partial = false)
 		),
 		'jquery_effect_speed' => array(
 			'name' => tra('Speed'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'fast' => tra('Fast'),
@@ -58,7 +58,7 @@ function prefs_jquery_list($partial = false)
 		),
 		'jquery_effect_direction' => array(
 			'name' => tra('Direction'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'vertical' => tra('Vertical'),
@@ -72,7 +72,7 @@ function prefs_jquery_list($partial = false)
 		),
 		'jquery_effect_tabs_speed' => array(
 			'name' => tra('Speed'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'fast' => tra('Fast'),
@@ -83,7 +83,7 @@ function prefs_jquery_list($partial = false)
 		),
 		'jquery_effect_tabs_direction' => array(
 			'name' => tra('Direction'),
-            'description' => tra(''),
+			'description' => tra(''),
 			'type' => 'list',
 			'options' => array(
 				'vertical' => tra('Vertical'),
@@ -96,39 +96,17 @@ function prefs_jquery_list($partial = false)
 			'default' => 'vertical',
 		),
 		'jquery_ui_chosen' => array(
-			'name' => tra('jQuery-ui Chosen Menu'),
-			'description' => tra('Styled replacement for dropdown select menus and multiple select inputs.'),
+			'name' => tra('jQuery-UI Chosen Select Boxes'),
+			'description' => tra('Styled replacement for dropdown select lists and multiple-select inputs.'),
 			'type' => 'flag',
 			'default' => 'n',
-			'tags' => array('experimental'),
 			'dependencies' => array(
 				'feature_jquery_ui',
-			),
-		),
-		'jquery_ui_selectmenu' => array(
-			'name' => tra('jQuery-ui Select Menu'),
-			'description' => tra('Styled replacement for dropdown select menus.'),
-			'type' => 'flag',
-			'default' => 'n',
-			'warning' => tra('Experimental. This plugin is deprecated in favor of "Chosen".'),
-			'dependencies' => array(
-				'feature_jquery_ui',
-			),
-		),
-		'jquery_ui_selectmenu_all' => array(
-			'name' => tra('Use Select Menu on all select elements'),
-			'description' => tra('Applies jQuery-ui Select Menu to every select menu.'),
-			'type' => 'flag',
-			'default' => 'n',
-			'tags' => array('experimental'),
-			'warning' => tra('Experimental. This feature is under development.'),
-			'dependencies' => array(
-				'jquery_ui_selectmenu',
 			),
 		),
 		'jquery_colorbox_theme' => array(
-			'name' => tra('CSS to use in Colorbox (a.k.a. "Shadowbox")'),
-            'description' => tra(''),
+			'name' => tra('Visual style of Colorbox (a.k.a. "Shadowbox")'),
+			'description' => tra(''),
 			'type' => 'list',
 			'perspective' => false,
 			'options' => array(
@@ -142,6 +120,18 @@ function prefs_jquery_list($partial = false)
 			'dependencies' => array(
 				'feature_shadowbox',
 			),
+		),
+		'jquery_fitvidjs' => array(
+			'name' => tra('FitVids.js'),
+			'description' => tra('jQuery plugin for fluid-width (responsive) embedded videos.'),
+			'type' => 'flag',
+			'default' => 'n',
+		),
+		'jquery_timeago' => array(
+			'name' => tra('jQuery Timeago'),
+			'description' => tra('jQuery plugin for fuzzy timestamps.'),
+			'type' => 'flag',
+			'default' => 'n',
 		),
 	);
 }

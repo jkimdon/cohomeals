@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-assignuser.php 46136 2013-06-02 12:12:36Z changi67 $
+// $Id: tiki-assignuser.php 63829 2017-09-13 16:57:47Z jonnybradley $
 
 // This script is used to assign groups to a particular user
 // ASSIGN USER TO GROUPS
@@ -32,14 +32,16 @@ if (!isset($_REQUEST["assign_user"]) || ($tiki_p_admin != 'y' && $tiki_p_admin_u
 
 $assign_user = $_REQUEST["assign_user"];
 
-if (isset($_REQUEST["action"])) {
-	check_ticket('admin-assign-user');
+if (isset($_REQUEST["action"]) && $access->checkOrigin()) {
 
 	if (!isset($_REQUEST["group"])) {
 		$smarty->assign('msg', tra("You have to indicate a group"));
 		$smarty->display("error.tpl");
 		die;
 	}
+
+	$access->check_authenticity(tr('Are you sure you want to add user %0 to group %1', $_REQUEST['assign_user'], $_REQUEST['group']));
+
 	if ($userChoice == 'y') {
 		$gps = $userlib->get_groups(0, -1, 'groupName_asc', '', '', '', '', $userChoice);
 		$groups = array();
@@ -66,13 +68,13 @@ if (isset($_REQUEST["action"])) {
 	}
 }
 
-if (isset($_REQUEST['set_default'])) {
+if (isset($_REQUEST['set_default']) && $access->checkOrigin()) {
 	$userlib->set_default_group($_REQUEST['login'], $_REQUEST['defaultgroup']);
 }
 
 $user_info = $userlib->get_user_info($assign_user, true);
 $smarty->assign_by_ref('user_info', $user_info);
-if (!empty($_REQUEST['save'])) {
+if (!empty($_REQUEST['save']) && $access->checkOrigin()) {
 	foreach ($_REQUEST as $r => $v) {
 		if (strpos($r, 'new_') === 0) {
 			$g = substr($r, 4);
@@ -141,8 +143,6 @@ $smarty->assign_by_ref('cant_pages', $users["cant"]);
 
 // Get users (list of users)
 $smarty->assign_by_ref('users', $users["data"]);
-
-ask_ticket('admin-assign-user');
 
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');

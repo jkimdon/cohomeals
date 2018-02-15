@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_wizard_completed.php 49682 2014-02-03 16:43:09Z xavidp $
+// $Id: user_wizard_completed.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 require_once('lib/wizard/wizard.php');
 
@@ -23,22 +23,20 @@ class UserWizardCompleted extends Wizard
 	
 	public function onSetupPage ($homepageUrl) 
 	{
-		global	$smarty;
-
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
-		
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_wizard_completed.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
 		
 		return true;
 	}
 
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_wizard_completed.tpl';
+		return $wizardTemplate;
+	}
+
 	function onContinue ($homepageUrl) 
 	{
-		global $tikilib; 
-
 		// Run the parent first
 		parent::onContinue($homepageUrl);
 	}

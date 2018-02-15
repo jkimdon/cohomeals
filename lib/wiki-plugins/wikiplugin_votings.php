@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_votings.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: wikiplugin_votings.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 function wikiplugin_votings_info()
 {
@@ -13,11 +13,14 @@ function wikiplugin_votings_info()
 		'description' => tra('Saves voting information in Smarty variables for display'),
 		'prefs' => array( 'wikiplugin_votings' ),	
 		'format' => 'html',
+		'iconname' => 'thumbs-up',
+		'introduced' => 8,
 		'params' => array(
 			'objectkey' => array(
 				'required' => true,
 				'name' => tra('Object Key'),
 				'description' => tra('Object key that is used to record votes'),
+				'since' => '8.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -25,6 +28,7 @@ function wikiplugin_votings_info()
 				'required' => false,
 				'name' => tra('Return value'),
 				'description' => tra('Value to display as output of plugin'),
+				'since' => '8.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -33,13 +37,13 @@ function wikiplugin_votings_info()
 }
 function wikiplugin_votings($data, $params)
 {
-	global $smarty, $user;
+	global $user;
 	if (!isset($params['objectkey'])) {
 		return '';
 	} else {
 		$key = $params['objectkey'];
 	}
-
+	$smarty = TikiLib::lib('smarty');
 	$votings = TikiDb::get()->table('tiki_user_votings');
 
 	$data = $votings->fetchRow(array('count' => $votings->count(), 'total' => $votings->sum('optionId')), array('id' => $key));

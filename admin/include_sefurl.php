@@ -1,14 +1,14 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_sefurl.php 50503 2014-03-25 23:52:33Z jyhem $
+// $Id: include_sefurl.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 require_once ('tiki-setup.php');
 $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
-if (isset($_REQUEST['save'])) {
-	check_ticket('admin-inc-sefurl');
+
+if (isset($_REQUEST['feature_sefurl_paths']) && $access->ticketMatch()) {
 	$_REQUEST['feature_sefurl_paths'] = preg_split('/ *[,\/] */', $_REQUEST['feature_sefurl_paths']);
 	simple_set_value('feature_sefurl_paths');
 }
@@ -74,5 +74,3 @@ if (isset($enabledFileName)) {
 	$smarty->assign('enabledFileName', $enabledFileName);
 	$smarty->assign('configurationFile', $configurationFile);
 }
-
-ask_ticket('admin-inc-sefurl');

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: editmode.php 45028 2013-03-04 13:36:55Z jonnybradley $
+// $Id: editmode.php 61553 2017-03-07 16:50:53Z jonnybradley $
 
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) != FALSE) {
 	header('location: index.php');
@@ -66,7 +66,6 @@ if (isset($jitRequest['edit'])) {
 	// Restore the property for the rest of the script
 	if ($is_html) {
 		$data = $jitRequest->edit->none();
-
 		$parserlib = TikiLib::lib('parser');
 		$noparsed = array();
 		$parserlib->plugins_remove($data, $noparsed);

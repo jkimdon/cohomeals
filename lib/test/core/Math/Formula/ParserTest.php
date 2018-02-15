@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ParserTest.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: ParserTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
 
 class Math_Formula_ParserTest extends TikiTestCase
 {
@@ -86,6 +86,27 @@ DOC;
 		$this->assertEquals($parser->parse($equivalent), $parser->parse($documented));
 	}
 
+	function testWithString()
+	{
+		$parser = new Math_Formula_Parser;
+
+		$element = new Math_Formula_Element(
+			'score',
+			array(
+				new Math_Formula_Element('object', [
+					new Math_Formula_InternalString('wiki page'),
+					new Math_Formula_InternalString('HomePage'),
+				]),
+				new Math_Formula_Element(
+					'range',
+					array(new Math_Formula_Element('mul', array(3600, 60)),)
+				),
+			)
+		);
+
+		$this->assertEquals($element, $parser->parse('(score (object "wiki page" "HomePage") (range (mul 3600 60)))'));
+	}
+
 	function testWithZero()
 	{
 		$parser = new Math_Formula_Parser;
@@ -116,6 +137,7 @@ DOC;
 			'doubles' => array('((test))'),
 			'trail' => array('(test) foo'),
 			'unfinished' => array('(score (object type object) (range 3600)'),
+			'unfinishedString' => array('(score (object "wiki page object) (range 3600))'),
 		);
 	}
 

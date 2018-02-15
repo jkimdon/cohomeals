@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Manipulator.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: Manipulator.php 60201 2016-11-08 09:52:00Z kroky6 $
 
 class Category_Manipulator
 {
@@ -80,15 +80,26 @@ class Category_Manipulator
 		return $this->filter($attempt, 'remove_object');
 	}
 
+	
+	/*
+	 * Check wether the given permission is allowed for the given categories.
+	 * Note: The group in question requires also the _global_ permission 'modify_object_categories'
+	 * which could be given to a parent object like parent Tracker of a TrackerItem.
+	 * @param array $categories - requested categories
+	 * @param string  $permission - required permission for that category. Ie. 'add_category'
+	 * @return array $authorizedCategories - filterd list of given $categories that have proper permissions set.
+	 */
 	private function filter( $categories, $permission )
 	{
-		$canModify = $this->canModifyObject();
+		$objectperms = Perms::get(array('type' => $this->objectType, 'object' => $this->objectId));
+		$canModifyObject = $objectperms->modify_object_categories;
 
 		$out = array();
 		foreach ($categories as $categ) {
 			$perms = Perms::get(array('type' => 'category', 'object' => $categ));
+			$hasCategoryPermission = $perms->$permission;
 
-			if ($this->overrideAll || ($canModify && $perms->$permission) || in_array($categ, $this->overrides)) {
+			if ($this->overrideAll || ($canModifyObject && $hasCategoryPermission) || in_array($categ, $this->overrides)) {
 				$out[] = $categ;
 			}
 		}
@@ -96,12 +107,6 @@ class Category_Manipulator
 		return $out;
 	}
 
-	private function canModifyObject()
-	{
-		$objectperms = Perms::get(array('type' => $this->objectType, 'object' => $this->objectId));
-
-		return $objectperms->modify_object_categories;
-	}
 
 	private function prepare()
 	{

@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-searchresults.php 49838 2014-02-11 22:38:40Z arildb $
+// $Id: tiki-searchresults.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $inputConfiguration = array(
 	array( 'staticKeyFilters' => array(
@@ -129,8 +129,7 @@ if ($prefs['feature_categories'] == 'y') {
 		$smarty->assign('find_categId', $_REQUEST['categId']);
 	}
 
-	global $categlib;
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 	$categories = $categlib->getCategories();
 	$smarty->assign_by_ref('categories', $categories);
 	$smarty->assign('cat_tree', $categlib->generate_cat_tree($categories, true, $selectedCategories));
@@ -164,8 +163,6 @@ if (!isset($_REQUEST["words"]) || empty($_REQUEST["words"])) {
 	$smarty->assign('words', '');
 } else {
 	$words = strip_tags($_REQUEST["words"]);
-	$words = addslashes($words); // to allow quotes for literal fulltext searching
-
 	if (!method_exists($searchlib, $find_where)) {
 		$find_where = "find_pages";
 	}
@@ -214,7 +211,8 @@ if ($prefs['feature_trackers'] == 'y') {
 }
 if (($where == 'wikis' || $where == 'articles') && $prefs['feature_multilingual'] == 'y') {
 	$languages = array();
-	$languages = $tikilib->list_languages(false, 'y');
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages(false, 'y');
 	$smarty->assign_by_ref('languages', $languages);
 }
 

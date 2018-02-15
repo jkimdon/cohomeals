@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_watches.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-user_watches.php 59887 2016-10-04 10:08:40Z xavidp $
 
 $section = 'mytiki';
 include_once ('tiki-setup.php');
@@ -15,11 +15,12 @@ $access->check_user($user);
 $access->check_feature('feature_user_watches');
 
 if ($prefs['feature_user_watches_translations']) {
-	$languages = $tikilib->list_languages();
+	$langLib = TikiLib::lib('language');
+	$languages = $langLib->list_languages();
 	$smarty->assign_by_ref('languages', $languages);
 }
 
-require_once('lib/notifications/notificationlib.php');
+$notificationlib = TikiLib::lib('notification');
 
 $notification_types = $notificationlib->get_global_watch_types(true);
 if ($prefs['feature_user_watches_translations'] == 'y') {
@@ -48,7 +49,7 @@ if (isset($_POST['langwatch'])) {
 }
 
 if ($prefs['feature_categories']) {
-	include_once ('lib/categories/categlib.php');
+	$categlib = TikiLib::lib('categ');
 	$categories = $categlib->getCategories(NULL, true, false);
 } else {
 	$categories = array();
@@ -198,7 +199,7 @@ $smarty->assign('user_wiki_watch_editor', $tikilib->get_user_preference($user, '
 $smarty->assign('user_blog_watch_editor', $tikilib->get_user_preference($user, 'user_blog_watch_editor'));
 $smarty->assign('user_tracker_watch_editor', $tikilib->get_user_preference($user, 'user_tracker_watch_editor'));
 $smarty->assign('user_comment_watch_editor', $tikilib->get_user_preference($user, 'user_comment_watch_editor'));
-
+$smarty->assign('user_category_watch_editor', $tikilib->get_user_preference($user, 'user_category_watch_editor'));
 
 $smarty->assign('mid', 'tiki-user_watches.tpl');
 $smarty->display("tiki.tpl");

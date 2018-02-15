@@ -1,12 +1,12 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-send_objects.php 45575 2013-04-18 15:51:49Z lphuberdeau $
+// $Id: tiki-send_objects.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/structures/structlib.php');
+$structlib = TikiLib::lib('struct');
 
 //get_strings tra("Send Pages");
 $access->check_feature('feature_comm');
@@ -177,7 +177,7 @@ if (isset($_REQUEST['send'])) {
 			}
 		}
 	}
-	global $artlib; require_once 'lib/articles/artlib.php';
+	$artlib = TikiLib::lib('art');
 	foreach ($sendarticles as $article) {
 		$page_info = $artlib->get_article($article);
 		if ($page_info) {
@@ -246,7 +246,7 @@ $pages = $tikilib->list_pageNames(0, -1, 'pageName_asc', $find);
 $smarty->assign('pages', $pages['data']);
 
 if ( $prefs['feature_articles'] == 'y' ) {
-	global $artlib; require_once 'lib/articles/artlib.php';
+	$artlib = TikiLib::lib('art');
 	$articles = $artlib->list_articles(0, -1, 'publishDate_desc', $find, 0, $tikilib->now, $user);
 	$smarty->assign('articles', $articles['data']);
 }

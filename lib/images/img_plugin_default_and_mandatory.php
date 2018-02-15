@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: img_plugin_default_and_mandatory.php 45134 2013-03-15 18:47:02Z changi67 $
+// $Id: img_plugin_default_and_mandatory.php 57967 2016-03-17 20:06:16Z jonnybradley $
 
 /*Admin default and mandatory settings (must be set by changing this fle or using plugin alias). Default will be used if not overridden
 by user. Mandatory will override user settings. Examples below set parameters depending on whether the image is in an article, a module, or
@@ -18,7 +18,8 @@ whether mobile mode is set, etc.*/
 if (!function_exists('apply_default_and_mandatory')) {
 	function apply_default_and_mandatory($imgdata, $default)
 	{
-		global $section, $smarty;
+		$smarty = TikiLib::lib('smarty');
+		global $section;
 		$imgdata[$default] = trim($imgdata[$default]) . ';'; // trim whitespace and ensure at least one semicolon
 		$img_conditions_array = explode(';', $imgdata[$default]); // conditions separated by semicolons
 		if ( !empty($img_conditions_array) ) {

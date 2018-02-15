@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: admin_text_area.php 48912 2013-12-02 21:33:02Z arildb $
+// $Id: admin_text_area.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 require_once('lib/wizard/wizard.php');
 
@@ -23,8 +23,8 @@ class AdminWizardTextArea extends Wizard
 	
 	public function onSetupPage ($homepageUrl) 
 	{
-		global	$smarty, $prefs;
-
+		global $prefs;
+		$smarty = TikiLib::lib('smarty');
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
 
@@ -42,12 +42,14 @@ class AdminWizardTextArea extends Wizard
 		require_once('lib/language/Language.php');
 		$isRTL = Language::isRTL();
 		$smarty->assign('isRTL', $isRTL);
-
-		// Assign the page temaplte
-		$wizardTemplate = 'wizard/admin_text_area.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
 		
 		return $showPage;		
+	}
+
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/admin_text_area.tpl';
+		return $wizardTemplate;
 	}
 
 	public function onContinue ($homepageUrl) 

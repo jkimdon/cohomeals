@@ -1,4 +1,10 @@
+{extends 'layout_view.tpl'}
+
+{block name="title"}
 	{title}{$title|escape}{/title}
+{/block}
+
+{block name="content"}
 	<div class="well">
 		<div style="overflow: auto; max-height: 400px;">
 		{$content}
@@ -15,3 +21,4 @@
 		<input class="btn btn-sm btn-danger" type="submit" name="decline" value="{tr}I Decline, log out{/tr}">
 		<input name="origin" value="{$origin|escape}" type="hidden">
 	</form>
+{/block}

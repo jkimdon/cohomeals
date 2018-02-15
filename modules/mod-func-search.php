@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-search.php 48558 2013-11-19 17:46:24Z jonnybradley $
+// $Id: mod-func-search.php 61728 2017-03-17 15:58:13Z luciash $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -71,15 +71,15 @@ function module_search_info()
 				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . tra(' tiki-searchresults.php or tiki-searchindex.php (for Tiki search)'),
 			),
 			'search_submit' => array(
-				'name' => tra('Edit Submit Label'),
+				'name' => tra('Search Submit Label'),
 				'description' => tra('The label on the button to submit the form.') . ' ' . tra('Default:') . ' ' . tra('Search'),
 			),
 			'go_action' => array(
 				'name' => tra('Go Form Action'),
-				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . ' tiki-editpage.php'
+				'description' => tra("If set, send the form to the given location (relative to Tiki's root) for processing.") . ' ' . tra('Default:') . ' tiki-listpages.php'
 			),
 			'go_submit' => array(
-				'name' => tra('Edit Submit Label'),
+				'name' => tra('Go Submit Label'),
 				'description' => tra('The label on the button to submit the form.') . ' ' . tra('Default:') . ' ' . tra('Go')
 			),
 			'edit_action' => array(
@@ -116,7 +116,10 @@ function module_search_info()
 				'name' => tra('Compact mode'),
 				'description' => tra('Makes the three buttons only appear on mouse-over.') . ' ' . tra('Default:') . ' "n"'
 			),
-
+			'additional_filters' => array(
+				'name' => tr('Additional filters'),
+				'description' => tr('Filters to be applied to the search results, as a URL-encoded string. Ex.: catgories=1+AND+2&prefix~title=Test'),
+			),
 		)
 	);
 }
@@ -127,7 +130,8 @@ function module_search_info()
  */
 function module_search($mod_reference, $smod_params) 	// modifies $smod_params so uses & reference
 {
-	global $smarty, $prefs;
+	$smarty = TikiLib::lib('smarty');
+	global $prefs;
 	static $search_mod_usage_counter = 0;
 	$smarty->assign('search_mod_usage_counter', ++$search_mod_usage_counter);
 
@@ -135,20 +139,25 @@ function module_search($mod_reference, $smod_params) 	// modifies $smod_params s
 	$smarty->assign_by_ref('smod_params', $smod_params);
 
 	// Deal with the two search types (sigh). If the requested search type is disabled but the other one is enabled, use it as a fallback.
-	$smod_params['tiki_search'] = isset($smod_params['tiki_search']) && $smod_params['tiki_search'] == 'y';
-
 	if ($prefs['feature_search'] == 'n' && $prefs['feature_search_fulltext'] == 'n') {
 		$smod_params['tiki_search'] = 'none';
 		$smarty->assign('module_error', tra('Search is disabled.'));
 		return;
 	} else if ($prefs['feature_search'] == 'n' && $smod_params['tiki_search'] == 'y') {
 		$smod_params['tiki_search'] = 'n';
-	} else if ($prefs['feature_search_fulltext'] == 'n' && $smod_params['tiki_search'] != 'y') {
+	} else if ($prefs['feature_search_fulltext'] == 'n' && (empty($smod_params['tiki_search']) || $smod_params['tiki_search'] != 'y')) {
 		$smod_params['tiki_search'] = 'y';
 	}
 
 	if (isset($smod_params['go_action']) && $smod_params['go_action'] == 'ti') {	// temporary fix for 5.0 in case params were truncated in the db
 		unset($smod_params['go_action']);
+	}
+
+	if (isset($smod_params['additional_filters'])) {
+		parse_str($smod_params['additional_filters'], $out);
+		$smod_params['additional_filters'] = $out ?: [];
+	} else {
+		$smod_params['additional_filters'] = [];
 	}
 
 	// set up other param defaults
@@ -165,13 +174,12 @@ function module_search($mod_reference, $smod_params) 	// modifies $smod_params s
 		'default_button' => 'search',
 		'input_size' => 0,
 		'select_size' => 10,
-		'search_action' => $smod_params['tiki_search'] ? 'tiki-searchindex.php' : 'tiki-searchresults.php',
+		'search_action' => $smod_params['tiki_search'] === 'y' ? 'tiki-searchindex.php' : 'tiki-searchresults.php',
 		'search_submit' => tra('Search'),
 		'go_action' => 'tiki-listpages.php',
-		'go_submit' => tra('Titles'),
+		'go_submit' => tra('Go'),
 		'edit_action' => 'tiki-editpage.php',
 		'edit_submit' => tra('Edit'),
-		'default_button' => 'search',
 		'search_heading' => '',
 		'templateId' => '',
 		'categId' => '',

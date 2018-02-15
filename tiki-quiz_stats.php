@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-quiz_stats.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-quiz_stats.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 $section = 'quizzes';
 require_once ('tiki-setup.php');
-include_once ('lib/quizzes/quizlib.php');
+$quizlib = TikiLib::lib('quiz');
 
 $auto_query_args = array('sort_mode', 'offset', 'find');
 

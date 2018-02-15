@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-domain_password.php 50657 2014-04-03 18:05:32Z arildb $
+// $Id: mod-func-domain_password.php 58787 2016-06-05 13:59:28Z lindonb $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -27,7 +27,7 @@ function module_domain_password_info()
 			),
 			'use_currentuser' => array(
 				'name' => tra('Use current user'),
-				'description' => tra('Use the currently logged in user. The username is not editable. (y/n) Default: y'),
+				'description' => tra('Use the currently logged-in user. The username is not editable. (y/n) Default: y'),
 			),
 			'can_update' => array(
 				'name' => tra('Can Update'),
@@ -48,7 +48,9 @@ function module_domain_password_info()
  */
 function module_domain_password($mod_reference, $module_params)
 {
-	global $prefs, $tikilib, $smarty, $user;
+	global $prefs, $user;
+	$smarty = TikiLib::lib('smarty');
+	$tikilib = TikiLib::lib('tiki');
 
 	// Allow for multiple modules on one page
 	$moduleNr = $mod_reference['moduleId'];
@@ -200,6 +202,6 @@ function module_domain_password($mod_reference, $module_params)
 		}
 	}
 	if (!empty($errors[$cntModule])) {
-		$smarty->assign('errors', $errors);
+		Feedback::error(['mes' => $errors[$cntModule]]);
 	}
 }

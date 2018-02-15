@@ -2,35 +2,37 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-theme_control_sections.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-theme_control_sections.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 require_once ('tiki-setup.php');
-include_once ('lib/themecontrol/tcontrol.php');
-include_once ('lib/categories/categlib.php');
+$themecontrollib = TikiLib::lib('themecontrol');
+$categlib = TikiLib::lib('categ');
+$themelib = TikiLib::lib('theme');
 
 $access->check_feature('feature_theme_control', '', 'look');
 $access->check_permission('tiki_p_admin');
 
-$auto_query_args = array('find', 'sort_mode', 'offset', 'theme', 'theme-option', 'section');
+$auto_query_args = array('find', 'sort_mode', 'offset', 'theme', 'theme_option', 'section');
 $smarty->assign('a_section', isset($_REQUEST['section']) ? $_REQUEST['section'] : '');
 
-$tcontrollib->setup_theme_menus();
+$themes = $themelib->list_themes_and_options();
+$smarty->assign('themes', $themes);
 
 if (isset($_REQUEST['assign'])) {
 	check_ticket('tc-sections');
-	$tcontrollib->tc_assign_section($_REQUEST['section'], $_REQUEST['theme'], isset($_REQUEST['theme-option']) ? $_REQUEST['theme-option'] : '');
+	$themecontrollib->tc_assign_section($_REQUEST['section'], $_REQUEST['theme']);
 }
 if (isset($_REQUEST['delete'])) {
 	check_ticket('tc-sections');
 	foreach (array_keys($_REQUEST["sec"]) as $sec) {
-		$tcontrollib->tc_remove_section($sec);
+		$themecontrollib->tc_remove_section($sec);
 	}
 }
-$channels = $tcontrollib->tc_list_sections(0, -1, 'section_asc', '');
+$channels = $themecontrollib->tc_list_sections(0, -1, 'section_asc', '');
 $smarty->assign_by_ref('channels', $channels["data"]);
 $smarty->assign('sections', $sections_enabled);
 ask_ticket('tc-sections');

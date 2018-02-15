@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Module.php 48066 2013-10-19 13:59:27Z nkoth $
+// $Id: Module.php 57969 2016-03-17 20:07:40Z jonnybradley $
 
 class Tiki_Profile_InstallHandler_Module extends Tiki_Profile_InstallHandler
 {
@@ -18,6 +18,7 @@ class Tiki_Profile_InstallHandler_Module extends Tiki_Profile_InstallHandler
 			'custom' => null,
 			'groups' => array(),
 			'params' => array(),
+			'parse' => null,
 		);
 
 		$data = array_merge($defaults, $this->obj->getData());
@@ -37,11 +38,11 @@ class Tiki_Profile_InstallHandler_Module extends Tiki_Profile_InstallHandler
 		$module_zones = array_map(array($this, 'processModuleZones'), $module_zones);
 		$module_zones = array_flip($module_zones);
 		$data['position'] = $module_zones[$data['position']];
-
-		$data['params'] = http_build_query($data['params'], '', '&');
 		if ( is_null($data['params']) ) {
 			// Needed on some versions of php to make sure null is not passed all the way to query as a parameter, since params field in db cannot be null
 			$data['params'] = '';
+		} else {
+			$data['params'] = http_build_query($data['params'], '', '&');
 		}
 
 		return $data;

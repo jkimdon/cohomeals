@@ -1,17 +1,73 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: paymentlib.php 51201 2014-05-09 16:53:50Z lphuberdeau $
+// $Id: paymentlib.php 60942 2017-01-19 17:42:27Z jonnybradley $
 
 class PaymentLib extends TikiDb_Bridge
 {
 	private $gateways = array();
 
+	public $fieldmap = [
+		'paymentRequestId' => [
+			'table' => 'tpr',
+			],
+		'description' => [
+			'table' => 'tpr',
+		],
+		'detail' => [
+			'table' => 'tpr',
+		],
+		'details' => [
+			'table' => 'tp',
+		],
+		'amount' => [
+			'table' => 'tpr',
+		],
+		'request_date' => [
+			'table' => 'tpr',
+		],
+		'payment_date' => [
+			'table' => 'tp',
+		],
+		'type' => [
+			'table' => 'tp',
+		],
+		'login' => [
+			'table' => 'uu',
+		],
+		'payer' => [
+			'table' => 'uup',
+			'field' => 'login',
+		],
+	];
+
+	private function setTable($field)
+	{
+		return isset($this->fieldmap[$field]['table']) ? $this->fieldmap[$field]['table'] : '';
+	}
+
+	private function setField($field)
+	{
+		return isset($this->fieldmap[$field]['field']) ? $this->fieldmap[$field]['field'] : $field;
+	}
+
+	private function fieldTableArray()
+	{
+		$ret = [];
+		foreach ($this->fieldmap as $field => $info) {
+			$table = $this->setTable($field);
+			$rfield = $this->setField($field);
+			$ret[] = $table . '.' . $rfield;
+		}
+		return $ret;
+	}
+
 	function request_payment( $description, $amount, $paymentWithin, $detail = null, $currency = null )
 	{
-		global $prefs, $userlib, $user;
+		global $prefs, $user;
+		$userlib = TikiLib::lib('user');
 
 		$description = substr($description, 0, 100);
 		if (empty($currency)) {
@@ -31,16 +87,16 @@ class PaymentLib extends TikiDb_Bridge
 		return $this->lastInsertId();
 	}
 
-	private function get_payments( $conditions, $offset, $max, $what='' )
+	private function get_payments( $conditions, $offset, $max, array $bindvars, $what='')
 	{
 		$mid = '`tiki_payment_requests` tpr LEFT JOIN `users_users` uu ON (uu.`userId` = tpr.`userId`)';
 		$count = 'SELECT COUNT(*) FROM ' . $mid . ' WHERE ' . $conditions;
 		$data = 'SELECT tpr.*, uu.`login` as `user` '.$what.' FROM ' . $mid . ' WHERE ' . $conditions;
 
-		$all = $this->fetchAll($data, array(), $max, $offset);
+		$all = $this->fetchAll($data, $bindvars, $max, $offset);
 
 		return array(
-			'cant' => $this->getOne($count),
+			'cant' => $this->getOne($count, $bindvars),
 			'data' => Perms::filter(
 				array( 'type' => 'payment' ),
 				'object',
@@ -51,36 +107,60 @@ class PaymentLib extends TikiDb_Bridge
 		);
 	}
 
-	function get_outstanding( $offset, $max, $ofUser = '' )
+	function get_outstanding( $offset, $max, $ofUser = '', $filter = [], $sort = null )
 	{
 		$conditions = '`amount_paid` < `amount` AND NOW() <= `due_date` AND `cancel_date` IS NULL AND (`authorized_until` IS NULL OR `authorized_until` <= NOW())';
 		if ($ofUser) {
 			$conditions .= " AND uu.`login` = " . $this->qstr($ofUser);
 		}
-		return $this->get_payments($conditions, $offset, $max);
+		$bindvars = [];
+		$conditions .= $this->addFilterSort($filter, $sort, $bindvars);
+		return $this->get_payments($conditions, $offset, $max, $bindvars);
 	}
 
-	function get_past( $offset, $max, $ofUser = '' )
+	function get_past( $offset, $max, $ofUser = '', $filter = [], $sort = null )
 	{
+		global $prefs;
+		$parserlib = TikiLib::lib('parser');
+
 		$conditions = 'tpr.`amount` <= tpr.`amount_paid` AND tpr.`cancel_date` IS NULL';
 		if ($ofUser) {
 			$conditions .= " AND uu.`login` = " . $this->qstr($ofUser);
 		}
+		$bindvars = [];
+		$conditions .= $this->addFilterSort($filter, $sort, $bindvars);
 
-		$count = 'SELECT COUNT(*) FROM `tiki_payment_requests` tpr LEFT JOIN `users_users` uu ON (uu.`userId` = tpr.`userId`) WHERE ' .
-							$conditions;
+		$count = 'SELECT COUNT(*)' .
+			' FROM `tiki_payment_requests` tpr' .
+			' LEFT JOIN `users_users` uu ON (uu.`userId` = tpr.`userId`)' .
+			' LEFT JOIN `tiki_payment_received` tp ON (tp.`paymentRequestId`=tpr.`paymentRequestId` AND tp.`status` = "paid")' .
+			' LEFT JOIN `users_users` uup ON (uup.`userId` = tp.`userId`) WHERE ' . $conditions;
 
 		$data = 'SELECT tpr.*, uu.`login` as `user`, tp.`type`, tp.`payment_date`,' .
-						' tp.`details` as `payment_detail`, uup.`login` as `payer`' .
-						' FROM `tiki_payment_requests` tpr' .
-						' LEFT JOIN `users_users` uu ON (uu.`userId` = tpr.`userId`)' .
-						' LEFT JOIN `tiki_payment_received` tp ON (tp.`paymentRequestId`=tpr.`paymentRequestId` AND tp.`status` = "paid")' .
-						' LEFT JOIN `users_users` uup ON (uup.`userId` = tp.`userId`) WHERE ' . $conditions;
+			' tp.`details` as `payment_detail`, tpr.`detail` as `request_detail`, uup.`login` as `payer`' .
+			' FROM `tiki_payment_requests` tpr' .
+			' LEFT JOIN `users_users` uu ON (uu.`userId` = tpr.`userId`)' .
+			' LEFT JOIN `tiki_payment_received` tp ON (tp.`paymentRequestId`=tpr.`paymentRequestId` AND tp.`status` = "paid")' .
+			' LEFT JOIN `users_users` uup ON (uup.`userId` = tp.`userId`) WHERE ' . $conditions;
 
-		$all = $this->fetchAll($data, array(), $max, $offset);
+		$all = $this->fetchAll($data, $bindvars, $max, $offset);
+
+		foreach($all as & $payment) {
+
+			if (empty($payment['payer'])) {	// anonymous
+				$details = json_decode($payment['payment_detail'], true);
+				if ($details && !empty($details['payer_email'])) {
+					$payment['payer_email'] = $details['payer_email'];
+				}
+			}
+
+			if (!empty($payment['request_detail']) && $prefs['feature_jquery_tablesorter']) {
+				$payment['request_detail'] = strip_tags(str_replace(['</td>','</td></tr>'], [' </td>','<br></td></tr>'], $parserlib->parse_data($payment['request_detail'])), '<a><br>');
+			}
+		}
 
 		return array(
-			'cant' => $this->getOne($count),
+			'cant' => $this->getOne($count, $bindvars),
 			'data' => Perms::filter(
 				array( 'type' => 'payment' ),
 				'object',
@@ -91,31 +171,37 @@ class PaymentLib extends TikiDb_Bridge
 		);
 	}
 
-	function get_overdue( $offset, $max, $ofUser = '' )
+	function get_overdue( $offset, $max, $ofUser = '', $filter = [], $sort = null )
 	{
 		$conditions = '`amount_paid` < `amount` AND NOW() > `due_date` AND `cancel_date` IS NULL AND (`authorized_until` IS NULL OR `authorized_until` <= NOW())';
 		if ($ofUser) {
 			$conditions .= " AND uu.`login` = " . $this->qstr($ofUser);
 		}
-		return $this->get_payments($conditions, $offset, $max);
+		$bindvars = [];
+		$conditions .= $this->addFilterSort($filter, $sort, $bindvars);
+		return $this->get_payments($conditions, $offset, $max, $bindvars);
 	}
 
-	function get_authorized( $offset, $max, $ofUser = '' )
+	function get_authorized( $offset, $max, $ofUser = '', $filter = [], $sort = null )
 	{
 		$conditions = '`amount_paid` < `amount` AND `cancel_date` IS NULL AND `authorized_until` IS NOT NULL AND `authorized_until` >= NOW()';
 		if ($ofUser) {
 			$conditions .= " AND uu.`login` = " . $this->qstr($ofUser);
 		}
-		return $this->get_payments($conditions, $offset, $max);
+		$bindvars = [];
+		$conditions .= $this->addFilterSort($filter, $sort, $bindvars);
+		return $this->get_payments($conditions, $offset, $max, $bindvars);
 	}
 
-	function get_canceled( $offset, $max, $ofUser = '' )
+	function get_canceled( $offset, $max, $ofUser = '', $filter = [], $sort = null )
 	{
 		$conditions = '`cancel_date` IS NOT NULL';
 		if ($ofUser) {
 			$conditions .= " AND uu.`login` = " . $this->qstr($ofUser);
 		}
-		return $this->get_payments($conditions, $offset, $max);
+		$bindvars = [];
+		$conditions .= $this->addFilterSort($filter, $sort, $bindvars);
+		return $this->get_payments($conditions, $offset, $max, $bindvars);
 	}
 
 	function uncancel_payment( $id )
@@ -250,7 +336,10 @@ class PaymentLib extends TikiDb_Bridge
 
 	function enter_payment( $invoice, $amount, $type, array $data )
 	{
-		global $user, $userlib;
+		$tx = TikiDb::get()->begin();
+
+		global $user;
+		$userlib = TikiLib::lib('user');
 		if ( $info = $this->get_payment($invoice) ) {
 			if ( $info['state'] != 'past' && $info['amount_remaining_raw'] - $amount <= 0 ) {
 				$results = $this->run_behaviors($info, 'complete');
@@ -279,11 +368,14 @@ class PaymentLib extends TikiDb_Bridge
 				array( $amount, $invoice )
 			);
 		}
+
+		$tx->commit();
 	}
 
 	function enter_authorization( $invoice, $type, $validForDays, array $data )
 	{
-		global $user, $userlib;
+		global $user;
+		$userlib = TikiLib::lib('user');
 		if ( $info = $this->get_payment($invoice) ) {
 			if ( $info['state'] != 'past' ) {
 				$results = $this->run_behaviors($info, 'authorize');
@@ -320,6 +412,12 @@ class PaymentLib extends TikiDb_Bridge
 			foreach ($info['payments'] as $received) {
 				if ($received['status'] != 'auth_pending') {
 					continue;
+				}
+
+				if ($received['amount']) {
+					// When electing to capture a specific amount, assume that amount is the total to be paid.
+					$table = $this->table('tiki_payment_requests');
+					$table->update(['amount' => (float) $received['amount']], ['paymentRequestId' => $paymentId]);
 				}
 
 				if ($gateway = $this->gateway($received['type'])) {
@@ -396,7 +494,70 @@ class PaymentLib extends TikiDb_Bridge
 			return $this->gateways[$name] = new IsraelPostLib($this);
 		}
 	}
-}
 
-global $paymentlib; $paymentlib = new PaymentLib;
+	private function addFilterSort(array $filter, $sort, array & $bindvars)
+	{
+		$ret = '';
+		if (!empty($filter)) {
+			foreach ($filter as $field => $value) {
+				if (isset($this->fieldmap[$field])) {
+					if ($field === 'payer') {
+						$field = 'details';
+					}
+					$table = $this->setTable($field);
+					$col = $this->setField($field);
+					$ret .= " AND " . $table . '.`' . $col . '`';
+					if ($field == 'description' || $field == 'detail' || $field == 'details') {
+						$ret .= ' LIKE ?';
+						$bindvars[] = "%$value%";
+					} elseif (in_array($field, ['payment_date', 'request_date'])) {
+						if (preg_match('/([<>=]*) \'?([^\']*)\' AND ([^ ]*) ([<>=]*) \'?([^\']*)/i', $value, $matches)) {
+							// quoted date range?
+							if ($matches[3] === $table . '.`' . $col . '`') {
+								$ret .= " {$matches[1]} ? AND {$matches[3]} {$matches[4]} ?";
+								$bindvars[] = $matches[2];
+								$bindvars[] = $matches[5];
+							}
+						} else if (preg_match('/([<>=]*) \'([^\']*)/', $value, $matches)) {
+							// single quoted date
+							$ret .= " {$matches[1]} ? ";
+							$bindvars[] = $matches[2];
+						} else if (preg_match('/BETWEEN FROM_UNIXTIME\(([^\)]*?)\) AND FROM_UNIXTIME\(([^\)]*)\)/i', $value, $matches)) {	// single quoted date
+							// between date range
+							$ret .= " BETWEEN FROM_UNIXTIME(?) AND  FROM_UNIXTIME(?)";
+							$bindvars[] = $matches[1];
+							$bindvars[] = $matches[2];
+						} else if (preg_match('/([<>=]*) FROM_UNIXTIME\(([^\)]*)\)/i', $value, $matches)) {	// single quoted date
+							$ret .= " {$matches[1]} FROM_UNIXTIME(?) ";
+							$bindvars[] = $matches[2];
+						}
+					} else {
+						$ret .= ' LIKE ?';
+						$bindvars[] = "$value%";
+					}
+				}
+			}
+		}
+		if (!empty($sort)) {
+			if (!is_array($sort)) {
+				$sort = explode(',', $sort);
+			}
+			foreach($sort as $s) {
+				if (strpos($s, '.') === false) {
+					$dir = strrchr($s, '_');
+					$sfield = substr($s, 0, strlen($s) - strlen($dir));
+					$stable = $this->setTable($sfield);
+					$scol = $this->setField($sfield);
+					$newsort[] = $stable . '.' . $scol . $dir;
+				}
+			}
+			if (!empty($newsort)) {
+				$fields = $this->fieldTableArray();
+				$newsort = implode(',', $newsort);
+				$ret .= ' ORDER BY ' . $this->convertSortMode($newsort, $fields);
+			}
+		}
+		return $ret;
+	}
+}
 

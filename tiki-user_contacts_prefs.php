@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_contacts_prefs.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: tiki-user_contacts_prefs.php 61507 2017-03-05 17:39:27Z jonnybradley $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
-require_once ('lib/webmail/contactlib.php');
+$contactlib = TikiLib::lib('contact');
 
 $access->check_feature('feature_contacts', '', 'community');
 $access->check_user($user);
@@ -73,8 +73,7 @@ if (isset($_REQUEST['ext_down'])) {
 }
 $exts = $contactlib->get_ext_list($user);
 $smarty->assign('exts', $exts);
-setcookie('tab', $cookietab);
-$smarty->assign_by_ref('cookietab', $cookietab);
+
 include_once ('tiki-mytiki_shared.php');
 //ask_ticket('user-contacts_prefs');
 include_once ('tiki-section_options.php');

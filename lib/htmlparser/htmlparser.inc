@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: htmlparser.inc 46630 2013-07-11 17:56:12Z jonnybradley $
+// $Id: htmlparser.inc 59645 2016-09-08 19:25:10Z jonnybradley $
 
 if (!defined("_ECHOSERVER_HTML_PARSER")) {
 define("_ECHOSERVER_HTML_PARSER",1);
@@ -45,7 +45,7 @@ define("_ECHOSERVER_HTML_PARSER",1);
 /**********************************************************************************
  * Class constructor
  **********************************************************************************/
-  function HtmlParser($data,$grammar,$name="",$datatype=0) {
+  function __construct($data,$grammar,$name="",$datatype=0) {
     $this->dc=array(" ","\t","\r","\n","<",">","\"","'","=","/");
     $this->nc=array("<",">","=","/");
     $this->qc=array("\"","'");

@@ -1,13 +1,13 @@
-{* $Id: mod-assistant.tpl 45021 2013-03-01 11:25:10Z chibaguy $ *}
+{* $Id: mod-assistant.tpl 60886 2017-01-13 00:35:59Z drsassafras $ *}
 {tikimodule error=$module_params.error title=$tpl_module_title name="assistant" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	<div align="center">
 		<strong>{tr}Thank you for installing Tiki{/tr}!</strong>
 	</div>
 	{if $tiki_p_admin eq 'y'}
 	<p>
-		<img src="img/icons/arrow_small.png" alt="" style="border:0;margin-right:2px;vertical-align:middle" align="left">
+		<img src="img/icons/arrow_small.png" style="border:0;margin-right:2px;vertical-align:middle" align="left">
 		<strong>{tr}To configure your Tiki{/tr}</strong>:<br>
-		{tr}Select{/tr} <a class="link" href="tiki-admin.php" title="{tr}Admin Home{/tr}">{tr}Admin{/tr} &gt; {tr}Admin Home{/tr}</a> {tr}from the menu{/tr}.
+		{tr}Select{/tr} <a class="link" href="tiki-admin.php" title="{tr}Control Panels{/tr}">{tr}Settings{/tr} &gt; {tr}Control Panels{/tr}</a> {tr}from the menu{/tr}.
 	</p>
 	<p>
 		{tr}Read the <a class="link" href="http://doc.tiki.org/Configuration" title="Tiki Documentation" target="_blank">configuration documentation</a>{/tr}.
@@ -16,14 +16,14 @@
 		{tr}Watch the <a class="link" href="http://tiki.org/TikiMovies" title="Demos" target="_blank">demo movies{/tr}</a>.
 	</p>
 	<p>
-		<img src="img/icons/arrow_small.png" alt="" style="border:0;margin-right:2px;vertical-align:middle" align="left">
+		<img src="img/icons/arrow_small.png" style="border:0;margin-right:2px;vertical-align:middle" align="left">
 		<strong>{tr}To remove this module{/tr}</strong>:<br>
-		{tr}Select{/tr} <a class="link" href="tiki-admin_modules.php#leftmod" title="{tr}Admin Modules{/tr}">{tr}Admin{/tr} &gt; {tr}Modules{/tr}</a> {tr}and remove the assistant module{/tr}. {tr}You can also add other modules{/tr}.
+		{tr}Select{/tr} <a class="link" href="tiki-admin_modules.php#leftmod" title="{tr}Admin Modules{/tr}">{tr}Configuration{/tr} &gt; {tr}Modules{/tr}</a> {tr}and remove the assistant module{/tr}. {tr}You can also add other modules{/tr}.
 	</p>
 	<p>
-		<img src="img/icons/arrow_small.png" alt="" style="border:0;margin-right:2px;vertical-align:middle" align="left">
+		<img src="img/icons/arrow_small.png" style="border:0;margin-right:2px;vertical-align:middle" align="left">
 		<strong>{tr}To customize the menu{/tr}</strong>:<br>
-		{tr}Select{/tr} <a class="link" href="tiki-admin_menus.php" title="{tr}Admin Menus{/tr}">{tr}Admin{/tr} &gt; {tr}Menus{/tr}</a> {tr}and edit menu ID 42{/tr}.<br>{tr}Or, create your own menu and add it to a module{/tr}.
+		{tr}Select{/tr} <a class="link" href="tiki-admin_menus.php" title="{tr}Admin Menus{/tr}">{tr}Configuration{/tr} &gt; {tr}Menus{/tr}</a> {tr}and edit menu ID 42{/tr}.<br>{tr}Or, create your own menu and add it to a module{/tr}.
 	</p>
 	<hr>
 	{else}
@@ -32,7 +32,7 @@
 	</p>
 	{/if}
 	<p>
-		<a href="http://tiki.org" title="{tr}The Tiki Community{/tr}" target="_blank"><img src="favicon.png" alt="{tr}The Tiki Community{/tr}" style="border:0;margin-right:2px;vertical-align:middle" align="left"></a>{tr}To learn more, visit: <a href="http://tiki.org" title="The Tiki Community" target="_blank">http://tiki.org</a>{/tr}.
+		<a href="http://tiki.org" title="{tr}The Tiki Community{/tr}" target="_blank"><img src="themes/base_files/favicon/favicon-16x16.png" alt="{tr}The Tiki Community{/tr}" style="border:0;margin-right:2px;vertical-align:middle" align="left"></a>{tr}To learn more, visit: <a href="http://tiki.org" title="The Tiki Community" target="_blank">http://tiki.org</a>{/tr}.
 	</p>
 	<p>
 		<a href="http://doc.tiki.org" title="{tr}Tiki Documentation{/tr}" target="_blank"><img src="img/icons/help.png" alt="{tr}Tiki Documentation{/tr}" style="border:0px;margin-right:2px;vertical-align:middle" align="left"></a>{tr}For help, visit <a href="http://doc.tiki.org" title="Tiki Documentation" target="_blank">http://doc.tiki.org</a>{/tr}.

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: prefs.php 53878 2015-02-11 12:52:42Z jonnybradley $
+// $Id: prefs.php 62837 2017-05-31 11:07:05Z drsassafras $
 
 // RULE1: $prefs does not contain serialized values. Only the database contains serialized values.
 // RULE2: put array('') in default prefs for serialized values
@@ -15,22 +15,21 @@ if (basename($_SERVER['SCRIPT_NAME']) == basename(__FILE__)) {
 }
 
 //
-// This section is being phased out. Please use the instructions at http://dev.tiki.org/Creating+New+Preferences instead.
+// This section is being phased out. Please use the instructions at https://dev.tiki.org/Create+a+new+preference instead.
 //
 
 // Prefs for which we want to use the site value (they will be prefixed with 'site_')
 // ( this is also used in tikilib, not only when reloading prefs )
 global $user_overrider_prefs, $prefs;
 $user_overrider_prefs = array(
-				'language',
-				'style',
-				'style_option',
-				'userbreadCrumb',
-				'tikiIndex',
-				'wikiHomePage',
-				'default_calendars',
-				'metatag_robots',
-				'themegenerator_theme'
+	'language',
+	'userbreadCrumb',
+	'tikiIndex',
+	'wikiHomePage',
+	'default_calendars',
+	'metatag_robots',
+	'theme',
+	'theme_option',
 );
 
 initialize_prefs();
@@ -38,10 +37,11 @@ initialize_prefs();
 function get_default_prefs()
 {
 	static $prefs;
-	if ( is_array($prefs) )
+	if ( is_array($prefs) ) {
 		return $prefs;
+	}
 
-	global $cachelib; require_once 'lib/cache/cachelib.php';
+	$cachelib = TikiLib::lib('cache');
 	if ( $prefs = $cachelib->getSerialized('tiki_default_preferences_cache') ) {
 		return $prefs;
 	}
@@ -76,11 +76,7 @@ function get_default_prefs()
 			'wiki_validate_plugin' => 'y',
 			'wiki_pagealias_tokens' => 'alias',
 
-			// webservices
-			'webservice_consume_defaultcache' => 300, // 5 min
-
 			// File galleries
-
 			// Root galleries fake preferences. These are automatically overridden by schema upgrade scripts
 			//  for installations that pre-date the existence of these root galleries.
 			'fgal_root_id' => 1, // Ancestor of "default" type galleries. For old installs, overriden by 20090811_filegals_container_tiki.sql
@@ -88,73 +84,8 @@ function get_default_prefs()
 																// overriden by 20101126_fgal_add_gallerie_user_tiki.php
 			'fgal_root_wiki_attachments_id' => 3, // Ancestor of wiki "attachments" type galleries (feature_use_fgal_for_wiki_attachments).
 																						// For old installs, overriden by 20101210_fgal_add_wiki_attachments_tiki.php
-
-			'fgal_enable_auto_indexing' => 'y',
-			'fgal_asynchronous_indexing' => 'y',
-			'fgal_sort_mode' => '',
-			'fgal_list_id' => 'o',
-			'fgal_list_type' => 'y',
-			'fgal_list_name' => 'n',
-			'fgal_list_description' => 'o',
-			'fgal_list_size' => 'y',
-			'fgal_list_created' => 'o',
-			'fgal_list_lastModif' => 'y',
-			'fgal_list_creator' => 'o',
-			'fgal_list_author' => 'o',
-			'fgal_list_last_user' => 'o',
-			'fgal_list_comment' => 'o',
-			'fgal_list_files' => 'o',
-			'fgal_list_hits' => 'o',
-			'fgal_list_lastDownload' => 'n',
-			'fgal_list_lockedby' => 'a',
-			'fgal_list_deleteAfter' => 'n',
-			'fgal_list_share' => 'n',
-			'fgal_show_path' => 'y',
-			'fgal_show_explorer' => 'y',
-			'fgal_show_slideshow' => 'n',
-			'fgal_default_view' => 'list',
-			'fgal_list_backlinks' => 'n',
-			'fgal_list_id_admin' => 'y',
-			'fgal_list_type_admin' => 'y',
-			'fgal_list_name_admin' => 'n',
-			'fgal_list_description_admin' => 'o',
-			'fgal_list_size_admin' => 'y',
-			'fgal_list_created_admin' => 'o',
-			'fgal_list_lastModif_admin' => 'y',
-			'fgal_list_creator_admin' => 'o',
-			'fgal_list_author_admin' => 'o',
-			'fgal_list_last_user_admin' => 'o',
-			'fgal_list_comment_admin' => 'o',
-			'fgal_list_files_admin' => 'o',
-			'fgal_list_hits_admin' => 'o',
-			'fgal_list_lastDownload_admin' => 'n',
-			'fgal_list_lockedby_admin' => 'n',
-			'fgal_list_backlinks_admin' => 'y',
+			//can probably be removed - doesn't seem to be set or used anywhere
 			'fgal_show_checked' => 'y',
-
-			// imagegals
-			'feature_gal_batch' => 'n',
-			'feature_gal_slideshow' => 'n',
-			'gal_use_db' => 'y',
-			'gal_use_lib' => 'imagick',
-			'gal_match_regex' => '',
-			'gal_nmatch_regex' => '',
-			'gal_use_dir' => '',
-			'gal_batch_dir' => '',
-			'feature_gal_rankings' => 'n',
-			'feature_image_galleries_comments' => 'n',
-			'image_galleries_comments_default_order' => 'points_desc',
-			'image_galleries_comments_per_page' => 10,
-			'gal_list_name' => 'y',
-			'gal_list_parent' => 'n',
-			'gal_list_description' => 'y',
-			'gal_list_created' => 'n',
-			'gal_list_lastmodif' => 'y',
-			'gal_list_user' => 'n',
-			'gal_list_imgs' => 'y',
-			'gal_list_visits' => 'y',
-			'preset_galleries_info' =>'n',
-			'gal_image_mouseover' => 'n',
 
 			// articles
 			'cms_bot_bar' => 'y',
@@ -165,15 +96,11 @@ function get_default_prefs()
 
 
 			// trackers
-			't_use_db' => 'y',
-			't_use_dir' => '',
 			'trackerCreatorGroupName' => ' ',
 
 			// user
 			'userlevels' => function_exists('tra') ? array('1'=>tra('Simple'),'2'=>tra('Advanced')) : array('1'=>'Simple','2'=>'Advanced'),
 			'userbreadCrumb' => 4,
-			'uf_use_db' => 'y',
-			'uf_use_dir' => '',
 			'feature_community_friends_permission' => 'n',
 			'feature_community_friends_permission_dep' => '2',
 			'lowercase_username' => 'n',
@@ -190,10 +117,6 @@ function get_default_prefs()
 			// freetags
 			'freetags_cloud_colors' => '',
 
-
-			// calendar
-			'feature_default_calendars' => 'n',
-			'default_calendars' => array(),
 
 			// feed
 			'max_rss_mapfiles' => 10,
@@ -223,17 +146,8 @@ function get_default_prefs()
 			'error_url' => 'tiki-error.php',
 
 			// intertiki
-			'feature_intertiki_server' => 'n',
-			'feature_intertiki_slavemode' => 'n',
 			'interlist' => array(),
-			'feature_intertiki_mymaster' => '',
-			'feature_intertiki_import_preferences' => 'n',
-			'feature_intertiki_import_groups' => 'n',
 			'known_hosts' => array(),
-			'tiki_key' => '',
-			'intertiki_logfile' => '',
-			'intertiki_errfile' => '',
-			'feature_intertiki_sharedcookie' => 'n',
 
 			// categories
 			'category_i18n_unsynced' => array(),
@@ -257,7 +171,7 @@ function get_default_prefs()
 				bold, italic, underline, strike, sub, sup,-, color, -, tikiimage, tikilink, link, unlink, anchor, -,
 				undo, redo, -, find, replace, -, removeformat, specialchar, smiley | help, switcheditor, autosave, admintoolbar /
 				format, templates, cut, copy, paste, pastetext, pasteword, -, h1, h2, h3, left, center, -,
-				blockquote, list, numlist, -, pagebreak, rule, -, table, -, source, showblocks, screencapture | fullscreen /
+				blockquote, list, numlist, -, pagebreak, rule, -, table, pastlink, -, source, showblocks, screencapture | fullscreen /
 				style, fontname, fontsize, outdent, indent /
 			',
 			'toolbar_global_comments' => '
@@ -290,12 +204,7 @@ function get_default_prefs()
 			'feature_intertiki_imported_groups' => '',
 			'feature_contributor_wiki' => '',
 			'https_login_required' => '',
-			'maxRowsGalleries' => '',
 			'replimaster' => '',
-			'rowImagesGalleries' => '',
-			'scaleSizeGalleries' => '',
-			'thumbSizeXGalleries' => '',
-			'thumbSizeYGalleries' => '',
 			'javascript_enabled' => 'n',
 
 
@@ -310,12 +219,6 @@ function get_default_prefs()
 	);
 
 	// Special default values
-
-	global $tikidomain;
-	if ( is_file('styles/'.$tikidomain.'/'.$prefs['site_favicon']) )
-		$prefs['site_favicon'] = 'styles/'.$tikidomain.'/'.$prefs['site_favicon'];
-	elseif ( ! is_file($prefs['site_favicon']) )
-		$prefs['site_favicon'] = false;
 
 	$_SESSION['tmpDir'] = class_exists('TikiInit') ? TikiInit::tempdir() : '/tmp';
 
@@ -347,13 +250,17 @@ function initialize_prefs($force = false)
 
 	if ($cachelib->isCached('global_preferences')) {
 		$prefs = $cachelib->getSerialized('global_preferences');
-	} else {
+		// note there is a small chance in high concurrency environments that cache file may be cleared
+		// in the interim leading to blank $prefs
+	}
+
+	if (empty($prefs) || !$cachelib->isCached('global_preferences')) {
 		$defaults = get_default_prefs();
 
 		// Find which preferences need to be serialized/unserialized, based on the default
 		//  values (those with arrays as values) and preferences with special serializations
 		$serializedPreferences = array();
-		global $prefslib; require_once 'lib/prefslib.php';
+		$prefslib = TikiLib::lib('prefs');
 		foreach ( $defaults as $preference => $value ) {
 			if ( is_array($value) || in_array($preference, array('category_defaults', 'memcache_servers'))) {
 				$serializedPreferences[] = $preference;
@@ -390,7 +297,7 @@ function initialize_prefs($force = false)
 
 	if ( $prefs['feature_perspective'] == 'y') {
 		if ( ! isset( $section ) || $section != 'admin' ) {
-			global $perspectivelib; require_once 'lib/perspectivelib.php';
+			$perspectivelib = TikiLib::lib('perspective');
 			if ( $persp = $perspectivelib->get_current_perspective($prefs) ) {
 				$perspectivePreferences = $perspectivelib->get_preferences($persp);
 				$prefs = $perspectivePreferences + $prefs;
@@ -399,7 +306,14 @@ function initialize_prefs($force = false)
 	}
 
 	// Override preferences with system-configured preferences.
-	$prefs = $systemConfiguration->preference->toArray() + $prefs;
+	$system = $systemConfiguration->preference->toArray();
+	// Also include the site_ versions
+	foreach ( $user_overrider_prefs as $uop ) {
+		if (isset($system[$uop])) {
+			$system['site_' . $uop] = $system[$uop];
+		}
+	}
+	$prefs = array_merge($prefs, $system);
 
 	if ( !defined('TIKI_PREFS_DEFINED') ) define('TIKI_PREFS_DEFINED', 1);
 }

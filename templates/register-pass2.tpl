@@ -1,36 +1,40 @@
+{* $Id: register-pass2.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
 {if $prefs.user_register_prettytracker eq 'y' and $prefs.user_register_prettytracker_tpl}
-	<input id='pass2' type="password" name="passAgain" onkeypress="regCapsLock(event)">
-	&nbsp;<strong class='mandatory_star'>*</strong>
+	<input id='pass2' type="password" name="passAgain" onkeypress="regCapsLock(event)" class="form-control" >
+	{if $prefs.user_register_prettytracker_hide_mandatory neq 'y'}&nbsp;<strong class='mandatory_star text-danger tips' title=":{tr}This field is mandatory{/tr}">*</strong>{/if}
 {else}
-	{if $openid_associate neq 'y'}
-		<tr>
-			<td style="vertical-align:top">
-				<label for="pass2">{tr}Repeat password:{/tr}</label>
-				{if $trackerEditFormId}&nbsp;<strong class='mandatory_star'>*</strong>&nbsp;{/if}
-			</td>
-			<td>
-				<input id='pass2' type="password" name="passAgain" onkeypress="regCapsLock(event)" value="{if !empty($smarty.post.passAgain)}{$smarty.post.passAgain}{/if}"
-					   onkeyup="{if $prefs.feature_jquery_validation neq 'y' && !$userTrackerData}checkPasswordsMatch('#pass2', '#pass1', '#mypassword2_text');{/if}">
-				<div style="float:right;margin-left:5px;">
-					<div id="mypassword2_text"></div>
+	{if !isset($openid_associate) || $openid_associate neq 'y'}
+		<div class="form-group">
+			<label class="col-sm-4 control-label" for="pass2">{tr}Repeat password{/tr} {if $trackerEditFormId}<strong class='mandatory_star text-danger tips' title=":{tr}This field is mandatory{/tr}">*</strong>{/if}</label>
+			<div class="col-sm-8">
+				<input
+					class="form-control"
+					id='pass2'
+					type="password"
+					name="passAgain"
+					value="{if !empty($smarty.post.passAgain)}{$smarty.post.passAgain}{/if}"
+				>
+				<div id="mypassword2_text">
+					<div id="match" style="display:none">
+						{icon name='ok' istyle='color:#0ca908'} {tr}Passwords match{/tr}
+					</div>
+					<div id="nomatch" style="display:none">
+						{icon name='error' istyle='color:#ff0000'} {tr}Passwords do not match{/tr}
+					</div>
 				</div>
 				{if $prefs.feature_jquery_validation neq 'y' && !$userTrackerData}<span id="checkpass"></span>{/if}
-			</td>
-		</tr>
+			</div>
+		</div>
 		{if $prefs.generate_password eq 'y'}
-			<tr>
-				{if !$reg_in_module}<td>&nbsp;</td>{/if}
-				<td{if $reg_in_module} colspan="2" {/if}>
-					<input id='genepass' name="genepass" type="text" tabindex="0" style="display: none">
-					<span id="genPass">
-						{if 0 and $prefs.feature_ajax eq 'y'}
-							{button href="#" _onclick="check_pass();" _text="{tr}Generate a password{/tr}"}
-						{else}
-							{button href="#" _onclick="" _text="{tr}Generate a password{/tr}"}
-						{/if}
-					</span>
-				</td>
-			</tr>
+			{*if !$reg_in_module}<td>&nbsp;</td>{/if*}
+			<div class="form-group">
+				<div class="col-sm-3 col-sm-offset-4">
+					<span id="genPass">{button href="#" _text="{tr}Generate a password{/tr}"}</span>
+				</div>
+				<div class="col-sm-3">
+					<input id='genepass' class="form-control" name="genepass" type="text" tabindex="0" style="display:none">
+				</div>
+			</div>
 		{/if}
 	{/if}
 {/if}

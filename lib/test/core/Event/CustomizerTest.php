@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CustomizerTest.php 47204 2013-08-22 11:27:48Z changi67 $
+// $Id: CustomizerTest.php 59642 2016-09-08 18:31:22Z jonnybradley $
 
 class Tiki_Event_CustomizerTest extends PHPUnit_Framework_TestCase
 {
@@ -84,6 +84,7 @@ class Tiki_Event_CustomizerTest extends PHPUnit_Framework_TestCase
 			'a' => 2,
 			'b' => 3,
 			'c' => 4,
+			'EVENT_ID' => 1,
 		);
 
 		$this->manager->trigger('tiki.trackeritem.save', $args);
@@ -102,6 +103,7 @@ class Tiki_Event_CustomizerTest extends PHPUnit_Framework_TestCase
 			'a' => 2,
 			'b' => 3,
 			'c' => 4,
+			'EVENT_ID' => 1,
 		);
 
 		$this->manager->bind('tiki.trackeritem.update', 'tiki.trackeritem.save');
@@ -140,6 +142,7 @@ class Tiki_Event_CustomizerTest extends PHPUnit_Framework_TestCase
 			array(
 				'amount' => 5,
 				'test' => 4,
+				'EVENT_ID' => 2,
 			), $this->lastArguments
 		);
 	}

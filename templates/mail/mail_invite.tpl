@@ -1,4 +1,4 @@
-{tr}You are invited by:{/tr} {$user|username}
+{* $Id: mail_invite.tpl 58620 2016-05-18 13:09:06Z jonnybradley $ *}{tr}You are invited by:{/tr} {$prefs.mail_template_custom_text}{$user|username}
 {if !empty($groups)}
 	{tr}You join this group:{/tr}
 	{foreach from=$groups item=group}

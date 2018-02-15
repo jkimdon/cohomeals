@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_paypal.php 45724 2013-04-26 17:33:23Z changi67 $
+// $Id: wikiplugin_paypal.php 61747 2017-03-18 18:28:58Z rjsmelo $
 
 // NB, all PayPal supported "HTML Variables" will be passed on to the button, even if not mentioned here
 
@@ -15,10 +15,10 @@ function wikiplugin_paypal_info()
 	return array(
 		'name' => tra('PayPal Button'),
 		'documentation' => 'Payment',
-		'description' => tra('Display a PayPal button'),
-		'introduced' => 11.0,
+		'description' => tra('Embed a PayPal button'),
+		'introduced' => 11,
 		'prefs' => array('wikiplugin_paypal'),		// not dependent on 'payment_feature', would be annoying if you just want one donate button for instance
-		'icon' => 'img/icons/basket.png',
+		'iconname' => 'paypal',
 		'format' => 'html',
 		'extraparams' => true,
 		'validate' => 'all',
@@ -27,8 +27,10 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Type'),
 				'description' => tra('Type of PayPal button'),
+				'since' => '11.0',
 				'filter' => 'word',
 				'options' => array(
+					array('text' => '', 'value' => ''),
 					array('text' => tra('Shopping cart'), 'value' => '_cart'),
 					array('text' => tra('Buy Now'), 'value' => '_xclick'),
 					array('text' => tra('Donations'), 'value' => 'donations'),
@@ -43,8 +45,10 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Cart Action'),
 				'description' => tra('Action if Shopping Cart selected for type'),
-				'filter' => 'text',
+				'since' => '11.0',
+				'filter' => 'word',
 				'options' => array(
+					array('text' => '', 'value' => ''),
 					array('text' => tra('Add to Cart'), 'value' => 'add'),
 					array('text' => tra('View Cart'), 'value' => 'display'),
 					//array('text' => tra('Cart Upload'), 'value' => 'upload'),	// N/A
@@ -55,6 +59,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Item Name'),
 				'description' => tra('Item name or description. Required for Shopping cart'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -62,6 +67,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Price'),
 				'description' => tra('Item price'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -69,6 +75,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('PayPal Button'),
 				'description' => tra('Button appearance'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'options' => array(
 					array('text' => tra('Normal'), 'value' => ''),
@@ -81,6 +88,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Custom Button'),
 				'description' => tra('Custom button image URL'),
+				'since' => '11.0',
 				'filter' => 'url',
 				'default' => '',
 			),
@@ -88,6 +96,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Product ID'),
 				'description' => tra('Optional item identifier, often a tracker itemId'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -95,6 +104,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Quantity'),
 				'description' => tra('Number of items, empty or 0 to have an input the user can fill in'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 			),
@@ -102,6 +112,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Shipping Cost'),
 				'description' => tra('The cost of shipping this item'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -110,6 +121,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Additional Shipping Cost'),
 				'description' => tra('The cost of shipping each additional unit of this item'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -118,6 +130,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Weight'),
 				'description' => tra('Weight of item'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -126,8 +139,10 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Weight Unit'),
 				'description' => tra('The unit of measure if weight is specified'),
-				'filter' => 'text',
+				'since' => '11.0',
+				'filter' => 'word',
 				'options' => array(
+					array('text' => '', 'value' => ''),
 					array('text' => tra('Kilos'), 'value' => 'kgs'),
 					array('text' => tra('Pounds'), 'value' => 'lbs'),
 				),
@@ -136,8 +151,9 @@ function wikiplugin_paypal_info()
 			),
 			'business' => array(
 				'required' => false,
-				'name' => tra('Business Id'),
+				'name' => tra('Business ID'),
 				'description' => tra('PayPal business name/ID') . ' ' . tra('(Uses value in admin/payment if not set here)'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => $prefs['payment_paypal_business'],
 				'advanced' => !empty($prefs['payment_paypal_business']),	// if set in prefs shouldn't need to change it here
@@ -146,8 +162,10 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Use MiniCart'),
 				'description' => tra('See https://github.com/jeffharrell/MiniCart'),
-				'filter' => 'text',
+				'since' => '11.0',
+				'filter' => 'alpha',
 				'options' => array(
+					array('text' => '', 'value' => ''),
 					array('text' => tra('Yes'), 'value' => 'y'),
 					array('text' => tra('No'), 'value' => 'n'),
 				),
@@ -157,15 +175,23 @@ function wikiplugin_paypal_info()
 			'no_shipping' => array(
 				'required' => false,
 				'name' => tra('Shipping Address Prompt'),
-				'description' => tra('0 – prompt for an address, but do not require one, 1 – do not prompt for an address, 2 – prompt for an address, and require one (default)'),
-				'filter' => 'int',
+				'description' => tra('Indicate whether to prompt for and require an address'),
+				'since' => '11.0',
+				'filter' => 'digits',
+				'options' => array(
+					array('text' => '', 'value' => ''),
+					array('text' => tra('Prompt for address'), 'value' => 0),
+					array('text' => tra('Do not prompt for address'), 'value' => 1),
+					array('text' => tra('Prompt for and require address'), 'value' => 2),
+				),
 				'default' => 2,
 				'advanced' => true,
 			),
 			'return' => array(
 				'required' => false,
 				'name' => tra('Completed payment return URL'),
-				'description' => tra('Empty for current page, "n" to disable'),
+				'description' => tr('Empty for current page, %0n%1 to disable', '<code>', '</code>'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -173,7 +199,8 @@ function wikiplugin_paypal_info()
 			'shopping_url' => array(
 				'required' => false,
 				'name' => tra('Continue Shopping URL'),
-				'description' => tra('Empty for current page, "n" to disable'),
+				'description' => tr('Empty for current page, %0n%1 to disable', '<code>', '</code>'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -181,7 +208,8 @@ function wikiplugin_paypal_info()
 			'cancel_return' => array(
 				'required' => false,
 				'name' => tra('Cancel payment URL'),
-				'description' => tra('Empty for current page, "n" to disable'),
+				'description' => tr('Empty for current page, %0n%1 to disable', '<code>', '</code>'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => '',
 				'advanced' => true,
@@ -190,6 +218,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Form title'),
 				'description' => tra('Tooltip for the form and alt attribute for the image'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => tra('PayPal — The safer, easier way to pay online.'),
 				'advanced' => true,
@@ -198,6 +227,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Button text'),
 				'description' => tra('The checkout button text'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => 'Checkout',
 				'advanced' => true,
@@ -206,6 +236,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Subtotal text'),
 				'description' => tra('The subtotal text'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => 'Subtotal: ',
 				'advanced' => true,
@@ -214,6 +245,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Discount text'),
 				'description' => tra('The discount text'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => 'Discount: ',
 				'advanced' => true,
@@ -222,6 +254,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Shipping text'),
 				'description' => tra('The shipping text'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => 'does not include shipping &amp; tax',
 				'advanced' => true,
@@ -230,6 +263,7 @@ function wikiplugin_paypal_info()
 				'required' => false,
 				'name' => tra('Processing text'),
 				'description' => tra('The processing text'),
+				'since' => '11.0',
 				'filter' => 'text',
 				'default' => 'Processing...',
 				'advanced' => true,
@@ -255,16 +289,16 @@ function wikiplugin_paypal($data, $params)
 
 	// check required params
 	if (empty($params['business'])) {
-		global $access;
+		$access = TikiLib::lib('access');
 		$access->check_feature('payment_paypal_business');
 	}
 
 	if ($params['cmd'] === '_cart') {
 		if (empty($params['item_name'])) {
-			return '<span class="error">' . tra('PayPal button:') . ' ' . tra('Item name (item_name) required') . '</span>';
+			return '<span class="alert-warning">' . tra('PayPal button:') . ' ' . tra('Item name (item_name) required') . '</span>';
 		}
 		if (empty($params['amount'])) {
-			return '<span class="error">' . tra('PayPal button:') . ' ' . tra('Price (amount) required') . '</span>';
+			return '<span class="alert-warning">' . tra('PayPal button:') . ' ' . tra('Price (amount) required') . '</span>';
 		}
 
 		$params[$params['cart_action']] = 1;
@@ -312,9 +346,9 @@ function wikiplugin_paypal($data, $params)
 				$button_type = 'paynow';
 		}
 		$size = $params['paypal_button'] === 'small_button' ? 'SM' : 'LG';
-		$button_url = "http://www.paypalobjects.com/{$locale}/i/btn/btn_{$button_type}_{$size}.gif";
+		$button_url = "https://www.paypalobjects.com/{$locale}/i/btn/btn_{$button_type}_{$size}.gif";
 	}
-	$pixel_url = "http://www.paypalobjects.com/{$locale}/i/scr/pixel.gif";
+	$pixel_url = "https://www.paypalobjects.com/{$locale}/i/scr/pixel.gif";
 
 	$smarty->assign('wppaypal_button', $button_url);
 	$smarty->assign('wppaypal_pixel', $pixel_url);
@@ -348,7 +382,7 @@ function wikiplugin_paypal($data, $params)
 	}
 
 	// just add javascript?
-	$jsfile = 'vendor/jquery/minicart/dist/minicart' . ($prefs['tiki_minify_javascript'] === 'y' ? '.min' : '') . '.js';
+	$jsfile = 'vendor_bundled/vendor/jquery/minicart/dist/minicart' . ($prefs['tiki_minify_javascript'] === 'y' ? '.min' : '') . '.js';
 	if ($params['minicart'] === 'y' && file_exists($jsfile)) {
 		// it appears currently if you set any of these all must be set
 		$miniParams = array('strings' => array());
@@ -357,6 +391,8 @@ function wikiplugin_paypal($data, $params)
 		$miniParams['strings']['discount']   = tra($params['stringDiscount']);
 		$miniParams['strings']['shipping']   = tra($params['stringShipping']);
 		$miniParams['strings']['processing'] = tra($params['stringProcessing']);
+		// this seems to be the only secure URL for these assets, minicart.com uses github's SSL certificate
+		$miniParams['assetURL'] = 'https://github.com/jeffharrell/minicart/raw/2.6.1/';
 		$miniParamStr = json_encode($miniParams);
 
 		TikiLib::lib('header')->add_js(

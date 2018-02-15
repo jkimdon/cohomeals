@@ -2,15 +2,15 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_blog_post.php 53948 2015-02-16 09:14:32Z xavidp $
+// $Id: tiki-view_blog_post.php 62664 2017-05-20 00:07:19Z jyhem $
 
 $section = 'blogs';
 require_once ('tiki-setup.php');
-include_once ('lib/blogs/bloglib.php');
+$bloglib = TikiLib::lib('blog');
 
 $auto_query_args = array(
 	'postId',
@@ -55,7 +55,7 @@ if (!$blog_data) {
 
 $tikilib->get_perm_object($blogId, 'blog');
 
-$access->check_permission('tiki_p_read_blog', '', 'blog post', $postId);
+$access->check_permission('tiki_p_read_blog', '', 'blog', $blogId);
 
 # Check also for local permissions at blog level, to ensure that when tiki_p_read_blog is not allowed at object level,
 # regardless of the global perm set, their posts are not allowed either to be read
@@ -90,13 +90,9 @@ if(($user && $ownsblog == 'y') || $tiki_p_blog_admin == 'y') {
 }
 $post_info['adjacent'] = $bloglib->_get_adjacent_posts($blogId, $post_info['created'], $tiki_p_blog_admin == 'y'? null: $tikilib->now, $user, $allowprivate);
 
-if (isset($post_info['priv']) && ($post_info['priv'] == 'y')) {
-	$post_info['title'] .= ' (' . tra("private") . ')';
-}
-
 if ($prefs['feature_freetags'] == 'y') {
 	// Get Tags
-	include_once ('lib/freetag/freetaglib.php');
+	$freetaglib = TikiLib::lib('freetag');
 	$post_info['freetags'] = $freetaglib->get_tags_on_object($postId, "blog post");
 
 	if ($blog_data['show_related'] == 'y' && !empty($post_info['freetags'])) {
@@ -159,12 +155,10 @@ if ($prefs['feature_categories'] == 'y') {
 	require_once('categorize_list.php');
 }
 $smarty->assign('ownsblog', $ownsblog);
-if ($post_info['wysiwyg'] !== 'y') {
-	$post_info['data'] = TikiLib::htmldecode($post_info['data']);
-}
 $smarty->assign('postId', $postId);
 $smarty->assign('blog_data', $blog_data);
 $smarty->assign('blogId', $blogId);
+$smarty->assign('public', $blog_data['public']);
 $smarty->assign('headtitle', $post_info['title'] . ' : ' . $blog_data['title']);
 $smarty->assign('title', $post_info['title'] . ' : ' . $blog_data['title']);
 if (!isset($_REQUEST['offset'])) {
@@ -183,9 +177,9 @@ $offset = $_REQUEST["offset"];
 $sort_mode = $_REQUEST["sort_mode"];
 $find = $_REQUEST["find"];
 if ($post_info['wysiwyg'] == "y") {
-	$parsed_data = $tikilib->parse_data($post_info["data"], array('is_html' => true));
+	$parsed_data = TikiLib::lib('parser')->parse_data($post_info["data"], array('is_html' => true));
 } else {
-	$parsed_data = $tikilib->parse_data($post_info["data"]);
+	$parsed_data = TikiLib::lib('parser')->parse_data($post_info["data"]);
 }
 if (!isset($_REQUEST['page'])) {
 	$_REQUEST['page'] = 1;

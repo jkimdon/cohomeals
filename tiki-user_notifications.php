@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_notifications.php 51812 2014-07-02 23:46:25Z nkoth $
+// $Id: tiki-user_notifications.php 59887 2016-10-04 10:08:40Z xavidp $
 
 $section = 'mytiki';
 require_once ('tiki-setup.php');
@@ -52,6 +52,12 @@ if (isset($_REQUEST['user_comment_watch_editor']) && $_REQUEST['user_comment_wat
 	$tikilib->set_user_preference($user, 'user_comment_watch_editor', 'y');
 } else {
 	$tikilib->set_user_preference($user, 'user_comment_watch_editor', 'n');
+}
+
+if (isset($_REQUEST['user_category_watch_editor']) && $_REQUEST['user_category_watch_editor'] == true) {
+	$tikilib->set_user_preference($user, 'user_category_watch_editor', 'y');
+} else {
+	$tikilib->set_user_preference($user, 'user_category_watch_editor', 'n');
 }
 
 header('Location: tiki-user_watches.php');

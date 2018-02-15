@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-quiz_edit.php 51089 2014-05-02 16:14:53Z jonnybradley $
+// $Id: tiki-quiz_edit.php 57956 2016-03-17 19:58:12Z jonnybradley $
 
 /*
 (The expire date must be rigid.  That is, papers will not be accepted after the expire
@@ -26,11 +26,11 @@ If you leave the data field blank, the default is to use all the questions from 
 You can also set the same option under the Generl Options section.
 */
 require_once ('tiki-setup.php');
-include_once ('lib/quizzes/quizlib.php');
 
 $access->check_feature('feature_quizzes');
 //Use 12- or 24-hour clock for $publishDate time selector based on admin and user preferences
-include_once ('lib/userprefs/userprefslib.php');
+$quizlib = TikiLib::lib('quiz');
+$userprefslib = TikiLib::lib('userprefs');
 $smarty->assign('use_24hr_clock', $userprefslib->get_user_clock_pref($user));
 
 // quizId of 0 is used as a placeholder; There should NEVER be a row in the

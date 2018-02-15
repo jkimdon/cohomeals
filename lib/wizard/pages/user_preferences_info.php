@@ -1,13 +1,13 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_preferences_info.php 49756 2014-02-06 11:13:28Z xavidp $
+// $Id: user_preferences_info.php 57961 2016-03-17 20:01:56Z jonnybradley $
 
 
 require_once('lib/wizard/wizard.php');
-include_once('lib/userprefs/userprefslib.php');
+$userprefslib = TikiLib::lib('userprefs');
 /**
  * Set up the Basic User Information
  */
@@ -34,7 +34,10 @@ class UserWizardPreferencesInfo extends Wizard
 	function onSetupPage ($homepageUrl) 
 	{
 
-		global	$smarty, $userlib, $tikilib, $user, $prefs, $user_preferences;
+		global $user, $prefs, $user_preferences;
+		$userlib = TikiLib::lib('user');
+		$tikilib = TikiLib::lib('tiki');
+		$smarty = TikiLib::lib('smarty');
 
 		// Run the parent first
 		parent::onSetupPage($homepageUrl);
@@ -77,7 +80,6 @@ class UserWizardPreferencesInfo extends Wizard
 		if ($prefs['userTracker'] == 'y') {
 			$re = $userlib->get_usertracker($userinfo["userId"]);
 			if (isset($re['usersTrackerId']) and $re['usersTrackerId']) {
-				include_once ('lib/trackers/trackerlib.php');
 				$trklib = TikiLib::lib('trk');
 				$info = $trklib->get_item_id($re['usersTrackerId'], $trklib->get_field_id($re['usersTrackerId'], 'Login'), $userwatch);
 				$usertrackerId = $re['usersTrackerId'];
@@ -86,17 +88,20 @@ class UserWizardPreferencesInfo extends Wizard
 		}
 		$smarty->assign('usertrackerId', $usertrackerId);
 		$smarty->assign('useritemId', $useritemId);
-
-		// Assign the page template
-		$wizardTemplate = 'wizard/user_preferences_info.tpl';
-		$smarty->assign('wizardBody', $wizardTemplate);
 		
 		return $showPage;		
 	}
 
+	function getTemplate()
+	{
+		$wizardTemplate = 'wizard/user_preferences_info.tpl';
+		return $wizardTemplate;
+	}
+
 	function onContinue ($homepageUrl) 
 	{
-		global $tikilib, $user, $prefs;
+		global $user, $prefs;
+		$tikilib = TikiLib::lib('tiki');
 		
 		$userwatch = $user;
 		
@@ -104,11 +109,11 @@ class UserWizardPreferencesInfo extends Wizard
 		parent::onContinue($homepageUrl);
 		
 		if (isset($_REQUEST["realName"]) && ($prefs['auth_ldap_nameattr'] == '' || $prefs['auth_method'] != 'ldap')) {
-	     $tikilib->set_user_preference($userwatch, 'realName', $_REQUEST["realName"]);
-	     if ( $prefs['user_show_realnames'] == 'y' ) {
-	       global $cachelib;
-	       $cachelib->invalidate('userlink.'.$user.'0');
-	     }
+			$tikilib->set_user_preference($userwatch, 'realName', $_REQUEST["realName"]);
+			if ( $prefs['user_show_realnames'] == 'y' ) {
+				$cachelib = TikiLib::lib('cache');
+				$cachelib->invalidate('userlink.'.$user.'0');
+			}
 		}
 		if ($prefs['feature_community_gender'] == 'y') {
 			if (isset($_REQUEST["gender"])) $tikilib->set_user_preference($userwatch, 'gender', $_REQUEST["gender"]);

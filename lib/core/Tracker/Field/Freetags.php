@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Freetags.php 45929 2013-05-13 19:34:16Z lphuberdeau $
+// $Id: Freetags.php 63265 2017-07-17 12:07:40Z jonnybradley $
 
 /**
  * Handler class for Freetags
@@ -11,14 +11,14 @@
  * Letter key: ~F~
  *
  */
-class Tracker_Field_Freetags extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable
+class Tracker_Field_Freetags extends Tracker_Field_Abstract implements Tracker_Field_Synchronizable, Tracker_Field_Exportable, Tracker_Field_Filterable
 {
 	public static function getTypes()
 	{
 		return array(
 			'F' => array(
-				'name' => tr('Freetags'),
-				'description' => tr('Allows freetags to be shown or added for tracker items.'),
+				'name' => tr('Tags'),
+				'description' => tr('Allows tags to be shown or added for tracker items.'),
 				'prefs' => array('trackerfield_freetags', 'feature_freetags'),
 				'tags' => array('advanced'),
 				'default' => 'y',
@@ -42,7 +42,7 @@ class Tracker_Field_Freetags extends Tracker_Field_Abstract implements Tracker_F
 					),
 					'hidesuggest' => array(
 						'name' => tr('Suggest'),
-						'description' => tr('Hide or show the freetag suggestions'),
+						'description' => tr('Hide or show the tag suggestions'),
 						'default' => '',
 						'filter' => 'alpha',
 						'options' => array(
@@ -113,6 +113,48 @@ class Tracker_Field_Freetags extends Tracker_Field_Abstract implements Tracker_F
 	function importRemoteField(array $info, array $syncInfo)
 	{
 		return $info;
+	}
+
+	function getTabularSchema()
+	{
+		$schema = new Tracker\Tabular\Schema($this->getTrackerDefinition());
+
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+
+		$schema->addNew($permName, 'default')
+			->setLabel($name)
+			->setRenderTransform(function ($value) {
+				return $value;
+			})
+			->setParseIntoTransform(function (& $info, $value) use ($permName) {
+				$info['fields'][$permName] = $value;
+			});
+
+		return $schema;
+	}
+
+	function getFilterCollection()
+	{
+		$filters = new Tracker\Filter\Collection($this->getTrackerDefinition());
+		$permName = $this->getConfiguration('permName');
+		$name = $this->getConfiguration('name');
+		$baseKey = $this->getBaseKey();
+
+
+		$filters->addNew($permName, 'lookup')
+			->setLabel($name)
+			->setControl(new Tracker\Filter\Control\TextField("tf_{$permName}_lookup"))
+			->setApplyCondition(function ($control, Search_Query $query) use ($baseKey) {
+				$value = $control->getValue();
+
+				if ($value) {
+					$query->filterContent($value, $baseKey);
+				}
+			})
+			;
+
+		return $filters;
 	}
 }
 

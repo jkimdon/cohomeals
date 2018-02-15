@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MemoryLimit.php 44444 2013-01-05 21:24:24Z changi67 $
+// $Id: MemoryLimit.php 61813 2017-03-22 14:34:38Z chealer $
 
 class Tiki_MemoryLimit
 {
@@ -13,20 +13,17 @@ class Tiki_MemoryLimit
 	{
 		$this->initialLimit = ini_get('memory_limit');
 		$this->applyMinimalLimit($targetLimit);
-
 	}
 
 	function __destruct()
 	{
+		// Restore initial limit
 		$this->applySafeLimit($this->initialLimit);
 	}
 
 	private function applyMinimalLimit($target)
 	{
-		$rawCurrent = $this->getRaw($this->initialLimit);
-		$rawTarget = $this->getRaw($target);
-
-		if ($rawCurrent < $rawTarget) {
+		if (self::toBytes($this->initialLimit) < self::toBytes($target)) {
 			ini_set('memory_limit', $target);
 		};
 	}
@@ -34,24 +31,23 @@ class Tiki_MemoryLimit
 	private function applySafeLimit($targetMemory)
 	{
 		$usage = memory_get_usage();
-		$target = $this->getRaw($targetMemory);
+		$target = self::toBytes($targetMemory);
 
 		if ($usage < $target) {
 			ini_set('memory_limit', $targetMemory);
 		}
 	}
 
-	private function getRaw($memory_limit)
+	private static function toBytes($limitString)
 	{
-		$s = trim($memory_limit);
-		$last = strtolower($s{strlen($s)-1});
-		switch ( $last ) {
-			case 'g': $s *= 1024;
-			case 'm': $s *= 1024;
-			case 'k': $s *= 1024;
+		$limitString = trim($limitString);
+		$bytes = (int) $limitString;
+		$lastCharacter = strtolower($limitString{strlen($limitString)-1});
+		$units = array('k' => 1, 'm' => 2, 'g' => 3);
+		if (array_key_exists($lastCharacter, $units)) {
+			$bytes = $bytes * (1024 ** $units[$lastCharacter]);
 		}
-
-		return $s;
+		return $bytes;
 	}
 }
 

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Snippet.php 49435 2014-01-17 14:45:26Z jonnybradley $
+// $Id: Snippet.php 57970 2016-03-17 20:08:22Z jonnybradley $
 
 class Search_Formatter_ValueFormatter_Snippet extends Search_Formatter_ValueFormatter_Abstract
 {
@@ -23,7 +23,7 @@ class Search_Formatter_ValueFormatter_Snippet extends Search_Formatter_ValueForm
 
 	function render($name, $value, array $entry)
 	{
-		$snippet = TikiLib::lib('tiki')->get_snippet($value, 'n', '', $this->length + 1);
+		$snippet = TikiLib::lib('tiki')->get_snippet($value, '', false, '', $this->length + 1);
 
 		if (function_exists('mb_strlen')) {
 			if (mb_strlen($snippet) > $this->length) {

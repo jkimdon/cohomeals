@@ -2,11 +2,11 @@
 /**
  * @package tikiwiki
  */
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 // 
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_notifications.php 46727 2013-07-19 11:47:04Z jonnybradley $
+// $Id: tiki-admin_notifications.php 62770 2017-05-27 10:49:54Z drsassafras $
 
 $inputConfiguration = array(
 	array(
@@ -15,8 +15,6 @@ $inputConfiguration = array(
 			'maxRecords' => 'digits',
 			'removeevent' => 'digits',
 			'removetype' => 'word',
-			'daconfirm' => 'word',
-			'ticket' => 'word',
 			'sort_mode' => 'word',
 			'find' => 'striptags',
 			'email' => 'email',
@@ -31,8 +29,9 @@ $inputConfiguration = array(
 );
 // Initialization
 require_once ('tiki-setup.php');
-include_once ('lib/notifications/notificationlib.php');
 $access->check_permission(array('tiki_p_admin_notifications'));
+
+$notificationlib = TikiLib::lib('notification');
 
 $auto_query_args = array(
 	'offset',
@@ -50,41 +49,28 @@ if (isset($_REQUEST["add"])) {
 		if ($userlib->user_exists($_REQUEST['login'])) {
 			$login = $_REQUEST['login'];
 		} else {
-			$tikifeedback[] = array(
-				'num' => 0,
-				'mes' => tra("Invalid username")
-			);
+			Feedback::error(tra('Invalid username'));
 			$save = false;
 		}
 	} elseif (!empty($_REQUEST['email'])) {
 		if (validate_email($_REQUEST['email'], $prefs['validateEmail'])) {
 			$email = $_REQUEST['email'];
 		} else {
-			$tikifeedback[] = array(
-				'num' => 0,
-				'mes' => tra("Invalid email")
-			);
+			Feedback::error(tra('Invalid email'));
 			$save = false;
 		}
 	} else {
-		$tikifeedback[] = array(
-			'num' => 0,
-			'mes' => tra("You need to provide a username or an email")
-		);
+		Feedback::error(tra('You need to provide a username or an email'));
 		$save = false;
 	}
 	if ($save and isset($_REQUEST['event']) and isset($watches[$_REQUEST['event']])) {
 		$result = $tikilib->add_user_watch($login, $_REQUEST["event"], $watches[$_REQUEST['event']]['object'], $watches[$_REQUEST['event']]['type'], $watches[$_REQUEST['event']]['label'], $watches[$_REQUEST['event']]['url'], isset($email) ? $email : NULL);
 		if (!$result) {
-			$tikifeedback[] = array(
-				'mes' => tra("The user has no email set. No notifications will be sent.")
-			);			
+			Feedback::error(tra('The user has no email set. No notifications will be sent.'));
 		}
 	}
 }
-if (!empty($tikifeedback)) {
-	$smarty->assign_by_ref('tikifeedback', $tikifeedback);
-}
+
 if (isset($_REQUEST["removeevent"]) && isset($_REQUEST['removetype'])) {
 	$access->check_authenticity();
 	if ($_REQUEST['removetype'] == 'user') {
@@ -127,8 +113,7 @@ $channels = $tikilib->list_watches($offset, $maxRecords, $sort_mode, $find);
 $smarty->assign_by_ref('cant', $channels['cant']);
 $smarty->assign_by_ref('channels', $channels["data"]);
 if ($prefs['feature_trackers'] == 'y') {
-	global $trklib;
-	include_once ('lib/trackers/trackerlib.php');
+	$trklib = TikiLib::lib('trk');
 	$trackers = $trklib->get_trackers_options(0, 'outboundemail', $find, 'empty');
 	$smarty->assign_by_ref('trackers', $trackers);
 }

@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.query.php 53959 2015-02-16 16:26:30Z jonnybradley $
+// $Id: function.query.php 63871 2017-09-19 14:51:24Z jonnybradley $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -43,14 +43,18 @@ function smarty_function_query($params, $smarty)
 	} else {
 		// Not using _REQUEST here, because it is sometimes directly modified in scripts
 		if ( $request === NULL ) {
-			if (!empty($_GET) && !empty($_POST)) {
-				$request = array_merge($_GET, $_POST);
-			} else if (!empty($_GET)) {
-				$request = $_GET;
-			} else if (!empty($_POST)) {
-				$request = $_POST;
-			} else {
-				$request = array();
+			// make a copy of the $_GET and $_POST arrays as it seems php7 assigns these by reference now
+			// and so they get directly modified below instead of just the query string being set
+			$request = [];
+			if (!empty($_GET)) {
+				foreach ($_GET as $k => $v) {
+					$request[$k] = $v;
+				}
+			}
+			if (!empty($_POST)) {
+				foreach ($_POST as $k => $v) {
+					$request[$k] = $v;
+				}
 			}
 		}
 		$query = $request;
@@ -105,7 +109,14 @@ function smarty_function_query($params, $smarty)
 				if ( is_array($v) ) {
 					foreach ( $v as $vk => $vv ) {
 						$vrname = $rname.'['.htmlspecialchars($vk, ENT_QUOTES, 'UTF-8').']';
-						$ret .= $rtag.' name="'.$vrname.'" value="'.htmlspecialchars($vv, ENT_QUOTES, 'UTF-8').'" />'."\n";
+						if (is_array($vv)) {	// handle nested array values
+							foreach ($vv as $vvk => $vvv) {
+								$vrname2 = $vrname . '[' . htmlspecialchars($vvk, ENT_QUOTES, 'UTF-8') . ']';
+								$ret .= $rtag.' name="'.$vrname2.'" value="'.htmlspecialchars($vvv, ENT_QUOTES, 'UTF-8').'" />'."\n";
+							}
+						} else {
+							$ret .= $rtag.' name="'.$vrname.'" value="'.htmlspecialchars($vv, ENT_QUOTES, 'UTF-8').'" />'."\n";
+						}
 					}
 				} else {
 					$ret .= $rtag.' name="'.$rname.'" value="'.htmlspecialchars($v, ENT_QUOTES, 'UTF-8').'" />'."\n";
@@ -165,7 +176,18 @@ function smarty_function_query($params, $smarty)
 					$smarty
 				);
 			} else {
-				$php_self = htmlspecialchars($_SERVER['PHP_SELF']);
+				if ($_SERVER['PHP_SELF'] == 'tiki-ajax_services.php' && isset($_GET['controller'], $_GET['action'])) {
+					$smarty->loadPlugin('smarty_function_service');
+					$php_self = smarty_function_service(
+						array(
+							'controller' => $_GET['controller'],
+							'action' => $_GET['action'],
+						),
+						$smarty
+					);
+				} else {
+					$php_self = htmlspecialchars($_SERVER['PHP_SELF']);
+				}
 			}
 
 		} else {

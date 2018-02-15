@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2013 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: structlib.php 49998 2014-02-21 15:57:03Z jonnybradley $
+// $Id: structlib.php 62116 2017-04-06 15:40:53Z drsassafras $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -94,8 +94,7 @@ class StructLib extends TikiLib
 			$page_info = $this->s_get_page_info($page_ref_id);
   			$query = 'select count(*) from `tiki_structures` where `page_id`=?';
 	  		$count = $this->getOne($query, array((int) $page_info['page_id']));
-			global $wikilib;
-			include_once('lib/wiki/wikilib.php');
+			$wikilib = TikiLib::lib('wiki');
 			if ($count == 1 && $wikilib->is_editable($page_info['pageName'], $user)) {
 				$this->remove_all_versions($page_info['pageName']);
 			}
@@ -366,7 +365,7 @@ class StructLib extends TikiLib
 
 	public function get_subtree($page_ref_id, $level = 0, $parent_pos = '')
 	{
-		global $tikilib;
+		$tikilib = TikiLib::lib('tiki');
 		$ret = array();
 		$pos = 1;
 		//The structure page is used as a title
@@ -378,7 +377,7 @@ class StructLib extends TikiLib
 			$aux['page_ref_id'] = $struct_info['page_ref_id'];
 			$aux['pageName']    = $struct_info['pageName'];
 			$aux['page_alias']  = $struct_info['page_alias'];
-			global $wikilib; include_once('lib/wiki/wikilib.php');
+			$wikilib = TikiLib::lib('wiki');
 			$is_locked = $wikilib->is_locked($struct_info['pageName']);
 			if ($is_locked) {
 				$aux['flag'] = 'L';
@@ -533,7 +532,7 @@ class StructLib extends TikiLib
 
 	public function use_user_language_preferences( $langContext = null )
 	{
-		global $prefs, $multilinguallib;
+		global $prefs;
 		if ( $prefs['feature_multilingual'] != 'y' ) {
 			return;
 		}
@@ -541,9 +540,7 @@ class StructLib extends TikiLib
 			return;
 		}
 
-		if ( !$multilinguallib ) {
-			include_once('lib/multilingual/multilinguallib.php');
-		}
+		$multilinguallib = TikiLib::lib('multilingual');
 
 		$this->displayLanguageOrder = $multilinguallib->preferredLangs($langContext);
 	}
@@ -686,16 +683,30 @@ class StructLib extends TikiLib
 		}
 		return $back;
 	}
-	public function get_toc($page_ref_id,$order='asc',$showdesc=false,$numbering=true,$numberPrefix='',$type='plain',$page='',$maxdepth=0, $structurePageName='')
+	public function get_toc($page_ref_id,$order='asc',$showdesc=false,$numbering=true,$numberPrefix='',$type='plain',$page='',$maxdepth=0,$mindepth=0, $sortalpha=0, $structurePageName='')
 	{
-		global $user;
+		global $user, $prefs;
 
 		$structure_tree = $this->build_subtree_toc($page_ref_id, false, $order, $numberPrefix);
 
 		if ($type === 'admin') {
 			// check perms here as we still have $page_ref_id
 			$structure_info = $this->s_get_structure_info($page_ref_id);
-			if (!$this->user_has_perm_on_object($user, $structure_info["pageName"], 'wiki page', 'tiki_p_edit_structures')) {
+
+			$perms = Perms::get('wiki page', $structure_info["pageName"]);
+
+			if ($prefs['lock_wiki_structures'] === 'y') {
+				$lockedby = TikiLib::lib('attribute')->get_attribute('wiki structure', $structure_info['pageName'], 'tiki.object.lock');
+				if ($lockedby && $lockedby === $user && $perms->lock_structures || ! $lockedby || $perms->admin_structures) {
+					$editable = $perms->edit_structures;
+				} else {
+					$editable = false;
+				}
+			} else {
+				$editable = $perms->edit_structures;
+			}
+
+			if (! $editable) {
 				$type = 'plain';
 			} else {
 				TikiLib::lib('smarty')->assign('structure_name', $structure_info["pageName"]);
@@ -709,11 +720,46 @@ class StructLib extends TikiLib
 						'type' => $type,
 						'page' => $page,
 						'maxdepth' => $maxdepth,
+						'mindepth' => $mindepth,
+						'sortalpha' => $sortalpha,
 						'structurePageName' => $structurePageName
 					)
 				);
 				TikiLib::lib('smarty')->assign('json_params', $json_params);
 
+			}
+		}
+
+		if ($structure_tree != '') {
+			if ($mindepth > 0) {
+				$currentLevel = $structure_tree;
+				for ($i = 0; $i < $mindepth; $i++) {
+					$deeperLevel = array();
+					if ($currentLevel != '') {
+						foreach ($currentLevel as $leaf) {
+							if (isset($leaf['sub']) && is_array($leaf['sub'])) {
+								foreach ($leaf['sub'] as $sub) {
+									$deeperLevel[] = $sub;
+								}
+							}
+						}
+					}
+					$currentLevel = $deeperLevel;
+				}
+				if ($maxdepth > 0) {
+					$maxdepth = $maxdepth - $mindepth;
+					if ($maxdepth <= 0) {
+						$maxdepth = 1;
+					}
+				}
+				$structure_tree = $currentLevel;
+			}
+			if ($sortalpha == 'alpha'){
+				if ($order == 'asc') {
+					usort($structure_tree, array($this, 'compareByPageName'));
+				} else {
+					usort($structure_tree, array($this, 'compareByPageNameDesc'));
+				}
 			}
 		}
 
@@ -723,12 +769,25 @@ class StructLib extends TikiLib
 		}
 		return $nodelist ."\n";
 	}
+
+	public function compareByPageName($a, $b)
+	{
+		return strcasecmp($a['pageName'], $b['pageName']);
+	}
+
+	public function compareByPageNameDesc($a, $b)
+	{
+		return strcasecmp($b['pageName'], $a['pageName']);
+	}
+
 	public function fetch_toc($structure_tree,$showdesc,$numbering,$type='plain',$page='',$maxdepth=0,$cur_depth=0,$structurePageName='')
 	{
-		global $smarty, $user;
+		$smarty = TikiLib::lib('smarty');
+		global $user;
 		$ret='';
 		if ($structure_tree != '') {
 			if (($maxdepth <= 0) || ($cur_depth < $maxdepth)) {
+
 
 				$smarty->assign('toc_type', $type);
 				$ret.= $smarty->fetch('structures_toc-startul.tpl')."\n";
@@ -965,7 +1024,7 @@ class StructLib extends TikiLib
 		if ( empty( $this->displayLanguageOrder ) ) {
 			$query = 'select `page_ref_id` ';
 			$query .= 'from `tiki_structures` ts, `tiki_pages` tp ';
-			$query .= 'where ts.`page_id`=tp.`page_id` and `pageName`=?';
+			$query .= 'where ts.`page_id`=tp.`page_id` and (tp.`pageName`=? OR tp.`pageSlug`=?)';
 		} else {
 			$query = "
 				SELECT DISTINCT
@@ -976,10 +1035,10 @@ class StructLib extends TikiLib
 					LEFT JOIN tiki_translated_objects b ON a.traId = b.traId AND b.type = 'wiki page'
 					LEFT JOIN tiki_pages tp ON ts.page_id = tp.page_id OR b.objId = tp.page_id
 				WHERE
-					pageName = ?";
+					tp.`pageName`=? OR tp.`pageSlug`=?";
 		}
 
-		$result = $this->query($query, array($pageName));
+		$result = $this->query($query, array($pageName,$pageName));
 		while ($res = $result->fetchRow()) {
 			$next_page = $this->s_get_structure_info($res['page_ref_id']);
 			//Add each structure head only once
@@ -1034,32 +1093,57 @@ class StructLib extends TikiLib
 		}
 		return $ret;
 	}
-	public function list_structures($offset, $maxRecords, $sort_mode, $find='', $exact_match = true, $filter = '')
+	public function list_structures($offset, $maxRecords, $sort_mode, $find='', $exact_match = true, $filter = array())
 	{
+		global $prefs;
+
 		if ($find) {
 			if (!$exact_match && $find) {
 				$find = preg_replace("/(\w+)/", "%\\1%", $find);
 				$find = preg_split("/[\s]+/", $find, -1, PREG_SPLIT_NO_EMPTY);
-				$mid = " where (`parent_id` is null or `parent_id`=0) and (tp.`pageName` like ".implode(' or tp.`pageName` like ', array_fill(0, count($find), '?')).")";
+				$mid = " where (`parent_id` is null or `parent_id`=0) and (tp.`pageName` like " . implode(' or tp.`pageName` like ', array_fill(0, count($find), '?')) . ")";
 				$bindvars = $find;
 			} else {
 				$mid = ' where (`parent_id` is null or `parent_id`=0) and (tp.`pageName` like ?)';
 				$findesc = '%' . $find . '%';
-				$bindvars=array($findesc);
+				$bindvars = array($findesc);
 			}
 		} else {
 			$mid = ' where (`parent_id` is null or `parent_id`=0) ';
-			$bindvars=array();
+			$bindvars = array();
 		}
+
+		// If language is set to '', assume that no language filtering should be done.
+		if (isset($filter['lang']) && $filter['lang'] == '') {
+			unset($filter['lang']);
+		}
+
+		if ($prefs['feature_wiki_categorize_structure'] == 'y') {
+			$category_jails = TikiLib::lib('categ')->get_jail();
+			if ( ! isset( $filter['andCategId'] ) && ! isset( $filter['categId'] ) && empty( $filter['noCateg'] ) && ! empty( $category_jails ) ) {
+				$filter['categId'] = $category_jails;
+			}
+		}
+
 		$join_tables = ' inner join `tiki_pages` tp on (tp.`page_id`= ts.`page_id`)';
 		$join_bindvars = array();
+		$distinct = '';
 		if (!empty($filter)) {
 			foreach ($filter as $type => $val) {
 				if ($type == 'categId') {
-					$join_tables .= " inner join `tiki_objects` as tob on (tob.`itemId`= tp.`pageName` and tob.`type`= ?) inner join `tiki_category_objects` as tc on (tc.`catObjectId`=tob.`objectId` and tc.`categId`=?) ";
-					$join_bindvars = array('wiki page', $val);
+					$categories = TikiLib::lib('categ')->get_jailed((array) $val);
+					$categories[] = -1;
+
+					$cat_count = count($categories);
+					$join_tables .= " inner join `tiki_objects` as tob on (tob.`itemId`= tp.`pageName` and tob.`type`= ?) inner join `tiki_category_objects` as tc on (tc.`catObjectId`=tob.`objectId` and tc.`categId` IN(" . implode(', ', array_fill(0, $cat_count, '?')) . ")) ";
+
+					if ( $cat_count > 1 ) {
+						$distinct = ' DISTINCT ';
+					}
+
+					$join_bindvars = array_merge(array('wiki page'), $categories);
 				} elseif ($type == 'lang') {
-					$mid .= empty($mid)? ' where ': ' and ';
+					$mid .= empty($mid) ? ' where ' : ' and ';
 					$mid .= '`lang`=? ';
 					$bindvars[] = $val;
 				}
@@ -1067,9 +1151,10 @@ class StructLib extends TikiLib
 		}
 
 		if (!empty($join_bindvars)) {
-			$bindvars = empty($bindvars)? $join_bindvars : array_merge($join_bindvars, $bindvars);
+			$bindvars = empty($bindvars) ? $join_bindvars : array_merge($join_bindvars, $bindvars);
 		}
-		$query = "select `page_ref_id`,`structure_id`,`parent_id`,ts.`page_id`,`page_alias`,`pos`,
+
+		$query = "select $distinct `page_ref_id`,`structure_id`,`parent_id`,ts.`page_id`,`page_alias`,`pos`,
 			`pageName`,tp.`hits`,`data`,tp.`description`,`lastModif`,`comment`,`version`,
 			`user`,`ip`,`flag`,`points`,`votes`,`cache`,`wiki_cache`,`cache_timestamp`,
 			`pageRank`,`creator`,`page_size` from `tiki_structures` as ts $join_tables $mid order by ".$this->convertSortMode($sort_mode);
@@ -1090,6 +1175,16 @@ class StructLib extends TikiLib
 					$res['editable']='y';
 				} else {
 					$res['editable']='n';
+				}
+				if ( $this->user_has_perm_on_object($user, $res['pageName'], 'wiki page', 'tiki_p_edit_structures') ) {
+					$res['edit_structure'] = 'y';
+				} else {
+					$res['edit_structure'] = 'n';
+				}
+				if ( $this->user_has_perm_on_object($user, $res['pageName'], 'wiki page', 'tiki_p_admin_structures') ) {
+					$res['admin_structure'] = 'y';
+				} else {
+					$res['admin_structure'] = 'n';
 				}
 				$ret[] = $res;
 
@@ -1150,7 +1245,7 @@ class StructLib extends TikiLib
 				$res['description']=$res['pageName'];
 			}
 	  		$pageName=$res['pageName'].'|'.$res['description'];
-	  		$dat = $this->parse_data($res['data']);
+	  		$dat = TikiLib::lib('parser')->parse_data($res['data']);
 	  		//Now dump the page
 	  		$dat = preg_replace("/tiki-index.php\?page=([^\'\" ]+)/", "$1.html", $dat);
 	  		$dat = str_replace('?nocache=1', '', $dat);
@@ -1195,9 +1290,9 @@ class StructLib extends TikiLib
 		fclose($fw);
 
 		// write the title page, using:
-		// Browser Title, Logo, Site Title, Site subtitle
+		// Browser Title, Logo, Site title, Site subtitle
 		$fw = fopen("$base/content.html", 'w+');
-		$titlepage = "<h1>". $prefs['browsertitle'] . "</h1><p><img src='../../".$prefs['sitelogo_src']."' alt='".$prefs['sitelogo_alt']."' align='center' /></p><h2>". $prefs['sitetitle'] ."</h2><h3>".  $prefs['sitesubtitle']  ."</h3>";
+		$titlepage = "<h1>". $prefs['browsertitle'] . "</h1><p><img src='../../".$prefs['sitelogo_src']."' alt='".$prefs['sitelogo_alt']."' style=\"text-align: center;\" /></p><h2>". $prefs['sitetitle'] ."</h2><h3>".  $prefs['sitesubtitle']  ."</h3>";
 		fwrite($fw, $titlepage);
 		fclose($fw);
 	}
@@ -1286,28 +1381,11 @@ class StructLib extends TikiLib
 			$this->query($query, array($structure_id, $structure_id, $pos+1, $page_ref_id));
 		}
 	}
-	public function move_to_structure_child($parent_ref_id, $structure_id, $first=true)
-	{
-		$query = "update `tiki_structures` set `pos`=`pos`-1 where `pos`>? and `parent_id`=?";
-		$this->query($query, array((int) $page_info["pos"], (int) $parent_ref_id));
-		if ($first) {
-			$query = "update `tiki_structures` set `pos`=`pos`+1 where `parent_id`=?";
-			$this->query($query, array($structure_id));
-			$pos = 1;
-			$query = "update `tiki_structures` set `structure_id`=?, `parent_id`=?, `pos`=? where `page_ref_id`=?";
-			$this->query($query, array($structure_id, $structure_id, $pos+1, $page_ref_id));
-		} else {
-			$query = "select max(`pos`) from `tiki_structures` where `parent_id`=?";
-			$pos = $this->getOne($query, array($structure_id));
-			$query = "update `tiki_structures` set `structure_id`=?, `parent_id`=?, `pos`=? where `page_ref_id`=?";
-			$this->query($query, array($structure_id, $structure_id, $pos+1, $page_ref_id));
-		}
-		return true;
-	}
+
 	/* transform a structure into a menu */
 	public function to_menu($channels, $structure, $sectionLevel=0, $cumul=0, $params=array())
 	{
-		global $smarty;
+		$smarty = TikiLib::lib('smarty');
 		include_once('lib/smarty_tiki/function.sefurl.php');
 		$options = array();
 		$cant = 0;
@@ -1351,4 +1429,4 @@ class StructLib extends TikiLib
 		return array('data'=>$options, 'cant'=>$cant);
 	}
 }
-global $structlib; $structlib = new StructLib;
+
