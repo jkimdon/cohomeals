@@ -224,51 +224,7 @@
 {elseif $dup_mode eq 'y'}
 	{include file='duplicate_file_gallery.tpl'}
 {else}
-	{if $prefs.fgal_elfinder_feature neq 'y' or $view neq 'finder'}
-		<div class="row">
-		{if $prefs.fgal_search eq 'y' and $view neq 'page'}
-			<div class="col-sm-6">
-				{include file='find.tpl' find_show_num_rows = 'y' find_show_categories_multi='y' find_durations=$find_durations find_show_sub='y' find_other="{tr}Gallery of this fileId{/tr}" find_in="<ul><li>{tr}Name{/tr}</li><li>{tr}Filename{/tr}</li><li>{tr}Description{/tr}</li></ul>"}
-			</div>
-		{/if}
-		{if $prefs.fgal_search_in_content eq 'y' and $galleryId > 0}
-			{if $view neq 'page'}
-				<div class="col-sm-6">
-					<form id="search-form" class="form" role="form" method="get" action="tiki-search{if $prefs.feature_forum_local_tiki_search eq 'y'}index{else}results{/if}.php">
-						<input type="hidden" name="where" value="files">
-						<input type="hidden" name="galleryId" value="{$galleryId}">
-						<label for="highlight" class="find_content sr-only">{tr}Search in content{/tr}</label>
-						<div class="input-group">
-							<input name="highlight" size="30" type="text" placeholder="{tr}Search in content{/tr}..." class="form-control">
-							<div class="input-group-btn">
-								<input type="submit" class="wikiaction btn btn-default" name="search" value="{tr}Go{/tr}">
-							</div>
-						</div>
-					</form>
-				</div>
-			{/if}
-		{/if}
-		</div>
-	{/if}
-
-	{if $view eq 'page'}
-		<div class="pageview">
-			<form id="size-form" class="form form-inline" role="form" action="tiki-list_file_gallery.php">
-				<input type="hidden" name="view" value="page">
-				<input type="hidden" name="galleryId" value="{$galleryId}">
-				<input type="hidden" name="maxRecords" value=1>
-				<input type="hidden" name="offset" value="{$offset}">
-				<label for="maxWidth">
-					{tr}Maximum width{/tr}&nbsp;<input id="maxWidth" class="form-control" type="text" name="maxWidth" value="{$maxWidth}">
-				</label>
-				<input type="submit" class="wikiaction btn btn-default" name="setSize" value="{tr}Submit{/tr}">
-			</form>
-		</div><br>
-		{pagination_links cant=$cant step=$maxRecords offset=$offset}
-			tiki-list_file_gallery.php?galleryId={$galleryId}&maxWidth={$maxWidth}&maxRecords={$maxRecords}&view={$view}
-		{/pagination_links}
-		<br>
-	{/if}
+	{include file='coho_tiki-list_file_gallery.tpl'}
 	{if $prefs.fgal_quota_show neq 'n' and $gal_info.quota}
 		<div style="float:right; width: 350px;">
 			{if $gal_info.usedSize neq null}

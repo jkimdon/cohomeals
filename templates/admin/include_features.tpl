@@ -33,6 +33,7 @@
 					{preference name=feature_trackers}
 					{preference name=feature_calendar}
 					{preference name=feature_search}
+					{preference name=feature_cohomeals}
 				</div>
 			</fieldset>
 

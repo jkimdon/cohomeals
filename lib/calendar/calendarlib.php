@@ -11,6 +11,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
   exit;
 }
 
+include_once ('lib/calendar/calrecurrence.php');
+include_once ('lib/cohomeals/coho_mealslib.php');
+
 if (!defined('ROLE_ORGANIZER')) define('ROLE_ORGANIZER', '6');
 if (!defined('weekInSeconds')) define('weekInSeconds', 604800);
 
@@ -250,6 +253,7 @@ class CalendarLib extends TikiLib
 		$bindvars[] = (int)$tstart;
 
 		$cond .= " and ((c.`personal`='y' and i.`user`=?) or c.`personal` != 'y')";
+		$cond .= " and (i.`name` not like 'DELETED%')";
 		$bindvars[] = $user;
 
 		$query = "select i.`calitemId` as `calitemId` ";
@@ -346,6 +350,261 @@ class CalendarLib extends TikiLib
 		return $ret;
 	}
 
+	function add_coho_recurrence_items(&$eventArray, $calIds, $user, $tstart, $tstop, $offset, $maxRecords, $sort_mode='start_asc', $find='', $customs=array())
+	{
+	  global $prefs;
+
+	  	if (count($calIds) == 0) {
+		    return;
+		}
+
+		$where = array();
+		$bindvars=array();
+		foreach ($calIds as $calendarId) {
+		    $where[] = "i.`calendarId`=?";
+		    $bindvars[] = (int)$calendarId;
+		}
+
+		$cond = "(" . implode(" or ", $where). ") and ";
+		// find all recurrences that intersect with the desired range
+		$cond .= " (i.`startPeriod` < ? and (i.`endPeriod` > ? or i.`endPeriod` = 0 or i.`endPeriod` IS NULL))";
+
+		$bindvars[] = (int)$tstop;
+		$bindvars[] = (int)$tstart;
+
+		$cond .= " and ((c.`personal`='y' and i.`user`=?) or c.`personal` != 'y')";
+		$bindvars[] = $user;
+
+		$query = "select i.`recurrenceId` as `recurrenceId`, i.`calendarId` as `calendarId`, i.`startPeriod` as `recurrenceStart`, i.`endPeriod` as `recurrenceEnd` ";
+
+		$tblRef = "i.";
+		$query .= "from `tiki_calendar_recurrence` as i left join `tiki_calendars` as c on i.`calendarId`=c.`calendarId` where ($cond)  order by ". $tblRef . $this->convertSortMode("$sort_mode");
+		$result = $this->query($query, $bindvars, $maxRecords, $offset);
+
+		while ($row = $result->fetchRow()) {
+		  // calculate the dates/times where we would expect unchanged items to be rendered
+		  $recurrenceEntry = new CalRecurrence($row["recurrenceId"]);
+		  // want to find where to start and end the rendering, bounded by view and recurrence period
+		  $inview_start = $row["recurrenceStart"];
+		  if ($inview_start < $tstart) $inview_start = $tstart;
+		  $inview_end = $row["recurrenceEnd"];
+		  if ($inview_end == 0) $inview_end = $tstop;
+		  elseif ($inview_end > $tstop) $inview_end = $tstop;
+		  $expectedDates = $recurrenceEntry->coho_getUnchangedDates((int)$inview_start,(int)$inview_end);
+
+		  /// NOTE: only one-day events are treated here
+
+		  // query for overrides
+		  $override_query = "select `recurrence_override` as `recurrence_override` " .
+		    "from `tiki_calendar_items` where `recurrenceId` = ? " .
+		    "and `calendarId` = ? ";
+		  $override_query .= "and (`recurrence_override` >= ? and `recurrence_override` <= ?) " .
+		    "order by `recurrence_override` ASC";
+		  $override_bindvars = array();
+		  $override_bindvars[] = $row["recurrenceId"];
+		  $override_bindvars[] = $row["calendarId"];
+		  $override_bindvars[] = (int)$tstart;
+		  $override_bindvars[] = (int)$tstop;
+
+		  $override_result = $this->query($override_query, $override_bindvars);
+		  $override_date = $override_result->fetchRow();
+
+		  // simulate the result of a get_item of an actual event
+		  $event = $this->get_coho_unchanged_recurrence_item($row["recurrenceId"],$expectedDates[0]);
+
+		  $render = false;
+		  foreach ($expectedDates as $unchangedDate) { // unix timestamp of beginning of day
+
+            	    if (!$override_date) {
+		      $render = true;
+		    } else {
+		      if ($override_date['recurrence_override'] != $unchangedDate) {
+                        // no overriding event so we can render it unchanged
+                  	$render = true;
+		      } else {
+                        $render = false;
+		      }
+		    }
+
+		    if ($render) { // rendering unchanged
+
+		      // all items in the unchanged recurring event are the same except the date
+		      $tmp = str_pad($event["start_time"],4,"0",STR_PAD_LEFT);
+		      $itemhour = substr($tmp,0,2);
+		      $itemminute = substr($tmp,-2);
+		      $time_addition = $itemhour*3600 + $itemminute*60;
+		      $eventstartTS = $unchangedDate + $time_addition;
+		      $event["start"] = $eventstartTS;
+		      $event["date_start"] = (int)$eventstartTS;
+		      $eventendTS = $eventstartTS + $event["duration"];
+		      $event["end"] = $eventendTS;
+		      $event["date_end"] = (int)$eventendTS;
+
+		      $head = TikiLib::date_format($prefs['short_time_format'], $event["start"]). " - " . TikiLib::date_format($prefs['short_time_format'], $event["end"]);
+
+		      $eventArray["$unchangedDate"][] = array(
+			  "result" => $event,
+			  "calitemId" => $event["calitemId"],
+			  "calname" => $event["calname"],
+			  "time" => $event["start_time"], /* user time */
+			  "end" => $event["end_time"], /* user time */
+			  "type" => $event["status"],
+			  "web" => $event["url"],
+			  "startTimeStamp" => $eventstartTS, /* unix time */
+			  "endTimeStamp" => $eventendTS, /* unix time */
+			  "nl" => $event["nlId"],
+			  "prio" => $event["priority"],
+			  "location" => $event["locationName"],
+			  "category" => $event["categoryName"],
+			  "name" => $event["name"],
+			  "head" => $head,
+			  "parsedDescription" => TikiLib::lib('parser')->parse_data($event["description"]),
+			  "description" => str_replace("\n|\r", "", $event["description"]),
+			  "recurrenceId" => $event["recurrenceId"],
+			  "calendarId" => $event['calendarId'],
+			  "status" => $event['status']
+		       );
+            } else { // not rendered, will be rendered in override during non-recurrence rendering
+		      // if "used up" this override_date, go to next override date
+		      $override_date = $override_result->fetchRow();
+		    }
+		  }
+		} 
+	}		  
+
+
+	function get_coho_unchanged_recurrence_item($recurrenceId,$dayinunix) 
+	{
+	        global $user, $tikilib;
+
+		$query = "select i.`calendarId` as `calendarId`, i.`user` as `user`, i.`start` as `start`, i.`end` as `end`, t.`name` as `calname`, ";
+		$query.= "i.`locationId` as `locationId`, l.`name` as `locationName`, i.`categoryId` as `categoryId`, c.`name` as `categoryName`, i.`priority` as `priority`, i.`nlId` as `nlId`, ";
+		$query.= "i.`status` as `status`, i.`url` as `url`, i.`lang` as `lang`, i.`name` as `name`, i.`description` as `description`, i.`created` as `created`, i.`lastmodif` as `lastModif`, i.`allday` as `allday`, i.`recurrenceId` as `recurrenceId`, ";
+		$query.= "t.`customlocations` as `customlocations`, t.`customcategories` as `customcategories`, t.`customlanguages` as `customlanguages`, t.`custompriorities` as `custompriorities`, ";
+		$query.= "t.`customsubscription` as `customsubscription`, ";
+		$query.= "t.`customparticipants` as `customparticipants` ";
+
+
+		$query.= "from `tiki_calendar_recurrence` as i left join `tiki_calendar_locations` as l on i.`locationId`=l.`callocId` ";
+		$query.= "left join `tiki_calendar_categories` as c on i.`categoryId`=c.`calcatId` left join `tiki_calendars` as t on i.`calendarId`=t.`calendarId` where `recurrenceId`=?";
+		$result = $this->query($query,array((int)$recurrenceId));
+		$res = $result->fetchRow();
+		$query = "select `username`, `role` from `tiki_calendar_roles` where `recurrenceId`=? order by `role`";
+		$rezult = $this->query($query,array((int)$recurrenceId));
+		$ppl = array();
+		$org = array();
+
+		while ($rez = $rezult->fetchRow()) {
+			if ($rez["role"] == ROLE_ORGANIZER) {
+				$org[] = $rez["username"];
+			} elseif ($rez["username"]) {
+				$ppl[] = array('name'=>$rez["username"],'role'=>$rez["role"]);
+			}
+		}
+
+		$res["calitemId"] = -1;
+
+		$res["participants"] = $ppl;
+		$res["organizers"] = $org;
+		$res["organizers_realname"] = $tikilib->get_user_preference($org[0], 'realName', $org[0]);
+
+		$res["start_time"] = $res["start"];
+		$res["end_time"] = $res["end"];
+
+		// start/end needs to be translated into unix time
+		$res["start"] = $this->coho_get_unix($res["start"],$dayinunix);
+		$res["end"] = $this->coho_get_unix($res["end"],$dayinunix);
+		$res['date_start'] = (int)$res['start'];
+		$res['date_end'] = (int)$res['end'];
+
+		$res['duration'] = $res['end'] - $res['start'];
+		if (!$res['description']) $res['parsed'] = "";
+		else $res['parsed'] = TikiLib::lib('parser')->parse_data($res['description']);
+		$res['parsedName'] = TikiLib::lib('parser')->parse_data($res['name']);
+
+		return $res;
+	}
+
+	function add_coho_meal_items(&$eventArray, $mealCalId, $user, $tstart, $tstop)
+	{
+	  global $prefs;
+	  $cohoml = new CohoMealsLib;
+
+	  // find meals that occur within date range
+	  $start_day = $this->coho_unix_to_YYYYMMDD($tstart);
+
+	  $end_day = $this->coho_unix_to_YYYYMMDD($tstop);
+	  $cond = "WHERE `cal_date` >= $start_day AND `cal_date` <= $end_day";
+	  $cond .= " AND `cal_cancelled` = 0";
+	  
+	  $query = "SELECT `cal_id`, `cal_date`, `cal_time`, `cal_signup_deadline`, `cal_base_price`, `cal_max_diners`, `cal_menu`, `cal_notes` ";
+	  $query .= " FROM `coho_meals_meal` ";
+	  $query .= $cond;
+
+	  $allmeals = $this->fetchAll($query);
+	  foreach ($allmeals as $meal) {
+	    /* $i is timestamp unix of the beginning of a day */
+	    $i = $this->coho_date_to_unix_daystart($meal["cal_date"]);
+
+	    // find the crew members
+	    $mealid = $meal["cal_id"];
+	    $chef = $cohoml->has_head_chef($mealid);
+	    if ($chef == false) $chef = "No head chef";
+	    else $chef = $this->get_user_preference($chef, 'realName', '??');
+	    $crew = $cohoml->load_crew($mealid);
+
+	    // deadline printing is hardcoded into tiki-calendar_box.tpl
+	    $deadline = $cohoml->get_day($meal["cal_date"],-1*$meal["cal_signup_deadline"]);
+
+	    // description includes price, crew, menu, notes
+	    $description = "<u>Price:</u> " . $cohoml->price_to_str($meal["cal_base_price"]) . "<br>";
+	    $description .= "<u>Menu:</u> " . $meal["cal_menu"] . "<br>" . 
+	      "<u>Chef:</u> " . $chef . "<br>";
+	    $description .= "<u>Crew:</u><ul>";
+	    foreach( $crew as $cm ) {
+	      $description .= "<li>" . $cm["fullname"] . "&nbsp;&nbsp; (" . $cm["job"] . ")</li>";	      
+	    }
+	    $description .= "</ul>";
+
+	    $description .= "<u>Notes:</u> " . $meal["cal_notes"];
+
+	    
+	    // print person's eat/work status on the main view
+	    $eat_work = $cohoml->get_eat_work_status($mealid, $user);
+	    if ($eat_work == "") $title = "Community Meal";
+	    else $title = "Community Meal (" . $eat_work . ")";
+
+	    $meal_url = "coho_view_meal.php";
+
+	    $eventArray["$i"][] = array(
+					"result" => $meal,
+					"calitemId" => $mealid,
+					"calname" => "Meal Program",
+					"time" => $meal["cal_time"], /* user time */
+					"end" => $meal["cal_time"]+20000, /* assume 2 hrs */
+					"type" => 1,
+					"web" => "",
+					"startTimeStamp" => $this->coho_get_unix($meal["cal_time"],$i),
+					"endTimeStamp" => $this->coho_get_unix($meal["cal_time"]+20000,$i),
+					"nl" => 0, /* unknown */
+					"prio" => 0, /* unknown */
+					"location" => "CH dining room", /* CH dining room */
+					"category" => 0, /* unknown */
+					"name" => $title,
+					"head" => $head,
+					"deadline" => $deadline,
+					"parsedDescription" => TikiLib::lib('parser')->parse_data($description),
+					"description" => str_replace("\n|\r", "", $description),
+					"calendarId" => $mealCalId, /* presume 1 for Meal Program */
+					"status" => 0, /* unknown */
+					"user" => $user
+					);
+	  }
+	}
+
+    
+
+
     /**
      * @param $calIds
      * @param $user
@@ -412,7 +671,7 @@ class CalendarLib extends TikiLib
      */
     function get_item($calitemId, $customs=array())
 	{
-		global $user, $prefs;
+		global $user, $prefs, $tikilib;
 
 		$query = "select i.`calitemId` as `calitemId`, i.`calendarId` as `calendarId`, i.`user` as `user`, i.`start` as `start`, i.`end` as `end`, t.`name` as `calname`, ";
 		$query.= "i.`locationId` as `locationId`, l.`name` as `locationName`, i.`categoryId` as `categoryId`, c.`name` as `categoryName`, i.`priority` as `priority`, i.`nlId` as `nlId`, ";
@@ -443,6 +702,7 @@ class CalendarLib extends TikiLib
 
 		$res["participants"] = $ppl;
 		$res["organizers"] = $org;
+		$res["organizers_realname"] = $tikilib->get_user_preference($org[0], 'realName', $org[0]);
 
 		$res['date_start'] = (int)$res['start'];
 		$res['date_end'] = (int)$res['end'];
@@ -503,7 +763,10 @@ class CalendarLib extends TikiLib
 
 		if ($caldata['customparticipants'] == 'y') {
 			$roles = array();
-			if ($data["organizers"]) {
+			if (trim($data["guestContact"])) {
+			  $roles[ROLE_ORGANIZER][] = trim($data["guestContact"]);
+			}
+			else if ($data["organizers"]) {
 				$orgs = explode(',', $data["organizers"]);
 				foreach ($orgs as $o) {
 					if (trim($o)) {
@@ -556,10 +819,10 @@ class CalendarLib extends TikiLib
 		$data['user']=$user;
 
 		$realcolumns=array('calitemId', 'calendarId', 'start', 'end', 'locationId', 'categoryId', 'nlId','priority',
-				   'status', 'url', 'lang', 'name', 'description', 'user', 'created', 'lastmodif', 'allday','recurrenceId','changed');
+				   'status', 'url', 'lang', 'name', 'description', 'user', 'created', 'lastmodif', 'allday', 'recurrenceId', 'recurrence_override', 'changed');
 		foreach ($customs as $custom) $realcolumns[]=$custom;
 
-		if ($calitemId) {
+		if ($calitemId>0) {
 			$new = false;
 			$data['lastmodif']=$this->now;
 
@@ -615,6 +878,55 @@ class CalendarLib extends TikiLib
 
 		return $calitemId;
 	}
+
+	function determine_location($calendarId, $inputLocId, $inputNewloc) 
+	{
+	        $locationId = 0;
+
+	        $caldata = $this->get_calendar($calendarId);
+
+		if ($caldata['customlocations'] == 'y') {
+			if (trim($inputNewloc)) {
+			        $bindvars=array((int)$calendarId,trim($inputNewloc));
+			        $oldId = $this->getOne("select `callocId` from `tiki_calendar_locations` where `calendarId`=? and `name`=?",$bindvars);
+				if ($oldId>0) {
+				  $locationId = $oldId;
+				} else {
+				  $query = "insert into `tiki_calendar_locations` (`calendarId`,`name`) values (?,?)";
+				  $this->query($query,$bindvars);
+				  $locationId = $this->getOne("select `callocId` from `tiki_calendar_locations` where `calendarId`=? and `name`=?",$bindvars);
+				}
+			} else $locationId = $inputLocId;
+		}
+		return $locationId;
+	}
+
+	function coho_set_organizer($calendarId, $recurrenceId, $hostUsername, $manuallyEnteredHost) 
+	{
+	  	$caldata = $this->get_calendar($calendarId);
+
+	        if ($caldata['customparticipants'] == 'y') {
+		        $host = '';
+			if (trim($manuallyEnteredHost)) {
+			  $host = trim($manuallyEnteredHost);
+			}
+			else if ($hostUsername) {
+			  $host = trim($hostUsername);
+			}
+
+
+			if ($recurrenceId) {
+			  $query = "delete from `tiki_calendar_roles` where `recurrenceId`=?";
+			  $this->query($query,array((int)$recurrenceId));
+			}
+			
+			$bindvars = array($recurrenceId,$host,(string)ROLE_ORGANIZER);
+			$query = "insert into `tiki_calendar_roles` (`recurrenceId`,`username`,`role`) values (?,?,?)";
+			$this->query($query,$bindvars);
+		}
+	}
+
+
 
     /**
      * @param $calitemId
@@ -1419,6 +1731,44 @@ class CalendarLib extends TikiLib
 			'trunc' => $trunc
 		);
 	}
+
+	function coho_unix_daystart($unixdate) {
+	  $itemdate = TikiLib::date_format2('Y/m/d',$unixdate);	  
+	  $itemdate = explode("/",$itemdate);
+	  $unixstartofday = TikiLib::make_time(0,0,0,$itemdate[1],$itemdate[2],$itemdate[0]);
+	  return $unixstartofday;
+	}
+
+	function coho_get_unix($itemtimeHM,$itemdateUnix) {
+	  $length = strlen($itemtimeHM);
+	  if ( ($length==3) || ($length==5) )
+	    $tmp = str_pad($itemtimeHM,$length+1,"0",STR_PAD_LEFT);
+	  else $tmp = $itemtimeHM;
+	  $tmp = str_pad($tmp,6,"0",STR_PAD_RIGHT);
+	  $itemhour = substr($tmp,0,2);
+	  $itemminute = substr($tmp,2,2);
+	  $itemdate = TikiLib::date_format2('Y/m/d',$itemdateUnix);
+	  $itemdate = explode("/",$itemdate);
+	  $unixtime = TikiLib::make_time($itemhour,$itemminute,0,$itemdate[1],$itemdate[2],$itemdate[0]);
+	  return $unixtime;
+	}
+
+
+	function coho_date_to_unix_daystart($YYYYMMDD) {
+	  $YYYY = substr($YYYYMMDD, 0, 4);
+	  $MM = substr($YYYYMMDD, 4, 2);
+	  $DD = substr($YYYYMMDD, 6, 2);
+	  $unixstartofday = TikiLib::make_time(0,0,0,$MM,$DD,$YYYY);
+	  return $unixstartofday;
+	}
+
+
+	function coho_unix_to_YYYYMMDD($unixdate) {
+	  $YYYYMMDD = TikiLib::date_format2('Ymd', $unixdate);
+	  return $YYYYMMDD;
+	}
+
+
 
     /**
      * @param $calitemId
