@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CategoryFilterDecorator.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: CategoryFilterDecorator.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Index_CategoryFilterDecorator extends Search_Index_AbstractIndexDecorator
 {
@@ -31,4 +31,3 @@ class Search_Index_CategoryFilterDecorator extends Search_Index_AbstractIndexDec
 		return $this->parent->addDocument($document);
 	}
 }
-

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Add" => "agiuntar",
 "Print" => "Stampar",
 "Log In" => "S'annunziar",
@@ -11,4 +11,4 @@ $lang = array(
 "Edit translations" => "Editar translaziuns",
 "Create translation" => "Crear translaziun",
 "remove" => "allontanar",
-);
+];

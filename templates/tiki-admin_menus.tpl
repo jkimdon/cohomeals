@@ -1,9 +1,9 @@
-{* $Id: tiki-admin_menus.tpl 57783 2016-03-05 18:04:25Z jonnybradley $ *}
+{* $Id: tiki-admin_menus.tpl 64656 2017-11-21 18:46:43Z jonnybradley $ *}
 {title help="Menus" admpage="general&amp;cookietab=3"}{tr}Menus{/tr}{/title}
 
 {if $tiki_p_admin eq 'y'}
 	<div class="t_navbar margin-bottom-md">
-		<a class="btn btn-default" href="{bootstrap_modal controller=menu action=manage_menu}">
+		<a class="btn btn-default" href="{bootstrap_modal controller=menu action=edit}">
 			{icon name="create"} {tr}Create Menu{/tr}
 		</a>
 		{button href="tiki-admin_modules.php" _icon_name="cogs" _type="link" _text="{tr}Modules{/tr}"}
@@ -50,7 +50,7 @@
 						{strip}
 							{if $channels[user].menuId neq 42}
 								{if $tiki_p_edit_menu eq 'y'}
-									{$libeg}<a href="{bootstrap_modal controller=menu action=manage_menu menuId=$channels[user].menuId}">
+									{$libeg}<a href="{bootstrap_modal controller=menu action=edit menuId=$channels[user].menuId}">
 										{icon name='edit' _menu_text='y' _menu_icon='y' alt="{tr}Edit{/tr}"}
 									</a>{$liend}
 								{/if}
@@ -71,7 +71,7 @@
 								{/if}
 							{/if}
 							{if $tiki_p_edit_menu eq 'y'}
-								{$libeg}<a href="{bootstrap_modal controller=menu action=clone_menu menuId=$channels[user].menuId}">
+								{$libeg}<a href="{bootstrap_modal controller=menu action=clone menuId=$channels[user].menuId}">
 									{icon name="copy" _menu_text='y' _menu_icon='y' alt="{tr}Clone{/tr}"}
 								</a>{$liend}
 							{/if}
@@ -82,7 +82,7 @@
 						class="tips"
 						title="{tr}Actions{/tr}"
 						href="#"
-						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.menu_actions|escape:"javascript"|escape:"html"}{/if}
+						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.menu_actions}{/if}
 						style="padding:0; margin:0; border:0"
 					>
 						{icon name='wrench'}

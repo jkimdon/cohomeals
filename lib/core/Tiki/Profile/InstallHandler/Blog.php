@@ -3,16 +3,17 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Blog.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Blog.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data )
+		if ($this->data) {
 			return $this->data;
+		}
 
-		$defaults = array(
+		$defaults = [
 			'description' => '',
 			'user' => 'admin',
 			'public' => 'n',
@@ -22,7 +23,7 @@ class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 			'use_find' => 'y',
 			'comments' => 'n',
 			'show_avatar' => 'n',
-		);
+		];
 
 		$data = array_merge($defaults, $this->obj->getData());
 
@@ -34,8 +35,9 @@ class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 	function canInstall()
 	{
 		$data = $this->getData();
-		if ( ! isset( $data['title'] ) )
+		if (! isset($data['title'])) {
 			return false;
+		}
 
 		return true;
 	}
@@ -65,5 +67,23 @@ class Tiki_Profile_InstallHandler_Blog extends Tiki_Profile_InstallHandler
 		);
 
 		return $blogId;
+	}
+
+	/**
+	 * Remove blog
+	 *
+	 * @param string $blog
+	 * @return bool
+	 */
+	function remove($blog)
+	{
+		if (! empty($blog)) {
+			$bloglib = TikiLib::lib('blog');
+			$blog = $bloglib->get_blog_by_title($blog);
+			if (! empty($blog['blogId']) && $bloglib->remove_blog($blog['blogId'])) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

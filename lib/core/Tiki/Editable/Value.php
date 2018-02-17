@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Value.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Value.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Editable_Value
 {
@@ -15,8 +15,8 @@ class Tiki_Editable_Value
 	function __construct($html, array $parameters)
 	{
 		$this->inner = $html;
-		
-		if (! empty($parameters['layout']) && in_array($parameters['layout'], array('inline', 'block'))) {
+
+		if (! empty($parameters['layout']) && in_array($parameters['layout'], ['inline', 'block'])) {
 			$this->layout = $parameters['layout'];
 		}
 
@@ -53,4 +53,3 @@ class Tiki_Editable_Value
 		return "<$tag class=\"editable-inline\" data-field-fetch-url=\"$fieldFetch\" data-object-store-url=\"$objectStore\">$value</$tag>";
 	}
 }
-

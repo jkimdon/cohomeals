@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PermissionSetTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: PermissionSetTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -16,7 +16,7 @@ class Perms_Reflection_PermissionSetTest extends TikiTestCase
 	{
 		$set = new Perms_Reflection_PermissionSet;
 
-		$this->assertEquals(array(), $set->getPermissionArray());
+		$this->assertEquals([], $set->getPermissionArray());
 	}
 
 	function testBasicSet()
@@ -27,10 +27,10 @@ class Perms_Reflection_PermissionSetTest extends TikiTestCase
 		$set->add('Anonymous', 'view');
 
 		$this->assertEquals(
-			array(
-				'Registered' => array('view', 'edit'),
-				'Anonymous' => array('view'),
-			),
+			[
+				'Registered' => ['view', 'edit'],
+				'Anonymous' => ['view'],
+			],
 			$set->getPermissionArray()
 		);
 	}
@@ -43,7 +43,7 @@ class Perms_Reflection_PermissionSetTest extends TikiTestCase
 		$set->add('Registered', 'view');
 
 		$this->assertEquals(
-			array('Registered' => array('view', 'edit'),),
+			['Registered' => ['view', 'edit'],],
 			$set->getPermissionArray()
 		);
 	}
@@ -71,7 +71,7 @@ class Perms_Reflection_PermissionSetTest extends TikiTestCase
 		$equivalent->add('Anonymous', 'c');
 
 		$multi = new Perms_Reflection_PermissionSet;
-		$multi->add('Anonymous', array('a', 'b', 'c'));
+		$multi->add('Anonymous', ['a', 'b', 'c']);
 
 		$this->assertEquals($equivalent, $multi);
 	}

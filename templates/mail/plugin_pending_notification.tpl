@@ -1,4 +1,4 @@
-{* $Id: plugin_pending_notification.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}{tr _0=$plugin_name _1={object_link type=$type id=$objectId}}Plugin %0 is pending approval on %1.{/tr}
+{* $Id: plugin_pending_notification.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}{tr _0=$plugin_name _1={object_link type=$type id=$objectId}}Plugin %0 is pending approval on %1.{/tr}
 
 {tr _0="{$base_url}tiki-plugins.php"}See all the {$prefs.mail_template_custom_text}pending plugins in the <a href='%0'>plugin approval page</a>.{/tr}
 

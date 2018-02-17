@@ -6,9 +6,9 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_languages.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-edit_languages.php 64605 2017-11-17 02:03:50Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 require_once('lib/language/Language.php');
 require_once('lib/language/LanguageTranslations.php');
 
@@ -31,7 +31,7 @@ if (isset($_REQUEST["edit_language"])) {
 
 $translations = new LanguageTranslations($edit_language);
 
-if (!isset($_REQUEST["action"])) {
+if (! isset($_REQUEST["action"])) {
 	$_REQUEST['action'] = 'edit_tran_sw';
 }
 $smarty->assign('action', $_REQUEST["action"]);
@@ -76,20 +76,32 @@ if (isset($_REQUEST["action"])) {
 
 if ($action == "edit_rec_sw" || $action == "edit_tran_sw") {
 	check_ticket('edit-languages');
-	
+
 	$offset = isset($_REQUEST["offset"]) ? $_REQUEST['offset'] : 0;
 	$smarty->assign('offset', $offset);
-	
+
 	$maxRecords = (isset($_REQUEST['maxRecords']) && $_REQUEST['maxRecords'] > 0) ? $_REQUEST['maxRecords'] : $prefs['maxRecords'];
 	$smarty->assign('maxRecords', $maxRecords);
-	
+
 	//check if user has translated something
 	for ($i = 0; $i < $maxRecords; $i++) {
 		// Handle edits in untranslated strings
 		if (isset($_REQUEST["edit_tran_$i"]) || isset($_REQUEST['translate_all'])) {
 			// Handle edits in edit translations
 			if (strlen($_REQUEST["tran_$i"]) > 0 && strlen($_REQUEST["source_$i"]) > 0) {
-				$translations->updateTrans($_REQUEST["source_$i"], $_REQUEST["tran_$i"]);
+				if ($prefs['lang_control_contribution'] == 'y') {
+					if (! isset($_REQUEST["scope_$i"])) {
+						 throw new Exception('scope parameter required');
+					} elseif ($_REQUEST["scope_$i"] == '') {
+						 $general = null;
+					} else {
+						 $general = $_REQUEST["scope_$i"] == 'general';
+					}
+					$optionalParameters = ['general' => $general];
+				} else {
+					$optionalParameters = [];
+				}
+				$translations->updateTrans($_REQUEST["source_$i"], $_REQUEST["tran_$i"], $optionalParameters);
 			}
 		} elseif (isset($_REQUEST["del_tran_$i"])) {
 			// Handle deletes here
@@ -105,9 +117,9 @@ if ($action == "edit_rec_sw" || $action == "edit_tran_sw") {
 
 	// update language array with new translations
 	$query = "select `source`, `tran` from `tiki_language` where `lang`=?";
-	$result = $tikilib->fetchAll($query, array($edit_language));
+	$result = $tikilib->fetchAll($query, [$edit_language]);
 
-	foreach ( $result as $row ) {
+	foreach ($result as $row) {
 		${"lang_$edit_language"}[ $row['source'] ] = $row['tran'];
 	}
 
@@ -121,7 +133,7 @@ if ($action == "edit_rec_sw" || $action == "edit_tran_sw") {
 
 	$sort_mode = "source_asc";
 
-	$data = array();
+	$data = [];
 
 	if ($action == "edit_rec_sw") {
 		if (isset($_REQUEST['only_db_untranslated']) && $_REQUEST['only_db_untranslated'] != 'n') {

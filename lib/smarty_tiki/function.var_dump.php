@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.var_dump.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.var_dump.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /** \file
@@ -27,22 +27,22 @@ function smarty_function_var_dump($params, $smarty)
 	require_once('lib/debug/debugger.php');
 	$smarty = TikiLib::lib('smarty');
 	$v = $params['var'];
-	if (!empty($v)) {
+	if (! empty($v)) {
 		$tmp = $smarty->getTemplateVars();
 		if (is_array($tmp) && isset($tmp["$v"])) {
 			if (is_string($tmp[$v])) {
-				$debugger->msg("Smarty var_dump(".$v.') = '.print_r($tmp[$v], true));
+				$debugger->msg("Smarty var_dump(" . $v . ') = ' . print_r($tmp[$v], true));
 			} else {
 				ob_start();
 				var_dump($tmp[$v]);
 				$d = ob_get_clean();
-				$debugger->msg("Smarty var_dump(".$v.') = '. $d);
+				$debugger->msg("Smarty var_dump(" . $v . ') = ' . $d);
 			}
 		} else {
-			$debugger->msg("Smarty var_dump(".$v."): Variable not found");
+			$debugger->msg("Smarty var_dump(" . $v . "): Variable not found");
 		}
 	} else {
 		$debugger->msg("Smarty var_dump: Parameter 'var' not specified");
 	}
-	return '<!-- var_dump('.$v.') -->';
+	return '<!-- var_dump(' . $v . ') -->';
 }

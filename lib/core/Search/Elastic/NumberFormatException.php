@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: NumberFormatException.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: NumberFormatException.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_NumberFormatException extends Search_Elastic_Exception
 {
@@ -17,4 +17,3 @@ class Search_Elastic_NumberFormatException extends Search_Elastic_Exception
 		parent::__construct(tr('String "%0" cannot be formatted as a number for field "%1"', $this->string, $this->field));
 	}
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.userlink.php 62661 2017-05-19 17:33:09Z jyhem $
+// $Id: modifier.userlink.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -30,11 +30,11 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  * Example: {$userinfo.login|userlink:'link':::25}
  */
 
-function smarty_modifier_userlink($other_user, $class='userlink', $idletime='not_set', $fullname='', $max_length=0, $popup='')
+function smarty_modifier_userlink($other_user, $class = 'userlink', $idletime = 'not_set', $fullname = '', $max_length = 0, $popup = '')
 {
 	global $prefs;
 
-	if (empty($other_user)){
+	if (empty($other_user)) {
 		return "";
 	}
 	if (is_array($other_user)) {
@@ -55,7 +55,7 @@ function smarty_modifier_userlink($other_user, $class='userlink', $idletime='not
 	} else {
 		$other_user = TikiLib::lib('user')->distinguish_anonymous_users($other_user);
 	}
-	if (!$fullname) {
+	if (! $fullname) {
 		$fullname = TikiLib::lib('user')->clean_user($other_user);
 	}
 	if ($max_length) {
@@ -71,4 +71,3 @@ function smarty_modifier_userlink($other_user, $class='userlink', $idletime='not
 
 	return TikiLib::lib('user')->build_userinfo_tag($other_user, $fullname, $class, $popup);
 }
-

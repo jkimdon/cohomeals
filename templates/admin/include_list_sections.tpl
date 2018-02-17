@@ -1,5 +1,5 @@
 
-{* $Id: include_list_sections.tpl 63115 2017-06-29 15:14:26Z chibaguy $ *}
+{* $Id: include_list_sections.tpl 63111 2017-06-29 09:41:30Z chibaguy $ *}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}Enable/disable Tiki features in {/tr}<a class="alert-link" href="tiki-admin.php?page=features">{tr}Control Panels{/tr}&nbsp;{$prefs.site_crumb_seper}&nbsp;{tr}Features{/tr}</a>{tr}, but configure them elsewhere{/tr}.

@@ -3,16 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-monitor.php 58740 2016-05-30 11:39:15Z jonnybradley $
+// $Id: tiki-monitor.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 //TODO Use a pref to handle the list
-if (!empty($tikiMonitorRestriction)) {
+if (! empty($tikiMonitorRestriction)) {
 	if (is_array($tikiMonitorRestriction)) {
-		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 			$aListIp = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
 			$sIpToCheck = $aListIp[0];
-		} elseif (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR'])) {
+		} elseif (isset($_SERVER['REMOTE_ADDR']) && ! empty($_SERVER['REMOTE_ADDR'])) {
 			$sIpToCheck = $_SERVER['REMOTE_ADDR'];
 		} else {
 			$sIpToCheck = null;
@@ -42,7 +42,7 @@ $result = [];
 $result['OPCodeCache'] = $opcode_stats['opcode_cache'];
 $result['OpCodeStats'] = $opcode_stats;
 
-include_once ('installer/installlib.php');
+include_once('installer/installlib.php');
 $installer = new Installer;
 $result['DbRequiresUpdate'] = $installer->requiresUpdate();
 

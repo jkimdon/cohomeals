@@ -3,13 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_slist.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_slist.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * \brief List of Smarty vars
  * \author zaufi <zaufi@sendmail.ru>
  */
-require_once ('lib/debug/debugger-ext.php');
+require_once('lib/debug/debugger-ext.php');
 
 /**
  * \brief Debugger command to list smatry vars
@@ -52,12 +52,14 @@ class DbgSList extends DebuggerCommand
 		$smarty = TikiLib::lib('smarty');
 		$tpl_vars = $smarty->getTemplateVars();
 		// convert to vector of names and sort
-		$vars = array();
+		$vars = [];
 		$len = strlen($mask);
 
-		foreach ($tpl_vars as $key => $val)
-			if (!$len || $len && preg_match('/' . $mask . '/', $key))
+		foreach ($tpl_vars as $key => $val) {
+			if (! $len || $len && preg_match('/' . $mask . '/', $key)) {
 				$vars[] = $key;
+			}
+		}
 
 		sort($vars);
 		//

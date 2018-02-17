@@ -1,6 +1,6 @@
-{* $Id: include_category.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_category.tpl 62265 2017-04-19 01:00:45Z lindonb $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=category" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			<a role="link" class="btn btn-link tips" href="tiki-browse_categories.php" title=":{tr}Categories listing{/tr}">

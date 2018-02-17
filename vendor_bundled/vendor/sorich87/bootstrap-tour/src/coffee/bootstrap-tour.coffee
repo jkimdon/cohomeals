@@ -2,7 +2,7 @@
   if typeof define is 'function' and define.amd
     define ['jquery'], (jQuery) -> (window.Tour = factory(jQuery))
   else if typeof exports is 'object'
-    module.exports = factory(require('jQuery'))
+    module.exports = factory(require('jquery'))
   else
     window.Tour = factory(window.jQuery)
 )(window, ($) ->
@@ -66,12 +66,7 @@
       @_force = false
       @_inited = false
       @_current = null
-      @backdrop =
-        overlay: null
-        $element: null
-        $background: null
-        backgroundShown: false
-        overlayElementShown: false
+      @backdrops = []
       @
 
     # Add multiple steps
@@ -135,6 +130,7 @@
 
       # Reshow popover on window resize using debounced resize
       @_onResize => @showStep @_current
+      @_onScroll => @_showPopoverAndOverlay(@_current)
 
       # Continue a tour that had started on a previous page load
       @showStep @_current unless @_current is null
@@ -171,6 +167,7 @@
         $(document).off "click.tour-#{@_options.name}"
         $(document).off "keyup.tour-#{@_options.name}"
         $(window).off "resize.tour-#{@_options.name}"
+        $(window).off "scroll.tour-#{@_options.name}"
         @_setState('end', 'yes')
         @_inited = false
         @_force = false
@@ -239,7 +236,6 @@
           .popover('destroy')
           .removeClass("tour-#{@_options.name}-element tour-#{@_options.name}-#{i}-element")
           .removeData('bs.popover')
-          .focus()
 
         if step.reflex
           $ step.reflexElement
@@ -248,7 +244,8 @@
 
         if step.backdrop
           next_step = iNext? and @getStep iNext
-          @_hideBackdrop() if !next_step or !next_step.backdrop or next_step.backdropElement != step.backdropElement
+          if !next_step or !next_step.backdrop or next_step.backdropElement != step.backdropElement
+            @_hideOverlayElement(step)
 
         step.onHidden(@) if step.onHidden?
 
@@ -304,20 +301,12 @@
           @_debug "Show the orphan step #{@_current + 1}. Orphans option is true."
 
         # Show backdrop
-        @_showBackdrop(step) if step.backdrop
-
-        showPopoverAndOverlay = =>
-          return if @getCurrentStep() isnt i or @ended()
-
-          @_showOverlayElement step, true if step.element? and step.backdrop
-          @_showPopover step, i
-          step.onShown @ if step.onShown?
-          @_debug "Step #{@_current + 1} of #{@_options.steps.length}"
+        # @_showBackdrop(step) if step.backdrop
 
         if step.autoscroll
-          @_scrollIntoView step, showPopoverAndOverlay
+          @_scrollIntoView i
         else
-          showPopoverAndOverlay()
+          @_showPopoverAndOverlay i
 
         # Play step timer
         @resume() if step.duration
@@ -349,7 +338,7 @@
 
     # Manually trigger a redraw on the overlay element
     redraw: ->
-      @_showOverlayElement(@getStep(@getCurrentStep()).element, true)
+      @_showOverlayElement(@getStep(@getCurrentStep()))
 
     # Set a state in storage
     _setState: (key, value) ->
@@ -483,6 +472,16 @@
     _isLast: ->
       @_current < @_options.steps.length - 1
 
+    _showPopoverAndOverlay: (i) =>
+      return if @getCurrentStep() isnt i or @ended()
+
+      step = @getStep i
+
+      @_showOverlayElement step if step.backdrop
+      @_showPopover step, i
+      step.onShown @ if step.onShown?
+      @_debug "Step #{@_current + 1} of #{@_options.steps.length}"
+
     # Show step popover
     _showPopover: (step, i) ->
       # Remove previously existing tour popovers. This prevents displaying of
@@ -528,10 +527,10 @@
       # Tip adjustment
       $tip = if $element.data 'bs.popover' then $element.data('bs.popover').tip() else $element.data('popover').tip()
       $tip.attr 'id', step.id
+      $tip.css 'position', 'fixed' if $element.css('position') is 'fixed'
 
-      @_focus $tip, $element, step.next < 0
-      @_reposition $tip, step
-      @_center $tip if isOrphan
+      @_reposition($tip, step)
+      @_center($tip) if isOrphan
 
     # Get popover template
     _template: (step, i) ->
@@ -565,12 +564,6 @@
 
     _reflexEvent: (reflex) ->
       if ({}).toString.call(reflex) is '[object Boolean]' then 'click' else reflex
-
-    _focus: ($tip, $element, end) ->
-      role = if end then 'end' else 'next'
-      $next = $tip.find("[data-role='#{role}']")
-
-      $element.on 'shown.bs.popover', -> $next.focus()
 
     # Prevent popover from crossing over the edge of the window
     _reposition: ($tip, step) ->
@@ -607,9 +600,10 @@
       $tip.find('.arrow').css position, if delta then 50 * (1 - delta / dimension) + '%' else ''
 
     # Scroll to the popup if it is not in the viewport
-    _scrollIntoView: (step, callback) ->
+    _scrollIntoView: (i) ->
+      step = @getStep i
       $element = $(step.element)
-      return callback() unless $element.length
+      return @_showPopoverAndOverlay(i) unless $element.length
 
       $window = $(window)
       offsetTop = $element.offset().top
@@ -631,7 +625,7 @@
         scrollTop: Math.ceil(scrollTop),
         =>
           if ++counter is 2
-            callback()
+            @_showPopoverAndOverlay(i)
             @_debug """Scroll into view.
             Animation end element offset: #{$element.offset().top}.
             Window height: #{$window.height()}."""
@@ -642,6 +636,11 @@
         clearTimeout(timeout)
         timeout = setTimeout(callback, 100)
 
+    # Debounced window scroll
+    _onScroll: (callback, timeout) ->
+      $(window).on "scroll.tour-#{@_options.name}", ->
+        clearTimeout(timeout)
+        timeout = setTimeout(callback, 100)
 
     # Event bindings for mouse navigation
     _initMouseNavigation: ->
@@ -698,55 +697,63 @@
       else
         cb.call(@, arg)
 
-    _showBackdrop: (step) ->
-      return if @backdrop.backgroundShown
+    _showBackground: (step, data) ->
+      height = $(document).height()
+      width = $(document).width()
+      for pos in ['top', 'bottom', 'left', 'right']
+        $backdrop = @backdrops[pos] ?= $('<div>', class: "tour-backdrop #{pos}")
+        $(step.backdropContainer).append($backdrop)
 
-      @backdrop = $ '<div>', class: 'tour-backdrop'
-      @backdrop.backgroundShown = true
-      $(step.backdropContainer).append @backdrop
+        switch pos
+          when 'top'
+            $backdrop
+            .height(if data.offset.top > 0 then data.offset.top else 0)
+            .width(width)
+            .offset(top: 0, left: 0)
+          when 'bottom'
+            $backdrop
+            .offset(top: data.offset.top + data.height, left: 0)
+            .height(height - (data.offset.top + data.height))
+            .width(width)
+          when 'left'
+            $backdrop
+            .offset(top: data.offset.top, left: 0)
+            .height(data.height)
+            .width(if data.offset.left > 0 then data.offset.left else 0)
+          when 'right'
+            $backdrop
+            .offset(top: data.offset.top, left: data.offset.left + data.width)
+            .height(data.height)
+            .width(width - (data.offset.left + data.width))
 
-    _hideBackdrop: ->
-      @_hideOverlayElement()
-      @_hideBackground()
-
-    _hideBackground: ->
-      if @backdrop && @backdrop.remove
-        @backdrop.remove()
-        @backdrop.overlay = null
-        @backdrop.backgroundShown = false
-
-    _showOverlayElement: (step, force) ->
-      $element = $ step.element
+    _showOverlayElement: (step) ->
       $backdropElement = $ step.backdropElement
 
-      return if not $element or $element.length is 0 or @backdrop.overlayElementShown and not force
+      if $backdropElement.length is 0
+        elementData =
+          width: 0
+          height: 0
+          offset:
+            top: 0
+            left: 0
+      else
+        elementData =
+          width: $backdropElement.innerWidth()
+          height: $backdropElement.innerHeight()
+          offset: $backdropElement.offset()
 
-      if !@backdrop.overlayElementShown
-        @backdrop.$element = $backdropElement.addClass 'tour-step-backdrop'
-        @backdrop.$background = $ '<div>', class: 'tour-step-background'
-        @backdrop.$background.appendTo(step.backdropContainer)
-        @backdrop.overlayElementShown = true
+        $backdropElement.addClass 'tour-step-backdrop'
+        elementData = @_applyBackdropPadding step.backdropPadding, elementData if step.backdropPadding
 
-      elementData =
-        width: $backdropElement.innerWidth()
-        height: $backdropElement.innerHeight()
-        offset: $backdropElement.offset()
+      @_showBackground(step, elementData)
 
-      elementData = @_applyBackdropPadding step.backdropPadding, elementData if step.backdropPadding
-      @backdrop
-      .$background
-      .width(elementData.width)
-      .height(elementData.height)
-      .offset(elementData.offset)
+    _hideOverlayElement: (step) ->
+      $(step.backdropElement).removeClass 'tour-step-backdrop'
 
-    _hideOverlayElement: ->
-      return unless @backdrop.overlayElementShown
+      for pos, $backdrop of @backdrops
+        $backdrop.remove() if $backdrop and $backdrop.remove isnt undefined
 
-      @backdrop.$element.removeClass 'tour-step-backdrop'
-      @backdrop.$background.remove()
-      @backdrop.$element = null
-      @backdrop.$background = null
-      @backdrop.overlayElementShown = false
+      @backdrops = []
 
     _applyBackdropPadding: (padding, data) ->
       if typeof padding is 'object'

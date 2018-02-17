@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CachedLookupHelper.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: CachedLookupHelper.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Schema;
+
 use TikiDb;
 
 /**
@@ -60,7 +61,7 @@ class CachedLookupHelper
 	public static function fieldLookup($fieldId)
 	{
 		$table = TikiDb::get()->table('tiki_tracker_item_fields');
-		
+
 		$cache = new self;
 		$cache->setInit(function ($count) use ($table, $fieldId) {
 			return $table->fetchMap('itemId', 'value', [
@@ -80,7 +81,7 @@ class CachedLookupHelper
 	public static function fieldInvert($fieldId)
 	{
 		$table = TikiDb::get()->table('tiki_tracker_item_fields');
-		
+
 		$cache = new self;
 		$cache->setInit(function ($count) use ($table, $fieldId) {
 			return $table->fetchMap('value', 'itemId', [
@@ -97,4 +98,3 @@ class CachedLookupHelper
 		return $cache;
 	}
 }
-

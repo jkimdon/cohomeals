@@ -1,4 +1,4 @@
-{* $Id: tiki-accounting_journal.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+{* $Id: tiki-accounting_journal.tpl 62448 2017-05-04 18:36:23Z patrick-proulx $ *}
 <a class="icon" href="tiki-accounting_export.php?action=print&what=journal&bookId={$bookId}{if isset($account.accountId)}&accountId={$account.accountId}{/if}" target="new">
 	{icon name="print" alt="{tr}printable version{/tr}"}
 </a>
@@ -24,23 +24,23 @@
 			<th>{tr}Text{/tr}</th>
 		</tr>
 		{foreach from=$journal item=j}{cycle values="odd,even" assign="style"}
-			<tr class="{$style}">
-				<td class="journal{if $j.journalCancelled==1}deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if} style="text-align:right">{$j.journalId}</td>
-				<td class="journal{if $j.journalCancelled==1}deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if} style="text-align:right">{$j.journalDate|date_format:"%Y-%m-%d"}</td>
-				<td class="journal{if $j.journalCancelled==1}deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if}>{$j.journalDescription|escape}</td>
+			<tr class="{$style}" title="{if $j.journalCancelled==1}Deleted{/if}">
+				<td class="journal{if $j.journalCancelled==1}Deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if} style="text-align:right">{$j.journalId}</td>
+				<td class="journal{if $j.journalCancelled==1}Deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if} style="text-align:right">{$j.journalDate|date_format:"%Y-%m-%d"}</td>
+				<td class="journal{if $j.journalCancelled==1}Deleted{/if}"{if $j.maxcount>1} rowspan="{$j.maxcount}"{/if}>{$j.journalDescription|escape}</td>
 				{section name=posts loop=$j.maxcount}{assign var='i' value=$smarty.section.posts.iteration-1}
 					{if !$smarty.section.posts.first}<tr class="{$style}">{/if}
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}" style="text-align:right">{if $i<$j.debitcount}{$j.debit[$i].itemAccountId}{/if}&nbsp;</td>
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}" style="text-align:right">{if $i<$j.debitcount}{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}{$j.debit[$i].itemAmount|number_format:$book.bookDecimals:$book.bookDecPoint:$book.bookThousand}{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;{/if}</td>
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}">{if $i<$j.debitcount}{$j.debit[$i].itemText|escape}{/if}&nbsp;</td>
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}" style="text-align:right">{if $i<$j.creditcount}{$j.credit[$i].itemAccountId}{/if}&nbsp;</td>
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}" style="text-align:right">{if $i<$j.creditcount}{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}{$j.credit[$i].itemAmount|number_format:$book.bookDecimals:$book.bookDecPoint:$book.bookThousand}{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;{/if}</td>
-						<td class="journal{if $j.journalCancelled==1}deleted{/if}">{if $i<$j.creditcount}{$j.credit[$i].itemText|escape}{/if}&nbsp;</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}" style="text-align:right">{if $i<$j.debitcount}{$j.debit[$i].itemAccountId}{/if}&nbsp;</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}" style="text-align:right">{if $i<$j.debitcount}{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}{$j.debit[$i].itemAmount|number_format:$book.bookDecimals:$book.bookDecPoint:$book.bookThousand}{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;{/if}</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}">{if $i<$j.debitcount}{$j.debit[$i].itemText|escape}{/if}&nbsp;</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}" style="text-align:right">{if $i<$j.creditcount}{$j.credit[$i].itemAccountId}{/if}&nbsp;</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}" style="text-align:right">{if $i<$j.creditcount}{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}{$j.credit[$i].itemAmount|number_format:$book.bookDecimals:$book.bookDecPoint:$book.bookThousand}{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;{/if}</td>
+						<td class="journal{if $j.journalCancelled==1}Deleted{/if}">{if $i<$j.creditcount}{$j.credit[$i].itemText|escape}{/if}&nbsp;</td>
 						{if $smarty.section.posts.first}
 							<td rowspan="{$j.maxcount}">
 								{if $j.journalCancelled==1}&nbsp;
 								{else}
-									<a class="icon" href="tiki-accounting_cancel.php?bookId={$bookId}&journalId={$j.journalId}">
+									<a class="icon timeout" href="tiki-accounting_cancel.php?bookId={$bookId}&journalId={$j.journalId}{ticket mode=get}">
 										{icon name="remove" alt="{tr}cancel this transaction{/tr}" _confirm="{tr}Are you sure you want to cancel this transaction{/tr}"}
 									</a>
 								{/if}

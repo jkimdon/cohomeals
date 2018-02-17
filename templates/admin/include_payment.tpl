@@ -1,6 +1,6 @@
-{* $Id: include_payment.tpl 62771 2017-05-27 13:17:44Z rjsmelo $ *}
+{* $Id: include_payment.tpl 62776 2017-05-27 18:17:29Z jonnybradley $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=payment" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			<a role="link" class="btn btn-link" href="tiki-payment.php" title="{tr}List{/tr}">

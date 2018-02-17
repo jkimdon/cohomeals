@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PregFilter.php 62389 2017-04-30 15:39:31Z lindonb $
+// $Id: PregFilter.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Class TikiFilter_PregFilter
@@ -50,6 +50,6 @@ class TikiFilter_PregFilter implements Zend\Filter\FilterInterface
 			$return = preg_filter($this->pattern, $this->replacement, $subject, $this->limit, $this->count);
 		}
 		//return empty string rather than null
-		return !empty($return) ? $subject : '';
+		return ! empty($return) ? $subject : '';
 	}
 }

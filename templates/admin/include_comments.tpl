@@ -1,6 +1,6 @@
-{* $Id: include_comments.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: include_comments.tpl 65140 2018-01-09 11:57:30Z jonnybradley $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=comments" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12">
 			<a role="link" href="tiki-list_comments.php" class="btn btn-link tips" title=":{tr}Comments listing{/tr}">{icon name="list"} {tr}Comments{/tr}</a>
@@ -37,6 +37,9 @@
 	<fieldset>
 		<legend>{tr}Annotations{/tr}</legend>
 		{preference name=feature_inline_comments}
+		<div class="adminoptionboxchild" id="feature_inline_comments_childcontainer">
+			{preference name=comments_inline_annotator}
+		</div>
 	</fieldset>
 	<fieldset>
 		<legend>{tr}Using comments in various features{/tr}</legend>

@@ -3,15 +3,15 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ResultCount.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: ResultCount.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class Tiki_Formula_Function_ResultCount extends Math_Formula_Function
 {
-	function evaluate( $element )
+	function evaluate($element)
 	{
 		$allowed = ['filter'];
 
-		if ( $extra = $element->getExtraValues($allowed) ) {
+		if ($extra = $element->getExtraValues($allowed)) {
 			$this->error(tr('Unexpected values: %0', implode(', ', $extra)));
 		}
 
@@ -27,7 +27,7 @@ class Tiki_Formula_Function_ResultCount extends Math_Formula_Function
 		}
 
 		$query->setRange(0, 1);
-		
+
 		$result = $query->search($searchlib->getIndex());
 		return count($result);
 	}
@@ -43,4 +43,3 @@ class Tiki_Formula_Function_ResultCount extends Math_Formula_Function
 		return $out;
 	}
 }
-

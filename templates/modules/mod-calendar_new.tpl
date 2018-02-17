@@ -1,4 +1,4 @@
-{* $Id: mod-calendar_new.tpl 62353 2017-04-27 11:56:55Z luciash $ *}
+{* $Id: mod-calendar_new.tpl 65136 2018-01-09 07:53:20Z yonixxx $ *}
 {if isset($show_calendar_module) and $show_calendar_module eq 'y'}
 	{tikimodule error=$module_params.error title=$tpl_module_title name=$name flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 		{if $viewlist eq 'list'}
@@ -45,7 +45,7 @@
 							{/if}
 							<td class="{if isset($cell[w][d].day) and $date eq $today}calhighlight calborder{else}{cycle advance=false}{/if}{if isset($cell[w][d].items[0])
 								and ((isset($cell[w][d].items[0].modifiable) and $cell[w][d].items[0].modifiable eq "y")
-								|| $cell[w][d].items[0].visible eq 'y')} calmodfocus{/if}" style="text-align:center; font-size:0.8em; width=14%">
+								|| $cell[w][d].items[0].visible eq 'y')} calmodfocus{/if}" style="font-size:0.8em; width=14%">
 								{if isset($cell[w][d].over)}
 									{assign var=over value=$cell[w][d].over}
 								{elseif isset($cell[w][d].items[0])}
@@ -56,7 +56,7 @@
 									{if empty($calendar_popup) or $calendar_popup eq "y"}
 										<a href="{$myurl}?todate={$date}&amp;viewmode={$viewmodelink}" title="{tr}View{/tr}"
 											{if (isset($sticky_popup) and $sticky_popup eq 'y') or ($prefs.calendar_sticky_popup eq "y" and $cell[w][d].items[0].calitemId)}
-												{popup sticky=true fullhtml="1" text=$over|escape:"javascript"|escape:"html"}{else}{popup fullhtml="1" text=$over|escape:"javascript"|escape:"html"}
+												{popup sticky=true fullhtml="1" text=$over}{else}{popup fullhtml="1" text=$over}
 											{/if}
 										>
 											{if isset($day_cursor)}

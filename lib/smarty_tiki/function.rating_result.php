@@ -3,9 +3,9 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_result.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.rating_result.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
-function smarty_function_rating_result( $params, $smarty )
+function smarty_function_rating_result($params, $smarty)
 {
 	global $prefs;
 	$ratinglib = TikiLib::lib('rating');
@@ -14,7 +14,6 @@ function smarty_function_rating_result( $params, $smarty )
 	$tableBody = "";
 
 	if ($prefs['rating_results_detailed'] == 'y') {
-
 		foreach ($votings as $vote => $voting) {
 			if ($prefs['rating_results_detailed_percent'] == 'y') {
 				$extra_info = '/' . $voting['percent'] . '%)';
@@ -25,11 +24,11 @@ function smarty_function_rating_result( $params, $smarty )
 				<div class="ui-widget-content">' .
 					($prefs['rating_smileys'] == 'y' ? '<img src="' . $smiles[$vote]['img'] . '"/> ' : '<b>' . $vote . '</b> ') .
 					'(' . $voting['votes'] . $extra_info .
-					($prefs['rating_smileys'] == 'y' ? '<div style="background-color: ' . $smiles[$vote]['color'] . ';">&nbsp;</div>' : '').
+					($prefs['rating_smileys'] == 'y' ? '<div style="background-color: ' . $smiles[$vote]['color'] . ';">&nbsp;</div>' : '') .
 				'</div>
 			</td>';
 		}
-	} else if ($votings) {
+	} elseif ($votings) {
 		// $smarty->loadPlugin('function_rating_result_avg'); apparently "plugin function_rating_result_avg is not a valid name format"
 		include_once('lib/smarty_tiki/function.rating_result_avg.php');
 		return smarty_function_rating_result_avg($params, $smarty);

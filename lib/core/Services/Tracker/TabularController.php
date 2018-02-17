@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TabularController.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: TabularController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Tracker_TabularController
 {
@@ -80,7 +80,7 @@ class Services_Tracker_TabularController
 			// FIXME : Blocks save and back does not restore changes, ajax validation required
 			// $schema->validate();
 
-			$lib->update($info['tabularId'], $input->name->text(), $schema->getFormatDescriptor(), $schema->getFilterDescriptor());
+			$lib->update($info['tabularId'], $input->name->text(), $schema->getFormatDescriptor(), $schema->getFilterDescriptor(), $input->config->none());
 
 			return [
 				'FORWARD' => [
@@ -97,6 +97,7 @@ class Services_Tracker_TabularController
 			'tabularId' => $info['tabularId'],
 			'trackerId' => $info['trackerId'],
 			'name' => $info['name'],
+			'config' => $info['config'],
 			'schema' => $schema,
 			'filterCollection' => $schema->getFilterCollection(),
 		];
@@ -119,7 +120,6 @@ class Services_Tracker_TabularController
 		$local = $schema->getFieldSchema($permName);
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
 			$column = $schema->addColumn($permName, $input->mode->text());
 
 			$return = [
@@ -336,10 +336,9 @@ class Services_Tracker_TabularController
 		if ($_SERVER['REQUEST_METHOD'] == 'POST' && is_uploaded_file($_FILES['file']['tmp_name'])) {
 			$source = new \Tracker\Tabular\Source\CsvSource($schema, $_FILES['file']['tmp_name']);
 			$writer = new \Tracker\Tabular\Writer\TrackerWriter;
-			$writer->write($source);
+			$done = $writer->write($source);
 
 			unlink($_FILES['file']['tmp_name']);
-			$done = true;
 		}
 
 		return [
@@ -491,6 +490,7 @@ class Services_Tracker_TabularController
 		$schema = new \Tracker\Tabular\Schema($tracker);
 		$schema->loadFormatDescriptor($info['format_descriptor']);
 		$schema->loadFilterDescriptor($info['filter_descriptor']);
+		$schema->loadConfig($info['config']);
 
 		return $schema;
 	}

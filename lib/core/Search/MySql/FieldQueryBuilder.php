@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FieldQueryBuilder.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: FieldQueryBuilder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 use Search_Expr_Token as Token;
 use Search_Expr_And as AndX;
@@ -48,7 +48,8 @@ class Search_MySql_FieldQueryBuilder
 						$childNodes = array_map(
 							function ($node) {
 								return substr($node, 1);
-							}, $childNodes
+							},
+							$childNodes
 						);
 						$invert = true;
 
@@ -77,4 +78,3 @@ class Search_MySql_FieldQueryBuilder
 		return $this->invert;
 	}
 }
-

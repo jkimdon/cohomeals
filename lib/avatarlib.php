@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: avatarlib.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: avatarlib.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 // this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -28,7 +28,7 @@ class AvatarLib extends TikiLib
 	 *
 	 * @return string	URL for the current page
 	 */
-	function set_avatar_from_url($url, $userwatch="", $name="")
+	function set_avatar_from_url($url, $userwatch = "", $name = "")
 	{
 		global $user, $prefs;
 
@@ -69,25 +69,32 @@ class AvatarLib extends TikiLib
 		if (($iwidth == $avsize and $iheight <= $avsize) || ($iwidth <= $avsize and $iheight == $avsize)) {
 			$userprefslib->set_user_avatar($userwatch, 'u', '', $name, $size, $itype, $data);
 		} else {
-			if (function_exists("ImageCreateFromString") && (!strstr($type, "gif"))) {
+			if (function_exists("ImageCreateFromString") && (! strstr($type, "gif"))) {
 				$img = imagecreatefromstring($data);
 				$size_x = imagesx($img);
 				$size_y = imagesy($img);
 				/* if the square crop is set, crop the image before resizing */
-				if ($prefs['user_small_avatar_square_crop']){
-					$crop_size = min ($size_x, $size_y);
-					$offset_x = ($size_x - $crop_size)/2;
-					$offset_y = ($size_y - $crop_size)/2;
-					$crop_array = array('x' =>$offset_x , 'y' => $offset_y, 'width' => $crop_size, 'height'=> $crop_size);
-					$img = imagecrop($img,$crop_array);
+				if ($prefs['user_small_avatar_square_crop']) {
+					$crop_size = min($size_x, $size_y);
+					$offset_x = ($size_x - $crop_size) / 2;
+					$offset_y = ($size_y - $crop_size) / 2;
+					$crop_array = ['x' => $offset_x , 'y' => $offset_y, 'width' => $crop_size, 'height' => $crop_size];
+					$img = imagecrop($img, $crop_array);
 					$size_x = $size_y = $crop_size;
 				}
-				if ($size_x > $size_y) $tscale = ((int)$size_x / $avsize);
-				else $tscale = ((int)$size_y / $avsize);
+				if ($size_x > $size_y) {
+					$tscale = ((int)$size_x / $avsize);
+				} else {
+					$tscale = ((int)$size_y / $avsize);
+				}
 				$tw = ((int)($size_x / $tscale));
 				$ty = ((int)($size_y / $tscale));
-				if ($tw > $size_x) $tw = $size_x;
-				if ($ty > $size_y) $ty = $size_y;
+				if ($tw > $size_x) {
+					$tw = $size_x;
+				}
+				if ($ty > $size_y) {
+					$ty = $size_y;
+				}
 				if (chkgd2()) {
 					$t = imagecreatetruecolor($tw, $ty);
 					imagecopyresampled($t, $img, 0, 0, 0, 0, $tw, $ty, $size_x, $size_y);
@@ -109,12 +116,13 @@ class AvatarLib extends TikiLib
 				$userprefslib->set_user_avatar($userwatch, 'u', '', $name, $size, $type, $data);
 			}
 		}
-		TikiLib::events()->trigger('tiki.user.avatar',
-			array(
+		TikiLib::events()->trigger(
+			'tiki.user.avatar',
+			[
 				'type' => 'user',
 				'object' => $userwatch,
 				'user' => $userwatch,
-			)
+			]
 		);
 	}
 }

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FilterTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: FilterTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -15,15 +15,15 @@ class JitFilter_FilterTest extends TikiTestCase
 
 	function setUp()
 	{
-		$this->array = array(
+		$this->array = [
 			'foo' => 'bar123',
 			'bar' => 10,
-			'baz' => array(
+			'baz' => [
 				'hello',
 				'world !',
-			),
+			],
 			'content' => '10 > 5 <script>',
-		);
+		];
 
 		$this->array = new JitFilter($this->array);
 		$this->array->setDefaultFilter(new Zend\I18n\Filter\Alnum);
@@ -56,11 +56,11 @@ class JitFilter_FilterTest extends TikiTestCase
 	function testMultipleFilters()
 	{
 		$this->array->replaceFilters(
-			array(
+			[
 				'foo' => new Zend\Filter\Digits,
 				'content' => new Zend\Filter\StripTags,
-				'baz' => array(1 => new Zend\Filter\StringToUpper,),
-			)
+				'baz' => [1 => new Zend\Filter\StringToUpper,],
+			]
 		);
 
 		$this->assertEquals('123', $this->array['foo']);
@@ -71,11 +71,11 @@ class JitFilter_FilterTest extends TikiTestCase
 	function testNestedDefault()
 	{
 		$this->array->replaceFilters(
-			array(
+			[
 				'foo' => new Zend\Filter\Digits,
 				'content' => new Zend\Filter\StripTags,
 				'baz' => new Zend\Filter\StringToUpper,
-			)
+			]
 		);
 
 		$this->assertEquals('123', $this->array['foo']);
@@ -86,7 +86,7 @@ class JitFilter_FilterTest extends TikiTestCase
 		$this->assertEquals('world', $this->array['baz'][1]);
 
 		$this->array->replaceFilters(
-			array('baz' => array(1 => new Zend\Filter\Digits,),)
+			['baz' => [1 => new Zend\Filter\Digits,],]
 		);
 
 		$this->assertEquals('hello', $this->array['baz'][0]);

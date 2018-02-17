@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Exception.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: Exception.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * @package   Tiki
  * @subpackage    Language
- * Exception class for language related classes 
+ * Exception class for language related classes
  */
 class Language_Exception extends Exception
 {

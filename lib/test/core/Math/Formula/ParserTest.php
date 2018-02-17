@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ParserTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: ParserTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Math_Formula_ParserTest extends TikiTestCase
 {
@@ -20,7 +20,7 @@ class Math_Formula_ParserTest extends TikiTestCase
 	{
 		$parser = new Math_Formula_Parser;
 
-		$element = new Math_Formula_Element('object', array('input-type', 'input-object-id'));
+		$element = new Math_Formula_Element('object', ['input-type', 'input-object-id']);
 		$this->assertEquals($element, $parser->parse('(object input-type input-object-id)'));
 	}
 
@@ -30,7 +30,7 @@ class Math_Formula_ParserTest extends TikiTestCase
 
 		$element = new Math_Formula_Element(
 			'score',
-			array(new Math_Formula_Element('object', array('type', 'object')))
+			[new Math_Formula_Element('object', ['type', 'object'])]
 		);
 
 		$this->assertEquals($element, $parser->parse('(score (object type object))'));
@@ -42,10 +42,10 @@ class Math_Formula_ParserTest extends TikiTestCase
 
 		$element = new Math_Formula_Element(
 			'score',
-			array(
-				new Math_Formula_Element('object', array('type', 'object')),
-				new Math_Formula_Element('range', array(3600)),
-			)
+			[
+				new Math_Formula_Element('object', ['type', 'object']),
+				new Math_Formula_Element('range', [3600]),
+			]
 		);
 
 		$this->assertEquals($element, $parser->parse('(score (object type object) (range 3600))'));
@@ -57,13 +57,13 @@ class Math_Formula_ParserTest extends TikiTestCase
 
 		$element = new Math_Formula_Element(
 			'score',
-			array(
-				new Math_Formula_Element('object', array('type', 'object')),
+			[
+				new Math_Formula_Element('object', ['type', 'object']),
 				new Math_Formula_Element(
 					'range',
-					array(new Math_Formula_Element('mul', array(3600, 60)),)
+					[new Math_Formula_Element('mul', [3600, 60]),]
 				),
-			)
+			]
 		);
 
 		$this->assertEquals($element, $parser->parse('(score (object type object) (range (mul 3600 60)))'));
@@ -92,16 +92,16 @@ DOC;
 
 		$element = new Math_Formula_Element(
 			'score',
-			array(
+			[
 				new Math_Formula_Element('object', [
 					new Math_Formula_InternalString('wiki page'),
 					new Math_Formula_InternalString('HomePage'),
 				]),
 				new Math_Formula_Element(
 					'range',
-					array(new Math_Formula_Element('mul', array(3600, 60)),)
+					[new Math_Formula_Element('mul', [3600, 60]),]
 				),
-			)
+			]
 		);
 
 		$this->assertEquals($element, $parser->parse('(score (object "wiki page" "HomePage") (range (mul 3600 60)))'));
@@ -112,10 +112,10 @@ DOC;
 		$parser = new Math_Formula_Parser;
 		$element = new Math_Formula_Element(
 			'add',
-			array(
-				new Math_Formula_Element('default', array(0)),
+			[
+				new Math_Formula_Element('default', [0]),
 				new Math_Formula_Element('attribute'),
-			)
+			]
 		);
 
 		$this->assertEquals(
@@ -131,14 +131,14 @@ DOC;
 
 	function badStrings()
 	{
-		return array(
-			'noOpening' => array('test'),
-			'noToken' => array('()'),
-			'doubles' => array('((test))'),
-			'trail' => array('(test) foo'),
-			'unfinished' => array('(score (object type object) (range 3600)'),
-			'unfinishedString' => array('(score (object "wiki page object) (range 3600))'),
-		);
+		return [
+			'noOpening' => ['test'],
+			'noToken' => ['()'],
+			'doubles' => ['((test))'],
+			'trail' => ['(test) foo'],
+			'unfinished' => ['(score (object type object) (range 3600)'],
+			'unfinishedString' => ['(score (object "wiki page object) (range 3600))'],
+		];
 	}
 
 	/**
@@ -152,4 +152,3 @@ DOC;
 		$parser->parse($string);
 	}
 }
-

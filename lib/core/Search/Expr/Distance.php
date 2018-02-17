@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Distance.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: Distance.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Expr_Distance implements Search_Expr_Interface
 {
@@ -66,7 +66,7 @@ class Search_Expr_Distance implements Search_Expr_Interface
 
 	function walk($callback)
 	{
-		return call_user_func($callback, $this, array());
+		return call_user_func($callback, $this, []);
 	}
 
 	function getValue(Search_Type_Factory_Interface $typeFactory)
@@ -82,6 +82,6 @@ class Search_Expr_Distance implements Search_Expr_Interface
 
 	function traverse($callback)
 	{
-		return call_user_func($callback, $callback, $this, array());
+		return call_user_func($callback, $callback, $this, []);
 	}
 }

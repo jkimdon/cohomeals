@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.translation.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: block.translation.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * Smarty plugin
@@ -15,7 +15,7 @@
  * Type:     block function<br>
  * Name:     translation<br>
  * Purpose:  Support many languages in a template, only showing block
-             if language matches
+			 if language matches
  * @param array
  * <pre>
  * Params:   lang: string (language, ex: en, pt-br)
@@ -27,8 +27,8 @@
 
 function smarty_block_translation($params, $content, $smarty, &$repeat)
 {
-	if ( !$repeat && !empty($content) ) {
-  	$lang = $params['lang'];
+	if (! $repeat && ! empty($content)) {
+		$lang = $params['lang'];
 		if ($smarty->getTemplateVars('language') == $lang) {
 			return $content;
 		} else {

@@ -3,9 +3,9 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_override_menu.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.rating_override_menu.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
-function smarty_function_rating_override_menu( $params, $smarty )
+function smarty_function_rating_override_menu($params, $smarty)
 {
 	global $prefs;
 	$headerlib = TikiLib::lib('header');
@@ -39,4 +39,3 @@ function smarty_function_rating_override_menu( $params, $smarty )
 		<span class='deliberationConfigureItemRatings button' style='float:right;'><a href='#'>" . tr('Configure Ratings') . "</a></span>
 		<input class='deliberatioRatingOverrideSelector' type='hidden' name='rating_override[]' value='" . ($optionsLength) . "'/>";
 }
-

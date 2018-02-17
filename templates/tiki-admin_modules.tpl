@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_modules.tpl 61837 2017-03-24 10:26:59Z jyhem $ *}
+{* $Id: tiki-admin_modules.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {strip}
 {title help="Modules" admpage="module"}{tr}Admin Modules{/tr}{/title}
@@ -117,7 +117,7 @@
 													class="tips"
 													title="{tr}Actions{/tr}"
 													href="#"
-													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.module_actions|escape:"javascript"|escape:"html"}{/if}
+													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.module_actions}{/if}
 													style="padding:0; margin:0; border:0"
 												>
 													{icon name='wrench'}
@@ -224,7 +224,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.custom_module_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.custom_module_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

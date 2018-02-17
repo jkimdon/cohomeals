@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-random_pages.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-random_pages.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,14 +16,14 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_random_pages_info()
 {
-	return array(
+	return [
 		'name' => tra('Random Pages'),
 		'description' => tra('Displays the specified number of random wiki pages.'),
-		'prefs' => array('feature_wiki'),
+		'prefs' => ['feature_wiki'],
 		'documentation' => 'Module random_pages',
-		'params' => array(),
-		'common_params' => array("rows", "nonums")
-	);
+		'params' => [],
+		'common_params' => ["rows", "nonums"]
+	];
 }
 
 /**
@@ -33,7 +33,7 @@ function module_random_pages_info()
 function module_random_pages($mod_reference, $module_params)
 {
 	$tikilib = TikiLib::lib('tiki');
-	$pages=$tikilib->list_pages(0, $mod_reference["rows"], "random", '', '', true, true);
+	$pages = $tikilib->list_pages(0, $mod_reference["rows"], "random", '', '', true, true);
 	$smarty = TikiLib::lib('smarty');
 	$smarty->assign('modRandomPages', $pages["data"]);
 }

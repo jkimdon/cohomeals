@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_forums.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
+{* $Id: tiki-admin_forums.tpl 65216 2018-01-15 23:37:14Z lindonb $ *}
 {if !$ts.ajax}
 	{title help="Forums" admpage="forums" url='tiki-admin_forums.php'}{tr}Admin Forums{/tr}{/title}
 
@@ -128,7 +128,7 @@
 										class="tips"
 										title="{tr}Actions{/tr}"
 										href="#"
-										{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_forum_actions|escape:"javascript"|escape:"html"}{/if}
+										{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_forum_actions}{/if}
 										style="padding:0; margin:0; border:0"
 									>
 										{icon name='wrench'}
@@ -139,11 +139,7 @@
 								</td>
 							</tr>
 						{sectionelse}
-							{if !$ts.enabled || ($ts.enabled && $ts.ajax)}
-								{norecords _colspan=$numbercol _text="No forums found"}
-							{else}
-								{norecords _colspan=$numbercol _text="Retrieving forums..."}
-							{/if}
+							{norecords _colspan=$numbercol _text="No forums found"}
 						{/section}
 					</tbody>
 				</table>

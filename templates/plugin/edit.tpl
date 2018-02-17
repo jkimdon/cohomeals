@@ -87,7 +87,7 @@ $("#picker_{{$name|escape}}").parent().click(function () {
 	{/function}
 	<div class="form-horizontal" id="plugin_params">
 		<form action="{service controller='plugin' action='edit'}" method="post">
-			{include file='access/include_ticket.tpl'}
+			{ticket}
 			{foreach $info.params as $name => $param}
 				<div class="form-group{if $param.advanced} advanced{/if}" id="param_{$name|escape}">
 					{plugin_edit_row param=$param name=$name info=$info pluginArgs=$pluginArgs}
@@ -114,7 +114,6 @@ $("#picker_{{$name|escape}}").parent().click(function () {
 				<input type="hidden" name="page" value="{$pageName|escape}">
 				<input type="hidden" name="type" value="{$type}">
 				<input type="hidden" name="index" value="{$index}">
-				<input type="hidden" name="args" value="{$pluginArgsJSON|escape}">{* It does not look like this is still in use after r61664. Chealer *}
 				<input type="submit" class="btn btn-primary" value="{tr}Save{/tr}">
 			</div>
 

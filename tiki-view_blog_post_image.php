@@ -6,14 +6,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_blog_post_image.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-view_blog_post_image.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 
 $access->check_feature('feature_blogs');
 
 $bloglib = TikiLib::lib('blog');
-if (!isset($_REQUEST['imgId'])) {
+if (! isset($_REQUEST['imgId'])) {
 	die;
 }
 $info = $bloglib->get_post_image($_REQUEST['imgId']);

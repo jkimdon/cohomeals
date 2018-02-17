@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "вельш",
 "Slovene" => "словенский",
 "Arabic" => "арабский",
@@ -2194,7 +2194,7 @@ $lang = array(
 "Rate" => "Оценка",
 "Use your email address as your log-in name" => "Используйте свой эл. адрес как имя пользователя",
 "Lowercase only" => "Только в нижнем регистре",
-"Repeat password" => "Снова",
+"Confirm password" => "Снова",
 "Generate a password" => "Создать пароль",
 "Back to tracker list" => "Список трекеров",
 "Valid" => "Valid",
@@ -3702,4 +3702,4 @@ $lang = array(
 "Aborted" => "Отменённые",
 "Top pages" => "Лучшие страницы",
 "Last pages" => "Последние страницы",
-);
+];

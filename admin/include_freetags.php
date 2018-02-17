@@ -1,14 +1,15 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_freetags.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: include_freetags.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
-// This script may only be included - so its better to die if called directly.
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
-require_once ('tiki-setup.php');
-$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
+require_once('tiki-setup.php');
 
 if (isset($_REQUEST["cleanup"]) && $access->ticketMatch()) {
 	$freetaglib = TikiLib::lib('freetag');

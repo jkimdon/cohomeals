@@ -7,7 +7,7 @@ if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
 }
 
 
-/*This file is part of J4PHP - Ensembles de propriétés et méthodes permettant le developpment rapide d'application web modulaire
+/*This file is part of J4PHP - Ensembles de propriÃ©tÃ©s et mÃ©thodes permettant le developpment rapide d'application web modulaire
 Copyright (c) 2002-2004 @PICNet
 
 This program is free software; you can redistribute it and/or
@@ -44,7 +44,7 @@ class HTTPHeader {
 	 * @return mixed 
 	 * @todo change order (POST normally overrides GET)
 	 */	
-	function HTTPHeader(){
+	function __construct(){
 		if (sizeof($_GET)>0) $this->_var = array_merge($this->_var, $_GET);
 		if (sizeof($_POST)>0) $this->_var = array_merge($this->_var, $_POST);
 	}

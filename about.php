@@ -6,7 +6,7 @@
  * @copyright (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project. All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * @licence Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
  */
-// $Id: about.php 57974 2016-03-17 20:11:05Z jonnybradley $
+// $Id: about.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
 /*
   this page is used as doxygen output mainpage,
@@ -66,4 +66,3 @@ Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for detail
 // I call index.php because tiki may not be setup when people attempt to call this.
 header("location: index.php");
 die;
-

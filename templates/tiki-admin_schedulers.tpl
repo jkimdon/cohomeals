@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_schedulers.tpl 62768 2017-05-26 22:40:55Z rjsmelo $ *}
+{* $Id: tiki-admin_schedulers.tpl 62776 2017-05-27 18:17:29Z jonnybradley $ *}
 {* Use css menus as fallback for item dropdown action menu if javascript is not being used *}
 {if $prefs.javascript_enabled !== 'y'}
 	{$js = 'n'}
@@ -95,7 +95,7 @@
 										<a
 												class="tips"
 												title="{tr}Actions{/tr}" href="#"
-												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.scheduler_actions|escape:"javascript"|escape:"html"}{/if}
+												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.scheduler_actions}{/if}
 												style="padding:0; margin:0; border:0"
 										>
 											{icon name='wrench'}

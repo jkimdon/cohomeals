@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiForums.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: TikiForums.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -23,83 +23,83 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
  */
 class Table_Settings_TikiForums extends Table_Settings_Standard
 {
-	protected $ts = array(
-		'ajax' => array(
-			'url' => array(
+	protected $ts = [
+		'ajax' => [
+			'url' => [
 				'file' => 'tiki-forums.php',
-			),
-		),
-		'columns' => array(
-			'#name' => array(
-				'sort' => array(
+			],
+		],
+		'columns' => [
+			'#name' => [
+				'sort' => [
 					'type' => true,
 					'dir' => 'asc',
-					'ajax' =>'name',
-				),
-				'filter' => array(
+					'ajax' => 'name',
+				],
+				'filter' => [
 					'type' => 'text',
-					'ajax' =>'find',
-				),
+					'ajax' => 'find',
+				],
 				'priority' => 'critical',
-			),
-			'#threads' => array(
-				'sort' => array(
+			],
+			'#threads' => [
+				'sort' => [
 					'type' => 'digit',
-					'ajax' =>'threads',
-				),
-				'filter' => array(
+					'ajax' => 'threads',
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 6,
-			),
-			'#comments' => array(
-				'sort' => array(
+			],
+			'#comments' => [
+				'sort' => [
 					'type' => 'digit',
-					'ajax' =>'comments',
-				),
-				'filter' => array(
+					'ajax' => 'comments',
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 6,
-			),
-			'#ppd' => array(
-				'sort' => array(
+			],
+			'#ppd' => [
+				'sort' => [
 					'type' => false,
-				),
-				'filter' => array(
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 6,
-			),
-			'#lastPost' => array(
-				'sort' => array(
+			],
+			'#lastPost' => [
+				'sort' => [
 					'type' => 'isoDate',
 					'ajax' => 'lastPost',
-				),
-				'filter' => array(
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 3,
-			),
-			'#hits' => array(
-				'sort' => array(
+			],
+			'#hits' => [
+				'sort' => [
 					'type' => 'digit',
-					'ajax' =>'hits',
-				),
-				'filter' => array(
+					'ajax' => 'hits',
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 5,
-			),
-			'#actions' => array(
-				'sort' => array(
+			],
+			'#actions' => [
+				'sort' => [
 					'type' => false,
-				),
-				'filter' => array(
+				],
+				'filter' => [
 					'type' => false,
-				),
+				],
 				'priority' => 1,
-			),
-		),
-	);
+			],
+		],
+	];
 }

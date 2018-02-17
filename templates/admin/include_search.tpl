@@ -1,4 +1,4 @@
-{* $Id: include_search.tpl 63800 2017-09-09 07:06:04Z drsassafras $ *}
+{* $Id: include_search.tpl 64648 2017-11-21 12:41:46Z robertokir $ *}
 
 {if $prefs.feature_search_stats eq 'y'}
 	{remarksbox type="tip" title="{tr}Tip{/tr}"}
@@ -14,7 +14,7 @@
 
 
 <form class="form-horizontal" action="tiki-admin.php?page=search" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
@@ -63,7 +63,6 @@
 					{/if}
 					<div class="adminoptionboxchild unified_engine_childcontainer lucene">
 						{preference name="unified_lucene_highlight"}
-						{preference name=unified_parse_results}
 
 						<fieldset>
 							<legend>{tr}Search engine settings{/tr}</legend>
@@ -124,6 +123,7 @@
 					{preference name=unified_cached_formatters}
 
 					{preference name=unified_trackerfield_keys}
+					{preference name=unified_cache_formatted_result}
 					{preference name=unified_add_to_categ_search}
 					{preference name=unified_trim_sorted_search}
 
@@ -217,7 +217,7 @@
 
 		{tab name="{tr}Tools{/tr}"}
 			<br>
-			<a href="tiki-report_string_in_db.php">{tr}Report all occurrences of a string in any table{/tr}</a><br>
+            {include file='admin/include_search_report_string_in_db.tpl'}
 		{/tab}
 
 	{/tabset}

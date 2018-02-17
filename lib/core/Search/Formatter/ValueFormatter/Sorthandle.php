@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Sorthandle.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Sorthandle.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Formatter_ValueFormatter_Sorthandle extends Search_Formatter_ValueFormatter_Abstract
 {
@@ -19,27 +19,27 @@ class Search_Formatter_ValueFormatter_Sorthandle extends Search_Formatter_ValueF
 		}
 
 		$tracker = Tracker_Definition::get($entry['tracker_id']);
-		if (!is_object($tracker)) {
+		if (! is_object($tracker)) {
 			return $value;
 		}
 		$field = $tracker->getField(substr($name, 14));
 		$field['value'] = $value;
 
-		$item = array();
+		$item = [];
 		if ($entry['object_type'] == 'trackeritem') {
 			$item['itemId'] = $entry['object_id'];
 		}
 
 		$trklib = TikiLib::lib('trk');
 		$rendered = $trklib->field_render_value(
-			array(
+			[
 				'item' => $item,
 				'field' => $field,
 				'process' => 'y',
 				'search_render' => 'y',
 				'list_mode' => 'n',
 				'editable' => 'direct',
-			)
+			]
 		);
 		return '~np~<span class="fa fa-sort inline-sort-handle" data-current-value="' . smarty_modifier_escape($value) . '"></span><span class="hidden">' . $rendered . '</span>~/np~';
 	}
@@ -49,4 +49,3 @@ class Search_Formatter_ValueFormatter_Sorthandle extends Search_Formatter_ValueF
 		return false;
 	}
 }
-

@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20130314_keep_search_pref_settings_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
+// $Id: 20130314_keep_search_pref_settings_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -21,7 +21,7 @@ function upgrade_20130314_keep_search_pref_settings_tiki($installer)
 
 	if ($unisearch !== 'n') {	// default values can be empty
 		$preferences = $installer->table('tiki_preferences');
-		$preferences->insertOrUpdate(array('value' => 'y'), array('name' => 'feature_search'));
-		$preferences->insertOrUpdate(array('value' => 'n'), array('name' => 'feature_search_fulltext'));
+		$preferences->insertOrUpdate(['value' => 'y'], ['name' => 'feature_search']);
+		$preferences->insertOrUpdate(['value' => 'n'], ['name' => 'feature_search_fulltext']);
 	}
 }

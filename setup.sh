@@ -4,7 +4,7 @@
 #
 # All Rights Reserved. See copyright.txt for details and a complete list of authors.
 # Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-# $Id: setup.sh 62939 2017-06-07 22:09:43Z jyhem $
+# $Id: setup.sh 64309 2017-10-18 10:47:13Z jonnybradley $
 
 # This file sets permissions and creates relevant folders for Tiki.
 #
@@ -43,7 +43,7 @@ WHAT_NEXT_AFTER_f='x'
 # Composer: If you are installing via a released Tiki package (zip, tar.gz,
 # tar.bz2, 7z), you can and should skip using Composer. If you are installing and
 # upgrading via SVN, you need to run Composer after 'svn checkout' and 'svn
-# upgrade'. More info at https://dev.tiki.org/Composer
+# upgrade'. More info at https://doc.tiki.org/Composer
 if [ -d ".svn" ]; then
 	DEFAULT_WHAT='c'
 else
@@ -162,6 +162,7 @@ usage: $0 [<switches>] ${POSSIBLE_COMMANDS}
 -v virtuals  list of virtuals (for multitiki, example: "www1 www2")
 -p php       alternate PHP command (default: php)
 -n           not prompt for user and group, assume current
+-k           don't guess user and group from context, keep same user and group as web root
 -d off|on    disable|enable debugging mode (override script default)
 -q           quiet (workaround to silence composer, e.g. in cron scripts)
 
@@ -188,14 +189,15 @@ OPT_PHPCLI=
 OPT_USE_CURRENT_USER_GROUP=
 OPT_QUIET=
 
-while getopts "hu:g:v:p:nd:q" OPTION; do
+while getopts "hu:g:v:p:nkd:q" OPTION; do
 	case $OPTION in
 		h) usage ; exit 0 ;;
 		u) OPT_AUSER=$OPTARG ;;
 		g) OPT_AGROUP=$OPTARG ;;
 		v) OPT_VIRTUALS=$OPTARG ;;
 		p) OPT_PHPCLI=$OPTARG ;;
-		n) OPT_USE_CURRENT_USER_GROUP=1 ;;
+		n) OPT_USE_CURRENT_USER_GROUP=1 ;; # Actually guess from context for historical reasons
+		k) OPT_GUESS_USER_GROUP_FROM_ROOT=1 ;; # Overrides -n user and group values
 		d) set_debug ;;
 		q) OPT_QUIET="-q" ;;
 		?) usage ; exit 1 ;;
@@ -274,11 +276,23 @@ else
 	elif [ "$UNAME" = "Darwin" ]; then
 		AUSER=_www
 		AGROUP=_www
+	elif [ "$UNAME" = "FreeBS" ]; then
+		AUSER=www
+		AGROUP=www
 	fi
 fi
 }
 
-check_distribution
+check_webroot() {
+	AUSER=`stat -c "%U" .`
+	AGROUP=`stat -c "%G" .`
+}
+
+if [ -z "${OPT_GUESS_USER_GROUP_FROM_ROOT}" ]; then
+	check_distribution
+else
+	check_webroot
+fi
 
 # part 3 - default and writable subdirs
 # -------------------------------------
@@ -1002,7 +1016,7 @@ tiki_setup_default_menu() {
  Tiki setup.sh - your options
  ============================
 
-Composer: If you are installing via a released Tiki package (zip, tar.gz, tar.bz2, 7z), you can and should skip using Composer. If you are installing and upgrading via SVN, you need to run Composer after 'svn checkout' and 'svn upgrade'. More info at https://dev.tiki.org/Composer
+Composer: If you are installing via a released Tiki package (zip, tar.gz, tar.bz2, 7z), you can and should skip using Composer. If you are installing and upgrading via SVN, you need to run Composer after 'svn checkout' and 'svn upgrade'. More info at https://doc.tiki.org/Composer
   
  c run composer (log output on screen, not all warnings) and exit (recommended to be done first)
  L run composer (log output to logfile) and exit (recommended to be done first)

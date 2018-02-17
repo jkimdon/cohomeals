@@ -3,18 +3,18 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.quotabar.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.quotabar.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /* length: length in pixels of the bar (default 50)
 	value: length in pixels to display at the left in red (if not set all length is display in red)
 */
-function smarty_function_quotabar( $params, $smarty )
+function smarty_function_quotabar($params, $smarty)
 {
 	extract($params, EXTR_SKIP);
-	if (!isset($length)) {
+	if (! isset($length)) {
 		$length = 100;
 	}
-	if (!isset($value)) {
+	if (! isset($value)) {
 		$value = $length;
 	}
 	if (empty($value)) {

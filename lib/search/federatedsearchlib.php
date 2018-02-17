@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: federatedsearchlib.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: federatedsearchlib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class FederatedSearchLib
 {
@@ -86,4 +86,3 @@ class FederatedSearchLib
 		$connection->mapping($index, $type, $mapping);
 	}
 }
-

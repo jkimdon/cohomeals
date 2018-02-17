@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Manager.php 61911 2017-03-28 15:47:08Z jonnybradley $
+// $Id: Manager.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -28,17 +28,17 @@ class Table_Code_Manager extends Table_Code_Abstract
 	 *
 	 * @var array
 	 */
-	protected $subclasses = array(
+	protected $subclasses = [
 		//other is jQuery needed before the tablesorter function call
 		'other' => '',
 		//this is the jQuery tablesorter function call
-		'main' => array(
+		'main' => [
 			'mainOptions' => '',
 			'widgetOptions' => '',
-		),
+		],
 		//events to bind to the tablesorter function call
 		'bind' => ''
-	);
+	];
 
 	/**
 	 * Call the classes for each section in the order determined by the $subclasses property
@@ -64,7 +64,7 @@ class Table_Code_Manager extends Table_Code_Abstract
 			}
 		}
 		//put sections together into final overall code
-		self::$code['main'] = $this->iterate(self::$code['main'], $this->nt . '$(\''. self::$tid
+		self::$code['main'] = $this->iterate(self::$code['main'], $this->nt . '$(\'' . self::$tid
 			. '\').tablesorter({', $this->nt . '})', '', '');
 		if (empty(self::$code['bind'])) {
 			self::$code['main'] .= ';';

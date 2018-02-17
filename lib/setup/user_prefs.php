@@ -3,18 +3,19 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: user_prefs.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: user_prefs.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
-//this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
 // Handle the current user prefs in session
-if ( ! isset($_SESSION['u_info']) || $_SESSION['u_info']['login'] != $user ) {
-	$_SESSION['u_info'] = array();
+if (! isset($_SESSION['u_info']) || $_SESSION['u_info']['login'] != $user) {
+	$_SESSION['u_info'] = [];
 	$_SESSION['u_info']['login'] = $user;
 	$_SESSION['u_info']['group'] = ( $user ) ? $userlib->get_user_default_group($user) : '';
 	if (empty($user)) {
-		$_SESSION['preferences'] = array(); // For anonymous, store some preferences like the theme in the session.
+		$_SESSION['preferences'] = []; // For anonymous, store some preferences like the theme in the session.
 	}
 }
 
@@ -23,9 +24,9 @@ $u_info =& $_SESSION['u_info'];
 $smarty->assign_by_ref('u_info', $u_info);
 
 $smarty->assign_by_ref('user', $user);
-$user_preferences = array(); // Used for cache
+$user_preferences = []; // Used for cache
 
-if ( $user ) {
+if ($user) {
 	$default_group = $group = $_SESSION['u_info']['group'];
 	$smarty->assign('group', $group); // do not use by_ref as $group can be changed in the .php
 	$smarty->assign('default_group', $group);
@@ -43,13 +44,13 @@ if ( $user ) {
 
 	// Get all user prefs in one query
 	$tikilib->get_user_preferences($user);
-	
+
 	// Check pref for user theme
-	if ( $prefs['change_theme'] !== 'y') {
+	if ($prefs['change_theme'] !== 'y') {
 		unset($user_preferences[$user]['theme']);
 		unset($user_preferences[$user]['theme_option']);
 	} else {
-		if (!empty($user_preferences[$user]['theme']) && empty($user_preferences[$user]['theme_option'])) {
+		if (! empty($user_preferences[$user]['theme']) && empty($user_preferences[$user]['theme_option'])) {
 			$prefs['theme_option'] = '';
 		}
 	}
@@ -58,15 +59,14 @@ if ( $user ) {
 	$prefs = array_merge($prefs, $user_preferences[$user]);
 
 	// Set the userPage name for this user since other scripts use this value.
-	$userPage = $prefs['feature_wiki_userpage_prefix'].$user;
+	$userPage = $prefs['feature_wiki_userpage_prefix'] . $user;
 	$exist = $tikilib->page_exists($userPage);
 	$smarty->assign('userPage', $userPage);
 	$smarty->assign('userPage_exists', $exist);
-
 } else {
-    if (isset($_SESSION['preferences'])) {
-        $prefs = array_merge($prefs, $_SESSION['preferences']);
-    }
+	if (isset($_SESSION['preferences'])) {
+		$prefs = array_merge($prefs, $_SESSION['preferences']);
+	}
 	$allowMsgs = 'n';
 }
 

@@ -10,8 +10,7 @@
 'use strict';
 
 var subtypes = require('./subtypes');
-
-var DESELECTDIM = 0.2;
+var DESELECTDIM = require('../../constants/interactions').DESELECTDIM;
 
 module.exports = function selectPoints(searchInfo, polygon) {
     var cd = searchInfo.cd,
@@ -19,7 +18,6 @@ module.exports = function selectPoints(searchInfo, polygon) {
         ya = searchInfo.yaxis,
         selection = [],
         trace = cd[0].trace,
-        curveNumber = trace.index,
         marker = trace.marker,
         i,
         di,
@@ -28,7 +26,7 @@ module.exports = function selectPoints(searchInfo, polygon) {
 
     // TODO: include lines? that would require per-segment line properties
     var hasOnlyLines = (!subtypes.hasMarkers(trace) && !subtypes.hasText(trace));
-    if(trace.visible !== true || hasOnlyLines) return;
+    if(hasOnlyLines) return [];
 
     var opacity = Array.isArray(marker.opacity) ? 1 : marker.opacity;
 
@@ -40,13 +38,12 @@ module.exports = function selectPoints(searchInfo, polygon) {
             di = cd[i];
             x = xa.c2p(di.x);
             y = ya.c2p(di.y);
+
             if(polygon.contains([x, y])) {
                 selection.push({
-                    curveNumber: curveNumber,
                     pointNumber: i,
                     x: di.x,
-                    y: di.y,
-                    id: di.id
+                    y: di.y
                 });
                 di.dim = 0;
             }

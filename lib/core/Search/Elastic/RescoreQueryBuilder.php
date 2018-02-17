@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RescoreQueryBuilder.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: RescoreQueryBuilder.php 65329 2018-01-24 16:03:35Z kerzay $
 
 use Search_Expr_Token as Token;
 use Search_Expr_And as AndX;
@@ -117,7 +117,7 @@ class Search_Elastic_RescoreQueryBuilder
 						$terms[] = $this->getTerm($child);
 					}
 				}
-				
+
 				if (count($terms) == count($childNodes)) {
 					$this->addPhrase($node, $firstField, implode(' ', $terms));
 				}
@@ -132,7 +132,6 @@ class Search_Elastic_RescoreQueryBuilder
 	private function getTerm($node)
 	{
 		$value = $node->getValue($this->factory);
-		return strtolower($value->getValue());
+		return mb_strtolower($value->getValue());
 	}
 }
-

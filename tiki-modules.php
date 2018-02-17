@@ -6,12 +6,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-modules.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: tiki-modules.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
-//this script may only be included - so its better to die if called directly.
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 require_once('tiki-setup.php');
-$access = TikiLib::lib('access');
-$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 
 $modlib = TikiLib::lib('mod');
 $usermoduleslib = TikiLib::lib('usermodules');
@@ -31,12 +31,12 @@ if (Perms::get()->admin) {
 
 $show_columns = array_fill_keys(array_keys($modules), 'n');
 
-$modnames = array();
-foreach ( $modules as $zone => & $moduleList ) {
+$modnames = [];
+foreach ($modules as $zone => & $moduleList) {
 	if ($prefs['feature_fullscreen'] != 'y' || empty($_SESSION['fullscreen']) || $_SESSION['fullscreen'] != 'y' ||
 			strpos($zone, 'page') === 0) {	// pagetop and pagebottom zones appear in fullscreen
 
-		foreach ( $moduleList as & $mod_reference ) {
+		foreach ($moduleList as & $mod_reference) {
 			$show_columns[$zone] = 'y';
 
 			$ref = (array) $mod_reference;
@@ -66,9 +66,7 @@ if (count($cssadd > 0)) {
 $smarty->assign('show_columns', $show_columns);
 $smarty->assign('module_zones', $modules);
 
-$module_nodecorations = array('decorations' => 'n');
-$module_isflippable = array('flip' => 'y');
+$module_nodecorations = ['decorations' => 'n'];
+$module_isflippable = ['flip' => 'y'];
 $smarty->assign('module_nodecorations', $module_nodecorations);
 $smarty->assign('module_isflippable', $module_isflippable);
-
-

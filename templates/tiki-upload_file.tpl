@@ -1,4 +1,4 @@
-{* $Id: tiki-upload_file.tpl 63242 2017-07-12 15:26:37Z jonnybradley $ *}
+{* $Id: tiki-upload_file.tpl 63244 2017-07-12 15:39:43Z jonnybradley $ *}
 {if !empty($filegals_manager) and !isset($smarty.request.simpleMode)}
 	{assign var=simpleMode value='y'}
 {else}

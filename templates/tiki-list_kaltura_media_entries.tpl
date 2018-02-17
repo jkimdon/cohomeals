@@ -1,4 +1,4 @@
-{* $Id: tiki-list_kaltura_media_entries.tpl 57783 2016-03-05 18:04:25Z jonnybradley $ *}
+{* $Id: tiki-list_kaltura_media_entries.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {if $cant > 0}
 <div class="table-responsive">
 	<table class="table table-striped table-hover">
@@ -8,7 +8,7 @@
 		<th width="100"><a href="tiki-list_kaltura_entries.php?list={$entryType}&amp;offset={$offset}&amp;sort_mode={if $sort_mode eq '-created_at'}asc_createdAt{else}desc_createdAt{/if}">{tr}Created{/tr}</a></th>
 		<th>{tr}Added by{/tr}</th>
 		<th>{tr}Tags{/tr}</th>
-		<th width="50"><a href='#'{popup fullhtml="1" text=$smarty.capture.other_sorts|escape:"javascript"|escape:"html"} title="{tr}Other Sorts{/tr}">{icon name='list' alt="{tr}Other Sorts{/tr}"}</a></th>
+		<th width="50"><a href='#'{popup fullhtml="1" text=$smarty.capture.other_sorts} title="{tr}Other Sorts{/tr}">{icon name='list' alt="{tr}Other Sorts{/tr}"}</a></th>
 	</tr>
 	{foreach from=$klist key=key item=item}
 		{if $item->id ne ''}
@@ -22,10 +22,10 @@
 		<td class="text">{$item->userId}</td>
 		<td class="text">{$item->tags}</td>
 		<td class="action">
-			<a href="#" class="tips" title="{tr}Information{/tr}" {popup delay="0|4000" fullhtml="1" text=$smarty.capture.add_info|escape:"javascript"|escape:"html" left=true}>
+			<a href="#" class="tips" title="{tr}Information{/tr}" {popup delay="0|4000" fullhtml="1" text=$smarty.capture.add_info left=true}>
 				{icon name='information'}
 			</a>
-			<a href="#" class="tips" title="{tr}Actions{/tr}" {popup fullhtml="1" text=$smarty.capture.actions|escape:"javascript"|escape:"html"}>
+			<a href="#" class="tips" title="{tr}Actions{/tr}" {popup fullhtml="1" text=$smarty.capture.actions}>
 				{icon name='wrench'}
 			</a>
 		</td>

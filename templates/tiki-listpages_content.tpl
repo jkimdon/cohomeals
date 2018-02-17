@@ -1,4 +1,4 @@
-{* $Id: tiki-listpages_content.tpl 62920 2017-06-06 21:26:47Z chealer $ *}
+{* $Id: tiki-listpages_content.tpl 64888 2017-12-13 17:16:52Z jyhem $ *}
 
 {* Use css menus as fallback for item dropdown action menu if javascript is not being used *}
 {if $prefs.javascript_enabled != 'y'}
@@ -163,7 +163,7 @@
 					<th id="catpaths">{tr}Categories{/tr}</th>
 				{/if}
 
-				{if $prefs.wiki_list_rating eq 'y'}
+				{if $prefs.wiki_list_rating eq 'y' AND $prefs.feature_polls eq 'y'}
 					{assign var='cntcol' value=$cntcol+1}
 					<th id="rating">
 						{self_link _sort_arg='sort_mode' _sort_field='rating' _title="{tr}Ratings{/tr}"}{tr}Ratings{/tr}{/self_link}
@@ -256,7 +256,7 @@
 							{/if}
 							{if $prefs.wiki_list_comment eq 'y' && $listpages[changes].comment neq ""}
 								<div>
-									<i>{$listpages[changes].comment|truncate:$prefs.wiki_list_comment_len:"...":true}</i>
+									<i>{$listpages[changes].comment|truncate:$prefs.wiki_list_comment_len:"...":true|escape}</i>
 								</div>
 							{/if}
 						</td>
@@ -350,9 +350,9 @@
 						</td>
 					{/if}
 
-					{if $prefs.wiki_list_rating eq 'y'}
+					{if $prefs.wiki_list_rating eq 'y' AND $prefs.feature_polls eq 'y'}
 						<td class="integer">
-							{if isset($listpages[changes].rating)}$listpages[changes].rating{/if}
+							{if isset($listpages[changes].rating)}{$listpages[changes].rating}{/if}
 						</td>
 					{/if}
 
@@ -390,7 +390,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.page_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.page_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}
@@ -404,7 +404,7 @@
 			{sectionelse}
 				{$find_htmlescaped = $find|escape}
 				{$initial_htmlescaped = $initial|escape}
-				{if $exact_match ne 'n'}{$intro = '{tr}No page:{/tr}'}{else}{$intro = '{tr}No pages found with:{/tr}'}{/if}
+				{if $exact_match ne 'n'}{$intro = "{tr}No page:{/tr}"}{else}{$intro = "{tr}No pages found with:{/tr}"}{/if}
 				{if $find ne '' && $aliases_were_found == 'y'}
 					{norecords _colspan=$cntcol _text="$intro &quot;$find_htmlescaped&quot;. <br/>However, some page aliases fitting the query were found (see Aliases section above)."}
 				{elseif $find ne '' && $initial ne '' && $aliases_were_found == 'y'}

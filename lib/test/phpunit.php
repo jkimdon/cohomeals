@@ -1,14 +1,14 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: phpunit.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: phpunit.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
 * A simple wrapper around /usr/bin/phpunit to enable debugging
 * tests with Xdebug from within Aptana or Eclipse.
-* 
+*
 * Linux only (it should be simple to add support to other OSs).
 */
 // Linux

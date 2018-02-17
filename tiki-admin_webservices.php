@@ -6,9 +6,9 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_webservices.php 63886 2017-09-20 16:48:17Z jonnybradley $
+// $Id: tiki-admin_webservices.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 
 $access->check_feature('feature_webservices');
 $access->check_permission('tiki_p_admin_webservices');
@@ -50,30 +50,29 @@ if (isset($_REQUEST['edit'])) {
 	$smarty->assign('edit', true);
 }
 
-if (!isset($_REQUEST['params'])) {
+if (! isset($_REQUEST['params'])) {
 	$_REQUEST['params'] = [];
 }
 
-if (!isset($_REQUEST['parse']) &&
+if (! isset($_REQUEST['parse']) &&
 		$response = $webservice->performRequest(
 			$_REQUEST['params'],
 			false,
 			(! empty($_REQUEST['nocache'] && isset($_REQUEST['test'])))
 		)
 ) {
-
 	$data = $response->data;
 	if (is_array($data)) {
 		unset($data['_template']);
 		unset($data['_version']);
 	}
 	$templates = $response->getTemplates(
-		array(
+		[
 			'smarty/tikiwiki',
 			'smarty/html',
 			'javascript/html',
 			'index/index',
-		)
+		]
 	);
 
 	$smarty->assign('data', print_r($data, true));
@@ -121,9 +120,9 @@ if (!isset($_REQUEST['parse']) &&
 			}
 			if ($service) {
 				$service->url = $_REQUEST['url'];
-				$service->wstype =  $_REQUEST['wstype'];
-				$service->body =  $_REQUEST['postbody'];
-				$service->operation =  $_REQUEST['$operation'];
+				$service->wstype = $_REQUEST['wstype'];
+				$service->body = $_REQUEST['postbody'];
+				$service->operation = $_REQUEST['$operation'];
 				$service->schemaDocumentation = $response->schemaDocumentation;
 				$service->schemaVersion = $response->schemaVersion;
 				$service->save();
@@ -138,9 +137,9 @@ if (!isset($_REQUEST['parse']) &&
 					$webservice = new Tiki_Webservice();
 				}
 				$service->url = $_REQUEST['url'];
-				$service->wstype =  $_REQUEST['wstype'];
-				$service->body =  $_REQUEST['postbody'];
-				$service->operation =  $_REQUEST['$operation'];
+				$service->wstype = $_REQUEST['wstype'];
+				$service->body = $_REQUEST['postbody'];
+				$service->operation = $_REQUEST['$operation'];
 				$storedTemplates = [];
 			}
 		}

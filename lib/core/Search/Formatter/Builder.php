@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Builder.php 61214 2017-02-03 19:04:00Z kroky6 $
+// $Id: Builder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Formatter_Builder
 {
@@ -11,23 +11,26 @@ class Search_Formatter_Builder
 	private $paginationArguments;
 
 	private $formatterPlugin;
-	private $subFormatters = array();
-	private $customFilters = array();
+	private $subFormatters = [];
+	private $customFilters = [];
 	private $alternateOutput;
 	private $id;
 	private $count;
 	private $tsOn;
 	private $tsettings;
 	private $actions;
+	private $isDownload;
+	private $downloadName;
 
 	function __construct()
 	{
 		$this->parser = new WikiParser_PluginArgumentParser;
-		$this->paginationArguments = array(
+		$this->paginationArguments = [
 			'offset_arg' => 'offset',
 			'max' => 50,
-		);
-		$this->actions = array();
+		];
+		$this->actions = [];
+		$this->isDownload = false;
 	}
 
 	function setPaginationArguments($arguments)
@@ -40,8 +43,14 @@ class Search_Formatter_Builder
 		$this->formatterPlugin = $plugin;
 	}
 
-	function setActions($actions) {
+	function setActions($actions)
+	{
 		$this->actions = $actions;
+	}
+
+	function setDownload($isDownload)
+	{
+		$this->isDownload = $isDownload;
 	}
 
 	function apply($matches)
@@ -68,7 +77,6 @@ class Search_Formatter_Builder
 			if ($name == 'filter') {
 				$this->handleFilter($match);
 			}
-
 		}
 	}
 
@@ -102,6 +110,10 @@ class Search_Formatter_Builder
 	{
 		$arguments = $this->parser->parse($match->getArguments());
 
+		if (isset($arguments['mode']) && $arguments['mode'] == 'download' && ! $this->isDownload) {
+			return;
+		}
+
 		if (isset($arguments['name'])) {
 			$plugin = new Search_Formatter_Plugin_WikiTemplate($match->getBody());
 			$plugin->setRaw(! empty($arguments['mode']) && $arguments['mode'] == 'raw');
@@ -114,10 +126,10 @@ class Search_Formatter_Builder
 		$arguments = $this->parser->parse($match->getArguments());
 
 		if (isset($arguments['editable'], $arguments['field'])) {
-			$this->customFilters[] = array(
+			$this->customFilters[] = [
 				'field' => $arguments['field'],
 				'mode' => $arguments['editable']
-			);
+			];
 		}
 	}
 
@@ -128,7 +140,7 @@ class Search_Formatter_Builder
 
 	private function handleOutput($output)
 	{
-        $smarty = TikiLib::lib('smarty');
+		$smarty = TikiLib::lib('smarty');
 		$arguments = $this->parser->parse($output->getArguments());
 
 		if (isset($arguments['template'])) {
@@ -141,9 +153,9 @@ class Search_Formatter_Builder
 				$arguments['template'] = dirname(__FILE__) . '/../../../../templates/search/list/carousel.tpl';
 			} elseif ($arguments['template'] == 'count') {
 				$arguments['template'] = dirname(__FILE__) . '/../../../../templates/search/list/count.tpl';
-			} elseif (!file_exists($arguments['template'])) {
+			} elseif (! file_exists($arguments['template'])) {
 				$temp = $smarty->get_filename($arguments['template']);
-				if (empty($temp)){ //if get_filename cannot find template, return error
+				if (empty($temp)) { //if get_filename cannot find template, return error
 					Feedback::error(tr('Missing template "%0"', $arguments['template']), 'session');
 					return '';
 				}
@@ -154,8 +166,17 @@ class Search_Formatter_Builder
 			foreach ($this->paginationArguments as $k => $v) {
 				$outputData[$k] = $this->paginationArguments[$k];
 			}
-			if( strstr($arguments['template'], 'table') )
+			if (strstr($arguments['template'], 'table')) {
 				$outputData['actions'] = $this->actions;
+				if (isset($arguments['downloadable'])) {
+					$outputData['downloadable'] = true;
+					$this->downloadName = $arguments['downloadable'];
+				}
+				if ($this->isDownload) {
+					$this->formatterPlugin = new Search_Formatter_Plugin_CsvTemplate($output->getBody());
+					return;
+				}
+			}
 
 			$templateData = file_get_contents($arguments['template']);
 
@@ -171,7 +192,6 @@ class Search_Formatter_Builder
 		}
 
 		if (isset($arguments['pagination'])) {
-
 			$plugin = new Search_Formatter_AppendPagination($plugin, $this->paginationArguments);
 		}
 
@@ -181,10 +201,10 @@ class Search_Formatter_Builder
 	private function handleTablesorter($match)
 	{
 		$args = $this->parser->parse($match->getArguments());
-		if (!$this->tsOn) {
+		if (! $this->tsOn) {
 			return false;
 		}
-		if (!Table_Check::isAjaxCall()) {
+		if (! Table_Check::isAjaxCall()) {
 			$ts = new Table_Plugin;
 			$ts->setSettings(
 				$this->id,
@@ -215,9 +235,9 @@ class Search_Formatter_Builder
 		$outputData = TikiLib::array_flat($outputData);
 
 		// Heuristic based: only lowercase letters, digits and underscore
-		$fields = array();
+		$fields = [];
 		foreach ($outputData as $candidate) {
-			if( !is_string($candidate) ) {
+			if (! is_string($candidate)) {
 				continue;
 			}
 			if (preg_match("/^[a-z0-9_]+$/", $candidate) || substr($candidate, 0, strlen('tracker_field_')) === 'tracker_field_') {
@@ -226,7 +246,7 @@ class Search_Formatter_Builder
 		}
 
 		preg_match_all('/\$(result|row|res)\.([a-z0-9_]+)[\|\}\w]+/', $templateData, $matches);
-		$fields = array_merge($fields, $matches[2]);	
+		$fields = array_merge($fields, $matches[2]);
 
 		$fields = array_fill_keys(array_unique($fields), null);
 
@@ -257,5 +277,9 @@ class Search_Formatter_Builder
 	{
 		return $this->tsettings;
 	}
-}
 
+	public function getDownloadName()
+	{
+		return $this->downloadName;
+	}
+}

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AnnotationController.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: AnnotationController.php 65140 2018-01-09 11:57:30Z jonnybradley $
 
 /**
  * Class Services_Annotator_Controller
@@ -21,9 +21,13 @@ class Services_Comment_AnnotationController
 	private $commentController;
 
 
+	/**
+	 * @throws Exception
+	 * @throws Services_Exception_Disabled
+	 */
 	function setUp()
 	{
-		Services_Exception_Disabled::check('feature_inline_comments');
+		Services_Exception_Disabled::check('comments_inline_annotator');
 
 		$this->commentslib = TikiLib::lib('comments');
 		$this->commentController = new Services_Comment_Controller();
@@ -42,6 +46,7 @@ class Services_Comment_AnnotationController
 	 *
 	 * @return array    unused probably
 	 *
+	 * @throws Exception
 	 * @throws Services_Exception_Denied
 	 */
 
@@ -105,7 +110,9 @@ class Services_Comment_AnnotationController
 	 *
 	 * @return array    unused probably
 	 *
+	 * @throws Exception
 	 * @throws Services_Exception_Denied
+	 * @throws Services_Exception_NotFound
 	 */
 
 	function action_update($input)
@@ -133,7 +140,6 @@ class Services_Comment_AnnotationController
 		}
 
 		return $ret;
-
 	}
 
 	/**
@@ -143,7 +149,7 @@ class Services_Comment_AnnotationController
 	 *        int       threadId  comment id to delete
 	 *
 	 * @return array
-	 * @throws Services_Exception_Denied
+	 * @throws Services_Exception
 	 */
 
 	function action_destroy($input)
@@ -165,6 +171,8 @@ class Services_Comment_AnnotationController
 	 *        string    uri     object-type:object-id identifier for the tiki object to search
 	 *
 	 * @return array    [total, rows]
+	 * @throws Exception
+	 * @throws Services_Exception
 	 */
 
 	function action_search($input)
@@ -184,7 +192,7 @@ class Services_Comment_AnnotationController
 
 		$comments = [];
 
-		foreach($list['comments'] as $comment) {
+		foreach ($list['comments'] as $comment) {
 			if (strpos($comment['data'], ';note:') === 0) {			// only the "inline" ones starting ;note: so far
 				$data = explode("\n", $comment['data'], 2);
 				$quote = trim(substr($data[0], 6));
@@ -227,6 +235,8 @@ class Services_Comment_AnnotationController
 	/**
 	 * @param $text
 	 * @return string
+	 * @throws Exception
+	 * @throws SmartyException
 	 */
 	private function createTitle($text)
 	{
@@ -247,5 +257,4 @@ class Services_Comment_AnnotationController
 		$safeQuote = addslashes($safeQuote);
 		return ';note:' . $safeQuote . "\n\n" . $text;
 	}
-
 }

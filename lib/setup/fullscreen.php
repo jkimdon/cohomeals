@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: fullscreen.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: fullscreen.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -11,13 +11,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 	exit;
 }
 
-if ( isset($_GET['fullscreen']) ) {
+if (isset($_GET['fullscreen'])) {
 	if ($_GET['fullscreen'] == 'y') {
 		$_SESSION['fullscreen'] = 'y';
 	} else {
 		$_SESSION['fullscreen'] = 'n';
 	}
 }
-if ( ! isset($_SESSION['fullscreen']) ) {
+if (! isset($_SESSION['fullscreen'])) {
 	$_SESSION['fullscreen'] = 'n';
 }

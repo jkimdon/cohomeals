@@ -1,7 +1,7 @@
-{* $Id: include_share.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_share.tpl 62273 2017-04-20 01:41:11Z lindonb $ *}
 
 <form class="form-horizontal" action="tiki-admin.php?page=share" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">

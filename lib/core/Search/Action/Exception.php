@@ -3,9 +3,8 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Exception.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: Exception.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Action_Exception extends Search_Exception
 {
 }
-

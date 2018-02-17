@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 61688 2017-03-14 17:03:16Z jonnybradley $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_AutoSave_Controller
 {
@@ -30,9 +30,9 @@ class Services_AutoSave_Controller
 			$res = TikiLib::lib('autosave')->get_autosave($input->editor_id->text(), $referer);
 		}
 
-		return array(
+		return [
 			'data' => $res,
-		);
+		];
 	}
 
 	/**
@@ -52,9 +52,9 @@ class Services_AutoSave_Controller
 			$res = TikiLib::lib('autosave')->auto_save($input->editor_id->text(), $data, $referer);
 		}
 
-		return array(
+		return [
 			'data' => $res,
-		);
+		];
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Services_AutoSave_Controller
 			TikiLib::lib('autosave')->remove_save($input->editor_id->text(), $referer);
 		}
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -98,17 +98,4 @@ class Services_AutoSave_Controller
 
 		return $isok;
 	}
-	//function added to hold current state of fancy table / sorted table for pdf and print version. So when user generates pdf he gets his sorted data not default data in table.
-	function action_storeTable($input){
-	   //write content to file
-	    $tableName=$input->tableName->text();
-	    //$tableHTML=$input->tableHTML->text();
-	   $tableFile=fopen("temp/".$tableName.'_'.session_id().".txt","w");
-	   //fwrite($tableFile,$input->tableHTML->text());
-	   fwrite($tableFile,$input->tableHTML->html());
-	   //create session array to hold temp tables for printing, table original name and file name
-	   chmod($tableFile,0755);
-		
-	}
 }
-

@@ -6,7 +6,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: reindex_file.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: reindex_file.php 64635 2017-11-19 13:15:24Z rjsmelo $
 
 // This script will send a 1x1 transparent gif image, close connection and reindex the file corresponding to the id url argument
 // The goal is to process reindexation in a background job for which the user won't have to wait
@@ -16,10 +16,9 @@
 require_once('tiki-setup.php');
 
 // Reindex the file for search
-if ( ($id = (int)$_GET['id']) > 0 ) {
-
+if (($id = (int)$_GET['id']) > 0) {
 	// Check feature
-	if ( $prefs['feature_file_galleries'] == 'y'
+	if ($prefs['feature_file_galleries'] == 'y'
 		&& $prefs['feature_search'] == 'y'
 		&& $prefs['feature_search_fulltext'] != 'y'
 		&& $prefs['search_refresh_index_mode'] == 'normal'
@@ -30,13 +29,13 @@ if ( ($id = (int)$_GET['id']) > 0 ) {
 
 		$info = $filegallib->get_file_info($id);
 
-		if ( $info['galleryId'] > 0 ) {
+		if ($info['galleryId'] > 0) {
 			$gal_info = $filegallib->get_file_gallery($info['galleryId']);
 
 			// Check perms
 			$tikilib->get_perm_object($info['galleryId'], 'file gallery', $gal_info, true);
 
-			if ( $tiki_p_admin_file_galleries == 'y'
+			if ($tiki_p_admin_file_galleries == 'y'
 				|| ( ( empty($fileInfo['lockedby']) || $fileInfo['lockedby'] == $user ) && $tiki_p_edit_gallery_file == 'y' )
 			) { // must be the owner or the locker or have the perms
 				error_reporting(0);
@@ -53,9 +52,9 @@ header('Cache-Control: no-cache');
 header('Content-type: image/gif');
 header('Content-length: 85');
 print base64_decode(
-	'R0lGODlhAQABALMAAAAAAIAAAACAA'.
-	'ICAAAAAgIAAgACAgMDAwICAgP8AAA'.
-	'D/AP//AAAA//8A/wD//wBiZCH5BAE'.
+	'R0lGODlhAQABALMAAAAAAIAAAACAA' .
+	'ICAAAAAgIAAgACAgMDAwICAgP8AAA' .
+	'D/AP//AAAA//8A/wD//wBiZCH5BAE' .
 	'AAA8ALAAAAAABAAEAAAQC8EUAOw=='
 );
 flush();

@@ -3,15 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: categories.php 63505 2017-08-09 17:39:58Z jonnybradley $
+// $Id: categories.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
-//this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
 if ($prefs['feature_categories'] == 'y' && $prefs['categories_used_in_tpl'] == 'y') {
 	$categlib = TikiLib::lib('categ');
 	// pick up the objectType from cat_type is set or from section
-	if (!empty($section) && !empty($sections) && !empty($sections[$section])) {
+	if (! empty($section) && ! empty($sections) && ! empty($sections[$section])) {
 		$here = $sections[$section];
 		if (isset($_REQUEST[$here['key']])) {
 			if (is_array($_REQUEST[$here['key']])) { // tiki-upload_file uses galleryId[]
@@ -30,9 +31,9 @@ if ($prefs['feature_categories'] == 'y' && $prefs['categories_used_in_tpl'] == '
 			$objectType = $here['objectType'];
 		}
 	}
-	$objectCategoryIds = array();
-	$objectCategoryIdsNoJail = array();
-	if (!empty($objectType)) {
+	$objectCategoryIds = [];
+	$objectCategoryIdsNoJail = [];
+	if (! empty($objectType)) {
 		if (isset($here['itemkey']) && isset($_REQUEST[$here['itemkey']]) && isset($here['itemObjectType'])) {
 			$objectCategoryIds = $categlib->get_object_categories($objectType, $_REQUEST[$here['itemkey']]);
 			$objectCategoryIdsNoJail = $categlib->get_object_categories($objectType, $_REQUEST[$here['itemkey']], -1, false);

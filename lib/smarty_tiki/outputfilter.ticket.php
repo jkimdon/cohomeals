@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: outputfilter.ticket.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: outputfilter.ticket.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /*
@@ -32,19 +32,19 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  *           mose@tikiwiki.org for coding
  * -------------------------------------------------------------
  */
- function smarty_outputfilter_ticket($source, $smarty)
- {
-		global $ticket;
-		$source = preg_replace(
-			"~((<form[^>]*action=(\"|')[^\"']*tiki-[^\"']*(\"|')[^>]*>(\s*))<)~si",
-			'$2<input type="hidden" name="ticket" value="' . $ticket . '" /><',
-			$source
-		);
+function smarty_outputfilter_ticket($source, $smarty)
+{
+	   global $ticket;
+	   $source = preg_replace(
+		   "~((<form[^>]*action=(\"|')[^\"']*tiki-[^\"']*(\"|')[^>]*>(\s*))<)~si",
+		   '$2<input type="hidden" name="ticket" value="' . $ticket . '" /><',
+		   $source
+	   );
 
-		$source = preg_replace(
-			"~((href=(\"|')[^\"']*tiki-[^\?\"']*)\?(ticket=[0-9a-z]*&)?([^\"']*(\"|')))~si",
-			'$2?ticket=' . $ticket . '&$5',
-			$source
-		);
-		return $source;
- }
+	   $source = preg_replace(
+		   "~((href=(\"|')[^\"']*tiki-[^\?\"']*)\?(ticket=[0-9a-z]*&)?([^\"']*(\"|')))~si",
+		   '$2?ticket=' . $ticket . '&$5',
+		   $source
+	   );
+	   return $source;
+}

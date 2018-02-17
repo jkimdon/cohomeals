@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Simplified Chinese" => "Chinês Simplificado",
 "Czech" => "Checo",
 "Danish" => "Holandês",
@@ -1312,7 +1312,7 @@ $lang = array(
 "vote" => "votar",
 "experimental" => "experimental",
 "Rate" => "Classificação",
-"Repeat password" => "Confirmação de palavra-passe",
+"Confirm password" => "Confirmação de palavra-passe",
 "Generate a password" => "Gerar uma palavra-passe",
 "The documents are returned sorted on relevance depending on order, proximity, frequency of terms. " => "Os documentos são apresentados organizados por relevância, dependendo da ordem, proximidade e frequência dos termos. ",
 "Valid" => "Válido",
@@ -2674,4 +2674,4 @@ $lang = array(
 "Aborted" => "Abortado",
 "Top pages" => "Páginas mais populares",
 "Last pages" => "Páginas recentes",
-);
+];

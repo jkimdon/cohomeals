@@ -19,28 +19,6 @@ var Axes = require('../plots/cartesian/axes');
 var Color = require('../components/color');
 
 
-// Get the container div: we store all variables for this plot as
-// properties of this div
-// some callers send this in by DOM element, others by id (string)
-exports.getGraphDiv = function(gd) {
-    var gdElement;
-
-    if(typeof gd === 'string') {
-        gdElement = document.getElementById(gd);
-
-        if(gdElement === null) {
-            throw new Error('No DOM element with id \'' + gd + '\' exists on the page.');
-        }
-
-        return gdElement;
-    }
-    else if(gd === null || gd === undefined) {
-        throw new Error('DOM element provided is null or undefined');
-    }
-
-    return gd;  // otherwise assume that gd is a DOM element
-};
-
 // clear the promise queue if one of them got rejected
 exports.clearPromiseQueue = function(gd) {
     if(Array.isArray(gd._promises) && gd._promises.length > 0) {
@@ -215,7 +193,6 @@ function cleanAxRef(container, attr) {
 // Make a few changes to the data right away
 // before it gets used for anything
 exports.cleanData = function(data, existingData) {
-
     // Enforce unique IDs
     var suids = [], // seen uids --- so we can weed out incoming repeats
         uids = data.concat(Array.isArray(existingData) ? existingData : [])
@@ -348,18 +325,38 @@ exports.cleanData = function(data, existingData) {
 
                 if(!Lib.isPlainObject(transform)) continue;
 
-                if(transform.type === 'filter') {
-                    if(transform.filtersrc) {
-                        transform.target = transform.filtersrc;
-                        delete transform.filtersrc;
-                    }
-
-                    if(transform.calendar) {
-                        if(!transform.valuecalendar) {
-                            transform.valuecalendar = transform.calendar;
+                switch(transform.type) {
+                    case 'filter':
+                        if(transform.filtersrc) {
+                            transform.target = transform.filtersrc;
+                            delete transform.filtersrc;
                         }
-                        delete transform.calendar;
-                    }
+
+                        if(transform.calendar) {
+                            if(!transform.valuecalendar) {
+                                transform.valuecalendar = transform.calendar;
+                            }
+                            delete transform.calendar;
+                        }
+                        break;
+
+                    case 'groupby':
+                        // Name has changed from `style` to `styles`, so use `style` but prefer `styles`:
+                        transform.styles = transform.styles || transform.style;
+
+                        if(transform.styles && !Array.isArray(transform.styles)) {
+                            var prevStyles = transform.styles;
+                            var styleKeys = Object.keys(prevStyles);
+
+                            transform.styles = [];
+                            for(var j = 0; j < styleKeys.length; j++) {
+                                transform.styles.push({
+                                    target: styleKeys[j],
+                                    value: prevStyles[styleKeys[j]]
+                                });
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -415,7 +412,7 @@ exports.swapXYData = function(trace) {
             Lib.swapAttrs(trace, ['error_?.color', 'error_?.thickness', 'error_?.width']);
         }
     }
-    if(trace.hoverinfo) {
+    if(typeof trace.hoverinfo === 'string') {
         var hoverInfoParts = trace.hoverinfo.split('+');
         for(i = 0; i < hoverInfoParts.length; i++) {
             if(hoverInfoParts[i] === 'x') hoverInfoParts[i] = 'y';
@@ -439,7 +436,7 @@ exports.coerceTraceIndices = function(gd, traceIndices) {
 
 /**
  * Manages logic around array container item creation / deletion / update
- * that nested property along can't handle.
+ * that nested property alone can't handle.
  *
  * @param {Object} np
  *  nested property of update attribute string about trace or layout object
@@ -482,5 +479,71 @@ exports.manageArrayContainers = function(np, newVal, undoit) {
         // If the last part of attribute string isn't a number,
         // np.set is all we need.
         np.set(newVal);
+    }
+};
+
+/*
+ * Match the part to strip off to turn an attribute into its parent
+ * really it should be either '.some_characters' or '[number]'
+ * but we're a little more permissive here and match either
+ * '.not_brackets_or_dot' or '[not_brackets_or_dot]'
+ */
+var ATTR_TAIL_RE = /(\.[^\[\]\.]+|\[[^\[\]\.]+\])$/;
+
+function getParent(attr) {
+    var tail = attr.search(ATTR_TAIL_RE);
+    if(tail > 0) return attr.substr(0, tail);
+}
+
+/*
+ * hasParent: does an attribute object contain a parent of the given attribute?
+ * for example, given 'images[2].x' do we also have 'images' or 'images[2]'?
+ *
+ * @param {Object} aobj
+ *  update object, whose keys are attribute strings and values are their new settings
+ * @param {string} attr
+ *  the attribute string to test against
+ * @returns {Boolean}
+ *  is a parent of attr present in aobj?
+ */
+exports.hasParent = function(aobj, attr) {
+    var attrParent = getParent(attr);
+    while(attrParent) {
+        if(attrParent in aobj) return true;
+        attrParent = getParent(attrParent);
+    }
+    return false;
+};
+
+/**
+ * Empty out types for all axes containing these traces so we auto-set them again
+ *
+ * @param {object} gd
+ * @param {[integer]} traces: trace indices to search for axes to clear the types of
+ * @param {object} layoutUpdate: any update being done concurrently to the layout,
+ *   which may supercede clearing the axis types
+ */
+var axLetters = ['x', 'y', 'z'];
+exports.clearAxisTypes = function(gd, traces, layoutUpdate) {
+    for(var i = 0; i < traces.length; i++) {
+        var trace = gd._fullData[i];
+        for(var j = 0; j < 3; j++) {
+            var ax = Axes.getFromTrace(gd, trace, axLetters[j]);
+
+            // do not clear log type - that's never an auto result so must have been intentional
+            if(ax && ax.type !== 'log') {
+                var axAttr = ax._name;
+                var sceneName = ax._id.substr(1);
+                if(sceneName.substr(0, 5) === 'scene') {
+                    if(layoutUpdate[sceneName] !== undefined) continue;
+                    axAttr = sceneName + '.' + axAttr;
+                }
+                var typeAttr = axAttr + '.type';
+
+                if(layoutUpdate[axAttr] === undefined && layoutUpdate[typeAttr] === undefined) {
+                    Lib.nestedProperty(gd.layout, typeAttr).set(null);
+                }
+            }
+        }
     }
 };

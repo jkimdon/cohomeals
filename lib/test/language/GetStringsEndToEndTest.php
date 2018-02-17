@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: GetStringsEndToEndTest.php 60592 2016-12-11 16:46:23Z chealer $
+// $Id: GetStringsEndToEndTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 require_once('lib/language/CollectFiles.php');
 require_once('lib/language/WriteFile.php');
@@ -61,7 +61,7 @@ class Language_GetStringsEndToEndTest extends TikiTestCase
 		$obj = new Language_GetStrings(
 			new Language_CollectFiles,
 			new Language_WriteFile_Factory,
-			array('baseDir' => vfsStream::url('root'))
+			['baseDir' => vfsStream::url('root')]
 		);
 		$obj->addFileType(new Language_FileType_Php);
 		$obj->addFileType(new Language_FileType_Tpl);
@@ -89,7 +89,7 @@ class Language_GetStringsEndToEndTest extends TikiTestCase
 		$obj = new Language_GetStrings(
 			new Language_CollectFiles,
 			new Language_WriteFile_Factory,
-			array('baseDir' => vfsStream::url('root'), 'fileName' => 'language_r.php')
+			['baseDir' => vfsStream::url('root'), 'fileName' => 'language_r.php']
 		);
 
 		$obj->addFileType(new Language_FileType_Php);
@@ -126,7 +126,7 @@ class Language_GetStringsEndToEndTest extends TikiTestCase
 		$obj = new Language_GetStrings(
 			new Language_CollectFiles,
 			new Language_WriteFile_Factory,
-			array('baseDir' => vfsStream::url('root'))
+			['baseDir' => vfsStream::url('root')]
 		);
 		$obj->addFileType(new Language_FileType_Php);
 		$obj->addFileType(new Language_FileType_Tpl);

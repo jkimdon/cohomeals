@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EngineSet.php 59675 2016-09-12 11:33:04Z jonnybradley $
+// $Id: EngineSet.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Recommendation;
 
@@ -52,7 +52,8 @@ class EngineSet
 		}
 	}
 
-	function getCount() {
+	function getCount()
+	{
 		return count($this->engines);
 	}
 }

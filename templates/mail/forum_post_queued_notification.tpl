@@ -1,4 +1,4 @@
-{* $Id: forum_post_queued_notification.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}{if $threadId}{tr}Note that this is an edited post{/tr}
+{* $Id: forum_post_queued_notification.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}{if $threadId}{tr}Note that this is an edited post{/tr}
 
 {/if}
 {if $new_topic}

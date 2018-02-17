@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.activity.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: function.activity.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 function smarty_function_activity($params)
 {
 	$smarty = TikiLib::lib('smarty');
-	
+
 	if (isset($params['info'])) {
 		$activity = $params['info'];
 	} else {
@@ -25,7 +25,7 @@ function smarty_function_activity($params)
 	}
 
 	$smarty->assign('activity', $activity);
-	$smarty->assign('activity_format', !empty($params['format']) ? $params['format'] : 'default');
+	$smarty->assign('activity_format', ! empty($params['format']) ? $params['format'] : 'default');
 	$templateName = 'activity/' . $activity['event_type'] . '.tpl';
 
 	if (empty($smarty->get_filename($templateName))) {
@@ -33,4 +33,3 @@ function smarty_function_activity($params)
 	}
 	return $smarty->fetch($templateName);
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ConditionsController.php 62028 2017-04-02 14:52:01Z jonnybradley $
+// $Id: ConditionsController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_User_ConditionsController
 {
@@ -66,10 +66,10 @@ class Services_User_ConditionsController
 		$hash = $this->generateHash($info, $user);
 
 		$content = $info['data'];
-		$parse_options = array(
+		$parse_options = [
 			'is_html' => $info['is_html'],
 			'language' => $info['lang'],
-		);
+		];
 
 		$pdata = new Tiki_Render_Lazy(
 			function () use ($content, $parse_options) {
@@ -97,12 +97,12 @@ class Services_User_ConditionsController
 			}
 		}
 
-		return array(
+		return [
 			'title' => tr('Terms and Conditions'),
 			'origin' => $origin,
 			'content' => $pdata,
 			'hash' => $hash,
-		);
+		];
 	}
 
 	public function action_age_validation($input)
@@ -125,12 +125,12 @@ class Services_User_ConditionsController
 			}
 		}
 
-		return array(
+		return [
 			'title' => tr('Age Validation'),
 			'origin' => $origin,
 			'birth_date' => $this->getBirthDate($user),
 			'hasRequiredAge' => $this->hasRequiredAge($user),
-		);
+		];
 	}
 
 	private function getApprovalPageInfo()
@@ -231,4 +231,3 @@ class Services_User_ConditionsController
 		}
 	}
 }
-

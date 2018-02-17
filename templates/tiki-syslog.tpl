@@ -1,4 +1,4 @@
-{* $Id: tiki-syslog.tpl 58748 2016-05-31 23:05:28Z lindonb $ *}
+{* $Id: tiki-syslog.tpl 64539 2017-11-12 22:18:56Z rjsmelo $ *}
 {title help="System Log"}{tr}Tiki Logs{/tr}{/title}
 
 <div class="t_navbar margin-bottom-md">
@@ -39,6 +39,16 @@
 				<td class="text"><textarea class="form-control" readonly="readonly">{$list[ix].action|escape:'html'}</textarea></td>
 				<td class="text">{$list[ix].ip|escape:"html"}</td>
 				<td class="text"><span title="{$list[ix].client|escape:'html'}">{$list[ix].client|truncate:30:"..."|escape:'html'}</span></td>
+				<td>
+					{if $list[ix].object == 'profile apply'}
+						<form method="post" action="tiki-syslog.php" onsubmit="return confirm('{tr}Are you sure you want to revert{/tr} &QUOT;{$list[ix].action|escape}&QUOT;?');">
+							{ticket}
+							<input type="hidden" name="page" value="profiles">
+							<input type="hidden" name="actionId" value="{$list[ix].actionId}">
+							<input type="submit" class="btn btn-primary" name="revert" value="{tr}Revert{/tr}">
+						</form>
+					{/if}
+				</td>
 			</tr>
 		{/section}
 	</table>

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Runner.php 63607 2017-08-20 23:16:05Z rjsmelo $
+// $Id: Runner.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class WikiPlugin_Casperjs_Runner
 {
@@ -48,7 +48,6 @@ class WikiPlugin_Casperjs_Runner
 		$result = new WikiPlugin_Casperjs_Result($output, $commandLine, $fullScript);
 
 		return $result;
-
 	}
 
 	protected function scriptPrefix()

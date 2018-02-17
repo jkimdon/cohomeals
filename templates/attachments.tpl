@@ -1,4 +1,4 @@
-{* $Id: attachments.tpl 57783 2016-03-05 18:04:25Z jonnybradley $ *}
+{* $Id: attachments.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 <a id="attachments"></a>
 {if $tiki_p_wiki_view_attachments == 'y' || $tiki_p_wiki_admin_attachments == 'y' || $tiki_p_wiki_attach_files == 'y'}
@@ -97,7 +97,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.att_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.att_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

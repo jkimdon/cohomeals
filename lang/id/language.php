@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Type" => "Jenis",
 "Description" => "Deskripsi",
 "Size" => "Besar",
@@ -143,4 +143,4 @@ $lang = array(
 "Is email public? (uses scrambling to prevent spam)" => "Tampilkan email? (dengan menggunakan metode pengacakan untuk mencegah spam)",
 "Does your email application need a special character set" => "Apakah program email anda membutuhkan karakter khusus",
 "%H:%M %Z" => "%H:%M %Z",
-);
+];

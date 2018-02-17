@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Initializer.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: Initializer.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class TikiDb_Initializer
 {
-	private $connectors = array(
+	private $connectors = [
 		'pdo' => 'TikiDb_Initializer_Pdo',
 		'adodb' => 'TikiDb_Initializer_Adodb',
-	);
+	];
 	private $preferred;
 	private $initializeCallback;
 
@@ -28,7 +28,7 @@ class TikiDb_Initializer
 
 	function getConnection(array $credentials)
 	{
-		if ( $connector = $this->getInitializer($this->preferred)) {
+		if ($connector = $this->getInitializer($this->preferred)) {
 			return $this->initialize($connector, $credentials);
 		}
 
@@ -62,4 +62,3 @@ class TikiDb_Initializer
 		}
 	}
 }
-

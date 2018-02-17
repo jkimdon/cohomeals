@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: StaticKeyFilterTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: StaticKeyFilterTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -15,10 +15,10 @@ class DeclFilter_StaticKeyFilterTest extends TikiTestCase
 	function testMatch()
 	{
 		$rule = new DeclFilter_StaticKeyFilterRule(
-			array(
+			[
 				'hello' => 'digits',
 				'world' => 'alpha',
-			)
+			]
 		);
 
 		$this->assertTrue($rule->match('hello'));
@@ -29,17 +29,17 @@ class DeclFilter_StaticKeyFilterTest extends TikiTestCase
 	function testApply()
 	{
 		$rule = new DeclFilter_StaticKeyFilterRule(
-			array(
+			[
 				'hello' => 'digits',
 				'world' => 'alpha',
-			)
+			]
 		);
 
-		$data = array(
+		$data = [
 			'hello' => '123abc',
 			'world' => '123abc',
 			'foo' => '123abc',
-		);
+		];
 
 		$rule->apply($data, 'hello');
 		$rule->apply($data, 'world');

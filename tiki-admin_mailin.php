@@ -6,12 +6,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_mailin.php 58748 2016-05-31 23:05:28Z lindonb $
+// $Id: tiki-admin_mailin.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 //check if feature is on
 $access->check_feature('feature_mailin');
-$access->check_permission(array('tiki_p_admin_mailin'));
+$access->check_permission(['tiki_p_admin_mailin']);
 
 $mailinlib = TikiLib::lib('mailin');
 
@@ -20,16 +20,17 @@ $accounts = $mailinlib->list_mailin_accounts(0, -1, 'account_asc', '');
 $smarty->assign('accounts', $accounts['data']);
 
 if (isset($_REQUEST['mailin_autocheck'])) {
-	if ($_REQUEST['mailin_autocheck'] == 'y' && !(preg_match('/[0-9]+/', $_REQUEST['mailin_autocheckFreq'])
-			&& $_REQUEST['mailin_autocheckFreq'] > 0))
-	{
+	if ($_REQUEST['mailin_autocheck'] == 'y' && ! (preg_match('/[0-9]+/', $_REQUEST['mailin_autocheckFreq'])
+			&& $_REQUEST['mailin_autocheckFreq'] > 0)) {
 		Feedback::warning(tra('Frequency should be a positive integer!'));
 	} else {
 		$tikilib->set_preference('mailin_autocheck', $_REQUEST['mailin_autocheck']);
 		$tikilib->set_preference('mailin_autocheckFreq', $_REQUEST['mailin_autocheckFreq']);
 		if ($prefs['mailin_autocheck'] == 'y') {
-			Feedback::warning(sprintf(tra('Mail-in accounts set to be checked every %s minutes'),
-				$prefs['mailin_autocheckFreq']));
+			Feedback::warning(sprintf(
+				tra('Mail-in accounts set to be checked every %s minutes'),
+				$prefs['mailin_autocheckFreq']
+			));
 		} else {
 			Feedback::warning(sprintf(tra('Automatic Mail-in accounts checking disabled')));
 		}

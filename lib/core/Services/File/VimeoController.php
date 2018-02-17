@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: VimeoController.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: VimeoController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_File_VimeoController
 {
@@ -20,11 +20,11 @@ class Services_File_VimeoController
 		$servicelib = TikiLib::lib('service');
 		TikiLib::lib('access')->redirect(
 			$servicelib->getUrl(
-				array(
+				[
 					'controller' => 'oauth',
 					'action' => 'request',
 					'provider' => 'vimeo',
-				)
+				]
 			)
 		);
 	}
@@ -53,35 +53,32 @@ class Services_File_VimeoController
 		$availableSD = 0;
 		$availableHD = 0;
 
-		if ($ticket['stat'] !== 'ok') {
-			$errMsg = tra($ticket['err']['msg']);				// get_strings tra('The upload limit was exceeded')
-			if ($tiki_p_admin === 'y') {
-				$errMsg .= '<br>' . tra($ticket['err']['expl']); // get_strings tra('The user has exceeded the daily number of uploads allowed.')
+		if (! empty($ticket['error'])) {
+			$errMsg = tra($ticket['error']);
+			if ($tiki_p_admin === 'y' && isset($ticket['developer_message'])) {
+				$errMsg .= "\n" . tra($ticket['developer_message']);
 			}
-		} else if ($quota['stat'] !== 'ok') {
-			$errMsg = tra($quota['err']['msg']);				// get_strings tra('Permission Denied') tra('Invalid signature')
-																// get_strings tra('Invalid consumer key')
-			if ($tiki_p_admin === 'y') {
-				$errMsg .= '<br>' . tra($quota['err']['expl']);	// get_strings tra('The OAuth token that was passed has either expired or was not valid.')
-																// get_strings tra('The oauth_signature passed was not valid.')
-																// get_strings tra('The consumer key passed was not valid.')
+		} elseif (! empty($quota['error'])) {
+			$errMsg = tra($quota['error']['msg']);
+			if ($tiki_p_admin === 'y' && isset($quota['developer_message'])) {
+				$errMsg .= "\n" . tra($quota['developer_message']);
 			}
 		} else {
-			$availableMB = round($quota['user']['upload_space']['free'] / 1024 / 1024, 1);
-			$availableSD = $quota['user']['sd_quota'];
-			$availableHD = $quota['user']['hd_quota'];
+			$availableMB = round($quota['space']['free'] / 1024 / 1024, 1);
+			$availableSD = $quota['quota']['sd'];
+			$availableHD = $quota['quota']['hd'];
 		}
 
-		return array(
+		return [
 			'availableMB' => $availableMB,
 			'availableSD' => $availableSD,
 			'availableHD' => $availableHD,
-			'ticket' => $ticket['ticket'],
+			'ticket' => $ticket,
 			'galleryId' => $galleryId,
 			'fieldId' => $fieldId,
 			'itemId' => $itemId,
 			'errMsg' => $errMsg,
-		);
+		];
 	}
 
 	function action_complete($input)
@@ -91,34 +88,43 @@ class Services_File_VimeoController
 		$galleryId = $input->galleryId->int();
 		$gal_info = $this->utilities->checkTargetGallery($galleryId);
 
-		$ticket = $input->ticket->word();
+		$completeUri = $input->completeUri->url();
 		$title = $input->title->text();
 		$filename = basename($input->file->text());
 
 		$vimeolib = TikiLib::lib('vimeo');
-		$chunks = $vimeolib->verifyChunks($ticket);
-		$completeInfo = $vimeolib->complete($ticket, $filename);
+
+		$completeInfo = $vimeolib->complete($completeUri);
 
 		$video = '';
 		$url = '';
 		$fileId = 0;
 
-		if ($completeInfo['stat'] !== 'ok') {
-			$errMsg = tra($completeInfo['err']['msg']);				// get_strings TODO?
-			if ($tiki_p_admin === 'y') {
-				$errMsg .= "\n" . tra($completeInfo['err']['expl']); // get_strings TODO?
+		if (! empty($completeInfo['error'])) {
+			$errMsg = tra($completeInfo['error']);
+			if ($tiki_p_admin === 'y' && isset($completeInfo['developer_message'])) {
+				$errMsg .= "\n" . tra($completeInfo['developer_message']);
 			}
-		} else {
+		} elseif (! empty($completeInfo['Location'])) {
 			$errMsg = '';
 
-			$video = $completeInfo['ticket']['video_id'];
-			$vimeolib->setTitle($video, $title);
-			$url = 'http://vimeo.com/' . $video;
+			$location = $completeInfo['Location'];
 
-			$info = array(
-				'expires' => TikiLib::lib('tiki')->now,
-				'etag' => null,
-			);
+
+			$urlparts = explode('/', $completeInfo['Location']);
+			foreach ($urlparts as $urlpart) {
+				if (ctype_digit($urlpart)) {
+					$video = $urlpart;
+				}
+			}
+
+			$vimeolib->setTitle($video, $title);
+			$url = 'http://vimeo.com' . $location;
+
+			$info = [
+			'expires' => TikiLib::lib('tiki')->now,
+			'etag' => null,
+			];
 
 			$size = $chunks['chunk']['size'];
 
@@ -126,16 +132,19 @@ class Services_File_VimeoController
 			$filegallib = TikiLib::lib('filegal');
 			$fileId = $this->utilities->uploadFile($gal_info, $title ?: $filename, $size, 'video/vimeo', 'REFERENCE');
 			$filegallib->attach_file_source($fileId, $url, $info, 1);
+		} else {
+			$errMsg = tra('Unknown error');
 		}
 
-		return array(
+		return [
 			'ticket' => $ticket,
 			'file' => $filename,
+			'name' => $title ?: $filename,
 			'video' => $video,
 			'url' => $url,
 			'fileId' => $fileId,
 			'err' => $errMsg,
-		);
+		];
 	}
 
 	/**
@@ -144,15 +153,26 @@ class Services_File_VimeoController
 	 * @return array
 	 * @throws Exception
 	 */
-	function action_view($input){
+	function action_view($input)
+	{
 		$fileId = $input->file_id->text();
+		$vimeoUrl = $input->vimeo_url->text();
 
-		$filelib = TikiLib::lib("filegal");
-		$file = $filelib->get_file_info($fileId);
-		return array(
-			"title" => $file["filename"],
+		if ($fileId) {
+			$filelib = TikiLib::lib("filegal");
+			$file = $filelib->get_file_info($fileId);
+		}
+
+		if ($input->title->text()) {
+			$title = $input->title->text();
+		} elseif (isset($file)) {
+			$title = $file["filename"];
+		}
+
+		return [
+			"title" => $title,
 			"file_id" => $fileId,
-		);
+			"vimeo_url" => $vimeoUrl,
+		];
 	}
 }
-

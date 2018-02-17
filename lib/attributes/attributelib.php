@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: attributelib.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: attributelib.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * AttributeLib
@@ -13,29 +13,37 @@
 class AttributeLib extends TikiDb_Bridge
 {
 	private $attributes;
+	private $cache;
 
-    /**
-     *
-     */
-    function __construct()
+	/**
+	 *
+	 */
+	function __construct()
 	{
 		$this->attributes = $this->table('tiki_object_attributes');
+		$this->cache = [];
 	}
 
-    /**
+	/**
 	 * Get all attributes for an object
 	 *
-     * @param $type string      One of \ObjectLib::get_supported_types()
-     * @param $objectId mixed   Object id (or name for wiki pages)
-     * @return array            Array [attribute => value]
-     */
-    function get_attributes( $type, $objectId )
+	 * @param $type string      One of \ObjectLib::get_supported_types()
+	 * @param $objectId mixed   Object id (or name for wiki pages)
+	 * @return array            Array [attribute => value]
+	 */
+	function get_attributes($type, $objectId)
 	{
-		return $this->attributes->fetchMap(
-			'attribute',
-			'value',
-			array('type' => $type,'itemId' => $objectId,)
-		);
+		if (count($this->cache) > 2048) {
+			$this->cache = [];
+		}
+		if (! isset($this->cache[$type . $objectId])) {
+			$this->cache[$type . $objectId] = $this->attributes->fetchMap(
+				'attribute',
+				'value',
+				['type' => $type,'itemId' => $objectId,]
+			);
+		}
+		return $this->cache[$type . $objectId];
 	}
 
 	/**
@@ -50,7 +58,7 @@ class AttributeLib extends TikiDb_Bridge
 	{
 		return $this->attributes->fetchOne(
 			'value',
-			array('type' => $type, 'itemId' => $objectId, 'attribute' => $attribute)
+			['type' => $type, 'itemId' => $objectId, 'attribute' => $attribute]
 		);
 	}
 
@@ -64,57 +72,56 @@ class AttributeLib extends TikiDb_Bridge
 	 * attribute naming, and document new tiki.*.* names that you add
 	 * (also grep "set_attribute" just in case there are undocumented names already used)
 	 */
-	function set_attribute( $type, $objectId, $attribute, $value )
+	function set_attribute($type, $objectId, $attribute, $value)
 	{
-		if ( false === $name = $this->get_valid($attribute) ) {
+		if (false === $name = $this->get_valid($attribute)) {
 			return false;
 		}
 
-		if ( $value == '' ) {
+		if ($value == '') {
 			$this->attributes->delete(
-				array(
+				[
 					'type' => $type,
 					'itemId' => $objectId,
 					'attribute' => $name,
-				)
+				]
 			);
 		} else {
 			$this->attributes->insertOrUpdate(
-				array('value' => $value),
-				array(
+				['value' => $value],
+				[
 					'type' => $type,
 					'itemId' => $objectId,
 					'attribute' => $name,
-				)
+				]
 			);
 		}
 
 		return true;
 	}
 
-    /**
-     * @param $name
-     * @return mixed
-     */
-    private function get_valid( $name )
+		/**
+		 * @param $name
+		 * @return mixed
+		 */
+	private function get_valid($name)
 	{
 		$filter = TikiFilter::get('attribute_type');
 		return $filter->filter($name);
 	}
 
-    /**
-     * @param $attribute
-     * @param $value
-     * @return mixed
-     */
-    function find_objects_with($attribute, $value)
+		/**
+		 * @param $attribute
+		 * @param $value
+		 * @return mixed
+		 */
+	function find_objects_with($attribute, $value)
 	{
 		$attribute = $this->get_valid($attribute);
 
 		return $this->attributes->fetchAll(
-			array('type', 'itemId'),
-			array('attribute' => $attribute, 'value' => $value,)
+			['type', 'itemId'],
+			['attribute' => $attribute, 'value' => $value,]
 		);
 	}
 }
-

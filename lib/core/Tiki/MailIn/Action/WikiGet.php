@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiGet.php 62028 2017-04-02 14:52:01Z jonnybradley $
+// $Id: WikiGet.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\MailIn\Action;
+
 use Tiki\MailIn\Account;
 use Tiki\MailIn\Source\Message;
 use TikiLib;
@@ -53,4 +54,3 @@ class WikiGet extends WikiPut
 		return true;
 	}
 }
-

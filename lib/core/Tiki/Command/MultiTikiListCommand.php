@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MultiTikiListCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: MultiTikiListCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -19,7 +19,8 @@ class MultiTikiListCommand extends Command
 		$this
 			->setName('multitiki:list')
 			->setDescription('List MultiTikis in a path')
-			->addArgument('path',
+			->addArgument(
+				'path',
 				InputArgument::OPTIONAL,
 				'path to the Tiki instance to list (defaults to this one if absent)'
 			)

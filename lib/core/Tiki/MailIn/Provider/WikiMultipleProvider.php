@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiMultipleProvider.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: WikiMultipleProvider.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\MailIn\Provider;
+
 use Tiki\MailIn\Action;
 
 class WikiMultipleProvider implements ProviderInterface
@@ -33,12 +34,12 @@ class WikiMultipleProvider implements ProviderInterface
 			'structure_routing' => $acc['routing'] == 'y',
 		];
 
-		return new Action\SubjectPrefixFactory(array(
+		return new Action\SubjectPrefixFactory([
 			'GET:' => new Action\DirectFactory('Tiki\MailIn\Action\WikiGet', $wikiParams),
 			'APPEND:' => new Action\DirectFactory('Tiki\MailIn\Action\WikiAppend', $wikiParams),
 			'PREPEND:' => new Action\DirectFactory('Tiki\MailIn\Action\WikiPrepend', $wikiParams),
 			'PUT:' => new Action\DirectFactory('Tiki\MailIn\Action\WikiPut', $wikiParams),
 			'' => new Action\DirectFactory('Tiki\MailIn\Action\WikiPut', $wikiParams),
-		));
+		]);
 	}
 }

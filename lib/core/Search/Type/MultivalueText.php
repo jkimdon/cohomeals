@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MultivalueText.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: MultivalueText.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Type_MultivalueText implements Search_Type_Interface
 {
@@ -21,7 +21,7 @@ class Search_Type_MultivalueText implements Search_Type_Interface
 
 	function getValue()
 	{
-		$strings = array();
+		$strings = [];
 		foreach ($this->values as $val) {
 			$val = md5($val);
 			$raw = 'token' . $val;
@@ -33,4 +33,3 @@ class Search_Type_MultivalueText implements Search_Type_Interface
 		return implode(' ', $strings);
 	}
 }
-

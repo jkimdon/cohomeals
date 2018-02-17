@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UrlHighlightTermsTransform.php 57610 2016-02-26 17:39:38Z jonnybradley $
+// $Id: UrlHighlightTermsTransform.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Search\ResultSet;
 
@@ -24,10 +24,8 @@ class UrlHighlightTermsTransform
 	{
 		if (isset($entry['url']) && $this->termsParameter) {
 			$entry['url'] = $entry['url'] . (strpos($entry['url'], '?') === false ? '?' : '&') . $this->termsParameter;
-
 		}
 
 		return $entry;
 	}
 }
-

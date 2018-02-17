@@ -21,8 +21,8 @@
 				{/if}
 				({tr}All day{/tr})
 			{else}
-				{if ($cellend - $cellstart < 86400) and ($cellcalendarId neq '2')} {* 2 is the guest room. coho Hardcoded.*}
-				        {$cellstart|tiki_short_time} &ndash; {$cellend|tiki_short_time}
+				{if ($cellend - $cellstart < 86400)}
+					{$cellstart|tiki_short_time} &ndash; {$cellend|tiki_short_time}
 				{else}
 					{$cellstart|tiki_short_date}&nbsp;({$cellstart|tiki_short_time}) &ndash; {$cellend|tiki_short_date}&nbsp;({$cellend|tiki_short_time})
 				{/if}
@@ -30,30 +30,29 @@
 		</strong>
 		<br>
 	{/if}
-	{if $cellcalendarId eq '1'} {* coho 1 is meal program *}
-  	    <a href="coho_meals-view_entry.php?id={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
-	{else}
-	    {if $cellid eq '-1'}
-  	    	<a href="tiki-calendar_edit_item.php?viewrecurrenceId={$cellrecurrenceId}&calendarId={$cellcalendarId}&itemdate={$cellstart}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
-	    {else}
-  	        <a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if $cellstatus eq '2'} style="text-decoration:line-through"{/if}>{$cellname|escape}</a><br />
-	    {/if}
-	{/if}
-	{if $cellcalendarId eq '1'}<div class="box-data"><u>Deadline</u> {$celldeadline|tiki_date_format:"%a, %b %e"}</div>{/if} {* coho 1 is meal program *}
-
+	<a href="tiki-calendar_edit_item.php?viewcalitemId={$cellid}" title="{tr}Details{/tr}"{if isset($cellstatus) and $cellstatus eq '2'} style="text-decoration:line-through"{/if}>
+		{$cellname|escape}
+	</a>
+	<p class="text-muted"><strong>{tr}Created by:{/tr}{$celluser}</strong></p>
 	{if $show_description eq 'y'}
 		<div class="panel-body">
 			{$celldescription|truncate:250:'...'}<br/><br/>
-			<strong>Created by:{$celluser}</strong>
+			<strong>{tr}Created by:{/tr}{$celluser}</strong>
 		</div>
 		<br>
 	{/if}
 
-	{if isset($show_participants) and $show_participants eq 'y' and isset($cellorganizers) and $cellorganizers}
+	{if isset($show_participants) and $show_participants eq 'y' and isset($cellparticipants) and $cellparticipants}
 		<span class="box-title">
-			{tr}Contact/Host:{/tr}
+			{tr}Organized by:{/tr}
 		</span>
 		{$cellorganizers}
+		<br>
+		<span class="box-title">
+			{tr}Participants:{/tr}
+		</span>
+		{$cellparticipants}
+		<br>
 		<br>
 	{/if}
 	{* need to check $cellCalendarId separately to eliminate notice fro some reason *}

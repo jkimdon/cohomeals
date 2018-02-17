@@ -3,16 +3,15 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SchedulerRunCommand.php 62021 2017-04-02 00:51:31Z rjsmelo $
+// $Id: SchedulerRunCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Scheduler_Utils;
-use Scheduler_Item;
-use TikiLib;
+use Symfony\Component\Console\Logger\ConsoleLogger;
+use Psr\Log\LogLevel;
 
 class SchedulerRunCommand extends Command
 {
@@ -25,60 +24,23 @@ class SchedulerRunCommand extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		global $prefs;
 
-		$start_time = time();
-
-		// Get all active schedulers
-		$schedLib = TikiLib::lib('scheduler');
-		$activeSchedulers = $schedLib->get_scheduler(null, 'active');
-
-		$runTasks = array();
-		$reRunTasks = array();
-
-		foreach ($activeSchedulers as $scheduler) {
-			// Check which tasks should run on time
-			if (Scheduler_Utils::is_time_cron($start_time, $scheduler['run_time'])) {
-				$runTasks[] = $scheduler;
-				continue;
-			}
-
-			// Check which tasks should run if they failed previously (last execution)
-			if ($scheduler['re_run']) {
-				$reRunTasks[] = $scheduler;
-				continue;
-			}
+		if ($prefs['feature_scheduler'] != 'y') {
+			$output->writeln("<error>Scheduler feature is not enabled.</error>");
+			exit(1);
 		}
 
-		foreach ($reRunTasks as $task) {
+		$verbosityLevelMap = [
+			LogLevel::ERROR => OutputInterface::OUTPUT_NORMAL,
+			LogLevel::NOTICE => OutputInterface::OUTPUT_NORMAL,
+			LogLevel::INFO   => OutputInterface::VERBOSITY_VERY_VERBOSE,
+			LogLevel::DEBUG   => OutputInterface::VERBOSITY_DEBUG,
+		];
 
-			$status = $schedLib->get_run_status($task['id']);
-			if ($status == 'failed') {
-				$runTasks[] = $task;
-			}
-		}
+		$logger = new ConsoleLogger($output, $verbosityLevelMap);
 
-		foreach ($runTasks as $runTask) {
-
-			$schedulerTask = new Scheduler_Item(
-				$runTask['id'],
-				$runTask['name'],
-				$runTask['description'],
-				$runTask['task'],
-				$runTask['params'],
-				$runTask['run_time'],
-				$runTask['status'],
-				$runTask['re_run']
-			);
-
-			$output->writeln('Start running ' . $runTask['name']);
-
-			$result = $schedulerTask->execute();
-
-			if ($result['status'] == 'failed') {
-				$output->writeln("<error>Failed running:\n{$result['message']}</error>");
-			} else {
-				$output->writeln("<info>Finish running {$runTask['name']}</info>");
-			}
-		}
+		$manager = new \Scheduler_Manager($logger);
+		$manager->run();
 	}
 }

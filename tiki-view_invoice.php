@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-view_invoice.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-view_invoice.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
 require_once('tiki-setup.php');
 $trklib = TikiLib::lib('trk');
@@ -40,7 +40,7 @@ $smarty->assign("amount", $amount);
 $smarty->assign(
 	"client",
 	Tracker_Query::tracker("Invoice Clients")
-	->fields(array("Client Id"))->equals(array($invoice['Client Id']))
+	->fields(["Client Id"])->equals([$invoice['Client Id']])
 	->byName()
 	->getOne()
 );
@@ -53,7 +53,7 @@ $smarty->assign(
 $smarty->assign(
 	"invoiceItems",
 	Tracker_Query::tracker("Invoice Items")
-	->fields(array("Invoice Id"))->equals(array($_REQUEST['InvoiceId']))
+	->fields(["Invoice Id"])->equals([$_REQUEST['InvoiceId']])
 	->byName()
 	->query()
 );

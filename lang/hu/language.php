@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "walesi",
 "Slovene" => "szlovén",
 "Arabic" => "arab",
@@ -940,7 +940,6 @@ $lang = array(
 "Long date format" => "Hosszú dátum formátum",
 "Long time format" => "Hosszú időformátum",
 "Mail end of line" => "Levél sor vég",
-"Specify the end-of-line (EOL) character used by Tiki when sending mail notifications" => "Levél sor vég",
 "LF (some Unix MTA)" => "LF (Unix MTA féle)",
 "Maximum length" => "Maximum hossz",
 "Memcache compression" => "Memcache tömörítés",
@@ -2462,7 +2461,7 @@ $lang = array(
 "Rate" => "Értékelés",
 "A valid email is mandatory to register" => "A regisztrációhoz szükséges egy valid Email cím megadása",
 "Use your email address as your log-in name" => "Email cím használata felhasználónévként",
-"Repeat password" => "Jelszó ismét",
+"Confirm password" => "Jelszó ismét",
 "Generate a password" => "Jelszó generálása",
 "Valid" => "Valid",
 "Create New" => "új létrehozása",
@@ -4222,4 +4221,4 @@ $lang = array(
 "Edit/Delete" => "Szerkesztés / Törlés",
 "Top pages" => "Leglátogatottabb oldalak",
 "Last pages" => "Legutóbbi oldalak",
-);
+];

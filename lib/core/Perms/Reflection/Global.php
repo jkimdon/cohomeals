@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Global.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: Global.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Perms_Reflection_Global implements Perms_Reflection_Container
 {
 	private $permissions;
 	private $factory;
 
-	function __construct( $factory, $type, $object )
+	function __construct($factory, $type, $object)
 	{
 		$this->factory = $factory;
 
@@ -18,18 +18,18 @@ class Perms_Reflection_Global implements Perms_Reflection_Container
 		$this->permissions = new Perms_Reflection_PermissionSet;
 
 		$all = $db->fetchAll('SELECT `groupName`, `permName` FROM `users_grouppermissions`');
-		foreach ( $all as $row ) {
+		foreach ($all as $row) {
 			$this->permissions->add($row['groupName'], $row['permName']);
 		}
 	}
 
-	function add( $group, $permission )
+	function add($group, $permission)
 	{
 		$userlib = TikiLib::lib('user');
 		$userlib->assign_permission_to_group($permission, $group);
 	}
 
-	function remove( $group, $permission )
+	function remove($group, $permission)
 	{
 		$userlib = TikiLib::lib('user');
 		if ($group != 'Admins' || $permission != 'tiki_p_admin') {

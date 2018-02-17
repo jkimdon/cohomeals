@@ -1,4 +1,4 @@
-{* $Id: tiki-remind_password.tpl 63410 2017-07-30 22:31:30Z xavidp $ *}
+{* $Id: tiki-remind_password.tpl 63425 2017-08-01 09:32:49Z jonnybradley $ *}
 {title admpage='login'}{tr}I forgot my password{/tr}{/title}
 
 {if $showmsg ne 'n'}

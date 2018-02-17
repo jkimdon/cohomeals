@@ -1,4 +1,4 @@
-{* $Id: include_security.tpl 62780 2017-05-28 12:37:09Z jonnybradley $ *}
+{* $Id: include_security.tpl 64120 2017-10-04 06:51:06Z arildb $ *}
 
 <div class="t_navbar btn-group form-group">
 	<a role="link" class="btn btn-link" href="tiki-admingroups.php" title="{tr}Admin groups{/tr}">
@@ -17,7 +17,7 @@
 {/remarksbox}
 
 <form class="admin form-horizontal" id="security" name="security" action="tiki-admin.php?page=security" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			{include file='admin/include_apply_top.tpl'}
@@ -71,24 +71,35 @@
 			{preference name=tiki_check_file_content}
 			{preference name=tiki_allow_trust_input}
 			{preference name=feature_quick_object_perms}
-			{preference name=feature_user_encryption}
-			<div class="adminoptionboxchild" id="feature_user_encryption_childcontainer">
-				{if isset($no_mcrypt)}
-					{remarksbox type="warning" title="{tr}Mcrypt is not loaded{/tr}"}
-					{tr}User Encryption requires the PHP extension Mcrypt for encryption.
-						You should activate Mcrypt before activating User Encryption{/tr}.
-					{/remarksbox}
-				{else}
-					Requires the Mcrypt PHP extension for encryption. <u>You have Mcrypt installed</u>.<br>
-				{/if}
-				You may also want to add the "Domain Password" module somewhere.<br>
-				<br>
-				Comma separated list of password domains, e.g.: Company ABC,Company XYZ<br>
-				The user can add passwords for a registered password domain.
-				{preference name=feature_password_domains}
-			</div>
 			{preference name=zend_http_sslverifypeer}
 			{preference name=feature_debug_console}
+			<fieldset>
+				<legend>{tr}User Encryption{/tr}{help url="User Encryption"}</legend>
+				{preference name=feature_user_encryption}
+				<div class="adminoptionboxchild" id="feature_user_encryption_childcontainer">
+					{if $openssl_available}
+						{tr}Requires the OpenSSL PHP extension for encryption.{/tr} {tr}You have OpenSSL installed.{/tr}<br>
+					{else}
+						{remarksbox type="warning" title="{tr}OpenSSL is not loaded{/tr}"}
+						{tr}User Encryption requires the PHP extension OpenSSL for encryption.
+							You should activate OpenSSL before activating User Encryption{/tr}.
+						{/remarksbox}
+					{/if}
+					{tr}You may also want to add the Domain Password module somewhere.{/tr}<br>
+					<br>
+					{tr}Comma separated list of password domains, e.g.: Company ABC,Company XYZ{/tr}<br>
+					{tr}The user can add passwords for a registered password domain.{/tr}
+					{preference name=feature_password_domains}
+					{if $prefs.feature_user_encryption eq 'y' and $show_user_encyption_stats eq 'y'}
+						{tr}Statistics for existing data:{/tr}
+						<ul>
+							<li>OpenSSL: {$user_encryption_stat_openssl}</li>
+							<li>MCrypt: {$user_encryption_stat_mcrypt}</li>
+						</ul>
+						{tr}When no data which was encoded by MCrypt in Tiki versions prior to 18 is present, User Encryption does not need the MCrypt PHP extension.{/tr}
+					{/if}
+				</div>
+			</fieldset>
 			<fieldset>
 				<legend>{tr}CSRF security{/tr}{help url="Security"}</legend>
 				<div class="adminoptionbox">
@@ -96,6 +107,40 @@
 				</div>
 				{preference name=feature_ticketlib}
 				{preference name=feature_ticketlib2}
+			</fieldset>
+			<br/>
+			<fieldset>
+				<legend>{tr}HTTP Headers{/tr}{help url="Security"}</legend>
+				<div class="adminoptionbox">
+					{tr}Use these options to add options related with security to the HTTP Headers{/tr}.
+				</div>
+
+				{preference name=http_header_frame_options}
+				<div class="adminoptionboxchild" id="http_header_frame_options_childcontainer">
+					{preference name=http_header_frame_options_value}
+				</div>
+
+				{preference name=http_header_xss_protection}
+				<div class="adminoptionboxchild" id="http_header_xss_protection_childcontainer">
+					{preference name=http_header_xss_protection_value}
+				</div>
+
+				{preference name=http_header_content_type_options}
+
+				{preference name=http_header_content_security_policy}
+				<div class="adminoptionboxchild" id="http_header_content_security_policy_childcontainer">
+					{preference name=http_header_content_security_policy_value}
+				</div>
+
+				{preference name=http_header_strict_transport_security}
+				<div class="adminoptionboxchild" id="http_header_strict_transport_security_childcontainer">
+					{preference name=http_header_strict_transport_security_value}
+				</div>
+
+				{preference name=http_header_public_key_pins}
+				<div class="adminoptionboxchild" id="http_header_public_key_pins_childcontainer">
+					{preference name=http_header_public_key_pins_value}
+				</div>
 			</fieldset>
 		{/tab}
 
@@ -165,35 +210,16 @@
 
 			{preference name=ids_enabled}
 			<div class="adminoptionboxchild" id="ids_enabled_childcontainer">
+				<div class="form-group adminoptionbox clearfix">
+					<div class="col-sm-offset-4 col-sm-8">
+						<a href="tiki-admin_ids.php">{tr}Admin IDS custom rules{/tr}</a>
+					</div>
+				</div>
+				{preference name=ids_custom_rules_file}
+				{preference name=ids_mode}
+				{preference name=ids_threshold}
 				{preference name=ids_log_to_file}
 				{*{preference name=ids_log_to_database}*}
-			</div>
-
-			{preference name=http_header_frame_options}
-			<div class="adminoptionboxchild" id="http_header_frame_options_childcontainer">
-				{preference name=http_header_frame_options_value}
-			</div>
-
-			{preference name=http_header_xss_protection}
-			<div class="adminoptionboxchild" id="http_header_xss_protection_childcontainer">
-				{preference name=http_header_xss_protection_value}
-			</div>
-
-			{preference name=http_header_content_type_options}
-
-			{preference name=http_header_content_security_policy}
-			<div class="adminoptionboxchild" id="http_header_content_security_policy_childcontainer">
-				{preference name=http_header_content_security_policy_value}
-			</div>
-
-			{preference name=http_header_strict_transport_security}
-			<div class="adminoptionboxchild" id="http_header_strict_transport_security_childcontainer">
-				{preference name=http_header_strict_transport_security_value}
-			</div>
-
-			{preference name=http_header_public_key_pins}
-			<div class="adminoptionboxchild" id="http_header_public_key_pins_childcontainer">
-				{preference name=http_header_public_key_pins_value}
 			</div>
 
 		{/tab}

@@ -9,19 +9,19 @@
          },
          "Bookmark this room": [
             null,
-            ""
+            "Raum als Lesezeichen setzen"
          ],
          "The name for this bookmark:": [
             null,
-            ""
+            "Der Name für das Lesezeichen:"
          ],
          "Would you like this room to be automatically joined upon startup?": [
             null,
-            ""
+            "Beim Anmelden diesem Raum automatisch betreten?"
          ],
          "What should your nickname for this room be?": [
             null,
-            ""
+            "Wie soll dein Nickname in diesem Raum sein?"
          ],
          "Save": [
             null,
@@ -31,29 +31,57 @@
             null,
             "Abbrechen"
          ],
+         "Are you sure you want to remove the bookmark \"%1$s\"?": [
+            null,
+            "Wollen Sie dieses Lesezeichen \"%1$s\" wirklich entfernen?"
+         ],
          "Sorry, something went wrong while trying to save your bookmark.": [
             null,
-            ""
+            "Entschuldigung! Beim Versuch das Lesezeichens zu speichern schlug etwas fehl."
          ],
-         "Bookmarked Rooms": [
+         "Click to toggle the bookmarks list": [
             null,
-            ""
+            "Liste der Lesezeichen umschalten"
          ],
-         "Click to open this room": [
+         "Bookmarks": [
             null,
-            "Hier klicken um diesen Raum zu öffnen"
+            "Lesezeichen"
+         ],
+         "Leave this room": [
+            null,
+            "Diesen Raum verlassen"
+         ],
+         "Remove this bookmark": [
+            null,
+            "Dieses Lesezeichen entfernen"
+         ],
+         "Unbookmark this room": [
+            null,
+            "Lesezeichen dieses Raums entfernen"
          ],
          "Show more information on this room": [
             null,
             "Mehr Information über diesen Raum zeigen"
          ],
-         "Remove this bookmark": [
+         "Click to open this room": [
             null,
-            ""
+            "Hier klicken um diesen Raum zu öffnen"
+         ],
+         "You have unread messages": [
+            null,
+            "Sie haben ungelesene Nachrichten"
+         ],
+         "Close this chat box": [
+            null,
+            "Das Chat-Fenster schließen"
          ],
          "Personal message": [
             null,
             "Persönliche Nachricht"
+         ],
+         "Send": [
+            null,
+            "Senden"
          ],
          "me": [
             null,
@@ -61,11 +89,11 @@
          ],
          "A very large message has been received.This might be due to an attack meant to degrade the chat performance.Output has been shortened.": [
             null,
-            ""
+            "Eine sehr lange Nachricht wurde empfangen. Dies könnte ein Angriff mit dem Ziel sein die Chat-Performanz zu reduzieren. Die Ausgabe wurde gekürzt."
          ],
          "Typing from another device": [
             null,
-            ""
+            "Schreibt von einem anderen Gerät"
          ],
          "is typing": [
             null,
@@ -73,7 +101,7 @@
          ],
          "Stopped typing on the other device": [
             null,
-            ""
+            "Schreibt nicht mehr auf dem anderen Gerät"
          ],
          "has stopped typing": [
             null,
@@ -99,6 +127,10 @@
             null,
             "Sind Sie sicher, dass Sie alle Nachrichten dieses Chats löschen möchten?"
          ],
+         "has gone offline": [
+            null,
+            "ist offline gegangen"
+         ],
          "is busy": [
             null,
             "ist beschäftigt"
@@ -109,11 +141,11 @@
          ],
          "Insert a smiley": [
             null,
-            ""
+            "Smiley einfügen"
          ],
          "Start a call": [
             null,
-            ""
+            "Beginne ein Gespräch"
          ],
          "Contacts": [
             null,
@@ -135,9 +167,17 @@
             null,
             "Anmelden"
          ],
+         "Username": [
+            null,
+            "Benutzername"
+         ],
          "user@server": [
             null,
-            ""
+            "Benutzer@Server"
+         ],
+         "password": [
+            null,
+            "passwort"
          ],
          "Sign in": [
             null,
@@ -175,6 +215,10 @@
             null,
             "abwesend"
          ],
+         "offline": [
+            null,
+            "abgemeldet"
+         ],
          "Online": [
             null,
             "Online"
@@ -195,6 +239,14 @@
             null,
             "Abmelden"
          ],
+         "Click to add new chat contacts": [
+            null,
+            "Hier klicken um neuen Kontakt hinzuzufügen"
+         ],
+         "Add a contact": [
+            null,
+            "Kontakt hinzufügen"
+         ],
          "Contact name": [
             null,
             "Name des Kontakts"
@@ -205,67 +257,31 @@
          ],
          "e.g. user@example.org": [
             null,
-            ""
+            "z.B. benutzer@example.org"
          ],
          "Add": [
             null,
             "Hinzufügen"
          ],
-         "Click to add new chat contacts": [
-            null,
-            "Hier klicken um neuen Kontakt hinzuzufügen"
-         ],
-         "Add a contact": [
-            null,
-            "Kontakt hinzufügen"
-         ],
          "No users found": [
             null,
             "Keine Benutzer gefunden"
          ],
-         "Click to add as a chat contact": [
+         "This client does not allow presence subscriptions": [
             null,
-            "Hier klicken um als Kontakt hinzuzufügen"
-         ],
-         "Toggle chat": [
-            null,
-            "Chat ein-/ausblenden"
+            "Dieser Kontakt erlaubt die Abonnieren des Status nicht"
          ],
          "Click to hide these contacts": [
             null,
             "Hier klicken um diese Kontakte zu verstecken"
          ],
-         "Reconnecting": [
+         "Close this box": [
             null,
-            "Verbindung wiederherstellen"
-         ],
-         "The connection has dropped, attempting to reconnect.": [
-            null,
-            ""
-         ],
-         "Connecting": [
-            null,
-            "Verbindungsaufbau"
-         ],
-         "Authenticating": [
-            null,
-            "Authentifizierung"
-         ],
-         "Authentication Failed": [
-            null,
-            "Authentifizierung gescheitert"
-         ],
-         "Sorry, there was an error while trying to add ": [
-            null,
-            ""
-         ],
-         "This client does not allow presence subscriptions": [
-            null,
-            ""
+            "Schließen"
          ],
          "Minimize this chat box": [
             null,
-            ""
+            "Minimiere dieses Gesprächsfenster"
          ],
          "Click to restore this chat": [
             null,
@@ -287,6 +303,10 @@
             null,
             "Dieser Raum zeigt jetzt nicht verfügbare Mitglieder nicht an"
          ],
+         "The room configuration has changed": [
+            null,
+            "Die Raumkonfiguration hat sich geändert"
+         ],
          "Room logging is now enabled": [
             null,
             "Nachrichten in diesem Raum werden ab jetzt protokolliert"
@@ -294,6 +314,10 @@
          "Room logging is now disabled": [
             null,
             "Nachrichten in diesem Raum werden nicht mehr protokolliert"
+         ],
+         "This room is now no longer anonymous": [
+            null,
+            "Dieses Zimmer ist jetzt nicht anonym"
          ],
          "This room is now semi-anonymous": [
             null,
@@ -321,7 +345,7 @@
          ],
          "You have been removed from this room because the room has changed to members-only and you're not a member": [
             null,
-            ""
+            "Du wurdest aus dem Raum entfernt, da der Raum jetzt nur noch Mitglieder erlaubt und du kein Mitglied bist"
          ],
          "You have been removed from this room because the MUC (Multi-user chat) service is being shut down.": [
             null,
@@ -331,13 +355,49 @@
             null,
             "%1$s ist verbannt worden"
          ],
+         "%1$s's nickname has changed": [
+            null,
+            "%1$s's Spitzname hat sich geändert"
+         ],
+         "%1$s has been kicked out": [
+            null,
+            "%1$s wurde hinausgeworfen"
+         ],
+         "%1$s has been removed because of an affiliation change": [
+            null,
+            "%1$s wurde wegen einer Zugehörigkeitsänderung entfernt"
+         ],
+         "%1$s has been removed for not being a member": [
+            null,
+            "%1$s ist kein Mitglied und wurde daher entfernt"
+         ],
+         "Your nickname has been automatically set to: %1$s": [
+            null,
+            "Ihr Spitzname wurde automatisiert geändert zu: %1$s"
+         ],
+         "Your nickname has been changed to: %1$s": [
+            null,
+            "Ihr Spitzname wurde geändert zu: %1$s"
+         ],
          "Message": [
             null,
             "Nachricht"
          ],
-         "Error: the \"": [
+         "Close and leave this room": [
             null,
-            ""
+            "Schließe und verlasse diesen Raum"
+         ],
+         "Configure this room": [
+            null,
+            "Einstellungsänderungen an diesem Raum vornehmen"
+         ],
+         "Hide the list of occupants": [
+            null,
+            "Teilnehmerliste ausblenden"
+         ],
+         "${command}": [
+            null,
+            "${command}"
          ],
          "Are you sure you want to clear the messages from this room?": [
             null,
@@ -349,15 +409,19 @@
          ],
          "Change user's affiliation to admin": [
             null,
-            ""
+            "Ändere die Zugehörigkeit des Benutzers zu Administrator"
          ],
          "Ban user from room": [
             null,
             "Verbanne einen Benutzer aus dem Raum"
          ],
+         "Change user role to occupant": [
+            null,
+            "Benutzerrolle zu Teilnehmer ändern"
+         ],
          "Kick user from room": [
             null,
-            "Werfe einen Benutzer aus dem Raum"
+            "Werfe Benutzer aus dem Raum"
          ],
          "Write in 3rd person": [
             null,
@@ -365,11 +429,11 @@
          ],
          "Grant membership to a user": [
             null,
-            ""
+            "Gewähre einem Benutzer Mitgliedschaft"
          ],
          "Remove user's ability to post messages": [
             null,
-            ""
+            "Entferne die Möglichkeit des Benutzers Nachrichten zu senden"
          ],
          "Change your nickname": [
             null,
@@ -377,7 +441,7 @@
          ],
          "Grant moderator role to user": [
             null,
-            ""
+            "Gebe Benutzer Moderatorrechte"
          ],
          "Grant ownership of this room": [
             null,
@@ -385,23 +449,35 @@
          ],
          "Revoke user's membership": [
             null,
-            ""
+            "Widerrufe die Mitgliedschaft des Benutzers"
+         ],
+         "Set room subject": [
+            null,
+            "Chatraum Thema festlegen"
          ],
          "Set room subject (alias for /subject)": [
             null,
-            ""
+            "Setze Raumthema (alias für /subject)"
          ],
          "Allow muted user to post messages": [
             null,
-            ""
+            "Erlaube stummgeschaltetem Benutzer Nachrichten zu senden"
          ],
          "The nickname you chose is reserved or currently in use, please choose a different one.": [
             null,
-            ""
+            "Der gewählte Spitzname ist reserviert oder derzeit in Gebrauch. Bitte wähle einen Anderen."
+         ],
+         "Please choose your nickname": [
+            null,
+            "Wähle deinen Spitznamen"
          ],
          "Nickname": [
             null,
             "Spitzname"
+         ],
+         "Enter room": [
+            null,
+            "Betrete Raum"
          ],
          "This chatroom requires a password": [
             null,
@@ -415,53 +491,89 @@
             null,
             "Abschicken"
          ],
-         "The reason given is: \"": [
+         "This action was done by %1$s.": [
             null,
-            "Die angegebene Begründung lautet: \""
+            "Diese Aktion wurde ausgeführt durch %1$s."
+         ],
+         "The reason given is: \"%1$s\".": [
+            null,
+            "Die angegebene Begründung lautet: \"%1$s\"."
+         ],
+         "${notification.reason}": [
+            null,
+            "${notification.reason}"
          ],
          " has left the room. \"": [
             null,
-            ""
+            " hat den Raum verlassen. \""
+         ],
+         " has left the room": [
+            null,
+            " hat den Raum verlassen"
          ],
          " has joined the room. \"": [
             null,
-            ""
+            " hat den Raum betreten. \""
          ],
          " has joined the room.": [
             null,
-            ""
+            " ist dem Raum beigetreten."
          ],
-         "You are not on the member list of this room": [
+         "You are not on the member list of this room.": [
             null,
-            "Sie sind nicht auf der Mitgliederliste dieses Raums"
+            "Sie sind nicht auf der Mitgliederliste dieses Raums."
          ],
-         "No nickname was specified": [
+         "You have been banned from this room.": [
             null,
-            "Kein Spitzname festgelegt"
+            "Sie sind aus diesem Raum verbannt worden."
          ],
-         "You are not allowed to create new rooms": [
+         "No nickname was specified.": [
             null,
-            "Es ist Ihnen nicht erlaubt neue Räume anzulegen"
+            "Kein Spitzname festgelegt."
          ],
-         "Your nickname doesn't conform to this room's policies": [
+         "You are not allowed to create new rooms.": [
             null,
-            "Ungültiger Spitzname"
+            "Es ist Ihnen nicht erlaubt neue Räume anzulegen."
          ],
-         "This room does not (yet) exist": [
+         "Your nickname doesn't conform to this room's policies.": [
             null,
-            "Dieser Raum existiert (noch) nicht"
+            "Ungültiger Spitzname."
+         ],
+         "This room does not (yet) exist.": [
+            null,
+            "Dieser Raum existiert (noch) nicht."
+         ],
+         "This room has reached its maximum number of occupants.": [
+            null,
+            "Maximale Anzahl an Mitgliedern für diesen Raum erreicht"
          ],
          "Topic set by %1$s to: %2$s": [
             null,
             "%1$s hat das Thema zu \"%2$s\" geändert"
          ],
+         "This user is a moderator.": [
+            null,
+            "Dieser Benutzer ist ein Moderator."
+         ],
+         "This user can send messages in this room.": [
+            null,
+            "Dieser Benutzer kann Nachrichten in diesem Raum verschicken."
+         ],
+         "This user can NOT send messages in this room.": [
+            null,
+            "Dieser Benutzer kann keine Nachrichten in diesem Raum verschicken."
+         ],
          "Occupants": [
             null,
-            "Teilnehmer"
+            "Teilnehmer/Innen"
          ],
          "Invite": [
             null,
             "Einladen"
+         ],
+         "Features": [
+            null,
+            "Funktionen"
          ],
          "Hidden": [
             null,
@@ -469,11 +581,11 @@
          ],
          "Message archiving": [
             null,
-            ""
+            "Nachrichten Archivierung"
          ],
          "Members only": [
             null,
-            ""
+            "Nur Mitglieder"
          ],
          "Moderated": [
             null,
@@ -483,9 +595,17 @@
             null,
             "Nicht anonym"
          ],
+         "Open": [
+            null,
+            "Offen"
+         ],
+         "Password protected": [
+            null,
+            "Passwort geschützt"
+         ],
          "Persistent": [
             null,
-            ""
+            "Dauerhaft"
          ],
          "Public": [
             null,
@@ -495,41 +615,81 @@
             null,
             "Teils anonym"
          ],
+         "Temporary": [
+            null,
+            "Vorübergehend"
+         ],
          "Unmoderated": [
             null,
             "Unmoderiert"
          ],
          "Unsecured": [
             null,
-            ""
+            "Ungeschützt"
+         ],
+         "This room is not publicly searchable": [
+            null,
+            "Dieser Raum ist nicht suchbar"
          ],
          "Messages are archived on the server": [
             null,
-            ""
+            "Nachrichten werden auf dem Server archiviert"
          ],
-         "All other room occupants can see your Jabber ID": [
+         "This room is restricted to members only": [
             null,
-            ""
+            "Dieser Raum ist nur für Mitglieder zugänglich"
+         ],
+         "This room is being moderated": [
+            null,
+            "Dieser Raum ist moderiert"
+         ],
+         "All other room occupants can see your XMPP username": [
+            null,
+            "Jeder in dem Raum kann deine XMPP/ Jabber ID sehen"
+         ],
+         "Anyone can join this room": [
+            null,
+            "Jeder kann diesen Raum betreten"
+         ],
+         "This room requires a password before entry": [
+            null,
+            "Dieser Raum erfordert ein Passwort"
          ],
          "This room persists even if it's unoccupied": [
             null,
-            ""
+            "Dieser Raum bleibt auch wenn Niemand in ihm ist bestehen"
          ],
-         "Only moderators can see your Jabber ID": [
+         "This room is publicly searchable": [
             null,
-            ""
+            "Dieser Raum ist per Suche auffindbar"
+         ],
+         "Only moderators can see your XMPP username": [
+            null,
+            "Nur Moderatoren können deine XMPP/ Jabber ID sehen"
          ],
          "This room will disappear once the last person leaves": [
             null,
-            ""
+            "Dieser Raum verschwindet sobald diesen die letzte Person verlassen hat"
+         ],
+         "This room is not being moderated": [
+            null,
+            "Dieser Raum ist unmoderiert"
+         ],
+         "This room does not require a password upon entry": [
+            null,
+            "Dieser Raum erfordert kein Passwort"
          ],
          "You are about to invite %1$s to the chat room \"%2$s\". ": [
             null,
-            ""
+            "Du bist gerade dabei %1$s in den Raum \"%2$s\" einzuladen. "
          ],
          "You may optionally include a message, explaining the reason for the invitation.": [
             null,
-            ""
+            "Du kannst optional eine Nachricht mit den Gründen der Einladung mitsenden."
+         ],
+         "Please enter a valid XMPP username": [
+            null,
+            "Bitte geben Sie eine gültige XMPP/ Jabber ID an"
          ],
          "Room name": [
             null,
@@ -555,13 +715,13 @@
             null,
             "Keine Räume auf %1$s"
          ],
-         "Rooms on %1$s": [
-            null,
-            "Räume auf %1$s"
-         ],
          "Description:": [
             null,
             "Beschreibung:"
+         ],
+         "Room Address (JID):": [
+            null,
+            "XMPP/ Jabber ID (JID) dieses Raumes:"
          ],
          "Occupants:": [
             null,
@@ -601,15 +761,19 @@
          ],
          "Notification from %1$s": [
             null,
-            ""
+            "Benachrichtigung von %1$s"
          ],
          "%1$s says": [
             null,
-            ""
+            "%1$s sagt"
+         ],
+         "has come online": [
+            null,
+            "kam online"
          ],
          "wants to be your contact": [
             null,
-            ""
+            "will dein Kontakt sein"
          ],
          "Re-establishing encrypted session": [
             null,
@@ -637,19 +801,19 @@
          ],
          "Your messages are not encrypted anymore": [
             null,
-            ""
+            "Deine Nachrichten sind nicht mehr verschlüsselt"
          ],
          "Your messages are now encrypted but your contact's identity has not been verified.": [
             null,
-            ""
+            "Deine Nachrichten sind ab jetzt verschlüsselt, aber die Identität des Kontaktes wurde noch nicht bestätigt."
          ],
          "Your contact's identify has been verified.": [
             null,
-            ""
+            "Die Identität des Kontakts wurde bestätigt."
          ],
          "Your contact has ended encryption on their end, you should do the same.": [
             null,
-            ""
+            "Dein Kontakt hat die Verschlüsselung deaktiviert, du solltest das gleiche tun."
          ],
          "Your message could not be sent": [
             null,
@@ -665,59 +829,59 @@
          ],
          "Here are the fingerprints, please confirm them with %1$s, outside of this chat.\n\nFingerprint for you, %2$s: %3$s\n\nFingerprint for %1$s: %4$s\n\nIf you have confirmed that the fingerprints match, click OK, otherwise click Cancel.": [
             null,
-            ""
+            "Hier sind die Fingerabdrücke, bitte bestätige diese mit %1$s, außerhalb von diesem Chat\n\nFingerabdruck für dich, %2$s: %3$s\n\nFingerabdruck für %1$s: %4$s\n\nWenn du überprüft hast, dass die Fingerabdrücke zusammenpassen, drücke OK, andernfalls Abbrechen."
          ],
          "You will be prompted to provide a security question and then an answer to that question.\n\nYour contact will then be prompted the same question and if they type the exact same answer (case sensitive), their identity will be verified.": [
             null,
-            ""
+            "Sie werden im folgenden nach einer Sicherheitsfrage und dann nach dessen Antwort gefragt.\n\nIhr Kontakt wird dann die Sicherheitsfrage lesen und die Antwort korrekt beantworten müssen (Groß- und Kleinschreibung beachten!) um die Identitäten zu überprüfen."
          ],
          "What is your security question?": [
             null,
-            ""
+            "Wie lautet Ihre Sicherheitsfrage?"
          ],
          "What is the answer to the security question?": [
             null,
-            ""
+            "Wie lautet die Antwort Ihrer Sicherheitsfrage?"
          ],
          "Invalid authentication scheme provided": [
             null,
-            ""
+            "Ungültiges Authentifizierungsmuster wurde zur Verfügung gestellt"
          ],
          "Your messages are not encrypted. Click here to enable OTR encryption.": [
             null,
-            ""
+            "Ihre Nachricht ist unverschlüsselt. Klicken Sie hier um OTR Verschlüsselung zu aktivieren."
          ],
          "Your messages are encrypted, but your contact has not been verified.": [
             null,
-            ""
+            "Ihre Nachrichten werden verschlüsselt aber Ihr Kontakt wurde noch nicht verifiziert/ bestätigt."
          ],
          "Your messages are encrypted and your contact verified.": [
             null,
-            ""
+            "Ihre Nachrichten werden verschlüsselt und Ihr Kontakt wurde bestätigt."
          ],
          "Your contact has closed their end of the private session, you should do the same": [
             null,
-            ""
+            "Ihr Kontakt hat die private Sitzung geschlossen. Sie sollten das gleiche tun."
          ],
          "End encrypted conversation": [
             null,
-            ""
+            "Beende die verschlüsselte Unterhaltung"
          ],
          "Refresh encrypted conversation": [
             null,
-            ""
+            "Verschlüsselte Unterhaltung aktualisieren"
          ],
          "Start encrypted conversation": [
             null,
-            ""
+            "Beginn einer verschlüsselten Unterhaltung"
          ],
          "Verify with fingerprints": [
             null,
-            ""
+            "Überprüfung mit Fingerabdruck"
          ],
          "Verify with SMP": [
             null,
-            ""
+            "Überprüfung mit SMP"
          ],
          "What's this?": [
             null,
@@ -745,7 +909,7 @@
          ],
          "Your XMPP provider's domain name:": [
             null,
-            ""
+            "Ihr XMPP/ Jabber Provider Domain Name:"
          ],
          "Fetch registration form": [
             null,
@@ -753,19 +917,19 @@
          ],
          "Tip: A list of public XMPP providers is available": [
             null,
-            ""
+            "Tipp: Eine Liste öffentlicher Provider ist verfügbar"
          ],
          "here": [
             null,
-            ""
+            "hier"
          ],
          "Register": [
             null,
-            ""
+            "Registrierung"
          ],
          "Sorry, the given provider does not support in band account registration. Please try with a different provider.": [
             null,
-            ""
+            "Entschuldigung: Dieser Provider erlaubt keine direkte Benutzer- Registrierung. Versuchen Sie einen anderen Provider oder erstellen Sie einen Zugang beim Provider direkt."
          ],
          "Requesting a registration form from the XMPP server": [
             null,
@@ -773,27 +937,35 @@
          ],
          "Something went wrong while establishing a connection with \"%1$s\". Are you sure it exists?": [
             null,
-            ""
+            "Etwas schlägt fehl beim Versuch eine Verbindung mit \"%1$s\" her zu stellen. Sicher das \"%1$s\" existiert?"
          ],
          "Now logging you in": [
             null,
-            ""
+            "Sie werden angemeldet"
          ],
          "Registered successfully": [
             null,
-            ""
-         ],
-         "Return": [
-            null,
-            "Zurück"
+            "Registrierung erfolgreich"
          ],
          "The provider rejected your registration attempt. Please check the values you entered for correctness.": [
             null,
-            ""
+            "Der Provider hat die Registrierung abgelehnt. Bitte überprüfen Sie Ihre Angaben auf Richtigkeit."
          ],
          "Retry": [
             null,
-            ""
+            "Wiederholen"
+         ],
+         "Click to toggle the rooms list": [
+            null,
+            "Umschalten der Raum listen"
+         ],
+         "Open Rooms": [
+            null,
+            "Offene Räume"
+         ],
+         "Are you sure you want to leave the room \"%1$s\"?": [
+            null,
+            "Wollen Sie diesen Raum \"%1$s\" wirklich verlassen?"
          ],
          "This contact is busy": [
             null,
@@ -841,15 +1013,19 @@
          ],
          "Filter": [
             null,
-            ""
+            "Filter"
          ],
          "State": [
             null,
-            ""
+            "Staat"
          ],
          "Any": [
             null,
             ""
+         ],
+         "Unread": [
+            null,
+            "Ungelesen"
          ],
          "Chatty": [
             null,
@@ -857,19 +1033,19 @@
          ],
          "Extended Away": [
             null,
-            ""
+            "Länger nicht anwesend"
          ],
-         "Click to remove this contact": [
+         "Click to remove %1$s as a contact": [
             null,
-            "Hier klicken um diesen Kontakt zu entfernen"
+            "Hier klicken um %1$s zu entfernen"
          ],
-         "Click to accept this contact request": [
+         "Click to accept the contact request from %1$s": [
             null,
-            "Hier klicken um diese Kontaktanfrage zu akzeptieren"
+            "Hier klicken um die Kontaktanfrage von %1$s zu akzeptieren"
          ],
-         "Click to decline this contact request": [
+         "Click to decline the contact request from %1$s": [
             null,
-            "Hier klicken um diese Kontaktanfrage zu abzulehnen"
+            "Hier klicken um die Kontaktanfrage von %1$s abzulehnen"
          ],
          "Click to chat with this contact": [
             null,
@@ -877,15 +1053,11 @@
          ],
          "Name": [
             null,
-            ""
+            "Name"
          ],
          "Are you sure you want to remove this contact?": [
             null,
             "Wollen Sie diesen Kontakt wirklich entfernen?"
-         ],
-         "Sorry, there was an error while trying to remove ": [
-            null,
-            ""
          ],
          "Are you sure you want to decline this contact request?": [
             null,

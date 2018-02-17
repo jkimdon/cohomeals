@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "웨일스어",
 "Slovene" => "슬로베니아어",
 "Arabic" => "아라빅",
@@ -2706,7 +2706,6 @@ $lang = array(
 "%A %d of %B, %Y %H:%M:%S %Z" => "%Y %B %A %d,  %H:%M:%S %Z",
 "Force lowercase" => "소문자 강제 적용",
 "Mail end of line" => "메일 줄 끝",
-"Specify the end-of-line (EOL) character used by Tiki when sending mail notifications" => "메일 줄 끝",
 "CRLF (standard)" => "CRLF (표준)",
 "LF (some Unix MTA)" => "LF (몇몇 Unix MTA)",
 "Main shadow start" => "주 음영 시작",
@@ -7773,7 +7772,7 @@ $lang = array(
 "A valid email is mandatory to register" => "등록하기 위해서 유효한 메일주소를 입력해 주세요.",
 "Use your email address as your log-in name" => "로그인으로 이메일 사용",
 "Lowercase only" => "소문자만 허용",
-"Repeat password" => "비밀번호(재입력)",
+"Confirm password" => "비밀번호(재입력)",
 "Generate a password" => "비밀번호 생성",
 "Passcode to register" => "등록할 패스코드",
 "Not your password" => "귀하의 암호는 불가",
@@ -11681,4 +11680,4 @@ $lang = array(
 "Aborted" => "중단됨",
 "Top pages" => "상위 페이지",
 "Last pages" => "최근 페이지",
-);
+];

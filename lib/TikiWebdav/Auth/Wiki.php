@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Wiki.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: Wiki.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 class TikiWebdav_Auth_Wiki extends TikiWebdav_Auth_Default
 {
@@ -21,7 +21,7 @@ class TikiWebdav_Auth_Wiki extends TikiWebdav_Auth_Default
 		$groups = $tikilib->get_user_groups($user);
 		$perms = Perms::getInstance();
 		$perms->setGroups($groups);
-		$perms = $tikilib->page_exists($page) ? Perms::get(array('type' => 'wiki page', 'object' => substr($path, 1))) : Perms::get();
+		$perms = $tikilib->page_exists($page) ? Perms::get(['type' => 'wiki page', 'object' => substr($path, 1)]) : Perms::get();
 
 		return ($access === self::ACCESS_READ && $perms->view) || ($access === self::ACCESS_WRITE && $perms->edit);
 	}

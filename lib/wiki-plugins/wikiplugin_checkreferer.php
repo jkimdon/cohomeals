@@ -3,21 +3,21 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_checkreferer.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: wikiplugin_checkreferer.php 64629 2017-11-19 12:06:52Z rjsmelo $
 
 function wikiplugin_checkreferer_info()
 {
-	return array(
+	return [
 		'name' => tra('Check Referer'),
 		'documentation' => 'PluginCheckReferer',
 		'description' => tra('Display content based on the address that originated the request for the current page'),
-		'prefs' => array('wikiplugin_checkreferer'),
+		'prefs' => ['wikiplugin_checkreferer'],
 		'introduced' => 14,
 		'iconname' => 'computer',
 		'body' => tr('Wiki text to display if conditions are met. The body may contain %0. Text after the marker
 			will be displayed if conditions are not met.', '<code>{ELSE}</code>'),
-		'params' => array(
-			'referer_list' => array(
+		'params' => [
+			'referer_list' => [
 				'required' => true,
 				'name' => tra('Referer List'),
 				'description' => tra('Comma-separated list of domains to check'),
@@ -25,12 +25,12 @@ function wikiplugin_checkreferer_info()
 				'separator' => ',',
 				'filter' => 'text',
 				'default' => '',
-			),
-		),
-	);
+			],
+		],
+	];
 }
 
-function wikiplugin_checkreferer( $data, $params )
+function wikiplugin_checkreferer($data, $params)
 {
 	$referer = parse_url($_SERVER['HTTP_REFERER']);
 	$parts = explode('{ELSE}', $data);

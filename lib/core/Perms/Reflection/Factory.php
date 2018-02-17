@@ -3,37 +3,37 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Factory.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: Factory.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Perms_Reflection_Factory
 {
 	private $fallback;
-	private $registry = array();
+	private $registry = [];
 
 	function register($type, $class)
 	{
 		$this->registry[$type] = $class;
 	}
 
-	function registerFallback( $class )
+	function registerFallback($class)
 	{
 		$this->fallback = $class;
 	}
 
-	function get( $type, $object )
+	function get($type, $object)
 	{
-		if ( ! $class = $this->getRegistered($type) ) {
+		if (! $class = $this->getRegistered($type)) {
 			$class = $this->fallback;
 		}
 
-		if ( $class ) {
+		if ($class) {
 			return new $class($this, $type, $object);
 		}
 	}
 
-	private function getRegistered( $type )
+	private function getRegistered($type)
 	{
-		if ( isset($this->registry[$type]) ) {
+		if (isset($this->registry[$type])) {
 			return $this->registry[$type ];
 		}
 	}

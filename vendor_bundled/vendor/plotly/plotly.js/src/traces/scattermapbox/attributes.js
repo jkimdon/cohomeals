@@ -15,31 +15,28 @@ var plotAttrs = require('../../plots/attributes');
 var colorbarAttrs = require('../../components/colorbar/attributes');
 
 var extendFlat = require('../../lib/extend').extendFlat;
+var overrideAll = require('../../plot_api/edit_types').overrideAll;
 
 var lineAttrs = scatterGeoAttrs.line;
 var markerAttrs = scatterGeoAttrs.marker;
 
 
-module.exports = {
+module.exports = overrideAll({
     lon: scatterGeoAttrs.lon,
     lat: scatterGeoAttrs.lat,
 
     // locations
     // locationmode
 
-    mode: {
-        valType: 'flaglist',
-        flags: ['lines', 'markers', 'text'],
+    mode: extendFlat({}, scatterAttrs.mode, {
         dflt: 'markers',
-        extras: ['none'],
-        role: 'info',
         description: [
             'Determines the drawing mode for this scatter trace.',
             'If the provided `mode` includes *text* then the `text` elements',
             'appear at the coordinates. Otherwise, the `text` elements',
             'appear on hover.'
         ].join(' ')
-    },
+    }),
 
     text: extendFlat({}, scatterAttrs.text, {
         description: [
@@ -47,16 +44,28 @@ module.exports = {
             'If a single string, the same string appears over',
             'all the data points.',
             'If an array of string, the items are mapped in order to the',
-            'this trace\'s (lon,lat) coordinates.'
+            'this trace\'s (lon,lat) coordinates.',
+            'If trace `hoverinfo` contains a *text* flag and *hovertext* is not set,',
+            'these elements will be seen in the hover labels.'
+        ].join(' ')
+    }),
+    hovertext: extendFlat({}, scatterAttrs.hovertext, {
+        description: [
+            'Sets hover text elements associated with each (lon,lat) pair',
+            'If a single string, the same string appears over',
+            'all the data points.',
+            'If an array of string, the items are mapped in order to the',
+            'this trace\'s (lon,lat) coordinates.',
+            'To be seen, trace `hoverinfo` must contain a *text* flag.'
         ].join(' ')
     }),
 
     line: {
         color: lineAttrs.color,
-        width: lineAttrs.width,
+        width: lineAttrs.width
 
         // TODO
-        dash: lineAttrs.dash
+        // dash: dash
     },
 
     connectgaps: scatterAttrs.connectgaps,
@@ -74,9 +83,7 @@ module.exports = {
                 'are only available for *circle* symbols.'
             ].join(' ')
         },
-        opacity: extendFlat({}, markerAttrs.opacity, {
-            arrayOk: false
-        }),
+        opacity: markerAttrs.opacity,
         size: markerAttrs.size,
         sizeref: markerAttrs.sizeref,
         sizemin: markerAttrs.sizemin,
@@ -89,7 +96,7 @@ module.exports = {
         autocolorscale: markerAttrs.autocolorscale,
         reversescale: markerAttrs.reversescale,
         showscale: markerAttrs.showscale,
-        colorbar: colorbarAttrs
+        colorbar: colorbarAttrs,
 
         // line
     },
@@ -102,5 +109,5 @@ module.exports = {
 
     hoverinfo: extendFlat({}, plotAttrs.hoverinfo, {
         flags: ['lon', 'lat', 'text', 'name']
-    }),
-};
+    })
+}, 'calc', 'nested');

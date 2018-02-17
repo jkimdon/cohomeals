@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: queuelib.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: queuelib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class QueueLib extends TikiDb_Bridge
 {
@@ -17,22 +17,22 @@ class QueueLib extends TikiDb_Bridge
 	function push($queue, array $message)
 	{
 		$this->queue->insert(
-			array(
+			[
 				'queue' => $queue,
 				'timestamp' => TikiLib::lib('tiki')->now,
 				'message' => json_encode($message),
-			)
+			]
 		);
 	}
 
 	function clear($queue)
 	{
-		$this->queue->deleteMultiple(array('queue' => $queue,));
+		$this->queue->deleteMultiple(['queue' => $queue,]);
 	}
 
 	function count($queue)
 	{
-		return $this->queue->fetchCount(array('queue' => $queue,));
+		return $this->queue->fetchCount(['queue' => $queue,]);
 	}
 
 	function pull($queue, $count = 1)
@@ -41,26 +41,26 @@ class QueueLib extends TikiDb_Bridge
 
 		// Mark entries as in processing
 		$this->queue->updateMultiple(
-			array('handler' => $handler),
-			array(
+			['handler' => $handler],
+			[
 				'queue' => $queue,
 				'handler' => null,
-			),
+			],
 			$count
 		);
 
 		// Obtain the marked list
-		$messages = $this->queue->fetchColumn('message', array('handler' => $handler,));
+		$messages = $this->queue->fetchColumn('message', ['handler' => $handler,]);
 
 		// Delete from the queue
-		$this->queue->deleteMultiple(array('handler' => $handler,));
+		$this->queue->deleteMultiple(['handler' => $handler,]);
 
 		// Strip duplicate messages
 		$messages = array_unique($messages);
-		if (count($messages))
+		if (count($messages)) {
 			return array_map('json_decode', $messages, array_fill(0, count($messages), true));
+		}
 
-		return array();
+		return [];
 	}
 }
-

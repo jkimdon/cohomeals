@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WebService.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: WebService.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_ResultLoader_WebService
 {
@@ -23,12 +23,12 @@ class Services_ResultLoader_WebService
 	function __invoke($offset, $count)
 	{
 		$this->client->setParameterPost(
-			array(
+			[
 				$this->offsetKey => $offset,
 				$this->countKey => $count,
-			)
+			]
 		);
-		$this->client->setHeaders(array('Accept' => 'application/json'));
+		$this->client->setHeaders(['Accept' => 'application/json']);
 
 		$this->client->setMethod(Zend\Http\Request::METHOD_POST);
 		$response = $this->client->send();
@@ -41,4 +41,3 @@ class Services_ResultLoader_WebService
 		return $out[$this->resultKey];
 	}
 }
-

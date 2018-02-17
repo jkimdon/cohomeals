@@ -1,4 +1,4 @@
-{* $Id: mod-last_created_blogs.tpl 62117 2017-04-06 16:45:08Z drsassafras $ *}
+{* $Id: mod-last_created_blogs.tpl 62137 2017-04-08 16:53:55Z lindonb $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="last_created_blogs" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	{modules_list list=$modLastCreatedBlogs nonums=$nonums}

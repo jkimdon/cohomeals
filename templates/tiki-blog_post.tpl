@@ -1,4 +1,4 @@
-{* $Id: tiki-blog_post.tpl 58008 2016-03-19 22:26:34Z lindonb $ *} 
+{* $Id: tiki-blog_post.tpl 64663 2017-11-21 22:15:24Z chealer $ *} 
 {title url="tiki-blog_post.php?blogId=$blogId&amp;postId=$postId"}{if $postId gt 0}{tr}Edit Post{/tr}{else}{tr}New Post{/tr}{/if}{if !empty($blog_data.title)} - {$blog_data.title}{/if}{/title}
 
 <div class="t_navbar btn-group form-group">
@@ -41,7 +41,6 @@
 {/strip}{/capture}
 
 <form enctype="multipart/form-data" name='blogpost' method="post" action="tiki-blog_post.php{$smarty.capture.actionUrlParam}" id ='editpageform' class="form-horizontal">
-	<input type="hidden" name="allowhtml" value="{if $prefs.wysiwyg_htmltowiki eq 'n'}on{/if}">
 	<input type="hidden" name="postId" value="{$postId|escape}">
 	<fieldset class="tabcontent">
 		{if $blogs|@count gt 1 and ( !isset($blogId) or $blogId eq 0 )}

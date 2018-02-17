@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiBuilder.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: WikiBuilder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_ResultSet_WikiBuilder
 {
@@ -30,8 +30,15 @@ class Search_ResultSet_WikiBuilder
 				$arguments = $argumentParser->parse($match->getArguments());
 
 				$field = isset($arguments['field']) ? $arguments['field'] : 'aggregate';
-				$collect = isset($arguments['collect']) ? explode(',', $arguments['collect']) : array('user');
+				$collect = isset($arguments['collect']) ? explode(',', $arguments['collect']) : ['user'];
 				$this->result->groupBy($field, $collect);
+			}
+			if ($name == 'aggregate') {
+				$arguments = $argumentParser->parse($match->getArguments());
+
+				$fields = isset($arguments['fields']) ? explode(',', $arguments['fields']) : [];
+				$totals = isset($arguments['totals']) ? explode(',', $arguments['totals']) : [];
+				$this->result->aggregate($fields, $totals);
 			}
 		}
 
@@ -40,4 +47,3 @@ class Search_ResultSet_WikiBuilder
 		}
 	}
 }
-

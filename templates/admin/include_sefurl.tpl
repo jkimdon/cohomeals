@@ -1,9 +1,9 @@
-{* $Id: include_sefurl.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_sefurl.tpl 65361 2018-01-29 11:57:01Z jonnybradley $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}See also{/tr} <a class="alert-link" href="tiki-admin.php?page=metatags">{tr}Meta tags{/tr}</a>.
 {/remarksbox}
 <form class="admin form-horizontal" method="post" action="tiki-admin.php?page=sefurl" role="form" class="form">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar clearfix">
 		{include file='admin/include_apply_top.tpl'}
 	</div>
@@ -48,12 +48,15 @@
 		{/if}
 		{preference name=feature_canonical_url}
 		<div id="feature_canonical_url_childcontainer" class="clearfix">
+			{preference name=https_external_links_for_users}
 			{preference name=feature_canonical_domain}
 			<span class="help-block col-md-8 col-md-push-4">
 				{tr}For example, if the field is left blank, the canonical URL domain is:{/tr} {$base_url_canonical_default}
 			</span>
 		</div>
 		{preference name=wiki_url_scheme}
+
+        {preference name=feature_sefurl_routes}
 	</fieldset>
 	<fieldset>
 		<legend>{tr}Settings{/tr}</legend>
@@ -79,6 +82,7 @@
 		</div>
 		{preference name=feature_sefurl_title_article}
 		{preference name=feature_sefurl_title_blog}
+		{preference name=feature_sefurl_title_trackeritem}
 		{preference name=feature_sefurl_tracker_prefixalias}
 		{preference name=url_only_ascii}
 	</fieldset>

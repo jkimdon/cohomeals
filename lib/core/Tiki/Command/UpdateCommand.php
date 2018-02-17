@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UpdateCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: UpdateCommand.php 64918 2017-12-15 18:34:34Z chealer $
 
 namespace Tiki\Command;
 
@@ -22,7 +22,7 @@ class UpdateCommand extends Command
 			->setDescription('Update the database to the latest schema')
 			->addOption(
 				'auto-register',
-				null,
+				'a',
 				InputOption::VALUE_NONE,
 				'Record any failed patch as applied.'
 			);
@@ -37,29 +37,30 @@ class UpdateCommand extends Command
 		if ($installed) {
 			$installer->update();
 			$output->writeln('Update completed.');
-			if (count($installer->installed)) {
-				foreach ($installer->installed as $patch) {
-					$output->writeln("<info>Installed: $patch</info>");
+			foreach (array_keys(\Patch::getPatches([\Patch::NEWLY_APPLIED])) as $patch) {
+				$output->writeln("<info>Installed: $patch</info>");
+			}
+			foreach (array_keys(\Patch::getPatches([\Patch::NOT_APPLIED])) as $patch) {
+				$output->writeln("<error>Failed: $patch</error>");
+
+				if ($autoRegister) {
+					\Patch::$list[$patch]->record();
 				}
 			}
 
-			if ( count($installer->executed) ) {
-				foreach ( $installer->executed as $script ) {
+			if (count($installer->executed)) {
+				foreach ($installer->executed as $script) {
 					$output->writeln("<info>Executed: $script</info>");
 				}
 			}
 
-			$output->writeln('<info>Queries executed successfully: ' . count($installer->success) . '</info>');
+			$output->writeln('<info>Queries executed successfully: ' . count($installer->queries['successful']) . '</info>');
 
-			if ( count($installer->failures) ) {
-				foreach ( $installer->failures as $key => $error ) {
+			if (count($installer->queries['failed'])) {
+				foreach ($installer->queries['failed'] as $key => $error) {
 					list( $query, $message, $patch ) = $error;
 
 					$output->writeln("<error>Error $key in $patch\n\t$query\n\t$message</error>");
-
-					if ($autoRegister) {
-						$installer->recordPatch($patch);
-					}
 				}
 			}
 

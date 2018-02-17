@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiAdminGroupsMembers.php 61489 2017-03-04 05:03:43Z lindonb $
+// $Id: TikiAdminGroupsMembers.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -58,7 +58,7 @@ class Table_Settings_TikiAdminGroupsMembers extends Table_Settings_Standard
 			'#assigned' => [
 				'sort' => [
 					'type' => 'isoDate',
-					'ajax' =>'created'
+					'ajax' => 'created'
 				],
 				'filter' => [
 					'type' => false
@@ -68,7 +68,7 @@ class Table_Settings_TikiAdminGroupsMembers extends Table_Settings_Standard
 			'#expires' => [
 				'sort' => [
 					'type' => 'isoDate',
-					'ajax' =>'expire'
+					'ajax' => 'expire'
 				],
 				'filter' => [
 					'type' => false
@@ -87,4 +87,3 @@ class Table_Settings_TikiAdminGroupsMembers extends Table_Settings_Standard
 		]
 	];
 }
-

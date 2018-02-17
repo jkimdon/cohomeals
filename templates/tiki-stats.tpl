@@ -1,4 +1,4 @@
-{* $Id: tiki-stats.tpl 63874 2017-09-19 15:42:32Z yonixxx $ *}
+{* $Id: tiki-stats.tpl 63879 2017-09-20 09:28:18Z jonnybradley $ *}
 
 {title help="Stats"}{tr}Stats{/tr}{/title}
 

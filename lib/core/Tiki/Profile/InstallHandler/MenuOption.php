@@ -1,28 +1,29 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MenuOption.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: MenuOption.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data )
+		if ($this->data) {
 			return $this->data;
+		}
 
-		$defaults = array(
+		$defaults = [
 			'type' => 'o',
 			'optionId' => 0,
 			'position' => 1,
 			'section' => '',
 			'perm' => '',
-			'groups' => array(),
+			'groups' => [],
 			'level' => 0,
 			'icon' => '',
 			'menuId' => 0
-		);
+		];
 
 
 		$data = $this->obj->getData();
@@ -31,9 +32,9 @@ class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 
 		$this->replaceReferences($data);
 
-		if (!empty($data['menuId']) && !empty($data['url'])) {
-		   $menulib = TikiLib::lib('menu');
-		   $data['optionId'] = $menulib->get_option($data['menuId'], $data['url']);
+		if (! empty($data['menuId']) && ! empty($data['url'])) {
+			$menulib = TikiLib::lib('menu');
+			$data['optionId'] = $menulib->get_option($data['menuId'], $data['url']);
 		}
 		return $this->data = $data;
 	}
@@ -42,8 +43,9 @@ class Tiki_Profile_InstallHandler_MenuOption extends Tiki_Profile_InstallHandler
 	{
 		$data = $this->getData();
 
-		if ( ! isset( $data['url'] ) || ! isset( $data['menuId'] ) )
+		if (! isset($data['url']) || ! isset($data['menuId'])) {
 			return false;
+		}
 		return true;
 	}
 	function _install()

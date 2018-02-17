@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_performance.php 61869 2017-03-26 17:25:25Z lindonb $
+// $Id: include_performance.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -13,7 +13,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 
 $opcode_stats = TikiLib::lib('admin')->getOpcodeCacheStatus();
 $stat_flag = $opcode_stats['stat_flag'];
-if ( $stat_flag ) {
+if ($stat_flag) {
 	$smarty->assign('stat_flag', $stat_flag);
 }
 
@@ -26,13 +26,13 @@ $txtAvailable = tr('Available');
 $smarty->assign(
 	'memory_graph',
 	$tikilib->httpScheme() . '://chart.googleapis.com/chart?' . http_build_query(
-		array(
+		[
 			'cht' => 'p3',
 			'chs' => '250x100',
 			'chd' => "t:{$opcode_stats['memory_used']},{$opcode_stats['memory_avail']}",
-			'chl' => $txtUsed . '|' .$txtAvailable,
+			'chl' => $txtUsed . '|' . $txtAvailable,
 			'chtt' => tr('Memory'),
-		),
+		],
 		'',
 		'&'
 	)
@@ -43,13 +43,13 @@ $txtMiss = tr('Miss');
 $smarty->assign(
 	'hits_graph',
 	$tikilib->httpScheme() . '://chart.googleapis.com/chart?' . http_build_query(
-		array(
+		[
 			'cht' => 'p3',
 			'chs' => '250x100',
 			'chd' => "t:{$opcode_stats['hit_hit']},{$opcode_stats['hit_miss']}",
 			'chl' => $txtHit . '|' . $txtMiss,
 			'chtt' => tr('Cache'),
-		),
+		],
 		'',
 		'&'
 	)

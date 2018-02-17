@@ -1,11 +1,11 @@
-{* $Id: include_features.tpl 63665 2017-08-25 04:16:20Z drsassafras $ *}
+{* $Id: include_features.tpl 63666 2017-08-25 04:17:14Z drsassafras $ *}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}Please see the <a class='alert-link' target='tikihelp' href='http://doc.tiki.org/Features'>evaluation of each feature</a> on Tiki's developer site.{/tr}
 {/remarksbox}
 
 <form class="admin form-horizontal" id="features" name="features" action="tiki-admin.php?page=features" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			{include file='admin/include_apply_top.tpl'}
@@ -33,7 +33,6 @@
 					{preference name=feature_trackers}
 					{preference name=feature_calendar}
 					{preference name=feature_search}
-					{preference name=feature_cohomeals}
 				</div>
 			</fieldset>
 
@@ -58,6 +57,7 @@
 				<div class="admin clearfix form-group featurelist">
 					{preference name=feature_stats}
 					{preference name=feature_actionlog}
+					{preference name=feature_scheduler}
 					<div class="adminoptionboxchild">
 						<fieldset>
 							<legend>{tr}Watches{/tr}</legend>

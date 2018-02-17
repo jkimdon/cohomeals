@@ -1,92 +1,124 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_include.php 59168 2016-07-13 21:46:43Z amnabilal $
+// $Id: wikiplugin_include.php 64859 2017-12-11 10:19:05Z yonixxx $
 
-function wikiplugin_include_info() 
+function wikiplugin_include_info()
 {
-	return array(
-		'name' => tra('Include'),
+	return [
+		'name' => tr('Include'),
 		'documentation' => 'PluginInclude',
-		'description' => tra('Include a portion of another wiki page'),
-		'prefs' => array('wikiplugin_include'),
+		'description' => tr('Include a portion of another wiki page'),
+		'prefs' => ['wikiplugin_include'],
 		'iconname' => 'copy',
 		'introduced' => 1,
-		'tags' => array( 'basic' ),
+		'tags' => [ 'basic' ],
 		'format' => 'html',
-		'params' => array(
-			'page' => array(
+		'params' => [
+			'page' => [
 				'required' => true,
-				'name' => tra('Page Name'),
-				'description' => tra('Wiki page name to include.'),
+				'name' => tr('Page Name'),
+				'description' => tr('Wiki page name where is saved the content that should be included.'),
 				'since' => '1',
 				'filter' => 'pagename',
 				'default' => '',
 				'profile_reference' => 'wiki_page',
-			),
-			'start' => array(
+			],
+			'start' => [
 				'required' => false,
-				'name' => tra('Start'),
-				'description' => tra('When only a portion of the page should be included, specify the marker from which
-					inclusion should start.'),
+				'name' => tr('Start'),
+				'description' => tr('When only a portion of the page should be included, enter the text of the full line after which
+					inclusion should start (it will not be included).'),
 				'since' => '1',
 				'default' => '',
-			),
-			'stop' => array(
+			],
+			'stop' => [
 				'required' => false,
-				'name' => tra('Stop'),
-				'description' => tra('When only a portion of the page should be included, specify the marker at which
-					inclusion should end.'),
+				'name' => tr('Stop'),
+				'description' => tr('When only a portion of the page should be included, enter the text of the full line before which
+					inclusion should end (it will not be included).'),
 				'since' => '1',
 				'default' => '',
-			),
-			'nopage_text' => array(
+			],
+			'linkoriginal' => [
 				'required' => false,
-				'name' => tra('Nopage Text'),
-				'description' => tra('Text to show when no page is found.'),
+				'name' => tr('Read more button'),
+				'description' => tr('Add a "Read more" link at the end of included content, linking to the original page. (shows \"Read More\" by default)'),
+				'since' => '18.0',
+				'default' => 'n',
+				'options' => [
+					['text' => tr('Yes'), 'value' => 'y'],
+					['text' => tr('No'), 'value' => 'n'],
+				],
+			],
+			'linkoriginal_text' => [
+				'required' => false,
+				'name' => tr('Read more button label'),
+				'description' => tr('Enter your text to change the default button label.'),
+				'since' => '18.0',
+				'filter' => 'text',
+				'default' => '',
+			],
+			'nopage_text' => [
+				'required' => false,
+				'name' => tr('Page not found'),
+				'description' => tr('Text to show when the page selected to be included is not found anymore.'),
 				'since' => '6.0',
 				'filter' => 'text',
 				'default' => '',
-			),
-			'pagedenied_text' => array(
+			],
+			'pagedenied_text' => [
 				'required' => false,
-				'name' => tra('Page Denied Text'),
-				'description' => tra('Text to show when the page exists but is denied to the user.'),
+				'name' => tr('Permission denied message'),
+				'description' => tr('Text to show when the page exists but the user has insufficient permissions to see it.'),
 				'since' => '6.0',
 				'filter' => 'text',
 				'default' => '',
-			),
-			'page_edit_icon' => array(
+			],
+            'pagenotapproved_text' => [
 				'required' => false,
-				'name' => tra('Edit Icon'),
-				'description' => tra('Option to show the edit icon for the included page (shown by default).'),
+				'name' => tr('No version approved error message'),
+				'description' => tr('Text to show when the page exists but no version is approved.'),
+				'since' => '18.0',
+				'filter' => 'text',
+				'default' => '',
+            ],
+			'page_edit_icon' => [
+				'required' => false,
+				'name' => tr('Edit Icon'),
+				'description' => tr('Option to show the edit icon for the included page (shown by default). Depends on the \"edit icons\" settings.'),
 				'since' => '12.1',
 				'default' => 'y',
 				'filter' => 'alpha',
-				'options' => array(
-					array('text' => '', 'value' => ''),
-					array('text' => tra('Yes'), 'value' => 'y'),
-					array('text' => tra('No'), 'value' => 'n'),
-				),
-			),
-		),
-	);
+				'options' => [
+					['text' => '', 'value' => ''],
+					['text' => tr('Yes'), 'value' => 'y'],
+					['text' => tr('No'), 'value' => 'n'],
+				],
+			],
+		],
+	];
 }
 
 function wikiplugin_include($dataIn, $params)
 {
-	global $user, $killtoc;
-    static $included_pages, $data;
+	global $user, $killtoc, $prefs;
+	static $included_pages, $data;
 	$userlib = TikiLib::lib('user');
 	$tikilib = TikiLib::lib('tiki');
 
 	$killtoc = true;
 	$max_times = 5;
-	$params = array_merge(array( 'nopage_text' => '', 'pagedenied_text' => '', 'page_edit_icon' => 'y' ), $params);
+	$params = array_merge([
+		'nopage_text' => '',
+		'pagedenied_text' => '',
+		'page_edit_icon' => 'y',
+		'pagenotapproved_text' => tr('There are no approved versions of this page.'),
+	], $params);
 	extract($params, EXTR_SKIP);
-	if (!isset($page)) {
+	if (! isset($page)) {
 		return ("<b>missing page for plugin INCLUDE</b><br />");
 	}
 
@@ -95,28 +127,52 @@ function wikiplugin_include($dataIn, $params)
 	$wikiplugin_included_page = $page;
 
 	$memo = $page;
-	if (isset($start)) $memo .= "/$start";
-	if (isset($end)) $memo .= "/$end";
-    if ( isset($included_pages[$memo]) ) {
-        if ( $included_pages[$memo]>=$max_times ) {
-            return '';
-        }
-        $included_pages[$memo]++;
-    } else {
-        $included_pages[$memo] = 1;
-        // only evaluate permission the first time round
-        // evaluate if object or system permissions enables user to see the included page
-    	$data[$memo] = $tikilib->get_page_info($page);
-    	if (!$data[$memo]) {
-    		$text = $nopage_text;
-    	}
+	if (isset($start)) {
+		$memo .= "/$start";
+	}
+	if (isset($end)) {
+		$memo .= "/$end";
+	}
+	if (isset($included_pages[$memo])) {
+		if ($included_pages[$memo] >= $max_times) {
+			return '';
+		}
+		$included_pages[$memo]++;
+	} else {
+		$included_pages[$memo] = 1;
+		// only evaluate permission the first time round
+		// evaluate if object or system permissions enables user to see the included page
+		if ($prefs['flaggedrev_approval'] != 'y') {
+			$data[$memo] = $tikilib->get_page_info($page);
+		} else {
+			$flaggedrevisionlib = TikiLib::lib('flaggedrevision');
+			if ($flaggedrevisionlib->page_requires_approval($page)) {
+				if ($version_info = $flaggedrevisionlib->get_version_with($page, 'moderation', 'OK')) {
+					$data[$memo] = $version_info;
+				} else {
+					$included_pages[$memo] = $max_times;
+					return($pagenotapproved_text);
+				}
+			} else {
+				$data[$memo] = $tikilib->get_page_info($page);
+			}
+		}
+		if (! $data[$memo]) {
+			$text = $nopage_text;
+		}
 		$perms = $tikilib->get_perm_object($page, 'wiki page', $data[$memo], false);
-        if ($perms['tiki_p_view'] != 'y') {
-            $included_pages[$memo] = $max_times;
-            $text = $pagedenied_text;
-            return($text);
-        }
-    }
+		if ($perms['tiki_p_view'] != 'y') {
+			$included_pages[$memo] = $max_times;
+			$text = $pagedenied_text;
+			return($text);
+		}
+	}
+
+	if (! empty($params['linkoriginal_text'])) {
+		$linkoriginal_text = $params['linkoriginal_text'];
+	} else {
+		$linkoriginal_text = 'Read more';
+	}
 
 	if ($data[$memo]) {
 		$text = $data[$memo]['data'];
@@ -139,7 +195,7 @@ function wikiplugin_include($dataIn, $params)
 						}
 					}
 				}
-			} else if (isset($start)) {
+			} elseif (isset($start)) {
 				// Only start marker is set. Search for it, dropping all lines until
 				// it is found.
 				foreach ($explText as $i => $line) {
@@ -164,18 +220,18 @@ function wikiplugin_include($dataIn, $params)
 						}
 					}
 				}
-			}	
+			}
 			$text = implode("\n", $explText);
 		}
 	}
-	
+
 	$parserlib = TikiLib::lib('parser');
-	$old_options = 	$parserlib->option;
-	$options = array(
+	$old_options = $parserlib->option;
+	$options = [
 		'is_html' => $data[$memo]['is_html'],
 		'suppress_icons' => true,
-	);
-	if (!empty($_REQUEST['page'])) {
+	];
+	if (! empty($_REQUEST['page'])) {
 		$options['page'] = $_REQUEST['page'];
 	}
 	$parserlib->setOptions($options);
@@ -183,18 +239,30 @@ function wikiplugin_include($dataIn, $params)
 	$text = $parserlib->parse_data($text, $options);
 	$parserlib->setOptions($old_options);
 
+	// append a "See full page" link at end of text if only a portion of page is being included
+    if (($prefs['wiki_plugin_include_link_original'] == 'y' && (isset($start) || isset($stop))) || (isset($linkoriginal) && $linkoriginal == 'y')) {
+        $wikilib = TikiLib::lib('wiki');
+	    $text .= '<p><a href="'.$wikilib->sefurl($page).'" class="btn btn-default"';
+        $text .= 'title="'.sprintf(tr('The text above comes from page "%s". Click to go to that page'), $page).'">';
+        $text .= smarty_function_icon(['name' => 'align-left'], $smarty).' ';
+        $text .= tr($linkoriginal_text);
+        $text .= '</a><p>';
+	}
+
 	// append an edit button if page_edit_icon does not equal 'n'
 	if ($page_edit_icon != 'n') {
-	if (isset($perms) && $perms['tiki_p_edit'] === 'y' && strpos($_SERVER['PHP_SELF'], 'tiki-send_newsletters.php') === false) {
-		$smarty = TikiLib::lib('smarty');
-		$smarty->loadPlugin('smarty_block_ajax_href');
-		$smarty->loadPlugin('smarty_function_icon');
-		$tip = tra('Include Plugin'). ' | ' . tra('Edit the included page:').' &quot;' . $page . '&quot;';
-		if($_REQUEST['display']!='pdf')
-		$text .= '<a class="editplugin tips" '.	// ironically smarty_block_self_link doesn't work for this! ;)
-				smarty_block_ajax_href(array('template' => 'tiki-editpage.tpl'), 'tiki-editpage.php?page='.urlencode($page).'&returnto='.urlencode($GLOBALS['page']), $smarty, $tmp = false) . '>' .
-				smarty_function_icon(array( '_id' => 'page_edit', 'title' => $tip, 'class' => 'icon tips'), $smarty) . '</a>';
-	}
+		if (isset($perms) && $perms['tiki_p_edit'] === 'y' && strpos($_SERVER['PHP_SELF'], 'tiki-send_newsletters.php') === false) {
+			$smarty = TikiLib::lib('smarty');
+			$smarty->loadPlugin('smarty_block_ajax_href');
+			$smarty->loadPlugin('smarty_function_icon');
+			$tip = tr('Include Plugin') . ' | ' . tr('Edit the included page:') . ' &quot;' . $page . '&quot;';
+			$returnto = ! empty($GLOBALS['page']) ? $GLOBALS['page'] : $_SERVER['REQUEST_URI'];
+			if (empty($_REQUEST['display']) || $_REQUEST['display'] != 'pdf') {
+				$text .= '<a class="editplugin tips" ' . // ironically smarty_block_self_link doesn't work for this! ;)
+				smarty_block_ajax_href(['template' => 'tiki-editpage.tpl'], 'tiki-editpage.php?page=' . urlencode($page) . '&returnto=' . urlencode($returnto), $smarty, $tmp = false) . '>' .
+				smarty_function_icon([ '_id' => 'page_edit', 'title' => $tip, 'class' => 'icon tips'], $smarty) . '</a>';
+			}
+		}
 	}
 	return $text;
 }

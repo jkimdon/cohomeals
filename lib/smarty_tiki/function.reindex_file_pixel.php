@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.reindex_file_pixel.php 60309 2016-11-17 18:41:11Z drsassafras $
+// $Id: function.reindex_file_pixel.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -19,7 +19,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function smarty_function_reindex_file_pixel($params, $smarty)
 {
-	if ( ! is_array($params) || ! isset($params['id']) || ( $id = (int) $params['id'] ) <= 0 ) {
+	if (! is_array($params) || ! isset($params['id']) || ( $id = (int) $params['id'] ) <= 0) {
 		return '';
 	}
 

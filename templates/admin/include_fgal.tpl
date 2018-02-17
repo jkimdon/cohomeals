@@ -1,4 +1,4 @@
-{* $Id: include_fgal.tpl 63572 2017-08-17 06:01:40Z drsassafras $ *}
+{* $Id: include_fgal.tpl 65297 2018-01-23 12:37:13Z lfagundes $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}To create or remove file galleries, select{/tr} <a class="rbox-link" href="tiki-list_file_gallery.php">{tr}File Galleries{/tr}</a> {tr}from the application menu{/tr}.
 	<hr>
@@ -8,7 +8,7 @@
 {/remarksbox}
 
 <form class="form-horizontal" action="tiki-admin.php?page=fgal" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
@@ -81,12 +81,16 @@
 					<input type="submit" class="btn btn-default btn-sm timeout" name="updateMime" id="updateMime" value="{tr}Update mime of all non archived octet-stream files{/tr}">
 				</div>
 
+				{preference name='fgal_clean_xml_always'}
+				{preference name='fgal_allow_svg'}
+
 				{preference name='fgal_upload_from_source'}
 				<div class="adminoptionboxchild" id="fgal_upload_from_source_childcontainer">
 					{preference name='fgal_source_refresh_frequency'}
 					{preference name='fgal_source_show_refresh'}
 				</div>
 				{preference name='tiki_check_file_content'}
+				{preference name='file_galleries_redirect_from_image_gallery'}
 			</fieldset>
 
 			<fieldset>

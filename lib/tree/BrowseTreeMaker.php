@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BrowseTreeMaker.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: BrowseTreeMaker.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 /** \file
  * \brief Browse a tree, for example a categories tree
@@ -12,7 +12,7 @@
  * \enhanced by luci@sh.ground.cz
  *
  */
-require_once ('lib/tree/tree.php');
+require_once('lib/tree/tree.php');
 
 /**
  * \brief Class to render categories browse tree
@@ -24,12 +24,12 @@ class BrowseTreeMaker extends TreeMaker
 	{
 		$headerlib = TikiLib::lib('header');
 
-		$r = '<ul class="tree root">'."\n";
+		$r = '<ul class="tree root">' . "\n";
 
 		$r .= $this->make_tree_r($rootid, $ar) . "</ul>\n";
 
 		// java script block that opens the nodes as remembered in cookies
-		$headerlib->add_jq_onready('$(".tree.root:not(.init)").browse_tree().addClass("init")');
+		$headerlib->add_jq_onready('setTimeout(function () {$(".tree.root:not(.init)").browse_tree().addClass("init")}, 100);');
 
 		// return tree
 		return $r;
@@ -57,12 +57,12 @@ class BrowseTreeMaker extends TreeMaker
 		return "\t\t";
 	}
 
-	function node_start_code_flip($nodeinfo, $count=0)
+	function node_start_code_flip($nodeinfo, $count = 0)
 	{
 		return "\t" . '<li class="treenode withflip ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
 
-	function node_start_code($nodeinfo, $count=0)
+	function node_start_code($nodeinfo, $count = 0)
 	{
 		return "\t" . '<li class="treenode ' . (($count % 2) ? 'odd' : 'even') . '">';
 	}
@@ -88,8 +88,16 @@ class BrowseTreeMaker extends TreeMaker
 	//
 	function node_child_start_code($nodeinfo)
 	{
+		global $prefs;
+
+		if ($this->node_cookie_state($nodeinfo['id']) != 'o' && $prefs['javascript_enabled'] === 'y') {
+			$style = ' style="display:none;"';
+		} else {
+			$style = '';
+		}
+
 		return '<ul class="tree" data-id="' . $nodeinfo['id'] .
-			   	'" data-prefix="' . $this->prefix . '"' . ($this->node_cookie_state($nodeinfo['id']) != 'o' ? ' style="display:none;"' : '') . '>';
+				   '" data-prefix="' . $this->prefix . '"' . $style . '>';
 	}
 
 	//

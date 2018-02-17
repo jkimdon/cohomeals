@@ -6,10 +6,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: get_strings.php 63609 2017-08-21 00:22:45Z drsassafras $
+// $Id: get_strings.php 65226 2018-01-16 16:59:27Z drsassafras $
 
 /**
  * Update lang/xx/language.php files
+ *
+ * Scans a directory (its files) and a set of (individual) files
+ * By default, the directory scanned is the Tiki root, excluding $excludeDirs. By default, the individual files scanned are files in these otherwise excluded directories.
  *
  * Examples:
  * 		- http://localhost/pathToTiki/get_strings.php -> update all language.php files
@@ -21,18 +24,18 @@
  * Command line examples:
  * 		- php get_strings.php
  * 		- php get_strings.php lang=pt-br outputFiles=true
+ *
+ * 		Only scan lib/, and only part of lib/ (exclude lib/core/Zend and lib/captcha), but still include captchalib.php and index.php
+ * 		This FAILS as of 2017-09-15, since the language files (for output) are looked for in baseDir.
  * 		- php get_strings.php baseDir=lib/ excludeDirs=lib/core/Zend,lib/captcha includeFiles=captchalib.php,index.php fileName=language_r.php
  *
- * Note: baseDir and fileName parameters are available in command line mode only
+ * Note: Parameters controlling scanned files (baseDir, excludeDirs, includeFiles) and fileName are available in command line mode only.
  *
- *
- * If you want to know the translation progression for your language, just visit : http://i18n.tiki.org/status
- * which is made with http://tikiwiki.svn.sourceforge.net/viewvc/tikiwiki/trunk/doc/devtools/get_translation_percentage.php?view=markup
  *
  */
 
+require_once('tiki-setup.php');
 if (php_sapi_name() != 'cli') {
-	require_once('tiki-setup.php');
 	$access->check_permission('tiki_p_admin');
 }
 
@@ -42,7 +45,7 @@ require_once('lib/setup/timer.class.php');
 $timer = new timer();
 $timer->start();
 
-$options = array();
+$options = [];
 
 $request = new Tiki_Request();
 
@@ -54,16 +57,18 @@ if ($request->hasProperty('outputFiles')) {
 	$options['outputFiles'] = $request->getProperty('outputFiles');
 }
 
-$excludeDirs = array(
-	'dump' , 'img', 'lang',
+$excludeDirs = [
+	'dump' , 'img', 'lang', 'addons', 'bin', 'installer/schema',
 	'vendor_bundled', 'vendor', 'vendor_extra', 'vendor_custom',
-	 'lib/test',	'temp', 'whelp',
-	'storage',	'tiki_tests', 'doc'
-);
+	 'lib/test',	'temp', 'permissioncheck',
+	'storage',	'tiki_tests', 'doc', 'db','lib/openlayers','tests', 'modules/cache'
+];
+$excludeDirs = array_filter($excludeDirs, 'is_dir'); // only keep in the exclude list if the dir exists
 
-$includeFiles = array(
+// Files are processed after the base directory, so adding a file here allows to scan it even if its directory was excluded.
+$includeFiles = [
 	'./lang/langmapping.php', './img/flags/flagnames.php'
-);
+];
 
 // command-line only options
 if (php_sapi_name() == 'cli') {
@@ -71,8 +76,8 @@ if (php_sapi_name() == 'cli') {
 		$options['baseDir'] = $request->getProperty('baseDir');
 
 		// when a custom base dir is set, default $includeFiles and $excludeDirs are not used
-		$includeFiles = array();
-		$excludeDirs = array();
+		$includeFiles = [];
+		$excludeDirs = [];
 	}
 
 	if ($request->hasProperty('excludeDirs')) {

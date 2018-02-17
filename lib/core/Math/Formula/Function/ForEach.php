@@ -3,30 +3,30 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ForEach.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: ForEach.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Math_Formula_Function_ForEach extends Math_Formula_Function
 {
-	function evaluate( $element )
+	function evaluate($element)
 	{
-		$allowed = array('list', 'formula');
+		$allowed = ['list', 'formula'];
 
 		if ($extra = $element->getExtraValues($allowed)) {
 			$this->error(tr('Unexpected values: %0', implode(', ', $extra)));
 		}
 
 		$list = $element->list;
-		if ( ! $list || count($list) != 1 ) {
+		if (! $list || count($list) != 1) {
 			$this->error(tra('Field must be provided and contain one argument: list'));
 		}
 		$list = $this->evaluateChild($list[0]);
 
-		if ( ! $element->formula || count($element->formula) != 1) {
+		if (! $element->formula || count($element->formula) != 1) {
 			$this->error(tra('Field must be provided and contain a function.'));
 		}
 		$formula = $element->formula[0];
 
-		$out = array();
+		$out = [];
 
 		foreach ($list as $values) {
 			$out[] = $this->evaluateChild($formula, $values);
@@ -35,4 +35,3 @@ class Math_Formula_Function_ForEach extends Math_Formula_Function
 		return $out;
 	}
 }
-

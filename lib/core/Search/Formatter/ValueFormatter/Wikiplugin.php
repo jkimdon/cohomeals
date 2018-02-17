@@ -3,13 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Wikiplugin.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Wikiplugin.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Formatter_ValueFormatter_Wikiplugin extends Search_Formatter_ValueFormatter_Abstract
 {
 	private $arguments;
 
-	function __construct( $arguments )
+	function __construct($arguments)
 	{
 		$this->arguments = $arguments;
 	}
@@ -24,22 +24,22 @@ class Search_Formatter_ValueFormatter_Wikiplugin extends Search_Formatter_ValueF
 
 		if (isset($this->arguments['content'])) {
 			$content = $this->arguments['content'];
-			unset( $this->arguments['content'] );
+			unset($this->arguments['content']);
 		} else {
 			$content = '';
 		}
-		$defaults = array();
+		$defaults = [];
 		if (isset($this->arguments['default'])) {
 			parse_str($this->arguments['default'], $defaults);
 		}
 
-		$params = array();
+		$params = [];
 		foreach ($this->arguments as $key => $val) {
 			if (isset($entry[$val])) {
 				$params[$key] = $entry[$val];
-			} else if (isset($defaults[$key])) {
+			} elseif (isset($defaults[$key])) {
 				$params[$key] = $defaults[$key];
-			} else if ($key !== 'default') {
+			} elseif ($key !== 'default') {
 				$params[$key] = $val;
 			}
 		}
@@ -51,14 +51,13 @@ class Search_Formatter_ValueFormatter_Wikiplugin extends Search_Formatter_ValueF
 			$params,
 			0,
 			false,
-			array(
+			[
 				'context_format' => 'html',
 				'ck_editor' => false,
 				'is_html' => 'y'
-			)
+			]
 		);
 
 		return '~np~' . $out . '~/np~';
 	}
 }
-

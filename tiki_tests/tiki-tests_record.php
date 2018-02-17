@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-tests_record.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-tests_record.php 64635 2017-11-19 13:15:24Z rjsmelo $
 
 require_once('../tiki-setup.php');
 
 if ($prefs['feature_tikitests'] != 'y') {
-	$smarty->assign('msg', tra('This feature is disabled').': feature_tikitests');
+	$smarty->assign('msg', tra('This feature is disabled') . ': feature_tikitests');
 	$smarty->display('error.tpl');
 	die;
 }

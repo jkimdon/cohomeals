@@ -6,7 +6,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-plugins.php 63094 2017-06-27 11:18:36Z jonnybradley $
+// $Id: tiki-plugins.php 64144 2017-10-05 08:12:53Z rjsmelo $
 
 require_once 'tiki-setup.php';
 $access->check_feature('wiki_validate_plugin');
@@ -34,32 +34,13 @@ if (isset($_REQUEST['clearone'])) {
 }
 
 if (isset($_REQUEST['refresh'])) {
-	$pages = $tikilib->list_pages();
-
-	$temp = serialize($headerlib);	// cache headerlib so we can remove all js etc added by plugins
-
-	// disable redirect plugin etc
-	$access->preventRedirect(true);
 	// try to avoid timeouts
 	$old_max_execution_time = ini_get('max_execution_time');
 	$time_limit = new Tiki_TimeLimit(0);
 
-	foreach ($pages['data'] as $apage) {
-		$page = $apage['pageName'];
-		$parserlib->setOptions(
-			array(
-				'page' => $page,
-				'is_html' => $apage['is_html'],
-			)
-		);
-		$parserlib->parse_first($apage['data'], $pre, $no);
-	}
+	$parserlib->pluginRefresh();
 
 	ini_set('max_execution_time', $old_max_execution_time);
-	$access->preventRedirect(false);
-
-	$headerlib = unserialize($temp);
-	unset($temp);
 }
 
 if (isset($_POST['approveall'])) {

@@ -10,7 +10,7 @@
 
 var d3 = require('d3');
 
-var Fx = require('../../plots/cartesian/graph_interact');
+var Fx = require('../../components/fx');
 var Color = require('../../components/color');
 var Drawing = require('../../components/drawing');
 var svgTextUtils = require('../../lib/svg_text_utils');
@@ -77,6 +77,10 @@ module.exports = function plot(gd, cdpie) {
                     return;
                 }
 
+                // to have consistent event data compared to other traces
+                pt.pointNumber = pt.i;
+                pt.curveNumber = trace.index;
+
                 quadrants[pt.pxmid[1] < 0 ? 0 : 1][pt.pxmid[0] < 0 ? 0 : 1].push(pt);
 
                 var cx = cd0.cx + depthVector[0],
@@ -86,10 +90,12 @@ module.exports = function plot(gd, cdpie) {
                     hasHoverData = false;
 
                 function handleMouseOver(evt) {
+                    evt.originalEvent = d3.event;
+
                     // in case fullLayout or fullData has changed without a replot
-                    var fullLayout2 = gd._fullLayout,
-                        trace2 = gd._fullData[trace.index],
-                        hoverinfo = trace2.hoverinfo;
+                    var fullLayout2 = gd._fullLayout;
+                    var trace2 = gd._fullData[trace.index];
+                    var hoverinfo = Fx.castHoverinfo(trace2, fullLayout2, pt.i);
 
                     if(hoverinfo === 'all') hoverinfo = 'label+text+value+percent+name';
 
@@ -97,6 +103,7 @@ module.exports = function plot(gd, cdpie) {
                     // or if hover is turned off
                     if(gd._dragging || fullLayout2.hovermode === false ||
                             hoverinfo === 'none' || hoverinfo === 'skip' || !hoverinfo) {
+                        Fx.hover(gd, evt, 'pie');
                         return;
                     }
 
@@ -107,8 +114,16 @@ module.exports = function plot(gd, cdpie) {
                         thisText = [];
 
                     if(hoverinfo.indexOf('label') !== -1) thisText.push(pt.label);
-                    if(trace2.text && trace2.text[pt.i] && hoverinfo.indexOf('text') !== -1) {
-                        thisText.push(trace2.text[pt.i]);
+                    if(hoverinfo.indexOf('text') !== -1) {
+                        if(trace2.hovertext) {
+                            thisText.push(
+                                Array.isArray(trace2.hovertext) ?
+                                    trace2.hovertext[pt.i] :
+                                    trace2.hovertext
+                            );
+                        } else if(trace2.text && trace2.text[pt.i]) {
+                            thisText.push(trace2.text[pt.i]);
+                        }
                     }
                     if(hoverinfo.indexOf('value') !== -1) thisText.push(helpers.formatPieValue(pt.v, separators));
                     if(hoverinfo.indexOf('percent') !== -1) thisText.push(helpers.formatPiePercent(pt.v / cd0.vTotal, separators));
@@ -119,11 +134,16 @@ module.exports = function plot(gd, cdpie) {
                         y: hoverCenterY,
                         text: thisText.join('<br>'),
                         name: hoverinfo.indexOf('name') !== -1 ? trace2.name : undefined,
-                        color: pt.color,
-                        idealAlign: pt.pxmid[0] < 0 ? 'left' : 'right'
+                        idealAlign: pt.pxmid[0] < 0 ? 'left' : 'right',
+                        color: Fx.castHoverOption(trace, pt.i, 'bgcolor') || pt.color,
+                        borderColor: Fx.castHoverOption(trace, pt.i, 'bordercolor'),
+                        fontFamily: Fx.castHoverOption(trace, pt.i, 'font.family'),
+                        fontSize: Fx.castHoverOption(trace, pt.i, 'font.size'),
+                        fontColor: Fx.castHoverOption(trace, pt.i, 'font.color')
                     }, {
                         container: fullLayout2._hoverlayer.node(),
-                        outerContainer: fullLayout2._paper.node()
+                        outerContainer: fullLayout2._paper.node(),
+                        gd: gd
                     });
 
                     Fx.hover(gd, evt, 'pie');
@@ -132,7 +152,9 @@ module.exports = function plot(gd, cdpie) {
                 }
 
                 function handleMouseOut(evt) {
+                    evt.originalEvent = d3.event;
                     gd.emit('plotly_unhover', {
+                        event: d3.event,
                         points: [evt]
                     });
 
@@ -144,8 +166,8 @@ module.exports = function plot(gd, cdpie) {
 
                 function handleClick() {
                     gd._hoverdata = [pt];
-                    gd._hoverdata.trace = cd.trace;
-                    Fx.click(gd, { target: true });
+                    gd._hoverdata.trace = cd0.trace;
+                    Fx.click(gd, d3.event);
                 }
 
                 slicePath.enter().append('path')
@@ -233,15 +255,11 @@ module.exports = function plot(gd, cdpie) {
                         .attr({
                             'class': 'slicetext',
                             transform: '',
-                            'data-bb': '',
-                            'text-anchor': 'middle',
-                            x: 0,
-                            y: 0
+                            'text-anchor': 'middle'
                         })
                         .call(Drawing.font, textPosition === 'outside' ?
                             trace.outsidetextfont : trace.insidetextfont)
-                        .call(svgTextUtils.convertToTspans);
-                    sliceText.selectAll('tspan.line').attr({x: 0, y: 0});
+                        .call(svgTextUtils.convertToTspans, gd);
 
                     // position the text relative to the slice
                     // TODO: so far this only accounts for flat
@@ -256,7 +274,6 @@ module.exports = function plot(gd, cdpie) {
                             sliceText.call(Drawing.font, trace.outsidetextfont);
                             if(trace.outsidetextfont.family !== trace.insidetextfont.family ||
                                     trace.outsidetextfont.size !== trace.insidetextfont.size) {
-                                sliceText.attr({'data-bb': ''});
                                 textBB = Drawing.bBox(sliceText.node());
                             }
                             transform = transformOutsideText(textBB, pt);

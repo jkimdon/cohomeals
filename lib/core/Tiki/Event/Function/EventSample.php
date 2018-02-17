@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EventSample.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: EventSample.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Event_Function_EventSample extends Math_Formula_Function
 {
@@ -12,20 +12,20 @@ class Tiki_Event_Function_EventSample extends Math_Formula_Function
 		$this->recorder = $recorder;
 	}
 
-	function evaluate( $element )
+	function evaluate($element)
 	{
 		$recorded = $this->evaluateChild($element[0]);
 		$event = $this->evaluateChild($element[1]);
 		$arguments = $this->evaluateChild($element[2]);
 
 		$this->recorder->setSample(
-			$recorded, array(
+			$recorded,
+			[
 				'event' => $event,
 				'args' => $arguments,
-			)
+			]
 		);
 
 		return 1;
 	}
 }
-

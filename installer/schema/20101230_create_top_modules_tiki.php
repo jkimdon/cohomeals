@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20101230_create_top_modules_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
+// $Id: 20101230_create_top_modules_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -26,15 +26,15 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function upgrade_20101230_create_top_modules_tiki($installer)
 {
 
-	$prefs = array();
-	$result = $installer->table('tiki_preferences')->fetchAll(array('name', 'value'), array());
+	$prefs = [];
+	$result = $installer->table('tiki_preferences')->fetchAll(['name', 'value'], []);
 	foreach ($result as $res) {
 		$prefs[$res['name']] = $res['value'];
 	}
 
 // merge in relevant defaults from 6.x as they are no longer defined in 7.x+
 	$prefs = array_merge(
-		array(
+		[
 			'feature_sitelogo' => 'y',
 			'feature_site_login' => 'y',
 			'feature_top_bar' => 'y',
@@ -43,7 +43,7 @@ function upgrade_20101230_create_top_modules_tiki($installer)
 			'feature_sitemycode' => 'y',
 			'feature_breadcrumbs' => 'n',
 			'feature_topbar_id_menu' => '42',
-		),
+		],
 		$prefs
 	);
 
@@ -101,5 +101,4 @@ function upgrade_20101230_create_top_modules_tiki($installer)
 	//	$installer->query("DELETE FROM `tiki_preferences` WHERE `name` IN ".
 	//							"('feature_top_bar','feature_sitelogo','feature_site_login','feature_sitemenu',".
 	//							"'feature_topbar_id_menu','feature_sitesearch');");
-
 }

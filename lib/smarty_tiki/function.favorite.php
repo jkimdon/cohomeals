@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.favorite.php 59477 2016-08-20 15:43:42Z jonnybradley $
+// $Id: function.favorite.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 function smarty_function_favorite($params, $smarty)
 {
@@ -18,28 +18,27 @@ function smarty_function_favorite($params, $smarty)
 	$smarty = TikiLib::lib('smarty');
 	$smarty->loadPlugin('smarty_modifier_escape');
 
-	$url = $servicelib->getUrl(array(
+	$url = $servicelib->getUrl([
 		'controller' => 'favorite',
 		'action' => 'toggle',
 		'type' => $params['type'],
 		'object' => $params['object'],
-	));
+	]);
 
 	$url = smarty_modifier_escape($url);
 	$e_user = smarty_modifier_escape($user);
 
-	if (isset($params['label'])){
+	if (isset($params['label'])) {
 		$label = $params['label'];
-	}else{
+	} else {
 		$label = tr('Favorite');
 	}
 
-	if (isset($params['button_classes'])){
-		$button_classes= $params['button_classes'];
-	}else{
+	if (isset($params['button_classes'])) {
+		$button_classes = $params['button_classes'];
+	} else {
 		$button_classes = "btn btn-default";
 	}
 
-	return '<a class="'. $button_classes .' favorite-toggle" href="' . $url . '" data-key="favorite_' . $e_user . '"> ' . $label . '</a>';
+	return '<a class="' . $button_classes . ' favorite-toggle" href="' . $url . '" data-key="favorite_' . $e_user . '"> ' . $label . '</a>';
 }
-

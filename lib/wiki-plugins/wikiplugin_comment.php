@@ -3,45 +3,45 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_comment.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: wikiplugin_comment.php 64629 2017-11-19 12:06:52Z rjsmelo $
 
 function wikiplugin_comment_info()
 {
-	return array(
+	return [
 		'name' => tra('Comment'),
 		'documentation' => 'PluginComment',
 		'description' => tra('Display a comment area for a specified object'),
-		'prefs' => array( 'wikiplugin_comment' ),
+		'prefs' => [ 'wikiplugin_comment' ],
 		'format' => 'html',
 		'iconname' => 'comment',
 		'introduced' => 8,
-		'params' => array(
-			'objectType' => array(
+		'params' => [
+			'objectType' => [
 				'required' => true,
 				'name' => tra('Object Type'),
 				'description' => tra('Object type the comment is associated with'),
 				'since' => '8.0',
 				'filter' => 'text',
-				'options' => array(
-					array('text' => tr('Tracker Item'), 'value' => 'trackeritem'),
-					array('text' => tr('Image Gallery'), 'value' => 'image gallery'),
-					array('text' => tr('Image'), 'value' => 'image'),
-					array('text' => tr('File Gallery'), 'value' => 'file gallery'),
-					array('text' => tr('File'), 'value' => 'file'),
-					array('text' => tr('Article'), 'value' => 'article'),
-					array('text' => tr('Submission'), 'value' => 'submission'),
-					array('text' => tr('Forum'), 'value' => 'forum'),
-					array('text' => tr('Blog'), 'value' => 'blog'),
-					array('text' => tr('Blog Post'), 'value' => 'blog post'),
-					array('text' => tr('Wiki Page'), 'value' => 'wiki page'),
-					array('text' => tr('History'), 'value' => 'history'),
-					array('text' => tr('FAQ'), 'value' => 'faq'),
-					array('text' => tr('Survey'), 'value' => 'survey'),
-					array('text' => tr('Newsletter'), 'value' => 'newsletter'),
-				),
+				'options' => [
+					['text' => tr('Tracker Item'), 'value' => 'trackeritem'],
+					['text' => tr('Image Gallery'), 'value' => 'image gallery'],
+					['text' => tr('Image'), 'value' => 'image'],
+					['text' => tr('File Gallery'), 'value' => 'file gallery'],
+					['text' => tr('File'), 'value' => 'file'],
+					['text' => tr('Article'), 'value' => 'article'],
+					['text' => tr('Submission'), 'value' => 'submission'],
+					['text' => tr('Forum'), 'value' => 'forum'],
+					['text' => tr('Blog'), 'value' => 'blog'],
+					['text' => tr('Blog Post'), 'value' => 'blog post'],
+					['text' => tr('Wiki Page'), 'value' => 'wiki page'],
+					['text' => tr('History'), 'value' => 'history'],
+					['text' => tr('FAQ'), 'value' => 'faq'],
+					['text' => tr('Survey'), 'value' => 'survey'],
+					['text' => tr('Newsletter'), 'value' => 'newsletter'],
+				],
 				'default' => tr('wiki page'),
-			),
-			'objectId' => array(
+			],
+			'objectId' => [
 				'required' => true,
 				'name' => tra('Object ID'),
 				'description' => tra('Object ID'),
@@ -49,9 +49,9 @@ function wikiplugin_comment_info()
 				'filter' => 'digits',
 				'default' => tr('The current wiki page to which you have added the plugin'),
 				'profile_reference' => 'type_in_param',
-			),
-		)
-	);
+			],
+		]
+	];
 }
 
 function wikiplugin_comment($data, $params)
@@ -59,10 +59,10 @@ function wikiplugin_comment($data, $params)
 	global $page;
 	$smarty = TikiLib::lib('smarty');
 	$params = array_merge(
-		array(
-			"objectId"=> $page,
-			"objectType"=> "wiki page"
-		),
+		[
+			"objectId" => $page,
+			"objectType" => "wiki page"
+		],
 		$params
 	);
 

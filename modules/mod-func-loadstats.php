@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-loadstats.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-loadstats.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,11 +16,11 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_loadstats_info()
 {
-	return array(
+	return [
 		'name' => tra('Server Load'),
 		'description' => tra('Report of server resources used'),
-		'params' => array(),
-	);
+		'params' => [],
+	];
 }
 
 /**
@@ -29,5 +29,4 @@ function module_loadstats_info()
  */
 function module_loadstats($mod_reference, $module_params)
 {
-
 }

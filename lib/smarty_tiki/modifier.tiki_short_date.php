@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.tiki_short_date.php 62117 2017-04-06 16:45:08Z drsassafras $
+// $Id: modifier.tiki_short_date.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -18,7 +18,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  * @return string
  */
 
-function smarty_modifier_tiki_short_date($string, $same='y')
+function smarty_modifier_tiki_short_date($string, $same = 'y')
 {
 	global $prefs;
 	$smarty = TikiLib::lib('smarty');
@@ -27,8 +27,8 @@ function smarty_modifier_tiki_short_date($string, $same='y')
 
 	if ($prefs['jquery_timeago'] === 'y' && $same === 'y') {
 		TikiLib::lib('header')->add_jq_onready('$("time.timeago").timeago();');
-		return '<time class="timeago" datetime="' . TikiLib::date_format('c', $string, false, 5, false) .  '">' . $date . '</time>';
-	} else  {
+		return '<time class="timeago" datetime="' . TikiLib::date_format('c', $string, false, 5, false) . '">' . $date . '</time>';
+	} else {
 		return $date;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "无",
 "Cache" => "系统缓存",
 "Tag already exists" => "标签已经存在",
@@ -1077,7 +1077,7 @@ $lang = array(
 "vote" => "投票",
 "Rate" => "评比",
 "A valid email is mandatory to register" => "你必须输入有效的邮箱才能完成注册",
-"Repeat password" => "再次输入密码",
+"Confirm password" => "再次输入密码",
 "Generate a password" => "生成一个密码",
 "Valid" => "有效",
 "Create New" => "创建新的",
@@ -2133,4 +2133,4 @@ $lang = array(
 "Aborted" => "放弃",
 "Top pages" => "热门页面",
 "Last pages" => "最近页面",
-);
+];

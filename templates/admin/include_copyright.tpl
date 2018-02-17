@@ -1,7 +1,7 @@
-{* $Id: include_copyright.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_copyright.tpl 62265 2017-04-19 01:00:45Z lindonb $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Allows a copyright to be determined for various objects{/tr}.{/remarksbox}
 <form role="form" class="form-horizontal" action="tiki-admin.php?page=copyright" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md clearfix">
 		{include file='admin/include_apply_top.tpl'}
 	</div>

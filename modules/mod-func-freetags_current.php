@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-freetags_current.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-freetags_current.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,12 +16,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_freetags_current_info()
 {
-	return array(
+	return [
 		'name' => tra('Wiki Page Tags'),
 		'description' => tra('Displays current tags on wiki pages and enables adding tags if permissions allow.'),
-		'prefs' => array('feature_freetags'),
-		'params' => array()
-	);
+		'prefs' => ['feature_freetags'],
+		'params' => []
+	];
 }
 
 /**
@@ -34,7 +34,7 @@ function module_freetags_current($mod_reference, $module_params)
 	$smarty = TikiLib::lib('smarty');
 	$freetaglib = TikiLib::lib('freetag');
 
-	$objectperms = Perms::get(array('type' => 'wiki page', 'object' => $page));
+	$objectperms = Perms::get(['type' => 'wiki page', 'object' => $page]);
 	if (! empty($page) && $objectperms->view) {
 		if ($objectperms->edit && $objectperms->freetags_tag) {
 			if (isset($_POST['mod_add_tags'])) {

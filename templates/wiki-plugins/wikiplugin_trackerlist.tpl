@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_trackerlist.tpl 63866 2017-09-18 18:10:58Z luciash $ *}
+{* $Id: wikiplugin_trackerlist.tpl 63873 2017-09-19 14:56:38Z jonnybradley $ *}
 {strip}
 	{capture assign=tdinstyle}overflow:hidden{/capture}
 	{capture assign=tdstyle}style="{$tdinstyle}"{/capture}
@@ -18,6 +18,31 @@
 	{/if}
 	{if $nonPublicFieldsWarning}
 		{remarksbox type='errors' title="{tr}Field error{/tr}"}{$nonPublicFieldsWarning}{/remarksbox}
+	{/if}
+	{if $allowtableexpansion eq 'y'}
+		<button title="{tr}Expand table{/tr}" class="btn btn-default btn-sm table-expand-toggle" type="button" ><span class="icon fa fa-caret-square-o-right fa-fw "></span></button>
+		{jq}
+			$(".table-expand-toggle").click(function(){
+				var $this = $(this);
+				if ( $this.data('expandStatus') != 'expanded' ) {
+					$this.data('expandStatus','expanded');
+					var $parentdiv = $(this).parent('div');
+					$parentdiv.find('div.table-responsive').each(function () {
+						$(this).removeClass('table-responsive').addClass('table');
+					}); // end each
+					$this.attr('title','{tr}Restore layout{/tr}');
+					$this.children('span').removeClass('fa-caret-square-o-right').addClass('fa-caret-square-o-left');
+				}else{
+					$this.data('expandStatus','responsive');
+					var $parentdiv = $(this).parent('div');
+					$parentdiv.find('div.table').each(function () {
+						$(this).addClass('table-responsive').removeClass('table');
+					}); // end each
+					$this.attr('title','{tr}Expand table{/tr}');
+					$this.children('span').removeClass('fa-caret-square-o-left').addClass('fa-caret-square-o-right');
+				}
+			});
+		{/jq}
 	{/if}
 	{if isset($user_watching_tracker)}
 		{if $user_watching_tracker eq 'n'}

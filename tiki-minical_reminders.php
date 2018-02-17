@@ -3,16 +3,18 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minical_reminders.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-minical_reminders.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
-include_once ("lib/init/initlib.php");
-include_once ('tiki-setup_base.php');
-include_once ('lib/minical/minicallib.php');
+include_once("lib/init/initlib.php");
+include_once('tiki-setup_base.php');
+include_once('lib/minical/minicallib.php');
 $access->check_feature('feature_minical');
-if (!$prefs['minical_reminders']) die;
+if (! $prefs['minical_reminders']) {
+	die;
+}
 //$refresh=$_REQUEST['refresh']*1000;
 $refresh = 1000 * 60 * 1;
 $evs = $minicallib->minical_get_events_to_remind($user, $prefs['minical_reminders']);

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiPaymentPast.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: TikiPaymentPast.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -25,7 +25,7 @@ class Table_Settings_TikiPaymentPast extends Table_Settings_TikiPayment
 
 	protected function getTableSettings()
 	{
-		unset ($this->ts['columns']['#req_date']);
+		unset($this->ts['columns']['#req_date']);
 		$this->ts['columns']['#detail'] = [
 			'sort' => [
 				'type' => 'text',
@@ -41,34 +41,34 @@ class Table_Settings_TikiPaymentPast extends Table_Settings_TikiPayment
 		$this->ts['columns']['#pmt_date'] = [
 			'sort' => [
 				'type' => 'dateFormat-yyyy-mm-dd',
-				'ajax' =>'payment_date',
+				'ajax' => 'payment_date',
 			],
 			'filter' => [
 				'type' => 'date',
-				'ajax' =>'filter_payment_date',
+				'ajax' => 'filter_payment_date',
 			],
 			'priority' => 5,
 		];
 		$this->ts['columns']['#pmt_type'] = [
 			'sort' => [
 				'type' => 'text',
-				'ajax' =>'type',
+				'ajax' => 'type',
 			],
 			'filter' => [
 				'type' => 'text',
-				'ajax' =>'filter_type',
+				'ajax' => 'filter_type',
 			],
 			'priority' => 5,
 		];
 		$this->ts['columns']['#payer'] = [
-			'sort' => array(
+			'sort' => [
 				'type' => 'text',
-				'ajax' =>'payer',
-			),
-			'filter' => array(
+				'ajax' => 'payer',
+			],
+			'filter' => [
 				'type' => 'text',
-				'ajax' =>'filter_payer',
-			),
+				'ajax' => 'filter_payer',
+			],
 			'priority' => 6,
 		];
 		$this->ts['ajax']['offset'] .= '_' . $this->ts['ajax']['requiredparams']['list_type'];

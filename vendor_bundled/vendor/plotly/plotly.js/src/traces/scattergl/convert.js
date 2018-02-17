@@ -10,7 +10,7 @@
 'use strict';
 
 var createScatter = require('gl-scatter2d');
-var createFancyScatter = require('gl-scatter2d-fancy');
+var createFancyScatter = require('gl-scatter2d-sdf');
 var createLine = require('gl-line2d');
 var createError = require('gl-error2d');
 var isNumeric = require('fast-isnumeric');
@@ -25,11 +25,12 @@ var formatColor = require('../../lib/gl_format_color');
 var subTypes = require('../scatter/subtypes');
 var makeBubbleSizeFn = require('../scatter/make_bubble_size_func');
 var getTraceColor = require('../scatter/get_trace_color');
-var MARKER_SYMBOLS = require('../../constants/gl_markers');
+var MARKER_SYMBOLS = require('../../constants/gl2d_markers');
 var DASHES = require('../../constants/gl2d_dashes');
+var DESELECTDIM = require('../../constants/interactions').DESELECTDIM;
 
 var AXES = ['xaxis', 'yaxis'];
-
+var TRANSPARENT = [0, 0, 0, 0];
 
 function LineWithMarkers(scene, uid) {
     this.scene = scene;
@@ -46,11 +47,17 @@ function LineWithMarkers(scene, uid) {
     this.hoverinfo = 'all';
     this.connectgaps = true;
 
+    this.index = null;
     this.idToIndex = [];
     this.bounds = [0, 0, 0, 0];
 
+    this.isVisible = false;
     this.hasLines = false;
-    this.lineOptions = {
+    this.hasErrorX = false;
+    this.hasErrorY = false;
+    this.hasMarkers = false;
+
+    this.line = this.initObject(createLine, {
         positions: new Float64Array(0),
         color: [0, 0, 0, 1],
         width: 1,
@@ -60,35 +67,26 @@ function LineWithMarkers(scene, uid) {
             [0, 0, 0, 1],
             [0, 0, 0, 1],
             [0, 0, 0, 1]],
-        dashes: [1]
-    };
-    this.line = createLine(scene.glplot, this.lineOptions);
-    this.line._trace = this;
+        dashes: [1],
+    }, 0);
 
-    this.hasErrorX = false;
-    this.errorXOptions = {
+    this.errorX = this.initObject(createError, {
         positions: new Float64Array(0),
         errors: new Float64Array(0),
         lineWidth: 1,
         capSize: 0,
         color: [0, 0, 0, 1]
-    };
-    this.errorX = createError(scene.glplot, this.errorXOptions);
-    this.errorX._trace = this;
+    }, 1);
 
-    this.hasErrorY = false;
-    this.errorYOptions = {
+    this.errorY = this.initObject(createError, {
         positions: new Float64Array(0),
         errors: new Float64Array(0),
         lineWidth: 1,
         capSize: 0,
         color: [0, 0, 0, 1]
-    };
-    this.errorY = createError(scene.glplot, this.errorYOptions);
-    this.errorY._trace = this;
+    }, 2);
 
-    this.hasMarkers = false;
-    this.scatterOptions = {
+    var scatterOptions0 = {
         positions: new Float64Array(0),
         sizes: [],
         colors: [],
@@ -98,17 +96,48 @@ function LineWithMarkers(scene, uid) {
         size: 12,
         color: [0, 0, 0, 1],
         borderSize: 1,
-        borderColor: [0, 0, 0, 1]
+        borderColor: [0, 0, 0, 1],
+        snapPoints: true
     };
-    this.scatter = createScatter(scene.glplot, this.scatterOptions);
-    this.scatter._trace = this;
-    this.fancyScatter = createFancyScatter(scene.glplot, this.scatterOptions);
-    this.fancyScatter._trace = this;
+    var scatterOptions1 = Lib.extendFlat({}, scatterOptions0, {snapPoints: false});
 
-    this.isVisible = false;
+    this.scatter = this.initObject(createScatter, scatterOptions0, 3);
+    this.fancyScatter = this.initObject(createFancyScatter, scatterOptions0, 4);
+    this.selectScatter = this.initObject(createScatter, scatterOptions1, 5);
 }
 
 var proto = LineWithMarkers.prototype;
+
+proto.initObject = function(createFn, options, objIndex) {
+    var _this = this;
+    var glplot = _this.scene.glplot;
+    var options0 = Lib.extendFlat({}, options);
+    var obj = null;
+
+    function update() {
+        if(!obj) {
+            obj = createFn(glplot, options);
+            obj._trace = _this;
+            obj._index = objIndex;
+        }
+        obj.update(options);
+    }
+
+    function clear() {
+        if(obj) obj.update(options0);
+    }
+
+    function dispose() {
+        if(obj) obj.dispose();
+    }
+
+    return {
+        options: options,
+        update: update,
+        clear: clear,
+        dispose: dispose
+    };
+};
 
 proto.handlePick = function(pickResult) {
     var index = pickResult.pointId;
@@ -189,7 +218,7 @@ function _convertArray(convert, data, count) {
 var convertNumber = convertArray.bind(null, function(x) { return +x; });
 var convertColorBase = convertArray.bind(null, str2RGBArray);
 var convertSymbol = convertArray.bind(null, function(x) {
-    return MARKER_SYMBOLS[x] || '●';
+    return MARKER_SYMBOLS[x] ? x : 'circle';
 });
 
 function convertColor(color, opacity, count) {
@@ -226,13 +255,21 @@ function _convertColor(colors, opacities, count) {
     return result;
 }
 
-/* Order is important here to get the correct laying:
- * - lines
- * - errorX
- * - errorY
- * - markers
- */
-proto.update = function(options) {
+function isSymbolOpen(symbol) {
+    return symbol.split('-open')[1] === '';
+}
+
+function fillColor(colorIn, colorOut, offsetIn, offsetOut, isDimmed) {
+    var dim = isDimmed ? DESELECTDIM : 1;
+    var j;
+
+    for(j = 0; j < 3; j++) {
+        colorIn[4 * offsetIn + j] = colorOut[4 * offsetOut + j];
+    }
+    colorIn[4 * offsetIn + j] = dim * colorOut[4 * offsetOut + j];
+}
+
+proto.update = function(options, cdscatter) {
     if(options.visible !== true) {
         this.isVisible = false;
         this.hasLines = false;
@@ -255,7 +292,11 @@ proto.update = function(options) {
     this.connectgaps = !!options.connectgaps;
 
     if(!this.isVisible) {
-        this.clear();
+        this.line.clear();
+        this.errorX.clear();
+        this.errorY.clear();
+        this.scatter.clear();
+        this.fancyScatter.clear();
     }
     else if(this.isFancy(options)) {
         this.updateFancy(options);
@@ -264,9 +305,26 @@ proto.update = function(options) {
         this.updateFast(options);
     }
 
+    // sort objects so that order is preserve on updates:
+    // - lines
+    // - errorX
+    // - errorY
+    // - markers
+    this.scene.glplot.objects.sort(function(a, b) {
+        return a._index - b._index;
+    });
+
+    // set trace index so that scene2d can sort object per traces
+    this.index = options.index;
+
     // not quite on-par with 'scatter', but close enough for now
     // does not handle the colorscale case
     this.color = getTraceColor(options, {});
+
+    // provide reference for selecting points
+    if(cdscatter && cdscatter[0] && !cdscatter[0]._glTrace) {
+        cdscatter[0]._glTrace = this;
+    }
 };
 
 // We'd ideally know that all values are of fast types; sampling gives no certainty but faster
@@ -274,7 +332,7 @@ proto.update = function(options) {
 //      representing the epoch milliseconds in a typed array;
 //      also, perhaps the Python / R interfaces take care of String->Date conversions
 //      such that there's no need to check for string dates in plotly.js)
-// Patterned from axis_defaults.js:moreDates
+// Patterned from axis_autotype.js:moreDates
 // Code DRYing is not done to preserve the most direct compilation possible for speed;
 // also, there are quite a few differences
 function allFastTypesLikely(a) {
@@ -292,22 +350,6 @@ function allFastTypesLikely(a) {
     return true;
 }
 
-proto.clear = function() {
-    this.lineOptions.positions = new Float64Array(0);
-    this.line.update(this.lineOptions);
-
-    this.errorXOptions.positions = new Float64Array(0);
-    this.errorX.update(this.errorXOptions);
-
-    this.errorYOptions.positions = new Float64Array(0);
-    this.errorY.update(this.errorYOptions);
-
-    this.scatterOptions.positions = new Float64Array(0);
-    this.scatterOptions.glyphs = [];
-    this.scatter.update(this.scatterOptions);
-    this.fancyScatter.update(this.scatterOptions);
-};
-
 proto.updateFast = function(options) {
     var x = this.xData = this.pickXData = options.x;
     var y = this.yData = this.pickYData = options.y;
@@ -317,7 +359,9 @@ proto.updateFast = function(options) {
         positions = new Float64Array(2 * len),
         bounds = this.bounds,
         pId = 0,
-        ptr = 0;
+        ptr = 0,
+        selection = options.selection,
+        i, selPositions, l;
 
     var xx, yy;
 
@@ -330,7 +374,7 @@ proto.updateFast = function(options) {
     // TODO bypass this on modebar +/- zoom
     if(fastType || isDateTime) {
 
-        for(var i = 0; i < len; ++i) {
+        for(i = 0; i < len; ++i) {
             xx = x[i];
             yy = y[i];
 
@@ -340,10 +384,10 @@ proto.updateFast = function(options) {
                     xx = Lib.dateTime2ms(xx, xcalendar);
                 }
 
-                idToIndex[pId++] = i;
-
                 positions[ptr++] = xx;
                 positions[ptr++] = yy;
+
+                idToIndex[pId++] = i;
 
                 bounds[0] = Math.min(bounds[0], xx);
                 bounds[1] = Math.min(bounds[1], yy);
@@ -356,6 +400,16 @@ proto.updateFast = function(options) {
     positions = truncate(positions, ptr);
     this.idToIndex = idToIndex;
 
+    // form selected set
+    if(selection && selection.length) {
+        selPositions = new Float64Array(2 * selection.length);
+
+        for(i = 0, l = selection.length; i < l; i++) {
+            selPositions[i * 2 + 0] = selection[i].x;
+            selPositions[i * 2 + 1] = selection[i].y;
+        }
+    }
+
     this.updateLines(options, positions);
     this.updateError('X', options);
     this.updateError('Y', options);
@@ -363,34 +417,75 @@ proto.updateFast = function(options) {
     var markerSize;
 
     if(this.hasMarkers) {
-        this.scatterOptions.positions = positions;
+        var markerColor, borderColor, opacity;
 
-        var markerColor = str2RGBArray(options.marker.color),
-            borderColor = str2RGBArray(options.marker.line.color),
+        // if we have selPositions array - means we have to render all points transparent, and selected points opaque
+        if(selPositions) {
+            this.scatter.options.positions = null;
+
+            markerColor = str2RGBArray(options.marker.color);
+            borderColor = str2RGBArray(options.marker.line.color);
+            opacity = (options.opacity) * (options.marker.opacity) * DESELECTDIM;
+
+            markerColor[3] *= opacity;
+            this.scatter.options.color = markerColor;
+
+            borderColor[3] *= opacity;
+            this.scatter.options.borderColor = borderColor;
+
+            markerSize = options.marker.size;
+            this.scatter.options.size = markerSize;
+            this.scatter.options.borderSize = options.marker.line.width;
+
+            this.scatter.update();
+            this.scatter.options.positions = positions;
+
+
+            this.selectScatter.options.positions = selPositions;
+
+            markerColor = str2RGBArray(options.marker.color);
+            borderColor = str2RGBArray(options.marker.line.color);
             opacity = (options.opacity) * (options.marker.opacity);
 
-        markerColor[3] *= opacity;
-        this.scatterOptions.color = markerColor;
+            markerColor[3] *= opacity;
+            this.selectScatter.options.color = markerColor;
 
-        borderColor[3] *= opacity;
-        this.scatterOptions.borderColor = borderColor;
+            borderColor[3] *= opacity;
+            this.selectScatter.options.borderColor = borderColor;
 
-        markerSize = options.marker.size;
-        this.scatterOptions.size = markerSize;
-        this.scatterOptions.borderSize = options.marker.line.width;
+            markerSize = options.marker.size;
+            this.selectScatter.options.size = markerSize;
+            this.selectScatter.options.borderSize = options.marker.line.width;
 
-        this.scatter.update(this.scatterOptions);
+            this.selectScatter.update();
+        }
+
+        else {
+            this.scatter.options.positions = positions;
+
+            markerColor = str2RGBArray(options.marker.color);
+            borderColor = str2RGBArray(options.marker.line.color);
+            opacity = (options.opacity) * (options.marker.opacity);
+            markerColor[3] *= opacity;
+            this.scatter.options.color = markerColor;
+
+            borderColor[3] *= opacity;
+            this.scatter.options.borderColor = borderColor;
+
+            markerSize = options.marker.size;
+            this.scatter.options.size = markerSize;
+            this.scatter.options.borderSize = options.marker.line.width;
+
+            this.scatter.update();
+        }
+
     }
     else {
-        this.scatterOptions.positions = new Float64Array(0);
-        this.scatterOptions.glyphs = [];
-        this.scatter.update(this.scatterOptions);
+        this.scatter.clear();
     }
 
     // turn off fancy scatter plot
-    this.scatterOptions.positions = new Float64Array(0);
-    this.scatterOptions.glyphs = [];
-    this.fancyScatter.update(this.scatterOptions);
+    this.fancyScatter.clear();
 
     // add item for autorange routine
     this.expandAxesFast(bounds, markerSize);
@@ -400,7 +495,8 @@ proto.updateFancy = function(options) {
     var scene = this.scene,
         xaxis = scene.xaxis,
         yaxis = scene.yaxis,
-        bounds = this.bounds;
+        bounds = this.bounds,
+        selection = options.selection;
 
     // makeCalcdata runs d2c (data-to-coordinate) on every point
     var x = this.pickXData = xaxis.makeCalcdata(options, 'x').slice();
@@ -425,7 +521,7 @@ proto.updateFancy = function(options) {
     var getX = (xaxis.type === 'log') ? xaxis.d2l : function(x) { return x; };
     var getY = (yaxis.type === 'log') ? yaxis.d2l : function(y) { return y; };
 
-    var i, j, xx, yy, ex0, ex1, ey0, ey1;
+    var i, xx, yy, ex0, ex1, ey0, ey1;
 
     for(i = 0; i < len; ++i) {
         this.xData[i] = xx = getX(x[i]);
@@ -461,57 +557,93 @@ proto.updateFancy = function(options) {
     this.updateError('X', options, positions, errorsX);
     this.updateError('Y', options, positions, errorsY);
 
-    var sizes;
+    var sizes, selIds;
+
+    if(selection && selection.length) {
+        selIds = {};
+        for(i = 0; i < selection.length; i++) {
+            selIds[selection[i].pointNumber] = true;
+        }
+    }
 
     if(this.hasMarkers) {
-        this.scatterOptions.positions = positions;
+        this.scatter.options.positions = positions;
 
         // TODO rewrite convert function so that
         // we don't have to loop through the data another time
 
-        this.scatterOptions.sizes = new Array(pId);
-        this.scatterOptions.glyphs = new Array(pId);
-        this.scatterOptions.borderWidths = new Array(pId);
-        this.scatterOptions.colors = new Array(pId * 4);
-        this.scatterOptions.borderColors = new Array(pId * 4);
+        this.scatter.options.sizes = new Array(pId);
+        this.scatter.options.glyphs = new Array(pId);
+        this.scatter.options.borderWidths = new Array(pId);
+        this.scatter.options.colors = new Array(pId * 4);
+        this.scatter.options.borderColors = new Array(pId * 4);
 
-        var markerSizeFunc = makeBubbleSizeFn(options),
-            markerOpts = options.marker,
-            markerOpacity = markerOpts.opacity,
-            traceOpacity = options.opacity,
-            colors = convertColorScale(markerOpts, markerOpacity, traceOpacity, len),
-            glyphs = convertSymbol(markerOpts.symbol, len),
-            borderWidths = convertNumber(markerOpts.line.width, len),
-            borderColors = convertColorScale(markerOpts.line, markerOpacity, traceOpacity, len),
-            index;
+        var markerSizeFunc = makeBubbleSizeFn(options);
+        var markerOpts = options.marker;
+        var markerOpacity = markerOpts.opacity;
+        var traceOpacity = options.opacity;
+        var symbols = convertSymbol(markerOpts.symbol, len);
+        var colors = convertColorScale(markerOpts, markerOpacity, traceOpacity, len);
+        var borderWidths = convertNumber(markerOpts.line.width, len);
+        var borderColors = convertColorScale(markerOpts.line, markerOpacity, traceOpacity, len);
+        var index, size, symbol, symbolSpec, isOpen, isDimmed, _colors, _borderColors, bw, minBorderWidth;
 
         sizes = convertArray(markerSizeFunc, markerOpts.size, len);
 
         for(i = 0; i < pId; ++i) {
             index = idToIndex[i];
 
-            this.scatterOptions.sizes[i] = 4.0 * sizes[index];
-            this.scatterOptions.glyphs[i] = glyphs[index];
-            this.scatterOptions.borderWidths[i] = 0.5 * borderWidths[index];
+            symbol = symbols[index];
+            symbolSpec = MARKER_SYMBOLS[symbol];
+            isOpen = isSymbolOpen(symbol);
+            isDimmed = selIds && !selIds[index];
 
-            for(j = 0; j < 4; ++j) {
-                this.scatterOptions.colors[4 * i + j] = colors[4 * index + j];
-                this.scatterOptions.borderColors[4 * i + j] = borderColors[4 * index + j];
+            if(symbolSpec.noBorder && !isOpen) {
+                _colors = borderColors;
+            } else {
+                _colors = colors;
             }
+
+            if(isOpen) {
+                _borderColors = colors;
+            } else {
+                _borderColors = borderColors;
+            }
+
+            // See  https://github.com/plotly/plotly.js/pull/1781#discussion_r121820798
+            // for more info on this logic
+            size = sizes[index];
+            bw = borderWidths[index];
+            minBorderWidth = (symbolSpec.noBorder || symbolSpec.noFill) ? 0.1 * size : 0;
+
+            this.scatter.options.sizes[i] = 4.0 * size;
+            this.scatter.options.glyphs[i] = symbolSpec.unicode;
+            this.scatter.options.borderWidths[i] = 0.5 * ((bw > minBorderWidth) ? bw - minBorderWidth : 0);
+
+            if(isOpen && !symbolSpec.noBorder && !symbolSpec.noFill) {
+                fillColor(this.scatter.options.colors, TRANSPARENT, i, 0);
+            } else {
+                fillColor(this.scatter.options.colors, _colors, i, index, isDimmed);
+            }
+            fillColor(this.scatter.options.borderColors, _borderColors, i, index, isDimmed);
         }
 
-        this.fancyScatter.update(this.scatterOptions);
+        // prevent scatter from resnapping points
+        if(selIds) {
+            this.scatter.options.positions = null;
+            this.fancyScatter.update();
+            this.scatter.options.positions = positions;
+        }
+        else {
+            this.fancyScatter.update();
+        }
     }
     else {
-        this.scatterOptions.positions = new Float64Array(0);
-        this.scatterOptions.glyphs = [];
-        this.fancyScatter.update(this.scatterOptions);
+        this.fancyScatter.clear();
     }
 
     // turn off fast scatter plot
-    this.scatterOptions.positions = new Float64Array(0);
-    this.scatterOptions.glyphs = [];
-    this.scatter.update(this.scatterOptions);
+    this.scatter.clear();
 
     // add item for autorange routine
     this.expandAxesFancy(x, y, sizes);
@@ -535,61 +667,60 @@ proto.updateLines = function(options, positions) {
             }
         }
 
-        this.lineOptions.positions = linePositions;
+        this.line.options.positions = linePositions;
 
         var lineColor = convertColor(options.line.color, options.opacity, 1),
-            lineWidth = Math.round(0.5 * this.lineOptions.width),
+            lineWidth = Math.round(0.5 * this.line.options.width),
             dashes = (DASHES[options.line.dash] || [1]).slice();
 
         for(i = 0; i < dashes.length; ++i) dashes[i] *= lineWidth;
 
         switch(options.fill) {
             case 'tozeroy':
-                this.lineOptions.fill = [false, true, false, false];
+                this.line.options.fill = [false, true, false, false];
                 break;
             case 'tozerox':
-                this.lineOptions.fill = [true, false, false, false];
+                this.line.options.fill = [true, false, false, false];
                 break;
             default:
-                this.lineOptions.fill = [false, false, false, false];
+                this.line.options.fill = [false, false, false, false];
                 break;
         }
 
         var fillColor = str2RGBArray(options.fillcolor);
 
-        this.lineOptions.color = lineColor;
-        this.lineOptions.width = 2.0 * options.line.width;
-        this.lineOptions.dashes = dashes;
-        this.lineOptions.fillColor = [fillColor, fillColor, fillColor, fillColor];
+        this.line.options.color = lineColor;
+        this.line.options.width = 2.0 * options.line.width;
+        this.line.options.dashes = dashes;
+        this.line.options.fillColor = [fillColor, fillColor, fillColor, fillColor];
+
+        this.line.update();
     }
     else {
-        this.lineOptions.positions = new Float64Array(0);
+        this.line.clear();
     }
-
-    this.line.update(this.lineOptions);
 };
 
 proto.updateError = function(axLetter, options, positions, errors) {
     var errorObj = this['error' + axLetter],
-        errorOptions = options['error_' + axLetter.toLowerCase()],
-        errorObjOptions = this['error' + axLetter + 'Options'];
+        errorOptions = options['error_' + axLetter.toLowerCase()];
 
     if(axLetter.toLowerCase() === 'x' && errorOptions.copy_ystyle) {
         errorOptions = options.error_y;
     }
 
     if(this['hasError' + axLetter]) {
-        errorObjOptions.positions = positions;
-        errorObjOptions.errors = errors;
-        errorObjOptions.capSize = errorOptions.width;
-        errorObjOptions.lineWidth = errorOptions.thickness / 2;  // ballpark rescaling
-        errorObjOptions.color = convertColor(errorOptions.color, 1, 1);
+        errorObj.options.positions = positions;
+        errorObj.options.errors = errors;
+        errorObj.options.capSize = errorOptions.width;
+        errorObj.options.lineWidth = errorOptions.thickness / 2;  // ballpark rescaling
+        errorObj.options.color = convertColor(errorOptions.color, 1, 1);
+
+        errorObj.update();
     }
     else {
-        errorObjOptions.positions = new Float64Array(0);
+        errorObj.clear();
     }
-
-    errorObj.update(errorObjOptions);
 };
 
 proto.expandAxesFast = function(bounds, markerSize) {
@@ -627,9 +758,10 @@ proto.dispose = function() {
     this.fancyScatter.dispose();
 };
 
-function createLineWithMarkers(scene, data) {
+function createLineWithMarkers(scene, data, cdscatter) {
     var plot = new LineWithMarkers(scene, data.uid);
-    plot.update(data);
+    plot.update(data, cdscatter);
+
     return plot;
 }
 

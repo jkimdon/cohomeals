@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: monitormaillib.php 62316 2017-04-24 12:00:34Z jonnybradley $
+// $Id: monitormaillib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class MonitorMailLib
 {
@@ -52,7 +52,7 @@ class MonitorMailLib
 			]);
 
 			$html = $this->applyStyle($html);
-			
+
 			$title = TikiLib::lib('smarty')->fetchLang($prefs['language'], 'monitor/notification_email_digest_subject.tpl');
 
 			$this->send($info['email'], $title, $html);
@@ -189,4 +189,3 @@ class MonitorMailLib
 		return $html;
 	}
 }
-

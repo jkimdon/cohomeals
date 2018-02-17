@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: NotificationDigestCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: NotificationDigestCommand.php 64686 2017-11-23 02:23:47Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -15,14 +15,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class NotificationDigestCommand extends Command
 {
-    protected function configure()
-    {
-        $this
-            ->setName('notification:digest')
-            ->setDescription('Send out email notification digests')
+	protected function configure()
+	{
+		$this
+			->setName('notification:digest')
+			->setDescription('Send out email notification digests')
 			->addArgument(
 				'domain',
-				InputArgument::REQUIRED,
+				InputArgument::OPTIONAL,
 				'Domain name to use (cannot be obtained from the URL)'
 			)
 			->addArgument(
@@ -50,10 +50,10 @@ class NotificationDigestCommand extends Command
 				'Port to include in the URL'
 			)
 			;
-    }
+	}
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+	protected function execute(InputInterface $input, OutputInterface $output)
+	{
 		global $prefs, $url_scheme, $url_host, $tikiroot, $url_port;
 		$days = intval($input->getArgument('days')) ?: 7;
 
@@ -74,6 +74,10 @@ class NotificationDigestCommand extends Command
 
 		$url_host = $input->getArgument('domain');
 
+		if (empty($url_host) && isset($prefs['fallbackBaseUrl'])) {
+			$url_host = $prefs['fallbackBaseUrl'];
+		}
+
 		$list = \TikiDb::get()->fetchAll("
 			SELECT userId, login, email, IFNULL(p.value, ?) language
 			FROM users_users u
@@ -81,7 +85,7 @@ class NotificationDigestCommand extends Command
 
 		$monitormail = \TikiLib::lib('monitormail');
 
-		$from = date('Y-m-d H:i:s', time() - $days*24*3600);
+		$from = date('Y-m-d H:i:s', time() - $days * 24 * 3600);
 		$to = date('Y-m-d H:i:s');
 
 		foreach ($list as $info) {
@@ -92,5 +96,5 @@ class NotificationDigestCommand extends Command
 				$output->writeln("No data for {$info['email']}");
 			}
 		}
-    }
+	}
 }

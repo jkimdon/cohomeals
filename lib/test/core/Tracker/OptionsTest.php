@@ -3,56 +3,55 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: OptionsTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: OptionsTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Tracker_OptionsTest extends PHPUnit_Framework_TestCase
 {
 	function testBuildLegacyStringBuilder()
 	{
 		$options = Tracker_Options::fromSerialized(
-			json_encode(array('a' => 3, 'b' => 2, 'c' => 1)),
-			array(
-				'params' => array(
-					'a' => array(
+			json_encode(['a' => 3, 'b' => 2, 'c' => 1]),
+			[
+				'params' => [
+					'a' => [
 						'legacy_index' => 2,
-					),
-					'b' => array(
+					],
+					'b' => [
 						'legacy_index' => 1,
-					),
-					'c' => array(
+					],
+					'c' => [
 						'legacy_index' => 0,
-					),
-					'd' => array(
+					],
+					'd' => [
 						// No legacy
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
-		$this->assertEquals(array('1', '2', '3'), $options->buildOptionsArray());
+		$this->assertEquals(['1', '2', '3'], $options->buildOptionsArray());
 	}
 
 	function testSeparatorOnEmptyData()
 	{
 		$options = Tracker_Options::fromString(
 			'a,,b',
-			array(
-				'params' => array(
-					'a' => array(
+			[
+				'params' => [
+					'a' => [
 						'legacy_index' => 0,
-					),
-					'b' => array(
+					],
+					'b' => [
 						'legacy_index' => 1,
 						'separator' => '|',
-					),
-					'c' => array(
+					],
+					'c' => [
 						'legacy_index' => 2,
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 
-		$this->assertEquals(array(), $options->getParam('b'));
+		$this->assertEquals([], $options->getParam('b'));
 	}
 }
-

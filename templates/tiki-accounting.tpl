@@ -1,4 +1,4 @@
-{* $Id: tiki-accounting.tpl 61857 2017-03-25 15:59:47Z marclaporte $ *}
+{* $Id: tiki-accounting.tpl 63998 2017-09-24 17:38:59Z rjsmelo $ *}
 {title help="accounting"}
 	{$book.bookName}
 {/title}
@@ -17,24 +17,26 @@
 		<div class="box">
 			<h3 class="boxtitle">{tr}This book{/tr}</h3>
 			<div class="box-data" style="width: 500px">
-				<div><div class="aclabel">{tr}Id{/tr}</div>{$book.bookId}</div>
-				<div><div class="aclabel">{tr}Name{/tr}</div>{$book.bookName}</div>
-				<div><div class="aclabel">{tr}Start date{/tr}</div>{$book.bookStartDate}</div>
-				<div><div class="aclabel">{tr}End date{/tr}</div>{$book.bookEndDate}</div>
-				<div><div class="aclabel">{tr}Closed{/tr}</div>{if $book.bookClosed=='y'}{tr}Yes{/tr}{else}{tr}No{/tr}{/if}</div>
-				<div><div class="aclabel">{tr}Currency{/tr}</div>{$book.bookCurrency} ({if $book.bookCurrencyPos==-1}{tr}before{/tr}{elseif $book.bookCurrencyPos==1}{tr}after{/tr}{else}{tr}don't display{/tr}{/if})</div>
-				<div><div class="aclabel">{tr}Decimals{/tr}</div>{$book.bookDecimals}</div>
-				<div><div class="aclabel">{tr}Decimal Point{/tr}</div>{$book.bookDecPoint}</div>
-				<div><div class="aclabel">{tr}Thousands separator{/tr}</div>{$book.bookThousand}</div>
-				<div><div class="aclabel">{tr}Auto Tax{/tr}</div>{if $book.bookAutoTax=='y'}{tr}Yes{/tr}{else}{tr}No{/tr}{/if}</div>
+				<dl class="dl-horizontal">
+					<dt>{tr}Id{/tr}</dt><dd>{$book.bookId}</dd>
+					<dt>{tr}Name{/tr}</dt><dd>{$book.bookName}</dd>
+					<dt>{tr}Start date{/tr}</dt><dd>{$book.bookStartDate}</dd>
+					<dt>{tr}End date{/tr}</dt><dd>{$book.bookEndDate}</dd>
+					<dt>{tr}Closed{/tr}</dt><dd>{if $book.bookClosed=='y'}{tr}Yes{/tr}{else}{tr}No{/tr}{/if}</dd>
+					<dt>{tr}Currency{/tr}</dt><dd>{$book.bookCurrency} ({if $book.bookCurrencyPos==-1}{tr}before{/tr}{elseif $book.bookCurrencyPos==1}{tr}after{/tr}{else}{tr}don't display{/tr}{/if})</dd>
+					<dt>{tr}Decimals{/tr}</dt><dd>{$book.bookDecimals}</dd>
+					<dt>{tr}Decimal Point{/tr}</dt><dd>{$book.bookDecPoint}</dd>
+					<dt>{tr}Thousands separator{/tr}</dt><dd>{$book.bookThousand}</dd>
+					<dt>{tr}Auto Tax{/tr}</dt><dd>{if $book.bookAutoTax=='y'}{tr}Yes{/tr}{else}{tr}No{/tr}{/if}</dd>
+				</dl>
 			</div>
 		</div>
 		<div class="box">
 			<h3 class="boxtitle">{tr}Tasks{/tr}</h3>
-			<div class="box-data" style="width: 500px">
-				{if $canBook}{button href="tiki-accounting_entry.php?bookId=$bookId" _text="{tr}Book new entries{/tr}"}<br>
-				{button href="tiki-accounting_stack.php?bookId=$bookId&hideform=1" _text="{tr}Confirm stack entries{/tr}"}<br>{/if}
-				{if $canStack}{button href="tiki-accounting_stack.php?bookId=$bookId" _text="{tr}Book into Stack{/tr}"}<br>{/if}
+			<div class="box-data col-md-12">
+				{if $canBook}{button href="tiki-accounting_entry.php?bookId={$bookId}{ticket mode=get}" _class="timeout btn" _text="{tr}Book new entries{/tr}"}
+				{button href="tiki-accounting_stack.php?bookId={$bookId}&hideform=1{ticket mode=get}" _class="timeout btn" _text="{tr}Confirm stack entries{/tr}"}{/if}
+				{if $canStack}{button href="tiki-accounting_stack.php?bookId={$bookId}{ticket mode=get}" _class="timeout btn" _text="{tr}Book into Stack{/tr}"}{/if}
 			</div>
 		</div>
 	{/tab}
@@ -44,14 +46,14 @@
 			{include file="tiki-accounting_account_list.tpl"}
 		</div>
 	{/tab}
-	{tab name="{tr}Bank accounts{/tr}"}
-		<h2>{tr}Bank accounts{/tr}</h2>
-	{/tab}
+	{*{tab name="{tr}Bank accounts{/tr}"}*}
+		{*<h2>{tr}Bank accounts{/tr}</h2>*}
+	{*{/tab}*}
 	{tab name="{tr}Journal{/tr}"}
 		<h2>{tr}Journal{/tr}</h2>
 		<div style="max-height: 80%; overflow: scroll;">
 			{if $journalLimit!=0}
-				{button href="tiki-accounting.php?bookId=$bookId&cookietab=4&journalLimit=0" text="{tr}Fetch all{/tr}"}
+				{button href="tiki-accounting.php?bookId={$bookId}&cookietab=4&journalLimit=0{ticket mode=get}" text="{tr}Fetch all{/tr}"}
 			{/if}
 			{include file="tiki-accounting_journal.tpl"}
 		</div>

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "Žiadny",
 "Cache" => "Cache",
 "Tag already exists" => "Táto značka už existuje",
@@ -766,7 +766,7 @@ $lang = array(
 "Current" => "Súčasná",
 "Versions are identical" => "Verzie sú identické",
 "vote" => "hlasovať",
-"Repeat password" => "Zopakovať heslo",
+"Confirm password" => "Zopakovať heslo",
 "Generate a password" => "Vygenerovať heslo",
 "Valid" => "Platný",
 "Create New" => "Vytvoriť nový",
@@ -1657,4 +1657,4 @@ $lang = array(
 "Aborted" => "Prerušené",
 "Top pages" => "Top stránky",
 "Last pages" => "Posledné stránky",
-);
+];

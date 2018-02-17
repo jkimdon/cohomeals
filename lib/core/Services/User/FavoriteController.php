@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FavoriteController.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: FavoriteController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_User_FavoriteController
 {
@@ -21,11 +21,11 @@ class Services_User_FavoriteController
 		global $user;
 
 		if (! $user) {
-			return array();
+			return [];
 		}
 
 		$relationlib = TikiLib::lib('relation');
-		$favorites = array();
+		$favorites = [];
 		foreach ($relationlib->get_relations_from('user', $user, 'tiki.user.favorite') as $relation) {
 			$favorites[$relation['relationId']] = $relation['type'] . ':' . $relation['itemId'];
 		}
@@ -71,13 +71,13 @@ class Services_User_FavoriteController
 
 				TikiLib::events()->trigger(
 					'tiki.social.favorite.add',
-					array(
+					[
 						'type' => $type,
 						'object' => $object,
 						'parentobject' => $parentobject,
 						'user' => $user,
 						'item_user' => $item_user,
-					)
+					]
 				);
 			}
 		} else {
@@ -86,21 +86,21 @@ class Services_User_FavoriteController
 				unset($relations[$relationId]);
 				TikiLib::events()->trigger(
 					'tiki.social.favorite.remove',
-					array(
+					[
 						'type' => $type,
 						'object' => $object,
 						'parentobject' => $parentobject,
 						'user' => $user,
-					)
+					]
 				);
 			}
 		}
 
 		$tx->commit();
 
-		return array(
+		return [
 			'list' => $relations,
-		);
+		];
 	}
 
 	private function getCurrentRelation($relations, $user, $type, $object)
@@ -133,4 +133,3 @@ class Services_User_FavoriteController
 		return $item_user;
 	}
 }
-

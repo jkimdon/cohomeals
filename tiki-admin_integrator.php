@@ -6,13 +6,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_integrator.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-admin_integrator.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
-require_once ('tiki-setup.php');
-require_once ('lib/integrator/integrator.php');
+require_once('tiki-setup.php');
+require_once('lib/integrator/integrator.php');
 // If Integrator is ON, check permissions...
 $access->check_feature('feature_integrator');
-$access->check_permission(array('tiki_p_admin_integrator'));
+$access->check_permission(['tiki_p_admin_integrator']);
 
 // Setup local variables from request or set default values
 $repID = isset($_REQUEST['repID']) ? $_REQUEST['repID'] : 0;
@@ -31,8 +31,9 @@ $integrator = new TikiIntegrator($dbTiki);
 // Check if 'submit' pressed ...
 if (isset($_REQUEST['save'])) {
 	// ... and all mandatory paramaters r OK
-	if (strlen($name) > 0) $integrator->add_replace_repository($repID, $name, $path, $start, $cssfile, $vis, $cacheable, $expiration, $description);
-	else {
+	if (strlen($name) > 0) {
+		$integrator->add_replace_repository($repID, $name, $path, $start, $cssfile, $vis, $cacheable, $expiration, $description);
+	} else {
 		$smarty->assign('msg', tra("Repository name can't be an empty"));
 		$smarty->display('error.tpl');
 		die;
@@ -65,7 +66,9 @@ if (isset($_REQUEST['action'])) {
 			break;
 
 		case 'clear':
-			if ($repID != 0) $integrator->clear_cache($repID);
+			if ($repID != 0) {
+				$integrator->clear_cache($repID);
+			}
 			header('location: ' . $_SERVER['SCRIPT_NAME'] . '?action=edit&repID=' . $repID);
 			exit;
 

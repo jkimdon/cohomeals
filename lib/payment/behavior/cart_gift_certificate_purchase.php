@@ -3,16 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cart_gift_certificate_purchase.php 57966 2016-03-17 20:05:33Z jonnybradley $
+// $Id: cart_gift_certificate_purchase.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 function payment_behavior_cart_gift_certificate_purchase(
-		$productId = 0,
-		$giftcertemail = '',
-		$quantity = 1,
-		$orderId = 0,
-		$orderItemId = 0
-		)
-{
+	$productId = 0,
+	$giftcertemail = '',
+	$quantity = 1,
+	$orderId = 0,
+	$orderItemId = 0
+) {
+
 	$trklib = TikiLib::lib('trk');
 	global $prefs;
 	$params['trackerId'] = $prefs['payment_cart_giftcert_tracker'];
@@ -38,8 +38,8 @@ function payment_behavior_cart_gift_certificate_purchase(
 	$params['updateFieldIds'][] = $trklib->get_field_id($params['trackerId'], 'Admin notes');
 	$params['updateFieldIds'][] = $trklib->get_field_id($params['trackerId'], 'Order ID');
 	$params['updateFieldIds'][] = $trklib->get_field_id($params['trackerId'], 'Order Item ID');
-	$balancefield = 'f_' .  $origbalanceFieldId;
-	$params['updateFieldValues'] = array(
+	$balancefield = 'f_' . $origbalanceFieldId;
+	$params['updateFieldValues'] = [
 					'',
 					'Order',
 					'-randomstring-',
@@ -47,12 +47,12 @@ function payment_behavior_cart_gift_certificate_purchase(
 					"Purchased by $giftcertemail",
 					$orderId,
 					$orderItemId
-	);
+	];
 
 	// Product tracker info
 	$productsTrackerId = $prefs['payment_cart_product_tracker'];
 	$giftcertTemplateFieldId = $trklib->get_field_id($productsTrackerId, $prefs['payment_cart_giftcerttemplate_fieldname']);
-	if (!$productId) {
+	if (! $productId) {
 		return false;
 	}
 	$giftcertId = $trklib->get_item_value($productsTrackerId, $productId, $giftcertTemplateFieldId);
@@ -60,10 +60,10 @@ function payment_behavior_cart_gift_certificate_purchase(
 	$params['copies_on_load'] = $quantity;
 	$params['return_array'] = 'y';
 
-	include_once ('lib/wiki-plugins/wikiplugin_trackeritemcopy.php');
+	include_once('lib/wiki-plugins/wikiplugin_trackeritemcopy.php');
 
 	$return_array = wikiplugin_trackeritemcopy('', $params);
-	$giftcerts = array();
+	$giftcerts = [];
 
 	// Get additional information
 	foreach ($return_array['items'] as $newItemId) {

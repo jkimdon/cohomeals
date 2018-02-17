@@ -13,6 +13,7 @@ var colorscaleAttrs = require('../../components/colorscale/attributes');
 var colorbarAttrs = require('../../components/colorbar/attributes');
 
 var extendFlat = require('../../lib/extend').extendFlat;
+var overrideAll = require('../../plot_api/edit_types').overrideAll;
 
 function makeContourProjAttr(axLetter) {
     return {
@@ -96,7 +97,7 @@ function makeContourAttr(axLetter) {
     };
 }
 
-module.exports = {
+var attrs = module.exports = overrideAll({
     z: {
         valType: 'data_array',
         description: 'Sets the z coordinates.'
@@ -122,7 +123,6 @@ module.exports = {
         ].join(' ')
     },
 
-    // Todo this block has a structure of colorscale/attributes.js but with colorscale/color_attributes.js names
     cauto: colorscaleAttrs.zauto,
     cmin: colorscaleAttrs.zmin,
     cmax: colorscaleAttrs.zmax,
@@ -243,4 +243,6 @@ module.exports = {
             description: 'Obsolete. Use `cmax` instead.'
         })
     }
-};
+}, 'calc', 'nested');
+
+attrs.x.editType = attrs.y.editType = attrs.z.editType = 'calc+clearAxisTypes';

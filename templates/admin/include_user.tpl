@@ -1,6 +1,6 @@
-{* $Id: include_user.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_user.tpl 62265 2017-04-19 01:00:45Z lindonb $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=user" class="admin" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="form-group col-lg-12 clearfix">
 		{include file='admin/include_apply_top.tpl'}
 	</div>

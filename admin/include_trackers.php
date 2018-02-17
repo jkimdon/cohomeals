@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_trackers.php 61912 2017-03-28 15:58:17Z chealer $
+// $Id: include_trackers.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -46,19 +46,19 @@ if ($access->ticketMatch()) {
 	} elseif (isset($_REQUEST['all2file'])) {
 		$attachements = $trklib->list_all_attachements();
 		for ($i = 0; $i < $attachements['cant']; $i++) {
-			if (!$attachements['data'][$i]['path']) {
+			if (! $attachements['data'][$i]['path']) {
 				$trklib->db_to_file($prefs['t_use_dir'] . md5($attachements['data'][$i]['filename']), $attachements['data'][$i]['attId']);
 			}
 		}
 	}
 
-	if (!empty($_REQUEST['find'])) {
+	if (! empty($_REQUEST['find'])) {
 		$find = $_REQUEST['find'];
 	}
-	if (!empty($_REQUEST['offset'])) {
+	if (! empty($_REQUEST['offset'])) {
 		$offset = $_REQUEST['offset'];
 	}
-	if (!empty($_REQUEST['sort_mode'])) {
+	if (! empty($_REQUEST['sort_mode'])) {
 		$sort_mode = $_REQUEST['sort_mode'];
 	}
 }
@@ -73,11 +73,10 @@ $headerlib->add_cssfile('themes/base_files/feature_css/admin.css');
 $smarty->assign_by_ref('attachements', $attachements['data']);
 
 $factory = new Tracker_Field_Factory(false);
-$fieldPreferences = array();
+$fieldPreferences = [];
 
 foreach ($factory->getFieldTypes() as $type) {
 	$fieldPreferences[] = array_shift($type['prefs']);
 }
 
 $smarty->assign('fieldPreferences', $fieldPreferences);
-

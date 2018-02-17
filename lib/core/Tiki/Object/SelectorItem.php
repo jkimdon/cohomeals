@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SelectorItem.php 63040 2017-06-19 22:02:32Z kroky6 $
+// $Id: SelectorItem.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Object;
 
@@ -35,9 +35,12 @@ class SelectorItem implements \ArrayAccess
 	function offsetGet($offset)
 	{
 		switch ($offset) {
-		case 'type': return $this->type;
-		case 'id': return $this->object;
-		case 'title': return $this->getTitle();
+			case 'type':
+				return $this->type;
+			case 'id':
+				return $this->object;
+			case 'title':
+				return $this->getTitle();
 		}
 	}
 
@@ -54,4 +57,3 @@ class SelectorItem implements \ArrayAccess
 		return "{$this->type}:{$this->object}";
 	}
 }
-

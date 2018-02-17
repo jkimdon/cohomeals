@@ -1,4 +1,4 @@
-{* $Id: comment-header.tpl 62325 2017-04-24 21:48:09Z montefuscolo $ *}
+{* $Id: comment-header.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 <header class="panel-heading clearfix postbody-title media-overflow-visible"> {*the panel-heading class will cut off dropdowns so need media-overflow-visible class *}
 	{if $prefs.feature_comments_locking neq 'y' or
 		( $comment.locked neq 'y' and $thread_is_locked neq 'y' )}
@@ -81,7 +81,7 @@
 				class="tips pull-right"
 				title="{tr}Actions{/tr}"
 				href="#"
-				{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.comment_actions|escape:"javascript"|escape:"html"}{/if}
+				{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.comment_actions}{/if}
 				style="padding:0; margin:0; border:0"
 			>
 				{icon name='wrench'}
@@ -117,7 +117,7 @@
 		<a class="heading-link" href="{$comments_parentId|sefurl:'forum post'}{if ($comment.threadId neq $comments_parentId)}#threadId{$comment.threadId}{/if}">{icon name="link"}</a>
 		{else}
 		<a class="heading-link" href="?tiki-view_forum_thread.php?forumId={$forumId}&comments_parentId={$comments_parentId}#threadId{$comment.threadId}">{icon name="link"}</a>
-	{/if}
+		{/if}
 	</h2>
 	{/if}
 

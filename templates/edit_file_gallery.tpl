@@ -1,4 +1,4 @@
-{* $Id: edit_file_gallery.tpl 58127 2016-03-30 12:37:27Z jonnybradley $ *}
+{* $Id: edit_file_gallery.tpl 63760 2017-09-07 15:24:29Z chealer $ *}
 {if $tiki_p_create_file_galleries eq 'y' or (not empty($user) and $user eq $gal_info.user and $gal_info.type eq 'user' and $tiki_p_userfiles eq 'y')}
 	{if isset($individual) and $individual eq 'y'}
 		{remarksbox type="tip" title="{tr}Permissions{/tr}"}
@@ -37,8 +37,8 @@
 								{/foreach}
 								{jq}
 $('#fgal_template').change( function() {
-var otherTabs = $('span.tabinactive');
-var otherParams = $('#description').parents('tr').nextAll('tr');
+var otherTabs = $('ul.nav-tabs li:not(.active)');
+var otherParams = $('#description').parents('div.form-group').nextAll('div.form-group');
 
 if ($(this).val() != '') {
 	// Select template, hide parameters

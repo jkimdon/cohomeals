@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: Controller.php 64903 2017-12-15 10:01:24Z kroky6 $
 
 use \Symfony\Component\Console\Helper\FormatterHelper;
 
@@ -43,9 +43,13 @@ class Services_Search_Controller
 
 		$num_queries_after = $num_queries;
 
+		list($engine, $version) = $unifiedsearchlib->getEngineAndVersion();
+
 		return [
 			'title' => tr('Rebuild Index'),
 			'stat' => $stat,
+			'search_engine' => $engine,
+			'search_version' => $version,
 			'queue_count' => $unifiedsearchlib->getQueueCount(),
 			'execution_time' => FormatterHelper::formatTime($timer->stop()),
 			'memory_usage' => FormatterHelper::formatMemory(memory_get_usage()),
@@ -83,31 +87,45 @@ class Services_Search_Controller
 		global $prefs;
 
 		try {
+			$filter = $input->filter->none() ?: [];
+			$format = $input->format->text() ?: '{title}';
+
 			$lib = TikiLib::lib('unifiedsearch');
-			$query = $lib->buildQuery($input->filter->none() ?: []);
+
+			if (! empty($filter['title']) && preg_match_all('/\{(\w+)\}/', $format, $matches)) {
+				// formatted object_selector search results should also search in formatted fields besides the title
+				$titleFilter = $filter['title'];
+				unset($filter['title']);
+				$query = $lib->buildQuery($filter);
+				$query->filterContent($titleFilter, $matches[1]);
+			} else {
+				$query = $lib->buildQuery($filter);
+			}
+
 			$query->setOrder($input->sort_order->text() ?: 'title_asc');
 			$query->setRange($input->offset->int(), $input->maxRecords->int() ?: $prefs['maxRecords']);
-			$result = $query->search($lib->getIndex());
 
-			$format = $input->format->text() ?: '{title}';
+			$result = $query->search($lib->getIndex());
 
 			$result->applyTransform(function ($item) use ($format) {
 				return [
 					'object_type' => $item['object_type'],
 					'object_id' => $item['object_id'],
-					'title' => preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($item) {
+					'title' => preg_replace_callback('/\{(\w+)\}/', function ($matches) use ($item, $format) {
 						$key = $matches[1];
 						if (isset($item[$key])) {
 							// if this is a trackeritem we do not want only the name but also the trackerid listed when setting up a field
 							// otherwise its hard to distingish which field that is if multiple tracker use the same fieldname
 							// example: setup of trackerfield item-link: choose some fields from a list. currently this list show all fields of all trackers
 							if ($item['object_type'] == 'trackerfield') {
-								return $item[$key] . ' (Tracker-'. $item['tracker_id']. ')';
+								return $item[$key] . ' (Tracker-' . $item['tracker_id'] . ')';
 							} else {
 								return $item[$key];
 							}
-						} else {
+						} elseif ($format == '{title}') {
 							return tr('empty');
+						} else {
+							return '';
 						}
 					}, $format),
 				];
@@ -124,4 +142,3 @@ class Services_Search_Controller
 		}
 	}
 }
-

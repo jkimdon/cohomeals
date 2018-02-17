@@ -3,13 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiSecurityTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: TikiSecurityTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class TikiSecurityTest extends PHPUnit_Framework_TestCase
 {
 	function testValidData()
 	{
-		$data = array('foo' => 'bar');
+		$data = ['foo' => 'bar'];
 
 		$security = new Tiki_Security('1234');
 		$string = $security->encode($data);
@@ -19,7 +19,7 @@ class TikiSecurityTest extends PHPUnit_Framework_TestCase
 
 	function testDecodeWithWrongHash()
 	{
-		$data = array('foo' => 'bar');
+		$data = ['foo' => 'bar'];
 
 		$security = new Tiki_Security('1234');
 		$string = $security->encode($data);
@@ -30,9 +30,9 @@ class TikiSecurityTest extends PHPUnit_Framework_TestCase
 
 	function testAlterData()
 	{
-        $this->markTestSkipped("As of 2013-09-30, this test is broken. Skipping it for now.");
+		$this->markTestSkipped("As of 2013-09-30, this test is broken. Skipping it for now.");
 
-        $data = array('foo' => 'bar');
+		$data = ['foo' => 'bar'];
 
 		$security = new Tiki_Security('1234');
 		$string = $security->encode($data);
@@ -41,4 +41,3 @@ class TikiSecurityTest extends PHPUnit_Framework_TestCase
 		$this->assertNull($security->decode($string));
 	}
 }
-

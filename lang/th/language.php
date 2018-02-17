@@ -1,6 +1,6 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Log out" => "ออกจากระบบ",
-);
+];

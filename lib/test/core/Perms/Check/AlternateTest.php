@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AlternateTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: AlternateTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -17,30 +17,30 @@ class Perms_Check_AlternateTest extends PHPUnit_Framework_TestCase
 		$resolver = new Perms_Resolver_Default(true);
 
 		$check = new Perms_Check_Alternate('admin');
-		$this->assertFalse($check->check($resolver, array(), 'view', array('Registered')));
+		$this->assertFalse($check->check($resolver, [], 'view', ['Registered']));
 	}
 
 	function testWithReplacementResolver()
 	{
 		$resolver = new Perms_Resolver_Default(false);
 		$replacement = new Perms_Resolver_Static(
-			array('Registered' => array('admin'),)
+			['Registered' => ['admin'],]
 		);
 
 		$check = new Perms_Check_Alternate('admin');
 		$check->setResolver($replacement);
-		$this->assertTrue($check->check($resolver, array(), 'view', array('Registered')));
+		$this->assertTrue($check->check($resolver, [], 'view', ['Registered']));
 	}
 
 	function testWithReplacementNotAllowing()
 	{
 		$resolver = new Perms_Resolver_Default(false);
 		$replacement = new Perms_Resolver_Static(
-			array('Registered' => array('view', 'edit'),)
+			['Registered' => ['view', 'edit'],]
 		);
 
 		$check = new Perms_Check_Alternate('admin');
 		$check->setResolver($replacement);
-		$this->assertFalse($check->check($resolver, array(), 'view', array('Registered')));
+		$this->assertFalse($check->check($resolver, [], 'view', ['Registered']));
 	}
 }

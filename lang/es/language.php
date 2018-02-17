@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabic",
 "Catalan" => "Catalan",
 "Simplified Chinese" => "Chino Simplificado",
@@ -2434,7 +2434,7 @@ $lang = array(
 "User rating on thread topic" => "Valoración de usuario/a sobre el tema del hilo de debate",
 "A valid email is mandatory to register" => "Un correo válido es obligatorio para registrarse",
 "Lowercase only" => "Sólo minúsculas",
-"Repeat password" => "Repetir la contraseña",
+"Confirm password" => "Repetir la contraseña",
 "Generate a password" => "Generar una contraseña",
 "Passcode to register" => "Código de paso para registrase",
 "Not your password" => "No es tu contraseña",
@@ -4828,4 +4828,4 @@ $lang = array(
 "Aborted" => "Abortado",
 "Top pages" => "Principales páginas",
 "Last pages" => "Últimas páginas",
-);
+];

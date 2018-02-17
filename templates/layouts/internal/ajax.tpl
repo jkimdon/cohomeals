@@ -1,4 +1,4 @@
-{* $Id: ajax.tpl 62780 2017-05-28 12:37:09Z jonnybradley $ *}<!DOCTYPE html>
+{* $Id: ajax.tpl 62781 2017-05-28 13:26:42Z jonnybradley $ *}<!DOCTYPE html>
 {if ! $plain}
 	{block name=title}{/block}
 {/if}

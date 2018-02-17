@@ -1,4 +1,4 @@
-{* $Id: register-login.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
+{* $Id: register-login.tpl 62699 2017-05-23 00:25:06Z jyhem $ *}
 {if $prefs.login_autogenerate eq 'y'}
 	{*do nothing*}
 {elseif $prefs.user_register_prettytracker eq 'y' and $prefs.user_register_prettytracker_tpl and $prefs.socialnetworks_user_firstlogin != 'y'}

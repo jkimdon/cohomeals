@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FilesDeleteoldCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: FilesDeleteoldCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -27,7 +27,7 @@ class FilesDeleteoldCommand extends Command
 				'Perform the deletes'
 			)
 		;
-	}	
+	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
@@ -51,7 +51,7 @@ class FilesDeleteoldCommand extends Command
 		} else {
 			$query = 'select * from `tiki_files` where `deleteAfter` < ? - `lastModif` and `deleteAfter` is not NULL and `deleteAfter` != \'\' order by galleryId asc';
 			$now = time();
-			$files = \TikiDb::get()->query($query, array($now));
+			$files = \TikiDb::get()->query($query, [$now]);
 
 			if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
 				if ($files->numrows) {
@@ -66,9 +66,7 @@ class FilesDeleteoldCommand extends Command
 				} else {
 					$output->writeln("<comment>No files to delete</comment>");
 				}
-
 			}
 		}
-
 	}
 }

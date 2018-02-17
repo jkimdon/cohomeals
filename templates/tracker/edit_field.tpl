@@ -136,7 +136,8 @@
 
 			<div class="form-group">
 				<label for="visible_by" class="groupselector control-label">{tr}Visible by{/tr}</label>
-				<input type="text" name="visible_by" value="{foreach from=$field.visibleBy item=group}{$group|escape}, {/foreach}" class="form-control">
+				<input type="text" name="visible_by" id="visible_by" value="{foreach from=$field.visibleBy item=group}{$group|escape}, {/foreach}" class="form-control">
+				{autocomplete element='#visible_by' type='groupname' options="multiple:true,multipleSeparator:','"}{* note, multiple doesn't work in jquery-ui 1.8 *}
 				<div class="help-block">
 					{tr}List of Group names with permission to see this field{/tr}. {tr}Separated by comma (,){/tr}
 				</div>
@@ -144,7 +145,8 @@
 
 			<div class="form-group">
 				<label for="editable_by" class="groupselector control-label">{tr}Editable by{/tr}</label>
-				<input type="text" name="editable_by" value="{foreach from=$field.editableBy item=group}{$group|escape}, {/foreach}" class="form-control">
+				<input type="text" name="editable_by" id="editable_by" value="{foreach from=$field.editableBy item=group}{$group|escape}, {/foreach}" class="form-control">
+				{autocomplete element='#editable_by' type='groupname' options="multiple:true,multipleSeparator:','"}{* note, multiple doesn't work in jquery-ui 1.8 *}
 				<div class="help-block">
 					{tr}List of Group names with permission to edit this field{/tr}. {tr}Separated by comma (,){/tr}
 				</div>
@@ -164,7 +166,7 @@
 					{tr}Changing the permanent name may have consequences in integrated systems.{/tr}
 				</div>
 			</div>
-			{if $prefs.tracker_change_field_type eq 'y'}
+			{if $types}
 				<div class="form-group">
 					<label for="type" class="control-label">{tr}Field Type{/tr}</label>
 					<select name="type" data-original="{$field.type}" class="confirm-prompt form-control">
@@ -199,8 +201,13 @@ $('select[name=type]').change(function () {
 	}
 }).change();
 {/jq}
-					<div class="alert alert-danger">
-						{icon name="warning"} {tr}Changing the field type may cause irretrievable data loss - use with caution!{/tr}
+					{if $prefs.tracker_change_field_type eq 'y'}
+						<div class="alert alert-danger">
+							{icon name="warning"} {tr}Changing the field type may cause irretrievable data loss - use with caution!{/tr}
+						</div>
+					{/if}
+					<div class="alert alert-info">
+						{icon name="information"} {tr}Make sure you rebuild the search index if you change field type.{/tr}
 					</div>
 				</div>
 			{/if}

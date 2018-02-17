@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ManifoldController.php 58072 2016-03-25 04:42:35Z dlucio $
+// $Id: ManifoldController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 use Search\Federated\ManifoldCfIndex;
 
@@ -51,10 +51,10 @@ class Services_Search_ManifoldController
 			}
 		}
 
-		return array(
+		return [
 			'title' => tr('ManifoldCF Configuration Check'),
 			'instances' => $instances,
-		);
+		];
 	}
 
 	function action_create_index($input)

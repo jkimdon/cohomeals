@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IndexRebuildCommand.php 63880 2017-09-20 11:34:49Z jonnybradley $
+// $Id: IndexRebuildCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -50,17 +50,32 @@ class IndexRebuildCommand extends Command
 			$log = 2;
 		} else {
 			$log = 0;
-		} 
+		}
 		$cron = $input->getOption('cron');
 
 		$unifiedsearchlib = \TikiLib::lib('unifiedsearch');
 
 		if ($force && $unifiedsearchlib->rebuildInProgress()) {
-			if (!$cron) { $output->writeln('<info>Removing leftovers...</info>'); }
+			if (! $cron) {
+				$output->writeln('<info>Removing leftovers...</info>');
+			}
 			$unifiedsearchlib->stopRebuild();
 		}
 
-		if (!$cron) { $output->writeln('Started rebuilding index...'); }
+		if (! $cron) {
+			$output->writeln('Started rebuilding index...');
+		}
+
+		if (! $cron) {
+			list($engine, $version) = $unifiedsearchlib->getEngineAndVersion();
+			if (! empty($engine)) {
+				$engineMessage = 'Unified search engine: ' . $engine;
+				if (! empty($version)) {
+					$engineMessage .= ', version ' . $version;
+				}
+				$output->writeln($engineMessage);
+			}
+		}
 
 		$timer = new \timer();
 		$timer->start();
@@ -77,9 +92,9 @@ class IndexRebuildCommand extends Command
 		$queries_after = $num_queries;
 
 		if ($result) {
-			if (!$cron) {
+			if (! $cron) {
 				$output->writeln("Indexed");
-				foreach($result as $key => $val) {
+				foreach ($result as $key => $val) {
 					$output->writeln("  $key: $val");
 				}
 				$output->writeln('Rebuilding index done');
@@ -95,15 +110,16 @@ class IndexRebuildCommand extends Command
 			if (is_array($errors)) {
 				foreach ($errors as $type => $message) {
 					if (is_array($message)) {
-						if (is_array($message[0]) && ! empty( $message[0]['mes'])) {
+						if (is_array($message[0]) && ! empty($message[0]['mes'])) {
 							$message = $type . ': ' . str_replace('<br />', "\n", $message[0]['mes'][0]);
-						} else if (! empty( $message['mes'])) {
+						} elseif (! empty($message['mes'])) {
 							$message = $type . ': ' . str_replace('<br />', "\n", $message['mes']);
 						}
 					}
 					$output->writeln("<info>$message</info>");
 				}
 				$output->writeln("\n<error>Search index rebuild failed. Last messages shown above.</error>");
+				\TikiLib::lib('logs')->add_action('rebuild indexes', 'Search index rebuild failed.', 'system');
 			}
 			return(1);
 		}

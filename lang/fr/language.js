@@ -1,8 +1,8 @@
-/* 
+/*
  * Javascript translation definition
  * Example to help translation of some English strings in some js files
- * 
- * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
+ *
+ * $Id: language.js 64615 2017-11-17 23:53:38Z rjsmelo $
  */
 
 lang = {
@@ -32,7 +32,7 @@ lang = {
 	"Edit" : "Modifier",
 	"Save" : "Enregistrer",
 	"Cancel" : "Annuler",
-	"Delete" : "Supprimer",	
+	"Delete" : "Supprimer",
 	"Unassign module" : "Supprimer le module",
 	"Edit module" : "Modifier le module",
 	"Edit module:" : "Modifier le module :",
@@ -47,5 +47,5 @@ lang = {
 	"Browse Files" : "Parcourir la liste des fichiers",
 	"Page only allowed once in a structure" : "Page autorisée une seule fois dans une structure",
 	// remember the IE does not support ending comma on last item
-	 "Bogus entry" : "bogus entry"
+	"Bogus entry" : "bogus entry"
 };

@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Addon.php 59367 2016-08-04 17:25:45Z nkoth $
+// $Id: Addon.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class TikiAddons_Addon
 {
 
-	private $libraries = array();
+	private $libraries = [];
 	private $configuration = null;
 	public $smarty = null;
 	private $utilities;
@@ -19,7 +19,7 @@ class TikiAddons_Addon
 			$folder = str_replace('/', '_', $folder);
 		}
 		$prefname = 'ta_' . $folder . '_on';
-			if (!isset($GLOBALS['prefs'][$prefname]) || $GLOBALS['prefs'][$prefname] != 'y') {
+		if (! isset($GLOBALS['prefs'][$prefname]) || $GLOBALS['prefs'][$prefname] != 'y') {
 			throw new Exception(tra('Addon is not activated: ') . $folder);
 		}
 		$file = TIKI_PATH . "/addons/$folder/tikiaddon.json";
@@ -73,11 +73,12 @@ class TikiAddons_Addon
 		return $parts[1];
 	}
 
-	function getDepends() {
+	function getDepends()
+	{
 		if (is_array($this->configuration->depends)) {
 			return $this->configuration->depends;
 		} else {
-			return array();
+			return [];
 		}
 	}
 

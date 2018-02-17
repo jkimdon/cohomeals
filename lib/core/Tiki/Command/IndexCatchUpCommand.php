@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IndexCatchUpCommand.php 58747 2016-05-31 23:00:07Z lindonb $
+// $Id: IndexCatchUpCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -43,13 +43,12 @@ class IndexCatchUpCommand extends Command
 
 			$output->writeln('Processing completed. Amount remaining: ' . $count);
 		} catch (ZendSearch\Lucene\Exception\ExceptionInterface $e) {
-
 			$msg = tr('Search index could not be updated: %0', $e->getMessage());
 			\Feedback::error($msg, 'session');
 		}
-		
+
 		$errors = \Feedback::get();
-		if (is_array($errors)){
+		if (is_array($errors)) {
 			foreach ($errors as $message) {
 				$output->writeln("<error>$message</error>");
 			}

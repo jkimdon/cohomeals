@@ -1,9 +1,10 @@
-{* $Id: tiki-accounting_export.tpl 53174 2014-11-21 20:42:31Z jyhem $ *}
+{* $Id: tiki-accounting_export.tpl 62265 2017-04-19 01:00:45Z lindonb $ *}
 {title help="accounting"}
 	{$book.bookName}: {tr}Export {$what}{/tr}
 {/title}
 <div id="export">
 	<form action="tiki-accounting_export.php" method="post">
+		{ticket}
 		<input type="hidden" name="action" value="export">
 		<input type="hidden" name="what" value="{$what}">
 		<input type="hidden" name="bookId" value="{$bookId}">
@@ -20,7 +21,7 @@
 				</select><br>
 				<label>{tr}Quote character for text{/tr}</label>
 				<input type="text" name="quote" id="quote" value="{$book.exportQuote|escape}"><br>
-				<input type="submit" class="btn btn-default btn-sm" name="submit" value="{tr}Export as CSV{/tr}" onclick="this.form.target='_blank';return true;">
+				<input type="submit" class="btn btn-default btn-sm timeout" name="submit" value="{tr}Export as CSV{/tr}" onclick="this.form.target='_blank';return true;">
 				{button href="tiki-accounting.php?bookId=$bookId" _text="Back to book page"}
 		</fieldset>
 	</form>

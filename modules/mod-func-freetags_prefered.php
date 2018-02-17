@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-freetags_prefered.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-freetags_prefered.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,13 +16,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_freetags_prefered_info()
 {
-	return array(
+	return [
 		'name' => tra('My Preferred Tags'),
 		'description' => tra('Displays to registered users the tags they prefer, based on the number of objects they tagged. Greater preference is indicated by a larger text size.'),
-		'prefs' => array('feature_freetags'),
-		'params' => array(),
-		'common_params' => array('rows')
-	);
+		'prefs' => ['feature_freetags'],
+		'params' => [],
+		'common_params' => ['rows']
+	];
 }
 
 /**

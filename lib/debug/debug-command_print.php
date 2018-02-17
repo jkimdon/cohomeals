@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_print.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_print.php 64635 2017-11-19 13:15:24Z rjsmelo $
 
 // \brief Command to print PHP variables to debug console
 require_once('lib/debug/debugger-ext.php');
@@ -31,7 +31,7 @@ class DbgPrint extends DebuggerCommand
 	/// \b Must have functio to show exampla of usage of given command
 	function example()
 	{
-		return 'print $_REQUEST'."\n".'print $_SERVER["REQUEST_URI"] $my_private_variable';
+		return 'print $_REQUEST' . "\n" . 'print $_SERVER["REQUEST_URI"] $my_private_variable';
 	}
 	/// Execute command with given set of arguments.
 	function execute($params)
@@ -43,13 +43,15 @@ class DbgPrint extends DebuggerCommand
 		$result = '';
 		$vars = explode(" ", $params);
 		foreach ($vars as $v) {
-			if (strlen(str_replace('$', '', trim($v))) == 0) continue;
-			$result .= $v.' = ';
-			$result .= trim($debugger->str_var_dump($v))."\n";
+			if (strlen(str_replace('$', '', trim($v))) == 0) {
+				continue;
+			}
+			$result .= $v . ' = ';
+			$result .= trim($debugger->str_var_dump($v)) . "\n";
 		}
 		return $result;
 	}
-};
+}
 
 /// Class factory to create instances of defined commands
 function dbg_command_factory_print()

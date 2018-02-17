@@ -1,5 +1,5 @@
 /* ========================================================================
- * bootstrap-tour - v0.10.3
+ * bootstrap-tour - v0.11.0
  * http://bootstraptour.com
  * ========================================================================
  * Copyright 2012-2015 Ulrich Sossou
@@ -20,29 +20,11 @@
  */
 
 .tour-backdrop {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: absolute;
   z-index: 1100;
   background-color: #000;
   opacity: 0.8;
   filter: alpha(opacity=80);
-}
-.tour-step-backdrop {
-  position: relative;
-  z-index: 1101;
-}
-.tour-step-backdrop > td {
-  position: relative;
-  z-index: 1101;
-}
-.tour-step-background {
-  position: absolute !important;
-  z-index: 1100;
-  background: inherit;
-  border-radius: 6px;
 }
 .popover[class*="tour-"] {
   z-index: 1102;

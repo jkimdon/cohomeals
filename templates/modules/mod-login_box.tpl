@@ -1,4 +1,4 @@
-{* $Id: mod-login_box.tpl 60195 2016-11-07 19:24:36Z smartingarcia $ *}
+{* $Id: mod-login_box.tpl 64932 2017-12-19 15:51:52Z jonnybradley $ *}
 {jq notonready=true}
 function capLock(e, el){
 	kc = e.keyCode ? e.keyCode : e.which;
@@ -53,13 +53,18 @@ if (jqueryTiki.no_cookie) {
 					</fieldset>
 				</form>
 			{elseif $tiki_p_admin eq 'y'}
-				<form action="{$login_module.login_url|escape}" method="post"{if $prefs.desactive_login_autocomplete eq 'y'} autocomplete="off"{/if} role="form">
+				<form action="{$login_module.login_url|escape}" method="post"{if $prefs.desactive_login_autocomplete eq 'y'} autocomplete="off"{/if}>
+					{ticket}
 					<fieldset>
 						<legend>{tr}Switch User{/tr}</legend>
 						<div class="form-group">
 							<label for="login-switchuser_{$module_logo_instance}">
 								{if $prefs.login_is_email eq 'y'}
-									{tr}Email:{/tr}
+									{if $prefs.login_is_email_obscure eq 'n'}
+										{tr}Email:{/tr}
+									{else}
+										{tr}Name:{/tr}
+									{/if}
 								{else}
 									{if $prefs.login_allow_email eq 'y'}
 										{tr}Email address or {/tr}
@@ -76,7 +81,7 @@ if (jqueryTiki.no_cookie) {
 							{if $prefs.feature_help eq 'y'}
 								{help url="Switch+User" desc="{tr}Help{/tr}" desc="{tr}Switch User:{/tr}{tr}Enter a username and click 'Switch'.<br>Useful for testing permissions.{/tr}"}
 							{/if}
-							{user_selector id="login-switchuser_"|cat:$module_logo_instance name='username' user='' editable=$tiki_p_admin class='form-control'}
+							{user_selector groupIds=$module_params.groups id="login-switchuser_"|cat:$module_logo_instance name='username' user='' editable=$tiki_p_admin class='form-control'}
 						</div>
 						<div class="text-center"><button type="submit" class="btn btn-primary" name="actsu">{tr}Switch{/tr}</button></div>
 					</fieldset>
@@ -93,14 +98,18 @@ if (jqueryTiki.no_cookie) {
 					<span class="caret"></span>
 					<span class="sr-only">{tr}Toggle Dropdown{/tr}</span>
 				</button>
-				<ul class="dropdown-menu">
+				{if empty($module_params.menu_id)}
+					<ul class="dropdown-menu">
+							<li>
+							<a href="tiki-user_information.php" title="{tr}My Account{/tr}">{if isset($module_params.show_user_name) && $module_params.show_user_name eq 'y'}{tr}My Account{/tr}{else}{tr}{$user|username|escape:"html"}{/tr}{/if}</a>
+							</li>
 						<li>
-						<a href="tiki-user_information.php" title="{tr}My Account{/tr}">{if isset($module_params.show_user_name) && $module_params.show_user_name eq 'y'}{tr}My Account{/tr}{else}{tr}{$user|username|escape:"html"}{/tr}{/if}</a>
+							<a href="tiki-logout.php" title="{tr}Log out{/tr}">{tr}Log out{/tr}</a>
 						</li>
-					<li>
-						<a href="tiki-logout.php" title="{tr}Log out{/tr}">{tr}Log out{/tr}</a>
-					</li>
-				</ul>
+					</ul>
+				{else}
+					{menu id=$module_params.menu_id bootstrap='y' bs_menu_class='dropdown-menu'}
+				{/if}
 			</div>
 		{/if}
 		{if $prefs.auth_method eq 'openid' and $openid_userlist|@count gt 1}

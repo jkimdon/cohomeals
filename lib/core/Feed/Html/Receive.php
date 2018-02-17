@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Receive.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: Receive.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * For HtmlFeed_Remote Protocol
@@ -22,7 +22,7 @@ class Feed_Html_Receive extends Feed_Abstract
 
 	public function getContents()
 	{
-		if (!empty($this->contents)) {
+		if (! empty($this->contents)) {
 			return $this->contents;
 		} else {
 			$feed = json_decode(file_get_contents($this->href));

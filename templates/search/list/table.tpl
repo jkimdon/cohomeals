@@ -1,4 +1,4 @@
-{* $Id: table.tpl 63329 2017-07-24 12:40:51Z kroky6 $ *}
+{* $Id: table.tpl 64123 2017-10-04 08:25:09Z kroky6 $ *}
 {if empty($iListExecute)}{assign var=iListExecute value=$id}{/if}
 {if $actions}
 <form method="post" action="#{$id}" class="form-inline" id="listexecute-{$iListExecute}">
@@ -21,7 +21,10 @@
 			<tr>
 				{if $actions}
 					{$fieldcount = 1}
-					<th><input type="checkbox" name="selectall" value="" class="listexecute-select-all"></th>
+					<th>
+						<input type="checkbox" name="selectall" value="" class="listexecute-select-all">
+						<input type="hidden" name="objects[]" value="" class="listexecute-all">
+					</th>
 				{/if}
 				{foreach from=$column item=col}
 					{$fieldcount = $fieldcount + 1}
@@ -41,12 +44,24 @@
 									{/if}
 								{/if}
 								{$click = $sort_jsvar|cat:'=\''|cat:$col.sort|cat:$order|cat:'\';'|cat:$_onclick}
-								{self_link _onclick=$click _ajax='y'}{$col.label|escape}{/self_link}
+								{if $col.translatelabel == 'y'}
+									{self_link _onclick=$click _ajax='y'}{$col.label|tra|escape}{/self_link}
+								{else}
+									{self_link _onclick=$click _ajax='y'}{$col.label|escape}{/self_link}
+								{/if}
 							{else}
-								{self_link _sort_arg=$sort_arg _sort_field=$col.sort}{$col.label|escape}{/self_link}
+								{if $col.translatelabel == 'y'}
+									{self_link _sort_arg=$sort_arg _sort_field=$col.sort}{$col.label|tra|escape}{/self_link}
+								{else}
+									{self_link _sort_arg=$sort_arg _sort_field=$col.sort}{$col.label|escape}{/self_link}
+								{/if}
 							{/if}
 						{else}
-							{$col.label|escape}
+							{if $col.translatelabel == 'y'}
+								{$col.label|tra|escape}
+							{else}
+								{$col.label|escape}
+							{/if}
 						{/if}
 					</th>
 				{/foreach}
@@ -101,6 +116,8 @@
 		} else {
 			$('input#submit_form_{{$id}}').prop('disabled', true);
 		}
+		var header_checked = $('#{{$id}}-div .checkbox_objects').not(':checked').length == 0;
+		$('#listexecute-{{$iListExecute}} .listexecute-all').val(header_checked ? 'ALL' : '');
 	};
 	$('#listexecute-{{$iListExecute}} .listexecute-select-all').removeClass('listexecute-select-all')
 		.on('click', function (e) {
@@ -126,6 +143,37 @@
 		});
 	$( "#{{$id}}-div .checkbox_objects" ).on( "click", countChecked );
 	countChecked();
+	$('#listexecute-{{$iListExecute}}').submit(function(){
+		feedback(tr('Action is being executed, please wait.'));
+		$(this).tikiModal(" ");
+	});
+})();
+{/jq}
+{/if}
+{if $downloadable}
+	{if $actions}
+	<br>
+	{/if}
+	<form method="post" id="listexecute-download-{$iListExecute}">
+		<input type="hidden" name="download" value="1">
+		<input type="hidden" name="tsAjax" value="y">
+		<input type="submit" name="submit" value="{tr}Download{/tr}" class="btn btn-default">
+	</form>
+{jq}
+(function(){
+	$('#listexecute-download-{{$iListExecute}}').submit(function(){
+		var $form = $(this);
+		$form.find('input[name^=filter]').remove();
+		$('.tablesorter-filter').each(function(i,el){
+			var column = $(el).data('column'),
+					value = $(el).val();
+			if( value ) {
+				$('<input type="hidden" name="filter['+column+']">')
+					.val(value)
+					.appendTo($form);
+			}
+		});
+	});
 })();
 {/jq}
 {/if}

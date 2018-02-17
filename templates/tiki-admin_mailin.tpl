@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_mailin.tpl 58748 2016-05-31 23:05:28Z lindonb $ *}
+{* $Id: tiki-admin_mailin.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {extends "layout_view.tpl"}
 
 {block name="title"}
@@ -73,7 +73,7 @@
 						class="tips"
 						title="{tr}Actions{/tr}"
 						href="#"
-						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.mailin_actions|escape:"javascript"|escape:"html"}{/if}
+						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.mailin_actions}{/if}
 						style="padding:0; margin:0; border:0"
 					>
 						{icon name='wrench'}

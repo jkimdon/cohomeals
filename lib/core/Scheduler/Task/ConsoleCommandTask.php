@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ConsoleCommandTask.php 62232 2017-04-16 16:48:48Z rjsmelo $
+// $Id: ConsoleCommandTask.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -18,6 +18,8 @@ class Scheduler_Task_ConsoleCommandTask extends Scheduler_Task_CommandTask
 			$this->errorMessage = tra('Missing parameters to run the command.');
 			return false;
 		}
+
+		$this->logger->debug(sprintf(tra('Executing console command: %s'), $params['console_command']));
 
 		$consoleParams = 'console.php ' . $params['console_command'];
 		$args = $this->parseConsoleParams($consoleParams);
@@ -59,13 +61,12 @@ class Scheduler_Task_ConsoleCommandTask extends Scheduler_Task_CommandTask
 
 	public function getParams()
 	{
-		return array(
-			'console_command' => array(
+		return [
+			'console_command' => [
 				'name' => tra('Console command'),
 				'type' => 'text',
 				'required' => true,
-			),
-		);
+			],
+		];
 	}
-
 }

@@ -3,21 +3,36 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: messu-read.php 57961 2016-03-17 20:01:56Z jonnybradley $
+// $Id: messu-read.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
 $section = 'user_messages';
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 $messulib = TikiLib::lib('message');
 $access->check_user($user);
 $access->check_feature('feature_messages');
 $access->check_permission('tiki_p_messages');
-if (isset($_REQUEST["delete"])) {
-	check_ticket('messu-read');
-	$messulib->delete_message($user, $_REQUEST['msgdel']);
+$access->checkAuthenticity();
+
+if (! isset($_REQUEST['msgId']) || $_REQUEST['msgId'] == 0) {
+	$smarty->assign('unread', 0);
+	$smarty->assign('legend', tra("No more messages"));
+	$smarty->assign('mid', 'messu-read.tpl');
+	$smarty->display("tiki.tpl");
+	die;
 }
+
+if ($access->ticketMatch()) {
+	if (isset($_REQUEST['action'])) {
+		$messulib->flag_message($user, $_REQUEST['msgId'], $_REQUEST['action'], $_REQUEST['actionval']);
+	}
+	if (isset($_REQUEST["delete"])) {
+		$messulib->delete_message($user, $_REQUEST['msgdel']);
+	}
+}
+
 $smarty->assign('sort_mode', $_REQUEST['sort_mode']);
 $smarty->assign('find', $_REQUEST['find']);
 $smarty->assign('flag', $_REQUEST['flag']);
@@ -25,16 +40,7 @@ $smarty->assign('offset', $_REQUEST['offset']);
 $smarty->assign('flagval', $_REQUEST['flagval']);
 $smarty->assign('priority', $_REQUEST['priority']);
 $smarty->assign('legend', '');
-if (!isset($_REQUEST['msgId']) || $_REQUEST['msgId'] == 0) {
-	$smarty->assign('unread', 0);
-	$smarty->assign('legend', tra("No more messages"));
-	$smarty->assign('mid', 'messu-read.tpl');
-	$smarty->display("tiki.tpl");
-	die;
-}
-if (isset($_REQUEST['action'])) {
-	$messulib->flag_message($user, $_REQUEST['msgId'], $_REQUEST['action'], $_REQUEST['actionval']);
-}
+
 // Using the sort_mode, flag, flagval and find get the next and prev messages
 $smarty->assign('msgId', $_REQUEST['msgId']);
 $next = $messulib->get_next_message($user, $_REQUEST['msgId'], $_REQUEST['sort_mode'], $_REQUEST['find'], $_REQUEST['flag'], $_REQUEST['flagval'], $_REQUEST['priority']);
@@ -61,8 +67,7 @@ if ($messulib->get_user_preference($user, 'mess_sendReadStatus', 'n') == 'y') {
 if ($prefs['feature_actionlog'] == 'y') {
 	$logslib->add_action('Viewed', '', 'message');
 }
-ask_ticket('messu-read');
-include_once ('tiki-section_options.php');
-include_once ('tiki-mytiki_shared.php');
+include_once('tiki-section_options.php');
+include_once('tiki-mytiki_shared.php');
 $smarty->assign('mid', 'messu-read.tpl');
 $smarty->display("tiki.tpl");

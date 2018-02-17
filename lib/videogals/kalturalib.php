@@ -1,12 +1,21 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: kalturalib.php 58747 2016-05-31 23:00:07Z lindonb $ 
+// $Id: kalturalib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
-
-require_once ('vendor_extra/kaltura/KalturaClient.php');
+use Kaltura\Client\Client;
+use Kaltura\Client\Configuration;
+use Kaltura\Client\Enum\UiConfCreationMode;
+use Kaltura\Client\Enum\UiConfObjType;
+use Kaltura\Client\Type\FilterPager;
+use Kaltura\Client\Type\MediaEntry;
+use Kaltura\Client\Type\MediaEntryFilter;
+use Kaltura\Client\Type\MixEntry;
+use Kaltura\Client\Type\MixEntryFilter;
+use Kaltura\Client\Type\UiConf;
+use Kaltura\Client\Type\UiConfFilter;
 
 class KalturaLib
 {
@@ -18,7 +27,7 @@ class KalturaLib
 	private $client;
 	private $sessionType;
 	private $initialized = false;
-	
+
 	function __construct($session_type)
 	{
 		$this->sessionType = $session_type;
@@ -48,10 +57,10 @@ class KalturaLib
 				return $_SESSION[$session]['key'];
 			}
 		} else {
-			$_SESSION[$session] = array(
+			$_SESSION[$session] = [
 				'key' => $key,
 				'expiry' => $tikilib->now + 1800, // Keep for half an hour
-			);
+			];
 		}
 
 		return $key;
@@ -61,8 +70,8 @@ class KalturaLib
 	{
 		if (! $this->kconfig) {
 			global $prefs;
-			$this->kconfig = new KalturaConfiguration($prefs['kaltura_partnerId']);
-			$this->kconfig->serviceUrl = $prefs['kaltura_kServiceUrl'];
+			$this->kconfig = new Configuration($prefs['kaltura_partnerId']);
+			$this->kconfig->setServiceUrl($prefs['kaltura_kServiceUrl']);
 		}
 
 		return $this->kconfig;
@@ -73,7 +82,7 @@ class KalturaLib
 		if (! $this->initialized && ! $this->client) {
 			$this->initialized = true;
 			try {
-				$client = new KalturaClient($this->getConfig());
+				$client = new Client($this->getConfig());
 				if ($session = $this->storedKey()) {
 					$client->setKs($session);
 					$this->client = $client;
@@ -94,23 +103,26 @@ class KalturaLib
 	{
 		global $prefs;
 		$config = $this->getConfig();
-		return $config->serviceUrl . "kwidget/wid/_{$prefs['kaltura_partnerId']}/uiconf_id/$playerId/entry_id/$entryId";
+		return $config->getServiceUrl() . "kwidget/wid/_{$prefs['kaltura_partnerId']}/uiconf_id/$playerId/entry_id/$entryId";
 	}
 
-	function getPlaylist($entryId) {
+	function getPlaylist($entryId)
+	{
 		return $this->getClient()->playlist->get($entryId);
 	}
 
-	function testSetup() {
+	function testSetup()
+	{
 		global $prefs;
-		if (empty($prefs['kaltura_partnerId']) || !is_numeric($prefs['kaltura_partnerId']) || empty($prefs['kaltura_secret']) || empty($prefs['kaltura_adminSecret'])) {
+		if (empty($prefs['kaltura_partnerId']) || ! is_numeric($prefs['kaltura_partnerId']) || empty($prefs['kaltura_secret']) || empty($prefs['kaltura_adminSecret'])) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
-	private function initializeClient($client) {
+
+	private function initializeClient($client)
+	{
 		global $prefs, $user;
 
 		if (! $this->testSetup()) {
@@ -131,27 +143,28 @@ class KalturaLib
 
 		return $session;
 	}
-	
+
 	private function _getPlayersUiConfs()
 	{
 		if ($client = $this->getClient()) {
-			$filter = new KalturaUiConfFilter();
+			$filter = new UiConfFilter();
 			$filter->objTypeEqual = 1; // 1 denotes Players
 			$filter->orderBy = '-createdAt';
 			$uiConfs = $client->uiConf->listAction($filter);
-			
+
 			if (is_null($client->error)) {
 				return $uiConfs;
 			}
 		}
 
 		$uiConfs = new stdClass();
-		$uiConfs->objects = array();
+		$uiConfs->objects = [];
 
 		return $uiConfs;
 	}
-	
-	function getPlayersUiConfs() {
+
+	function getPlayersUiConfs()
+	{
 		$cachelib = TikiLib::lib('cache');
 
 		if (! $configurations = $cachelib->getSerialized(self::CONFIGURATION_LIST)) {
@@ -159,9 +172,9 @@ class KalturaLib
 				$obj = $this->_getPlayersUiConfs()->objects;
 			} catch (Exception $e) {
 				Feedback::error($e->getMessage(), 'session');
-				return array();
+				return [];
 			}
-			$configurations = array();
+			$configurations = [];
 			foreach ($obj as $o) {
 				$configurations[] = get_object_vars($o);
 			}
@@ -172,7 +185,8 @@ class KalturaLib
 		return $configurations;
 	}
 
-	function getPlayersUiConf($playerId) {
+	function getPlayersUiConf($playerId)
+	{
 		// Ontaining full list, because it is cached
 		$confs = $this->getPlayersUiConfs();
 
@@ -183,13 +197,14 @@ class KalturaLib
 		}
 	}
 
-	function updateStandardTikiKcw() {
+	function updateStandardTikiKcw()
+	{
 		if ($client = $this->getClient()) {
 			// first check if there is an existing one
 			$pager = null;
-			$filter = new KalturaUiConfFilter();
+			$filter = new UiConfFilter();
 			$filter->nameLike = 'Tiki.org Standard 2013';
-			$filter->objTypeEqual = KalturaUiConfObjType::CONTRIBUTION_WIZARD;
+			$filter->objTypeEqual = UiConfObjType::CONTRIBUTION_WIZARD;
 			$existing = $client->uiConf->listAction($filter, $pager);
 			if (count($existing->objects) > 0) {
 				$current_obj = array_pop($existing->objects);
@@ -199,9 +214,9 @@ class KalturaLib
 			}
 
 			global $tikipath;
-			$uiConf = new KalturaUiConf();
+			$uiConf = new UiConf();
 			$uiConf->name = 'Tiki.org Standard 2013';
-			$uiConf->objType = KalturaUiConfObjType::CONTRIBUTION_WIZARD;
+			$uiConf->objType = UiConfObjType::CONTRIBUTION_WIZARD;
 			$filename = $tikipath . "lib/videogals/standardTikiKcw.xml";
 			$fh = fopen($filename, 'r');
 			$confXML = fread($fh, filesize($filename));
@@ -212,27 +227,27 @@ class KalturaLib
 
 			// first try to update
 			if ($current) {
-				 try {
-					 $results = $client->uiConf->update($current, $uiConf);
-					 if (isset($results->id)) {
-						 return $results->id;
-					 }
-				 } catch (Exception $e) {
-					 Feedback::error($e->getMessage(), 'session');
-				 }
-			 } else {
-				 try {
-					 // create if updating failed or not updating
-					 $uiConf->creationMode = KalturaUiConfCreationMode::ADVANCED;
-					 $results = $client->uiConf->add($uiConf);
-					 if (isset($results->id)) {
-						 return $results->id;
-					 } else {
-						 return '';
-					 }
-				 } catch (Exception $e) {
-					 Feedback::error($e->getMessage(), 'session');
-				 }
+				try {
+					$results = $client->uiConf->update($current, $uiConf);
+					if (isset($results->id)) {
+						return $results->id;
+					}
+				} catch (Exception $e) {
+					Feedback::error($e->getMessage(), 'session');
+				}
+			} else {
+				try {
+					// create if updating failed or not updating
+					$uiConf->creationMode = UiConfCreationMode::ADVANCED;
+					$results = $client->uiConf->add($uiConf);
+					if (isset($results->id)) {
+						return $results->id;
+					} else {
+						return '';
+					}
+				} catch (Exception $e) {
+					Feedback::error($e->getMessage(), 'session');
+				}
 			}
 		}
 
@@ -277,7 +292,7 @@ class KalturaLib
 	public function updateMix($entryId, array $data)
 	{
 		if ($client = $this->getClient()) {
-			$kentry = new KalturaMixEntry();
+			$kentry = new MixEntry();
 			$kentry->name = $data['name'];
 			$kentry->description = $data['description'];
 			$kentry->tags = $data['tags'];
@@ -298,7 +313,7 @@ class KalturaLib
 	public function updateMedia($entryId, array $data)
 	{
 		if ($client = $this->getClient()) {
-			$kentry = new KalturaMediaEntry();
+			$kentry = new MediaEntry();
 			$kentry->name = $data['name'];
 			$kentry->description = $data['description'];
 			$kentry->tags = $data['tags'];
@@ -307,34 +322,34 @@ class KalturaLib
 			return $client->media->update($entryId, $kentry);
 		}
 	}
-	
+
 	public function listMix($sort_mode, $page, $page_size, $find)
 	{
 		if ($client = $this->getClient()) {
-			$kpager = new KalturaFilterPager();
+			$kpager = new FilterPager();
 			$kpager->pageIndex = $page;
 			$kpager->pageSize = $page_size;
 
-			$kfilter = new KalturaMixEntryFilter();
+			$kfilter = new MixEntryFilter();
 			$kfilter->orderBy = $sort_mode;
 			$kfilter->nameMultiLikeOr = $find;
-			
+
 			return $client->mixing->listAction($kfilter, $kpager);
 		}
 	}
-	
+
 	public function listMedia($sort_mode, $page, $page_size, $find)
 	{
 		if ($client = $this->getClient()) {
-			$kpager = new KalturaFilterPager();
+			$kpager = new FilterPager();
 			$kpager->pageIndex = $page;
 			$kpager->pageSize = $page_size;
 
-			$kfilter = new KalturaMediaEntryFilter();
+			$kfilter = new MediaEntryFilter();
 			$kfilter->orderBy = $sort_mode;
 			$kfilter->nameMultiLikeOr = $find;
 			$kfilter->statusIn = '-1,-2,0,1,2';
-			
+
 			return $client->media->listAction($kfilter, $kpager);
 		}
 	}
@@ -342,25 +357,24 @@ class KalturaLib
 	public function getMovieList(array $movies)
 	{
 		if (count($movies) && $client = $this->getClient()) {
-			$kpager = new KalturaFilterPager();
+			$kpager = new FilterPager();
 			$kpager->pageIndex = 0;
 			$kpager->pageSize = count($movies);
 
-			$kfilter = new KalturaMediaEntryFilter();
+			$kfilter = new MediaEntryFilter();
 			$kfilter->idIn = implode(',', $movies);
-			
-			$mediaList = array();
+
+			$mediaList = [];
 			foreach ($client->media->listAction($kfilter, $kpager)->objects as $media) {
-				$mediaList[] = array(
+				$mediaList[] = [
 					'id' => $media->id,
 					'name' => $media->name,
-				);
+				];
 			}
 
 			return $mediaList;
 		}
 
-		return array();
+		return [];
 	}
 }
-

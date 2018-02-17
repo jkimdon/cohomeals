@@ -1,4 +1,4 @@
-{* $Id: profiles_useful_admin_confs.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: profiles_useful_admin_confs.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 
 <div class="media">
 	<span class="pull-left fa-stack fa-lg margin-right-18em" alt="{tr}Configuration Profiles Wizard{/tr}" title="{tr}Configuration Profiles Wizard{/tr}" >

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiText.php 62028 2017-04-02 14:52:01Z jonnybradley $
+// $Id: WikiText.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Type_WikiText implements Search_Type_Interface
 {
@@ -18,13 +18,14 @@ class Search_Type_WikiText implements Search_Type_Interface
 	{
 		global $prefs;
 		$out = TikiLib::lib('parser')->parse_data(
-			$this->value, array(
+			$this->value,
+			[
 				'parsetoc' => false,
 				'indexing' => true,
 				'exclude_plugins' => $prefs['unified_excluded_plugins'],
 				'exclude_all_plugins' => $prefs['unified_exclude_all_plugins'] == 'y',
 				'include_plugins' => $prefs['unified_included_plugins'],
-			)
+			]
 		);
 
 		return strip_tags($out);
@@ -41,4 +42,3 @@ class Search_Type_WikiText implements Search_Type_Interface
 		return new self($value);
 	}
 }
-

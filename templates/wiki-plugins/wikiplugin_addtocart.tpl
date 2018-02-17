@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_addtocart.tpl 62445 2017-05-04 10:06:56Z yonixxx $ *}
+{* $Id: wikiplugin_addtocart.tpl 62446 2017-05-04 10:13:32Z yonixxx $ *}
 <form method="post" action="{query _type=relative _keepall=y}" style="display: inline;" class="wp_addtocart_form"{$form_data}>
 	<input type="hidden" name="code" value="{$params.code|escape}">
 	{if $onbehalf == 'y'}

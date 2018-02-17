@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Column.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: Column.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Schema;
 
@@ -187,9 +187,11 @@ class Column
 						continue;
 					}
 
-					throw new \Exception(tr('Column "%0" cannot co-exist with "%1".',
+					throw new \Exception(tr(
+						'Column "%0" cannot co-exist with "%1".',
 						$column->getEncodedHeader(),
-						$this->getEncodedHeader()));
+						$this->getEncodedHeader()
+					));
 				}
 			}
 		}
@@ -220,4 +222,3 @@ class Column
 		return $column;
 	}
 }
-

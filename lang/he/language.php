@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Europe" => "אירופה",
 "None" => "בלי",
 "Memory" => "זיכרון",
@@ -1441,7 +1441,7 @@ $lang = array(
 "You need to set" => "חובה להגדיר",
 "experimental" => "ניסיוני",
 "A valid email is mandatory to register" => "דוא\"ל חוקית חובה כדי להירשם",
-"Repeat password" => "חזור על הסיסמה",
+"Confirm password" => "חזור על הסיסמה",
 "Generate a password" => "בחר לי סיסמה",
 "Valid" => "תקף",
 "Create New" => "צור",
@@ -2942,4 +2942,4 @@ $lang = array(
 "Edit/Delete" => "ערוך/מחק",
 "Top pages" => "עמודים נצפים ביותר",
 "Last pages" => "עמודים ששונו לאחרונה",
-);
+];

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Low German" => "Platdútsk",
 "Description" => "Omskriuwing",
 "Comment" => "Opmerking",
@@ -89,4 +89,4 @@ $lang = array(
 "Is email public? (uses scrambling to prevent spam)" => "Is email publyklik? (br&ucirc;kt ferfoarming om spam foar te kommen)",
 "Does your email application need a special character set" => "Br&ucirc;kt jo maill&ecirc;zer in spesjale karakterset",
 "The language can't be changed as its set of translations has already this language" => "De taal kin net oanpast wurde, omdat der al besteande oersettingen binne foar dizze taal",
-);
+];

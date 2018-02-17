@@ -4,11 +4,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20161109_remove_old_password_tiki.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: 20161109_remove_old_password_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-    header("location: index.php");
-    exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -18,10 +18,10 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function upgrade_20161109_remove_old_password_tiki($installer)
 {
-    $query = "SHOW COLUMNS FROM `users_users` LIKE 'password'";
-    $result = $installer->query($query, array());
-    if ($result->numRows()) {
-        $query = 'ALTER TABLE `users_users` DROP `password`';
-        $installer->query($query, array());
-    }
+	$query = "SHOW COLUMNS FROM `users_users` LIKE 'password'";
+	$result = $installer->query($query, []);
+	if ($result->numRows()) {
+		$query = 'ALTER TABLE `users_users` DROP `password`';
+		$installer->query($query, []);
+	}
 }

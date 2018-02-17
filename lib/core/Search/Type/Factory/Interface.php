@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Interface.php 60381 2016-11-23 10:56:42Z jonnybradley $
+// $Id: Interface.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 interface Search_Type_Factory_Interface
 {
@@ -12,7 +12,7 @@ interface Search_Type_Factory_Interface
 	// wiki parsed before indexed - tokenized - indexed - unstored in database
 	function wikitext($value);
 	// not tokenized - indexed - stored in database
-	function timestamp($value);
+	function timestamp($value, $dateOnly = false);
 	// not tokenized - indexed - stored in database
 	function identifier($value);
 	// not tokenized - indexed - stored in database
@@ -27,4 +27,6 @@ interface Search_Type_Factory_Interface
 	function sortable($value);
 	// tokenized - indexed - unstored in database (?)
 	function geopoint($value);
+	// like object but - not indexed - not mapped
+	function json($value);
 }

@@ -4,7 +4,7 @@
 	{title}{$title|escape}{/title}
 {/block}
 {block name="content"}
-	<form action="{service controller=language action=write_to_language_php}" method="post" role="form" class="form">
+	<form action="{service controller=language action=write_to_language_php}" method="post" class="form">
 		{if isset($expmsg)}
 			{remarksbox type="note" title="{tr}Note:{/tr}"}
 				{$expmsg}
@@ -20,6 +20,11 @@
 					<label>
 						{tr}Translations in the database{/tr}: <span class="badge">{$db_translation_count}</span>
 					</label>
+					{if $prefs.lang_control_contribution eq 'y'}
+						<label>
+							<input type="checkbox" name="all"> {tr}Merge all translations, whether or not they are marked as general (for contribution){/tr}
+						</label>
+					{/if}
 				</div>
 				<div class="form-group">
 					<label>

@@ -3,19 +3,21 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-pick_avatar.php 60943 2017-01-20 00:12:26Z drsassafras $
+// $Id: tiki-pick_avatar.php 65320 2018-01-24 10:49:49Z lfagundes $
 
 $section = 'mytiki';
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 $userprefslib = TikiLib::lib('userprefs');
 $imagegallib = TikiLib::lib('imagegal');
 $access->check_feature('feature_userPreferences');
 $access->check_user($user);
-$auto_query_args = array('view_user');
-if (!isset($_REQUEST["showall"])) $_REQUEST["showall"] = 'n';
+$auto_query_args = ['view_user'];
+if (! isset($_REQUEST["showall"])) {
+	$_REQUEST["showall"] = 'n';
+}
 $smarty->assign('showall', $_REQUEST["showall"]);
 $userwatch = $user;
 if (isset($_REQUEST["view_user"])) {
@@ -38,6 +40,16 @@ if (isset($_FILES['userfile1']) && is_uploaded_file($_FILES['userfile1']['tmp_na
 	check_ticket('pick-avatar');
 	$name = $_FILES['userfile1']['name'];
 
+	$filegallib = TikiLib::lib('filegal');
+	try {
+		$filegallib->assertUploadedFileIsSafe($_FILES['userfile1']['tmp_name'], $_FILES['userfile1']['name']);
+	} catch (Exception $e) {
+		$smarty->assign('errortype', 403);
+		$smarty->assign('msg', $e->getMessage());
+		$smarty->display("error.tpl");
+		die;
+	}
+		
 	$avatarlib = TikiLib::lib('avatar');
 	$avatarlib->set_avatar_from_url($_FILES['userfile1']['tmp_name'], $userwatch, $name);
 
@@ -59,7 +71,7 @@ if (isset($_REQUEST["reset"])) {
 	$userprefslib->set_user_avatar($userwatch, '0', '', '', '', '', '');
 	$userprefslib->remove_file_gallery_image($userwatch);
 }
-$avatars = array();
+$avatars = [];
 $h = opendir("img/avatars/");
 while ($file = readdir($h)) {
 	if ($file != '.' && $file != '..' && $file != 'index.php' && substr($file, 0, 1) != "." && $file != "CVS" && $file != "README") {
@@ -75,11 +87,11 @@ $avatar = $tikilib->get_user_avatar($userwatch);
 $smarty->assign('avatar', $avatar);
 
 // Get full user picture if it is set
-if ($prefs["user_store_file_gallery_picture"] == 'y' && $user_picture_id = $userprefslib->get_user_picture_id($userwatch) ) {
-	$smarty->assign('user_picture_id', $user_picture_id);	
+if ($prefs["user_store_file_gallery_picture"] == 'y' && $user_picture_id = $userprefslib->get_user_picture_id($userwatch)) {
+	$smarty->assign('user_picture_id', $user_picture_id);
 }
 
 ask_ticket('pick-avatar');
-include_once ('tiki-mytiki_shared.php');
+include_once('tiki-mytiki_shared.php');
 $smarty->assign('mid', 'tiki-pick_avatar.tpl');
 $smarty->display("tiki.tpl");

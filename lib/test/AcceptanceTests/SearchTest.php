@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SearchTest.php 58382 2016-04-20 08:59:56Z jonnybradley $
+// $Id: SearchTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group gui
@@ -48,11 +48,11 @@ class AcceptanceTests_SearchTest extends TikiSeleniumTestCase
 		$this->_searchFor($query);
 
 		$this->_assertSearchResultsWere(
-			array(
+			[
 				0 => "HomePage",
 				1 => 'Multilingual Test Page 1',
 				2 => 'Another page containing the word feature'
-			),
+			],
 			$query,
 			""
 		);
@@ -69,10 +69,10 @@ class AcceptanceTests_SearchTest extends TikiSeleniumTestCase
 		$query = 'hello';
 		$this->_searchFor($query);
 		$this->_assertSearchResultsWere(
-			array(
+			[
 				0 => "test page for search 1",
 				1 => 'test page for search 2'
-			),
+			],
 			$query,
 			"Bad list of search results for query '$query'. Search should have been case insensitive."
 		);
@@ -88,15 +88,14 @@ class AcceptanceTests_SearchTest extends TikiSeleniumTestCase
 		$query = 'hello world';
 		$this->_searchFor($query);
 		$this->_assertSearchResultsWere(
-			array(
+			[
 				0 => "test page for search 1",
 				1 => "test page for search 2",
 				2 => 'test page for search 3'
-			),
+			],
 			$query,
 			"Bad list of search results for multi word query '$query'. Could be that the search engine did not use an OR to combine the search words."
 		);
-
 	}
 
 	/**************************************
@@ -107,7 +106,6 @@ class AcceptanceTests_SearchTest extends TikiSeleniumTestCase
 	{
 		$this->type("highlight", $query);
 		$this->clickAndWait('search');
-
 	}
 
 	private function _assertSearchFormIsWellFormed()

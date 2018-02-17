@@ -1,4 +1,4 @@
-{* $Id: upgrade_new_in_15.tpl 63460 2017-08-05 12:13:10Z xavidp $ *}
+{* $Id: upgrade_new_in_15.tpl 63459 2017-08-05 12:06:28Z xavidp $ *}
 
 <div class="media">
 	<span class="pull-left fa-stack fa-lg margin-right-18em" alt="{tr}Upgrade Wizard{/tr}" title="Upgrade Wizard">

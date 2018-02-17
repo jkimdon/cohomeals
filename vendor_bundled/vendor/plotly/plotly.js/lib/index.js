@@ -21,6 +21,7 @@ Plotly.register([
     require('./pie'),
     require('./contour'),
     require('./scatterternary'),
+    require('./sankey'),
 
     require('./scatter3d'),
     require('./surface'),
@@ -32,8 +33,14 @@ Plotly.register([
     require('./scattergl'),
     require('./pointcloud'),
     require('./heatmapgl'),
+    require('./parcoords'),
+    require('./table'),
 
     require('./scattermapbox'),
+
+    require('./carpet'),
+    require('./scattercarpet'),
+    require('./contourcarpet'),
 
     require('./ohlc'),
     require('./candlestick')
@@ -50,8 +57,10 @@ Plotly.register([
 // https://github.com/plotly/plotly.js/pull/978#pullrequestreview-2403353
 //
 Plotly.register([
+    require('./aggregate'),
     require('./filter'),
-    require('./groupby')
+    require('./groupby'),
+    require('./sort')
 ]);
 
 // components

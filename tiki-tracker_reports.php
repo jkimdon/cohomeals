@@ -6,12 +6,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-tracker_reports.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-tracker_reports.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
 require_once('tiki-setup.php');
 
 if ($tiki_p_admin_trackers != 'y') {
-	$access->display_error('', tra('Permission denied').": ". 'tiki_p_admin_trackers', '403');
+	$access->display_error('', tra('Permission denied') . ": " . 'tiki_p_admin_trackers', '403');
 }
 
 $headerlib->add_jq_onready(

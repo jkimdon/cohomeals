@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "عربي",
 "Catalan" => "كاتالان",
 "Simplified Chinese" => "چيني ساده‌شده",
@@ -1283,7 +1283,7 @@ $lang = array(
 "vote" => "راي دادن",
 "Rate" => "نرخ",
 "A valid email is mandatory to register" => "براي ثبت‌نام، يك پست الكترونيكي معتبر ضروري است",
-"Repeat password" => "تكرار ‌كلمه‌ي عبور",
+"Confirm password" => "تكرار ‌كلمه‌ي عبور",
 "Generate a password" => "يك كلمه‌ي عبور توليد كن ",
 "Valid" => "معتبر",
 "Create New" => "ساخت جديد",
@@ -2644,4 +2644,4 @@ $lang = array(
 "Aborted" => "منقطع شده",
 "Top pages" => "برترين صفحات",
 "Last pages" => "آخرين صفحات",
-);
+];

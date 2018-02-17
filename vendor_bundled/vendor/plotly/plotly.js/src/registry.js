@@ -9,8 +9,15 @@
 
 'use strict';
 
-var Lib = require('./lib');
+var Loggers = require('./lib/loggers');
+var noop = require('./lib/noop');
+var pushUnique = require('./lib/push_unique');
+var ExtendModule = require('./lib/extend');
+var extendFlat = ExtendModule.extendFlat;
+var extendDeepAll = ExtendModule.extendDeepAll;
+
 var basePlotAttributes = require('./plots/attributes');
+var baseLayoutAttributes = require('./plots/layout_attributes');
 
 exports.modules = {};
 exports.allCategories = {};
@@ -19,6 +26,8 @@ exports.subplotsRegistry = {};
 exports.transformsRegistry = {};
 exports.componentsRegistry = {};
 exports.layoutArrayContainers = [];
+exports.layoutArrayRegexes = [];
+exports.traceLayoutAttributes = {};
 
 /**
  * register a module as the handler for a trace type
@@ -31,7 +40,7 @@ exports.layoutArrayContainers = [];
  */
 exports.register = function(_module, thisType, categoriesIn, meta) {
     if(exports.modules[thisType]) {
-        Lib.log('Type ' + thisType + ' already registered');
+        Loggers.log('Type ' + thisType + ' already registered');
         return;
     }
 
@@ -51,6 +60,19 @@ exports.register = function(_module, thisType, categoriesIn, meta) {
     }
 
     exports.allTypes.push(thisType);
+
+    for(var componentName in exports.componentsRegistry) {
+        mergeComponentAttrsToTrace(componentName, thisType);
+    }
+
+    /*
+     * Collect all trace layout attributes in one place for easier lookup later
+     * but don't merge them into the base schema as it would confuse the docs
+     * (at least after https://github.com/plotly/documentation/issues/202 gets done!)
+     */
+    if(_module.layoutAttributes) {
+        extendFlat(exports.traceLayoutAttributes, _module.layoutAttributes);
+    }
 };
 
 /**
@@ -76,12 +98,21 @@ exports.registerSubplot = function(_module) {
     var plotType = _module.name;
 
     if(exports.subplotsRegistry[plotType]) {
-        Lib.log('Plot type ' + plotType + ' already registered.');
+        Loggers.log('Plot type ' + plotType + ' already registered.');
         return;
     }
 
+    // relayout array handling will look for component module methods with this
+    // name and won't find them because this is a subplot module... but that
+    // should be fine, it will just fall back on redrawing the plot.
+    findArrayRegexps(_module);
+
     // not sure what's best for the 'cartesian' type at this point
     exports.subplotsRegistry[plotType] = _module;
+
+    for(var componentName in exports.componentsRegistry) {
+        mergeComponentAttrsToSubplot(componentName, _module.name);
+    }
 };
 
 exports.registerComponent = function(_module) {
@@ -89,10 +120,83 @@ exports.registerComponent = function(_module) {
 
     exports.componentsRegistry[name] = _module;
 
-    if(_module.layoutAttributes && _module.layoutAttributes._isLinkedToArray) {
-        Lib.pushUnique(exports.layoutArrayContainers, name);
+    if(_module.layoutAttributes) {
+        if(_module.layoutAttributes._isLinkedToArray) {
+            pushUnique(exports.layoutArrayContainers, name);
+        }
+        findArrayRegexps(_module);
+    }
+
+    for(var traceType in exports.modules) {
+        mergeComponentAttrsToTrace(name, traceType);
+    }
+
+    for(var subplotName in exports.subplotsRegistry) {
+        mergeComponentAttrsToSubplot(name, subplotName);
+    }
+
+    for(var transformType in exports.transformsRegistry) {
+        mergeComponentAttrsToTransform(name, transformType);
+    }
+
+    if(_module.schema && _module.schema.layout) {
+        extendDeepAll(baseLayoutAttributes, _module.schema.layout);
     }
 };
+
+exports.registerTransform = function(_module) {
+    exports.transformsRegistry[_module.name] = _module;
+
+    for(var componentName in exports.componentsRegistry) {
+        mergeComponentAttrsToTransform(componentName, _module.name);
+    }
+};
+
+function findArrayRegexps(_module) {
+    if(_module.layoutAttributes) {
+        var arrayAttrRegexps = _module.layoutAttributes._arrayAttrRegexps;
+        if(arrayAttrRegexps) {
+            for(var i = 0; i < arrayAttrRegexps.length; i++) {
+                pushUnique(exports.layoutArrayRegexes, arrayAttrRegexps[i]);
+            }
+        }
+    }
+}
+
+function mergeComponentAttrsToTrace(componentName, traceType) {
+    var componentSchema = exports.componentsRegistry[componentName].schema;
+    if(!componentSchema || !componentSchema.traces) return;
+
+    var traceAttrs = componentSchema.traces[traceType];
+    if(traceAttrs) {
+        extendDeepAll(exports.modules[traceType]._module.attributes, traceAttrs);
+    }
+}
+
+function mergeComponentAttrsToTransform(componentName, transformType) {
+    var componentSchema = exports.componentsRegistry[componentName].schema;
+    if(!componentSchema || !componentSchema.transforms) return;
+
+    var transformAttrs = componentSchema.transforms[transformType];
+    if(transformAttrs) {
+        extendDeepAll(exports.transformsRegistry[transformType].attributes, transformAttrs);
+    }
+}
+
+function mergeComponentAttrsToSubplot(componentName, subplotName) {
+    var componentSchema = exports.componentsRegistry[componentName].schema;
+    if(!componentSchema || !componentSchema.subplots) return;
+
+    var subplotModule = exports.subplotsRegistry[subplotName];
+    var subplotAttrs = subplotModule.layoutAttributes;
+    var subplotAttr = subplotModule.attr === 'subplot' ? subplotModule.name : subplotModule.attr;
+    if(Array.isArray(subplotAttr)) subplotAttr = subplotAttr[0];
+
+    var componentLayoutAttrs = componentSchema.subplots[subplotAttr];
+    if(subplotAttrs && componentLayoutAttrs) {
+        extendDeepAll(subplotAttrs, componentLayoutAttrs);
+    }
+}
 
 /**
  * Get registered module using trace object or trace type
@@ -104,7 +208,7 @@ exports.registerComponent = function(_module) {
  */
 exports.getModule = function(trace) {
     if(trace.r !== undefined) {
-        Lib.warn('Tried to put a polar trace ' +
+        Loggers.warn('Tried to put a polar trace ' +
             'on an incompatible graph of cartesian ' +
             'data. Ignoring this dataset.', trace
         );
@@ -135,7 +239,7 @@ exports.traceIs = function(traceType, category) {
 
     if(!_module) {
         if(traceType && traceType !== 'area') {
-            Lib.log('Unrecognized trace type ' + traceType + '.');
+            Loggers.log('Unrecognized trace type ' + traceType + '.');
         }
 
         _module = exports.modules[basePlotAttributes.type.dflt];
@@ -145,7 +249,50 @@ exports.traceIs = function(traceType, category) {
 };
 
 /**
- * Retrieve component module method
+ * Determine if this trace has a transform of the given type and return
+ * array of matching indices.
+ *
+ * @param {object} data
+ *  a trace object (member of data or fullData)
+ * @param {string} type
+ *  type of trace to test
+ * @return {array}
+ *  array of matching indices. If none found, returns []
+ */
+exports.getTransformIndices = function(data, type) {
+    var indices = [];
+    var transforms = data.transforms || [];
+    for(var i = 0; i < transforms.length; i++) {
+        if(transforms[i].type === type) {
+            indices.push(i);
+        }
+    }
+    return indices;
+};
+
+/**
+ * Determine if this trace has a transform of the given type
+ *
+ * @param {object} data
+ *  a trace object (member of data or fullData)
+ * @param {string} type
+ *  type of trace to test
+ * @return {boolean}
+ */
+exports.hasTransform = function(data, type) {
+    var transforms = data.transforms || [];
+    for(var i = 0; i < transforms.length; i++) {
+        if(transforms[i].type === type) {
+            return true;
+        }
+    }
+    return false;
+
+};
+
+/**
+ * Retrieve component module method. Falls back on noop if either the
+ * module or the method is missing, so the result can always be safely called
  *
  * @param {string} name
  *  name of component (as declared in component module)
@@ -156,8 +303,8 @@ exports.traceIs = function(traceType, category) {
 exports.getComponentMethod = function(name, method) {
     var _module = exports.componentsRegistry[name];
 
-    if(!_module) return Lib.noop;
-    return _module[method];
+    if(!_module) return noop;
+    return _module[method] || noop;
 };
 
 function getTraceType(traceType) {

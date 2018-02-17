@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.feedback.php 63014 2017-06-18 02:42:47Z lindonb $
+// $Id: function.feedback.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 function smarty_function_feedback($params, $smarty)
 {
@@ -14,4 +14,3 @@ function smarty_function_feedback($params, $smarty)
 	$ret = $smarty->fetch('feedback/default.tpl');
 	return $ret;
 }
-

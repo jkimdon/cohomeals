@@ -3,18 +3,18 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IsEmpty.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: IsEmpty.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Math_Formula_Function_IsEmpty extends Math_Formula_Function
 {
-	function evaluate( $element )
+	function evaluate($element)
 	{
 		// Multiple components will all need to be equal.
-		$out = array();
+		$out = [];
 
-		foreach ( $element as $child ) {
+		foreach ($element as $child) {
 			$component = $this->evaluateChild($child);
-			if (!empty($component)) {
+			if (! empty($component)) {
 				return false;
 			}
 		}
@@ -22,4 +22,3 @@ class Math_Formula_Function_IsEmpty extends Math_Formula_Function
 		return true;
 	}
 }
-

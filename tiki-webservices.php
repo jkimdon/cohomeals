@@ -6,7 +6,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-webservices.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-webservices.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
 require_once 'tiki-setup.php';
 
@@ -69,7 +69,6 @@ if (is_null($_GET['wsdl'])) {
 	$server = new Zend\Soap\Server($protocol . '://' . $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'] . '?wsdl');
 	$server->setClass('Tiki_WebServices');
 	$server->handle();
-
 } else {
 	$wsdl = new Zend\Soap\AutoDiscover();
 	$wsdl->setUri($_SERVER['SCRIPT_NAME']);

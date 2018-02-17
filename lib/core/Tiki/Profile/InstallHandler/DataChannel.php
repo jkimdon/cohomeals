@@ -1,21 +1,22 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: DataChannel.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: DataChannel.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_DataChannel extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data )
+		if ($this->data) {
 			return $this->data;
+		}
 
-		$defaults = array(
+		$defaults = [
 			'domain' => 'tiki://local',
-			'groups' => array( 'Admins' ),
-		);
+			'groups' => [ 'Admins' ],
+		];
 
 		$data = array_merge($defaults, $this->obj->getData());
 
@@ -25,12 +26,15 @@ class Tiki_Profile_InstallHandler_DataChannel extends Tiki_Profile_InstallHandle
 	function canInstall()
 	{
 		$data = $this->getData();
-		if ( ! isset( $data['name'], $data['profile'] ) )
+		if (! isset($data['name'], $data['profile'])) {
 			return false;
-		if ( ! is_array($data['groups']) )
+		}
+		if (! is_array($data['groups'])) {
 			return false;
-		if ( ! is_string($data['domain']) )
+		}
+		if (! is_string($data['domain'])) {
 			return false;
+		}
 
 		return true;
 	}

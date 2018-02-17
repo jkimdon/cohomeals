@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetReader.php 59593 2016-09-04 17:03:54Z jonnybradley $
+// $Id: FacetReader.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_FacetReader
 {
@@ -25,7 +25,7 @@ class Search_Elastic_FacetReader
 
 		if (isset($this->data->facets->$facetName)) {
 			$entry = $this->data->facets->$facetName;
-		} else if (isset($this->data->aggregations->$facetName)) {
+		} elseif (isset($this->data->aggregations->$facetName)) {
 			$entry = $this->data->aggregations->$facetName;
 		}
 
@@ -34,18 +34,18 @@ class Search_Elastic_FacetReader
 
 	private function getFromTerms($entry)
 	{
-		$out = array();
+		$out = [];
 
 		if (! empty($entry->terms)) {
 			foreach ($entry->terms as $term) {
 				if ('' !== $term->term) {
-					$out[] = array('value' => $term->term, 'count' => $term->count);
+					$out[] = ['value' => $term->term, 'count' => $term->count];
 				}
 			}
-		} else if (! empty($entry->buckets)) {
+		} elseif (! empty($entry->buckets)) {
 			foreach ($entry->buckets as $bucket) {
 				if ('' !== $bucket->key) {
-					$out[] = array('value' => $bucket->key, 'count' => $bucket->doc_count);
+					$out[] = ['value' => $bucket->key, 'count' => $bucket->doc_count];
 				}
 			}
 		}
@@ -53,4 +53,3 @@ class Search_Elastic_FacetReader
 		return $out;
 	}
 }
-

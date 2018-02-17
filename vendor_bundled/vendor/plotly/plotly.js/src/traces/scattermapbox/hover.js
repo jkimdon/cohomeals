@@ -9,17 +9,16 @@
 
 'use strict';
 
-var Fx = require('../../plots/cartesian/graph_interact');
+var Fx = require('../../components/fx');
 var getTraceColor = require('../scatter/get_trace_color');
-
+var fillHoverText = require('../scatter/fill_hover_text');
+var BADNUM = require('../../constants/numerical').BADNUM;
 
 module.exports = function hoverPoints(pointData, xval, yval) {
     var cd = pointData.cd,
         trace = cd[0].trace,
         xa = pointData.xa,
         ya = pointData.ya;
-
-    if(cd[0].placeholder) return;
 
     // compute winding number about [-180, 180] globe
     var winding = (xval >= 0) ?
@@ -31,10 +30,13 @@ module.exports = function hoverPoints(pointData, xval, yval) {
     var xval2 = xval - lonShift;
 
     function distFn(d) {
-        var lonlat = d.lonlat,
-            dx = Math.abs(xa.c2p(lonlat) - xa.c2p([xval2, lonlat[1]])),
-            dy = Math.abs(ya.c2p(lonlat) - ya.c2p([lonlat[0], yval])),
-            rad = Math.max(3, d.mrc || 0);
+        var lonlat = d.lonlat;
+
+        if(lonlat[0] === BADNUM) return Infinity;
+
+        var dx = Math.abs(xa.c2p(lonlat) - xa.c2p([xval2, lonlat[1]]));
+        var dy = Math.abs(ya.c2p(lonlat) - ya.c2p([lonlat[0], yval]));
+        var rad = Math.max(3, d.mrc || 0);
 
         return Math.max(Math.sqrt(dx * dx + dy * dy) - rad, 1 - 3 / rad);
     }
@@ -65,13 +67,14 @@ module.exports = function hoverPoints(pointData, xval, yval) {
 };
 
 function getExtraText(trace, di) {
-    var hoverinfo = trace.hoverinfo.split('+'),
-        isAll = (hoverinfo.indexOf('all') !== -1),
-        hasLon = (hoverinfo.indexOf('lon') !== -1),
-        hasLat = (hoverinfo.indexOf('lat') !== -1);
+    var hoverinfo = di.hi || trace.hoverinfo;
+    var parts = hoverinfo.split('+');
+    var isAll = parts.indexOf('all') !== -1;
+    var hasLon = parts.indexOf('lon') !== -1;
+    var hasLat = parts.indexOf('lat') !== -1;
 
-    var lonlat = di.lonlat,
-        text = [];
+    var lonlat = di.lonlat;
+    var text = [];
 
     // TODO should we use a mock axis to format hover?
     // If so, we'll need to make precision be zoom-level dependent
@@ -81,13 +84,14 @@ function getExtraText(trace, di) {
 
     if(isAll || (hasLon && hasLat)) {
         text.push('(' + format(lonlat[0]) + ', ' + format(lonlat[1]) + ')');
+    } else if(hasLon) {
+        text.push('lon: ' + format(lonlat[0]));
+    } else if(hasLat) {
+        text.push('lat: ' + format(lonlat[1]));
     }
-    else if(hasLon) text.push('lon: ' + format(lonlat[0]));
-    else if(hasLat) text.push('lat: ' + format(lonlat[1]));
 
-    if(isAll || hoverinfo.indexOf('text') !== -1) {
-        var tx = di.tx || trace.text;
-        if(!Array.isArray(tx)) text.push(tx);
+    if(isAll || parts.indexOf('text') !== -1) {
+        fillHoverText(di, trace, text);
     }
 
     return text.join('<br>');

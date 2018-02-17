@@ -3,13 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_sprint.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_sprint.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * \brief Print Smarty vars
  * \author zaufi <zaufi@sendmail.ru>
  */
-require_once ('lib/debug/debugger-ext.php');
+require_once('lib/debug/debugger-ext.php');
 
 /**
  * \brief Debugger command to print smarty vars
@@ -55,10 +55,11 @@ class DbgSPrint extends DebuggerCommand
 			if (strlen($v) != 0) {
 				$tmp = $smarty->getTemplateVars();
 
-				if (is_array($tmp) && isset($tmp[$v]))
-					$result .= $v . ' = ' . print_r($tmp[$v], true). "\n";
-				else
+				if (is_array($tmp) && isset($tmp[$v])) {
+					$result .= $v . ' = ' . print_r($tmp[$v], true) . "\n";
+				} else {
 					$result .= 'Smarty variable "' . $v . '" not found';
+				}
 			}
 		}
 

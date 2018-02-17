@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ListPluginHelper.php 63407 2017-07-30 13:18:11Z jonnybradley $
+// $Id: ListPluginHelper.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Class Services_Edit_ListPluginHelper
@@ -513,4 +513,3 @@ class Services_Edit_ListPluginHelper
 		];
 	}
 }
-

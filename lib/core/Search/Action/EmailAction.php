@@ -1,23 +1,25 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EmailAction.php 63301 2017-07-20 22:45:25Z rjsmelo $
+// $Id: EmailAction.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Action_EmailAction implements Search_Action_Action
 {
 	function getValues()
 	{
-		return array(
+		return [
 			'replyto' => false,
 			'to+' => true,
 			'cc+' => false,
 			'bcc+' => false,
+			'from' => false,
 			'subject' => true,
 			'content' => true,
+			'is_html' => false,
 			'pdf_page_attachment' => false,
-		);
+		];
 	}
 
 	function validate(JitFilter $data)
@@ -35,28 +37,43 @@ class Search_Action_EmailAction implements Search_Action_Action
 			$mail = tiki_get_admin_mail();
 
 			if ($replyto = $this->dereference($data->replyto->text())) {
-				$mail->setReplyTo($replyto);
+				$mail->setReplyTo($replyto[0]);
 			}
 
 			foreach ($data->to->text() as $to) {
-				if( $to = $this->dereference($to) ) {
-					$mail->addTo($to);
+				if ($to = $this->dereference($to)) {
+					foreach ($to as $email) {
+						$mail->addTo($email);
+					}
 				}
 			}
 
 			foreach ($data->cc->text() as $cc) {
-				if( $cc = $this->dereference($cc) ) {
-					$mail->addCc($cc);
+				if ($cc = $this->dereference($cc)) {
+					foreach ($cc as $email) {
+						$mail->addCc($email);
+					}
 				}
 			}
 
 			foreach ($data->bcc->text() as $bcc) {
-				if( $bcc = $this->dereference($bcc) ) {
-					$mail->addBcc($bcc);
+				if ($bcc = $this->dereference($bcc)) {
+					foreach ($bcc as $email) {
+						$mail->addBcc($email);
+					}
 				}
 			}
 
-			$content = $this->parse($data->content->none());
+			if ($from = $data->from->text()) {
+				$fromEmail = $this->dereference($from);
+				$fromName = $this->dereferenceName($from);
+				if (! empty($fromEmail[0])) {
+					$mail->setFrom($fromEmail[0], $fromName);
+					$mail->setSender($fromEmail[0], $fromName);
+				}
+			}
+
+			$content = $this->parse($data->content->none(), $data->is_html->boolean());
 			$subject = $this->parse($data->subject->text());
 
 			$mail->setSubject(strip_tags($subject));
@@ -68,18 +85,16 @@ class Search_Action_EmailAction implements Search_Action_Action
 				$bodyMessage->setCharset($prefs['default_mail_charset']);
 			}
 
-			$messageParts = array(
+			$messageParts = [
 				$bodyMessage
-			);
+			];
 
-			if (!empty($data->pdf_page_attachment->text())) {
-
+			if (! empty($data->pdf_page_attachment->text())) {
 				$pageName = $data->pdf_page_attachment->text();
 				$fileName = $pageName . ".pdf";
 				$pdfContent = $this->getPDFAttachment($pageName);
 
 				if ($pdfContent) {
-
 					$attachment = new \Zend\Mime\Part($pdfContent);
 					$attachment->type = 'application/pdf';
 					$attachment->filename = $fileName;
@@ -97,20 +112,19 @@ class Search_Action_EmailAction implements Search_Action_Action
 
 			tiki_send_email($mail);
 
-			if($prefs['log_mail'] == 'y') {
+			if ($prefs['log_mail'] == 'y') {
 				$logslib = TikiLib::lib('logs');
-				foreach($data->to->text() as $email) {
+				foreach ($data->to->text() as $email) {
 					$logslib->add_log('mail', tr('EmailAction - send to %0, subject - %1', $email, $subject));
 				}
 			}
 
 			return true;
 		} catch (Exception $e) {
-
-			if($prefs['log_mail'] == 'y') {
+			if ($prefs['log_mail'] == 'y') {
 				$logslib = TikiLib::lib('logs');
-				foreach($data->to->text() as $email) {
-				$logslib->add_log('mail error', tr("EmailAction - can't send new message"));
+				foreach ($data->to->text() as $email) {
+					$logslib->add_log('mail error', tr("EmailAction - can't send new message"));
 				}
 			}
 
@@ -118,72 +132,99 @@ class Search_Action_EmailAction implements Search_Action_Action
 		}
 	}
 
-	function requiresInput(JitFilter $data) {
+	function requiresInput(JitFilter $data)
+	{
 		return false;
 	}
 
-	private function parse($content)
+	private function parse($content, $is_html = null)
 	{
 		$content = "~np~$content~/np~";
 
 		$parserlib = TikiLib::lib('parser');
 
-		$options = array(
+		$options = [
 			'protect_email' => false,
-		);
+		];
+
+		if ($is_html) {
+			$options['is_html'] = true;
+		}
 
 		return trim($parserlib->parse_data($content, $options));
 	}
 
 	private function stripNp($content)
 	{
-		return str_replace(array('~np~', '~/np~'), '', $content);
+		return str_replace(['~np~', '~/np~'], '', $content);
 	}
 
-	private function dereference($email_or_username) {
-		if( empty($email_or_username) ) {
+	private function dereference($email_or_username)
+	{
+		if (empty($email_or_username)) {
 			return null;
 		}
 		$email_or_username = $this->stripNp($email_or_username);
-		if( strstr($email_or_username, '@') ) {
-			return $email_or_username;
+		if (strstr($email_or_username, '@')) {
+			return [$email_or_username];
 		} else {
-			return TikiLib::lib('user')->get_user_email($email_or_username);
+			$users = TikiLib::lib('trk')->parse_user_field($email_or_username);
+			return array_map(function ($username) {
+				return TikiLib::lib('user')->get_user_email($username);
+			}, $users);
 		}
 	}
 
-	private function getPDFAttachment($pageName) {
+	private function dereferenceName($email_or_username)
+	{
+		if (empty($email_or_username)) {
+			return null;
+		}
+		$email_or_username = $this->stripNp($email_or_username);
+		if (strstr($email_or_username, '@')) {
+			return null;
+		} else {
+			$users = TikiLib::lib('trk')->parse_user_field($email_or_username);
+			if ($users) {
+				return TikiLib::lib('user')->clean_user($users[0]);
+			} else {
+				return null;
+			}
+		}
+	}
+
+	private function getPDFAttachment($pageName)
+	{
 
 		if (! Perms::get('wiki page', $pageName)->view) {
-			return array();
+			return [];
 		}
 
-		require_once ('tiki-setup.php');
+		require_once('tiki-setup.php');
 		require_once 'lib/pdflib.php';
 		$generator = new PdfGenerator;
-		if (!empty($generator->error)) {
+		if (! empty($generator->error)) {
 			Feedback::error($generator->error);
 			return false;
 		} else {
-			$params = array( 'page' => $pageName );
+			$params = [ 'page' => $pageName ];
 
 			// If the page doesn't exist then display an error
-			if (!($info = TikiLib::lib('tiki')->get_page_info($pageName))) {
+			if (! ($info = TikiLib::lib('tiki')->get_page_info($pageName))) {
 				Feedback::error(sprintf(tra('Page %s cannot be found'), $pageName));
 				return false;
 			}
 
-			$pdata = TikiLib::lib('parser')->parse_data($info["data"], array(
+			$pdata = TikiLib::lib('parser')->parse_data($info["data"], [
 				'page' => $pageName,
 				'is_html' => $info["is_html"],
 				'print' => 'y',
 				'namespace' => $info["namespace"]
-			));
+			]);
 			//replacing bootstrap classes for print version.
-			$pdata = str_replace(array('col-sm','col-md','col-lg'),'col-xs',$pdata);
+			$pdata = str_replace(['col-sm','col-md','col-lg'], 'col-xs', $pdata);
 
 			return $generator->getPdf('tiki-print.php', $params, $pdata);
 		}
 	}
 }
-

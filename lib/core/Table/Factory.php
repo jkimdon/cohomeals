@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Factory.php 58740 2016-05-30 11:39:15Z jonnybradley $
+// $Id: Factory.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -37,7 +37,7 @@ class Table_Factory
 	 *
 	 * @return bool|Table_Manager
 	 */
-	static public function build($name, $settings = null, $type = 'manager')
+	public static function build($name, $settings = null, $type = 'manager')
 	{
 		if (Table_Check::isEnabled()) {
 			switch ($type) {

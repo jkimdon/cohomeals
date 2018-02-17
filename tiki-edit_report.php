@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_report.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-edit_report.php 64605 2017-11-17 02:03:50Z rjsmelo $
 
 require_once('tiki-setup.php');
 global $reportFullscreen, $index, $values;
@@ -18,10 +18,10 @@ TikiLib::lib("sheet")->setup_jquery_sheet();
 $headerlib
 	->add_jsfile('lib/core/Report/Builder.js')
 	->add_jq_onready('$.reportInit();');
-	
+
 $smarty->assign('definitions', Report_Builder::listDefinitions());
 
-if (!empty($reportFullscreen)) {
+if (! empty($reportFullscreen)) {
 	$smarty->assign('index', $index);
 	$smarty->assign('values', $values);
 	$smarty->assign('reportFullscreen', 'true');

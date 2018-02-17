@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: InternalString.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: InternalString.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Math_Formula_InternalString
 {
@@ -11,7 +11,7 @@ class Math_Formula_InternalString
 	private $type;
 	private $children;
 
-	function __construct( $content )
+	function __construct($content)
 	{
 		$this->content = trim($content, '"');
 	}
@@ -21,4 +21,3 @@ class Math_Formula_InternalString
 		return $this->content;
 	}
 }
-

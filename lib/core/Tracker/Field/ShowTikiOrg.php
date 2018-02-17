@@ -3,7 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ShowTikiOrg.php 60051 2016-10-25 09:18:17Z kroky6 $
+// $Id: ShowTikiOrg.php 64622 2017-11-18 19:34:07Z rjsmelo $
+
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SSH2;
 
 class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 {
@@ -11,65 +14,65 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 	{
 		global $prefs;
 
-		return array(
-			'STO' => array(
+		return [
+			'STO' => [
 				'name' => tr('show.tiki.org'),
 				'description' => tr('Create, display or manage show.tiki.org instances.'),
-				'prefs' => array('trackerfield_showtikiorg'),
-				'tags' => array('experimental'),
+				'prefs' => ['trackerfield_showtikiorg'],
+				'tags' => ['experimental'],
 				'help' => 'show.tiki.org',
 				'default' => 'n',
-				'params' => array(
-					'domain' => array(
+				'params' => [
+					'domain' => [
 						'name' => tr('Domain name of show server'),
 						'description' => tr('For example, show.tiki.org'),
 						'filter' => 'text',
 						'legacy_index' => 0,
-					),
-					'remoteShellUser' => array(
+					],
+					'remoteShellUser' => [
 						'name' => tr('Shell username on remote server'),
 						'description' => tr('The shell username on the show server'),
 						'filter' => 'text',
 						'legacy_index' => 1,
-					),
-					'publicKey' => array(
+					],
+					'publicKey' => [
 						'name' => tr('Public key file path'),
-						'description' => tr('System path to public key on local server'),
+						'description' => tr('System path to public key on local server. Only RSA keys are supported.'),
 						'filter' => 'text',
 						'legacy_index' => 2,
-					),
-					'privateKey' => array(
+					],
+					'privateKey' => [
 						'name' => tr('Private key file path'),
-						'description' => tr('System path to private key on local server'),
+						'description' => tr('System path to private key on local server. Only RSA keys are supported.'),
 						'filter' => 'text',
 						'legacy_index' => 3,
-					),
-					'debugMode' => array(
+					],
+					'debugMode' => [
 						'name' => tr('Show debugging information'),
 						'description' => tr('Show debugging info during testing'),
 						'filter' => 'int',
-                                                'options' => array(
-                                                        0 => tr('No'),
-                                                        1 => tr('Yes'),
-                                                ),
+												'options' => [
+														0 => tr('No'),
+														1 => tr('Yes'),
+												],
 						'legacy_index' => 4,
-					),
-					'fixedUserId' => array(
+					],
+					'fixedUserId' => [
 						'name' => tr('Fixed user ID'),
 						'description' => tr('Set fixed user ID instead of using the user ID of the creator of the tracker item'),
 						'filter' => 'int',
 						'legacy_index' => 5,
-					),
-				),
-			),
-		);
+					],
+				],
+			],
+		];
 	}
 
-	function getFieldData(array $requestData = array())
+	function getFieldData(array $requestData = [])
 	{
 		global $user;
 
-		$ret = array(
+		$ret = [
 			'id' => 0,
 			'userid' => 0,
 			'status' => 'DISCO',
@@ -81,15 +84,10 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 			'showlogurl' => '',
 			'snapshoturl' => '',
 			'value' => 'none', // this is required to show the field, otherwise it gets hidden if tracker is set to doNotShowEmptyField
-		);
-
-		if (!function_exists('ssh2_connect')) {
-			$ret['status'] = 'NOSSH';
-			return $ret;
-		}
+		];
 
 		$id = $this->getItemId();
-		if (!$id) {
+		if (! $id) {
 			return $ret;
 		} else {
 			$ret['id'] = $id;
@@ -109,7 +107,7 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 
 		$item = TikiLib::lib('trk')->get_tracker_item($id);
 		$creator = $item['createdBy'];
-		if (!$creator) {
+		if (! $creator) {
 			$creator = reset(TikiLib::lib('trk')->get_item_creators($item['trackerId'], $id));
 		}
 
@@ -119,7 +117,7 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 			$userid = TikiLib::lib('tiki')->get_user_id($creator);
 		}
 
-		if (!$userid || !$creator) {
+		if (! $userid || ! $creator) {
 			return $ret;
 		} else {
 			$ret['userid'] = $userid;
@@ -131,24 +129,27 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 			$ret['username'] = 'user';
 		}
 
-		$conn = ssh2_connect($this->getOption('domain'), 22);
-		$conntry = ssh2_auth_pubkey_file(
-			$conn,
-			$this->getOption('remoteShellUser'),
-			$this->getOption('publicKey'),
-			$this->getOption('privateKey')
-		);
+		$conn = new SSH2($this->getOption('domain'));
 
-		if (!$conntry) {
+		$password = new RSA();
+
+		$publicKeyLoaded = $password->loadKey(file_get_contents($this->getOption('publicKey')));
+		$privateKeyLoaded = $password->loadKey(file_get_contents($this->getOption('privateKey')));
+
+		if (! $publicKeyLoaded || ! $privateKeyLoaded) {
+			$ret['status'] = 'INVKEYS';
+			return $ret;
+		}
+
+		$conntry = $conn->login($this->getOption('remoteShellUser'), $password);
+
+		if (! $conntry) {
 			$ret['status'] = 'DISCO';
 			return $ret;
 		}
 
 		$infostring = "info -i $id -U $userid";
-		$infostream = ssh2_exec($conn, $infostring);
-
-		stream_set_blocking($infostream, TRUE);
-		$infooutput = stream_get_contents($infostream);
+		$infooutput = $conn->exec($infostring);
 		$ret['debugoutput'] = $infostring . " " . $infooutput;
 
 		if (strpos($infooutput, 'MAINTENANCE: ') !== false) {
@@ -169,7 +170,7 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 		$statuspos = strpos($infooutput, 'STATUS: ');
 		$status = substr($infooutput, $statuspos + 8, 5);
 		$status = trim($status);
-		if (!$status || $status == 'FAIL') {
+		if (! $status || $status == 'FAIL') {
 			$ret['status'] = 'FAIL';
 		} else {
 			$ret['status'] = $status;
@@ -194,12 +195,12 @@ class Tracker_Field_ShowTikiOrg extends Tracker_Field_Abstract
 		return $ret;
 	}
 
-	function renderInput($context = array())
+	function renderInput($context = [])
 	{
 		return $this->renderTemplate('trackerinput/showtikiorg.tpl', $context);
 	}
 
-	function renderOutput($context = array())
+	function renderOutput($context = [])
 	{
 		return $this->renderTemplate('trackerinput/showtikiorg.tpl', $context);
 	}

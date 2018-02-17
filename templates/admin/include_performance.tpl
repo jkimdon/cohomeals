@@ -1,9 +1,9 @@
-{* $Id: include_performance.tpl 63800 2017-09-09 07:06:04Z drsassafras $ *}
+{* $Id: include_performance.tpl 63808 2017-09-11 13:50:28Z chealer $ *}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}Please see the <a class='alert-link' target='tikihelp' href='http://dev.tiki.org/Performance'>Performance page</a> on Tiki's developer site.{/tr}{/remarksbox}
 
 <form class="admin form-horizontal" id="performance" name="performance" action="tiki-admin.php?page=performance" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			{include file='admin/include_apply_top.tpl'}
@@ -66,16 +66,16 @@
 				{/if}
 
 				<p>
-					<table style="width=520px;border: 0px;text-align:center">
+					<table style="width:520px;border: 0px;text-align:center">
 						<tr>
 							<td><img src="{$memory_graph|escape}" width="250" height="100"></td>
 							<td><img src="{$hits_graph|escape}" width="250" height="100"></td>
 						</tr>
 						<tr>
-							<td style="width=260px">
+							<td style="width:260px">
 								{tr}Memory Used{/tr}: {$opcode_stats.memory_used * 100}% - {tr}Available{/tr}: {$opcode_stats.memory_avail * 100}%
 							</td>
-							<td style="width=260px">
+							<td style="width:260px">
 								{tr}Cache Hits{/tr}: {$opcode_stats.hit_hit * 100}% - {tr}Misses{/tr}: {$opcode_stats.hit_miss * 100}%
 							</td>
 						</tr>
@@ -164,7 +164,6 @@
 			{preference name=feature_actionlog_bytes}
 			{preference name=search_parsed_snippet}
 			{preference name="unified_lucene_highlight"}
-			{preference name=unified_parse_results}
 			{preference name=error_reporting_level}
 			{remarksbox type="tip" title="{tr}Tip{/tr}"}
 				{tr}Many search options impact performance. Please see <a href="tiki-admin.php?page=search">Search admin panel</a>.{/tr}
@@ -191,6 +190,8 @@
 			{preference name=allocate_memory_tracker_export_items}
 			{preference name=allocate_time_tracker_export_items}
 			{preference name=allocate_time_tracker_clear_items}
+			{preference name=allocate_memory_print_pdf}
+			{preference name=allocate_time_print_pdf}
 			{preference name="allocate_memory_unified_rebuild"}
 			{preference name="allocate_time_unified_rebuild"}
 		{/tab}

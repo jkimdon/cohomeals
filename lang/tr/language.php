@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Type" => "T&uuml;r",
 "Register" => "Kayıt",
 "Administration" => "Y&ouml;netim",
@@ -52,4 +52,4 @@ $lang = array(
 "Contributors to this page" => "Sayfaya katkıda bulunanlar",
 "Is email public? (uses scrambling to prevent spam)" => "E-posta adresi herkese a&ccedil;ık mı? ",
 "Does your email application need a special character set" => "E-posta okuyucunuz &ouml;zel karakter k&uuml;mesine ihtiya&ccedil; duyar mı?",
-);
+];

@@ -4,7 +4,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: console.php 62083 2017-04-05 12:46:02Z drsassafras $
+// $Id: console.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
 use Symfony\Component\Console\Input\ArgvInput;
 
@@ -35,7 +35,7 @@ require_once 'lib/setup/twversion.class.php';
 
 $input = new ArgvInput;
 
-if (false !== $site = $input->getParameterOption(array('--site'))) {
+if (false !== $site = $input->getParameterOption(['--site'])) {
 	$_SERVER['TIKI_VIRTUAL'] = $site;
 }
 
@@ -61,7 +61,7 @@ if ($isInstalled) {
 		$exceptionToRender = $e;
 	}
 
-	if (! $asUser = $input->getParameterOption(array('--as-user'))) {
+	if (! $asUser = $input->getParameterOption(['--as-user'])) {
 		$asUser = 'admin';
 	}
 
@@ -73,7 +73,7 @@ if ($isInstalled) {
 $consoleBuilder = new Tiki\Command\ConsoleApplicationBuilder($site);
 $console = $consoleBuilder->create();
 
-if ($exceptionToRender instanceof Exception){
+if ($exceptionToRender instanceof Exception) {
 	$console->renderException($exceptionToRender, new \Symfony\Component\Console\Output\ConsoleOutput());
 }
 

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Send.php 59644 2016-09-08 19:21:58Z jonnybradley $
+// $Id: Send.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Send e-mail reports to users with changes in Tiki
@@ -56,7 +56,7 @@ class Reports_Send
 			$this->mail->setHtml($mailData);
 		}
 
-		$this->mail->send(array($userData['email']));
+		$this->mail->send([$userData['email']]);
 
 		$prefs['language'] = $lgSave;  //Restore language settings
 	}

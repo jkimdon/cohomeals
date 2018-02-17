@@ -1,4 +1,4 @@
-{* $Id: tiki-pagehistory.tpl 62205 2017-04-14 00:35:26Z lindonb $ *}
+{* $Id: tiki-pagehistory.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {title admpage="wiki" url='tiki-pagehistory.php?page='|cat:$page|escape}{tr}History:{/tr} {$page}{/title}
 
@@ -376,7 +376,7 @@
 									class="tips"
 									title="{tr}Actions{/tr}"
 									href="#"
-									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.current_actions|escape:"javascript"|escape:"html"}{/if}
+									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.current_actions}{/if}
 									style="padding:0; margin:0; border:0"
 								>
 									{icon name='settings'}
@@ -485,7 +485,7 @@
 									class="tips"
 									title="{tr}Actions{/tr}"
 									href="#"
-									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.history_actions|escape:"javascript"|escape:"html"}{/if}
+									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.history_actions}{/if}
 									style="padding:0; margin:0; border:0"
 								>
 									{icon name='settings'}

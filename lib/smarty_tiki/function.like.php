@@ -3,17 +3,17 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.like.php 62079 2017-04-05 03:57:03Z drsassafras $
+// $Id: function.like.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * This is a like smarty function. It sets a thumb button link that allows you to like (and unlike) an object. It also
- * provides a count of likes thus far on that particular object. 
+ * provides a count of likes thus far on that particular object.
  * @param $params
  *  - type - sets the type of object being liked. Ex: trackeritem, wiki, article, etc
- *  - object - sets the id of the object being liked. 
+ *  - object - sets the id of the object being liked.
  * 	- count_label - default "Likes" - sets the label after the count. Ex: "recommendations" would show "54 recommendations" instead of |Likes"
- *  - count_only - default 'false' - sets whether to only show the count. 
- * 
+ *  - count_only - default 'false' - sets whether to only show the count.
+ *
  * @param $smarty
  * @return string|void
  * @throws Exception
@@ -57,4 +57,3 @@ function smarty_function_like($params, $smarty)
 	$smarty->assign('count_only', $count_only);
 	return $smarty->fetch('like.tpl');
 }
-

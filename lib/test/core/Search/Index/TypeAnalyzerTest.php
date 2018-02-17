@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TypeAnalyzerTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: TypeAnalyzerTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
  */
 abstract class Search_Index_TypeAnalyzerTest extends PHPUnit_Framework_TestCase
 {
-	protected abstract function getIndex();
+	abstract protected function getIndex();
 
 	function testIdentifierTypes()
 	{
@@ -19,7 +19,7 @@ abstract class Search_Index_TypeAnalyzerTest extends PHPUnit_Framework_TestCase
 		$index = new Search_Index_TypeAnalysisDecorator($index);
 
 		$index->addDocument(
-			array(
+			[
 				'object_type' => $typeFactory->identifier('wiki page'),
 				'object_id' => $typeFactory->identifier('X'),
 				'a' => $typeFactory->plaintext('X'),
@@ -29,10 +29,9 @@ abstract class Search_Index_TypeAnalyzerTest extends PHPUnit_Framework_TestCase
 				'e' => $typeFactory->numeric('X'),
 				'f' => $typeFactory->multivalue('X'),
 				'g' => $typeFactory->sortable('X'),
-			)
+			]
 		);
 
-		$this->assertEquals(array('object_type', 'object_id', 'd', 'e'), $index->getIdentifierFields());
+		$this->assertEquals(['object_type', 'object_id', 'd', 'e'], $index->getIdentifierFields());
 	}
 }
-

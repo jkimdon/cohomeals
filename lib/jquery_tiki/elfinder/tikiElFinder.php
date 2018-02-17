@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiElFinder.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: tikiElFinder.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 // initially from https://github.com/Studio-42/elFinder/wiki/Adding-file-description-to-Properties-dialog
 
@@ -13,31 +13,30 @@ class tikiElFinder extends elFinder
 	{
 		parent::__construct($opts);
 		/* Adding new command */
-		$this->commands['info'] = array('target' => true, 'content' => false);
+		$this->commands['info'] = ['target' => true, 'content' => false];
 	}
 
 	protected function info($args)
 	{
 		$target = $args['target'];
 		$newDesc = $args['content'];
-		$error = array(self::ERROR_UNKNOWN, '#' . $target);
+		$error = [self::ERROR_UNKNOWN, '#' . $target];
 
 		if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false) {
-			return array('error' => $this->error($error, self::ERROR_FILE_NOT_FOUND));
+			return ['error' => $this->error($error, self::ERROR_FILE_NOT_FOUND)];
 		}
 
 		$error[1] = $file['name'];
 
 		if ($volume->commandDisabled('info')) {
-			return array('error' => $this->error($error, self::ERROR_ACCESS_DENIED));
+			return ['error' => $this->error($error, self::ERROR_ACCESS_DENIED)];
 		}
 
 		if (($info = $volume->info($target, $newDesc)) == -1) {
-			return array('error' => $this->error($error, $volume->error()));
+			return ['error' => $this->error($error, $volume->error())];
 		}
 
-		return array('info' => $info);
+		return ['info' => $info];
 	}
-
 }

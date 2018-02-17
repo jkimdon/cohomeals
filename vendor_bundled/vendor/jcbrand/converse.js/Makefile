@@ -1,28 +1,24 @@
 # You can set these variables from the command line.
-BUILDDIR        = ./docs
-BUNDLE          ?= ./.bundle/bin/bundle
-GRUNT           ?= ./node_modules/.bin/grunt
-HTTPSERVE       ?= ./node_modules/.bin/http-server
-JSHINT          ?= ./node_modules/.bin/jshint
-ESLINT          ?= ./node_modules/.bin/eslint
-PAPER           =
-PHANTOMJS       ?= ./node_modules/.bin/phantomjs
-RJS             ?= ./node_modules/.bin/r.js
-PO2JSON         ?= ./node_modules/.bin/po2json
-SASS            ?= ./.bundle/bin/sass
-CLEANCSS        ?= ./node_modules/.bin/cleancss
-SPHINXBUILD     ?= ./bin/sphinx-build
-SPHINXOPTS      =
+UGLIFYJS		?= node_modules/.bin/uglifyjs
+BABEL			?= node_modules/.bin/babel
+BOURBON_TEMPLATES = ./node_modules/bourbon/app/assets/stylesheets/ 
+BUILDDIR		= ./docs
+BUNDLE		  	?= ./.bundle/bin/bundle
+CHROMIUM		?= ./node_modules/.bin/run-headless-chromium
+CLEANCSS		?= ./node_modules/clean-css-cli/bin/cleancss --skip-rebase
+ESLINT		  	?= ./node_modules/.bin/eslint
+GRUNT		   	?= ./node_modules/.bin/grunt
+HTTPSERVE	   	?= ./node_modules/.bin/http-server
+PAPER		   	=
+PO2JSON		 	?= ./node_modules/.bin/po2json
+RJS			 	?= ./node_modules/.bin/r.js
+SASS			?= ./.bundle/bin/sass
+SPHINXBUILD	 	?= ./bin/sphinx-build
+SED				?= sed
+SPHINXOPTS	  	=
 
 # Internal variables.
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) ./docs/source
-SOURCES    = $(wildcard *.js) $(wildcard spec/*.js) $(wildcard src/*.js)
-JSHINTEXCEPTIONS = $(GENERATED) \
-           src/build-mobile.js \
-           src/build-no-jquery.js \
-           src/build-no-dependencies.js \
-           src/build.js \
-CHECKSOURCES    = $(filter-out $(JSHINTEXCEPTIONS),$(SOURCES))
 
 .PHONY: all
 all: dev dist
@@ -55,17 +51,21 @@ help:
 ## Miscellaneous
 
 .PHONY: serve
-serve: stamp-npm
-	$(HTTPSERVE) -p 8000 -c -1
+serve: dev 
+	$(HTTPSERVE) -p 8000 -c-1
+
+.PHONY: serve_bg
+serve_bg: dev
+	$(HTTPSERVE) -p 8000 -c-1 -s &
 
 ########################################################################
 ## Translation machinery
 
-GETTEXT = xgettext --keyword=__ --keyword=___ --from-code=UTF-8 --output=locale/converse.pot src/*.js --package-name=Converse.js --copyright-holder="Jan-Carel Brand" --package-version=3.0.1 -c
+GETTEXT = xgettext --language="JavaScript" --keyword=__ --keyword=___ --from-code=UTF-8 --output=locale/converse.pot src/*.js --package-name=Converse.js --copyright-holder="Jan-Carel Brand" --package-version=3.2.1 -c
 
 .PHONY: pot
 pot:
-	$(GETTEXT) --language="javascript" 2>&1 > /dev/null; test $$? -eq 0 && exit 0 || $(GETTEXT) --language="python" && exit $$?;
+	$(GETTEXT) 2>&1 > /dev/null; exit $$?;
 
 .PHONY: po
 po:
@@ -80,16 +80,16 @@ po2json:
 
 .PHONY: release
 release:
-	sed -ri s/Version:\ [0-9]\+\.[0-9]\+\.[0-9]\+/Version:\ $(VERSION)/ src/start.frag
-	sed -ri s/Project-Id-Version:\ Converse\.js\ [0-9]\+\.[0-9]\+\.[0-9]\+/Project-Id-Version:\ Converse.js\ $(VERSION)/ locale/converse.pot
-	sed -ri s/\"version\":\ \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\":\ \"$(VERSION)\"/ bower.json
-	sed -ri s/\"version\":\ \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\":\ \"$(VERSION)\"/ package.json
-	sed -ri s/--package-version=[0-9]\+\.[0-9]\+\.[0-9]\+/--package-version=$(VERSION)/ Makefile
-	sed -ri s/v[0-9]\+\.[0-9]\+\.[0-9]\+\.zip/v$(VERSION)\.zip/ index.html
-	sed -ri s/v[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz/v$(VERSION)\.tar\.gz/ index.html
-	sed -ri s/version\ =\ \'[0-9]\+\.[0-9]\+\.[0-9]\+\'/version\ =\ \'$(VERSION)\'/ docs/source/conf.py
-	sed -ri s/release\ =\ \'[0-9]\+\.[0-9]\+\.[0-9]\+\'/release\ =\ \'$(VERSION)\'/ docs/source/conf.py
-	sed -ri "s/(Unreleased)/(`date +%Y-%m-%d`)/" docs/CHANGES.md
+	$(SED) -ri s/Version:\ [0-9]\+\.[0-9]\+\.[0-9]\+/Version:\ $(VERSION)/ COPYRIGHT
+	$(SED) -ri s/Version:\ [0-9]\+\.[0-9]\+\.[0-9]\+/Version:\ $(VERSION)/ src/start.frag
+	$(SED) -ri s/Project-Id-Version:\ Converse\.js\ [0-9]\+\.[0-9]\+\.[0-9]\+/Project-Id-Version:\ Converse.js\ $(VERSION)/ locale/converse.pot
+	$(SED) -ri s/\"version\":\ \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\":\ \"$(VERSION)\"/ package.json
+	$(SED) -ri s/--package-version=[0-9]\+\.[0-9]\+\.[0-9]\+/--package-version=$(VERSION)/ Makefile
+	$(SED) -ri s/v[0-9]\+\.[0-9]\+\.[0-9]\+\.zip/v$(VERSION)\.zip/ index.html
+	$(SED) -ri s/v[0-9]\+\.[0-9]\+\.[0-9]\+\.tar\.gz/v$(VERSION)\.tar\.gz/ index.html
+	$(SED) -ri s/version\ =\ \'[0-9]\+\.[0-9]\+\.[0-9]\+\'/version\ =\ \'$(VERSION)\'/ docs/source/conf.py
+	$(SED) -ri s/release\ =\ \'[0-9]\+\.[0-9]\+\.[0-9]\+\'/release\ =\ \'$(VERSION)\'/ docs/source/conf.py
+	$(SED) -ri "s/(Unreleased)/`date +%Y-%m-%d`/" CHANGES.md
 	make pot
 	make po
 	make po2json
@@ -99,8 +99,7 @@ release:
 ## Install dependencies
 
 stamp-npm: package.json
-	npm install
-	touch stamp-npm
+	npm install && touch stamp-npm
 
 stamp-bundler: Gemfile
 	mkdir -p .bundle
@@ -110,7 +109,7 @@ stamp-bundler: Gemfile
 
 .PHONY: clean
 clean:
-	-rm -f stamp-npm stamp-bundler
+	-rm -f stamp-npm stamp-bundler package-lock.json
 	-rm -rf node_modules .bundle
 
 .PHONY: dev
@@ -120,55 +119,87 @@ dev: stamp-bundler stamp-npm
 ## Builds
 
 .PHONY: css
-css: sass/*.scss css/converse.css css/converse.min.css css/mobile.min.css css/theme.min.css css/converse-muc-embedded.min.css
+css: sass/*.scss css/converse.css css/converse.min.css css/mobile.min.css css/theme.min.css css/converse-muc-embedded.min.css css/inverse.css css/inverse.min.css
 
-css/converse-muc-embedded.css:: stamp-bundler sass
-	$(SASS) -I ./node_modules/bourbon/app/assets/stylesheets/ sass/_muc_embedded.scss css/converse-muc-embedded.css
+css/inverse.css:: stamp-bundler sass sass/*
+	$(SASS) -I $(BOURBON_TEMPLATES) sass/inverse/inverse.scss css/inverse.css
+
+css/inverse.min.css:: css/inverse.css
+	$(CLEANCSS) css/inverse.css > css/inverse.min.css
+
+css/converse-muc-embedded.css:: stamp-bundler sass/*
+	$(SASS) -I $(BOURBON_TEMPLATES) sass/_muc_embedded.scss css/converse-muc-embedded.css
 
 css/converse-muc-embedded.min.css:: stamp-bundler sass css/converse-muc-embedded.css
 	$(CLEANCSS) css/converse-muc-embedded.css > css/converse-muc-embedded.min.css
 
-css/converse.css:: stamp-bundler sass
-	$(SASS) -I ./node_modules/bourbon/app/assets/stylesheets/ sass/converse.scss css/converse.css
+css/converse.css:: stamp-bundler sass/*
+	$(SASS) -I $(BOURBON_TEMPLATES) sass/converse/converse.scss css/converse.css
 
-css/converse.min.css:: stamp-npm sass
+css/converse.min.css:: css/converse.css
 	$(CLEANCSS) css/converse.css > css/converse.min.css
 
 css/theme.min.css:: stamp-npm css/theme.css
 	$(CLEANCSS) css/theme.css > css/theme.min.css
 
-css/mobile.min.css:: stamp-npm sass
+css/mobile.min.css:: stamp-npm sass/*
 	$(CLEANCSS) css/mobile.css > css/mobile.min.css
 
 .PHONY: watch
 watch: stamp-bundler
-	$(SASS) --watch -I ./node_modules/bourbon/app/assets/stylesheets/ sass/converse.scss:css/converse.css sass/_muc_embedded.scss:css/converse-muc-embedded.css
+	$(SASS) --watch -I ./node_modules/bourbon/app/assets/stylesheets/ sass/converse/converse.scss:css/converse.css sass/_muc_embedded.scss:css/converse-muc-embedded.css sass/inverse/inverse.scss:css/inverse.css
+
+.PHONY: watchjs
+watchjs: stamp-npm
+	$(BABEL) --source-maps --watch=./src --out-dir=./builds
+
+.PHONY: transpile
+transpile: stamp-npm
+	$(BABEL) --source-maps --out-dir=./builds ./src
 
 BUILDS = dist/converse.js \
 		 dist/converse.min.js \
-         dist/converse-mobile.js \
-         dist/converse-mobile.min.js \
-         dist/converse-no-jquery.js \
+		 dist/converse-esnext.js \
+		 dist/converse-esnext.min.js \
+		 dist/inverse.js \
+		 dist/inverse.min.js \
+		 dist/converse-mobile.js \
+		 dist/converse-mobile.min.js \
+		 dist/converse-muc-embedded.js \
+		 dist/converse-muc-embedded.min.js \
+		 dist/converse-no-jquery.js \
  		 dist/converse-no-jquery.min.js \
 		 dist/converse-no-dependencies.min.js \
 		 dist/converse-no-dependencies.js
 
+dist/converse.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build.js include=converse out=dist/converse.js optimize=none 
 dist/converse.min.js: src locale node_modules *.js
 	$(RJS) -o src/build.js include=converse out=dist/converse.min.js
-dist/converse.js: src locale node_modules *.js
-	$(RJS) -o src/build.js include=converse out=dist/converse.js optimize=none 
-dist/converse-no-jquery.min.js: src locale node_modules *.js
-	$(RJS) -o src/build.js include=converse wrap.endFile=end-no-jquery.frag exclude=jquery exclude=jquery-private out=dist/converse-no-jquery.min.js
-dist/converse-no-jquery.js: src locale node_modules *.js
-	$(RJS) -o src/build.js include=converse wrap.endFile=end-no-jquery.frag exclude=jquery exclude=jquery-private out=dist/converse-no-jquery.js optimize=none 
+dist/converse-esnext.js: src locale node_modules *.js transpile
+	$(RJS) -o src/build-esnext.js include=converse out=dist/converse-esnext.js optimize=none 
+dist/converse-esnext.min.js: src locale node_modules *.js transpile
+	$(RJS) -o src/build-esnext.js include=converse out=dist/converse-esnext.min.js
+dist/inverse.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build-inverse.js include=inverse out=dist/inverse.js optimize=none 
+dist/inverse.min.js: src locale node_modules *.js
+	$(RJS) -o src/build-inverse.js include=inverse out=dist/inverse.min.js
+dist/converse-no-jquery.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build.js include=converse wrap.endFile=end-no-jquery.frag exclude=jquery exclude=jquery.noconflict out=dist/converse-no-jquery.js optimize=none 
+dist/converse-no-jquery.min.js: src locale node_modules *.js transpile
+	$(RJS) -o src/build.js include=converse wrap.endFile=end-no-jquery.frag exclude=jquery exclude=jquery.noconflict out=dist/converse-no-jquery.min.js
+dist/converse-no-dependencies.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build-no-dependencies.js optimize=none out=dist/converse-no-dependencies.min.js
 dist/converse-no-dependencies.min.js: src locale node_modules *.js
-	$(RJS) -o src/build-no-dependencies.js
-dist/converse-no-dependencies.js: src locale node_modules *.js
-	$(RJS) -o src/build-no-dependencies.js optimize=none out=dist/converse-no-dependencies.js
+	$(RJS) -o src/build-no-dependencies.js out=dist/converse-no-dependencies.min.js
+dist/converse-mobile.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build.js paths.converse=src/converse-mobile include=converse out=dist/converse-mobile.js optimize=none 
 dist/converse-mobile.min.js: src locale node_modules *.js
 	$(RJS) -o src/build.js paths.converse=src/converse-mobile include=converse out=dist/converse-mobile.min.js
-dist/converse-mobile.js: src locale node_modules *.js
-	$(RJS) -o src/build.js paths.converse=src/converse-mobile include=converse out=dist/converse-mobile.js optimize=none 
+dist/converse-muc-embedded.js: transpile src locale node_modules *.js
+	$(RJS) -o src/build.js paths.converse=src/converse-embedded include=converse out=dist/converse-muc-embedded.js optimize=none 
+dist/converse-muc-embedded.min.js: src locale node_modules *.js
+	$(RJS) -o src/build.js paths.converse=src/converse-embedded include=converse out=dist/converse-muc-embedded.min.js
 
 .PHONY: jsmin
 jsmin: $(BUILDS)
@@ -177,16 +208,12 @@ jsmin: $(BUILDS)
 dist:: build
 
 .PHONY: build
-build:: stamp-bundler css
+build:: dev css transpile
 	$(GRUNT) json
 	make jsmin
 
 ########################################################################
 ## Tests
-
-.PHONY: jshint
-jshint: stamp-npm
-	$(JSHINT) --config jshintrc $(CHECKSOURCES)
 
 .PHONY: eslint
 eslint: stamp-npm
@@ -194,8 +221,9 @@ eslint: stamp-npm
 	$(ESLINT) spec/
 
 .PHONY: check
-check: jshint eslint
-	$(PHANTOMJS) node_modules/phantom-jasmine/lib/run_jasmine_test.coffee tests.html
+check: eslint
+	LOG_CR_VERBOSITY=INFO $(CHROMIUM) http://localhost:8000/tests.html
+
 
 ########################################################################
 ## Documentation

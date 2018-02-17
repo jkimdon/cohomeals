@@ -1,18 +1,19 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WebserviceTemplate.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: WebserviceTemplate.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_WebserviceTemplate extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data )
+		if ($this->data) {
 			return $this->data;
+		}
 
-		$defaults = array();
+		$defaults = [];
 
 		$data = array_merge($defaults, $this->obj->getData());
 
@@ -23,8 +24,9 @@ class Tiki_Profile_InstallHandler_WebserviceTemplate extends Tiki_Profile_Instal
 	{
 		$data = $this->getData();
 
-		if ( ! isset( $data['name'], $data['engine'], $data['output'], $data['content'] ) )
+		if (! isset($data['name'], $data['engine'], $data['output'], $data['content'])) {
 			return false;
+		}
 
 		return true;
 	}

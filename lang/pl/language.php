@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "Brak",
 "Cache" => "Cache",
 "Tag already exists" => "Tag already exists",
@@ -830,7 +830,7 @@ $lang = array(
 "Current" => "Bieżąca",
 "Versions are identical" => "Versions are identical",
 "vote" => "vote",
-"Repeat password" => "Powtórz hasło",
+"Confirm password" => "Powtórz hasło",
 "Generate a password" => "Generuj hasło",
 "Valid" => "Valid",
 "Create New" => "Utwórz nową",
@@ -1796,4 +1796,4 @@ $lang = array(
 "Aborted" => "Aborted",
 "Top pages" => "Najlepsze strony",
 "Last pages" => "Ostatnie strony",
-);
+];

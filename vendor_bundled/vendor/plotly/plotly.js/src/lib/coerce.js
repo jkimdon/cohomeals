@@ -12,13 +12,13 @@
 var isNumeric = require('fast-isnumeric');
 var tinycolor = require('tinycolor2');
 
+var baseTraceAttrs = require('../plots/attributes');
 var getColorscale = require('../components/colorscale/get_scale');
 var colorscaleNames = Object.keys(require('../components/colorscale/scales'));
 var nestedProperty = require('./nested_property');
+var counterRegex = require('./regex').counter;
 
-var ID_REGEX = /^([2-9]|[1-9][0-9]+)$/;
-
-exports.valObjects = {
+exports.valObjectMeta = {
     data_array: {
         // You can use *dflt=[] to force said array to exist though.
         description: [
@@ -43,6 +43,20 @@ exports.valObjects = {
             if(opts.coerceNumber) v = +v;
             if(opts.values.indexOf(v) === -1) propOut.set(dflt);
             else propOut.set(v);
+        },
+        validateFunction: function(v, opts) {
+            if(opts.coerceNumber) v = +v;
+
+            var values = opts.values;
+            for(var i = 0; i < values.length; i++) {
+                var k = String(values[i]);
+
+                if((k.charAt(0) === '/' && k.charAt(k.length - 1) === '/')) {
+                    var regex = new RegExp(k.substr(1, k.length - 2));
+                    if(regex.test(v)) return true;
+                } else if(v === values[i]) return true;
+            }
+            return false;
         }
     },
     'boolean': {
@@ -79,7 +93,7 @@ exports.valObjects = {
             'are coerced to the `dflt`.'
         ].join(' '),
         requiredOpts: [],
-        otherOpts: ['dflt', 'min', 'max'],
+        otherOpts: ['dflt', 'min', 'max', 'arrayOk'],
         coerceFunction: function(v, propOut, dflt, opts) {
             if(v % 1 || !isNumeric(v) ||
                     (opts.min !== undefined && v < opts.min) ||
@@ -166,23 +180,18 @@ exports.valObjects = {
         requiredOpts: ['dflt'],
         otherOpts: [],
         coerceFunction: function(v, propOut, dflt) {
-            var dlen = dflt.length;
-            if(typeof v === 'string' && v.substr(0, dlen) === dflt &&
-                    ID_REGEX.test(v.substr(dlen))) {
+            if(typeof v === 'string' && counterRegex(dflt).test(v)) {
                 propOut.set(v);
                 return;
             }
             propOut.set(dflt);
         },
         validateFunction: function(v, opts) {
-            var dflt = opts.dflt,
-                dlen = dflt.length;
+            var dflt = opts.dflt;
 
             if(v === dflt) return true;
             if(typeof v !== 'string') return false;
-            if(v.substr(0, dlen) === dflt && ID_REGEX.test(v.substr(dlen))) {
-                return true;
-            }
+            if(counterRegex(dflt).test(v)) return true;
 
             return false;
         }
@@ -196,7 +205,7 @@ exports.valObjects = {
             'Values in `extras` cannot be combined.'
         ].join(' '),
         requiredOpts: ['flags'],
-        otherOpts: ['dflt', 'extras'],
+        otherOpts: ['dflt', 'extras', 'arrayOk'],
         coerceFunction: function(v, propOut, dflt, opts) {
             if(typeof v !== 'string') {
                 propOut.set(dflt);
@@ -274,7 +283,7 @@ exports.valObjects = {
  * Ensures that container[attribute] has a valid value.
  *
  * attributes[attribute] is an object with possible keys:
- * - valType: data_array, enumerated, boolean, ... as in valObjects
+ * - valType: data_array, enumerated, boolean, ... as in valObjectMeta
  * - values: (enumerated only) array of allowed vals
  * - min, max: (number, integer only) inclusive bounds on allowed vals
  *      either or both may be omitted
@@ -301,7 +310,7 @@ exports.coerce = function(containerIn, containerOut, attributes, attribute, dflt
         return v;
     }
 
-    exports.valObjects[opts.valType].coerceFunction(v, propOut, dflt, opts);
+    exports.valObjectMeta[opts.valType].coerceFunction(v, propOut, dflt, opts);
 
     return propOut.get();
 };
@@ -338,13 +347,42 @@ exports.coerceFont = function(coerce, attr, dfltObj) {
     return out;
 };
 
+/** Coerce shortcut for 'hoverinfo'
+ * handling 1-vs-multi-trace dflt logic
+ *
+ * @param {object} traceIn : user trace object
+ * @param {object} traceOut : full trace object (requires _module ref)
+ * @param {object} layoutOut : full layout object (require _dataLength ref)
+ * @return {any} : the coerced value
+ */
+exports.coerceHoverinfo = function(traceIn, traceOut, layoutOut) {
+    var moduleAttrs = traceOut._module.attributes;
+    var attrs = moduleAttrs.hoverinfo ?
+        {hoverinfo: moduleAttrs.hoverinfo} :
+        baseTraceAttrs;
+
+    var valObj = attrs.hoverinfo;
+    var dflt;
+
+    if(layoutOut._dataLength === 1) {
+        var flags = valObj.dflt === 'all' ?
+            valObj.flags.slice() :
+            valObj.dflt.split('+');
+
+        flags.splice(flags.indexOf('name'), 1);
+        dflt = flags.join('+');
+    }
+
+    return exports.coerce(traceIn, traceOut, attrs, 'hoverinfo', dflt);
+};
+
 exports.validate = function(value, opts) {
-    var valObject = exports.valObjects[opts.valType];
+    var valObjectDef = exports.valObjectMeta[opts.valType];
 
     if(opts.arrayOk && Array.isArray(value)) return true;
 
-    if(valObject.validateFunction) {
-        return valObject.validateFunction(value, opts);
+    if(valObjectDef.validateFunction) {
+        return valObjectDef.validateFunction(value, opts);
     }
 
     var failed = {},
@@ -353,6 +391,6 @@ exports.validate = function(value, opts) {
 
     // 'failed' just something mutable that won't be === anything else
 
-    valObject.coerceFunction(value, propMock, failed, opts);
+    valObjectDef.coerceFunction(value, propMock, failed, opts);
     return out !== failed;
 };

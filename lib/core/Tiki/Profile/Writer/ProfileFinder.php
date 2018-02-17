@@ -3,11 +3,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ProfileFinder.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: ProfileFinder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_Writer_ProfileFinder
 {
-	private $profiles = array();
+	private $profiles = [];
 	private $symbols;
 
 	function __construct()
@@ -18,13 +18,14 @@ class Tiki_Profile_Writer_ProfileFinder
 	function lookup($type, $object)
 	{
 		$result = $this->symbols->fetchAll(
-			array(
+			[
 				'repository' => 'domain',
 				'profile',
-			), array(
+			],
+			[
 				'type' => $type,
 				'value' => $object,
-			)
+			]
 		);
 
 		foreach ($result as $entry) {
@@ -41,14 +42,15 @@ class Tiki_Profile_Writer_ProfileFinder
 	function getSymbols($repository, $profile)
 	{
 		return $this->symbols->fetchAll(
-			array(
+			[
 				'type',
 				'id' => 'value',
 				'symbol' => 'object',
-			), array(
+			],
+			[
 				'domain' => $repository,
 				'profile' => $profile,
-			)
+			]
 		);
 	}
 
@@ -56,8 +58,7 @@ class Tiki_Profile_Writer_ProfileFinder
 	{
 		$count = count($this->profiles);
 
-		$this->profiles = array();
+		$this->profiles = [];
 		return $count > 0;
 	}
 }
-

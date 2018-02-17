@@ -9,15 +9,21 @@
 
 'use strict';
 
+var isNumeric = require('fast-isnumeric');
+
 var Lib = require('../../lib');
+var BADNUM = require('../../constants/numerical').BADNUM;
 var geoJsonUtils = require('../../lib/geojson_utils');
 
+var Colorscale = require('../../components/colorscale');
+var makeBubbleSizeFn = require('../scatter/make_bubble_size_func');
 var subTypes = require('../scatter/subtypes');
 var convertTextOpts = require('../../plots/mapbox/convert_text_opts');
+var DESELECTDIM = require('../../constants/interactions').DESELECTDIM;
 
 var COLOR_PROP = 'circle-color';
 var SIZE_PROP = 'circle-radius';
-
+var OPACITY_PROP = 'circle-opacity';
 
 module.exports = function convert(calcTrace) {
     var trace = calcTrace[0].trace;
@@ -43,16 +49,16 @@ module.exports = function convert(calcTrace) {
     };
 
     // early return if not visible or placeholder
-    if(!isVisible || calcTrace[0].placeholder) return opts;
+    if(!isVisible) return opts;
 
     // fill layer and line layer use the same coords
-    var coords;
+    var lineCoords;
     if(hasFill || hasLines) {
-        coords = geoJsonUtils.calcTraceToLineCoords(calcTrace);
+        lineCoords = geoJsonUtils.calcTraceToLineCoords(calcTrace);
     }
 
     if(hasFill) {
-        fill.geojson = geoJsonUtils.makePolygon(coords);
+        fill.geojson = geoJsonUtils.makePolygon(lineCoords);
         fill.layout.visibility = 'visible';
 
         Lib.extendFlat(fill.paint, {
@@ -61,7 +67,7 @@ module.exports = function convert(calcTrace) {
     }
 
     if(hasLines) {
-        line.geojson = geoJsonUtils.makeLine(coords);
+        line.geojson = geoJsonUtils.makeLine(lineCoords);
         line.layout.visibility = 'visible';
 
         Lib.extendFlat(line.paint, {
@@ -77,12 +83,13 @@ module.exports = function convert(calcTrace) {
         var hash = {};
         hash[COLOR_PROP] = {};
         hash[SIZE_PROP] = {};
+        hash[OPACITY_PROP] = {};
 
         circle.geojson = makeCircleGeoJSON(calcTrace, hash);
         circle.layout.visibility = 'visible';
 
         Lib.extendFlat(circle.paint, {
-            'circle-opacity': trace.opacity * trace.marker.opacity,
+            'circle-opacity': calcCircleOpacity(trace, hash),
             'circle-color': calcCircleColor(trace, hash),
             'circle-radius': calcCircleRadius(trace, hash)
         });
@@ -155,12 +162,44 @@ function initContainer() {
 //
 // The solution prove to be more robust than trying to generate
 // `stops` arrays from scale functions.
+//
+// TODO axe this when we bump mapbox-gl and rewrite this using
+// "identity" property functions.
+// See https://github.com/plotly/plotly.js/pull/1543
+//
 function makeCircleGeoJSON(calcTrace, hash) {
     var trace = calcTrace[0].trace;
+    var marker = trace.marker;
 
-    var marker = trace.marker,
-        hasColorArray = Array.isArray(marker.color),
-        hasSizeArray = Array.isArray(marker.size);
+    var colorFn;
+    if(Colorscale.hasColorscale(trace, 'marker')) {
+        colorFn = Colorscale.makeColorScaleFunc(
+             Colorscale.extractScale(marker.colorscale, marker.cmin, marker.cmax)
+         );
+    } else if(Array.isArray(marker.color)) {
+        colorFn = Lib.identity;
+    }
+
+    var sizeFn;
+    if(subTypes.isBubble(trace)) {
+        sizeFn = makeBubbleSizeFn(trace);
+    }
+
+    function combineOpacities(d, mo) {
+        return trace.opacity * mo * (d.dim ? DESELECTDIM : 1);
+    }
+
+    var opacityFn;
+    if(Array.isArray(marker.opacity)) {
+        opacityFn = function(d) {
+            var mo = isNumeric(d.mo) ? +Lib.constrain(d.mo, 0, 1) : 0;
+            return combineOpacities(d, mo);
+        };
+    } else if(trace._hasDimmedPts) {
+        opacityFn = function(d) {
+            return combineOpacities(d, marker.opacity);
+        };
+    }
 
     // Translate vals in trace arrayOk containers
     // into a val-to-index hash object
@@ -174,16 +213,27 @@ function makeCircleGeoJSON(calcTrace, hash) {
 
     for(var i = 0; i < calcTrace.length; i++) {
         var calcPt = calcTrace[i];
+        var lonlat = calcPt.lonlat;
+
+        if(isBADNUM(lonlat)) continue;
 
         var props = {};
-        if(hasColorArray) translate(props, COLOR_PROP, calcPt.mcc, i);
-        if(hasSizeArray) translate(props, SIZE_PROP, calcPt.mrc, i);
+        if(colorFn) {
+            var mcc = calcPt.mcc = colorFn(calcPt.mc);
+            translate(props, COLOR_PROP, mcc, i);
+        }
+        if(sizeFn) {
+            translate(props, SIZE_PROP, sizeFn(calcPt.ms), i);
+        }
+        if(opacityFn) {
+            translate(props, OPACITY_PROP, opacityFn(calcPt), i);
+        }
 
         features.push({
             type: 'Feature',
             geometry: {
                 type: 'Point',
-                coordinates: calcPt.lonlat
+                coordinates: lonlat
             },
             properties: props
         });
@@ -214,6 +264,8 @@ function makeSymbolGeoJSON(calcTrace) {
 
     for(var i = 0; i < calcTrace.length; i++) {
         var calcPt = calcTrace[i];
+
+        if(isBADNUM(calcPt.lonlat)) continue;
 
         features.push({
             type: 'Feature',
@@ -275,18 +327,38 @@ function calcCircleRadius(trace, hash) {
             stops.push([ hash[SIZE_PROP][val], +val ]);
         }
 
-        // stops indices must be sorted
-        stops.sort(function(a, b) {
-            return a[0] - b[0];
-        });
-
         out = {
             property: SIZE_PROP,
-            stops: stops
+            stops: stops.sort(ascending)
         };
     }
     else {
         out = marker.size / 2;
+    }
+
+    return out;
+}
+
+function calcCircleOpacity(trace, hash) {
+    var marker = trace.marker;
+    var out;
+
+    if(Array.isArray(marker.opacity) || trace._hasDimmedPts) {
+        var vals = Object.keys(hash[OPACITY_PROP]);
+        var stops = [];
+
+        for(var i = 0; i < vals.length; i++) {
+            var val = vals[i];
+            stops.push([hash[OPACITY_PROP][val], +val]);
+        }
+
+        out = {
+            property: OPACITY_PROP,
+            stops: stops.sort(ascending)
+        };
+    }
+    else {
+        out = trace.opacity * marker.opacity;
     }
 
     return out;
@@ -305,3 +377,10 @@ function getFillFunc(attr) {
 }
 
 function blankFillFunc() { return ''; }
+
+function ascending(a, b) { return a[0] - b[0]; }
+
+// only need to check lon (OR lat)
+function isBADNUM(lonlat) {
+    return lonlat[0] === BADNUM;
+}

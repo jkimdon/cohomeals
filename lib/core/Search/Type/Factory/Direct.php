@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Direct.php 60381 2016-11-23 10:56:42Z jonnybradley $
+// $Id: Direct.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Type_Factory_Direct implements Search_Type_Factory_Interface
 {
@@ -17,7 +17,7 @@ class Search_Type_Factory_Direct implements Search_Type_Factory_Interface
 		return new Search_Type_PlainText($value);
 	}
 
-	function timestamp($value)
+	function timestamp($value, $dateOnly = false)
 	{
 		return new Search_Type_Whole($value);
 	}
@@ -56,5 +56,9 @@ class Search_Type_Factory_Direct implements Search_Type_Factory_Interface
 	{
 		return new Search_Type_Whole($value);
 	}
-}
 
+	function json($value)
+	{
+		return new Search_Type_PlainText($value);
+	}
+}

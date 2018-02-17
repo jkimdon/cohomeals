@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: StemmingTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: StemmingTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -16,13 +16,13 @@ abstract class Search_Index_StemmingTest extends PHPUnit_Framework_TestCase
 	{
 		$typeFactory = $index->getTypeFactory();
 		$index->addDocument(
-			array(
+			[
 				'object_type' => $typeFactory->identifier('wikipage?!'),
 				'object_id' => $typeFactory->identifier('Comité Wiki'),
 				'description' => $typeFactory->plaintext('a descriptions for the pages éducation Case'),
 				'contents' => $typeFactory->plaintext('a descriptions for the pages éducation Case'),
 				'hebrew' => $typeFactory->plaintext('מחשב הוא מכונה המעבדת נתונים על פי תוכנית, כלומר על פי רצף פקודות נתון מראש. מחשבים הם חלק בלתי נפרד מחיי היומיום '),
-			)
+			]
 		);
 	}
 
@@ -97,4 +97,3 @@ abstract class Search_Index_StemmingTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(1, count($query->search($this->index)));
 	}
 }
-

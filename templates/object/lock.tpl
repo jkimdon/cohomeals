@@ -1,4 +1,4 @@
-{* $Id: lock.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: lock.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 {strip}
 <span class="lock_block">
 	<a class="lock_button" id="lock_{$data.instance}" data-type="{$data.type}" data-object="{$data.object}" data-is_locked="{$data.is_locked}"

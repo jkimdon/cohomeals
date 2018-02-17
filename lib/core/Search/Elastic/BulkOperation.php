@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BulkOperation.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: BulkOperation.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_BulkOperation
 {
@@ -32,29 +32,29 @@ class Search_Elastic_BulkOperation
 	function index($index, $type, $id, array $data)
 	{
 		$this->append(
-			array(
-				array('index' => array(
+			[
+				['index' => [
 						'_index' => $index,
 						'_type' => $type,
 						'_id' => $id,
-					)
-				),
+					]
+				],
 				$data,
-			)
+			]
 		);
 	}
 
 	function unindex($index, $type, $id)
 	{
 		$this->append(
-			array(
-				array('delete' => array(
+			[
+				['delete' => [
 						'_index' => $index,
 						'_type' => $type,
 						'_id' => $id,
-					)
-				),
-			)
+					]
+				],
+			]
 		);
 	}
 
@@ -70,4 +70,3 @@ class Search_Elastic_BulkOperation
 		}
 	}
 }
-

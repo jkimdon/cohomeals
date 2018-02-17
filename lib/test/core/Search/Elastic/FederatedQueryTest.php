@@ -7,42 +7,43 @@ class Search_Elastic_FederatedQueryTest extends PHPUnit_Framework_TestCase
 
 	function setUp()
 	{
-		$connection = new Search_Elastic_Connection('http://localhost:9200');
+		$elasticSearchHost = empty(getenv('ELASTICSEARCH_HOST')) ? 'localhost' : getenv('ELASTICSEARCH_HOST');
+		$connection = new Search_Elastic_Connection('http://' . $elasticSearchHost . ':9200');
 
 		$status = $connection->getStatus();
 		if (! $status->ok) {
-			$this->markTestSkipped('Elasticsearch needs to be available on localhost:9200 for the test to run.');
+			$this->markTestSkipped('Elasticsearch needs to be available on ' . $elasticSearchHost . ':9200 for the test to run.');
 		}
 
 		$this->indexA = new Search_Elastic_Index($connection, 'test_index_a');
 		$this->indexA->destroy();
 		$factory = $this->indexA->getTypeFactory();
-		$this->indexA->addDocument(array(
+		$this->indexA->addDocument([
 			'object_type' => $factory->identifier('wiki page'),
 			'object_id' => $factory->identifier('PageA'),
 			'contents' => $factory->plaintext('Hello World A'),
 			'url' => $factory->identifier('PageA'),
-		));
+		]);
 
 		$this->indexB = new Search_Elastic_Index($connection, 'test_index_b_foo');
 		$this->indexB->destroy();
 		$factory = $this->indexB->getTypeFactory();
-		$this->indexB->addDocument(array(
+		$this->indexB->addDocument([
 			'object_type' => $factory->identifier('wiki page'),
 			'object_id' => $factory->identifier('PageB'),
 			'contents' => $factory->plaintext('Hello World B'),
 			'url' => $factory->identifier('PageB'),
-		));
+		]);
 
 		$this->indexC = new Search_Elastic_Index($connection, 'test_index_c');
 		$this->indexC->destroy();
 		$factory = $this->indexC->getTypeFactory();
-		$this->indexC->addDocument(array(
+		$this->indexC->addDocument([
 			'object_type' => $factory->identifier('wiki page'),
 			'object_id' => $factory->identifier('PageB'),
 			'contents' => $factory->plaintext('Hello World C'),
 			'url' => $factory->identifier('/PageC'),
-		));
+		]);
 
 		$connection->refresh('*');
 		$connection->assignAlias('test_index_b', 'test_index_b_foo');
@@ -103,4 +104,3 @@ class Search_Elastic_FederatedQueryTest extends PHPUnit_Framework_TestCase
 		$this->assertContains('http://bar.example.com/PageC', $urls);
 	}
 }
-

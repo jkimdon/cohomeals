@@ -1,4 +1,4 @@
-{* $Id: tiki-edit_quiz.tpl 57907 2016-03-16 13:23:47Z patrick-proulx $ *}
+{* $Id: tiki-edit_quiz.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {* Copyright (c) 2002-2008 *}
 {* All Rights Reserved. See copyright.txt for details and a complete list of authors. *}
@@ -67,7 +67,7 @@
 							{/capture}
 							<a class="tips"
 								title="{tr}Actions{/tr}"
-								href="#" {popup fullhtml="1" center=true text=$smarty.capture.edit_quiz_actions|escape:"javascript"|escape:"html"}
+								href="#" {popup fullhtml="1" center=true text=$smarty.capture.edit_quiz_actions}
 								style="padding:0; margin:0; border:0"
 									>
 								{icon name='wrench'}

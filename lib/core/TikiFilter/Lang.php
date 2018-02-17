@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Lang.php 62389 2017-04-30 15:39:31Z lindonb $
+// $Id: Lang.php 62390 2017-04-30 15:42:05Z lindonb $
 
 /**
  * Class TikiFilter_Lang

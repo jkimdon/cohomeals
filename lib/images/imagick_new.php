@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: imagick_new.php 62608 2017-05-16 15:15:25Z jonnybradley $
+// $Id: imagick_new.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 require_once('lib/images/abstract.php');
 
@@ -13,14 +13,14 @@ require_once('lib/images/abstract.php');
 class Image extends ImageAbstract
 {
 
-    /**
-     * @param $image
-     * @param bool $isfile
-     * @param string $format
-     */
-    function __construct($image, $isfile = false, $format = 'jpeg')
+	/**
+	 * @param $image
+	 * @param bool $isfile
+	 * @param string $format
+	 */
+	function __construct($image, $isfile = false, $format = 'jpeg')
 	{
-		if ( $isfile ) {
+		if ($isfile) {
 			$this->filename = $image;
 			parent::__construct($image, $isfile);
 		} else {
@@ -31,26 +31,24 @@ class Image extends ImageAbstract
 
 	function _load_data()
 	{
-		if (!$this->loaded) {
-			if (!empty($this->filename)) {
+		if (! $this->loaded) {
+			if (! empty($this->filename)) {
 				$this->data = new Imagick();
 				try {
 					$this->data->readImage($this->filename);
 					$this->loaded = true;
 					$this->filename = null;
-				}
-				catch (ImagickException $e) {
+				} catch (ImagickException $e) {
 					$this->loaded = true;
 					$this->data = null;
 				}
-			} elseif (!empty($this->data)) {
+			} elseif (! empty($this->data)) {
 				$tmp = new Imagick();
 				try {
 					$tmp->readImageBlob($this->data);
 					$this->data =& $tmp;
 					$this->loaded = true;
-				}
-				catch (ImagickException $e) {
+				} catch (ImagickException $e) {
 					$this->data = null;
 				}
 			}
@@ -60,12 +58,12 @@ class Image extends ImageAbstract
 		}
 	}
 
-    /**
-     * @param $x
-     * @param $y
-     * @return mixed
-     */
-    function _resize($x, $y)
+	/**
+	 * @param $x
+	 * @param $y
+	 * @return mixed
+	 */
+	function _resize($x, $y)
 	{
 		if ($this->data) {
 			return $this->data->scaleImage($x, $y);
@@ -74,13 +72,12 @@ class Image extends ImageAbstract
 
 	function resizethumb()
 	{
-		if ( $this->thumb !== null ) {
+		if ($this->thumb !== null) {
 			$this->data = new Imagick();
 			try {
 				$this->data->readImageBlob($this->thumb);
 				$this->loaded = true;
-			}
-			catch (ImagickException $e) {
+			} catch (ImagickException $e) {
 				$this->loaded = true;
 				$this->data = null;
 			}
@@ -92,10 +89,10 @@ class Image extends ImageAbstract
 		}
 	}
 
-    /**
-     * @param $format
-     */
-    function set_format($format)
+	/**
+	 * @param $format
+	 */
+	function set_format($format)
 	{
 		$this->_load_data();
 		if ($this->data) {
@@ -104,18 +101,18 @@ class Image extends ImageAbstract
 		}
 	}
 
-    /**
-     * @return string
-     */
-    function get_format()
+	/**
+	 * @return string
+	 */
+	function get_format()
 	{
 		return $this->format;
 	}
 
-    /**
-     * @return mixed
-     */
-    function display()
+	/**
+	 * @return mixed
+	 */
+	function display()
 	{
 		$this->_load_data();
 		if ($this->data) {
@@ -123,11 +120,11 @@ class Image extends ImageAbstract
 		}
 	}
 
-    /**
-     * @param $angle
-     * @return bool
-     */
-    function rotate($angle)
+	/**
+	 * @param $angle
+	 * @return bool
+	 */
+	function rotate($angle)
 	{
 		$this->_load_data();
 		if ($this->data) {
@@ -138,11 +135,11 @@ class Image extends ImageAbstract
 		}
 	}
 
-    /**
-     * @param $format
-     * @return bool
-     */
-    function is_supported($format)
+	/**
+	 * @param $format
+	 * @return bool
+	 */
+	function is_supported($format)
 	{
 		$image = new Imagick();
 		$format = strtoupper(trim($format));
@@ -157,23 +154,65 @@ class Image extends ImageAbstract
 		return in_array($format, $image->queryFormats());
 	}
 
-    /**
-     * @return mixed
-     */
-    function get_height()
+	/**
+	 * @return mixed
+	 */
+	function get_height()
 	{
 		$this->_load_data();
-		if ($this->data)
+		if ($this->data) {
 			return $this->data->getImageHeight();
+		}
 	}
 
-    /**
-     * @return mixed
-     */
-    function get_width()
+	/**
+	 * @return mixed
+	 */
+	function get_width()
 	{
 		$this->_load_data();
-		if ($this->data)
+		if ($this->data) {
 			return $this->data->getImageWidth();
+		}
+	}
+
+	/**
+	 * Allow adding text as overlay to a image
+	 * @param $text
+	 * @return string
+	 */
+	function addTextToImage($text)
+	{
+		$this->_load_data();
+
+		if (! $this->data) {
+			return false;
+		}
+
+		$font = dirname(dirname(__DIR__)) . '/lib/captcha/DejaVuSansMono.ttf';
+
+		$padLeft = 20;
+		$padBottom = 20;
+
+		$image = new Imagick();
+		$image->readImageBlob($this->data);
+		$height = $image->getimageheight();
+
+		$draw = new ImagickDraw();
+		$draw->setFillColor('#000000');
+		$draw->setStrokeColor(new ImagickPixel('#000000'));
+		$draw->setStrokeWidth(3);
+		$draw->setFont($font);
+		$draw->setFontSize(12);
+		$image->annotateImage($draw, $padLeft, $height - $padBottom, 0, $text);
+
+		$draw = new ImagickDraw();
+		$draw->setFillColor('#ffff00');
+		$draw->setFont($font);
+		$draw->setFontSize(12);
+		$image->annotateImage($draw, $padLeft, $height - $padBottom, 0, $text);
+
+		$this->data = $image;
+		return $image->getImageBlob();
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Hit" => "Hit",
 "Cache" => "Cache",
 "Re:" => "Re:",
@@ -966,7 +966,7 @@ $lang = array(
 "[-]" => "[-]",
 "vote" => "glasuj",
 "A valid email is mandatory to register" => "Za registracijo je potreben veljaven e-naslov",
-"Repeat password" => "Ponovi geslo",
+"Confirm password" => "Ponovi geslo",
 "Generate a password" => "Generiraj geslo",
 "Create New" => "Ustvari novo",
 "Last modification" => "Zadnja sprememba",
@@ -1727,4 +1727,4 @@ $lang = array(
 "Edit/Delete" => "Uredite/Izbrišite",
 "Top pages" => "Najbolj gledane strani",
 "Last pages" => "Zadnje strani",
-);
+];

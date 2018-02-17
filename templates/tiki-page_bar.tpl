@@ -1,4 +1,4 @@
-{* $Id: tiki-page_bar.tpl 62106 2017-04-06 04:38:54Z drsassafras $ *}
+{* $Id: tiki-page_bar.tpl 62109 2017-04-06 07:17:24Z kroky6 $ *}
 {if !isset($versioned) or not $versioned}
 	{capture assign=more_section}
 		{if $page|lower ne 'sandbox'}

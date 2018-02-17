@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: h5p.php 63317 2017-07-22 14:20:24Z jonnybradley $
+// $Id: h5p.php 64679 2017-11-22 20:18:42Z jonnybradley $
 
 function prefs_h5p_list($partial = false)
 {
@@ -101,6 +101,15 @@ function prefs_h5p_list($partial = false)
 			'filter' => 'alpha',
 			'default' => 'n',
 		],
+		'h5p_hub_is_enabled' => [
+			'name' => tra('Hub Is Enabled'),
+			'description' => tra('Unused so far'),
+			'dependencies' => [
+				'h5p_enabled',
+			],
+			'type' => 'flag',
+			'filter' => 'alpha',
+			'default' => 'n',
+		],
 	];
 }
-

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "Nimic",
 "You must specify a directory" => "Trebuie să specificați un dosar",
 "Tiki Email Test" => "Tiki Email Test",
@@ -118,7 +118,7 @@ $lang = array(
 "Password:" => "Parolă:",
 "Click here if you've forgotten your password" => "Clic aici dacă v-aţi uitat parola",
 "Click here to register" => "Clic aici pentru a vă &icirc;nregistra",
-"Repeat password" => "Repetă parola",
+"Confirm password" => "Repetă parola",
 "Generate a password" => "Generează o parolă",
 "Administrator" => "Administrator",
 "Home" => "Acasă",
@@ -209,4 +209,4 @@ $lang = array(
 "Register as a new user" => "&Icirc;nregistrare ca utilizator nou",
 "Content may be out of date" => "S-ar putea să fie nevoie de o actualizare a conţinutului",
 "Review" => "Revedere",
-);
+];

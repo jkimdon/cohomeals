@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.ifsearchexists.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: block.ifsearchexists.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_block_ifsearchexists($params, $content, $smarty, &$repeat)
@@ -23,8 +23,8 @@ function smarty_block_ifsearchexists($params, $content, $smarty, &$repeat)
 	$query->addObject($params['type'], $params['id']);
 	$index = TikiLib::lib('unifiedsearch')->getIndex();
 	$result = $query->search($index);
-	
-	if ($result->count() > 0 ) {
+
+	if ($result->count() > 0) {
 		return $content;
 	} else {
 		return '';

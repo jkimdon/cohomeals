@@ -1,10 +1,10 @@
-{* $Id: include_textarea.tpl 62772 2017-05-27 17:33:15Z jonnybradley $ *}
+{* $Id: include_textarea.tpl 64639 2017-11-19 16:37:13Z chealer $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}Text area (that apply throughout many features){/tr}
 {/remarksbox}
 
 <form class="form-horizontal" action="tiki-admin.php?page=textarea" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
@@ -42,6 +42,7 @@
 				{preference name=feature_wiki_argvariable}
 				{preference name=wiki_dynvar_style}
 				{preference name=wiki_dynvar_multilingual}
+				{preference name=wiki_make_ordered_list_items_display_unique_numbers}
 			</fieldset>
 
 			<fieldset>
@@ -165,7 +166,9 @@
 			<fieldset class="margin-bottom-lg">
 				<legend>{tr}Edit plugin icons{/tr}</legend>
 				{preference name=wiki_edit_plugin}
-				{preference name=wiki_edit_icons_toggle}
+				<div class="adminoptionboxchild" id="wiki_edit_plugin_childcontainer">
+					{preference name=wiki_edit_icons_toggle}
+				</div>
 				{preference name=wikiplugin_list_gui}
 			</fieldset>
 
@@ -183,10 +186,12 @@
 					{/if}
 				</fieldset>
 				<div id="pluginlist">
+				{if $prefs.unified_search_textarea_admin eq 'y'}
 					{remarksbox type='tip' title='{tr}Plugin List{/tr}'}
 						{tr}Use the filter input above to find plugins, or enter return to see the whole list{/tr}
 						<a href="{bootstrap_modal controller=search action=help}">{tr}Search Help{/tr} {icon name='help'}</a>
 					{/remarksbox}
+				{/if}
 				</div>
 				{if $prefs.unified_search_textarea_admin eq 'y'}<noscript>{/if}
 					{foreach from=$plugins key=plugin item=info}

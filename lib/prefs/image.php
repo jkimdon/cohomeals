@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: image.php 63665 2017-08-25 04:16:20Z drsassafras $
+// $Id: image.php 63666 2017-08-25 04:17:14Z drsassafras $
 
 function prefs_image_list()
 {

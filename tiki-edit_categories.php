@@ -6,15 +6,15 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-edit_categories.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-edit_categories.php 64605 2017-11-17 02:03:50Z rjsmelo $
 
-$inputConfiguration = array(array(
-	'staticKeyFiltersForArrays' => array(
+$inputConfiguration = [[
+	'staticKeyFiltersForArrays' => [
 		'filter' => 'text',
 		'sort_mode' => 'text',
-	),
+	],
 	'catchAllUnset' => null,
-));
+]];
 
 require_once 'tiki-setup.php';
 $categlib = TikiLib::lib('categ');
@@ -25,13 +25,13 @@ $access->check_feature('feature_categories');
 // Generate the category tree {{{
 $ctall = $categlib->getCategories();
 
-$tree_nodes = array();
+$tree_nodes = [];
 foreach ($ctall as $c) {
 	$url = htmlentities(
 		'tiki-edit_categories.php?' . http_build_query(
-			array(
+			[
 				'filter~categories' => $c['categId'],
-			)
+			]
 		),
 		ENT_QUOTES,
 		'UTF-8'
@@ -49,25 +49,25 @@ $remove
 <a class="catname" href="{$url}" data-categ="{$c['categId']}">{$name}</a>
 BODY;
 
-	$tree_nodes[] = array(
+	$tree_nodes[] = [
 		'id' => $c['categId'],
 		'parent' => $c['parentId'],
 		'data' => $body,
-	);
+	];
 }
 
-$tree_nodes[] = array(
+$tree_nodes[] = [
 	'id' => 'orphan',
 	'parent' => '0',
 	'data' => '<span class="object-count">' . $orphans['cant'] . '</span><a class="catname" href="tiki-edit_categories.php?filter~categories=orphan"><em>' . tr('Orphans') . '</em></a>',
-);
+];
 
 $tm = new BrowseTreeMaker('categ');
 $res = $tm->make_tree(0, $tree_nodes);
 $smarty->assign('tree', $res);
 // }}}
 
-$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : array();
+$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : [];
 $smarty->assign('filter', $filter);
 
 if (count($filter)) {

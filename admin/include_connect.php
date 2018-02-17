@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_connect.php 61626 2017-03-11 16:39:42Z lindonb $
+// $Id: include_connect.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -20,17 +20,17 @@ $headerlib->add_jsfile('lib/jquery_tiki/tiki-connect.js');
 
 if (empty($prefs['connect_site_title'])) {
 	$defaults = json_encode(
-		array(
+		[
 			'connect_site_title' => $prefs['browsertitle'],
 			'connect_site_email' => $userlib->get_admin_email(),
 			'connect_site_url' => $base_url,
 			'connect_site_keywords' => $prefs['metatag_keywords'],
 			'connect_site_location' => $prefs['gmap_defaultx'] . ',' . $prefs['gmap_defaulty'] . ',' . $prefs['gmap_defaultz'],
-		)
+		]
 	);
 
 	$headerlib->add_jq_onready(
-<<<JQ
+		<<<JQ
 		$("#connect_defaults_btn a").click(function(){
 			var connect_defaults = $defaults;
 			for (var el in connect_defaults) {
@@ -50,7 +50,7 @@ if ($prefs['connect_server_mode'] === 'y') {
 	if (isset($_REQUEST['cserver'])) {
 		if ($_REQUEST['cserver'] === 'rebuild') {
 			$connectlib->rebuildIndex();
-		} else if (!empty($_REQUEST['cserver_search'])) {
+		} elseif (! empty($_REQUEST['cserver_search'])) {
 			$search_str = $_REQUEST['cserver_search'];
 		}
 	}

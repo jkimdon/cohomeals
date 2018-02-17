@@ -3,20 +3,26 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.trackerinput.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.trackerinput.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
-function smarty_function_trackerinput( $params, $smarty )
+function smarty_function_trackerinput($params, $smarty)
 {
 	$trklib = TikiLib::lib('trk');
 
 	$field = $params['field'];
-	$item = isset($params['item']) ? $params['item'] : array();
+	if (isset($params['item'])) {
+		$item = $params['item'];
+	} elseif ($params['itemId']) {
+		$item = $trklib->get_item_info($params['itemId']);
+	} else {
+		$item = [];
+	}
 
 	$handler = $trklib->get_field_handler($field, $item);
 
@@ -30,11 +36,14 @@ function smarty_function_trackerinput( $params, $smarty )
 			$desc = $params['field']['description'];
 			if ($params['field']['descriptionIsParsed'] == 'y') {
 				$desc = TikiLib::lib('parser')->parse_data($desc);
+			} else {
+				$desc = htmlspecialchars($desc);
 			}
-			if (!empty($desc)) $desc = '<div class="description help-block">'.$desc.'</div>';
+			if (! empty($desc)) {
+				$desc = '<div class="description help-block">' . $desc . '</div>';
+			}
 		}
 
-		return $handler->renderInput($context).$desc;
+		return $handler->renderInput($context) . $desc;
 	}
 }
-

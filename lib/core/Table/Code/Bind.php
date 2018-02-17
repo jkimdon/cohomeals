@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Bind.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: Bind.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -50,9 +50,9 @@ class Table_Code_Bind extends Table_Code_Manager
 			}
 		}
 		$bindtr[] = '$(\'div#' . parent::$id . '\').css(\'visibility\', \'visible\');';
-		$bindup = 'storeSortTable(\''.parent::$tid.'\',$(\'' . parent::$tid . '\').html());';
+		$bindup = 'storeSortTable(\'' . parent::$tid . '\',$(\'' . parent::$tid . '\').html());';
 		$jq[] = $this->iterate($bindtr, '.on(\'tablesorter-ready\', function(){', $this->nt . '})', $this->nt2, '', '');
-        $jq[] = "$('.icon-pdf').parent().click(function(){".$bindup."})";
+		$jq[] = "$('.icon-pdf').parent().click(function(){" . $bindup . "})";
 
 		if (count($jq) > 0) {
 			$code = $this->iterate($jq, '', ';', $this->nt, '', '');

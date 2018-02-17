@@ -1,4 +1,4 @@
-{* $Id: include_login.tpl 63655 2017-08-24 23:01:48Z drsassafras $ *}
+{* $Id: include_login.tpl 63656 2017-08-25 00:44:52Z drsassafras $ *}
 {jq}
 	$("#genPass").click(function () {
 		var passcodeId = $("input[name=registerPasscode]").attr('id');
@@ -7,7 +7,7 @@
 	});
 {/jq}
 <form action="tiki-admin.php?page=login" class="admin form-horizontal" method="post" name="LogForm" enctype="multipart/form-data">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md">
 		{button href="tiki-admingroups.php" _type="text" _class="btn btn-link tips" _icon_name="group" _text="{tr}Groups{/tr}" _title=":{tr}Group Administration{/tr}"}
 		{button href="tiki-adminusers.php" _type="text" _class="btn btn-link tips" _icon_name="user" _text="{tr}Users{/tr}" _title=":{tr}User Administration{/tr}"}
@@ -317,7 +317,6 @@
 				{/if}
 				{preference name=pam_create_user_tiki}
 				{preference name=pam_skip_admin}
-				{preference name=pam_service}
 			</fieldset>
 		{/tab}
 
@@ -343,11 +342,13 @@
 		{tab name="{tr}SAML2{/tr}"}
 			<fieldset>
 				<legend>{tr}SAML2{/tr}{help url="SAML" desc="{tr}based on Onelogin's php-saml {/tr}"}</legend>
-				{if $prefs.auth_method ne 'saml'}
+				{if $prefs.auth_method ne 'saml' && $prefs.saml_auth_enabled eq 'y'}
 					{remarksbox type="warning" title="{tr}Warning{/tr}" close="n"}
 						{tr}You must change the Authentication Method to SAML for these changes to take effect{/tr}
 					{/remarksbox}
 				{/if}
+
+				{preference name=saml_auth_enabled}
 
 				<fieldset>
 					<legend>{tr}Identity provider settings{/tr}</legend>

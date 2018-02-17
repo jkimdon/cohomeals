@@ -6,7 +6,6 @@
 * LICENSE file in the root directory of this source tree.
 */
 
-
 'use strict';
 
 var d3 = require('d3');
@@ -19,19 +18,26 @@ var dragElement = require('../dragelement');
 var Drawing = require('../drawing');
 var Color = require('../color');
 var svgTextUtils = require('../../lib/svg_text_utils');
+var handleClick = require('./handle_click');
 
 var constants = require('./constants');
+var interactConstants = require('../../constants/interactions');
+var LINE_SPACING = require('../../constants/alignment').LINE_SPACING;
+
 var getLegendData = require('./get_legend_data');
 var style = require('./style');
 var helpers = require('./helpers');
 var anchorUtils = require('./anchor_utils');
 
+var DBLCLICKDELAY = interactConstants.DBLCLICKDELAY;
 
 module.exports = function draw(gd) {
     var fullLayout = gd._fullLayout;
     var clipId = 'legend' + fullLayout._uid;
 
     if(!fullLayout._infolayer || !gd.calcdata) return;
+
+    if(!gd._legendMouseDownTime) gd._legendMouseDownTime = 0;
 
     var opts = fullLayout.legend,
         legendData = fullLayout.showlegend && getLegendData(gd.calcdata, opts),
@@ -106,7 +112,7 @@ module.exports = function draw(gd) {
     traces.enter().append('g').attr('class', 'traces');
     traces.exit().remove();
 
-    traces.call(style)
+    traces.call(style, gd)
         .style('opacity', function(d) {
             var trace = d[0].trace;
             if(Registry.traceIs(trace, 'pie')) {
@@ -264,7 +270,9 @@ module.exports = function draw(gd) {
             scrollBarY = constants.scrollBarMargin -
                 scrollBoxY / scrollBoxYMax * scrollBarYMax;
             scrollHandler(scrollBarY, scrollBoxY);
-            d3.event.preventDefault();
+            if(scrollBoxY !== 0 && scrollBoxY !== -scrollBoxYMax) {
+                d3.event.preventDefault();
+            }
         });
 
         // to be safe, remove previous listeners
@@ -303,13 +311,14 @@ module.exports = function draw(gd) {
         });
     }
 
-    if(gd._context.editable) {
+    if(gd._context.edits.legendPosition) {
         var xf, yf, x0, y0;
 
         legend.classed('cursor-move', true);
 
         dragElement.init({
             element: legend.node(),
+            gd: gd,
             prepFn: function() {
                 var transform = Drawing.getTranslate(legend);
 
@@ -325,9 +334,26 @@ module.exports = function draw(gd) {
                 xf = dragElement.align(newX, 0, gs.l, gs.l + gs.w, opts.xanchor);
                 yf = dragElement.align(newY, 0, gs.t + gs.h, gs.t, opts.yanchor);
             },
-            doneFn: function(dragged) {
+            doneFn: function(dragged, numClicks, e) {
                 if(dragged && xf !== undefined && yf !== undefined) {
                     Plotly.relayout(gd, {'legend.x': xf, 'legend.y': yf});
+                } else {
+                    var clickedTrace =
+                        fullLayout._infolayer.selectAll('g.traces').filter(function() {
+                            var bbox = this.getBoundingClientRect();
+                            return (e.clientX >= bbox.left && e.clientX <= bbox.right &&
+                                e.clientY >= bbox.top && e.clientY <= bbox.bottom);
+                        });
+                    if(clickedTrace.size() > 0) {
+                        if(numClicks === 1) {
+                            legend._clickTimeout = setTimeout(function() { handleClick(clickedTrace, gd, numClicks); }, DBLCLICKDELAY);
+                        } else if(numClicks === 2) {
+                            if(legend._clickTimeout) {
+                                clearTimeout(legend._clickTimeout);
+                            }
+                            handleClick(clickedTrace, gd, numClicks);
+                        }
+                    }
                 }
             }
         });
@@ -344,60 +370,71 @@ function drawTexts(g, gd) {
 
     var text = g.selectAll('text.legendtext')
         .data([0]);
+
     text.enter().append('text').classed('legendtext', true);
-    text.attr({
-        x: 40,
-        y: 0,
-        'data-unformatted': name
-    })
-    .style('text-anchor', 'start')
-    .classed('user-select-none', true)
-    .call(Drawing.font, fullLayout.legend.font)
-    .text(name);
+
+    text.attr('text-anchor', 'start')
+        .classed('user-select-none', true)
+        .call(Drawing.font, fullLayout.legend.font)
+        .text(name);
 
     function textLayout(s) {
-        svgTextUtils.convertToTspans(s, function() {
-            s.selectAll('tspan.line').attr({x: s.attr('x')});
-            g.call(computeTextDimensions, gd);
+        svgTextUtils.convertToTspans(s, gd, function() {
+            computeTextDimensions(g, gd);
         });
     }
 
-    if(gd._context.editable && !isPie) {
-        text.call(svgTextUtils.makeEditable)
+    if(gd._context.edits.legendText && !isPie) {
+        text.call(svgTextUtils.makeEditable, {gd: gd})
             .call(textLayout)
             .on('edit', function(text) {
-                this.attr({'data-unformatted': text});
-
                 this.text(text)
                     .call(textLayout);
 
+                var origText = text;
+
                 if(!this.text()) text = ' \u0020\u0020 ';
 
-                var fullInput = legendItem.trace._fullInput || {},
-                    astr;
+                var transforms, direction;
+                var fullInput = legendItem.trace._fullInput || {};
+                var update = {};
 
                 // N.B. this block isn't super clean,
                 // is unfortunately untested at the moment,
                 // and only works for for 'ohlc' and 'candlestick',
                 // but should be generalized for other one-to-many transforms
                 if(['ohlc', 'candlestick'].indexOf(fullInput.type) !== -1) {
-                    var transforms = legendItem.trace.transforms,
-                        direction = transforms[transforms.length - 1].direction;
+                    transforms = legendItem.trace.transforms;
+                    direction = transforms[transforms.length - 1].direction;
 
-                    astr = direction + '.name';
+                    update[direction + '.name'] = text;
+                } else if(Registry.hasTransform(fullInput, 'groupby')) {
+                    var groupbyIndices = Registry.getTransformIndices(fullInput, 'groupby');
+                    var index = groupbyIndices[groupbyIndices.length - 1];
+
+                    var kcont = Lib.keyedContainer(fullInput, 'transforms[' + index + '].styles', 'target', 'value.name');
+
+                    if(origText === '') {
+                        kcont.remove(legendItem.trace._group);
+                    } else {
+                        kcont.set(legendItem.trace._group, text);
+                    }
+
+                    update = kcont.constructUpdate();
+                } else {
+                    update.name = text;
                 }
-                else astr = 'name';
 
-                Plotly.restyle(gd, astr, text, traceIndex);
+                return Plotly.restyle(gd, update, traceIndex);
             });
+    } else {
+        text.call(textLayout);
     }
-    else text.call(textLayout);
 }
 
 function setupTraceToggle(g, gd) {
-    var hiddenSlices = gd._fullLayout.hiddenlabels ?
-        gd._fullLayout.hiddenlabels.slice() :
-        [];
+    var newMouseDownTime,
+        numClicks = 1;
 
     var traceToggle = g.selectAll('rect')
         .data([0]);
@@ -408,58 +445,55 @@ function setupTraceToggle(g, gd) {
         .attr('pointer-events', 'all')
         .call(Color.fill, 'rgba(0,0,0,0)');
 
-    traceToggle.on('click', function() {
-        if(gd._dragged) return;
 
-        var legendItem = g.data()[0][0],
-            fullData = gd._fullData,
-            trace = legendItem.trace,
-            legendgroup = trace.legendgroup,
-            traceIndicesInGroup = [],
-            tracei,
-            newVisible;
+    traceToggle.on('mousedown', function() {
+        newMouseDownTime = (new Date()).getTime();
+        if(newMouseDownTime - gd._legendMouseDownTime < DBLCLICKDELAY) {
+            // in a click train
+            numClicks += 1;
+        }
+        else {
+            // new click train
+            numClicks = 1;
+            gd._legendMouseDownTime = newMouseDownTime;
+        }
+    });
+    traceToggle.on('mouseup', function() {
+        if(gd._dragged || gd._editing) return;
+        var legend = gd._fullLayout.legend;
 
-        if(Registry.traceIs(trace, 'pie')) {
-            var thisLabel = legendItem.label,
-                thisLabelIndex = hiddenSlices.indexOf(thisLabel);
+        if((new Date()).getTime() - gd._legendMouseDownTime > DBLCLICKDELAY) {
+            numClicks = Math.max(numClicks - 1, 1);
+        }
 
-            if(thisLabelIndex === -1) hiddenSlices.push(thisLabel);
-            else hiddenSlices.splice(thisLabelIndex, 1);
-
-            Plotly.relayout(gd, 'hiddenlabels', hiddenSlices);
-        } else {
-            if(legendgroup === '') {
-                traceIndicesInGroup = [trace.index];
-            } else {
-                for(var i = 0; i < fullData.length; i++) {
-                    tracei = fullData[i];
-                    if(tracei.legendgroup === legendgroup) {
-                        traceIndicesInGroup.push(tracei.index);
-                    }
-                }
+        if(numClicks === 1) {
+            legend._clickTimeout = setTimeout(function() { handleClick(g, gd, numClicks); }, DBLCLICKDELAY);
+        } else if(numClicks === 2) {
+            if(legend._clickTimeout) {
+                clearTimeout(legend._clickTimeout);
             }
-
-            newVisible = trace.visible === true ? 'legendonly' : true;
-            Plotly.restyle(gd, 'visible', newVisible, traceIndicesInGroup);
+            gd._legendMouseDownTime = 0;
+            handleClick(g, gd, numClicks);
         }
     });
 }
 
 function computeTextDimensions(g, gd) {
-    var legendItem = g.data()[0][0],
-        mathjaxGroup = g.select('g[class*=math-group]'),
-        opts = gd._fullLayout.legend,
-        lineHeight = opts.font.size * 1.3,
-        height,
-        width;
+    var legendItem = g.data()[0][0];
 
     if(!legendItem.trace.showlegend) {
         g.remove();
         return;
     }
 
-    if(mathjaxGroup.node()) {
-        var mathjaxBB = Drawing.bBox(mathjaxGroup.node());
+    var mathjaxGroup = g.select('g[class*=math-group]');
+    var mathjaxNode = mathjaxGroup.node();
+    var opts = gd._fullLayout.legend;
+    var lineHeight = opts.font.size * LINE_SPACING;
+    var height, width;
+
+    if(mathjaxNode) {
+        var mathjaxBB = Drawing.bBox(mathjaxNode);
 
         height = mathjaxBB.height;
         width = mathjaxBB.width;
@@ -467,18 +501,19 @@ function computeTextDimensions(g, gd) {
         Drawing.setTranslate(mathjaxGroup, 0, (height / 4));
     }
     else {
-        var text = g.selectAll('.legendtext'),
-            textSpans = g.selectAll('.legendtext>tspan'),
-            textLines = textSpans[0].length || 1;
+        var text = g.select('.legendtext');
+        var textLines = svgTextUtils.lineCount(text);
+        var textNode = text.node();
 
         height = lineHeight * textLines;
-        width = text.node() && Drawing.bBox(text.node()).width;
+        width = textNode ? Drawing.bBox(textNode).width : 0;
 
         // approximation to height offset to center the font
         // to avoid getBoundingClientRect
         var textY = lineHeight * (0.3 + (1 - textLines) / 2);
-        text.attr('y', textY);
-        textSpans.attr('y', textY);
+        // TODO: this 40 should go in a constants file (along with other
+        // values related to the legend symbol size)
+        svgTextUtils.positionText(text, 40, textY);
     }
 
     height = Math.max(height, 16) + 3;
@@ -488,10 +523,15 @@ function computeTextDimensions(g, gd) {
 }
 
 function computeLegendDimensions(gd, groups, traces) {
-    var fullLayout = gd._fullLayout,
-        opts = fullLayout.legend,
-        borderwidth = opts.borderwidth,
-        isGrouped = helpers.isGrouped(opts);
+    var fullLayout = gd._fullLayout;
+    var opts = fullLayout.legend;
+    var borderwidth = opts.borderwidth;
+    var isGrouped = helpers.isGrouped(opts);
+
+    var extraWidth = 0;
+
+    opts.width = 0;
+    opts.height = 0;
 
     if(helpers.isVertical(opts)) {
         if(isGrouped) {
@@ -499,9 +539,6 @@ function computeLegendDimensions(gd, groups, traces) {
                 Drawing.setTranslate(this, 0, i * opts.tracegroupgap);
             });
         }
-
-        opts.width = 0;
-        opts.height = 0;
 
         traces.each(function(d) {
             var legendItem = d[0],
@@ -523,26 +560,9 @@ function computeLegendDimensions(gd, groups, traces) {
             opts.height += (opts._lgroupsLength - 1) * opts.tracegroupgap;
         }
 
-        // make sure we're only getting full pixels
-        opts.width = Math.ceil(opts.width);
-        opts.height = Math.ceil(opts.height);
-
-        traces.each(function(d) {
-            var legendItem = d[0],
-                bg = d3.select(this).select('.legendtoggle');
-
-            bg.call(Drawing.setRect,
-                0,
-                -legendItem.height / 2,
-                (gd._context.editable ? 0 : opts.width) + 40,
-                legendItem.height
-            );
-        });
+        extraWidth = 40;
     }
     else if(isGrouped) {
-        opts.width = 0;
-        opts.height = 0;
-
         var groupXOffsets = [opts.width],
             groupData = groups.data();
 
@@ -583,26 +603,8 @@ function computeLegendDimensions(gd, groups, traces) {
 
         opts.height += 10 + borderwidth * 2;
         opts.width += borderwidth * 2;
-
-        // make sure we're only getting full pixels
-        opts.width = Math.ceil(opts.width);
-        opts.height = Math.ceil(opts.height);
-
-        traces.each(function(d) {
-            var legendItem = d[0],
-                bg = d3.select(this).select('.legendtoggle');
-
-            bg.call(Drawing.setRect,
-                0,
-                -legendItem.height / 2,
-                (gd._context.editable ? 0 : opts.width),
-                legendItem.height
-            );
-        });
     }
     else {
-        opts.width = 0;
-        opts.height = 0;
         var rowHeight = 0,
             maxTraceHeight = 0,
             maxTraceWidth = 0,
@@ -641,22 +643,23 @@ function computeLegendDimensions(gd, groups, traces) {
         opts.width += borderwidth * 2;
         opts.height += 10 + borderwidth * 2;
 
-        // make sure we're only getting full pixels
-        opts.width = Math.ceil(opts.width);
-        opts.height = Math.ceil(opts.height);
-
-        traces.each(function(d) {
-            var legendItem = d[0],
-                bg = d3.select(this).select('.legendtoggle');
-
-            bg.call(Drawing.setRect,
-                0,
-                -legendItem.height / 2,
-                (gd._context.editable ? 0 : opts.width),
-                legendItem.height
-            );
-        });
     }
+
+    // make sure we're only getting full pixels
+    opts.width = Math.ceil(opts.width);
+    opts.height = Math.ceil(opts.height);
+
+    traces.each(function(d) {
+        var legendItem = d[0],
+            bg = d3.select(this).select('.legendtoggle');
+
+        bg.call(Drawing.setRect,
+            0,
+            -legendItem.height / 2,
+            (gd._context.edits.legendText ? 0 : opts.width) + extraWidth,
+            legendItem.height
+        );
+    });
 }
 
 function expandMargin(gd) {

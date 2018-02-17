@@ -1,9 +1,6 @@
 <?php
-// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-//
-// All Rights Reserved. See copyright.txt for details and a complete list of authors.
-// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.escape.php 63074 2017-06-26 01:25:49Z lindonb $
+
+// $Id: modifier.escape.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * Smarty plugin
@@ -40,18 +37,23 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = 'UTF-8'
 				$string = implode(',', $string);
 			}
 			$return = htmlspecialchars($string, ENT_QUOTES, $char_set, $double_encode);
+
 			// Convert back sanitization tags into real tags to avoid them to be displayed
 			$return = str_replace('&lt;x&gt;', '<x>', $return);
 			// Convert back sanitization tags into real tags for no wrap space
 			$return = str_replace('&amp;nbsp;', '&nbsp;', $return);
+
 			return $return;
 
 		case 'htmlall':
 			$return = htmlentities($string, ENT_QUOTES, $char_set);
-			if (!strlen($return) && strlen($string)) // Bug php when there is non utf8 characters in the string(http://bugs.php.net/bug.php?id=43549, http://bugs.php.net/bug.php?id=43294)
+			if (! strlen($return) && strlen($string)) { // Bug php when there is non utf8 characters in the string(http://bugs.php.net/bug.php?id=43549, http://bugs.php.net/bug.php?id=43294)
 				$return = htmlentities($string, ENT_QUOTES);
+			}
+
 			// Convert back sanitization tags into real tags to avoid them to be displayed
 			$return = str_replace('&lt;x&gt;', '<x>', $return);
+
 			return $return;
 
 		case 'url':
@@ -67,32 +69,32 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = 'UTF-8'
 		case 'hex':
 			// escape every character into hex
 			$return = '';
-			for ($x=0, $xstrlen_string=strlen($string); $x < $xstrlen_string; $x++) {
+			for ($x = 0, $xstrlen_string = strlen($string); $x < $xstrlen_string; $x++) {
 				$return .= '%' . bin2hex($string[$x]);
 			}
 			return $return;
 
 		case 'hexentity':
 			$return = '';
-			for ($x=0, $x_strlen_string = strlen($string); $x < $x_strlen_string; $x++) {
+			for ($x = 0, $x_strlen_string = strlen($string); $x < $x_strlen_string; $x++) {
 				$return .= '&#x' . bin2hex($string[$x]) . ';';
 			}
 			return $return;
 
 		case 'decentity':
 			$return = '';
-			for ($x=0, $x_strlen_string = strlen($string); $x < $x_strlen_string; $x++) {
+			for ($x = 0, $x_strlen_string = strlen($string); $x < $x_strlen_string; $x++) {
 				$return .= '&#' . ord($string[$x]) . ';';
 			}
 			return $return;
 
 		case 'javascript':
 			// escape quotes and backslashes, newlines, etc.
-			return strtr($string, array('\\'=>'\\\\', "'"=>"\\'", '"'=>'\\"', "\r"=>'\\r', "\n"=>'\\n', '</'=>'<\/'));
+			return strtr($string, ['\\' => '\\\\', "'" => "\\'", '"' => '\\"', "\r" => '\\r', "\n" => '\\n', '</' => '<\/']);
 
 		case 'mail':
 			// safe way to display e-mail address on a web page
-			return str_replace(array('@', '.'), array(' [AT] ', ' [DOT] '), $string);
+			return str_replace(['@', '.'], [' [AT] ', ' [DOT] '], $string);
 
 		case 'nonstd':
 			// escape non-standard chars, such as ms document quotes
@@ -111,7 +113,7 @@ function smarty_modifier_escape($string, $esc_type = 'html', $char_set = 'UTF-8'
 		case 'unescape':
 			return rawurldecode($string);
 
-		case  'attr':
+		case 'attr':
 			$esc = new Zend\Escaper\Escaper();
 			return $esc->escapeHtmlAttr($string);
 

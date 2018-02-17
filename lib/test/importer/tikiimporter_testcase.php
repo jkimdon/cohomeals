@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiimporter_testcase.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: tikiimporter_testcase.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 //require_once('PHPUnit/Framework/TestCase.php');
 
@@ -12,5 +12,5 @@
  */
 abstract class TikiImporter_TestCase extends PHPUnit_Framework_TestCase
 {
- 	protected $backupGlobals = FALSE;
+	protected $backupGlobals = false;
 }

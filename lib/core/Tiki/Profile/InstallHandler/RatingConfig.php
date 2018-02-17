@@ -1,19 +1,19 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RatingConfig.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: RatingConfig.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_RatingConfig extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data ) {
+		if ($this->data) {
 			return $this->data;
 		}
 
-		$defaults = array('expiry' => 3600);
+		$defaults = ['expiry' => 3600];
 		$data = array_merge($defaults, $this->obj->getData());
 
 		$data = Tiki_Profile::convertYesNo($data);
@@ -24,7 +24,7 @@ class Tiki_Profile_InstallHandler_RatingConfig extends Tiki_Profile_InstallHandl
 	function canInstall()
 	{
 		$data = $this->getData();
-		if ( ! isset($data['name'], $data['formula']) ) {
+		if (! isset($data['name'], $data['formula'])) {
 			return false;
 		}
 
@@ -58,11 +58,11 @@ class Tiki_Profile_InstallHandler_RatingConfig extends Tiki_Profile_InstallHandl
 			return false;
 		}
 
-		$writer->addObject('rating_config', $info['ratingConfigId'], array(
+		$writer->addObject('rating_config', $info['ratingConfigId'], [
 			'name' => $info['name'],
 			'expiry' => $info['expiry'],
 			'formula' => $info['formula'],
-		));
+		]);
 
 		return true;
 	}

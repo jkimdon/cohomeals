@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: federated.php 62023 2017-04-02 07:10:43Z lindonb $
+// $Id: federated.php 64628 2017-11-19 12:03:08Z rjsmelo $
 
 function prefs_federated_list()
 {
@@ -16,13 +16,13 @@ function prefs_federated_list()
 			'hint' => tr('Elasticsearch is required'),
 			'dependencies' => ['feature_search'],
 		],
-		'federated_elastic_url' => array(
+		'federated_elastic_url' => [
 			'name' => tra('Elasticsearch tribe node URL'),
 			'description' => tra('URL of the tribe client node accessing multiple clusters.'),
 			'type' => 'text',
 			'filter' => 'url',
 			'default' => '',
 			'size' => 40,
-		),
+		],
 	];
 }

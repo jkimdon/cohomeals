@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_structures.tpl 59888 2016-10-04 10:10:37Z xavidp $ *}
+{* $Id: tiki-admin_structures.tpl 63890 2017-09-20 17:34:24Z chealer $ *}
 {title help="Structures"}{tr}Structures{/tr}{/title}
 
 {if $tiki_p_admin eq 'y'}
@@ -68,8 +68,8 @@
 {/if}
 
 {tabset}
-	{tab name="{tr}Structures{/tr}"}
-		<h2>{tr}Structures{/tr}</h2>
+	{tab name="{tr}Existing Structures{/tr}"}
+		<h2>{tr}Existing Structures{/tr}</h2>
 		{if $channels or ($find ne '')}
 			<div class="clearfix">
 				{include file='find.tpl' find_show_languages='y' find_show_categories='y' find_show_num_rows='y'}
@@ -103,9 +103,9 @@
 							{/if}
 							<td class="text">
 								<a class="tips" href="tiki-edit_structure.php?page_ref_id={$channels[ix].page_ref_id}" title=":{tr}View Structure{/tr}">
-									{$channels[ix].pageName}
+									{$channels[ix].pageName|escape}
 									{if $channels[ix].page_alias}
-										({$channels[ix].page_alias})
+										({$channels[ix].page_alias|escape})
 									{/if}
 								</a>
 							</td>
@@ -135,7 +135,7 @@
 										{/if}
 
 										{if $pdf_export eq 'y'}
-											{$libeg}<a href="tiki-print_multi_pages.php?printstructures=a%3A1%3A%7Bi%3A0%3Bs%3A1%3A%22{$channels[ix].page_ref_id}%22%3B%7D&amp;display=pdf">
+											{$libeg}<a href="tiki-print_multi_pages.php?printstructures=%255B%2522{$channels[ix].page_ref_id}%2522%255D&amp;display=pdf&amp;print=pdf">
 												{icon name='pdf' _menu_text='y' _menu_icon='y' alt="{tr}PDF{/tr}"}
 											</a>{$liend}
 										{/if}
@@ -176,7 +176,7 @@
 									class="tips"
 									title="{tr}Actions{/tr}"
 									href="#"
-									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_structure_actions|escape:"javascript"|escape:"html"}{/if}
+									{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_structure_actions}{/if}
 									style="padding:0; margin:0; border:0"
 								>
 									{icon name='wrench'}

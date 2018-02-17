@@ -3,40 +3,40 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PluginOutput.php 62028 2017-04-02 14:52:01Z jonnybradley $
+// $Id: PluginOutput.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class WikiParser_PluginOutput
 {
 	private $format;
 	private $data;
 
-	private function __construct( $format, $data )
+	private function __construct($format, $data)
 	{
 		$this->format = $format;
 		$this->data = $data;
 	}
 
-	public static function wiki( $text )
+	public static function wiki($text)
 	{
 		return new self('wiki', $text);
 	}
 
-	public static function html( $html )
+	public static function html($html)
 	{
 		return new self('html', $html);
 	}
 
-	public static function internalError( $message )
+	public static function internalError($message)
 	{
 		return self::error(tra('Internal error'), $message);
 	}
 
-	public static function userError( $message )
+	public static function userError($message)
 	{
 		return self::error(tra('User error'), $message);
 	}
 
-	public static function argumentError( $missingArguments )
+	public static function argumentError($missingArguments)
 	{
 		$content = tra('Plugin argument(s) missing:');
 
@@ -51,7 +51,7 @@ class WikiParser_PluginOutput
 		return self::userError($content);
 	}
 
-	public static function error( $label, $message )
+	public static function error($label, $message)
 	{
 		$smarty = TikiLib::lib('smarty');
 		$smarty->loadPlugin('smarty_block_remarksbox');
@@ -60,10 +60,10 @@ class WikiParser_PluginOutput
 		return new self(
 					'html',
 					smarty_block_remarksbox(
-						array(
+						[
 							'type' => 'error',
 							'title' => $label,
-						),
+						],
 						$message,
 						$smarty,
 						$repeat
@@ -71,17 +71,17 @@ class WikiParser_PluginOutput
 		);
 	}
 
-	public static function disabled( $name, $preferences )
+	public static function disabled($name, $preferences)
 	{
 		$content = tr('Plugin <strong>%0</strong> cannot be executed.', $name);
 
-		if ( Perms::get()->admin ) {
+		if (Perms::get()->admin) {
 			$smarty = TikiLib::lib('smarty');
 			$smarty->loadPlugin('smarty_function_preference');
 			$smarty->loadPlugin('smarty_modifier_escape');
 			$content .= '<form method="post" action="tiki-admin.php">';
-			foreach ( $preferences as $pref ) {
-				$content .= smarty_function_preference(array('name' => $pref), $smarty);
+			foreach ($preferences as $pref) {
+				$content .= smarty_function_preference(['name' => $pref], $smarty);
 			}
 			$access = Tikilib::lib('access');
 			$check = $access->check_authenticity(null, false);
@@ -96,28 +96,27 @@ class WikiParser_PluginOutput
 	function toWiki()
 	{
 		switch ($this->format) {
-		case 'wiki':
-			return $this->data;
-		case 'html':
-			return "~np~{$this->data}~/np~";
+			case 'wiki':
+				return $this->data;
+			case 'html':
+				return "~np~{$this->data}~/np~";
 		}
 	}
 
-	function toHtml($parseOptions = array())
+	function toHtml($parseOptions = [])
 	{
 		switch ($this->format) {
-		case 'wiki':
-			return $this->parse($this->data, $parseOptions);
-		case 'html':
-			return $this->data;
+			case 'wiki':
+				return $this->parse($this->data, $parseOptions);
+			case 'html':
+				return $this->data;
 		}
 	}
 
-	private function parse( $data, $parseOptions = array() )
+	private function parse($data, $parseOptions = [])
 	{
 		global $tikilib;
 
 		return TikiLib::lib('parser')->parse_data($data, $parseOptions);
 	}
 }
-

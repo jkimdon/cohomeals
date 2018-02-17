@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Type" => "Τύπος",
 "Name" => "Όνομα",
 "Description" => "Περιγραφή",
@@ -457,4 +457,4 @@ $lang = array(
 "Changes" => "Αλλαγές",
 "Aborted" => "ακυρώθηκε",
 "Last pages" => "Τελευταίες σελίδες",
-);
+];

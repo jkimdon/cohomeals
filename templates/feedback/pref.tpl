@@ -1,4 +1,4 @@
-{* $Id: pref.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: pref.tpl 63064 2017-06-22 19:44:23Z chealer $ *}
 {if $fb|count > 0}
 	{if $fb|count == 1}
 		{$title = "{tr}The following change has been applied{/tr}"}
@@ -22,7 +22,7 @@
 						{icon name='information'}
 					{/if}
 					{if $item.st ne 3}{tr}Preference{/tr} {/if}<strong>{tr}{$item.mes[0]|stringfix}{/tr}</strong>
-					{if $item.st ne 3}(<small>{tr}Preference name:{/tr} {$item.name})</small>{/if}
+					{if $item.st ne 3}<small>({tr}Preference name:{/tr} {$item.name})</small>{/if}
 				</li>
 			{/foreach}
 		</ul>

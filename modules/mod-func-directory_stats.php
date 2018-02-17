@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-directory_stats.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-directory_stats.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,13 +16,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_directory_stats_info()
 {
-	return array(
+	return [
 		'name' => tra('Directory Statistics'),
 		'description' => tra('Displays statistics about the directory, including the number of sites validated and to validate, the number of categories, of searches and of visited links.'),
-		'prefs' => array('feature_directory'),
+		'prefs' => ['feature_directory'],
 		'documentation' => 'Module directory_stats',
-		'params' => array()
-	);
+		'params' => []
+	];
 }
 
 /**

@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_xmlupdate.tpl 62879 2017-06-04 16:35:33Z drsassafras $ *}
+{* $Id: wikiplugin_xmlupdate.tpl 62883 2017-06-04 17:03:17Z drsassafras $ *}
 
 <p>The current values for the {$xmlcount} items from the XML management file are shown in the input fields below.</p>
 

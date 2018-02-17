@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-mustread.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-mustread.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,18 +16,18 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_mustread_info()
 {
-	return array(
+	return [
 		'name' => tr('Must Read'),
 		'description' => tr('Request the creation of a mustread item based on the current object.'),
 		'prefs' => ['mustread_enabled'],
-		'params' => array(
-			'objectField' => array(
+		'params' => [
+			'objectField' => [
 				'required' => true,
 				'name' => tr('Object Field'),
 				'description' => tr('Permanent name of the field containing the object reference'),
-			),
-		),
-	);
+			],
+		],
+	];
 }
 
 /**

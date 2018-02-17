@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ReplyHandlerProvider.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: ReplyHandlerProvider.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\MailIn\Provider;
+
 use Tiki\MailIn\Action;
 
 class ReplyHandlerProvider implements ProviderInterface
@@ -28,8 +29,8 @@ class ReplyHandlerProvider implements ProviderInterface
 
 	function getActionFactory(array $acc)
 	{
-		return new Action\RecipientPlaceholderFactory(array(
+		return new Action\RecipientPlaceholderFactory([
 			'comment' => 'Tiki\MailIn\Action\Comment',
-		));
+		]);
 	}
 }

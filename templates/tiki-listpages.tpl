@@ -1,4 +1,4 @@
-{* $Id: tiki-listpages.tpl 63217 2017-07-09 16:10:57Z jonnybradley $ *}
+{* $Id: tiki-listpages.tpl 63219 2017-07-09 16:35:55Z jonnybradley $ *}
 {title admpage="wiki" help="Using Wiki Pages#List_Pages"}{tr}Pages{/tr}{/title}
 
 {tabset name='tabs_wikipages'}

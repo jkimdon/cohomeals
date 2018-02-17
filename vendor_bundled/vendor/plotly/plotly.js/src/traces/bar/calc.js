@@ -49,18 +49,11 @@ module.exports = function calc(gd, trace) {
 
     // create the "calculated data" to plot
     var serieslen = Math.min(pos.length, size.length),
-        cd = [];
+        cd = new Array(serieslen);
 
-    // set position
+    // set position and size
     for(i = 0; i < serieslen; i++) {
-
-        // add bars with non-numeric sizes to calcdata
-        // so that ensure that traces with gaps are
-        // plotted in the correct order
-
-        if(isNumeric(pos[i])) {
-            cd.push({p: pos[i]});
-        }
+        cd[i] = { p: pos[i], s: size[i] };
     }
 
     // set base
@@ -70,7 +63,11 @@ module.exports = function calc(gd, trace) {
     if(Array.isArray(base)) {
         for(i = 0; i < Math.min(base.length, cd.length); i++) {
             b = sa.d2c(base[i], 0, scalendar);
-            cd[i].b = (isNumeric(b)) ? b : 0;
+            if(isNumeric(b)) {
+                cd[i].b = +b;
+                cd[i].hasB = 1;
+            }
+            else cd[i].b = 0;
         }
         for(; i < cd.length; i++) {
             cd[i].b = 0;
@@ -78,16 +75,11 @@ module.exports = function calc(gd, trace) {
     }
     else {
         b = sa.d2c(base, 0, scalendar);
-        b = (isNumeric(b)) ? b : 0;
+        var hasBase = isNumeric(b);
+        b = hasBase ? b : 0;
         for(i = 0; i < cd.length; i++) {
             cd[i].b = b;
-        }
-    }
-
-    // set size
-    for(i = 0; i < cd.length; i++) {
-        if(isNumeric(size[i])) {
-            cd[i].s = size[i];
+            if(hasBase) cd[i].hasB = 1;
         }
     }
 

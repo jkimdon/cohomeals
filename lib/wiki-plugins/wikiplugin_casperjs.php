@@ -3,23 +3,23 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_casperjs.php 61984 2017-04-01 00:22:13Z rjsmelo $
+// $Id: wikiplugin_casperjs.php 64634 2017-11-19 12:59:14Z rjsmelo $
 
 function wikiplugin_casperjs_info()
 {
-	return array(
+	return [
 		'name' => tra('CasperJS'),
 		'documentation' => 'CasperJS',
 		'description' => tra('Enables to run CasperJS scripts from tiki'),
-		'prefs' => array('wikiplugin_casperjs'),
-		'packages_required' => array('jerome-breton/casperjs-installer'=>'CasperJsInstaller\Installer'),
+		'prefs' => ['wikiplugin_casperjs'],
+		'packages_required' => ['jerome-breton/casperjs-installer' => 'CasperJsInstaller\Installer'],
 		'body' => tra('text'),
 		'introduced' => 17,
 		'iconname' => 'monitor',
-		'tags' => array('advanced'),
+		'tags' => ['advanced'],
 		'validate' => 'arguments',
-		'params' => array(),
-	);
+		'params' => [],
+	];
 }
 
 function wikiplugin_casperjs($data, $params)
@@ -28,12 +28,12 @@ function wikiplugin_casperjs($data, $params)
 
 	$info = wikiplugin_casperjs_info();
 	foreach ($info['packages_required'] as $class) {
-		if (!class_exists($class)){
+		if (! class_exists($class)) {
 			return tra('CasperJS not available');
 		}
 	}
 
-	$actionKey = md5(serialize(array($data, $params)));
+	$actionKey = md5(serialize([$data, $params]));
 
 	// Generate Link
 	$label = tra('Execute CasperJS script');
@@ -42,11 +42,11 @@ function wikiplugin_casperjs($data, $params)
 	if (isset($urlParts['query'])) {
 		parse_str($urlParts['query'], $requestParams);
 	} else {
-		$requestParams = array();
+		$requestParams = [];
 	}
 	$requestParams[$actionKey] = $label;
 	$requestParamStr = http_build_query($requestParams, null, '&');
-	$link = '<a href='.$path.'?'.$requestParamStr.' class="btn btn-default btn-sm">'.$label.'</a>';
+	$link = '<a href=' . $path . '?' . $requestParamStr . ' class="btn btn-default btn-sm">' . $label . '</a>';
 
 	$htmlResult .= $link;
 
@@ -68,5 +68,3 @@ function wikiplugin_casperjs($data, $params)
 
 	return $htmlResult;
 }
-
-

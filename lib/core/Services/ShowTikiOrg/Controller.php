@@ -3,7 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
+
+use phpseclib\Crypt\RSA;
+use phpseclib\Net\SSH2;
 
 class Services_ShowTikiOrg_Controller
 {
@@ -25,13 +28,13 @@ class Services_ShowTikiOrg_Controller
 		$creator = $input->username->text();
 
 		$item = Tracker_Item::fromId($id);
-		if (!$item->canViewField($fieldId)) {
+		if (! $item->canViewField($fieldId)) {
 			throw new Services_Exception_Denied;
 		}
 
 		$field = TikiLib::lib('trk')->get_tracker_field($fieldId);
 		$options = json_decode($field['options']);
-		if (!is_object($options) && is_array($field['options_array'])) {
+		if (! is_object($options) && is_array($field['options_array'])) {
 			// Support Tiki 11
 			$options = new stdClass();
 			$options->domain = $field['options_array'][0];
@@ -41,24 +44,22 @@ class Services_ShowTikiOrg_Controller
 		}
 		$domain = $options->domain;
 
-		$conn = ssh2_connect($domain, 22);
-		$conntry = ssh2_auth_pubkey_file(
-			$conn,
-			$options->remoteShellUser,
-			$options->publicKey,
-			$options->privateKey
-		);
+		$conn = new SSH2($domain);
 
-		if (!$conntry) {
+		$password = new RSA();
+		$password->setPrivateKey(file_get_contents($options->privateKey));
+		$password->setPublicKey(file_get_contents($options->publicKey));
+
+		$conntry = $conn->login($options->remoteShellUser, $password);
+
+		if (! $conntry) {
 			$ret['status'] = 'DISCO';
 			return $ret;
 		}
 
 		$infostring = "info -i $id -U $userid";
-		$infostream = ssh2_exec($conn, $infostring);
+		$infooutput = $conn->exec($infostring);
 
-		stream_set_blocking($infostream, TRUE);
-		$infooutput = stream_get_contents($infostream);
 		$ret['debugoutput'] = $infooutput;
 
 		if (strpos($infooutput, 'MAINTENANCE: ') !== false) {
@@ -79,14 +80,14 @@ class Services_ShowTikiOrg_Controller
 		$statuspos = strpos($infooutput, 'STATUS: ');
 		$status = substr($infooutput, $statuspos + 8, 5);
 		$status = trim($status);
-		if (!$status || $status == 'FAIL') {
+		if (! $status || $status == 'FAIL') {
 			$ret['status'] = 'FAIL';
 		} else {
 			$ret['status'] = $status;
 			$sitepos = strpos($infooutput, 'SITE: ');
 			$site = substr($infooutput, $sitepos + 6);
 			$site = substr($site, 0, strpos($site, ' '));
-		 	$ret['showurl'] = $site;
+			 $ret['showurl'] = $site;
 			$ret['showlogurl'] = $site . '/info.txt';
 			$ret['snapshoturl'] = $site . '/snapshots/';
 			if ($site && $ret['status'] == 'ACTIV') {
@@ -99,13 +100,13 @@ class Services_ShowTikiOrg_Controller
 				TikiLib::lib('trk')->modify_field($id, $fieldId, $value);
 				require_once('lib/search/refresh-functions.php');
 				refresh_index('trackeritem', $id);
-		 	}
+			}
 		}
 
-		if (!empty($command)) {
+		if (! empty($command)) {
 			global $user;
 
-			if (($command == 'update' || $command == 'reset' || $command == 'destroy') && !TikiLib::lib('user')->user_has_permission($user, 'tiki_p_admin') && $user != $creator) {
+			if (($command == 'update' || $command == 'reset' || $command == 'destroy') && ! TikiLib::lib('user')->user_has_permission($user, 'tiki_p_admin') && $user != $creator) {
 				throw new Services_Exception_Denied;
 			}
 
@@ -115,19 +116,16 @@ class Services_ShowTikiOrg_Controller
 				$fullstring = "$command -t $svntag -u $username -i $id -U $userid";
 			}
 
-			$stream = ssh2_exec($conn, $fullstring);
-			stream_set_blocking($stream, TRUE);
-			$output = stream_get_contents($stream);
-			fclose($stream);
+			$output = $conn->exec($fullstring);
 			$ret['debugoutput'] = $fullstring . "\n" . $output;
 
 			if ($command == 'snapshot') {
 				$ret['status'] = 'SNAPS';
-			} else if ($command == 'destroy') {
+			} elseif ($command == 'destroy') {
 				$ret['status'] = 'DESTR';
-			} else if ($command == 'create' || $command == 'update') {
+			} elseif ($command == 'create' || $command == 'update') {
 				$ret['status'] = 'BUILD';
-			} else if ($command == 'reset') {
+			} elseif ($command == 'reset') {
 				if (strpos('ERROR', $fullstring) !== false) {
 					$ret['status'] = 'RENOK';
 				} else {
@@ -145,4 +143,3 @@ class Services_ShowTikiOrg_Controller
 		return $ret;
 	}
 }
-

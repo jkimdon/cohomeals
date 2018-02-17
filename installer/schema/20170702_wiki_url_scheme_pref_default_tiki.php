@@ -4,11 +4,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: $
+// $Id: 20170702_wiki_url_scheme_pref_default_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-    header("location: index.php");
-    exit;
+	header("location: index.php");
+	exit;
 }
 
 /**

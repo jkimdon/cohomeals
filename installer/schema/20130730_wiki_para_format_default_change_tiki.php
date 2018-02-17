@@ -4,7 +4,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20130730_wiki_para_format_default_change_tiki.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: 20130730_wiki_para_format_default_change_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -22,6 +22,6 @@ function upgrade_20130730_wiki_para_format_default_change_tiki($installer)
 
 	if ($value !== 'y') {	// default values can be empty
 		$preferences = $installer->table('tiki_preferences');
-		$preferences->insertOrUpdate(array('value' => 'n'), array('name' => 'feature_wiki_paragraph_formatting'));
+		$preferences->insertOrUpdate(['value' => 'n'], ['name' => 'feature_wiki_paragraph_formatting']);
 	}
 }

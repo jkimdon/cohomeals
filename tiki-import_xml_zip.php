@@ -3,10 +3,10 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-import_xml_zip.php 60751 2016-12-30 01:43:34Z lindonb $
+// $Id: tiki-import_xml_zip.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
 $section = 'wiki page';
 require_once('tiki-setup.php');
@@ -17,7 +17,7 @@ $access->check_permission('tiki_p_admin');
 
 if (isset($_REQUEST['import'])) {
 	check_ticket('import_xml_zip');
-	if (!empty($_REQUEST['local'])) {
+	if (! empty($_REQUEST['local'])) {
 		$zipFile = $_REQUEST['local'];
 		$path = pathinfo($_REQUEST['local']);
 		$filename = $path['basename'];
@@ -31,9 +31,8 @@ if (isset($_REQUEST['import'])) {
 	if ($zipFile) {
 		include_once('lib/wiki/xmllib.php');
 		$xmllib = new XmlLib;
-		$config = array();
+		$config = [];
 		if ($xmllib->import_pages($zipFile, $config)) {
-
 			$success = tr('Pages in zip file %0 successfully imported.', $filename);
 		} else {
 			$error = $xmllib->get_error();
@@ -44,9 +43,8 @@ if (isset($_REQUEST['import'])) {
 	}
 	if (isset($error)) {
 		Feedback::error(['mes' => $error]);
-	} 
+	}
 }
 ask_ticket('import_xml_zip');
 $smarty->assign('mid', 'tiki-import_xml_zip.tpl');
 $smarty->display("tiki.tpl");
-

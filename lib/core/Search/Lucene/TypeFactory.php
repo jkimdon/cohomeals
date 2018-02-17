@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TypeFactory.php 60381 2016-11-23 10:56:42Z jonnybradley $
+// $Id: TypeFactory.php 65362 2018-01-29 17:12:04Z jonnybradley $
 
 class Search_Lucene_TypeFactory implements Search_Type_Factory_Interface
 {
@@ -17,14 +17,13 @@ class Search_Lucene_TypeFactory implements Search_Type_Factory_Interface
 		return new Search_Type_WikiText($value);
 	}
 
-	function timestamp($value)
+	function timestamp($value, $dateOnly = false)
 	{
 		if (is_numeric($value)) {
 			return new Search_Type_Timestamp(gmdate('YmdHis', $value));
 		} else {
 			return new Search_Type_PlainText('');
 		}
-
 	}
 
 	function identifier($value)
@@ -63,5 +62,13 @@ class Search_Lucene_TypeFactory implements Search_Type_Factory_Interface
 	{
 		return new Search_Type_ShortText($value);
 	}
-}
 
+	/* Not fully supported in Lucene indexes - elasticsearch recommended */
+	function json($value)
+	{
+		if (is_array($value)) {
+			$value = json_encode($value);
+		}
+		return new Search_Type_PlainText($value);
+	}
+}

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FilesBatchuploadCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: FilesBatchuploadCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -86,7 +86,7 @@ class FilesBatchuploadCommand extends Command
 				'Path to files to upload'
 			)
 		;
-	}	
+	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
@@ -165,7 +165,7 @@ class FilesBatchuploadCommand extends Command
 				if ($error) {
 					$message = "<error>$message</error>";
 					$output->writeln($message);
-				} else if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+				} elseif ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
 					$message = "<info>$message</info>";
 					$output->writeln($message);
 				}
@@ -179,7 +179,7 @@ class FilesBatchuploadCommand extends Command
 				$output->writeln("<comment>Files to upload from {$prefs['fgal_batch_dir']} to gallery #$galleryId</comment>");
 			}
 
-			foreach($files as $file) {
+			foreach ($files as $file) {
 				$fname = substr($file['file'], strlen($prefs['fgal_batch_dir']));
 				if (! $file['writable']) {
 					$fname = "<error>$fname</error>";
@@ -188,6 +188,5 @@ class FilesBatchuploadCommand extends Command
 			}
 			$output->writeln("<info>Use the --confirm option to proceed with the upload operation.</info>");
 		}
-
 	}
 }

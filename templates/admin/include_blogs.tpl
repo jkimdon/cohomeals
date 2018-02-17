@@ -1,6 +1,6 @@
-{* $Id: include_blogs.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_blogs.tpl 62265 2017-04-19 01:00:45Z lindonb $ *}
 <form role="form" class="form-horizontal" action="tiki-admin.php?page=blogs" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md clearfix">
 		<a role="button" class="btn btn-link tips" href="tiki-list_blogs.php" title=":{tr}Blogs listing{/tr}">
 			{icon name="list"} {tr}Blogs{/tr}

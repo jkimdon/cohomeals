@@ -3,16 +3,17 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WebmailAccount.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: WebmailAccount.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_WebmailAccount extends Tiki_Profile_InstallHandler
 {
 	function getData()
 	{
-		if ( $this->data )
+		if ($this->data) {
 			return $this->data;
+		}
 
-		$defaults = array(
+		$defaults = [
 			'mode' => 'create',		// 'create' or 'update' account with same name (i.e. 'account')
 			'account' => '',		// * required
 			'pop' => '', 			// * one of pop, imap, mbox or maildir required
@@ -30,7 +31,7 @@ class Tiki_Profile_InstallHandler_WebmailAccount extends Tiki_Profile_InstallHan
 			'maildir' => '', 		// *? see pop
 			'useSSL' => 'n',			// y|n (default n)
 			'fromEmail' => '',
-		);
+		];
 
 		$data = array_merge($defaults, $this->obj->getData());
 
@@ -46,7 +47,7 @@ class Tiki_Profile_InstallHandler_WebmailAccount extends Tiki_Profile_InstallHan
 	{
 		$data = $this->getData();
 
-		if ( ! isset( $data['account']) || (!isset($data['pop']) && !isset($data['imap']) && !isset($data['mbox']) && !isset($data['maildir'] ))) {
+		if (! isset($data['account']) || (! isset($data['pop']) && ! isset($data['imap']) && ! isset($data['mbox']) && ! isset($data['maildir']))) {
 			return false;
 		}
 
@@ -60,7 +61,8 @@ class Tiki_Profile_InstallHandler_WebmailAccount extends Tiki_Profile_InstallHan
 
 		$this->replaceReferences($data);
 
-		global $webmaillib; require_once 'lib/webmail/webmaillib.php';
+		global $webmaillib;
+		require_once 'lib/webmail/webmaillib.php';
 
 		if ($data['mode'] == 'update') {
 			$accountId = $webmaillib->get_webmail_account_by_name($user, $data['account']);

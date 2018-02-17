@@ -1,8 +1,8 @@
 <?php
 
-$access = TikiLib::lib('access');
-$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
-
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
 // +----------------------------------------------------------------------+
@@ -22,7 +22,7 @@ $access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
 // | Based on OLE::Storage_Lite by Kawai, Takanori                        |
 // +----------------------------------------------------------------------+
 //
-// $Id: ole.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: ole.php 62842 2017-05-31 12:39:01Z drsassafras $
 
 
 /**

@@ -1,15 +1,15 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TypeAnalysisDecorator.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: TypeAnalysisDecorator.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Index_TypeAnalysisDecorator extends Search_Index_AbstractIndexDecorator
 {
 	private $identifierClass;
 	private $numericClass;
-	private $mapping = array();
+	private $mapping = [];
 
 	function __construct(Search_Index_Interface $index)
 	{
@@ -31,5 +31,9 @@ class Search_Index_TypeAnalysisDecorator extends Search_Index_AbstractIndexDecor
 	{
 		return array_keys(array_filter($this->mapping));
 	}
-}
 
+	function getFieldCount()
+	{
+		return count(array_keys($this->mapping));
+	}
+}

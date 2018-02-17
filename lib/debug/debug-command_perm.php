@@ -3,13 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_perm.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_perm.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * \brief Show current permissions in a convenient way
  * \author zaufi <zaufi@sendmail.ru>
  */
-require_once ('lib/debug/debugger-ext.php');
+require_once('lib/debug/debugger-ext.php');
 
 /**
  * \brief Show current permissions in a convenient way
@@ -56,22 +56,24 @@ class DbgPermissions extends DebuggerCommand
 		$tpl_vars = $smarty->getTemplateVars();
 		// Get descriptions for all permissions
 		$pd = $userlib->get_permissions();
-		$descriptions = array();
+		$descriptions = [];
 
-		foreach ($pd['data'] as $p)
+		foreach ($pd['data'] as $p) {
 			$descriptions[$p['permName']] = $p['permDesc'];
+		}
 
 		// convert to vector of names, filter permissions only
-		$perms = array();
+		$perms = [];
 		$len = strlen($mask);
 
 		foreach ($tpl_vars as $key => $val) {
-			if ((!$len || $len && preg_match('/' . $mask . '/', $key)) && preg_match('/tiki_p_/', $key))
-				$perms[] = array(
+			if ((! $len || $len && preg_match('/' . $mask . '/', $key)) && preg_match('/tiki_p_/', $key)) {
+				$perms[] = [
 					'name' => $key,
 					'value' => $val,
 					'description' => isset($descriptions[$key]) ? $descriptions[$key] : 'No description'
-				);
+				];
+			}
 		}
 
 		return $perms;

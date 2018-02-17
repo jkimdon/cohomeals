@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SortTest.php 59595 2016-09-04 17:48:30Z jonnybradley $
+// $Id: SortTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_MySql_SortTest extends Search_Index_SortTest
 {
@@ -22,4 +22,3 @@ class Search_MySql_SortTest extends Search_Index_SortTest
 		}
 	}
 }
-

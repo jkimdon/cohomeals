@@ -1,12 +1,15 @@
+/*global waitUntilPromise */
+
 (function (root, factory) {
     define([
+        "jasmine",
         "jquery",
         "converse-core",
         "utils",
         "mock",
-        "test_utils"
+        "test-utils"
         ], factory);
-} (this, function ($, converse, utils, mock, test_utils) {
+} (this, function (jasmine, $, converse, utils, mock, test_utils) {
     "use strict";
     var $iq = converse.env.$iq,
         Strophe = converse.env.Strophe,
@@ -14,20 +17,22 @@
 
     describe("A chat room", function () {
 
-        it("can be bookmarked", mock.initConverse(function (_converse) {
+        it("can be bookmarked", mock.initConverseWithPromises(
+            null, ['rosterGroupsFetched'], {}, function (done, _converse) {
+
             var sent_stanza, IQ_id;
             var sendIQ = _converse.connection.sendIQ;
-            spyOn(_converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
+            spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                 sent_stanza = iq;
                 IQ_id = sendIQ.bind(this)(iq, callback, errback);
             });
-            spyOn(_converse.connection, 'getUniqueId').andCallThrough();
+            spyOn(_converse.connection, 'getUniqueId').and.callThrough();
 
             test_utils.openChatRoom(_converse, 'theplay', 'conference.shakespeare.lit', 'JC');
             var jid = 'theplay@conference.shakespeare.lit';
             var view = _converse.chatboxviews.get(jid);
-            spyOn(view, 'renderBookmarkForm').andCallThrough();
-            spyOn(view, 'cancelConfiguration').andCallThrough();
+            spyOn(view, 'renderBookmarkForm').and.callThrough();
+            spyOn(view, 'cancelConfiguration').and.callThrough();
 
             var $bookmark = view.$el.find('.icon-pushpin');
             $bookmark.click();
@@ -76,7 +81,8 @@
             $form.find('input[name="name"]').val('Play&apos;s the Thing');
             $form.find('input[name="autojoin"]').prop('checked', true);
             $form.find('input[name="nick"]').val('JC');
-            $form.submit();
+            view.$el.find('.button-primary').click();
+
             expect(view.model.get('bookmarked')).toBeTruthy();
             expect($bookmark.hasClass('on-button'), true);
 
@@ -121,9 +127,12 @@
             _converse.connection._dataRecv(test_utils.createRequest(stanza));
             // We ignore this IQ stanza... (unless it's an error stanza), so
             // nothing to test for here.
+            done();
         }));
 
-        it("will be automatically opened if 'autojoin' is set on the bookmark", mock.initConverse(function (_converse) {
+        it("will be automatically opened if 'autojoin' is set on the bookmark", mock.initConverseWithPromises(
+            null, ['rosterGroupsFetched'], {}, function (done, _converse) {
+
             var jid = 'lounge@localhost';
             _converse.bookmarks.create({
                 'jid': jid,
@@ -141,90 +150,85 @@
                 'nick': ' Othello'
             });
             expect(_.isUndefined(_converse.chatboxviews.get(jid))).toBeFalsy();
+            done();
         }));
 
         describe("when bookmarked", function () {
 
-            it("displays that it's bookmarked through its bookmark icon", mock.initConverse(function (_converse) {
-                runs(function () {
-                    test_utils.openChatRoom(_converse, 'lounge', 'localhost', 'dummy');
-                });
-                waits(100);
-                runs(function () {
-                    var view = _converse.chatboxviews.get('lounge@localhost');
-                    var $bookmark_icon = view.$('.icon-pushpin');
-                    expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
-                    view.model.set('bookmarked', true);
-                    expect($bookmark_icon.hasClass('button-on')).toBeTruthy();
-                    view.model.set('bookmarked', false);
-                    expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
-                });
+            it("displays that it's bookmarked through its bookmark icon", mock.initConverseWithPromises(
+                null, ['rosterGroupsFetched'], {}, function (done, _converse) {
+
+                test_utils.openChatRoom(_converse, 'lounge', 'localhost', 'dummy');
+                var view = _converse.chatboxviews.get('lounge@localhost');
+                var $bookmark_icon = view.$('.icon-pushpin');
+                expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
+                view.model.set('bookmarked', true);
+                expect($bookmark_icon.hasClass('button-on')).toBeTruthy();
+                view.model.set('bookmarked', false);
+                expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
+                done();
             }));
 
-            it("can be unbookmarked", mock.initConverse(function (_converse) {
-                var view, sent_stanza, IQ_id;
+            it("can be unbookmarked", mock.initConverseWithPromises(
+                null, ['rosterGroupsFetched'], {}, function (done, _converse) {
+
+                var sent_stanza, IQ_id;
                 var sendIQ = _converse.connection.sendIQ;
-                spyOn(_converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
+                test_utils.openChatRoom(_converse, 'theplay', 'conference.shakespeare.lit', 'JC');
+                var jid = 'theplay@conference.shakespeare.lit';
+                var view = _converse.chatboxviews.get(jid);
+                spyOn(view, 'toggleBookmark').and.callThrough();
+                spyOn(_converse.bookmarks, 'sendBookmarkStanza').and.callThrough();
+                view.delegateEvents();
+                _converse.bookmarks.create({
+                    'jid': view.model.get('jid'),
+                    'autojoin': false,
+                    'name':  'The Play',
+                    'nick': ' Othello'
+                });
+                expect(_converse.bookmarks.length).toBe(1);
+                expect(view.model.get('bookmarked')).toBeTruthy();
+                var $bookmark_icon = view.$('.icon-pushpin');
+                expect($bookmark_icon.hasClass('button-on')).toBeTruthy();
+
+                spyOn(_converse.connection, 'sendIQ').and.callFake(function (iq, callback, errback) {
                     sent_stanza = iq;
                     IQ_id = sendIQ.bind(this)(iq, callback, errback);
                 });
-                spyOn(_converse.connection, 'getUniqueId').andCallThrough();
+                spyOn(_converse.connection, 'getUniqueId').and.callThrough();
+                $bookmark_icon.click();
+                expect(view.toggleBookmark).toHaveBeenCalled();
+                expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
+                expect(_converse.bookmarks.length).toBe(0);
 
-                runs(function () {
-                    test_utils.openChatRoom(_converse, 'theplay', 'conference.shakespeare.lit', 'JC');
-                });
-                waits(100);
-                runs(function () {
-                    var jid = 'theplay@conference.shakespeare.lit';
-                    view = _converse.chatboxviews.get(jid);
-                    spyOn(view, 'toggleBookmark').andCallThrough();
-                    spyOn(_converse.bookmarks, 'sendBookmarkStanza').andCallThrough();
-                    view.delegateEvents();
-                    _converse.bookmarks.create({
-                        'jid': view.model.get('jid'),
-                        'autojoin': false,
-                        'name':  'The Play',
-                        'nick': ' Othello'
-                    });
-                    expect(_converse.bookmarks.length).toBe(1);
-                });
-                waits(100);
-                runs(function () {
-                    expect(view.model.get('bookmarked')).toBeTruthy();
-                    var $bookmark_icon = view.$('.icon-pushpin');
-                    expect($bookmark_icon.hasClass('button-on')).toBeTruthy();
-                    $bookmark_icon.click();
-                    expect(view.toggleBookmark).toHaveBeenCalled();
-                    expect($bookmark_icon.hasClass('button-on')).toBeFalsy();
-                    expect(_converse.bookmarks.length).toBe(0);
-                    // Check that an IQ stanza is sent out, containing no
-                    // conferences to bookmark (since we removed the one and
-                    // only bookmark).
-                    expect(sent_stanza.toLocaleString()).toBe(
-                        "<iq type='set' from='dummy@localhost/resource' xmlns='jabber:client' id='"+IQ_id+"'>"+
-                            "<pubsub xmlns='http://jabber.org/protocol/pubsub'>"+
-                                "<publish node='storage:bookmarks'>"+
-                                    "<item id='current'>"+
-                                        "<storage xmlns='storage:bookmarks'/>"+
-                                    "</item>"+
-                                "</publish>"+
-                                "<publish-options>"+
-                                    "<x xmlns='jabber:x:data' type='submit'>"+
-                                        "<field var='FORM_TYPE' type='hidden'>"+
-                                            "<value>http://jabber.org/protocol/pubsub#publish-options</value>"+
-                                        "</field>"+
-                                        "<field var='pubsub#persist_items'>"+
-                                            "<value>true</value>"+
-                                        "</field>"+
-                                        "<field var='pubsub#access_model'>"+
-                                            "<value>whitelist</value>"+
-                                        "</field>"+
-                                    "</x>"+
-                                "</publish-options>"+
-                            "</pubsub>"+
-                        "</iq>"
-                    );
-                });
+                // Check that an IQ stanza is sent out, containing no
+                // conferences to bookmark (since we removed the one and
+                // only bookmark).
+                expect(sent_stanza.toLocaleString()).toBe(
+                    "<iq type='set' from='dummy@localhost/resource' xmlns='jabber:client' id='"+IQ_id+"'>"+
+                        "<pubsub xmlns='http://jabber.org/protocol/pubsub'>"+
+                            "<publish node='storage:bookmarks'>"+
+                                "<item id='current'>"+
+                                    "<storage xmlns='storage:bookmarks'/>"+
+                                "</item>"+
+                            "</publish>"+
+                            "<publish-options>"+
+                                "<x xmlns='jabber:x:data' type='submit'>"+
+                                    "<field var='FORM_TYPE' type='hidden'>"+
+                                        "<value>http://jabber.org/protocol/pubsub#publish-options</value>"+
+                                    "</field>"+
+                                    "<field var='pubsub#persist_items'>"+
+                                        "<value>true</value>"+
+                                    "</field>"+
+                                    "<field var='pubsub#access_model'>"+
+                                        "<value>whitelist</value>"+
+                                    "</field>"+
+                                "</x>"+
+                            "</publish-options>"+
+                        "</pubsub>"+
+                    "</iq>"
+                );
+                done();
             }));
         });
 
@@ -255,7 +259,7 @@
 
     describe("Bookmarks", function () {
 
-        it("can be pushed from the XMPP server", mock.initConverse(function (_converse) {
+        xit("can be pushed from the XMPP server", mock.initConverse(function (_converse) {
             // TODO
             /* The stored data is automatically pushed to all of the user's
              * connected resources.
@@ -302,14 +306,8 @@
              */
         }));
 
-        it("can be retrieved from the XMPP server", mock.initConverse(function (_converse) {
-            var sent_stanza, IQ_id,
-                sendIQ = _converse.connection.sendIQ;
-            spyOn(_converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
-                sent_stanza = iq;
-                IQ_id = sendIQ.bind(this)(iq, callback, errback);
-            });
-            _converse.emit('chatBoxesFetched');
+        it("can be retrieved from the XMPP server", mock.initConverseWithPromises(
+            ['send'], ['rosterGroupsFetched'], {}, function (done, _converse) {
 
             /* Client requests all items
              * -------------------------
@@ -320,13 +318,26 @@
              *  </pubsub>
              *  </iq>
              */
-            expect(sent_stanza.toLocaleString()).toBe(
-                "<iq from='dummy@localhost/resource' type='get' xmlns='jabber:client' id='"+IQ_id+"'>"+
-                "<pubsub xmlns='http://jabber.org/protocol/pubsub'>"+
-                    "<items node='storage:bookmarks'/>"+
-                "</pubsub>"+
-                "</iq>"
-            );
+            var IQ_id;
+            expect(_.filter(_converse.connection.send.calls.all(), function (call) {
+                var stanza = call.args[0];
+                if (!(stanza instanceof Element) || stanza.nodeName !== 'iq') {
+                    return;
+                }
+                // XXX: Wrapping in a div is a workaround for PhantomJS
+                var div = document.createElement('div');
+                div.appendChild(stanza);
+                if (div.innerHTML ===
+                    '<iq from="dummy@localhost/resource" type="get" '+
+                         'xmlns="jabber:client" id="'+stanza.getAttribute('id')+'">'+
+                    '<pubsub xmlns="http://jabber.org/protocol/pubsub">'+
+                        '<items node="storage:bookmarks"></items>'+
+                    '</pubsub>'+
+                    '</iq>') {
+                    IQ_id = stanza.getAttribute('id');
+                    return true;
+                }
+            }).length).toBe(1);
 
             /*
              * Server returns all items
@@ -369,18 +380,36 @@
             expect(_converse.bookmarks.models.length).toBe(2);
             expect(_converse.bookmarks.findWhere({'jid': 'theplay@conference.shakespeare.lit'}).get('autojoin')).toBe(true);
             expect(_converse.bookmarks.findWhere({'jid': 'another@conference.shakespeare.lit'}).get('autojoin')).toBe(false);
+            done();
         }));
 
         describe("The rooms panel", function () {
 
-            it("shows a list of bookmarks", mock.initConverse(function (_converse) {
+            it("shows a list of bookmarks", mock.initConverseWithPromises(
+                ['send'], ['rosterGroupsFetched'], {}, function (done, _converse) {
+
                 var IQ_id;
-                var sendIQ = _converse.connection.sendIQ;
-                spyOn(_converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
-                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
-                });
+                expect(_.filter(_converse.connection.send.calls.all(), function (call) {
+                    var stanza = call.args[0];
+                    if (!(stanza instanceof Element) || stanza.nodeName !== 'iq') {
+                        return;
+                    }
+                    // XXX: Wrapping in a div is a workaround for PhantomJS
+                    var div = document.createElement('div');
+                    div.appendChild(stanza);
+                    if (div.innerHTML ===
+                        '<iq from="dummy@localhost/resource" type="get" '+
+                            'xmlns="jabber:client" id="'+stanza.getAttribute('id')+'">'+
+                        '<pubsub xmlns="http://jabber.org/protocol/pubsub">'+
+                            '<items node="storage:bookmarks"></items>'+
+                        '</pubsub>'+
+                        '</iq>') {
+                        IQ_id = stanza.getAttribute('id');
+                        return true;
+                    }
+                }).length).toBe(1);
+
                 _converse.chatboxviews.get('controlbox').$('#chatrooms dl.bookmarks').html('');
-                _converse.emit('chatBoxesFetched');
                 var stanza = $iq({'to': _converse.connection.jid, 'type':'result', 'id':IQ_id})
                     .c('pubsub', {'xmlns': Strophe.NS.PUBSUB})
                         .c('items', {'node': 'storage:bookmarks'})
@@ -394,7 +423,7 @@
                                     .c('conference', {
                                         'name': 'Bookmark with a very very long name that will be shortened',
                                         'autojoin': 'false',
-                                        'jid': 'theplay@conference.shakespeare.lit'
+                                        'jid': 'longname@conference.shakespeare.lit'
                                     }).c('nick').t('JC').up().up()
                                     .c('conference', {
                                         'name': 'Another room',
@@ -402,22 +431,57 @@
                                         'jid': 'another@conference.shakespeare.lit'
                                     }).c('nick').t('JC').up().up();
                 _converse.connection._dataRecv(test_utils.createRequest(stanza));
-                expect($('#chatrooms dl.bookmarks dd').length).toBe(3);
+
+                test_utils.waitUntil(function () {
+                    return $('#chatrooms dl.bookmarks dd').length;
+                }, 300).then(function () {
+                    expect($('#chatrooms dl.bookmarks dd').length).toBe(3);
+                    done();
+                });
             }));
 
-            it("remembers the toggle state of the bookmarks list", mock.initConverse(function (_converse) {
-                runs(function () {
-                    _converse.bookmarks.create({
-                        'jid': 'theplay@conference.shakespeare.lit',
-                        'autojoin': false,
-                        'name':  'The Play',
-                        'nick': ''
-                    });
-                    _converse.emit('chatBoxesFetched');
-                    test_utils.openControlBox().openRoomsPanel(_converse);
+            it("remembers the toggle state of the bookmarks list", mock.initConverseWithPromises(
+                ['send'], ['rosterGroupsFetched'], {}, function (done, _converse) {
+
+                var IQ_id;
+                expect(_.filter(_converse.connection.send.calls.all(), function (call) {
+                    var stanza = call.args[0];
+                    if (!(stanza instanceof Element) || stanza.nodeName !== 'iq') {
+                        return;
+                    }
+                    // XXX: Wrapping in a div is a workaround for PhantomJS
+                    var div = document.createElement('div');
+                    div.appendChild(stanza);
+                    if (div.innerHTML ===
+                        '<iq from="dummy@localhost/resource" type="get" '+
+                            'xmlns="jabber:client" id="'+stanza.getAttribute('id')+'">'+
+                        '<pubsub xmlns="http://jabber.org/protocol/pubsub">'+
+                            '<items node="storage:bookmarks"></items>'+
+                        '</pubsub>'+
+                        '</iq>') {
+                        IQ_id = stanza.getAttribute('id');
+                        return true;
+                    }
+                }).length).toBe(1);
+                _converse.chatboxviews.get('controlbox').$('#chatrooms dl.bookmarks').html('');
+                var stanza = $iq({'to': _converse.connection.jid, 'type':'result', 'id':IQ_id})
+                    .c('pubsub', {'xmlns': Strophe.NS.PUBSUB})
+                        .c('items', {'node': 'storage:bookmarks'})
+                            .c('item', {'id': 'current'})
+                                .c('storage', {'xmlns': 'storage:bookmarks'});
+                _converse.connection._dataRecv(test_utils.createRequest(stanza));
+
+                _converse.bookmarks.create({
+                    'jid': 'theplay@conference.shakespeare.lit',
+                    'autojoin': false,
+                    'name':  'The Play',
+                    'nick': ''
                 });
-                waits(100);
-                runs(function () {
+                test_utils.openControlBox().openRoomsPanel(_converse);
+
+                test_utils.waitUntil(function () {
+                    return $('#chatrooms dl.bookmarks dd:visible').length;
+                }, 300).then(function () {
                     expect($('#chatrooms dl.bookmarks dd:visible').length).toBe(1);
                     expect(_converse.bookmarksview.list_model.get('toggle-state')).toBe(_converse.OPENED);
                     $('#chatrooms .bookmarks-toggle').click();
@@ -426,8 +490,52 @@
                     $('#chatrooms .bookmarks-toggle').click();
                     expect($('#chatrooms dl.bookmarks dd:visible').length).toBe(1);
                     expect(_converse.bookmarksview.list_model.get('toggle-state')).toBe(_converse.OPENED);
+                    done();
                 });
             }));
         });
+    });
+
+    describe("When hide_open_bookmarks is true and a bookmarked room is opened", function () {
+
+        it("can be closed", mock.initConverseWithPromises(
+            null, ['rosterGroupsFetched'],
+            { hide_open_bookmarks: true },
+            function (done, _converse) {
+
+            test_utils.openControlBox().openRoomsPanel(_converse);
+            // XXX Create bookmarks view here, otherwise we need to mock stanza
+            // traffic for it to get created.
+            _converse.bookmarksview = new _converse.BookmarksView(
+                {'model': _converse.bookmarks}
+            );
+            _converse.emit('bookmarksInitialized');
+
+            // Check that it's there
+            var jid = 'room@conference.example.org';
+            _converse.bookmarks.create({
+                'jid': jid,
+                'autojoin': false,
+                'name':  'The Play',
+                'nick': ' Othello'
+            });
+
+            expect(_converse.bookmarks.length).toBe(1);
+            var room_els = _converse.bookmarksview.el.querySelectorAll(".open-room");
+            expect(room_els.length).toBe(1);
+
+            // Check that it disappears once the room is opened
+            var bookmark = _converse.bookmarksview.el.querySelector(".open-room");
+            bookmark.click();
+            room_els = _converse.bookmarksview.el.querySelectorAll(".open-room");
+            expect(room_els.length).toBe(0);
+
+            // Check that it reappears once the room is closed
+            var view = _converse.chatboxviews.get(jid);
+            view.close();
+            room_els = _converse.bookmarksview.el.querySelectorAll(".open-room");
+            expect(room_els.length).toBe(1);
+            done();
+        }));
     });
 }));

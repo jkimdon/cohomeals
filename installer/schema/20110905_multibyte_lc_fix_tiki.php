@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20110905_multibyte_lc_fix_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
+// $Id: 20110905_multibyte_lc_fix_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -16,7 +16,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function upgrade_20110905_multibyte_lc_fix_tiki($installer)
 {
 	if (function_exists('mb_strtolower')) {
-		$pages = $installer->table('tiki_pages')->fetchColumn('pageName', array());
+		$pages = $installer->table('tiki_pages')->fetchColumn('pageName', []);
 		$objectperms = $installer->table('users_objectpermissions');
 
 		foreach ($pages as $originalName) {
@@ -28,16 +28,15 @@ function upgrade_20110905_multibyte_lc_fix_tiki($installer)
 				$new = md5('wiki page' . $mblowercase);
 
 				$objectperms->updateMultiple(
-					array(
+					[
 						'objectId' => $new,
-					),
-					array(
+					],
+					[
 						'objectType' => 'wiki page',
 						'objectId' => $old,
-					)
+					]
 				);
 			}
 		}
 	}
 }
-

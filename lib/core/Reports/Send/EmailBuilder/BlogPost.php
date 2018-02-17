@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: BlogPost.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: BlogPost.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Class for blog_post events
@@ -14,7 +14,7 @@ class Reports_Send_EmailBuilder_BlogPost extends Reports_Send_EmailBuilder_Abstr
 	{
 		return tr('New blog posts:');
 	}
-	
+
 	public function getOutput(array $change)
 	{
 		$base_url = $change['data']['base_url'];
@@ -23,7 +23,7 @@ class Reports_Send_EmailBuilder_BlogPost extends Reports_Send_EmailBuilder_Abstr
 							tra('replied to the blog') .
 							" <a href=\"{$base_url}tiki-view_blog.php?blogId=" . $change['data']['blogId'] . "\">" . $change['data']['blogTitle'] . "</a>" .
 							" <a href=\"{$base_url}tiki-view_blog_post.php?postId=\"" . $change['data']['postId'] . "></a>.";
-		
+
 		return $output;
 	}
 }

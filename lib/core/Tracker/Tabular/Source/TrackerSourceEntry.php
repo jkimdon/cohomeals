@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TrackerSourceEntry.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: TrackerSourceEntry.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Source;
 
@@ -34,4 +34,3 @@ class TrackerSourceEntry
 		return $column->render($value, $this->extra);
 	}
 }
-

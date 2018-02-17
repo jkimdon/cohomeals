@@ -1,4 +1,4 @@
-{* $Id: tiki-calendar.tpl 60897 2017-01-14 11:57:45Z luciash $ *}
+{* $Id: tiki-calendar.tpl 64016 2017-09-26 11:22:09Z jonnybradley $ *}
 
 {title admpage="calendar"}
 	{if $displayedcals|@count eq 1}
@@ -110,18 +110,16 @@
 
 
 
-	<div class="categbar" align="right">
-		{if $user and $prefs.feature_user_watches eq 'y'}
-			{if isset($category_watched) and $category_watched eq 'y'}
-				{tr}Watched by categories:{/tr}
-				{section name=i loop=$watching_categories}
-					{assign var=thiswatchingcateg value=$watching_categories[i].categId}
-					{button href="tiki-browse_categories.php?parentId=$thiswatchingcateg" _text=$watching_categories[i].name|escape}
-					&nbsp;
-				{/section}
-			{/if}
-		{/if}
+	{if $user and $prefs.feature_user_watches eq 'y' and isset($category_watched) and $category_watched eq 'y'}
+	<div class="categbar">
+		{tr}Watched by categories:{/tr}
+		{section name=i loop=$watching_categories}
+			{assign var=thiswatchingcateg value=$watching_categories[i].categId}
+			{button href="tiki-browse_categories.php?parentId=$thiswatchingcateg" _text=$watching_categories[i].name|escape}
+			&nbsp;
+		{/section}
 	</div>
+	{/if}
 
 	{if count($listcals) >= 1}
 		<form class="modal-content" id="filtercal" method="get" action="{$myurl}" name="f" style="display:none;">
@@ -250,7 +248,6 @@
 							$( "#calendar_dialog h1, #calendar_dialog .navbar", $dialog ).remove();
 							$( "#calendar_dialog .modal-title", $dialog ).html(event.title);
 							$dialog.appendTo("body").modal({backdrop:"static"});
-							$this.tikiModal();
 						}
 					});
 					return false;

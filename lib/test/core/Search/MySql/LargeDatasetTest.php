@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: LargeDatasetTest.php 59675 2016-09-12 11:33:04Z jonnybradley $
+// $Id: LargeDatasetTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_MySql_LargeDatasetTest extends PHPUnit_Framework_TestCase
 {
@@ -33,10 +33,10 @@ class Search_MySql_LargeDatasetTest extends PHPUnit_Framework_TestCase
 	function testManyColumns()
 	{
 		$typeFactory = $this->index->getTypeFactory();
-		$document = array(
+		$document = [
 			'object_type' => $typeFactory->identifier('test'),
 			'object_id' => $typeFactory->identifier('test'),
-		);
+		];
 
 		for ($i = 0; 1500 > $i; ++$i) {
 			$document['identifier_' . $i] = $typeFactory->identifier('test');
@@ -53,10 +53,10 @@ class Search_MySql_LargeDatasetTest extends PHPUnit_Framework_TestCase
 	function testManyIndexes()
 	{
 		$typeFactory = $this->index->getTypeFactory();
-		$document = array(
+		$document = [
 			'object_type' => $typeFactory->identifier('test'),
 			'object_id' => $typeFactory->identifier('test'),
-		);
+		];
 
 		$query = new Search_Query;
 		for ($i = 0; 3000 > $i; ++$i) {
@@ -69,4 +69,3 @@ class Search_MySql_LargeDatasetTest extends PHPUnit_Framework_TestCase
 		$query->search($this->index);
 	}
 }
-

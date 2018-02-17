@@ -1,4 +1,4 @@
-// $Id: tiki-miscellaneous_global.less 63044 2017-06-20 10:39:17Z luciash $
+// $Id: tiki-miscellaneous_global.less 64825 2017-12-06 15:25:18Z luciash $
 //****** Misc. Global Classes (layout and style) ****/
 // highlight on interface text to draw attention;
 // also highlight on "button" links, e.g. if there are some comments it
@@ -319,6 +319,10 @@ span.btn-link {
 	margin-right: 2px;
 }
 
+.jscal.datetime input[type=text] {	/* shows the timezone too */
+	width: 50%;
+}
+
 //date picker dropdowns
 select.form-control.date {
 	padding: 0;
@@ -419,3 +423,51 @@ textarea.wikiedit {
 	margin-top: @top-margin-compensation-for-side-col-toggle;
 	padding-top: @line-height-computed;
 }
+
+div.categbar {
+	text-align: right;
+	clear: both;
+}
+
+// For page with full-width content:
+// This uses a "Full_width_content" class (assumes a Tiki category of the same name is created) on the body element placed by activating "use class name as body tag"
+.cat_Full_width_content,
+.cat_full_width_content {
+	& > .container,
+	.middle.container,
+	.layout_social > .container {
+		width: 100%;
+		padding-left: 0;
+		padding-right: 0;
+	}
+	#row-middle.row {
+		margin-left: 0;
+		margin-right: 0;
+	}
+	#col1 {
+		padding-left: 0;
+		padding-right: 0;
+	}
+	.content-area {
+		padding: 0;
+	}
+	.catblock,
+	.wikitopline,
+	.wikiactions_wrapper,
+	#page-bar {
+		padding-left: 15px;
+		padding-right: 15px;
+	}
+}
+
+// Auto unique-numbered ordered lists (for ordered lists wrapped in class="uol" wrapper (or when enabled globally) to generate unique "chapter like" numbering X.Y.Z)
+.uol ol:not(.media-list), ol.uol { 
+    counter-reset: item;
+}
+.uol ol:not(.media-list) > li { display: block; text-indent: -1rem } // negative text-indent here simulates the common ol rendering indentation
+.uol ol:not(.media-list) > li:before { content: counters(item, ".") ".\0000a0"; counter-increment: item } // \0000a0 is nbsp Unicode escaped
+.uol ol:not(.media-list) > li ol > li:before { content: counters(item, ".") "\0000a0"; counter-increment: item } // here we remove the last dot (looks better?)
+
+.nouol ol > li { display: list-item; text-indent: 0 }
+.nouol ol > li:before, .nouol ol > li ol > li:before { content: "" }
+

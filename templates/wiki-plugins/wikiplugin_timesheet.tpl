@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_timesheet.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: wikiplugin_timesheet.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 <div id="timesheet" class="ui-widget-content ui-corner-all" style="display: table; text-align: center; padding-bottom: 15px;">
 	<div class="ui-widget-header ui-corner-top">{tr}Mini TimeSheet{/tr} {button href="tiki-timesheet.php" _text="{tr}Full View{/tr}"}</div>
 	<div id="jtrack-holder" style="margin: 5px;text-align: left;">

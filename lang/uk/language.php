@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Czech" => "Чеська",
 "Danish" => "Датська",
 "German" => "Німецька",
@@ -808,7 +808,7 @@ $lang = array(
 "Current" => "поточний",
 "Versions are identical" => "Версії ідентичні",
 "vote" => "голосувати",
-"Repeat password" => "Пароль ще раз",
+"Confirm password" => "Пароль ще раз",
 "Generate a password" => "Сгенерувати пароль",
 "Create New" => "створити нову",
 "To edit the copyright notices" => "Щоб редагувати запис авторських прав",
@@ -1682,4 +1682,4 @@ $lang = array(
 "Aborted" => "скасовано",
 "Top pages" => "Найпопулярніші сторінки",
 "Last pages" => "Найновіші сторінки",
-);
+];

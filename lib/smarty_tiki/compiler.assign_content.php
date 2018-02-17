@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: compiler.assign_content.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: compiler.assign_content.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /*
 * Smarty plugin
@@ -20,30 +20,30 @@
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_compiler_assign_content($tag_attrs, $compiler)
 {
 	$_params = $compiler->_parse_attrs($tag_attrs);
 
-	if ( ! isset($_params['var']) ) {
+	if (! isset($_params['var'])) {
 		$compiler->_syntax_error("assign: missing 'var' parameter", E_USER_WARNING);
 		return;
 	}
 
 	$func_name = 'content';
-	if ( ! isset($_params['id']) && ! isset($_params['label']) ) {
+	if (! isset($_params['id']) && ! isset($_params['label'])) {
 		$_params['id'] = 0;
 		$func_name = 'rcontent';
 	}
 
 	$str_params = 'array('
-		.( isset($_params['id']) ? "'id' => ".$_params['id'].', ' : '' )
-		.( isset($_params['label']) ? "'label' => ".$_params['label'].', ' : '' )
-		.')';
+		. ( isset($_params['id']) ? "'id' => " . $_params['id'] . ', ' : '' )
+		. ( isset($_params['label']) ? "'label' => " . $_params['label'] . ', ' : '' )
+		. ')';
 
 	return "include_once('lib/smarty_tiki/function.$func_name.php');\n"
-		.'$this->assign('.$_params['var'].", smarty_function_$func_name(".$str_params.', $this));';
+		. '$this->assign(' . $_params['var'] . ", smarty_function_$func_name(" . $str_params . ', $this));';
 }

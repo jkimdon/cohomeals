@@ -14,7 +14,7 @@
 	</div>
 </div>
 <div class="modal fade intertrans" id="intertrans-modal" tabindex="-1" role="dialog" aria-labelledby="intertransModalLabel">
-	<form method="post" action="tiki-interactive_trans.php" role="form" class="form">
+	<form method="post" action="tiki-interactive_trans.php" class="form">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -44,12 +44,9 @@
 					</div>
 				</div>
 				<div class="modal-footer">
-					<button id="intertrans-close" type="button" class="btn btn-default" data-dismiss="modal">
-						{tr}Close{/tr}
-					</button>
 					<input id="intertrans-submit" type="submit" class="btn btn-primary" value="{tr}Save translations{/tr}">
 					<input id="intertrans-cancel" class="btn btn-default" type="reset" value="{tr}Cancel{/tr}">
-					<input id="intertrans-close" class="btn btn-default" type="reset" value="{tr}Close{/tr}" style="display: none;">
+					<input id="intertrans-close" class="btn btn-default" type="reset" value="{tr}Close{/tr}">
 					<span id="intertrans-help" class="help-block">
 						{tr}Changes will be applied on next page load only.{/tr}
 					</span>

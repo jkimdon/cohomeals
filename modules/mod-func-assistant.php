@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-assistant.php 57961 2016-03-17 20:01:56Z jonnybradley $
+// $Id: mod-func-assistant.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 
@@ -17,10 +17,10 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_assistant_info()
 {
-	return array(
+	return [
 		'name' => tra('Tiki Assistant'),
 		'description' => tra('Display an assistant to guide new Tiki admins.'),
-		'prefs' => array(),
-		'params' => array()
-	);
+		'prefs' => [],
+		'params' => []
+	];
 }

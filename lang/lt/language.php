@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Lithuanian" => "lietuvių",
 "comments" => "komentarai",
 "Post new comment" => "Ra&scaron;yti komentarą",
@@ -16,4 +16,4 @@ $lang = array(
 "Oct." => "Oct.",
 "Nov." => "Nov.",
 "remove" => "Pa&scaron;alinti",
-);
+];

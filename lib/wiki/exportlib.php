@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: exportlib.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: exportlib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -18,10 +18,10 @@ class ExportLib extends TikiLib
 	{
 		global $tikidomain;
 		$zipname = 'wikidb.zip';
-		include_once ('lib/tar.class.php');
+		include_once('lib/tar.class.php');
 		$tar = new tar();
 		$query = 'select `pageName` from `tiki_pages` order by ' . $this->convertSortMode('pageName_asc');
-		$result = $this->query($query, array());
+		$result = $this->query($query, []);
 
 		while ($res = $result->fetchRow()) {
 			$page = $res['pageName'];
@@ -31,10 +31,10 @@ class ExportLib extends TikiLib
 		$dump = 'dump';
 
 		if ($tikidomain) {
-			$dump.= "/$tikidomain";
+			$dump .= "/$tikidomain";
 		}
 
-		$tar->toTar("$dump/export.tar", FALSE);
+		$tar->toTar("$dump/export.tar", false);
 
 		return '';
 	}
@@ -44,7 +44,7 @@ class ExportLib extends TikiLib
 		global $prefs;
 
 		$head = '';
-		$head .= 'Date: ' . $this->date_format('%a, %e %b %Y %H:%M:%S %O'). "\r\n";
+		$head .= 'Date: ' . $this->date_format('%a, %e %b %Y %H:%M:%S %O') . "\r\n";
 		$head .= sprintf("Mime-Version: 1.0 (Produced by Tiki)\r\n");
 		$info = $this->get_page_info($pageName);
 
@@ -59,7 +59,7 @@ class ExportLib extends TikiLib
 			}
 		}
 
-		$parts = array();
+		$parts = [];
 		$parts[] = MimeifyPageRevision($info);
 
 		if ($nversions > 1 || $nversions == 0) {
@@ -67,12 +67,14 @@ class ExportLib extends TikiLib
 			foreach ($iter as $revision) {
 				$parts[] = MimeifyPageRevision($revision);
 
-				if ($nversions > 0 && count($parts) >= $nversions)
+				if ($nversions > 0 && count($parts) >= $nversions) {
 					break;
+				}
 			}
 		}
-		if (count($parts) > 1)
+		if (count($parts) > 1) {
 			return $head . MimeMultipart($parts);
+		}
 
 		assert($parts);
 		return $head . $parts[0];
@@ -84,11 +86,11 @@ class ExportLib extends TikiLib
 	{
 		$query = 'select `pageName`, `description`, `version`, `lastModif`, `user`, `ip`, `data`, `comment`' .
 						' from `tiki_history` where `pageName`=? order by ' . $this->convertSortMode('version_desc');
-		$result = $this->query($query, array($page));
-		$ret = array();
+		$result = $this->query($query, [$page]);
+		$ret = [];
 
 		while ($res = $result->fetchRow()) {
-			$aux = array();
+			$aux = [];
 			$aux['version'] = $res['version'];
 			$aux['lastModif'] = $res['lastModif'];
 			$aux['user'] = $res['user'];

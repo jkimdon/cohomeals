@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TodoController.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: TodoController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Tracker_TodoController
 {
@@ -32,12 +32,12 @@ class Services_Tracker_TodoController
 		$todolib = TikiLib::lib('todo');
 		$trklib = TikiLib::lib('trk');
 
-		return array(
+		return [
 			'title' => tr('Events'),
 			'trackerId' => $trackerId,
 			'todos' => $todolib->listTodoObject('tracker', $trackerId),
 			'statusTypes' => $trklib->status_types(),
-		);
+		];
 	}
 
 	function action_add($input)
@@ -68,15 +68,15 @@ class Services_Tracker_TodoController
 			$event,
 			'tracker',
 			$trackerId,
-			array('status' => $from),
-			array('status' => $to)
+			['status' => $from],
+			['status' => $to]
 		);
 
 		if ($delayNotif) {
-			$detail = array(
+			$detail = [
 				'mail' => 'creator',
 				'before' => $delayNotif,
-			);
+			];
 
 			if ($subject) {
 				$detail['subject'] = $subject;
@@ -89,22 +89,21 @@ class Services_Tracker_TodoController
 			$todolib->addTodo($delayAfter - $delayNotif, $event, 'todo', $todoId, "", $detail);
 		}
 
-		return array(
+		return [
 			'trackerId' => $trackerId,
 			'todoId' => $todoId,
-		);
+		];
 	}
 
 	function action_delete($input)
 	{
 		TikiLib::lib('todo')->delTodo($input->todoId->int());
-		return array(
-			'FORWARD' => array(
+		return [
+			'FORWARD' => [
 				'controller' => 'tracker_todo',
 				'action' => 'view',
 				'trackerId' => $input->trackerId->int(),
-			),
-		);
+			],
+		];
 	}
 }
-

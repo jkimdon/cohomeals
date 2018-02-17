@@ -1,4 +1,4 @@
-{* $Id: xmpp-client.tpl 62223 2017-04-15 21:28:56Z montefuscolo $ *}
+{* $Id: xmpp-client.tpl 62217 2017-04-15 15:27:37Z montefuscolo $ *}
 <script type="text/javascript">document.addEventListener("DOMContentLoaded", function(){
     var xmpp_service_url = $.service("xmpp", "prebind");
 

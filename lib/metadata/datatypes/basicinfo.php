@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: basicinfo.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: basicinfo.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
-header('location: index.php');
-exit;
+	header('location: index.php');
+	exit;
 }
 
 /**
@@ -21,21 +21,21 @@ class BasicInfo
 	 *
 	 * @var array
 	 */
-	var	$specs = array(
-		'size' => array(
+	var	$specs = [
+		'size' => [
 			'label' => 'File Size',
 			'suffix' => 'bytes',
-		),
-		'type' => array(
+		],
+		'type' => [
 			'label' => 'File Type',
-		),
-		'charset' => array(
+		],
+		'charset' => [
 			'label' => 'Character Set',
-		),
-		'devices' => array(
+		],
+		'devices' => [
 			'label' => 'Devices',
-		),
-	);
+		],
+	];
 
 	/**
 	 * Process raw basic metadata to ready for table presentations by adding labels and suffixes and expected fields

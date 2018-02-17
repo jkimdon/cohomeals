@@ -1,15 +1,15 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_test.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_test.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * \brief Skeleton to quick startup of making new debugger command
  * \author zaufi <zaufi@sendmail.ru>
  */
-require_once ('lib/debug/debugger-ext.php');
+require_once('lib/debug/debugger-ext.php');
 
 /**
  * \brief Just a test

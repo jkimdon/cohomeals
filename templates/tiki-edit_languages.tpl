@@ -1,12 +1,12 @@
-{* $Id: tiki-edit_languages.tpl 57255 2016-01-18 08:30:55Z gezzzan $ *}
+{* $Id: tiki-edit_languages.tpl 64338 2017-10-22 16:23:22Z jyhem $ *}
 {title admpage="i18n"}{tr}Edit languages{/tr}{/title}
 <div class="t_navbar margin-bottom-md">
 	{if $smarty.session.interactive_translation_mode eq 'on'}
-		{button href="tiki-interactive_trans.php?interactive_translation_mode=off" _text="{tr}Toggle interactive translation off{/tr}" _ajax="n"}
+		{button href="tiki-interactive_trans.php?interactive_translation_mode=off" _text="{tr}Turn off interactive translation{/tr}" _ajax="n"}
 	{else}
-		{button href="tiki-interactive_trans.php?interactive_translation_mode=on" _text="{tr}Toggle interactive translation on{/tr}" _ajax="n"}
+		{button href="tiki-interactive_trans.php?interactive_translation_mode=on" _text="{tr}Turn on interactive translation{/tr}" _ajax="n"}
 	{/if}
-	<a class="btn btn-link tips" href="{service controller=language action=manage_custom_php_translations}" title="{tr}Customized String Translation{/tr}:{tr}Manage local translations in a custom.php file{/tr}">
+	<a class="btn btn-link tips" href="{service controller=language action=manage_custom_translations}" title="{tr}Customized String Translation{/tr}:{tr}Manage local translations in a custom.php file{/tr}">
 		{icon name="file-code-o"} {tr}Custom Translations{/tr}
 	</a>
 	<a class="btn btn-link tips" href="{service controller=language action=upload language={$edit_language}}" title="{tr}Upload Translations{/tr}:{tr}Upload a file with translations for the selected language.{/tr}">
@@ -39,7 +39,7 @@
 				</a>
 				<a class="btn btn-link tips" href="{bootstrap_modal controller=language action=write_to_language_php language={$edit_language}}" title="{tr}Write to language.php{/tr}:{tr}Translations in the database will be merged with the other translations in language.php for the selected language.{/tr}">
 					{icon name="flash"}
-				</a>				
+				</a>
 			</div>
 		</div>
 	</div>
@@ -47,31 +47,31 @@
 		<div class="adminoptionbox">
 			<label for="add_tran_sw" class="col-md-4 control-label">{tr}Add a translation{/tr}</label>
 			<div class="col-md-8">
-				<label class="radio-inline"><input id="add_tran_sw" class="translation_action" type="radio" name="action" value="add_tran_sw" {if $action eq 'add_tran_sw'}checked="checked"{/if}>{tr}Add{/tr}</label>
+				<input id="add_tran_sw" class="translation_action" type="radio" name="action" value="add_tran_sw" {if $action eq 'add_tran_sw'}checked="checked"{/if}>
 			</div>
 		</div>
 	</div>
 	<div class="form-group">
 		<div class="adminoptionbox">
-			<label for="add_tran_sw" class="col-md-4 control-label">{tr}Edit translations{/tr}</label>
+			<label for="edit_rec_sw" class="col-md-4 control-label">{tr}Untranslated strings{/tr}</label>
 			<div class="col-md-8">
-				<label class="radio-inline"><input id="edit_tran_sw" class="translation_action" align="right" type="radio" name="action" value="edit_tran_sw" {if $action eq 'edit_tran_sw'}checked="checked"{/if}>{tr}Edit{/tr}</label>
-				<div class="adminoptionboxchild">
-					<label class="checkbox-inline"><input id="only_db_translations" class="translation_action" type="checkbox" name="only_db_translations" {if $only_db_translations eq 'y'}checked="checked"{/if}>{tr}Show only database stored translations{/tr}</label>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="form-group">
-		<div class="adminoptionbox">
-			<label for="add_tran_sw" class="col-md-4 control-label">{tr}Unstranslated strings{/tr}</label>
-			<div class="col-md-8">
-				<label class="radio-inline"><input id="edit_rec_sw" class="translation_action" align="right" type="radio" name="action" value="edit_rec_sw" {if $action eq 'edit_rec_sw'}checked="checked"{/if}>{tr}Untranslated{/tr}</label>
+				<input id="edit_rec_sw" class="translation_action" type="radio" name="action" value="edit_rec_sw" {if $action eq 'edit_rec_sw'}checked="checked"{/if}>
 				{if $prefs.record_untranslated eq 'y'}
 				<div class="adminoptionboxchild">
 					<label class="checkbox-inline"><input id="only_db_untranslated" class="translation_action" type="checkbox" name="only_db_untranslated" {if $only_db_untranslated eq 'y'}checked="checked"{/if}>{tr}Show only database stored untranslated strings{/tr}</label>
 				</div>
 				{/if}
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="adminoptionbox">
+			<label for="edit_tran_sw" class="col-md-4 control-label">{tr}Edit translations{/tr}</label>
+			<div class="col-md-8">
+				<input id="edit_tran_sw" class="translation_action" type="radio" name="action" value="edit_tran_sw" {if $action eq 'edit_tran_sw'}checked="checked"{/if}>
+				<div class="adminoptionboxchild">
+					<label class="checkbox-inline"><input id="only_db_translations" class="translation_action" type="checkbox" name="only_db_translations" {if $only_db_translations eq 'y'}checked="checked"{/if}>{tr}Show only database stored translations{/tr}</label>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -136,10 +136,10 @@
 							<th>
 								{tr}Translation{/tr}
 							</th>
-							<th></th>								
+							<th></th>
 						</tr>
 					</thead>
-					<tbody>					
+					<tbody>
 						{foreach from=$translations name=translations item=item}
 							<tr>
 								<td class="col-md-3">
@@ -154,17 +154,31 @@
 									<textarea id="tran_{$smarty.foreach.translations.index}" name="tran_{$smarty.foreach.translations.index}" class="form-control" rows="2">{$item.tran|escape}</textarea>
 								</td>
 								<td class="col-md-3 text-center">
-									<button type="submit" class="btn btn-primary btn-sm tips" name="edit_tran_{$smarty.foreach.translations.index}" title=":{tr}Save translation in the database{/tr}">
-										{tr}Translate{/tr}
-									</button>
-									{if $action eq 'edit_tran_sw' && isset($item.changed)}
-										<button type="submit" class="btn btn-warning btn-sm tips" name="del_tran_{$smarty.foreach.translations.index}" title=":{tr}Delete translation from the database{/tr}">
-											{tr}Delete{/tr}
-										</button>
+									{if $prefs.lang_control_contribution eq 'y'}
+										<label for="scope_{$smarty.foreach.translations.index}"
+											{if ! isset($item.id)}style="display: none"{/if}{* Only translations in the database have an id. *}
+											>
+											{tr}Contribute:{/tr}
+											<select name="scope_{$smarty.foreach.translations.index}" id="scope_{$smarty.foreach.translations.index}">
+												<option {if ! isset($item.general)}selected {/if}value="">{tr}Undecided{/tr}</option>
+												<option {if $item.general === true}selected {/if}value="general">{tr}Yes{/tr}</option>
+												<option {if $item.general === false}selected {/if}value="local">{tr}No{/tr}</option>
+											</select>
+										</label>
 									{/if}
+									<div>
+										<button type="submit" class="btn btn-primary btn-sm tips" name="edit_tran_{$smarty.foreach.translations.index}" title=":{tr}Save translation in the database{/tr}">
+											{tr}Translate{/tr}
+										</button>
+										{if $action eq 'edit_tran_sw' && isset($item.changed)}
+											<button type="submit" class="btn btn-warning btn-sm tips" name="del_tran_{$smarty.foreach.translations.index}" title=":{tr}Delete translation from the database{/tr}">
+												{tr}Delete{/tr}
+											</button>
+										{/if}
+									</div>
 									{assign var=itemIndex value=$smarty.foreach.translations.index}
 									{if isset($item.originalTranslation)}
-										{button _flip_id="diff_$itemIndex" _flip_hide_text="n" _text="{tr}Compare{/tr}" _title=":{tr}Compare the origional translation with the database translation{/tr}" _class="btn btn-default btn-sm tips"}
+										{button _flip_id="diff_$itemIndex" _flip_hide_text="n" _text="{tr}Compare{/tr}" _title=":{tr}Compare the original translation with the database translation{/tr}" _class="btn btn-default btn-sm tips"}
 									{/if}
 									{if isset($item.user) && isset($item.lastModif)}
 										<span class="help-block">
@@ -189,6 +203,16 @@
 						{/foreach}
 					</tbody>
 				</table>
+				{jq}
+					jQuery('select[name^="scope_"]').tooltip(
+						{title: "{tr}For translations specific to this Tiki instance, select No. If this translation can be contributed to the Tiki community, select Yes.{/tr}"}
+						);
+					
+					// Allow setting scope of database translations
+					jQuery('textarea[name^="tran_"]').change(function() {
+							jQuery(this).closest('tr').find("label[for^='scope_']").show();
+						});
+				{/jq}
 				<div class="text-center">
 					{pagination_links cant=$total step=$maxRecords offset=$offset _ajax='n'}{strip}
 					tiki-edit_languages.php?edit_language={$edit_language}&action={$action}&maxRecords={$maxRecords}&only_db_translations={$only_db_translations}&only_db_untranslated={$only_db_untranslated}{if isset($find)}&find={$find}{/if}

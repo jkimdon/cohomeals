@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: StructureController.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: StructureController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Wiki_StructureController
 {
@@ -21,8 +21,8 @@ class Services_Wiki_StructureController
 			$structlib->reorder_structure($data);
 			$params = json_decode($input->params->text());
 
-			$_GET = array();		// self_link and query objects used by get_toc adds all this request data to the action links
-			$_POST = array();
+			$_GET = [];		// self_link and query objects used by get_toc adds all this request data to the action links
+			$_POST = [];
 
 			$html = $structlib->get_toc(
 				$params->page_ref_id,
@@ -37,18 +37,17 @@ class Services_Wiki_StructureController
 				$params->mindepthsortalpha,
 				$params->structurePageName
 			);
-			
+
 			//Empty structure caches to refresh structure data in menu module. Seems better to empty cache for any possible subnodes, might make it a bit slow
 			$cachelib = TikiLib::lib('cache');
-			$structurePages = array();
+			$structurePages = [];
 			$structurePages = $structlib->s_get_structure_pages($params->page_ref_id);
-			foreach($structurePages as &$value) {
-				$cachetype = 'structure_'.$value["page_ref_id"].'_';
+			foreach ($structurePages as &$value) {
+				$cachetype = 'structure_' . $value["page_ref_id"] . '_';
 				$cachelib->empty_type_cache($cachetype);
 			}
 			unset($value);
 		}
-		return array('html' => $html);
+		return ['html' => $html];
 	}
 }
-

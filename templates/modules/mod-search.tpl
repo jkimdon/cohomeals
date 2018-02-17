@@ -1,4 +1,4 @@
-{* $Id: mod-search.tpl 62476 2017-05-07 15:36:45Z jonnybradley $ *}
+{* $Id: mod-search.tpl 62478 2017-05-07 16:07:47Z jonnybradley $ *}
 {compact}
 	{if $tiki_p_search eq 'y'}
 		{tikimodule error=$module_error title=$smod_params.title name="search" flip=$smod_params.flip decorations=$smod_params.decorations nobox=$smod_params.nobox notitle=$smod_params.notitle}

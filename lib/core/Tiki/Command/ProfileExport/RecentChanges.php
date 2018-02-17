@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RecentChanges.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: RecentChanges.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command\ProfileExport;
 
@@ -39,7 +39,7 @@ class RecentChanges extends ObjectWriter
 			$since = strtotime($since);
 		}
 
-		$ignoreList = array();
+		$ignoreList = [];
 		foreach ($input->getOption('ignore') as $object) {
 			if (preg_match("/^(?P<type>\w+):(?P<object>.+)$/", $object, $parts)) {
 				$ignoreList[] = $parts;
@@ -50,15 +50,19 @@ class RecentChanges extends ObjectWriter
 
 		$logs = \TikiDb::get()->table('tiki_actionlog');
 		$actions = $logs->fetchAll(
-			array(
+			[
 				'timestamp' => 'lastModif',
 				'action',
 				'type' => 'objectType',
 				'object',
 				'detail' => 'comment',
-			), array(
+			],
+			[
 				'lastModif' => $logs->greaterThan($since),
-			), -1, -1, 'lastModif_asc'
+			],
+			-1,
+			-1,
+			'lastModif_asc'
 		);
 
 		$queue = new \Tiki_Profile_Writer_Queue;

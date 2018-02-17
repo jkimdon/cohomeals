@@ -1,10 +1,10 @@
-{* $Id: include_wiki.tpl 62714 2017-05-24 09:36:53Z yonixxx $ *}
+{* $Id: include_wiki.tpl 64761 2017-11-30 14:18:41Z lfagundes $ *}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}Use the 'Quick Edit' module to easily create or edit wiki pages.{/tr} <a class="btn btn-default" href="tiki-admin_modules.php">{icon name="module"} {tr}Modules{/tr}</a>
 {/remarksbox}
 <form class="form-horizontal" action="tiki-admin.php?page=wiki" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="heading input_submit_container text-right">
 	</div>
 	<div class="t_navbar margin-bottom-md clearfix">
@@ -26,6 +26,9 @@
 				<legend>{tr}Plugins{/tr}</legend>
 				{preference name=wikiplugin_author}
 				{preference name=wikiplugin_include}
+				<div class="adminoptionboxchild" id="wikiplugin_include_childcontainer">
+				  {preference name=wiki_plugin_include_link_original}
+				</div>
 				{preference name=wikiplugin_transclude}
 				{preference name=wikiplugin_randominclude}
 				{preference name=wikiplugin_slideshow}
@@ -84,11 +87,12 @@
 				{preference name=feature_wiki_allowhtml}
 				{preference name=feature_wysiwyg}
 				{preference name=wiki_timeout_warning}
-				{preference name=wiki_edit_icons_toggle}
+				{preference name=wiki_edit_plugin}
 				{preference name=wiki_edit_section}
 				<div class="adminoptionboxchild" id="wiki_edit_section_childcontainer">
 					{preference name=wiki_edit_section_level}
 				</div>
+				{preference name=wiki_edit_icons_toggle}
 				{preference name=wiki_edit_minor}
 				{preference name=feature_wiki_mandatory_category}
 				{preference name=feature_actionlog_bytes}
@@ -160,6 +164,14 @@
 			{preference name=feature_backlinks}
 			<div class="adminoptionboxchild" id="feature_backlinks_childcontainer">
 				{preference name=wiki_backlinks_name_len}
+                                {preference name=wiki_backlinks_show_forum_post}
+                                {preference name=wiki_backlinks_show_comment}
+                                {preference name=wiki_backlinks_show_post}
+                                {preference name=wiki_backlinks_show_article}
+                                {preference name=wiki_backlinks_show_trackeritem}
+                                {preference name=wiki_backlinks_show_tracker}
+                                {preference name=wiki_backlinks_show_trackerfield}
+                                {preference name=wiki_backlinks_show_calendar_event}
 				<div class="col-sm-offset-4 col-md-8">
 					{permission_link addclass="timeout" mode=button permType=wiki textFilter=backlinks showDisabled=y}
 				</div>

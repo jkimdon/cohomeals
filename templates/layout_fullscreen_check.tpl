@@ -1,4 +1,4 @@
-{* $Id: layout_fullscreen_check.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: layout_fullscreen_check.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 {* this tpl is included in the various layout tpl's to show the *}
 {* clickable fullscreen icon if the full screen feature has been set *}
 

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 61745 2017-03-18 18:08:14Z lindonb $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -37,18 +37,19 @@ class Services_Access_Controller
 		return $ret;
 	}
 
-	private function prepareReturn($input) {
-		$title = !empty($input['title']) ? $input['title'] : tra('Please confirm');
-		$confirmButton = !empty($input['confirmButton']) ? $input['confirmButton'] : tra('OK');
-		$confirmButtonClass = !empty($input['confirmButtonClass']) ? $input['confirmButtonClass'] : 'btn-primary';
+	private function prepareReturn($input)
+	{
+		$title = ! empty($input['title']) ? $input['title'] : tra('Please confirm');
+		$confirmButton = ! empty($input['confirmButton']) ? $input['confirmButton'] : tra('OK');
+		$confirmButtonClass = ! empty($input['confirmButtonClass']) ? $input['confirmButtonClass'] : 'btn-primary';
 		$items = $input->asArray('items');
 
 		/*** confirm message ***/
-		$customMsg = !empty($input['customMsg']) ? $input['customMsg'] : '';
-		$customVerb = !empty($input['customVerb']) ? $input['customVerb'] : '';
-		$customObject = !empty($input['customObject']) ? $input['customObject'] : '';
+		$customMsg = ! empty($input['customMsg']) ? $input['customMsg'] : '';
+		$customVerb = ! empty($input['customVerb']) ? $input['customVerb'] : '';
+		$customObject = ! empty($input['customObject']) ? $input['customObject'] : '';
 		if (empty($customMsg)) {
-			if (!empty($customVerb) && !empty($customObject)) {
+			if (! empty($customVerb) && ! empty($customObject)) {
 				$customMsg = tr('Are you sure you want to %0 the following %1?', $customVerb, $customObject);
 			} else {
 				if (count($items) === 1) {
@@ -65,7 +66,7 @@ class Services_Access_Controller
 			'extra' => $input->asArray('extra'),
 			'toMsg' => $input->toMsg->xss(),
 			'toList' => $input->asArray('toList'),
-			'ticket' => $input->ticket->alnum(),
+			'ticket' => $input->ticket->striptags(),
 			'title' => $title,
 			'help' => $input->help->xss(),
 			'customMsg' => $customMsg,

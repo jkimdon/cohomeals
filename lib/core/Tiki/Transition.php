@@ -1,16 +1,16 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Transition.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: Transition.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Transition
 {
 	private $from;
 	private $to;
-	private $states = array();
-	private $guards = array();
+	private $states = [];
+	private $guards = [];
 
 	private $blockers;
 
@@ -29,9 +29,9 @@ class Tiki_Transition
 	function addGuard($type, $boundary, $set)
 	{
 		if (method_exists($this, '_' . $type)) {
-			$this->guards[] = array($type, $boundary, $set);
+			$this->guards[] = [$type, $boundary, $set];
 		} else {
-			$this->guards[] = array('unknown', 1, array($type));
+			$this->guards[] = ['unknown', 1, [$type]];
 		}
 	}
 
@@ -42,9 +42,9 @@ class Tiki_Transition
 
 	function explain()
 	{
-		$this->blockers = array();
-		$this->_exactly(1, array($this->from));
-		$this->_exactly(0, array($this->to));
+		$this->blockers = [];
+		$this->_exactly(1, [$this->from]);
+		$this->_exactly(0, [$this->to]);
 
 		$this->applyGuards();
 
@@ -56,13 +56,13 @@ class Tiki_Transition
 		foreach ($this->guards as $guard) {
 			$method = '_' . array_shift($guard);
 
-			call_user_func_array(array($this, $method), $guard);
+			call_user_func_array([$this, $method], $guard);
 		}
 	}
 
 	private function addBlocker($type, $amount, $set)
 	{
-		$this->blockers[] = array('class' => $type, 'count' => $amount, 'set' => array_values($set));
+		$this->blockers[] = ['class' => $type, 'count' => $amount, 'set' => array_values($set)];
 	}
 
 	private function _exactly($amount, $list)

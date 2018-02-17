@@ -1,4 +1,4 @@
-{* $Id: tiki-list_quizzes.tpl 57907 2016-03-16 13:23:47Z patrick-proulx $ *}
+{* $Id: tiki-list_quizzes.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title help="Quiz"}{tr}Quizzes{/tr}{/title}
 
 <div class="t_navbar margin-bottom-md">
@@ -81,7 +81,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.quiz_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.quiz_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: graph.pie.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: graph.pie.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 require_once 'lib/graph-engine/core.php';
 
@@ -16,49 +16,56 @@ class PieChartGraphic extends Graphic
 {
 	var $pie_data;
 
-	function PieChartGraphic()
+	function __construct()
 	{
-		Graphic::Graphic();
-		$this->pie_data = array();
+		parent::__construct();
+		$this->pie_data = [];
 	}
 
 	function getRequiredSeries()
 	{
-		return array(
+		return [
 			'label' => false,
 			'value' => true,
 			'color' => false,
 			'style' => false
-		);
+		];
 	}
 
-	function _handleData( $data )
+	function _handleData($data)
 	{
 		$elements = count($data['value']);
 
-		if ( !isset( $data['color'] ) ) {
-			$data['color'] = array();
-			for ( $i = 0; $elements > $i; ++$i )
+		if (! isset($data['color'])) {
+			$data['color'] = [];
+			for ($i = 0; $elements > $i; ++$i) {
 				$data['color'][] = $this->_getColor();
+			}
 		}
 
-		if ( !isset( $data['style'] ) )
-			for ( $i = 0; $elements > $i; ++$i )
+		if (! isset($data['style'])) {
+			for ($i = 0; $elements > $i; ++$i) {
 				$data['style'][] = 'FillStroke-' . $data['color'][$i];
+			}
+		}
 
-		if ( isset($data['label']) )
-			foreach ( $data['label'] as $key => $label )
+		if (isset($data['label'])) {
+			foreach ($data['label'] as $key => $label) {
 				$this->addLegend($data['color'][$key], $label);
+			}
+		}
 
 		$total = array_sum($data['value']);
-		foreach ( $data['value'] as $key => $value )
-			if ( is_numeric($value) )
-				$this->pie_data[] = array($data['style'][$key], $value / $total * 360);
+		foreach ($data['value'] as $key => $value) {
+			if (is_numeric($value)) {
+				$this->pie_data[] = [$data['style'][$key], $value / $total * 360];
+			}
+		}
 
 		return true;
 	}
 
-	function _drawContent( &$renderer )
+	function _drawContent(&$renderer)
 	{
 		$layout = $this->_layout();
 		$centerX = $layout['pie-center-x'];
@@ -67,7 +74,7 @@ class PieChartGraphic extends Graphic
 
 		$base = 0;
 
-		foreach ( $this->pie_data as $info ) {
+		foreach ($this->pie_data as $info) {
 			list($style, $degree) = $info;
 			$renderer->drawPie(
 				$centerX,
@@ -82,7 +89,7 @@ class PieChartGraphic extends Graphic
 		}
 	}
 
-	function _drawLegendBox( &$renderer, $color )
+	function _drawLegendBox(&$renderer, $color)
 	{
 		$renderer->drawRectangle(0, 0, 1, 1, $renderer->getStyle("FillStroke-$color"));
 	}
@@ -91,11 +98,11 @@ class PieChartGraphic extends Graphic
 	{
 		return array_merge(
 			parent::_default(),
-			array(
+			[
 				'pie-center-x' => 0.5,
 				'pie-center-y' => 0.5,
 				'pie-radius' => 0.4
-			)
+			]
 		);
 	}
 }

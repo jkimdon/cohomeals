@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WidgetOptions.php 61911 2017-03-28 15:47:08Z jonnybradley $
+// $Id: WidgetOptions.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -68,5 +68,4 @@ class Table_Code_WidgetOptions extends Table_Code_Manager
 			parent::$code[self::$level1][self::$level2] = $code;
 		}
 	}
-
 }

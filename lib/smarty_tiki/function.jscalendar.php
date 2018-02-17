@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.jscalendar.php 62994 2017-06-13 12:38:04Z kroky6 $
+// $Id: function.jscalendar.php 64634 2017-11-19 12:59:14Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -19,7 +19,7 @@ function smarty_function_jscalendar($params, $smarty)
 
 	$uiCalendarInstance = uniqid();
 
-	if (!isset($params['id'])) {
+	if (! isset($params['id'])) {
 		$params['id'] = 'uiCal_' . $uiCalendarInstance;
 	}
 	$id = '';
@@ -29,15 +29,15 @@ function smarty_function_jscalendar($params, $smarty)
 	} else {
 		$name = '';
 	}
-	if (!isset($params['date'])) {
+	if (! isset($params['date'])) {
 		// if date is provided empty then show a blank date (for filters)
 		$params['date'] = $tikilib->now;
 	}
-	$datepicker_options = '{ altField: "#' . $params['id'] . '", onClose: function(dateText, inst) {'.
-		'$(inst.settings.altField).removeClass("isDatepicker");'.
-		'$.datepickerAdjustAltField("'.((!isset($params['showtime']) || $params['showtime'] === 'n') ? 'datepicker' : 'datetimepicker').'", inst);'.
+	$datepicker_options = '{ altField: "#' . $params['id'] . '", onClose: function(dateText, inst) {' .
+		'$(inst.settings.altField).removeClass("isDatepicker");' .
+		'$.datepickerAdjustAltField("' . ((! isset($params['showtime']) || $params['showtime'] === 'n') ? 'datepicker' : 'datetimepicker') . '", inst);' .
 		'}';
-	if (!empty($params['goto'])) {
+	if (! empty($params['goto'])) {
 		$datepicker_options .= ', onSelect: function(dateText, inst) { window.location="' .
 														$params['goto'] . '".replace("%s",$("#' . $params['id'] . '").val()/1000); }';
 	}
@@ -47,7 +47,7 @@ function smarty_function_jscalendar($params, $smarty)
 		$calendarlib = TikiLib::lib('calendar');
 		$first = $calendarlib->firstDayofWeek();
 
-		if (!is_numeric($first) || !in_array($first, array(0, 1, 2, 3, 4, 5, 6))) {
+		if (! is_numeric($first) || ! in_array($first, [0, 1, 2, 3, 4, 5, 6])) {
 			$first = 0;
 		}
 
@@ -117,40 +117,40 @@ function smarty_function_jscalendar($params, $smarty)
 
 	$datepicker_options .= $datepicker_options_common;
 
-	$html = '<input type="hidden" id="' . $params['id'] . '"' . $name  . ' value="'.$params['date'].'" class="isDatepicker">';
+	$html = '<input type="hidden" id="' . $params['id'] . '"' . $name . ' value="' . $params['date'] . '" class="isDatepicker">';
 	$html .= '<input type="hidden" id="tzoffset" name="tzoffset" value="">';
 	$headerlib->add_jq_onready('$("input[name=tzoffset]").val((new Date()).getTimezoneOffset());');
-	if( isset($params['isutc']) && $params['isutc'] )
+	if (isset($params['isutc']) && $params['isutc']) {
 		$headerlib->add_jq_onready('$("#' . $params['id'] . '").val(' . intval($params['date']) . ' + (new Date()).getTimezoneOffset()*60);');
-	$html .= '<input type="text" style="width:225px" class="form-control isDatepicker" id="' . $params['id'] . '_dptxt" value="">';	// text version of datepicker date
+	}
+	$html .= '<input type="text" class="form-control isDatepicker" id="' . $params['id'] . '_dptxt" value="">';	// text version of datepicker date
 	$headerlib->add_jq_onready('$("#' . $params['id'] . '_dptxt").change(function(e){' .
-		'var inst = $.datepicker._getInst(this);'.
-		'$.datepickerAdjustAltField("'.( !isset($params['showtime']) || $params['showtime'] === 'n' ? 'datepicker' : 'datetimepicker' ).'", inst);'.
+		'var inst = $.datepicker._getInst(this);' .
+		'$.datepickerAdjustAltField("' . ( ! isset($params['showtime']) || $params['showtime'] === 'n' ? 'datepicker' : 'datetimepicker' ) . '", inst);' .
 		'})');
 
 	$display_tz = $tikilib->get_display_timezone();
-	if ( $display_tz == '' ) {
+	if ($display_tz == '') {
 		$display_tz = 'UTC';
 	}
 	if (strpos($display_tz, 'Etc/GMT+') !== false) {
 		$display_tz = str_replace('Etc/GMT+', 'GMT-', $display_tz);
-	} else if (strpos($display_tz, 'Etc/GMT-') !== false) {
+	} elseif (strpos($display_tz, 'Etc/GMT-') !== false) {
 		$display_tz = str_replace('Etc/GMT-', 'GMT+', $display_tz);
 	}
 
 	// TODO use a parsed version of $prefs['short_date_format']
 	// Note: JS timestamp is in milliseconds - php is seconds
 	// Note: adding local browser offset if php date is in UTC, see JsCalendar tracker field
-	if (!isset($params['showtime']) || $params['showtime'] === 'n') {
-
+	if (! isset($params['showtime']) || $params['showtime'] === 'n') {
 		$command = 'datepicker';
 		$js_val = empty($params['date']) ? '""' : '$.datepicker.formatDate( "' .
-			$prefs['short_date_format_js'] . '", new Date('.$params['date'].'* 1000 + '.(isset($params['isutc']) && $params['isutc'] ? '(new Date()).getTimezoneOffset()*60*1000' : '0').'))';
+			$prefs['short_date_format_js'] . '", new Date(' . $params['date'] . '* 1000 + ' . (isset($params['isutc']) && $params['isutc'] ? '(new Date()).getTimezoneOffset()*60*1000' : '0') . '))';
 		$headerlib->add_jq_onready(
 			'$("#' . $params['id'] . '_dptxt").val(' . $js_val . ').tiki("' .
 			$command . '", "jscalendar", ' . $datepicker_options . ');'
 		);
-
+		$timeclass = '';
 	} else {
 		// add timezone info if showing the time
 		$html .= '<span class="description">' . tra('Time zone') . ': ' . $display_tz . '</span>';
@@ -159,7 +159,7 @@ function smarty_function_jscalendar($params, $smarty)
 		$command = 'datetimepicker';
 
 		$js_val1 = empty($params['date']) ? '' : '
-var dt = new Date('.$params['date'].'* 1000 + '.(isset($params['isutc']) && $params['isutc'] ? '(new Date()).getTimezoneOffset()*60*1000' : '0').');
+var dt = new Date(' . $params['date'] . '* 1000 + ' . (isset($params['isutc']) && $params['isutc'] ? '(new Date()).getTimezoneOffset()*60*1000' : '0') . ');
 var tm = { hour: dt.getHours(), minute: dt.getMinutes(), second: dt.getSeconds() };
 ';
 		$js_val2 = empty($params['date']) ? '""' : '$.datepicker.formatDate( "' .
@@ -167,20 +167,21 @@ var tm = { hour: dt.getHours(), minute: dt.getMinutes(), second: dt.getSeconds()
 					$prefs['short_time_format_js'] . '", tm)';
 
 		$headerlib->add_jq_onready(
-			$js_val1 . '$("#' . $params['id'] . '_dptxt").val(' . $js_val2 . ').tiki("' . 
+			$js_val1 . '$("#' . $params['id'] . '_dptxt").val(' . $js_val2 . ').tiki("' .
 			$command . '", "jscalendar", ' . $datepicker_options . ');'
 		);
+
+		$timeclass = ' datetime';
 	}
 
 	$smarty->loadPlugin('smarty_function_icon');
 	$icon = smarty_function_icon(['name' => 'calendar'], $smarty);
 	$headerlib->add_jq_onready("$('#" . $params['id'] . "').closest('div.jscal').find(' button.ui-datepicker-trigger').empty().append('$icon').addClass('btn btn-sm btn-link').css({'padding' : '0px', 'font-size': '16px'});");
 
-	return '<div class="jscal" style="margin-bottom:10px">' . $html . '</div>';
+	return '<div class="jscal' . $timeclass . '" style="margin-bottom:10px">' . $html . '</div>';
 }
 
 function smarty_function_jscalendar_tra($str)
 {
 	return str_replace("'", "\\'", tra($str));
 }
-

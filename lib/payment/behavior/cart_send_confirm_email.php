@@ -3,16 +3,18 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: cart_send_confirm_email.php 57966 2016-03-17 20:05:33Z jonnybradley $
+// $Id: cart_send_confirm_email.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
-function payment_behavior_cart_send_confirm_email( $u, $email_template_ids = array() )
+function payment_behavior_cart_send_confirm_email($u, $email_template_ids = [])
 {
 	global $prefs;
 	$userlib = TikiLib::lib('user');
 	$smarty = TikiLib::lib('smarty');
 	require_once('lib/webmail/tikimaillib.php');
 	$email = $userlib->get_user_email($u);
-	if (!$email) return false;
+	if (! $email) {
+		return false;
+	}
 	$smarty->assign("email_template_ids", $email_template_ids);
 	$mail_subject = $smarty->fetch('mail/cart_order_received_reg_subject.tpl');
 	$mail_data = $smarty->fetch('mail/cart_order_received_reg.tpl');

@@ -3,13 +3,13 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-live_support_message.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-live_support_message.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
-require_once ('tiki-setup.php');
-include_once ('lib/live_support/lsadminlib.php');
+require_once('tiki-setup.php');
+include_once('lib/live_support/lsadminlib.php');
 $access->check_feature('feature_live_support');
 $smarty->assign('sent', 'n');
 $smarty->assign('nomsg', 'y');

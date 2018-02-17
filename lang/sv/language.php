@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Simplified Chinese" => "Förenklad kinesiska",
 "Czech" => "Tjeckiska",
 "Danish" => "Danska",
@@ -1013,7 +1013,7 @@ $lang = array(
 "Requires" => "Kräver",
 "You need to set" => "Du behöver aktivera",
 "Rate" => "Betyg",
-"Repeat password" => "Upprepa lösenordet",
+"Confirm password" => "Upprepa lösenordet",
 "Generate a password" => "Generera ett lösenord",
 "Valid" => "Giltig",
 "Create New" => "Skapa ny",
@@ -2166,4 +2166,4 @@ $lang = array(
 "Aborted" => "Avbruten",
 "Top pages" => "Bästa sidor",
 "Last pages" => "Senaste sidor",
-);
+];

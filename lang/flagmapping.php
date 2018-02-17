@@ -1,9 +1,9 @@
 <?php // -*- coding:utf-8 -*-
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: flagmapping.php 57973 2016-03-17 20:10:42Z jonnybradley $
+// $Id: flagmapping.php 64615 2017-11-17 23:53:38Z rjsmelo $
 
 /** \brief This table associates language country (flag name) and language name in the current language
 * PLEASE : Translators, update this file with your flag for your own language (if applicable)
@@ -15,45 +15,45 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	exit;
 }
 
-$flagmapping = array(
-	'ca' 	=> array('Catalan_Countries'),
-	'cs' 	=> array('Czech_Republic'),
-	'da' 	=> array('Denmark'),
-	'de' 	=> array('Germany'),
-	'en' 	=> array('United_States'),
-	'en-uk'	=> array('United_Kingdom'),
-	'es' 	=> array('Spain'),
-	'el' 	=> array('Greece'),
-	'fi' 	=> array('Finland'),
-	'fj' 	=> array('Fiji'),
-	'fr' 	=> array('France'),
-	'he' 	=> array('Israel'),
-	'hr' 	=> array('Croatia'),
-	'id' 	=> array('Indonesia'),
-	'is'	=> array('Iceland'),  
-	'it' 	=> array('Italy'),
-	'ja' 	=> array('Japan'),
-	'lt' 	=> array('Lithuania'),
-	'hu' 	=> array('Hungary'),
+$flagmapping = [
+	'ca' 	=> ['Catalan_Countries'],
+	'cs' 	=> ['Czech_Republic'],
+	'da' 	=> ['Denmark'],
+	'de' 	=> ['Germany'],
+	'en' 	=> ['United_States'],
+	'en-uk'	=> ['United_Kingdom'],
+	'es' 	=> ['Spain'],
+	'el' 	=> ['Greece'],
+	'fi' 	=> ['Finland'],
+	'fj' 	=> ['Fiji'],
+	'fr' 	=> ['France'],
+	'he' 	=> ['Israel'],
+	'hr' 	=> ['Croatia'],
+	'id' 	=> ['Indonesia'],
+	'is'	=> ['Iceland'],
+	'it' 	=> ['Italy'],
+	'ja' 	=> ['Japan'],
+	'lt' 	=> ['Lithuania'],
+	'hu' 	=> ['Hungary'],
 //        'nds' 	=> array('Low_Germany'),
-        'nds' 	=> array('Hansa_HH'),  
-//        'nds' 	=> array('Hansa_HL'),  
-	'nl' 	=> array('Netherlands'),
-	'no' 	=> array('Norway'),
-	'pl' 	=> array('Poland'),
-	'pt' 	=> array('Portugal'),
-	'pt-br'	=> array('Brazil'),
-	'ro' 	=> array('Romania'),
-	'ru' 	=> array('Russian_Federation'),
-	'sb' 	=> array('Solomon_Islands'),
-	'sk' 	=> array('Slovakia'),
-	'sl' 	=> array('Slovenia'),
-	'sr-latn'	=> array('Serbia'),
-	'sq' 	=> array('Albania'),
-	'sv' 	=> array('Sweden'),
-	'tr' 	=> array('Turkey'),
-	'tv' 	=> array('Tuvalu'),
-	'uk' 	=> array('Ukraine'),
-	'cy'	=> array('Wales'),
-	'vi' 	=> array('Viet_Nam'),
-);
+		'nds' 	=> ['Hansa_HH'],
+//        'nds'     => array('Hansa_HL'),
+	'nl' 	=> ['Netherlands'],
+	'no' 	=> ['Norway'],
+	'pl' 	=> ['Poland'],
+	'pt' 	=> ['Portugal'],
+	'pt-br'	=> ['Brazil'],
+	'ro' 	=> ['Romania'],
+	'ru' 	=> ['Russian_Federation'],
+	'sb' 	=> ['Solomon_Islands'],
+	'sk' 	=> ['Slovakia'],
+	'sl' 	=> ['Slovenia'],
+	'sr-latn'	=> ['Serbia'],
+	'sq' 	=> ['Albania'],
+	'sv' 	=> ['Sweden'],
+	'tr' 	=> ['Turkey'],
+	'tv' 	=> ['Tuvalu'],
+	'uk' 	=> ['Ukraine'],
+	'cy'	=> ['Wales'],
+	'vi' 	=> ['Viet_Nam'],
+];

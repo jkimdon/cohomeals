@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ListPagesTest.php 58382 2016-04-20 08:59:56Z jonnybradley $
+// $Id: ListPagesTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group gui
  */
 
 
-class  AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
+class AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
 {
 
 	public function ___testRememberToReactivateTestsIn_AcceptanceTests_ListPagesTest()
@@ -25,7 +25,7 @@ class  AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
 	{
 		$this->openTikiPage('tiki-listpages.php');
 		$this->_assertListPagesTableIsWellFormed();
-		$this->_assertListedPagesWere(array(0 => "HomePage", 1 => "EnglishTestPage"), "Listed pages");
+		$this->_assertListedPagesWere([0 => "HomePage", 1 => "EnglishTestPage"], "Listed pages");
 		$this->assertEquals("Page", $this->getTable("//div[@id='tiki-listpages-content']/form/table.0.1"));
 		$this->assertEquals("Hits", $this->getTable("//div[@id='tiki-listpages-content']/form/table.0.2"));
 		$this->assertEquals("Last mod", $this->getTable("//div[@id='tiki-listpages-content']/form/table.0.3"));
@@ -54,11 +54,11 @@ class  AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
 	{
 		$this->openTikiPage('tiki-listpages.php');
 		$this->logInIfNecessaryAs('admin');
-		$this->_assertListedPagesWere(array(0 => 'HomePage', 1 => 'EnglishTestPage'), "Listed pages");
+		$this->_assertListedPagesWere([0 => 'HomePage', 1 => 'EnglishTestPage'], "Listed pages");
 		$this->assertTrue($this->isElementPresent("//img[@alt='Remove']"));
 		$this->clickAndWait("//img[@alt='Remove']");
 		$this->open('http://localhost/tiki-trunk/tiki-listpages.php');
-		$this->_assertListedPagesWere(array(0 => "HomePage"), "Listed pages");
+		$this->_assertListedPagesWere([0 => "HomePage"], "Listed pages");
 	}
 
 	/**
@@ -104,7 +104,6 @@ class  AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
 			"xpath=//a[contains(@title,'Versions')]",
 			"Versions column was not present"
 		);
-
 	}
 
 	private function _assertListedPagesWere($listOfPages, $message)
@@ -117,5 +116,4 @@ class  AcceptanceTests_ListPagesTest extends TikiSeleniumTestCase
 			$this->assertElementPresent("link=$expectedPage", "$message\nLink to expected page '$expectedPage' was missing");
 		}
 	}
-
 }

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_gal.php 61743 2017-03-18 17:42:47Z lindonb $
+// $Id: include_gal.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 // This script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -44,7 +44,7 @@ if ($access->ticketMatch()) {
 			$mvresult = $imagegallib->move_gallery_store($_REQUEST['move_gallery'], $_REQUEST['mvimg']);
 			$mvmsg = sprintf(tra('moved %d images, %d errors occurred.'), $mvresult['moved_images'], $mvresult['errors']);
 			if ($mvresult['timeout']) {
-				$mvmsg.= ' ' . tra('a timeout occurred. Hit the reload button to move the rest');
+				$mvmsg .= ' ' . tra('a timeout occurred. Hit the reload button to move the rest');
 			}
 			Feedback::note($mvmsg, 'session');
 		}

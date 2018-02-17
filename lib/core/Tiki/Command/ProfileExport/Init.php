@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Init.php 60724 2016-12-21 16:00:18Z kroky6 $
+// $Id: Init.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command\ProfileExport;
 
@@ -52,8 +52,8 @@ HTACCESS;
 profile.name = $profileName
 INI;
 		file_put_contents("profiles/info.ini", $definition);
-		
-		if( !file_exists("profiles/$profileName") ) {
+
+		if (! file_exists("profiles/$profileName")) {
 			mkdir("profiles/$profileName");
 		}
 	}

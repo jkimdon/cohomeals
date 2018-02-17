@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: resource.tplwiki.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: resource.tplwiki.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -22,9 +22,9 @@ function smarty_resource_tplwiki_source($page, &$tpl_source, $smarty)
 {
 	global $tikilib, $user;
 
-	$perms = Perms::get(array( 'type' => 'wiki page', 'object' => $page ));
-	if ( ! $perms->use_as_template ) {
-		$tpl_source= tra('Permission denied: the specified wiki page cannot be used as Smarty template resource').'<br />';
+	$perms = Perms::get([ 'type' => 'wiki page', 'object' => $page ]);
+	if (! $perms->use_as_template) {
+		$tpl_source = tra('Permission denied: the specified wiki page cannot be used as Smarty template resource') . '<br />';
 		// TODO: do not cache ! and return the message only once should be enough...
 		return true;
 	}
@@ -54,10 +54,10 @@ function smarty_resource_tplwiki_timestamp($page, &$tpl_timestamp, $smarty)
 
 function smarty_resource_tplwiki_secure($tpl_name, $smarty)
 {
-    return true;
+	return true;
 }
 
 function smarty_resource_tplwiki_trusted($tpl_name, $smarty)
 {
-    return true;
+	return true;
 }

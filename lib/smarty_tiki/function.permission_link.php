@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.permission_link.php 60201 2016-11-08 09:52:00Z kroky6 $
+// $Id: function.permission_link.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -28,20 +28,20 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  *                      button_link: button with label (btn-link)
  *
  * Occasional: label, alter the displayed text from default
-               group, parameter to objectpermissions
+			   group, parameter to objectpermissions
 			   textFilter, parameter to objectpermissions
 			   showDisabled, parameter to objectpermissions
 			   addclass: add classes separated by spaces
  */
-function smarty_function_permission_link( $params, $smarty )
+function smarty_function_permission_link($params, $smarty)
 {
 	$params = new JitFilter($params);
 	$type = $params->type->text();
 	$objectType = $params->objectType->text();
-	if (! $objectType ) {
+	if (! $objectType) {
 		$objectType = $type;
 	}
-	$id = $params->id->text();
+	$id = $params->id->none();
 
 	$objectlib = TikiLib::lib('object');
 	if (isset($params['type'], $params['id'])) {
@@ -49,7 +49,7 @@ function smarty_function_permission_link( $params, $smarty )
 			'objectType' => $objectType,
 			'objectId' => $id,
 			'permType' => $type,
-			'objectName' => $params->title->text() ?: $objectlib->get_title($type, $id),
+			'objectName' => $params->title->none() ?: $objectlib->get_title($type, $id),
 		];
 	} else {
 		$arguments = [];
@@ -92,4 +92,3 @@ function smarty_function_permission_link( $params, $smarty )
 		],
 	]);
 }
-

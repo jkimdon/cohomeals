@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SmartyTemplate.php 59367 2016-08-04 17:25:45Z nkoth $
+// $Id: SmartyTemplate.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_Interface
 {
 	private $templateFile;
 	private $changeDelimiters;
-	private $data = array();
-	private $fields = array();
+	private $data = [];
+	private $fields = [];
 
 	function __construct($templateFile, $changeDelimiters = false)
 	{
@@ -47,7 +47,7 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 	{
 		$smarty = new Smarty_Tiki;
 
-		if ( $this->changeDelimiters ) {
+		if ($this->changeDelimiters) {
 			$smarty->left_delimiter = '{{';
 			$smarty->right_delimiter = '}}';
 		}
@@ -64,12 +64,12 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 			'facets',
 			array_map(
 				function ($facet) {
-					return array(
+					return [
 						'name' => $facet->getName(),
 						'label' => $facet->getLabel(),
 						'options' => $facet->getOptions(),
 						'operator' => $facet->getOperator(),
-					);
+					];
 				},
 				$entries->getFacets()
 			)
@@ -90,4 +90,3 @@ class Search_Formatter_Plugin_SmartyTemplate implements Search_Formatter_Plugin_
 		return $smarty->fetch($this->templateFile);
 	}
 }
-

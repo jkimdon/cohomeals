@@ -1,4 +1,4 @@
-/* $Id: tiki_base.css 63745 2017-09-06 08:31:39Z chibaguy $
+/* $Id: tiki_base.css 64929 2017-12-19 05:17:42Z chibaguy $
 	This Tiki Wiki CMS Groupware file contains global design
 	and layout properties. */
 .margin-bottom-xs {
@@ -33,6 +33,9 @@ a.fc-event:hover {
 }
 .filter .fancyfilter .token {
   background: #ffffff;
+  border: 1px solid #777777;
+  font-size: 11px;
+  padding: 3px;
 }
 .note-list .postbody-title {
   background: #ffffff;
@@ -621,7 +624,8 @@ h6 a.tiki_anchor:hover {
   border-left: 2px solid #777777;
 }
 .mandatory_star {
-  color: #ebccd1;
+  color: #d9534f;
+  font-size: 120%;
 }
 .trackerplugindesc {
   color: #333333;
@@ -1058,6 +1062,10 @@ span.btn-link {
   display: inline-block;
   margin-right: 2px;
 }
+.jscal.datetime input[type=text] {
+  /* shows the timezone too */
+  width: 50%;
+}
 select.form-control.date {
   padding: 0;
   margin-left: 0;
@@ -1272,6 +1280,69 @@ textarea.wikiedit {
   margin-top: -20px;
   padding-top: 20px;
 }
+div.categbar {
+  text-align: right;
+  clear: both;
+}
+.cat_Full_width_content > .container,
+.cat_full_width_content > .container,
+.cat_Full_width_content .middle.container,
+.cat_full_width_content .middle.container,
+.cat_Full_width_content .layout_social > .container,
+.cat_full_width_content .layout_social > .container {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+.cat_Full_width_content #row-middle.row,
+.cat_full_width_content #row-middle.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+.cat_Full_width_content #col1,
+.cat_full_width_content #col1 {
+  padding-left: 0;
+  padding-right: 0;
+}
+.cat_Full_width_content .content-area,
+.cat_full_width_content .content-area {
+  padding: 0;
+}
+.cat_Full_width_content .catblock,
+.cat_full_width_content .catblock,
+.cat_Full_width_content .wikitopline,
+.cat_full_width_content .wikitopline,
+.cat_Full_width_content .wikiactions_wrapper,
+.cat_full_width_content .wikiactions_wrapper,
+.cat_Full_width_content #page-bar,
+.cat_full_width_content #page-bar {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.uol ol:not(.media-list),
+ol.uol {
+  counter-reset: item;
+}
+.uol ol:not(.media-list) > li {
+  display: block;
+  text-indent: -1rem;
+}
+.uol ol:not(.media-list) > li:before {
+  content: counters(item, ".") ".\0000a0";
+  counter-increment: item;
+}
+.uol ol:not(.media-list) > li ol > li:before {
+  content: counters(item, ".") "\0000a0";
+  counter-increment: item;
+}
+.nouol ol > li {
+  display: list-item;
+  text-indent: 0;
+}
+.nouol ol > li:before,
+.nouol ol > li ol > li:before {
+  content: "";
+}
 .box-quickadmin li {
   font-size: 0.9em;
 }
@@ -1421,6 +1492,10 @@ li.login_link ul li a {
 .siteloginbar_popup img {
   height: 24px;
 }
+.siteloginbar_popup .list-unstyled li a {
+  padding-left: 0;
+  padding-right: 0;
+}
 .navbar-form .siteloginbar_poppedup .form-control,
 .navbar-form .siteloginbar_poppedup .form-group.text-center {
   width: 100%;
@@ -1554,6 +1629,16 @@ div.cvsup {
 .layout_fixed_top_modules #top_modules .btn-link {
   margin-top: 6.57142857px;
 }
+.navbar-fixed-top .dropdown .btn,
+.layout_social .topbar_modules .dropdown .btn,
+.layout_social_modules .topbar_modules .dropdown .btn,
+.layout_fixed_top_modules #top_modules .dropdown .btn,
+.navbar-fixed-top .dropdown .btn-link,
+.layout_social .topbar_modules .dropdown .btn-link,
+.layout_social_modules .topbar_modules .dropdown .btn-link,
+.layout_fixed_top_modules #top_modules .dropdown .btn-link {
+  margin-top: inherit;
+}
 .layout_social_modules #topbar_modules {
   display: block;
 }
@@ -1565,6 +1650,27 @@ div.cvsup {
 @media (min-width: 768px) {
   .layout_social_modules .navbar-header {
     margin-top: -34px;
+  }
+}
+@media (max-width: 767px) {
+  .box-search .form-inline .input-group {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .box-search .form-inline .input-group .form-control {
+    width: auto;
+  }
+  .box-search .form-inline .input-group .input-group-btn {
+    float: left;
+    width: auto;
+  }
+  .box-search .panel-body .form-inline .input-group {
+    width: 100%;
+  }
+  .box-search .panel-body .form-inline .input-group .input-group-addon,
+  .box-search .panel-body .form-inline .input-group .input-group-btn,
+  .box-search .panel-body .form-inline .input-group .form-control {
+    width: 100%;
   }
 }
 .textarea-toolbar img.icon {
@@ -1839,8 +1945,9 @@ div.posthead {
 span.posthead {
   display: block;
 }
-.postbody-title .panel-title {
-  font-size: 1.4em;
+.tiki-view_blog .postbody .panel-title,
+.tiki-view_blog_post .postbody .panel-title {
+  font-size: 28px;
 }
 .breadcrumb {
   font-size: 90%;
@@ -2281,7 +2388,8 @@ table.treetable tr.expanded span.indenter a {
   padding-right: 1em;
   font-size: 0.9em;
 }
-.tracker-item-files label {
+.tracker-item-files a.file-delete-icon {
+  display: inline-block;
   clear: right;
   float: right;
 }
@@ -2447,11 +2555,8 @@ ul.tree {
 .plugin-sample .plugin-param {
   padding-left: 15px;
 }
-div.aclabel,
-span.aclabel,
-label.aclabel {
-  float: left;
-  min-width: 150px;
+td.journalDeleted {
+  color: #ddd;
 }
 .viewmode {
   line-height: 1em;
@@ -4773,6 +4878,44 @@ div.tiki_plugin {
   margin: .2em;
   padding: .2em;
 }
+.options-container ol,
+.new-option {
+  list-style: none;
+}
+.options-container #options {
+  min-height: 10em;
+  border: 4px #eeeeee dashed;
+}
+.options-container li {
+  padding: .5em;
+  margin: .2em;
+  position: relative;
+}
+li .label-group {
+  width: 16em;
+  max-width: 35%;
+  margin-right: 2em;
+}
+li .url-group {
+  width: 25em;
+  max-width: 55%;
+}
+.options-container > ol > li {
+  border: 1px solid #eeeeee;
+}
+.options-container .child-options {
+  width: 100%;
+  float: left;
+}
+.options-container .child-options > li {
+  margin-bottom: 0;
+}
+.new-option .label-group {
+  max-width: 100%;
+}
+.new-option * {
+  cursor: move;
+}
 .TextArea-fullscreen {
   display: block;
   width: 100%;
@@ -5263,5 +5406,654 @@ h6:hover .heading-link {
 }
 .tiki select {
   font-size: 14px;
+}
+.tiki #converse-embedded-chat,
+.tiki #conversejs {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333333;
+}
+.tiki #converse-embedded-chat a,
+.tiki #conversejs a,
+.tiki #converse-embedded-chat a:visited,
+.tiki #conversejs a:visited {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat input[type=text],
+.tiki #conversejs input[type=text],
+.tiki #converse-embedded-chat textarea,
+.tiki #conversejs textarea,
+.tiki #converse-embedded-chat select,
+.tiki #conversejs select {
+  background-color: #ffffff;
+  color: #555555;
+  border-color: #cccccc;
+}
+.tiki #converse-embedded-chat form.pure-form input[type=text],
+.tiki #conversejs form.pure-form input[type=text],
+.tiki #converse-embedded-chat form.pure-form textarea,
+.tiki #conversejs form.pure-form textarea,
+.tiki #converse-embedded-chat form.pure-form select,
+.tiki #conversejs form.pure-form select {
+  background-color: #ffffff;
+  color: #555555;
+  border-color: #cccccc;
+}
+.tiki #converse-embedded-chat form.pure-form.converse-form,
+.tiki #conversejs form.pure-form.converse-form {
+  background-color: inherit;
+}
+.tiki #converse-embedded-chat form.pure-form.converse-form .form-help,
+.tiki #conversejs form.pure-form.converse-form .form-help,
+.tiki #converse-embedded-chat form.pure-form.converse-form .form-help:hover,
+.tiki #conversejs form.pure-form.converse-form .form-help:hover {
+  color: #333333;
+}
+.tiki #converse-embedded-chat .button-primary,
+.tiki #conversejs .button-primary {
+  color: #ffffff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.tiki #converse-embedded-chat .button-primary:focus,
+.tiki #conversejs .button-primary:focus,
+.tiki #converse-embedded-chat .button-primary.focus,
+.tiki #conversejs .button-primary.focus {
+  color: #ffffff;
+  background-color: #286090;
+  border-color: #122b40;
+}
+.tiki #converse-embedded-chat .button-primary:hover,
+.tiki #conversejs .button-primary:hover {
+  color: #ffffff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+.tiki #converse-embedded-chat .button-primary:active,
+.tiki #conversejs .button-primary:active,
+.tiki #converse-embedded-chat .button-primary.active,
+.tiki #conversejs .button-primary.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-primary,
+.open > .dropdown-toggle.tiki #conversejs .button-primary {
+  color: #ffffff;
+  background-color: #286090;
+  border-color: #204d74;
+}
+.tiki #converse-embedded-chat .button-primary:active:hover,
+.tiki #conversejs .button-primary:active:hover,
+.tiki #converse-embedded-chat .button-primary.active:hover,
+.tiki #conversejs .button-primary.active:hover,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-primary:hover,
+.open > .dropdown-toggle.tiki #conversejs .button-primary:hover,
+.tiki #converse-embedded-chat .button-primary:active:focus,
+.tiki #conversejs .button-primary:active:focus,
+.tiki #converse-embedded-chat .button-primary.active:focus,
+.tiki #conversejs .button-primary.active:focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-primary:focus,
+.open > .dropdown-toggle.tiki #conversejs .button-primary:focus,
+.tiki #converse-embedded-chat .button-primary:active.focus,
+.tiki #conversejs .button-primary:active.focus,
+.tiki #converse-embedded-chat .button-primary.active.focus,
+.tiki #conversejs .button-primary.active.focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-primary.focus,
+.open > .dropdown-toggle.tiki #conversejs .button-primary.focus {
+  color: #ffffff;
+  background-color: #204d74;
+  border-color: #122b40;
+}
+.tiki #converse-embedded-chat .button-primary:active,
+.tiki #conversejs .button-primary:active,
+.tiki #converse-embedded-chat .button-primary.active,
+.tiki #conversejs .button-primary.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-primary,
+.open > .dropdown-toggle.tiki #conversejs .button-primary {
+  background-image: none;
+}
+.tiki #converse-embedded-chat .button-primary.disabled:hover,
+.tiki #conversejs .button-primary.disabled:hover,
+.tiki #converse-embedded-chat .button-primary[disabled]:hover,
+.tiki #conversejs .button-primary[disabled]:hover,
+fieldset[disabled] .tiki #converse-embedded-chat .button-primary:hover,
+fieldset[disabled] .tiki #conversejs .button-primary:hover,
+.tiki #converse-embedded-chat .button-primary.disabled:focus,
+.tiki #conversejs .button-primary.disabled:focus,
+.tiki #converse-embedded-chat .button-primary[disabled]:focus,
+.tiki #conversejs .button-primary[disabled]:focus,
+fieldset[disabled] .tiki #converse-embedded-chat .button-primary:focus,
+fieldset[disabled] .tiki #conversejs .button-primary:focus,
+.tiki #converse-embedded-chat .button-primary.disabled.focus,
+.tiki #conversejs .button-primary.disabled.focus,
+.tiki #converse-embedded-chat .button-primary[disabled].focus,
+.tiki #conversejs .button-primary[disabled].focus,
+fieldset[disabled] .tiki #converse-embedded-chat .button-primary.focus,
+fieldset[disabled] .tiki #conversejs .button-primary.focus {
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+.tiki #converse-embedded-chat .button-primary .badge,
+.tiki #conversejs .button-primary .badge {
+  color: #337ab7;
+  background-color: #ffffff;
+}
+.tiki #converse-embedded-chat .button-secondary,
+.tiki #conversejs .button-secondary {
+  color: #ffffff;
+  background-color: #5bc0de;
+  border-color: #46b8da;
+}
+.tiki #converse-embedded-chat .button-secondary:focus,
+.tiki #conversejs .button-secondary:focus,
+.tiki #converse-embedded-chat .button-secondary.focus,
+.tiki #conversejs .button-secondary.focus {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #1b6d85;
+}
+.tiki #converse-embedded-chat .button-secondary:hover,
+.tiki #conversejs .button-secondary:hover {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+.tiki #converse-embedded-chat .button-secondary:active,
+.tiki #conversejs .button-secondary:active,
+.tiki #converse-embedded-chat .button-secondary.active,
+.tiki #conversejs .button-secondary.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-secondary,
+.open > .dropdown-toggle.tiki #conversejs .button-secondary {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+.tiki #converse-embedded-chat .button-secondary:active:hover,
+.tiki #conversejs .button-secondary:active:hover,
+.tiki #converse-embedded-chat .button-secondary.active:hover,
+.tiki #conversejs .button-secondary.active:hover,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-secondary:hover,
+.open > .dropdown-toggle.tiki #conversejs .button-secondary:hover,
+.tiki #converse-embedded-chat .button-secondary:active:focus,
+.tiki #conversejs .button-secondary:active:focus,
+.tiki #converse-embedded-chat .button-secondary.active:focus,
+.tiki #conversejs .button-secondary.active:focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-secondary:focus,
+.open > .dropdown-toggle.tiki #conversejs .button-secondary:focus,
+.tiki #converse-embedded-chat .button-secondary:active.focus,
+.tiki #conversejs .button-secondary:active.focus,
+.tiki #converse-embedded-chat .button-secondary.active.focus,
+.tiki #conversejs .button-secondary.active.focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-secondary.focus,
+.open > .dropdown-toggle.tiki #conversejs .button-secondary.focus {
+  color: #ffffff;
+  background-color: #269abc;
+  border-color: #1b6d85;
+}
+.tiki #converse-embedded-chat .button-secondary:active,
+.tiki #conversejs .button-secondary:active,
+.tiki #converse-embedded-chat .button-secondary.active,
+.tiki #conversejs .button-secondary.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat .button-secondary,
+.open > .dropdown-toggle.tiki #conversejs .button-secondary {
+  background-image: none;
+}
+.tiki #converse-embedded-chat .button-secondary.disabled:hover,
+.tiki #conversejs .button-secondary.disabled:hover,
+.tiki #converse-embedded-chat .button-secondary[disabled]:hover,
+.tiki #conversejs .button-secondary[disabled]:hover,
+fieldset[disabled] .tiki #converse-embedded-chat .button-secondary:hover,
+fieldset[disabled] .tiki #conversejs .button-secondary:hover,
+.tiki #converse-embedded-chat .button-secondary.disabled:focus,
+.tiki #conversejs .button-secondary.disabled:focus,
+.tiki #converse-embedded-chat .button-secondary[disabled]:focus,
+.tiki #conversejs .button-secondary[disabled]:focus,
+fieldset[disabled] .tiki #converse-embedded-chat .button-secondary:focus,
+fieldset[disabled] .tiki #conversejs .button-secondary:focus,
+.tiki #converse-embedded-chat .button-secondary.disabled.focus,
+.tiki #conversejs .button-secondary.disabled.focus,
+.tiki #converse-embedded-chat .button-secondary[disabled].focus,
+.tiki #conversejs .button-secondary[disabled].focus,
+fieldset[disabled] .tiki #converse-embedded-chat .button-secondary.focus,
+fieldset[disabled] .tiki #conversejs .button-secondary.focus {
+  background-color: #5bc0de;
+  border-color: #46b8da;
+}
+.tiki #converse-embedded-chat .button-secondary .badge,
+.tiki #conversejs .button-secondary .badge {
+  color: #5bc0de;
+  background-color: #ffffff;
+}
+.tiki #converse-embedded-chat .toggle-controlbox,
+.tiki #conversejs .toggle-controlbox {
+  background-color: #337ab7;
+  padding: 8px 10px 0 10px;
+}
+.tiki #converse-embedded-chat .toggle-controlbox span,
+.tiki #conversejs .toggle-controlbox span {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatbox,
+.tiki #conversejs #minimized-chats .chat-head-chatbox {
+  background-color: #337ab7;
+}
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatbox .restore-chat,
+.tiki #conversejs #minimized-chats .chat-head-chatbox .restore-chat,
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatbox .chatbox-btn,
+.tiki #conversejs #minimized-chats .chat-head-chatbox .chatbox-btn {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatroom,
+.tiki #conversejs #minimized-chats .chat-head-chatroom {
+  background-color: #5bc0de;
+}
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatroom .restore-chat,
+.tiki #conversejs #minimized-chats .chat-head-chatroom .restore-chat,
+.tiki #converse-embedded-chat #minimized-chats .chat-head-chatroom .chatbox-btn,
+.tiki #conversejs #minimized-chats .chat-head-chatroom .chatbox-btn {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat #controlbox .box-flyout,
+.tiki #conversejs #controlbox .box-flyout,
+.tiki #converse-embedded-chat .chatbox .box-flyout,
+.tiki #conversejs .chatbox .box-flyout {
+  background-color: #ffffff;
+}
+.tiki #converse-embedded-chat #controlbox .controlbox-head,
+.tiki #conversejs #controlbox .controlbox-head,
+.tiki #converse-embedded-chat #controlbox .controlbox-panes,
+.tiki #conversejs #controlbox .controlbox-panes,
+.tiki #converse-embedded-chat #controlbox .controlbox-pane,
+.tiki #conversejs #controlbox .controlbox-pane {
+  background-color: inherit;
+}
+.tiki #converse-embedded-chat #controlbox .controlbox-head,
+.tiki #conversejs #controlbox .controlbox-head {
+  border-bottom: 1px solid #dddddd;
+}
+.tiki #converse-embedded-chat #controlbox .controlbox-head .chatbox-btn,
+.tiki #conversejs #controlbox .controlbox-head .chatbox-btn {
+  color: #333333;
+}
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs,
+.tiki #conversejs #controlbox #controlbox-tabs {
+  border-bottom: 1px solid #dddddd;
+}
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs li a,
+.tiki #conversejs #controlbox #controlbox-tabs li a {
+  margin-left: 2px;
+  height: 48px;
+  line-height: 48px;
+  color: #337ab7;
+  border: 1px solid transparent;
+  box-shadow: none;
+  background-color: transparent;
+}
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs li a:hover,
+.tiki #conversejs #controlbox #controlbox-tabs li a:hover {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs li a.current,
+.tiki #conversejs #controlbox #controlbox-tabs li a.current,
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs li a.current:hover,
+.tiki #conversejs #controlbox #controlbox-tabs li a.current:hover,
+.tiki #converse-embedded-chat #controlbox #controlbox-tabs li a.current:focus,
+.tiki #conversejs #controlbox #controlbox-tabs li a.current:focus {
+  color: #555555;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-bottom-color: transparent;
+  height: 48px;
+}
+.tiki #converse-embedded-chat #controlbox #chatrooms dl.rooms-list dt,
+.tiki #conversejs #controlbox #chatrooms dl.rooms-list dt {
+  color: #333333;
+  text-shadow: none;
+}
+.tiki #converse-embedded-chat #controlbox #chatrooms dl.rooms-list dd.available-chatroom:hover,
+.tiki #conversejs #controlbox #chatrooms dl.rooms-list dd.available-chatroom:hover {
+  background-color: inherit;
+}
+.tiki #converse-embedded-chat #controlbox #chatrooms dl.rooms-list dd.available-chatroom:hover a,
+.tiki #conversejs #controlbox #chatrooms dl.rooms-list dd.available-chatroom:hover a {
+  color: #333333;
+}
+.tiki #converse-embedded-chat #controlbox #chatrooms dl.rooms-list dd.available-chatroom a.room-info,
+.tiki #conversejs #controlbox #chatrooms dl.rooms-list dd.available-chatroom a.room-info {
+  margin-top: 2px;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown,
+.tiki #conversejs #controlbox .fancy-dropdown {
+  color: #ffffff;
+  background-color: #5bc0de;
+  border-color: #46b8da;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:focus,
+.tiki #conversejs #controlbox .fancy-dropdown:focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.focus,
+.tiki #conversejs #controlbox .fancy-dropdown.focus {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #1b6d85;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:hover,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:hover,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:hover,
+.tiki #conversejs #controlbox .fancy-dropdown:hover {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:active,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:active,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:active,
+.tiki #conversejs #controlbox .fancy-dropdown:active,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.active,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.active,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.active,
+.tiki #conversejs #controlbox .fancy-dropdown.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select,
+.open > .dropdown-toggle.tiki #conversejs #controlbox #fancy-xmpp-status-select,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox .fancy-dropdown,
+.open > .dropdown-toggle.tiki #conversejs #controlbox .fancy-dropdown {
+  color: #ffffff;
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:active:hover,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:active:hover,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:active:hover,
+.tiki #conversejs #controlbox .fancy-dropdown:active:hover,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.active:hover,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.active:hover,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.active:hover,
+.tiki #conversejs #controlbox .fancy-dropdown.active:hover,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:hover,
+.open > .dropdown-toggle.tiki #conversejs #controlbox #fancy-xmpp-status-select:hover,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox .fancy-dropdown:hover,
+.open > .dropdown-toggle.tiki #conversejs #controlbox .fancy-dropdown:hover,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:active:focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:active:focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:active:focus,
+.tiki #conversejs #controlbox .fancy-dropdown:active:focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.active:focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.active:focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.active:focus,
+.tiki #conversejs #controlbox .fancy-dropdown.active:focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:focus,
+.open > .dropdown-toggle.tiki #conversejs #controlbox #fancy-xmpp-status-select:focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox .fancy-dropdown:focus,
+.open > .dropdown-toggle.tiki #conversejs #controlbox .fancy-dropdown:focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:active.focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:active.focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:active.focus,
+.tiki #conversejs #controlbox .fancy-dropdown:active.focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.active.focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.active.focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.active.focus,
+.tiki #conversejs #controlbox .fancy-dropdown.active.focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.focus,
+.open > .dropdown-toggle.tiki #conversejs #controlbox #fancy-xmpp-status-select.focus,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox .fancy-dropdown.focus,
+.open > .dropdown-toggle.tiki #conversejs #controlbox .fancy-dropdown.focus {
+  color: #ffffff;
+  background-color: #269abc;
+  border-color: #1b6d85;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:active,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select:active,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown:active,
+.tiki #conversejs #controlbox .fancy-dropdown:active,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.active,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.active,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.active,
+.tiki #conversejs #controlbox .fancy-dropdown.active,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select,
+.open > .dropdown-toggle.tiki #conversejs #controlbox #fancy-xmpp-status-select,
+.open > .dropdown-toggle.tiki #converse-embedded-chat #controlbox .fancy-dropdown,
+.open > .dropdown-toggle.tiki #conversejs #controlbox .fancy-dropdown {
+  background-image: none;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.disabled:hover,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.disabled:hover,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.disabled:hover,
+.tiki #conversejs #controlbox .fancy-dropdown.disabled:hover,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select[disabled]:hover,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select[disabled]:hover,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown[disabled]:hover,
+.tiki #conversejs #controlbox .fancy-dropdown[disabled]:hover,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:hover,
+fieldset[disabled] .tiki #conversejs #controlbox #fancy-xmpp-status-select:hover,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox .fancy-dropdown:hover,
+fieldset[disabled] .tiki #conversejs #controlbox .fancy-dropdown:hover,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.disabled:focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.disabled:focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.disabled:focus,
+.tiki #conversejs #controlbox .fancy-dropdown.disabled:focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select[disabled]:focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select[disabled]:focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown[disabled]:focus,
+.tiki #conversejs #controlbox .fancy-dropdown[disabled]:focus,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select:focus,
+fieldset[disabled] .tiki #conversejs #controlbox #fancy-xmpp-status-select:focus,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox .fancy-dropdown:focus,
+fieldset[disabled] .tiki #conversejs #controlbox .fancy-dropdown:focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.disabled.focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select.disabled.focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown.disabled.focus,
+.tiki #conversejs #controlbox .fancy-dropdown.disabled.focus,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select[disabled].focus,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select[disabled].focus,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown[disabled].focus,
+.tiki #conversejs #controlbox .fancy-dropdown[disabled].focus,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select.focus,
+fieldset[disabled] .tiki #conversejs #controlbox #fancy-xmpp-status-select.focus,
+fieldset[disabled] .tiki #converse-embedded-chat #controlbox .fancy-dropdown.focus,
+fieldset[disabled] .tiki #conversejs #controlbox .fancy-dropdown.focus {
+  background-color: #5bc0de;
+  border-color: #46b8da;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select .badge,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select .badge,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown .badge,
+.tiki #conversejs #controlbox .fancy-dropdown .badge {
+  color: #5bc0de;
+  background-color: #ffffff;
+}
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select .choose-xmpp-status,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select .choose-xmpp-status,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown .choose-xmpp-status,
+.tiki #conversejs #controlbox .fancy-dropdown .choose-xmpp-status,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select .toggle-xmpp-contact-form,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select .toggle-xmpp-contact-form,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown .toggle-xmpp-contact-form,
+.tiki #conversejs #controlbox .fancy-dropdown .toggle-xmpp-contact-form,
+.tiki #converse-embedded-chat #controlbox #fancy-xmpp-status-select a.change-xmpp-status-message,
+.tiki #conversejs #controlbox #fancy-xmpp-status-select a.change-xmpp-status-message,
+.tiki #converse-embedded-chat #controlbox .fancy-dropdown a.change-xmpp-status-message,
+.tiki #conversejs #controlbox .fancy-dropdown a.change-xmpp-status-message {
+  color: inherit;
+  text-shadow: none;
+}
+.tiki #converse-embedded-chat #controlbox .xmpp-status-menu li a.online,
+.tiki #conversejs #controlbox .xmpp-status-menu li a.online,
+.tiki #converse-embedded-chat #controlbox .xmpp-status-menu li a.dnd,
+.tiki #conversejs #controlbox .xmpp-status-menu li a.dnd,
+.tiki #converse-embedded-chat #controlbox .xmpp-status-menu li a.away,
+.tiki #conversejs #controlbox .xmpp-status-menu li a.away {
+  color: #1f7e9a;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-filter-form .filter-type,
+.tiki #conversejs #controlbox #converse-roster .roster-filter-form .filter-type {
+  border-color: #cccccc;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-filter-form .roster-filter,
+.tiki #conversejs #controlbox #converse-roster .roster-filter-form .roster-filter {
+  background-color: #ffffff;
+  color: #555555;
+  border-color: #cccccc;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dt,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dt {
+  color: #333333;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dt a,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dt a {
+  color: inherit;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dt:hover,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dt:hover {
+  background-color: transparent;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dd,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dd {
+  color: #337ab7;
+  background-color: transparent;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dd a,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dd a,
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dd span,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dd span {
+  color: inherit;
+  text-shadow: none;
+}
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dd a:hover,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dd a:hover,
+.tiki #converse-embedded-chat #controlbox #converse-roster .roster-contacts dd span:hover,
+.tiki #conversejs #controlbox #converse-roster .roster-contacts dd span:hover {
+  color: #333333;
+}
+.tiki #converse-embedded-chat #controlbox #converse-register,
+.tiki #conversejs #controlbox #converse-register {
+  background-color: transparent;
+}
+.tiki #converse-embedded-chat #controlbox #converse-register .form-help .url,
+.tiki #conversejs #controlbox #converse-register .form-help .url {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat #controlbox #converse-register .form-help .url:hover,
+.tiki #conversejs #controlbox #converse-register .form-help .url:hover {
+  color: #23527c;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar {
+  background-color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar ul,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar ul {
+  background-color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar > li,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar > li {
+  margin: -2px;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar a,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar a,
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley,
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar .unencrypted,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar .unencrypted {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley ul li:hover,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley ul li:hover {
+  background-color: #ffffff;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley ul li:hover a,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar .toggle-smiley ul li:hover a {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatbox form.sendXMPPMessage .chat-toolbar .chat-toolbar-text,
+.tiki #conversejs .chatbox form.sendXMPPMessage .chat-toolbar .chat-toolbar-text {
+  text-shadow: none;
+}
+.tiki #converse-embedded-chat .chatbox .dropdown,
+.tiki #conversejs .chatbox .dropdown {
+  background-color: transparent;
+}
+.tiki #converse-embedded-chat .chatbox .chat-head,
+.tiki #conversejs .chatbox .chat-head {
+  border-bottom: 1px solid #333333;
+}
+.tiki #converse-embedded-chat .chatbox .chat-head.chat-head-chatbox,
+.tiki #conversejs .chatbox .chat-head.chat-head-chatbox {
+  background-color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatbox .chat-head .chat-title,
+.tiki #conversejs .chatbox .chat-head .chat-title,
+.tiki #converse-embedded-chat .chatbox .chat-head .close-chatbox-button,
+.tiki #conversejs .chatbox .chat-head .close-chatbox-button,
+.tiki #converse-embedded-chat .chatbox .chat-head .toggle-chatbox-button,
+.tiki #conversejs .chatbox .chat-head .toggle-chatbox-button {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat .chatbox .chat-body,
+.tiki #conversejs .chatbox .chat-body {
+  background-color: inherit;
+}
+.tiki #converse-embedded-chat .chatbox .chat-body .chat-content,
+.tiki #conversejs .chatbox .chat-body .chat-content {
+  height: calc(100% - 95px);
+  color: #333333;
+  background-color: inherit;
+}
+.tiki #converse-embedded-chat .chatbox .chat-body .chat-info,
+.tiki #conversejs .chatbox .chat-body .chat-info {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatbox .chat-body .chat-message span.chat-msg-me,
+.tiki #conversejs .chatbox .chat-body .chat-message span.chat-msg-me {
+  color: #5bc0de;
+}
+.tiki #converse-embedded-chat .chatbox .chat-body .chat-message span.chat-msg-them,
+.tiki #conversejs .chatbox .chat-body .chat-message span.chat-msg-them {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom {
+  background-color: #5bc0de;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .close-chatbox-button,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .close-chatbox-button,
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .toggle-chatbox-button,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .toggle-chatbox-button,
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .toggle-bookmark,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .toggle-bookmark,
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .chat-title,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .chat-title,
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .chatroom-description,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .chatroom-description,
+.tiki #converse-embedded-chat .chatroom .box-flyout .chat-head-chatroom .configure-chatroom-button,
+.tiki #conversejs .chatroom .box-flyout .chat-head-chatroom .configure-chatroom-button {
+  color: #ffffff;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body p,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body p {
+  color: #333333;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body .occupants,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body .occupants {
+  background-color: inherit;
+  border-left-color: #333333;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body .occupants ul li.moderator,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body .occupants ul li.moderator {
+  color: #337ab7;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body .occupants ul li.occupant .occupant-status,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body .occupants ul li.occupant .occupant-status {
+  margin-left: 1px;
+  box-shadow: 0px 0px 1px 1px #444;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body .chatroom-form-container,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body .chatroom-form-container {
+  background-color: inherit;
+  color: #333333;
+}
+.tiki #converse-embedded-chat .chatroom .box-flyout .chatroom-body .room-invite .invited-contact,
+.tiki #conversejs .chatroom .box-flyout .chatroom-body .room-invite .invited-contact {
+  border-color: #cccccc;
 }
 /* End of file */

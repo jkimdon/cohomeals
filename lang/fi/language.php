@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabia",
 "Catalan" => "Katalonia",
 "Simplified Chinese" => "Yksinkertaistettu Kiina",
@@ -1382,7 +1382,7 @@ $lang = array(
 "vote" => "äänestä",
 "Rate" => "Kerroin",
 "A valid email is mandatory to register" => "Voimassa oleva sähköposti osoite on pakollinen rekisteröinnissä",
-"Repeat password" => "Toista salasana",
+"Confirm password" => "Toista salasana",
 "Generate a password" => "Luo salasana",
 "Valid" => "Hyväksytty",
 "Create New" => "Luo uusi",
@@ -2832,4 +2832,4 @@ $lang = array(
 "Aborted" => "Keskeytetty",
 "Top pages" => "Top sivut",
 "Last pages" => "Viimeiset sivut",
-);
+];

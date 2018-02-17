@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: HTMLPurifier.tiki.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: HTMLPurifier.tiki.php 64798 2017-12-04 15:35:17Z jonnybradley $
 
 /**
  * @file
@@ -29,8 +29,8 @@
 function HTMLPurifier($html, $config = null)
 {
 	static $purifier = false;
-	if (!$purifier || !$config) {
-		if (!$config) {	// mod for tiki temp files location
+	if (! $purifier || ! $config) {
+		if (! $config) {	// mod for tiki temp files location
 			$config = getHTMLPurifierTikiConfig();
 		}
 		$purifier = new HTMLPurifier();
@@ -45,10 +45,13 @@ function getHTMLPurifierTikiConfig()
 {
 	global $tikipath, $prefs;
 
-	$d = $tikipath.'temp/cache/HTMLPurifierCache';
-	if (!is_dir($d)) {
-		if (!mkdir($d)) {
-			$d = $tikipath.'temp/cache';
+	$d = $tikipath . 'temp/cache/HTMLPurifierCache';
+	if (! is_dir($d)) {
+		if (! mkdir($d)) {
+			$d = $tikipath . 'temp/cache';
+		} else {
+			// add x for dir perms which is 0111 in octal, 73 in decimal
+			chmod($d, (int) $prefs['smarty_cache_perms'] | 73);
 		}
 	}
 	$conf = HTMLPurifier_Config::createDefault();
@@ -59,13 +62,13 @@ function getHTMLPurifierTikiConfig()
 		$conf->set('Attr.EnableID', 1);
 		$conf->set('HTML.Doctype', 'XHTML 1.0 Transitional');
 		$conf->set('HTML.TidyLevel', 'light');
-		if ( $def = $conf->maybeGetRawHTMLDefinition() ) {
+		if ($def = $conf->maybeGetRawHTMLDefinition()) {
 			$def->addAttribute('a', 'target', 'Enum#_blank,_self,_target,_top');
 			$def->addAttribute('a', 'name', 'CDATA');
 			// Add usemap attribute to img tag
 			$def->addAttribute('img', 'usemap', 'CDATA');
 		// rel attribute for anchors
-		$def->addAttribute('a', 'rel', 'CDATA');
+			$def->addAttribute('a', 'rel', 'CDATA');
 
 			// Add map tag
 			$map = $def->addElement(
@@ -73,13 +76,13 @@ function getHTMLPurifierTikiConfig()
 				'Block', // content set
 				'Flow', // allowed children
 				'Common', // attribute collection
-				array( // attributes
+				[ // attributes
 					'name' => 'CDATA',
 					'id' => 'ID',
 					'title' => 'CDATA',
-				)
+				]
 			);
-			$map->excludes = array('map' => true);
+			$map->excludes = ['map' => true];
 
 			// Add area tag
 			$area = $def->addElement(
@@ -87,20 +90,20 @@ function getHTMLPurifierTikiConfig()
 				'Block', // content set
 				'Empty', // don't allow children
 				'Common', // attribute collection
-				array( // attributes
+				[ // attributes
 					'name' => 'CDATA',
 					'id' => 'ID',
 					'alt' => 'Text',
 					'coords' => 'CDATA',
 					'accesskey' => 'Character',
-					'nohref' => new HTMLPurifier_AttrDef_Enum(array('nohref')),
+					'nohref' => new HTMLPurifier_AttrDef_Enum(['nohref']),
 					'href' => 'URI',
-					'shape' => new HTMLPurifier_AttrDef_Enum(array('rect','circle','poly','default')),
+					'shape' => new HTMLPurifier_AttrDef_Enum(['rect','circle','poly','default']),
 					'tabindex' => 'Number',
-					'target' => new HTMLPurifier_AttrDef_Enum(array('_blank','_self','_target','_top'))
-				)
+					'target' => new HTMLPurifier_AttrDef_Enum(['_blank','_self','_target','_top'])
+				]
 			);
-			$area->excludes = array('area' => true);
+			$area->excludes = ['area' => true];
 		}
 	}
 	return $conf;

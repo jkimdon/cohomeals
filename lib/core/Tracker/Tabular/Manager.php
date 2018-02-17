@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Manager.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: Manager.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular;
 
@@ -27,6 +27,7 @@ class Manager
 
 		$info['format_descriptor'] = json_decode($info['format_descriptor'], true) ?: [];
 		$info['filter_descriptor'] = json_decode($info['filter_descriptor'], true) ?: [];
+		$info['config'] = json_decode($info['config'], true) ?: [];
 		return $info;
 	}
 
@@ -37,15 +38,27 @@ class Manager
 			'trackerId' => $trackerId,
 			'format_descriptor' => '[]',
 			'filter_descriptor' => '[]',
+			'config' => json_encode([
+				'simple_headers' => 0,
+				'import_update' => 1,
+				'ignore_blanks' => 0,
+				'import_transaction' => 0,
+			]),
 		]);
 	}
 
-	function update($tabularId, $name, array $fields, array $filters)
+	function update($tabularId, $name, array $fields, array $filters, array $config)
 	{
 		return $this->table->update([
 			'name' => $name,
 			'format_descriptor' => json_encode($fields),
 			'filter_descriptor' => json_encode($filters),
+			'config' => json_encode([
+				'simple_headers' => intval(! empty($config['simple_headers'])),
+				'import_update' => intval(! empty($config['import_update'])),
+				'ignore_blanks' => intval(! empty($config['ignore_blanks'])),
+				'import_transaction' => intval(! empty($config['import_transaction'])),
+			])
 		], ['tabularId' => $tabularId]);
 	}
 
@@ -54,4 +67,3 @@ class Manager
 		return $this->table->delete(['tabularId' => $tabularId]);
 	}
 }
-

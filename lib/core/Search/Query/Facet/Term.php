@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Term.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Term.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Query_Facet_Term implements Search_Query_Facet_Interface
 {
@@ -85,7 +85,7 @@ class Search_Query_Facet_Term implements Search_Query_Facet_Interface
 
 	function setOperator($operator)
 	{
-		$this->operator = in_array($operator, array('and', 'or')) ? $operator : 'or';
+		$this->operator = in_array($operator, ['and', 'or']) ? $operator : 'or';
 		return $this;
 	}
 
@@ -94,4 +94,3 @@ class Search_Query_Facet_Term implements Search_Query_Facet_Interface
 		return $this->operator;
 	}
 }
-

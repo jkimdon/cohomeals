@@ -3,16 +3,16 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-directory_redirect.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-directory_redirect.php 64605 2017-11-17 02:03:50Z rjsmelo $
 
-require_once ('tiki-setup.php');
-include_once ('lib/directory/dirlib.php');
+require_once('tiki-setup.php');
+include_once('lib/directory/dirlib.php');
 $access->check_feature('feature_directory');
 $access->check_permission('tiki_p_view_directory');
-if (!isset($_REQUEST['siteId'])) {
+if (! isset($_REQUEST['siteId'])) {
 	$smarty->assign('msg', tra("No site indicated"));
 	$smarty->display("error.tpl");
 	die;

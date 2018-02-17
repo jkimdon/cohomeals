@@ -3,11 +3,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Customizer.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Customizer.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Event_Customizer
 {
-	private $ruleSets = array();
+	private $ruleSets = [];
 
 	function addRule($eventName, $function)
 	{
@@ -30,4 +30,3 @@ class Tiki_Event_Customizer
 		return $this->ruleSets[$eventName];
 	}
 }
-

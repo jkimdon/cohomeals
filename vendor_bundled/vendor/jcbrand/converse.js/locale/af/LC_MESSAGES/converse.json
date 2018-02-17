@@ -31,6 +31,10 @@
             null,
             "Kanseleer"
          ],
+         "Are you sure you want to remove the bookmark \"%1$s\"?": [
+            null,
+            "Is u seker u wil die boekmerk \"%1$s\" verwyder?"
+         ],
          "Sorry, something went wrong while trying to save your bookmark.": [
             null,
             "Jammer, 'n fout het voorgekom tydens storing van u boekmerk."
@@ -39,25 +43,17 @@
             null,
             "Klik om die boekmerklys te skakel"
          ],
-         "Bookmarked Rooms": [
+         "Remove this bookmark": [
             null,
-            "Kletskamerboekmerke"
-         ],
-         "Are you sure you want to remove the bookmark \"%1$s\"?": [
-            null,
-            "Is u seker u wil die boekmerk \"%1$s\" verwyder?"
-         ],
-         "Click to open this room": [
-            null,
-            "Klik om hierdie kletskamer te open"
+            "Verwyder hierdie boekmerk"
          ],
          "Show more information on this room": [
             null,
             "Wys meer inligting aangaande hierdie kletskamer"
          ],
-         "Remove this bookmark": [
+         "Click to open this room": [
             null,
-            "Verwyder hierdie boekmerk"
+            "Klik om hierdie kletskamer te open"
          ],
          "You have unread messages": [
             null,
@@ -70,6 +66,10 @@
          "Personal message": [
             null,
             "Persoonlike boodskap"
+         ],
+         "Send": [
+            null,
+            ""
          ],
          "me": [
             null,
@@ -227,6 +227,14 @@
             null,
             "Meld af"
          ],
+         "Click to add new chat contacts": [
+            null,
+            "Klik om nuwe kletskontakte by te voeg"
+         ],
+         "Add a contact": [
+            null,
+            "Voeg 'n kontak by"
+         ],
          "Contact name": [
             null,
             "Kontaknaam"
@@ -243,73 +251,17 @@
             null,
             "Voeg by"
          ],
-         "Click to add new chat contacts": [
-            null,
-            "Klik om nuwe kletskontakte by te voeg"
-         ],
-         "Add a contact": [
-            null,
-            "Voeg 'n kontak by"
-         ],
          "No users found": [
             null,
             "Geen gebruikers gevind"
          ],
-         "Click to add as a chat contact": [
+         "This client does not allow presence subscriptions": [
             null,
-            "Klik om as kletskontak by te voeg"
-         ],
-         "Toggle chat": [
-            null,
-            "Klets"
+            "Hierdie klient laat nie beskikbaarheidsinskrywings toe nie"
          ],
          "Click to hide these contacts": [
             null,
             "Klik om hierdie kontakte te verskuil"
-         ],
-         "Reconnecting": [
-            null,
-            "Herkonnekteer"
-         ],
-         "The connection has dropped, attempting to reconnect.": [
-            null,
-            "Die konneksie is onderbreek, probeer tans tans om te herkonnekteer."
-         ],
-         "Connection error": [
-            null,
-            "Fout tydens verbinding"
-         ],
-         "An error occurred while connecting to the chat server.": [
-            null,
-            "A fout het voorgekom tydens verbinding met die kletsbediener."
-         ],
-         "Connecting": [
-            null,
-            "Verbind tans"
-         ],
-         "Authenticating": [
-            null,
-            "Besig om te bekragtig"
-         ],
-         "Authentication Failed": [
-            null,
-            "Bekragtiging het gefaal"
-         ],
-         "Connection failed": [
-            null,
-            "Verbinding het gefaal"
-         ],
-         "An error occurred while connecting to the chat server: ": [
-            null,
-            "A fout het voorgekom tydens verbinding met die kletsbediener: "
-         ],
-         "Sorry, there was an error while trying to add ": [
-            null,
-            "Jammer, 'n ander fout het voorgekom tydens byvoeging. "
-         ],
-         "This client does not allow presence subscriptions": [
-            null,
-            "Hierdie klient laat nie beskikbaarheidsinskrywings toe nie"
          ],
          "Close this box": [
             null,
@@ -431,9 +383,9 @@
             null,
             "Verskuil die lys van deelnemers"
          ],
-         "Error: the \"": [
+         "${command}": [
             null,
-            "Fout: die \""
+            ""
          ],
          "Are you sure you want to clear the messages from this room?": [
             null,
@@ -535,9 +487,9 @@
             null,
             "Die gegewe rede is: \"%1$s\"."
          ],
-         "The reason given is: \"": [
+         "${notification.reason}": [
             null,
-            "Die gegewe rede is: \""
+            ""
          ],
          " has left the room. \"": [
             null,
@@ -555,37 +507,37 @@
             null,
             " het die kamer bygetree."
          ],
-         "You are not on the member list of this room": [
+         "You are not on the member list of this room.": [
             null,
-            "Jy is nie op die ledelys van hierdie kamer nie"
+            "Jy is nie op die ledelys van hierdie kamer nie."
          ],
-         "No nickname was specified": [
+         "You have been banned from this room.": [
             null,
-            "Geen bynaam verskaf nie"
+            "Jy is uit die kamer verban."
          ],
-         "You are not allowed to create new rooms": [
+         "No nickname was specified.": [
             null,
-            "Jy word nie toegelaat om nog kletskamers te skep nie"
+            "Geen bynaam verskaf nie."
          ],
-         "Your nickname doesn't conform to this room's policies": [
+         "You are not allowed to create new rooms.": [
             null,
-            "Jou bynaam voldoen nie aan die kamer se beleid nie"
+            "Jy word nie toegelaat om nog kletskamers te skep nie."
          ],
-         "This room does not (yet) exist": [
+         "Your nickname doesn't conform to this room's policies.": [
             null,
-            "Hierdie kamer bestaan tans (nog) nie"
+            "Jou bynaam voldoen nie aan die kamer se beleid nie."
          ],
-         "This room has reached its maximum number of occupants": [
+         "This room does not (yet) exist.": [
             null,
-            "Hierdie kletskamer het sy maksimum aantal deelnemers bereik"
+            "Hierdie kamer bestaan tans (nog) nie."
+         ],
+         "This room has reached its maximum number of occupants.": [
+            null,
+            "Hierdie kletskamer het sy maksimum aantal deelnemers bereik."
          ],
          "Topic set by %1$s to: %2$s": [
             null,
             "Onderwerp deur %1$s bygewerk na: %2$s"
-         ],
-         "Click to mention ": [
-            null,
-            "Klik om te noem "
          ],
          "This user is a moderator.": [
             null,
@@ -663,6 +615,10 @@
             null,
             "Onversekerd"
          ],
+         "This room is not publicly searchable": [
+            null,
+            "Hierdie kletskamer is nie publiek opspoorbaar nie"
+         ],
          "Messages are archived on the server": [
             null,
             "Boodskappe word op die bediener gestoor"
@@ -675,10 +631,6 @@
             null,
             "Hierdie kletskamer word gemodereer"
          ],
-         "All other room occupants can see your Jabber ID": [
-            null,
-            "Alle ander deelnemers can u Jabber ID sien"
-         ],
          "Anyone can join this room": [
             null,
             "Enige iemand kan hierdie kletskamer binnekom"
@@ -687,9 +639,13 @@
             null,
             "Hierdie kletskamer benodig 'n wagwoord"
          ],
-         "Only moderators can see your Jabber ID": [
+         "This room persists even if it's unoccupied": [
             null,
-            "Slegs moderators kan u Jabber ID sien"
+            "Hierdie kletskamer bestaan voort selfs al is dit leeg"
+         ],
+         "This room is publicly searchable": [
+            null,
+            "Hierdie kletskamer is publiek opspoorbaar"
          ],
          "This room will disappear once the last person leaves": [
             null,
@@ -710,6 +666,10 @@
          "You may optionally include a message, explaining the reason for the invitation.": [
             null,
             "U mag na keuse 'n boodskap insluit, om bv. die rede vir die uitnodiging te staaf."
+         ],
+         "Please enter a valid XMPP username": [
+            null,
+            ""
          ],
          "Room name": [
             null,
@@ -735,13 +695,13 @@
             null,
             "Geen kletskamers op %1$s"
          ],
-         "Rooms on %1$s": [
-            null,
-            "Kletskamers op %1$s"
-         ],
          "Description:": [
             null,
             "Beskrywing:"
+         ],
+         "Room Address (JID):": [
+            null,
+            ""
          ],
          "Occupants:": [
             null,
@@ -967,10 +927,6 @@
             null,
             "Suksesvol geregistreer"
          ],
-         "Return": [
-            null,
-            "Terug"
-         ],
          "The provider rejected your registration attempt. Please check the values you entered for correctness.": [
             null,
             "Die verskaffer het u registrasieversoek verwerp. Kontrolleer asb. jou gegewe waardes vir korrektheid."
@@ -1035,6 +991,10 @@
             null,
             "Enige"
          ],
+         "Unread": [
+            null,
+            ""
+         ],
          "Chatty": [
             null,
             "Geselserig"
@@ -1042,18 +1002,6 @@
          "Extended Away": [
             null,
             "Weg vir langer"
-         ],
-         "Click to remove this contact": [
-            null,
-            "Klik om hierdie kontak te verwyder"
-         ],
-         "Click to accept this contact request": [
-            null,
-            "Klik om hierdie kontakversoek te aanvaar"
-         ],
-         "Click to decline this contact request": [
-            null,
-            "Klik om hierdie kontakversoek te weier"
          ],
          "Click to chat with this contact": [
             null,
@@ -1066,10 +1014,6 @@
          "Are you sure you want to remove this contact?": [
             null,
             "Is u seker u wil hierdie gespreksmaat verwyder?"
-         ],
-         "Sorry, there was an error while trying to remove ": [
-            null,
-            "Jammer, 'n fout het voorgekom tydens die verwydering van "
          ],
          "Are you sure you want to decline this contact request?": [
             null,

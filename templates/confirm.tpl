@@ -1,4 +1,4 @@
-{* $Id: confirm.tpl 54656 2015-03-22 17:54:02Z lindonb $ *}
+{* $Id: confirm.tpl 63885 2017-09-20 16:09:54Z chealer $ *}
 <div class="panel panel-default">
 	{if !empty($confirmation_text)}
 		<div class="panel-heading">
@@ -11,8 +11,9 @@
 	<div class="panel-body">
 		<form id='confirm' action="{$confirmaction|escape}" method="post">
 			<div>
-				{query _type='form_input' _keepall='y' ticket=$ticket daconfirm='y'}
-				{button href="#" _onclick="javascript:document.forms['confirm'].submit();return false;" _text="{tr}Click here to confirm your action{/tr}" _ajax="n"}
+				{query _type='form_input' _keepall='y'}
+				{ticket}
+				{button href="#" _onclick="javascript:document.forms['confirm'].submit();return false;" _text="{tr}Confirm action{/tr}" _ajax="n"}
 				{button href="#" _onclick="javascript:history.back(); return false;" _text="{tr}Go back{/tr}" _ajax="n"}
 				{button href=$prefs.tikiIndex _text="{tr}Return to home page{/tr}"}
 			</div>

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: EngineSetTest.php 59675 2016-09-12 11:33:04Z jonnybradley $
+// $Id: EngineSetTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 namespace Tiki\Recommendation;
 
@@ -60,7 +60,7 @@ class EngineSetTest extends \PHPUnit_Framework_TestCase
 
 			$out[spl_object_hash($engine)]++;
 		}
-		
+
 		$this->assertEquals([
 			spl_object_hash($a) => 5,
 			spl_object_hash($b) => 5,
@@ -88,7 +88,7 @@ class EngineSetTest extends \PHPUnit_Framework_TestCase
 
 			$out[spl_object_hash($engine)]++;
 		}
-		
+
 		$this->assertEquals([
 			spl_object_hash($a) => 8,
 			spl_object_hash($b) => 2,

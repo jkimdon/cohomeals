@@ -1,4 +1,4 @@
-// $Id: lumen.less 61747 2017-03-18 18:28:58Z rjsmelo $
+// $Id: lumen.less 64893 2017-12-14 07:03:18Z chibaguy $
 @web-font-path: "https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic";
 
 .web-font(@path) {
@@ -17,4 +17,10 @@
 @import "../../base_files/less/external-scripts.less";
 @import "variables.less";
 
-// the Bootstrap variables.less file with theme-specific values replacing the defaults
+// Override button movement on hover to prevent context problems
+.btn:hover {border-bottom-width: 2.5px;}
+.dropdown-menu .btn:hover { margin-bottom: 1px; }
+.btn.admbox:hover,
+.btn.admbox:active { margin-top: .4em; }
+
+

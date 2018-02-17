@@ -1,5 +1,5 @@
-{* $Id: tiki-accounting_account_list.tpl 54656 2015-03-22 17:54:02Z lindonb $ *}
-<table>
+{* $Id: tiki-accounting_account_list.tpl 62368 2017-04-27 20:47:22Z patrick-proulx $ *}
+<table class="table">
 	<tr>
 		<th>{tr}Account{/tr}</th>
 		<th>{tr}Account name{/tr}</th>
@@ -37,17 +37,17 @@
 			<td>{$a.accountTax}</td>
 			{if $tiki_p_acct_manage_accounts=='y'}
 				<td style="width:64px;">
-					<a class="icon" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=edit">
+					<a class="icon timeout" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=edit{ticket mode=get}">
 						{icon name="edit" alt="{tr}edit account{/tr}"}
 					</a>
-					<a class="icon" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=lock">
+					<a class="icon timeout" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=lock{ticket mode=get}">
 						{if $a.accountLocked==1}
 							{icon name="unlock" alt="{tr}unlock account{/tr}" _confirm="{tr}Are you sure you want to unlock this account?{/tr}"}
 						{else}
 							{icon name="lock" alt="{tr}lock account{/tr}" _confirm="{tr}Are you sure you want to lock this account?{/tr}"}
 						{/if}
 					</a>
-					<a class="icon" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=delete">
+					<a class="icon timeout" href="tiki-accounting_account.php?bookId={$bookId}&accountId={$a.accountId}&action=delete{ticket mode=get}">
 						{icon name="remove" alt="{tr}delete account{/tr}" _confirm="{tr}Are you sure, you want to delete this account{/tr}"}
 					</a>
 				</td>
@@ -55,7 +55,7 @@
 		</tr>
 	{/foreach}
 </table>
-{button href="tiki-accounting_account.php?action=new&bookId=$bookId" _text="{tr}Create a new account{/tr}"}
+{button type="submit" href="tiki-accounting_account.php?action=new&bookId={$bookId|escape}{ticket mode=get}" _text="{tr}Create a new account{/tr}"}
 <a class="icon" href="tiki-accounting_export.php?action=print&bookId={$bookId}&what=accounts" target="new">
 	{icon name="print" alt="{tr}printable version{/tr}"}
 </a>

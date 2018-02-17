@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: creditspaylib.php 57966 2016-03-17 20:05:33Z jonnybradley $
+// $Id: creditspaylib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class UserPayCredits extends CreditsLib
 {
@@ -16,11 +16,11 @@ class UserPayCredits extends CreditsLib
 		$userId = $this->get_user_id($user);
 		$uc = $this->getScaledCredits($userId);
 
-		$ret = array();
-		for ($i = 0, $cvalid_credits = count($valid_credits); $i < $cvalid_credits ; $i++) {
-			$one = array();
+		$ret = [];
+		for ($i = 0, $cvalid_credits = count($valid_credits); $i < $cvalid_credits; $i++) {
+			$one = [];
 			$k = $valid_credits[$i];
-			if (!empty($credits_xcrates[$i])) {
+			if (! empty($credits_xcrates[$i])) {
 				$one['xcrate'] = $credits_xcrates[$i];
 			} else {
 				$one['xcrate'] = 1;
@@ -67,12 +67,12 @@ class UserPayCredits extends CreditsLib
 				$invoice,
 				$amount,
 				'tikicredits',
-				array(
+				[
 					'info' => $msg,
 					'username' => $user,
 					'creditType' => $creditType,
 					'creditAmount' => $credits_amount
-				)
+				]
 			);
 			return true;
 		} else {

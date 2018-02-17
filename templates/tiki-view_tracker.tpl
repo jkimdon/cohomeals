@@ -1,4 +1,4 @@
-{* $Id: tiki-view_tracker.tpl 63866 2017-09-18 18:10:58Z luciash $ *}
+{* $Id: tiki-view_tracker.tpl 63873 2017-09-19 14:56:38Z jonnybradley $ *}
 {title url=$trackerId|sefurl:'tracker' adm="trackers"}{$tracker_info.name}{/title}
 {if !empty($tracker_info.description)}
 	{if $tracker_info.descriptionIsParsed eq 'y'}
@@ -110,16 +110,14 @@
 	</div>
 </div>
 
-<div class="categbar" align="right">
-	{if $user and $prefs.feature_user_watches eq 'y'}
-		{if $category_watched eq 'y'}
-			{tr}Watched by categories:{/tr}
-			{section name=i loop=$watching_categories}
-				<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}">{$watching_categories[i].name|escape}</a>&nbsp;
-			{/section}
-		{/if}
-	{/if}
-</div>
+{if $user and $prefs.feature_user_watches eq 'y' and $category_watched eq 'y'}
+	<div class="categbar">
+		{tr}Watched by categories:{/tr}
+		{section name=i loop=$watching_categories}
+			<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}">{$watching_categories[i].name|escape}</a>&nbsp;
+		{/section}
+	</div>
+{/if}
 
 {if !empty($mail_msg)}
 	<div class="wikitext">{$mail_msg}</div>
@@ -281,7 +279,7 @@
 												class="tips"
 												title="{tr}Actions{/tr}"
 												href="#"
-												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.view_tracker_actions|escape:"javascript"|escape:"html"}{/if}
+												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.view_tracker_actions}{/if}
 												style="padding:0; margin:0; border:0"
 												onclick="return false;"
 											>

@@ -1,9 +1,7 @@
 <?php
 /**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/zf2 for the canonical source repository
- * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @link      http://github.com/zendframework/zend-servicemanager for the canonical source repository
+ * @copyright Copyright (c) 2005-2016 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
@@ -79,7 +77,7 @@ class ServiceManager implements ServiceLocatorInterface
     protected $factories = [];
 
     /**
-     * @var Initializer\InitializerInterface[]
+     * @var Initializer\InitializerInterface[]|callable[]
      */
     protected $initializers = [];
 
@@ -132,6 +130,13 @@ class ServiceManager implements ServiceLocatorInterface
      * @var bool
      */
     protected $configured = false;
+
+    /**
+     * Cached abstract factories from string.
+     *
+     * @var array
+     */
+    private $cachedAbstractFactories = [];
 
     /**
      * Constructor.
@@ -512,11 +517,17 @@ class ServiceManager implements ServiceLocatorInterface
     {
         foreach ($abstractFactories as $abstractFactory) {
             if (is_string($abstractFactory) && class_exists($abstractFactory)) {
-                $abstractFactory = new $abstractFactory();
+                //Cached string
+                if (! isset($this->cachedAbstractFactories[$abstractFactory])) {
+                    $this->cachedAbstractFactories[$abstractFactory] = new $abstractFactory();
+                }
+
+                $abstractFactory = $this->cachedAbstractFactories[$abstractFactory];
             }
 
             if ($abstractFactory instanceof Factory\AbstractFactoryInterface) {
-                $this->abstractFactories[] = $abstractFactory;
+                $abstractFactoryObjHash = spl_object_hash($abstractFactory);
+                $this->abstractFactories[$abstractFactoryObjHash] = $abstractFactory;
                 continue;
             }
 
@@ -550,7 +561,7 @@ class ServiceManager implements ServiceLocatorInterface
     /**
      * Instantiate initializers for to avoid checks during service construction.
      *
-     * @param string[]|callable[]|Initializer\InitializerInterface[] $initializers
+     * @param string[]|Initializer\InitializerInterface[]|callable[] $initializers
      *
      * @return void
      */
@@ -656,6 +667,12 @@ class ServiceManager implements ServiceLocatorInterface
         if (is_callable($factory)) {
             if ($lazyLoaded) {
                 $this->factories[$name] = $factory;
+            }
+            // PHP 5.6 fails on 'class::method' callables unless we explode them:
+            if (PHP_MAJOR_VERSION < 7
+                && is_string($factory) && strpos($factory, '::') !== false
+            ) {
+                $factory = explode('::', $factory);
             }
             return $factory;
         }

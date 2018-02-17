@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetBuilder.php 59593 2016-09-04 17:03:54Z jonnybradley $
+// $Id: FacetBuilder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_FacetBuilder
 {
@@ -19,25 +19,24 @@ class Search_Elastic_FacetBuilder
 	function build(array $facets)
 	{
 		if (empty($facets)) {
-			return array();
+			return [];
 		}
 
-		$out = array();
+		$out = [];
 		foreach ($facets as $facet) {
 			$out[$facet->getName()] = $this->buildFacet($facet);
 		}
 
-		return array(
+		return [
 			$this->mainKey => $out,
-		);
+		];
 	}
 
 	private function buildFacet(Search_Query_Facet_Interface $facet)
 	{
-		return array('terms' => array(
+		return ['terms' => [
 			'field' => $facet->getField(),
 			'size' => $facet->getCount() ?: $this->count,
-		));
+		]];
 	}
 }
-

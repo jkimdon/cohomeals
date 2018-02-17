@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Datetime.php 61915 2017-03-28 16:20:04Z jonnybradley $
+// $Id: Datetime.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Formatter_ValueFormatter_Datetime extends Search_Formatter_ValueFormatter_Abstract
 {
@@ -11,7 +11,7 @@ class Search_Formatter_ValueFormatter_Datetime extends Search_Formatter_ValueFor
 
 	function __construct(array $arguments = [])
 	{
-		if( isset($arguments['dateFormat']) ) {
+		if (isset($arguments['dateFormat'])) {
 			$this->format = $arguments['dateFormat'];
 		} else {
 			$tikilib = TikiLib::lib('tiki');
@@ -33,11 +33,17 @@ class Search_Formatter_ValueFormatter_Datetime extends Search_Formatter_ValueFor
 		}
 	}
 
-	public function timestamp($value) {
+	public function timestamp($value)
+	{
 		if (preg_match('/^\d{14}$/', $value)) {
 			// Facing a date formated as YYYYMMDDHHIISS as indexed in lucene
 			// Always stored as UTC
-			$value = date_create_from_format('YmdHise', $value . 'UTC')->getTimestamp();
+			$value = date_create_from_format('YmdHise', $value . 'UTC')->format('Y-m-d H:i:s');
+		}
+
+		if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+			// YYYY-MM-DD formatted date without time portion => assume UTC to parse it without date shifts below
+			$value = date_create_from_format('Y-m-de', $value . 'UTC')->format('Y-m-d 12:00:00');
 		}
 
 		// indexed datetime value is always UTC, so use correct timezone when converting back to timestamp
@@ -49,4 +55,3 @@ class Search_Formatter_ValueFormatter_Datetime extends Search_Formatter_ValueFor
 		return $time;
 	}
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MemoryLimit.php 61813 2017-03-22 14:34:38Z chealer $
+// $Id: MemoryLimit.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_MemoryLimit
 {
@@ -42,12 +42,11 @@ class Tiki_MemoryLimit
 	{
 		$limitString = trim($limitString);
 		$bytes = (int) $limitString;
-		$lastCharacter = strtolower($limitString{strlen($limitString)-1});
-		$units = array('k' => 1, 'm' => 2, 'g' => 3);
+		$lastCharacter = strtolower($limitString{strlen($limitString) - 1});
+		$units = ['k' => 1, 'm' => 2, 'g' => 3];
 		if (array_key_exists($lastCharacter, $units)) {
 			$bytes = $bytes * (1024 ** $units[$lastCharacter]);
 		}
 		return $bytes;
 	}
 }
-

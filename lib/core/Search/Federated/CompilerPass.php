@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CompilerPass.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: CompilerPass.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Search\Federated;
 
@@ -15,7 +15,7 @@ class CompilerPass implements CompilerPassInterface
 {
 	public function process(ContainerBuilder $container)
 	{
-		if (!$container->hasDefinition('tiki.lib.federatedsearch')) {
+		if (! $container->hasDefinition('tiki.lib.federatedsearch')) {
 			return;
 		}
 
@@ -32,4 +32,3 @@ class CompilerPass implements CompilerPassInterface
 		}
 	}
 }
-

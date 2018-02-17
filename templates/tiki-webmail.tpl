@@ -1,4 +1,4 @@
-{* $Id: tiki-webmail.tpl 61828 2017-03-23 10:35:36Z jyhem $ *}
+{* $Id: tiki-webmail.tpl 64357 2017-10-23 14:13:41Z jonnybradley $ *}
 
 {title help="Webmail" admpage="webmail"}{tr}Webmail{/tr}{/title}
 
@@ -110,7 +110,7 @@
 											class="tips"
 											title="{tr}Actions{/tr}"
 											href="#"
-											{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.webmail_actions|escape:"javascript"|escape:"html"}{/if}
+											{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.webmail_actions}{/if}
 											style="padding:0; margin:0; border:0"
 										>
 											{icon name='settings'}
@@ -192,7 +192,7 @@
 											class="tips"
 											title="{tr}Actions{/tr}"
 											href="#"
-											{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.webmail_group_actions|escape:"javascript"|escape:"html"}{/if}
+											{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.webmail_group_actions}{/if}
 											style="padding:0; margin:0; border:0"
 										>
 											{icon name='settings'}
@@ -538,7 +538,7 @@
 			{/if}
 			<tr>
 				<th>{tr}Date{/tr}</th>
-				<td>{$headers.timestamp|tiki_short_datetime}</td>
+				<td>{$headers.timestamp|tiki_short_datetime:'':'n'}</td>
 			</tr>
 		{/if}
 		{if $fullheaders eq 'y'}

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 61987 2017-04-01 12:39:23Z rjsmelo $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Scheduler_Controller
 {
@@ -44,21 +44,21 @@ class Services_Scheduler_Controller
 
 		$scheduler = $this->lib->get_scheduler($schedulerId);
 
-		if (!$scheduler) {
+		if (! $scheduler) {
 			throw new Services_Exception_NotFound;
 		}
 
 		if ($confirm) {
 			$this->lib->remove_scheduler($schedulerId);
 
-			return array(
+			return [
 				'schedulerId' => 0,
-			);
+			];
 		}
 
-		return array(
+		return [
 			'schedulerId' => $schedulerId,
 			'name' => $scheduler['name'],
-		);
+		];
 	}
 }

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: events.php 61937 2017-03-29 15:55:20Z jonnybradley $
+// $Id: events.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 
 tiki_setup_events();
@@ -19,12 +19,12 @@ function tiki_setup_events()
 	$events = TikiLib::events();
 	$events->reset();
 
-	$defer = function ($lib, $function ) {
+	$defer = function ($lib, $function) {
 		return Tiki_Event_Lib::defer($lib, $function);
 	};
 
 	if ($prefs['feature_wiki'] == 'y') {
-		if ( $prefs['quantify_changes'] == 'y' && $prefs['feature_multilingual'] == 'y' ) {
+		if ($prefs['quantify_changes'] == 'y' && $prefs['feature_multilingual'] == 'y') {
 			$events->bind('tiki.wiki.save', $defer('quantify', 'wiki_update'));
 		}
 
@@ -38,10 +38,10 @@ function tiki_setup_events()
 						$user = substr($args['object'], strlen($prefix));
 						$events->trigger(
 							'tiki.user.update',
-							array(
+							[
 								'type' => 'user',
 								'object' => $user,
-							)
+							]
 						);
 					}
 				}
@@ -89,16 +89,16 @@ function tiki_setup_events()
 		$events->bind('tiki.trackeritem.save', $defer('trk', 'update_create_missing_pages'));
 
 		if ($prefs['trackerfield_computed'] == 'y') {
-			$events->bind('tiki.trackeritem.rating', array('Tracker_Field_Computed', 'computeFields'));
-			$events->bind('tiki.trackeritem.save', array('Tracker_Field_Computed', 'computeFields'));
+			$events->bind('tiki.trackeritem.rating', ['Tracker_Field_Computed', 'computeFields']);
+			$events->bind('tiki.trackeritem.save', ['Tracker_Field_Computed', 'computeFields']);
 		}
 
 		if ($prefs['feature_multilingual'] == 'y') {
-			$events->bind('tiki.trackeritem.save', array('Tracker_Field_Language', 'update_language'));
+			$events->bind('tiki.trackeritem.save', ['Tracker_Field_Language', 'update_language']);
 		}
 
 		if ($prefs['trackerfield_icon'] == 'y') {
-			$events->bind('tiki.trackeritem.save', array('Tracker_Field_Icon', 'updateIcon'));
+			$events->bind('tiki.trackeritem.save', ['Tracker_Field_Icon', 'updateIcon']);
 		}
 
 		// Certain non-read only fields that can be edited outside of using the tracker field do store a value in the
@@ -113,11 +113,11 @@ function tiki_setup_events()
 		// is the most likely place it would be edited outside of tracker field but an event would be cleaner.
 		//
 		if ($prefs['trackerfield_relation'] == 'y') {
-			$events->bind('tiki.social.relation.add', array('Tracker_Field_Relation', 'syncRelationAdded'));
-			$events->bind('tiki.social.relation.remove', array('Tracker_Field_Relation', 'syncRelationRemoved'));
+			$events->bind('tiki.social.relation.add', ['Tracker_Field_Relation', 'syncRelationAdded']);
+			$events->bind('tiki.social.relation.remove', ['Tracker_Field_Relation', 'syncRelationRemoved']);
 		}
 		if ($prefs['trackerfield_category'] == 'y') {
-			$events->bind('tiki.object.categorized', array('Tracker_Field_Category', 'syncCategoryFields'));
+			$events->bind('tiki.object.categorized', ['Tracker_Field_Category', 'syncCategoryFields']);
 		}
 
 		$events->bind('tiki.trackeritem.save', $defer('trk', 'update_tracker_summary'));
@@ -145,7 +145,7 @@ function tiki_setup_events()
 	}
 
 	if ($prefs['dailyreports_enabled_for_new_users'] == 'y') {
-		$events->bind('tiki.user.create', array(Reports_Factory::build('Reports_Users'), 'addUserToDailyReports'));
+		$events->bind('tiki.user.create', [Reports_Factory::build('Reports_Users'), 'addUserToDailyReports']);
 	}
 
 	if ($prefs['scorm_enabled'] == 'y') {
@@ -157,11 +157,6 @@ function tiki_setup_events()
 		$events->bind('tiki.file.create', $defer('h5p', 'handle_fileCreation'));
 		$events->bind('tiki.file.update', $defer('h5p', 'handle_fileUpdate'));
 		$events->bind('tiki.file.delete', $defer('h5p', 'handle_fileDelete'));
-	}
-
-	if ($prefs['feature_futurelinkprotocol'] == 'y') {
-		$events->bind("tiki.wiki.view", $defer('wlte', 'tiki_wiki_view_pastlink'));
-		$events->bind("tiki.wiki.save", $defer('wlte', 'tiki_wiki_save_pastlink'));
 	}
 
 	if ($prefs['goal_enabled'] == 'y') {
@@ -346,6 +341,16 @@ function tiki_setup_events()
 	$events->bind('tiki.mustread.completed', 'tiki.save');
 	$events->bind('tiki.mustread.required', 'tiki.save');
 
+	$events->bind('tiki.calendar.update', 'tiki.calendar.save');
+	$events->bind('tiki.calendar.create', 'tiki.calendar.save');
+	$events->bind('tiki.calendar.delete', 'tiki.save');
+	$events->bind('tiki.calendar.save', 'tiki.save');
+
+	$events->bind('tiki.calendaritem.update', 'tiki.calendaritem.save');
+	$events->bind('tiki.calendaritem.create', 'tiki.calendaritem.save');
+	$events->bind('tiki.calendaritem.delete', 'tiki.save');
+	$events->bind('tiki.calendaritem.save', 'tiki.save');
+
 	// As PHP's register_shutdown_function might change the working directory, change it back to avoid bugs.
 	$events->bindPriority(-20, 'tiki.process.shutdown', 'tiki_shutdown_cwd');
 
@@ -357,7 +362,7 @@ function tiki_setup_events()
 	// if article indexing is on as part of the rss article generator bind the categorization of objects to ensure
 	// that the trackeritem and article are always in sync category-wise
 	if (isset($prefs['tracker_article_indexing']) && $prefs['tracker_article_indexing'] == 'y') {
-		$events->bind('tiki.object.categorized', $defer('trk','sync_tracker_article_categories'));
+		$events->bind('tiki.object.categorized', $defer('trk', 'sync_tracker_article_categories'));
 	}
 
 	//Check the Addons to see if there are any events to bind

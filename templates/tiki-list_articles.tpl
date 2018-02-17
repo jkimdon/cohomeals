@@ -1,4 +1,4 @@
-{* $Id: tiki-list_articles.tpl 61837 2017-03-24 10:26:59Z jyhem $ *}
+{* $Id: tiki-list_articles.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {title help="Articles" admpage="articles"}{tr}Articles{/tr}{/title}
 
@@ -224,7 +224,7 @@
 							class="tips"
 							title="{tr}Actions{/tr}"
 							href="#"
-							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.articles_actions|escape:"javascript"|escape:"html"}{/if}
+							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.articles_actions}{/if}
 							style="padding:0; margin:0; border:0"
 						>
 							{icon name='wrench'}

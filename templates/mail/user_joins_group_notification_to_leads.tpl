@@ -1,4 +1,4 @@
-{* $Id: user_joins_group_notification_to_leads.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}{tr}You are getting this email because you are a leader of{/tr} - {$prefs.mail_template_custom_text}{$mail_group}
+{* $Id: user_joins_group_notification_to_leads.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}{tr}You are getting this email because you are a leader of{/tr} - {$prefs.mail_template_custom_text}{$mail_group}
 <br/>
 {$mail_real} ({$mail_user}) {tr}joined{/tr} - {$mail_group}
 <br/>

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ReportsEndToEndTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
+// $Id: ReportsEndToEndTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 require_once('lib/test/TikiDatabaseTestCase.php');
 
@@ -17,12 +17,12 @@ class Reports_EndToEndTest extends TikiDatabaseTestCase
 
 		$this->mail = $this->createMock('TikiMail');
 
-		$this->tikilib = $this->createMock('TikiLib', array('get_user_preference'));
+		$this->tikilib = $this->createMock('TikiLib', ['get_user_preference']);
 
 		$this->overrideLibs = new TestableTikiLib;
-		$this->overrideLibs->overrideLibs(array('calendar' => $this->createMock('MockCalendarLib', array('get_item'))));
+		$this->overrideLibs->overrideLibs(['calendar' => $this->createMock('MockCalendarLib', ['get_item'])]);
 
-		$tikiPrefs = array('short_date_format' => '%Y-%m-%d');
+		$tikiPrefs = ['short_date_format' => '%Y-%m-%d'];
 
 		$this->obj = Reports_Factory::build('Reports_Manager', $this->dt, $this->mail, $this->tikilib, $tikiPrefs);
 
@@ -61,7 +61,7 @@ class Reports_EndToEndTest extends TikiDatabaseTestCase
 		$this->mail->expects($this->once())->method('setHtml')->with(file_get_contents(dirname(__FILE__) . '/fixtures/email_body.txt'));
 		$this->mail->expects($this->once())->method('setSubject')->with('Report from 2012-03-27 (20 changes)');
 		$this->mail->expects($this->once())->method('buildMessage');
-		$this->mail->expects($this->once())->method('send')->with(array('test@test.com'));
+		$this->mail->expects($this->once())->method('send')->with(['test@test.com']);
 
 		$this->obj->send();
 	}

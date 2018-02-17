@@ -1,4 +1,4 @@
-{* $Id: tiki-list_trackers.tpl 60518 2016-12-04 15:40:28Z jonnybradley $ *}
+{* $Id: tiki-list_trackers.tpl 64425 2017-10-29 17:21:58Z jonnybradley $ *}
 {extends "layout_view.tpl"}
 
 {block name="title"}
@@ -39,9 +39,14 @@
 					{/if}
 				</ul>
 			</div>
+			{if $prefs.tracker_tabular_enabled eq 'y'}
+				<a class="btn btn-default" href="{service controller=tabular action=manage}">
+					{icon name="list"} {tr}Manage Tabular Formats{/tr}
+				</a>
+			{/if}
 			{if $prefs.tracker_remote_sync eq 'y'}
 				<a class="btn btn-default" href="{service controller=tracker_sync action=clone_remote}">
-				{icon name="copy"} {tr}Clone remote{/tr}
+					{icon name="copy"} {tr}Clone remote{/tr}
 				</a>
 			{/if}
 		</div>
@@ -116,6 +121,19 @@
 					<td class="action">
 						{capture name=tracker_actions}
 							{strip}
+								{if $tracker.permissions->admin_trackers}
+									{$libeg}<a href="tiki-admin_tracker_fields.php?trackerId={$tracker.trackerId}">
+									{icon name='th-list' _menu_text='y' _menu_icon='y' alt="{tr}Fields{/tr}"}
+									</a>{$liend}
+									{$libeg}<a href="{service controller=tracker action=replace trackerId=$tracker.trackerId modal=true}"
+											   data-toggle="modal"
+											   data-backdrop="static"
+											   data-target="#bootstrap-modal"
+											   onclick="$('[data-toggle=popover]').popover('hide');"
+									>
+									{icon name='settings' _menu_text='y' _menu_icon='y' alt="{tr}Properties{/tr}"}
+									</a>{$liend}
+								{/if}
 								{if $tracker.permissions->export_tracker}
 									{$libeg}<a onclick="$('[data-toggle=popover]').popover('hide');"
 										data-toggle="modal"
@@ -175,17 +193,6 @@
 								{/if}
 
 								{if $tracker.permissions->admin_trackers}
-									{$libeg}<a href="tiki-admin_tracker_fields.php?trackerId={$tracker.trackerId}">
-									{icon name='th-list' _menu_text='y' _menu_icon='y' alt="{tr}Fields{/tr}"}
-									</a>{$liend}
-									{$libeg}<a href="{service controller=tracker action=replace trackerId=$tracker.trackerId modal=true}"
-										data-toggle="modal"
-										data-backdrop="static"
-										data-target="#bootstrap-modal"
-										onclick="$('[data-toggle=popover]').popover('hide');"
-									>
-										{icon name='settings' _menu_text='y' _menu_icon='y' alt="{tr}Properties{/tr}"}
-									</a>{$liend}
 									{$libeg}{permission_link mode=text type=tracker permType=trackers id=$tracker.trackerId}{$liend}
 									{if $tracker.items > 0}
 										{$libeg}<a href="{service controller=tracker action=clear trackerId=$tracker.trackerId}" class="clear confirm-prompt">
@@ -205,7 +212,7 @@
 							class="tips"
 							title="{tr}Actions{/tr}"
 							href="#"
-							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.tracker_actions|escape:"javascript"|escape:"html"}{/if}
+							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.tracker_actions}{/if}
 							style="padding:0; margin:0; border:0"
 						>
 							{icon name='wrench'}

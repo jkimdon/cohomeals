@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.div.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: modifier.div.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -18,13 +18,15 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  *
  * -------------------------------------------------------------
  */
-function smarty_modifier_div($string, $num, $max=10)
+function smarty_modifier_div($string, $num, $max = 10)
 {
-	if ($num == 0) 
+	if ($num == 0) {
 		return 0;
+	}
 
-	if (ceil(strlen($string) / $num) > $max)
+	if (ceil(strlen($string) / $num) > $max) {
 		return $max;
+	}
 
 	return ceil(strlen($string) / $num);
 }

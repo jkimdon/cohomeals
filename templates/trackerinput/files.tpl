@@ -1,4 +1,4 @@
-<div class="files-field uninitialized {if $data.replaceFile}replace{/if}" data-galleryid="{$field.galleryId|escape}" data-firstfile="{$field.firstfile|escape}" data-filter="{$field.filter|escape}" data-limit="{$field.limit|escape}">
+<div id="display_f{$field.fieldId|escape}" class="files-field display_f{$field.fieldId|escape} uninitialized {if $data.replaceFile}replace{/if}" data-galleryid="{$field.galleryId|escape}" data-firstfile="{$field.firstfile|escape}" data-filter="{$field.filter|escape}" data-limit="{$field.limit|escape}">
 	{if $field.canUpload}
 		{if $field.limit}
 			{remarksbox _type=info title="{tr}Attached files limitation{/tr}"}
@@ -12,12 +12,16 @@
 						{icon name='vimeo'}
 					{elseif $field.options_map.displayMode eq 'img'}
 						<img src="tiki-download_file.php?fileId={$info.fileId|escape}&display&y=24" height="24">
+						{$info.name|escape}
 					{else}
-						<img src="tiki-download_file.php?fileId={$info.fileId|escape}&icon" width="32" height="32">
+						<a href="tiki-download_file.php?fileId={$info.fileId|escape}" >
+							<img src="tiki-download_file.php?fileId={$info.fileId|escape}&thumbnail" width="32" height="32">
+							{$info.name|escape}
+						</a>
 					{/if}
-					{$info.name|escape} <label class="file-delete-icon">
+					<a href="#" class="file-delete-icon">
 						{icon name='delete'}
-					</label>
+					</a>
 				</li>
 			{/foreach}
 		</ol>
@@ -97,7 +101,7 @@
 				$field.input_csv('add', ',', fileId);
 
 				li.prepend($.fileTypeIcon(fileId, { type: type, name: name }));
-				li.append($('<label class="file-delete-icon">{{icon name='delete'}}</label>'));
+				li.append($('<a class="file-delete-icon">{{icon name='delete'}}</a>'));
 
 				if (replaceFile && $self.data('firstfile') > 0) {
 					li.prev('li').remove();
@@ -106,6 +110,8 @@
 				if (! $self.data('firstfile')) {
 					$self.data('firstfile', fileId);
 				}
+
+				$field.change();
 
 				toggleWarning();
 			}
@@ -159,9 +165,12 @@
 			$files.parent().on('click', '.file-delete-icon', function (e) {
 				var fileId = $(e.target).closest('li').data('file-id');
 				if (fileId) {
-					$field.input_csv('delete', ',', fileId); $(e.target).closest('li').remove();
+					$field.input_csv('delete', ',', fileId);
+					$(e.target).closest('li').remove();
+					$field.change();
 					toggleWarning();
 				}
+				return false;
 			});
 
 			$url.keypress(function (e) {

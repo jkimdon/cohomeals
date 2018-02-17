@@ -3,13 +3,13 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-poll_form.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-poll_form.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
 $section = 'poll';
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 $polllib = TikiLib::lib('poll');
 $access->check_feature('feature_polls');
 $access->check_permission('tiki_p_vote_poll');
@@ -20,9 +20,9 @@ if (empty($_REQUEST["pollId"])) {
 }
 $poll_info = $polllib->get_poll($_REQUEST["pollId"]);
 if (empty($poll_info)) {
-        $smarty->assign('msg', tra("No poll indicated"));
-        $smarty->display("error.tpl");
-        die;
+		$smarty->assign('msg', tra("No poll indicated"));
+		$smarty->display("error.tpl");
+		die;
 }
 $options = $polllib->list_poll_options($_REQUEST["pollId"]);
 $smarty->assign_by_ref('menu_info', $poll_info);

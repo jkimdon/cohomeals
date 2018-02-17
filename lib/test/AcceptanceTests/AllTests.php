@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AllTests.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: AllTests.php 64624 2017-11-19 11:24:47Z rjsmelo $
 require_once('AcceptanceTests/CollaborativeMultilingualTerminologyTest.php');
 require_once('AcceptanceTests/ListPagesTest.php');
 require_once('AcceptanceTests/MultilingualTest.php');
@@ -14,21 +14,21 @@ require_once('AcceptanceTests/TikiLibrariesAccessTest.php');
 
 class AcceptanceTests_AllTests
 {
-  public static function main()
-  {
-    PHPUnit_TextUI_TestRunner::run(self::suite());
-  }
+	public static function main()
+	{
+		PHPUnit_TextUI_TestRunner::run(self::suite());
+	}
 
-  public static function suite()
-  {
-    $suite = new PHPUnit_Framework_TestSuite('AcceptanceTestsSuite');
+	public static function suite()
+	{
+		$suite = new PHPUnit_Framework_TestSuite('AcceptanceTestsSuite');
 
-    $suite->addTestSuite('AcceptanceTests_CollaborativeMultilingualTerminologyTest');
-    $suite->addTestSuite('AcceptanceTests_ListPagesTest');		
-    $suite->addTestSuite('AcceptanceTests_MultilingualTest');
-    $suite->addTestSuite('AcceptanceTests_MultilinguallibTest');
-    $suite->addTestSuite('AcceptanceTests_SearchTest');
-    $suite->addTestSuite('AcceptanceTests_TikiLibrariesAccessTest');
-    return $suite;
-  }
+		$suite->addTestSuite('AcceptanceTests_CollaborativeMultilingualTerminologyTest');
+		$suite->addTestSuite('AcceptanceTests_ListPagesTest');
+		$suite->addTestSuite('AcceptanceTests_MultilingualTest');
+		$suite->addTestSuite('AcceptanceTests_MultilinguallibTest');
+		$suite->addTestSuite('AcceptanceTests_SearchTest');
+		$suite->addTestSuite('AcceptanceTests_TikiLibrariesAccessTest');
+		return $suite;
+	}
 }

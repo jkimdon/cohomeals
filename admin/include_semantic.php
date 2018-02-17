@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_semantic.php 63218 2017-07-09 16:34:53Z jonnybradley $
+// $Id: include_semantic.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $access->ticketMatch()) {
 		}
 	}
 	if (isset($_POST['remove'])) {
-		$list = array();
+		$list = [];
 		if (isset($_POST['select'])) {
 			$list = (array) $_POST['select'];
 		}
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $access->ticketMatch()) {
 		}
 	}
 	if (isset($_POST['removeclean'])) {
-		$list = array();
+		$list = [];
 		if (isset($_POST['select'])) {
 			$list = (array) $_POST['select'];
 		}
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $access->ticketMatch()) {
 		}
 	}
 	if (isset($_POST['clean'])) {
-		$list = array();
+		$list = [];
 		if (isset($_POST['select'])) {
 			$list = (array) $_POST['select'];
 		}
@@ -67,8 +67,8 @@ if ($access->ticketMatch()) {
 		$smarty->assign('rename', $_REQUEST['token']);
 	}
 	if (isset($_POST['list'])) {
-		$lists = array();
-		$list = array();
+		$lists = [];
+		$list = [];
 		if (isset($_POST['select'])) {
 			$list = (array) $_POST['select'];
 		}

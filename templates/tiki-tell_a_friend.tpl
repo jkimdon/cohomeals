@@ -1,4 +1,4 @@
-{* $Id: tiki-tell_a_friend.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
+{* $Id: tiki-tell_a_friend.tpl 62699 2017-05-23 00:25:06Z jyhem $ *}
 
 {title}
 	{if $report eq 'y'}

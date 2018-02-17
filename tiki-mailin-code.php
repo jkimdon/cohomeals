@@ -6,13 +6,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-mailin-code.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: tiki-mailin-code.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
 use Tiki\MailIn;
 
-require_once ('tiki-setup.php');
-$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
-include_once ("lib/webmail/tikimaillib.php");
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
+
+require_once('tiki-setup.php');
+include_once("lib/webmail/tikimaillib.php");
 
 $mailinlib = TikiLib::lib('mailin');
 

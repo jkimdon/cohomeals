@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Schema.php 63319 2017-07-22 15:16:24Z jonnybradley $
+// $Id: Schema.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular;
 
@@ -14,6 +14,7 @@ class Schema
 	private $primaryKey;
 	private $schemas = [];
 	private $filters;
+	private $config;
 
 	function __construct(\Tracker_Definition $definition)
 	{
@@ -54,6 +55,7 @@ class Schema
 		$out = new self($this->definition);
 		$out->filters = $this->filters;
 		$out->schemas = $this->schemas;
+		$out->config = $this->config;
 		$out->primaryKey = $this->primaryKey;
 
 		foreach ($this->columns as $column) {
@@ -81,6 +83,26 @@ class Schema
 		}
 
 		return $out;
+	}
+
+	function loadConfig($config)
+	{
+		$this->config = $config;
+	}
+
+	function canImportUpdate()
+	{
+		return $this->config['import_update'];
+	}
+
+	function ignoreImportBlanks()
+	{
+		return $this->config['ignore_blanks'];
+	}
+
+	function isImportTransaction()
+	{
+		return $this->config['import_transaction'];
 	}
 
 	function loadFormatDescriptor($descriptor)
@@ -200,17 +222,17 @@ class Schema
 		return $column;
 	}
 
-	function addStatic($value)     
-	{     
-		$column = new Schema\Column('ignore', uniqid());    
-		$column->setReadOnly(true);    
-		$column->setRenderTransform(function () use ($value) {     
-			return $value;    
-		});    
+	function addStatic($value)
+	{
+		$column = new Schema\Column('ignore', uniqid());
+		$column->setReadOnly(true);
+		$column->setRenderTransform(function () use ($value) {
+			return $value;
+		});
 
-		$this->columns[] = $column;    
-		return $column;    
-	}     
+		$this->columns[] = $column;
+		return $column;
+	}
 
 	function getColumns()
 	{
@@ -231,6 +253,10 @@ class Schema
 
 			if (! $header) {
 				throw new \Exception(tr('Not enough columns, expecting "%0".', $column->getEncodedHeader()));
+			}
+
+			if ($this->config['simple_headers'] && $column->getLabel() == $header) {
+				continue;
 			}
 
 			if (preg_match(Schema\Column::HEADER_PATTERN, $header, $parts)) {
@@ -282,10 +308,10 @@ class Schema
 	private function getSystemSchema($name)
 	{
 		switch ($name) {
-		case 'actions':
-			$trackerId = $this->definition->getConfiguration('trackerId');
-			$schema = new self($this->definition);
-			$schema->addNew($name, 'all')
+			case 'actions':
+				$trackerId = $this->definition->getConfiguration('trackerId');
+				$schema = new self($this->definition);
+				$schema->addNew($name, 'all')
 				->setLabel(tr('Actions'))
 				->addQuerySource('itemId', 'object_id')
 				->setReadOnly(true)
@@ -303,49 +329,49 @@ class Schema
 
 					return $smarty->fetch('tabular/item_actions.tpl');
 				})
-				;
-			return $schema;
-		case 'itemId':
-			$schema = new self($this->definition);
-			$schema->addNew($name, 'id')
+					;
+				return $schema;
+			case 'itemId':
+				$schema = new self($this->definition);
+				$schema->addNew($name, 'id')
 				->setLabel(tr('Item ID'))
 				->addQuerySource('itemId', 'object_id')
 				->setRenderTransform(function ($value, $extra) {
 					return $extra['itemId'];
 				})
-				->setParseIntoTransform(function (& $info, $value) {
-					$info['itemId'] = (int) $value;
-				})
-				;
-			return $schema;
-		case 'status':
-			$types = \TikiLib::lib('trk')->status_types();
-			$invert = array_flip(array_map(function ($s) {
-				return $s['name'];
-			}, $types));
+					->setParseIntoTransform(function (& $info, $value) {
+						$info['itemId'] = (int) $value;
+					})
+					;
+				return $schema;
+			case 'status':
+				$types = \TikiLib::lib('trk')->status_types();
+				$invert = array_flip(array_map(function ($s) {
+					return $s['name'];
+				}, $types));
 
-			$schema = new self($this->definition);
-			$schema->addNew($name, 'system')
-				->setLabel(tr('Status'))
-				->addQuerySource('status', 'tracker_status')
-				->setRenderTransform(function ($value, $extra) {
-					return $extra['status'];
-				})
-				->setParseIntoTransform(function (& $info, $value) {
-					$info['status'] = $value;
-				})
-				;
-			$schema->addNew($name, 'name')
-				->setLabel(tr('Status'))
-				->addQuerySource('status', 'tracker_status')
-				->setRenderTransform(function ($value, $extra) use ($types) {
-					return $types[$extra['status']]['name'];
-				})
-				->setParseIntoTransform(function (& $info, $value) use ($invert) {
-					$info['status'] = $invert[$value];
-				})
-				;
-			return $schema;
+				$schema = new self($this->definition);
+				$schema->addNew($name, 'system')
+					->setLabel(tr('Status'))
+					->addQuerySource('status', 'tracker_status')
+					->setRenderTransform(function ($value, $extra) {
+						return $extra['status'];
+					})
+					->setParseIntoTransform(function (& $info, $value) {
+						$info['status'] = $value;
+					})
+					;
+				$schema->addNew($name, 'name')
+					->setLabel(tr('Status'))
+					->addQuerySource('status', 'tracker_status')
+					->setRenderTransform(function ($value, $extra) use ($types) {
+						return $types[$extra['status']]['name'];
+					})
+					->setParseIntoTransform(function (& $info, $value) use ($invert) {
+						$info['status'] = $invert[$value];
+					})
+					;
+				return $schema;
 		}
 	}
 }

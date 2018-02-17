@@ -3,12 +3,12 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_reports_send.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-user_reports_send.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 
 if (php_sapi_name() != 'cli') {
 	$access->check_permission('tiki_p_admin');

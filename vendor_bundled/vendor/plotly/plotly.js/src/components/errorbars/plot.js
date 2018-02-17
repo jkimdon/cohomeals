@@ -12,13 +12,14 @@
 var d3 = require('d3');
 var isNumeric = require('fast-isnumeric');
 
+var Drawing = require('../drawing');
 var subTypes = require('../../traces/scatter/subtypes');
 
 module.exports = function plot(traces, plotinfo, transitionOpts) {
     var isNew;
 
-    var xa = plotinfo.xaxis,
-        ya = plotinfo.yaxis;
+    var xa = plotinfo.xaxis;
+    var ya = plotinfo.yaxis;
 
     var hasAnimation = transitionOpts && transitionOpts.duration > 0;
 
@@ -42,12 +43,17 @@ module.exports = function plot(traces, plotinfo, transitionOpts) {
             trace.marker.maxdisplayed > 0
         );
 
-        if(!yObj.visible && !xObj.visible) return;
+        if(!yObj.visible && !xObj.visible) d = [];
 
         var errorbars = d3.select(this).selectAll('g.errorbar')
             .data(d, keyFunc);
 
         errorbars.exit().remove();
+
+        if(!d.length) return;
+
+        if(!xObj.visible) errorbars.selectAll('path.xerror').remove();
+        if(!yObj.visible) errorbars.selectAll('path.yerror').remove();
 
         errorbars.style('opacity', 1);
 
@@ -59,6 +65,8 @@ module.exports = function plot(traces, plotinfo, transitionOpts) {
                 .duration(transitionOpts.duration)
                 .style('opacity', 1);
         }
+
+        Drawing.setClipUrl(errorbars, plotinfo.layerClipId);
 
         errorbars.each(function(d) {
             var errorbar = d3.select(this);
@@ -86,6 +94,7 @@ module.exports = function plot(traces, plotinfo, transitionOpts) {
 
                 if(isNew) {
                     yerror = errorbar.append('path')
+                        .style('vector-effect', 'non-scaling-stroke')
                         .classed('yerror', true);
                 } else if(hasAnimation) {
                     yerror = yerror
@@ -114,6 +123,7 @@ module.exports = function plot(traces, plotinfo, transitionOpts) {
 
                 if(isNew) {
                     xerror = errorbar.append('path')
+                        .style('vector-effect', 'non-scaling-stroke')
                         .classed('xerror', true);
                 } else if(hasAnimation) {
                     xerror = xerror

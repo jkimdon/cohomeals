@@ -3,21 +3,21 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TikiAddons.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: TikiAddons.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 abstract class TikiAddons
 {
-	private static $installed = array();
-	private static $paths = array();
-	protected static $addons = array();
+	private static $installed = [];
+	private static $paths = [];
+	protected static $addons = [];
 
 	public static function refresh()
 	{
-		self::$installed = array();
-		self::$paths = array();
+		self::$installed = [];
+		self::$paths = [];
 		$addon_list = glob(TIKI_PATH . '/addons/*/tikiaddon.json');
-		if ( $addon_list != NULL ) {
-			foreach ( $addon_list as $file ) {
+		if ($addon_list != null) {
+			foreach ($addon_list as $file) {
 				try {
 					$conf = json_decode(file_get_contents($file));
 					$package = str_replace('_', '/', basename(dirname($file)));
@@ -35,8 +35,9 @@ abstract class TikiAddons
 		}
 	}
 
-	private static function initializeGroupApi($package) {
-		if (!empty(self::$installed[$package]->api->group)) {
+	private static function initializeGroupApi($package)
+	{
+		if (! empty(self::$installed[$package]->api->group)) {
 			$tracker = self::$installed[$package]->api->group->tracker;
 			$public_catroot = self::$installed[$package]->api->group->public_catroot;
 			$private_catroot = self::$installed[$package]->api->group->private_catroot;
@@ -50,15 +51,17 @@ abstract class TikiAddons
 		}
 	}
 
-	private static function initializeNavbarApi($package) {
-		if (!empty(self::$installed[$package]->api->navbar)) {
+	private static function initializeNavbarApi($package)
+	{
+		if (! empty(self::$installed[$package]->api->navbar)) {
 			$tpl = self::$installed[$package]->api->navbar->tpl;
 			TikiAddons_Api_NavBar::setNavBar($package, $tpl);
 		}
 	}
 
-	private static function initializeFileGalleryApi($package) {
-		if (!empty(self::$installed[$package]->api->filegallery)) {
+	private static function initializeFileGalleryApi($package)
+	{
+		if (! empty(self::$installed[$package]->api->filegallery)) {
 			$parent = self::$installed[$package]->api->filegallery->parent;
 			TikiAddons_Api_FileGallery::setParents($package, $parent);
 			$tracker = self::$installed[$package]->api->filegallery->tracker;
@@ -66,15 +69,17 @@ abstract class TikiAddons
 		}
 	}
 
-	private static function initializeEventsApi($package) {
-		if (!empty(self::$installed[$package]->api->eventmap)) {
+	private static function initializeEventsApi($package)
+	{
+		if (! empty(self::$installed[$package]->api->eventmap)) {
 			$eventMap = self::$installed[$package]->api->eventmap;
 			TikiAddons_Api_Events::setEventMap($package, $eventMap);
 		}
 	}
 
-	private static function initializeSearchApi($package) {
-		if (!empty(self::$installed[$package]->api->search->addonSources)) {
+	private static function initializeSearchApi($package)
+	{
+		if (! empty(self::$installed[$package]->api->search->addonSources)) {
 			$sources = self::$installed[$package]->api->search->addonSources;
 			TikiAddons_Api_Search::setAddonSources($package, $sources);
 		}
@@ -98,5 +103,4 @@ abstract class TikiAddons
 	{
 		return self::$paths;
 	}
-
 }

@@ -6,21 +6,21 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: group_tracker_ajax.php 58995 2016-06-28 15:39:41Z jonnybradley $
+// $Id: group_tracker_ajax.php 65281 2018-01-21 15:55:32Z jonnybradley $
 require_once('tiki-setup.php');
 
-$access->check_feature(array('feature_trackers', 'feature_ajax', 'wikiplugin_tracker'));
+$access->check_feature(['feature_trackers', 'feature_ajax', 'wikiplugin_tracker']);
 
-include_once ('lib/wiki-plugins/wikiplugin_tracker.php');
+include_once('lib/wiki-plugins/wikiplugin_tracker.php');
 
 $headerlib->clear_js();								// so store existing js for later and clear
 
-$json_data = array();
+$json_data = [];
 $re = $userlib->get_group_info(isset($_REQUEST['chosenGroup']) ? $_REQUEST['chosenGroup'] : 'Registered');
-if (!empty($re['usersTrackerId']) && !empty($re['registrationUsersFieldIds'])) {
+if (! empty($re['usersTrackerId']) && ! empty($re['registrationUsersFieldIds'])) {
 	$json_data['res'] = wikiplugin_tracker(
 		'',
-		array(
+		[
 			'trackerId' => $re['usersTrackerId'],
 			'fields' => explode(':', $re['registrationUsersFieldIds']),
 			'showdesc' => 'y',
@@ -28,15 +28,15 @@ if (!empty($re['usersTrackerId']) && !empty($re['registrationUsersFieldIds'])) {
 			'embedded' => 'y',
 			'action' => tra('Register'),
 			'registration' => 'n',
-			'formtag'=>'n',
+			'formtag' => 'n',
 			'_ajax_form_ins_id' => 'group',
-		)
+		]
 	);
 
 	$json_data['res'] .= $headerlib->output_js();
-	
 } else {
-	$json_data['res'] = $_REQUEST['chosenGroup'];
+	$json_data['res'] = '<div class="form-group"><label class="col-sm-4 control-label">' . tr('Group') .'</label>' .
+		'<div class="col-sm-8"><div class="form-control"><span class="text-muted">' . $_REQUEST['chosenGroup'] . '</span></div></div></div>';
 	$json_data['debug'] = $re;
 }
 

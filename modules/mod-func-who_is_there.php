@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-who_is_there.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-who_is_there.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -16,26 +16,26 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
  */
 function module_who_is_there_info()
 {
-	return array(
+	return [
 		'name' => tra('Online Users'),
 		'description' => tra('Display information about users currently logged in.'),
-		'prefs' => array(),
+		'prefs' => [],
 		'documentation' => 'Module who_is_there',
-		'params' => array(
-			'content' => array(
+		'params' => [
+			'content' => [
 				'name' => tra('List Type'),
 				'description' => tra('Display the number of users logged in, the list of users logged in, or both.') . " " . tr('Possible values: "count", "list" or "both". Default value: "both"')
-			),
-			'cluster' => array(
+			],
+			'cluster' => [
 				'name' => tra('Cluster Mode'),
 				'description' => tra('If set to "1", separate users based on which host/server they logged on.')
-			),
-			'silent' => array(
+			],
+			'silent' => [
 				'name' => tra('Silent Mode'),
 				'description' => tra('If set to "1" hides the module, which allows another "who is there" module to include users that should not see it.')
-			),
-		)
-	);
+			],
+		]
+	];
 }
 
 /**
@@ -46,8 +46,8 @@ function module_who_is_there($mod_reference, $module_params)
 {
 	$tikilib = TikiLib::lib('tiki');
 	$smarty = TikiLib::lib('smarty');
-	$count = !isset($module_params['content']) || $module_params['content'] != 'list';
-	$list = !isset($module_params['content']) || $module_params['content'] != 'count';
+	$count = ! isset($module_params['content']) || $module_params['content'] != 'list';
+	$list = ! isset($module_params['content']) || $module_params['content'] != 'count';
 	$smarty->assign('count', $count);
 	$smarty->assign('list', $list);
 
@@ -61,7 +61,7 @@ function module_who_is_there($mod_reference, $module_params)
 		$smarty->assign_by_ref('online_users', $online_users);
 	}
 
-	if (isset($module_params['cluster']) && $module_params['cluster']==1) {
+	if (isset($module_params['cluster']) && $module_params['cluster'] == 1) {
 		$smarty->assign('cluster', true);
 		if ($count) {
 			$logged_cluster_users = $tikilib->count_cluster_sessions();
@@ -70,5 +70,4 @@ function module_who_is_there($mod_reference, $module_params)
 	} else {
 		$smarty->assign('cluster', false);
 	}
-
 }

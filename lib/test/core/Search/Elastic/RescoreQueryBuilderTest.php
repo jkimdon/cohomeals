@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RescoreQueryBuilderTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: RescoreQueryBuilderTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 use Search_Elastic_RescoreQueryBuilder as QueryBuilder;
 use Search_Expr_Token as Token;
@@ -34,7 +34,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 						]],
 					]]],
 				]
-			]], $query
+			]],
+			$query
 		);
 	}
 
@@ -55,7 +56,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 				["match_phrase" => [
 						"contents" => ["query" => "hello", "boost" => 1.5, 'slop' => 50],
 				]],
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -77,7 +79,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 				["match_phrase" => [
 						"contents" => ["query" => "hello world", "boost" => 1.0, 'slop' => 50],
 				]],
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -102,7 +105,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 				["match_phrase" => [
 						"contents" => ["query" => "world", "boost" => 1.5, 'slop' => 50],
 				]],
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -128,7 +132,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 				["match_phrase" => [
 						"contents" => ["query" => "world", "boost" => 1.5, 'slop' => 50],
 				]],
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -145,7 +150,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals(
 			[
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -157,7 +163,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals(
 			[
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -169,7 +176,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals(
 			[
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -181,7 +189,8 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals(
 			[
-			], $query['rescore']['query']['rescore_query']['bool']['should']
+			],
+			$query['rescore']['query']['rescore_query']['bool']['should']
 		);
 	}
 
@@ -213,4 +222,3 @@ class Search_Elastic_RescoreQueryBuilderTest extends PHPUnit_Framework_TestCase
 		);
 	}
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 61082 2017-01-26 15:56:08Z kroky6 $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_ActivityStream_Controller
 {
@@ -54,24 +54,23 @@ class Services_ActivityStream_Controller
 
 		try {
 			$plugin = new Search_Formatter_Plugin_SmartyTemplate('activity/activitystream.tpl');
-			$plugin->setFields(array(
+			$plugin->setFields([
 				'like_list' => true,
 				'user_groups' => true,
 				'contributors' => true,
-			));
+			]);
 			$formatter = Search_Formatter_Factory::newFormatter($plugin);
 			$out = $formatter->format($result);
 		} catch (SmartyException $e) {
 			throw new Services_Exception_NotAvailable($e->getMessage());
 		}
 
-		return array(
+		return [
 			'autoScroll' => $request->autoscroll->int(),
 			'pageNumber' => $page,
 			'nextPossible' => $builder->isNextPossible(),
 			'stream' => $encoded,
-			'body' => TikiLib::lib('parser')->parse_data($out, array('is_html' => true)),
-		);
+			'body' => TikiLib::lib('parser')->parse_data($out, ['is_html' => true]),
+		];
 	}
 }
-

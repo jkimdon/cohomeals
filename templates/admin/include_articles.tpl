@@ -1,11 +1,11 @@
-{* $Id: include_articles.tpl 62140 2017-04-08 17:04:55Z lindonb $ *}
+{* $Id: include_articles.tpl 62273 2017-04-20 01:41:11Z lindonb $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
 	{tr}Look under "<a href="tiki-admin_rssmodules.php" target="_blank" class="alert-link">External Feeds</a>" on the application menu if you are searching for the <a href="https://doc.tiki.org/Article+generator" target="_blank" class="alert-link">"Article Generator" on RSS feeds</a>{/tr}.
 {/remarksbox}
 {if !empty($msgs)}
 {/if}
 <form role="form" class="form-horizontal" method="post" action="tiki-admin.php?page=articles" enctype="multipart/form-data">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md clearfix">
 		<a role="link" class="btn btn-link tips" href="tiki-list_articles.php" title=":{tr}List of articles{/tr}">
 			{icon name="list"} {tr}Articles{/tr}

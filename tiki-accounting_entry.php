@@ -6,30 +6,31 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-accounting_entry.php 57958 2016-03-17 19:59:37Z jonnybradley $
+// $Id: tiki-accounting_entry.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
 $section = 'accounting';
-require_once ('tiki-setup.php');
-require_once ('lib/accounting/accountinglib.php');
+require_once('tiki-setup.php');
+
+$access->checkAuthenticity();
 
 
 // Feature available?
-if ($prefs['feature_accounting'] !='y') {
+if ($prefs['feature_accounting'] != 'y') {
 	$smarty->assign('msg', tra('This feature is disabled') . ': feature_accounting');
 	$smarty->display('error.tpl');
 	die;
 }
 
 $globalperms = Perms::get();
-$objectperms = Perms::get(array( 'type' => 'accounting book', 'object' => $bookId ));
+$objectperms = Perms::get([ 'type' => 'accounting book', 'object' => $bookId ]);
 
-if (!($globalperms->acct_book or $objectperms->acct_book)) {
+if (! ($globalperms->acct_book or $objectperms->acct_book)) {
 	$smarty->assign('msg', tra('You do not have the right to book'));
 	$smarty->display('error.tpl');
 	die;
 }
 
-if (!isset($_REQUEST['bookId'])) {
+if (! isset($_REQUEST['bookId'])) {
 	$smarty->assign('msg', tra('Missing book id'));
 	$smarty->display('error.tpl');
 	die;
@@ -37,17 +38,26 @@ if (!isset($_REQUEST['bookId'])) {
 $bookId = $_REQUEST['bookId'];
 $smarty->assign('bookId', $bookId);
 
+$accountinglib = TikiLib::lib('accounting');
 $book = $accountinglib->getBook($bookId);
 $smarty->assign('book', $book);
 
 $accounts = $accountinglib->getAccounts($bookId, $all = true);
 $smarty->assign('accounts', $accounts);
 
-if (isset($_REQUEST['book'])) {
-	check_ticket('accounting');
+if ($_REQUEST['journal_Year']) {
+	$journalDate = new DateTime();
+	$journalDate->setDate(
+		$_REQUEST['journal_Year'],
+		$_REQUEST['journal_Month'],
+		$_REQUEST['journal_Day']
+	);
+}
+
+if (isset($_REQUEST['book']) && $access->ticketMatch()) {
 	$result = $accountinglib->book(
 		$bookId,
-		$_REQUEST['journalDate'],
+		$journalDate,
 		$_REQUEST['journalDescription'],
 		$_REQUEST['debitAccount'],
 		$_REQUEST['creditAccount'],
@@ -67,7 +77,7 @@ if (isset($_REQUEST['book'])) {
 
 if (is_array($result)) {
 	$smarty->assign('errors', $result);
-	$smarty->assign('journalDate', $_REQUEST['journalDate']);
+	$smarty->assign('journalDate', $journalDate);
 	$smarty->assign('journalDescription', $_REQUEST['journalDescription']);
 	$smarty->assign('debitAccount', $_REQUEST['debitAccount']);
 	$smarty->assign('creditAccount', $_REQUEST['creditAccount']);
@@ -79,18 +89,17 @@ if (is_array($result)) {
 		$smarty->assign('statementId', $_REQUEST['statementId']);
 	}
 } else {
-	$smarty->assign('debitAccount', array(''));
-	$smarty->assign('creditAccount', array(''));
-	$smarty->assign('debitAmount', array(''));
-	$smarty->assign('creditAmount', array(''));
-	$smarty->assign('debitText', array(''));
-	$smarty->assign('creditText', array(''));
+	$smarty->assign('debitAccount', ['']);
+	$smarty->assign('creditAccount', ['']);
+	$smarty->assign('debitAmount', ['']);
+	$smarty->assign('creditAmount', ['']);
+	$smarty->assign('debitText', ['']);
+	$smarty->assign('creditText', ['']);
 }
-
-ask_ticket('accounting');
 
 $journal = $accountinglib->getJournal($bookId, '%', '`journalId` DESC', 5);
 $smarty->assign('journal', $journal);
 
+$smarty->assign('req_url', $_SERVER['REQUEST_URI']);
 $smarty->assign('mid', 'tiki-accounting_entry.tpl');
 $smarty->display('tiki.tpl');

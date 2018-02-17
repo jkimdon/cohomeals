@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabisch",
 "Catalan" => "Catalaans",
 "Simplified Chinese" => "Simpel Chinees",
@@ -1446,7 +1446,7 @@ $lang = array(
 "vote" => "stemmen",
 "Rate" => "Scoor",
 "A valid email is mandatory to register" => "Een geldig e-mail adres is vereist voor registratie",
-"Repeat password" => "Opnieuw",
+"Confirm password" => "Opnieuw",
 "Generate a password" => "Maak een wachtwoord aan",
 "Valid" => "Geldig",
 "Create New" => "Maak nieuwe aan",
@@ -2876,4 +2876,4 @@ $lang = array(
 "Aborted" => "Afgebroken",
 "Top pages" => "Top pagina's",
 "Last pages" => "Laatste pagina's",
-);
+];

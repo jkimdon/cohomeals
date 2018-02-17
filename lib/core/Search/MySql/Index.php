@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Index.php 63860 2017-09-18 14:11:14Z kroky6 $
+// $Id: Index.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_MySql_Index implements Search_Index_Interface
 {
@@ -11,7 +11,7 @@ class Search_MySql_Index implements Search_Index_Interface
 	private $table;
 	private $builder;
 
-	private $providedMappings = array();
+	private $providedMappings = [];
 
 	function __construct(TikiDb $db, $index)
 	{
@@ -40,7 +40,8 @@ class Search_MySql_Index implements Search_Index_Interface
 		$data = array_map(
 			function ($entry) {
 				return $entry->getValue();
-			}, $data
+			},
+			$data
 		);
 
 		$this->table->insert($data);
@@ -61,7 +62,7 @@ class Search_MySql_Index implements Search_Index_Interface
 		} elseif ($value instanceof Search_Type_MultivalueText) {
 			$this->table->ensureHasField($name, 'TEXT');
 		} elseif ($value instanceof Search_Type_Timestamp) {
-			$this->table->ensureHasField($name, 'DATETIME');
+			$this->table->ensureHasField($name, $value->isDateOnly() ? 'DATE' : 'DATETIME');
 		} else {
 			throw new Exception('Unsupported type: ' . get_class($value));
 		}
@@ -90,9 +91,9 @@ class Search_MySql_Index implements Search_Index_Interface
 			$words = $this->getWords($query->getExpr());
 
 			$condition = $this->builder->build($query->getExpr());
-			$conditions = empty($condition) ? array() : array(
+			$conditions = empty($condition) ? [] : [
 				$this->table->expr($condition),
-			);
+			];
 
 			$scoreFields = [];
 			$indexes = $this->builder->getRequiredIndexes();
@@ -113,7 +114,7 @@ class Search_MySql_Index implements Search_Index_Interface
 			if ($scoreFields) {
 				$str = $this->db->qstr(implode(' ', $words));
 				$scoreCalc = '';
-				foreach($scoreFields as $field) {
+				foreach ($scoreFields as $field) {
 					$scoreCalc .= $scoreCalc ? ' + ' : '';
 					$scoreCalc .= "ROUND(MATCH(`{$field['field']}`) AGAINST ($str),2) * {$field['weight']}";
 				}
@@ -128,7 +129,7 @@ class Search_MySql_Index implements Search_Index_Interface
 			return $resultSet;
 		} catch (Search_MySql_QueryException $e) {
 			Feedback::error($e->getMessage());
-			$resultSet = new Search_ResultSet(array(), 0, $resultStart, $resultCount);
+			$resultSet = new Search_ResultSet([], 0, $resultStart, $resultCount);
 			return $resultSet;
 		}
 	}
@@ -143,7 +144,7 @@ class Search_MySql_Index implements Search_Index_Interface
 			foreach ($result as $row) {
 				yield $row;
 			}
-			
+
 			$hasMore = $result->hasMore();
 		}
 	}
@@ -154,7 +155,7 @@ class Search_MySql_Index implements Search_Index_Interface
 
 		if ($order->getField() == Search_Query_Order::FIELD_SCORE) {
 			if ($useScore) {
-				return array('score' => 'DESC');
+				return ['score' => 'DESC'];
 			} else {
 				return; // No specific order
 			}
@@ -171,13 +172,13 @@ class Search_MySql_Index implements Search_Index_Interface
 
 	private function getWords($expr)
 	{
-		$words = array();
+		$words = [];
 		$factory = new Search_Type_Factory_Direct;
 		$expr->walk(
 			function ($node) use (& $words, $factory) {
 				if ($node instanceof Search_Expr_Token && $node->getField() !== 'searchable') {
 					$word = $node->getValue($factory)->getValue();
-					if (is_string($word) && !in_array($word, $words)) {
+					if (is_string($word) && ! in_array($word, $words)) {
 						$words[] = $word;
 					}
 				}
@@ -192,4 +193,3 @@ class Search_MySql_Index implements Search_Index_Interface
 		return new Search_MySql_TypeFactory;
 	}
 }
-

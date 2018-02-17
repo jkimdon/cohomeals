@@ -1,4 +1,4 @@
-{* $Id: tiki-list_surveys.tpl 57783 2016-03-05 18:04:25Z jonnybradley $ *}
+{* $Id: tiki-list_surveys.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title help="Surveys"}{tr}Surveys{/tr}{/title}
 
 <div class="t_navbar margin-bottom-md">
@@ -78,7 +78,7 @@
 							class="tips"
 							title="{tr}Actions{/tr}"
 							href="#"
-							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.list_survey_actions|escape:"javascript"|escape:"html"}{/if}
+							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.list_survey_actions}{/if}
 							style="padding:0; margin:0; border:0"
 						>
 							{icon name='wrench'}

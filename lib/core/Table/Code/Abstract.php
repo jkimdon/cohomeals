@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Abstract.php 61911 2017-03-28 15:47:08Z jonnybradley $
+// $Id: Abstract.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -68,7 +68,7 @@ class Table_Code_Abstract
 			//whether to use array index to identify columns or a selector (id, class, etc.)
 			//generally index used for plugins where columns are set by user and selectors are used with tables with
 			//smarty templates to keep from recreating tpl logic that determines which columns are shown
-			self::$usecolselector = !isset(self::$s['usecolselector']) || self::$s['usecolselector'] !== false;
+			self::$usecolselector = ! isset(self::$s['usecolselector']) || self::$s['usecolselector'] !== false;
 			self::$pager = empty($settings['pager']['type']) ? false : true;
 			global $prefs;
 			self::$ajax = $settings['ajax']['type'] === true && $prefs['feature_ajax'] === 'y';
@@ -103,14 +103,14 @@ class Table_Code_Abstract
 	 *
 	 * @return string
 	 */
-	protected function iterate(array $data, $start = '', $finish = '', $before = '\'' , $after = '\'', $separator = ', ')
+	protected function iterate(array $data, $start = '', $finish = '', $before = '\'', $after = '\'', $separator = ', ')
 	{
 		// if $data is just empty, count($data) equals 1. So need to check for type.
-		if (!is_array($data)) {
-			$ret = $start. $before. $after. $finish;
+		if (! is_array($data)) {
+			$ret = $start . $before . $after . $finish;
 			return $ret;
 		}
-		
+
 		$c = count($data);
 		$i = 0;
 		$ret = '';

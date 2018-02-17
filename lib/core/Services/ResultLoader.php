@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ResultLoader.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: ResultLoader.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Iterator to read from paginated results until the end is reached. Allows to read
@@ -58,4 +58,3 @@ class Services_ResultLoader implements Iterator
 		return isset($this->data[$this->position % $this->perPage]);
 	}
 }
-

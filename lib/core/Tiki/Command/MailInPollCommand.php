@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MailInPollCommand.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: MailInPollCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -18,15 +18,15 @@ use TikiLib;
 
 class MailInPollCommand extends Command
 {
-    protected function configure()
-    {
-        $this
-            ->setName('mail-in:poll')
-            ->setDescription('Read the mail-in messages');
-    }
+	protected function configure()
+	{
+		$this
+			->setName('mail-in:poll')
+			->setDescription('Read the mail-in messages');
+	}
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+	protected function execute(InputInterface $input, OutputInterface $output)
+	{
 		$mailinlib = TikiLib::lib('mailin');
 		$accs = $mailinlib->list_active_mailin_accounts(0, -1, 'account_desc', '');
 
@@ -39,5 +39,5 @@ class MailInPollCommand extends Command
 			$account = MailIn\Account::fromDb($acc);
 			$account->check();
 		}
-    }
+	}
 }

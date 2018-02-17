@@ -24,12 +24,12 @@ class File extends ErrorManager {
 	var $separator = NULL;
 	var $os = NULL;
 	
-	function File($path=NULL, $new=False){
+	function __construct($path=NULL, $new=False){
 		$this->separator = DIRECTORY_SEPARATOR;
 		$this->os = getenv('OS');
 		$this->setFilePath($path);
 		if ($new) $this->createFile();
-		parent::ErrorManager();
+		parent::__construct();
 	}
 	
 	function setFilePath($path){
@@ -84,7 +84,7 @@ class File extends ErrorManager {
 	
 	function writeData($data){
 		$isSucceful = true;
-		// Assurons nous que le fichier est accessible en écriture
+		// Assurons nous que le fichier est accessible en Ã©criture
 		if ($this->isWriteable()) {      
 			if (!$handle = fopen($this->getFilePath(), 'w')) {
 				$isSucceful = false;
@@ -102,7 +102,7 @@ class File extends ErrorManager {
 	
 	function readData(){
 		$isSucceful = true;
-		// Assurons nous que le fichier est accessible en écriture
+		// Assurons nous que le fichier est accessible en Ã©criture
 		if ($this->isReadable()) {      
 			if (!$handle = fopen($this->getFilePath(), 'r')) {
 				$isSucceful = false;

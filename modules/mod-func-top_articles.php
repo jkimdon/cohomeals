@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-top_articles.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-top_articles.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,13 +16,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_top_articles_info()
 {
-	return array(
+	return [
 		'name' => tra('Top Articles'),
 		'description' => tra('Lists the specified number of articles with links to them, from the most visited one to the least.'),
-		'prefs' => array('feature_articles'),
-		'params' => array(),
-		'common_params' => array('nonums', 'rows')
-	);
+		'prefs' => ['feature_articles'],
+		'params' => [],
+		'common_params' => ['nonums', 'rows']
+	];
 }
 
 /**
@@ -41,6 +41,6 @@ function module_top_articles($mod_reference, $module_params)
 		$lang = $module_params['lang'];
 	}
 	$ranking = $artlib->list_articles(0, $mod_reference['rows'], 'nbreads_desc', '', '', '', $user, '', '', '', '', '', '', '', $lang, '', '', '', 'y');
-	
+
 	$smarty->assign('modTopArticles', $ranking["data"]);
 }

@@ -1,4 +1,4 @@
-{* $Id: tiki-wiki_topline.tpl 62276 2017-04-20 15:24:11Z chealer $ *}
+{* $Id: tiki-wiki_topline.tpl 64894 2017-12-14 11:46:01Z luciash $ *}
 <div class="wikitopline clearfix" style="clear: both;">
 	<div class="content">
 		{if !isset($hide_page_header) or !$hide_page_header}
@@ -64,15 +64,15 @@
 						<a role="button" data-toggle="dropdown" data-hover="dropdown" class="btn btn-link dropdown-toggle">
 							{icon name="backlink"}
 						</a>
-						<ul class="dropdown-menu" role="menu">
+						<ul class="dropdown-menu dropdown-menu-right" role="menu">
 							<li class="dropdown-title">
 								{tr}Backlinks{/tr}
 							</li>
 							<li class="divider"></li>
 							<li role="presentation">
 								{section name=back loop=$backlinks}
-									<a role="menuitem" tabindex="-1" href="{$backlinks[back].fromPage|sefurl:'wiki'}" title="{$backlinks[back].fromPage|escape}">
-										{if $prefs.wiki_backlinks_name_len ge '1'}{$backlinks[back].fromPage|truncate:$prefs.wiki_backlinks_name_len:"...":true|escape}{else}{$backlinks[back].fromPage|escape}{/if}
+									<a role="menuitem" tabindex="-1" href="{$backlinks[back].objectId|sefurl:$backlinks[back].type}" title="{object_title id=$backlinks[back].objectId type=$backlinks[back].type|escape}">
+									  {if $prefs.wiki_backlinks_name_len ge '1'}{object_title id=$backlinks[back].objectId type=$backlinks[back].type|truncate:$prefs.wiki_backlinks_name_len:"...":true|escape}{else}{object_title id=$backlinks[back].objectId type=$backlinks[back].type|escape}{/if}
 									</a>
 								{/section}
 							</li>
@@ -93,11 +93,11 @@
 							<li class="divider"></li>
 							<li role="presentation">
 								{section name=struct loop=$showstructs}
-									<a href="tiki-index.php?page={$page}&amp;structure={$showstructs[struct].pageName|escape}" {if isset($structure_path[0].pageName) and $showstructs[struct].pageName eq $structure_path[0].pageName} title="Current structure: {$showstructs[struct].pageName|escape}" class="selected tips" {else} class="tips" title="{tr}Show structure{/tr}: {$showstructs[struct].pageName|escape}"{/if}>
+									<a href="tiki-index.php?page={$page|escape:url}&amp;structure={$showstructs[struct].pageName|escape:url}" {if isset($structure_path[0].pageName) and $showstructs[struct].pageName eq $structure_path[0].pageName} title="Current structure: {$showstructs[struct].pageName|escape}" class="selected tips" {else} class="tips" title="{tr}Show structure{/tr}: {$showstructs[struct].pageName|escape}"{/if}>
 										{if $showstructs[struct].page_alias}
 											{$showstructs[struct].page_alias}
 										{else}
-											{$showstructs[struct].pageName}
+											{$showstructs[struct].pageName|escape}
 										{/if}
 									</a>
 								{/section}
@@ -153,13 +153,13 @@
 										$("#wiki_plugin_edit_view").click( function () {
 										var $icon = $("#wiki_plugin_edit_view span");
 										if (! $icon.hasClass("highlight")) {
-										$(".editplugin, .icon_edit_section").show();
-										$icon.addClass("highlight");
-										setCookieBrowser("wiki_plugin_edit_view", true);
+											$(".editplugin, .icon_edit_section").show();
+											$icon.addClass("highlight");
+											setCookieBrowser("wiki_plugin_edit_view", true);
 										} else {
-										$(".editplugin, .icon_edit_section").hide();
-										$icon.removeClass("highlight");
-										deleteCookie("wiki_plugin_edit_view");
+											$(".editplugin, .icon_edit_section").hide();
+											$icon.removeClass("highlight");
+											deleteCookie("wiki_plugin_edit_view");
 										}
 										return false;
 										});
@@ -179,13 +179,13 @@
 										$("#wysiwyg_inline_edit").click( function () {
 										var $icon = $("#wysiwyg_inline_edit span");
 										if (! $icon.hasClass("highlight")) {
-										if (enableWysiwygInlineEditing()) {
-										$icon.addClass("highlight");
-										}
+											if (enableWysiwygInlineEditing()) {
+												$icon.addClass("highlight");
+											}
 										} else {
-										if (disableWyiswygInlineEditing()) {
-										$icon.removeClass("highlight");
-										}
+											if (disableWYSIWYGInlineEditing()) {
+												$icon.removeClass("highlight");
+											}
 										}
 										return false;
 										});

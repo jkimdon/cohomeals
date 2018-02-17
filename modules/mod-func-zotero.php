@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-zotero.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-zotero.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -15,13 +15,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_zotero_info()
 {
-	return array(
+	return [
 		'name' => tra('Bibliography Search'),
 		'description' => tra('Search the group\'s Zotero library for entries with the specified tags'),
-		'prefs' => array('zotero_enabled'),
-		'params' => array(
-		),
-	);
+		'prefs' => ['zotero_enabled'],
+		'params' => [
+		],
+	];
 }
 
 /**
@@ -35,4 +35,3 @@ function module_zotero($mod_reference, $module_params)
 
 	$smarty->assign('zotero_authorized', $zoterolib->is_authorized());
 }
-

@@ -1,13 +1,13 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AutoIncrement.php 62112 2017-04-06 13:12:50Z kroky6 $
+// $Id: AutoIncrement.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Handler class for Auto increment
- * 
+ *
  * Letter key: ~q~
  *
  */
@@ -15,78 +15,88 @@ class Tracker_Field_AutoIncrement extends Tracker_Field_Abstract implements Trac
 {
 	public static function getTypes()
 	{
-		return array(
-			'q' => array(
+		return [
+			'q' => [
 				'name' => tr('Auto-Increment'),
 				'description' => tr('Allows an incrementing value field, or itemId field.'),
 				'readonly' => true,
-				'help' => 'Auto-Increment Field',				
-				'prefs' => array('trackerfield_autoincrement'),
-				'tags' => array('advanced'),
+				'help' => 'Auto-Increment Field',
+				'prefs' => ['trackerfield_autoincrement'],
+				'tags' => ['advanced'],
 				'default' => 'n',
-				'params' => array(
-					'start' => array(
+				'supported_changes' => ['d', 'D', 'R', 'M', 't', 'a', 'n', 'q', 'b'],
+				'params' => [
+					'start' => [
 						'name' => tr('Start'),
 						'description' => tr('The starting value for the field'),
 						'default' => 1,
 						'filter' => 'int',
 						'legacy_index' => 0,
-					),
-					'prepend' => array(
+					],
+					'prepend' => [
 						'name' => tr('Prepend'),
 						'description' => tr('Text that will be displayed before the field'),
 						'filter' => 'text',
 						'legacy_index' => 1,
-					),
-					'append' => array(
+					],
+					'append' => [
 						'name' => tr('Append'),
 						'description' => tr('Text that will be displayed after the field'),
 						'filter' => 'text',
 						'legacy_index' => 2,
-					),
-					'itemId' => array(
+					],
+					'itemId' => [
 						'name' => tr('Item ID'),
 						'description' => tr('If set to "itemId", will set this field to match the value of the actual database itemId field value'),
 						'filter' => 'alpha',
-						'options' => array(
+						'options' => [
 							'' => '',
 							'itemId' => 'itemId',
-						),
+						],
 						'legacy_index' => 3,
-					),
-				),
-			),
-		);
+					],
+					'update' => [
+						'name' => tr('Update Empty'),
+						'description' => tr("Add auto-increment numbers to items in this tracker that don't have one one. ********** N.B. This modifies data and there is no undo **********"),
+						'filter' => 'int',
+						'options' => [
+							0 => tr('No'),
+							1 => tr('Yes'),
+						],
+					],
+				],
+			],
+		];
 	}
 
-	function getFieldData(array $requestData = array())
+	function getFieldData(array $requestData = [])
 	{
 		$ins_id = $this->getInsertId();
 		$value = isset($requestData[$ins_id]) ? $requestData[$ins_id] : $this->getValue();
 
-		return array('value' => $value);
+		return ['value' => $value];
 	}
-	
-	function renderInput($context = array())
+
+	function renderInput($context = [])
 	{
 		return $this->renderTemplate('trackerinput/autoincrement.tpl', $context);
 	}
 
-	protected function renderInnerOutput($context = array())
+	protected function renderInnerOutput($context = [])
 	{
 		$value = $this->getValue();
 		$prepend = $this->getOption('prepend');
-		if (!empty($prepend)) {
-			if( $context['list_mode'] !== 'csv' ) {
+		if (! empty($prepend)) {
+			if ($context['list_mode'] !== 'csv') {
 				$value = "<span class='formunit'>$prepend</span>" . $value;
 			} else {
 				$value = $prepend . $value;
 			}
 		}
-	
+
 		$append = $this->getOption('append');
-		if (!empty($append)) {
-			if( $context['list_mode'] !== 'csv' ) {
+		if (! empty($append)) {
+			if ($context['list_mode'] !== 'csv') {
 				$value .= "<span class='formunit'>$append</span>";
 			} else {
 				$value .= $append;
@@ -110,9 +120,9 @@ class Tracker_Field_AutoIncrement extends Tracker_Field_Abstract implements Trac
 			}
 		}
 
-		return array(
+		return [
 			'value' => $value,
-		);
+		];
 	}
 
 	function getTabularSchema()
@@ -170,11 +180,65 @@ class Tracker_Field_AutoIncrement extends Tracker_Field_Abstract implements Trac
 		$prepend = $this->getOption('prepend');
 		$append = $this->getOption('append');
 
-		$out = array(
+		$out = [
 			$baseKey => $typeFactory->numeric($item),
-			"{$baseKey}_text" => $typeFactory->sortable($prepend.$item.$append),
-		);
+			"{$baseKey}_text" => $typeFactory->sortable($prepend . $item . $append),
+		];
 		return $out;
 	}
-}
 
+	// if we need to update after field save then do it here
+	function handleFieldSave($data)
+	{
+		if ($this->getOption('update')) {
+			$trklib = TikiLib::lib('trk');
+			$searchlib = TikiLib::lib('unifiedsearch');
+
+			$trackerId = $this->getConfiguration('trackerId');
+			$fieldId = $this->getConfiguration('fieldId');
+
+			$tiki_tracker_items = TikiDb::get()->table('tiki_tracker_items');
+			$tiki_tracker_item_fields = TikiDb::get()->table('tiki_tracker_item_fields');
+
+			$options = json_decode($data['options'], true);	// get the start index, might have been updated in the field save
+			$value = empty($options['start']) ? 1 : $options['start'];
+			$count = 0;
+
+			$itemIds = $tiki_tracker_items->fetchColumn(
+				'itemId',
+				['trackerId' => $trackerId],
+				-1,
+				0,
+				['created' => 'ASC']
+			);
+			$autoIncValues = $tiki_tracker_item_fields->fetchMap(
+				'itemId',
+				'value',
+				['fieldId' => $fieldId]
+			);
+
+			$tx = TikiDb::get()->begin();
+
+			foreach ($itemIds as $itemId) {
+				if (empty($autoIncValues[$itemId])) {
+					while (array_search($value, $autoIncValues) !== false) {
+						// this value already exists
+						$value++;
+					}
+
+					$trklib->modify_field($itemId, $fieldId, $value);
+					$searchlib->invalidateObject('trackeritem', $itemId);
+
+					$value++;
+					$count++;
+				}
+			}
+
+			$tx->commit();
+
+			if ($count) {
+				Feedback::warning(tr('Note: %0 auto-increment item values updated', $count), 'session');
+			}
+		}
+	}
+}

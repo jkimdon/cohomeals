@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ModeNotSupported.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: ModeNotSupported.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Filter\Exception;
 
@@ -19,4 +19,3 @@ class ModeNotSupported extends Exception
 		$this->permName = $permName;
 	}
 }
-

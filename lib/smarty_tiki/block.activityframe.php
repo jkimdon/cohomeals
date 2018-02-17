@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.activityframe.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: block.activityframe.php 65069 2018-01-04 08:38:11Z robertokir $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -13,7 +13,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 
 function smarty_block_activityframe($params, $content, $smarty, &$repeat)
 {
-	if ( $repeat ) return;
+	if ($repeat) {
+		return;
+	}
 
 	$commentMode = 'default';
 	if (isset($params['comment']) && in_array($params['comment'], ['object', 'activity', 'disabled'])) {
@@ -25,31 +27,31 @@ function smarty_block_activityframe($params, $content, $smarty, &$repeat)
 		$likeMode = 'disabled';
 	}
 
-	$likes = isset($params['activity']['like_list']) ? $params['activity']['like_list'] : array();
+	$likes = isset($params['activity']['like_list']) ? $params['activity']['like_list'] : [];
 	if (! is_array($likes)) {
-		$params['activity']['like_list'] = $likes = array();
+		$params['activity']['like_list'] = $likes = [];
 	}
 
-	if (isset($params['activity']['user_groups'])) {
+	if (isset($params['activity']['user_groups']) && is_array($params['activity']['user_groups'])) {
 		$userGroups = TikiLib::lib('user')->get_user_groups($GLOBALS['user']);
 		$choiceGroups = TikiLib::lib('user')->get_groups_userchoice();
 		$sharedGroups = array_intersect($params['activity']['user_groups'], $userGroups, $choiceGroups);
 	} else {
-		$sharedGroups = array();
+		$sharedGroups = [];
 	}
 
 	if (isset($params['activity']['object_type'], $params['activity']['object_id'])) {
 		// Use the activity
-		$object = array(
+		$object = [
 			'type' => $params['activity']['object_type'],
 			'id' => $params['activity']['object_id'],
-		);
+		];
 	} elseif (isset($params['activity']['type'], $params['activity']['object'])) {
 		// Not a registered activity, use parent object
-		$object = array(
+		$object = [
 			'type' => $params['activity']['type'],
 			'id' => $params['activity']['object'],
-		);
+		];
 	} else {
 		$object = [];
 	}
@@ -68,10 +70,10 @@ function smarty_block_activityframe($params, $content, $smarty, &$repeat)
 	} elseif ($object['type'] == 'activity' && $commentMode == 'object') {
 		if (isset($params['activity']['type'], $params['activity']['object'])) {
 			// Not a registered activity, use parent object
-			$comment = array(
+			$comment = [
 				'type' => $params['activity']['type'],
 				'id' => $params['activity']['object'],
-			);
+			];
 		} else {
 			$comment = null;
 		}
@@ -83,7 +85,8 @@ function smarty_block_activityframe($params, $content, $smarty, &$repeat)
 
 	$smarty = TikiLib::lib('smarty');
 	$smarty->assign(
-		'activityframe', array(
+		'activityframe',
+		[
 			'content' => $content,
 			'activity' => $params['activity'],
 			'object' => $object,
@@ -94,7 +97,7 @@ function smarty_block_activityframe($params, $content, $smarty, &$repeat)
 			'sharedgroups' => $sharedGroups,
 			'summary' => isset($params['summary']) ? $params['summary'] : null,
 			'params' => $params,
-		)
+		]
 	);
 	$out = $smarty->fetch('activity/activityframe.tpl');
 

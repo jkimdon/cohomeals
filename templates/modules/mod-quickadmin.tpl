@@ -1,4 +1,4 @@
-{* $Id: mod-quickadmin.tpl 63138 2017-07-02 16:04:01Z jonnybradley $ *}
+{* $Id: mod-quickadmin.tpl 64682 2017-11-22 23:26:32Z rjsmelo $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="quickadmin" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 {if $prefs.javascript_enabled != 'y'}
@@ -116,11 +116,20 @@
 							{icon name="module"} {tr}Modules{/tr}
 						</a>
 					</li>
+					{if $prefs.feature_scheduler eq "y"}
 					<li>
 						<a href="tiki-admin_schedulers.php">
 							{icon name="calendar"} {tr}Scheduler{/tr}
 						</a>
 					</li>
+					{/if}
+					{if $prefs.feature_sefurl_routes eq "y"}
+						<li>
+							<a href="tiki-admin_routes.php">
+								{icon name="random"} {tr}Custom Routes{/tr}
+							</a>
+						</li>
+					{/if}
 					{if $prefs.feature_debug_console eq 'y'}
 						<li>
 							<a href="{query _type='relative' show_smarty_debug=1}">

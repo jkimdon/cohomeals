@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: KeyPatternFilterTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: KeyPatternFilterTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -15,10 +15,10 @@ class DeclFilter_KeyPatternFilterTest extends TikiTestCase
 	function testMatch()
 	{
 		$rule = new DeclFilter_KeyPatternFilterRule(
-			array(
+			[
 				'/^foo_\d+$/' => 'digits',
 				'/^bar_[a-z]+$/' => 'digits',
-			)
+			]
 		);
 
 		$this->assertTrue($rule->match('foo_123'));
@@ -30,17 +30,17 @@ class DeclFilter_KeyPatternFilterTest extends TikiTestCase
 	function testApply()
 	{
 		$rule = new DeclFilter_KeyPatternFilterRule(
-			array(
+			[
 				'/^foo_\d+$/' => 'digits',
 				'/^bar_[a-z]+$/' => 'alpha',
-			)
+			]
 		);
 
-		$data = array(
+		$data = [
 			'foo_123' => '123abc',
 			'bar_abc' => '123abc',
 			'foo' => '123abc',
-		);
+		];
 
 		$rule->apply($data, 'foo_123');
 		$rule->apply($data, 'bar_abc');
@@ -53,18 +53,18 @@ class DeclFilter_KeyPatternFilterTest extends TikiTestCase
 	function testApplyOnElements()
 	{
 		$rule = new DeclFilter_KeyPatternFilterRule(
-			array(
+			[
 				'/^foo_\d+$/' => 'digits',
-			)
+			]
 		);
 		$rule->applyOnElements();
 
-		$data = array(
-			'foo_123' => array('123abc', '456def'),
-		);
+		$data = [
+			'foo_123' => ['123abc', '456def'],
+		];
 
 		$rule->apply($data, 'foo_123');
 
-		$this->assertEquals($data['foo_123'], array('123', '456'));
+		$this->assertEquals($data['foo_123'], ['123', '456']);
 	}
 }

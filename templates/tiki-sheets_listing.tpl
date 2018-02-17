@@ -1,4 +1,4 @@
-{* $Id: tiki-sheets_listing.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: tiki-sheets_listing.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {* Use css menus as fallback for item dropdown action menu if javascript is not being used *}
 {if $prefs.javascript_enabled !== 'y'}
 	{$js = 'n'}
@@ -59,7 +59,7 @@
 		<a
 			class="tips"
 			title="{tr}Actions{/tr}" href="#"
-			{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.sheets_actions|escape:"javascript"|escape:"html"}{/if}
+			{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.sheets_actions}{/if}
 			style="padding:0; margin:0; border:0"
 		>
 			{icon name='settings'}

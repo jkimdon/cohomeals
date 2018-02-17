@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.object_selector_multi.php 58704 2016-05-25 18:54:04Z jonnybradley $
+// $Id: function.object_selector_multi.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -25,7 +25,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  * The component will build a drop list for the object selector if the results fit in a reasonable amount
  * of space or will use autocomplete on the object title otherwise.
  */
-function smarty_function_object_selector_multi( $params, $smarty )
+function smarty_function_object_selector_multi($params, $smarty)
 {
 	global $prefs;
 	static $uniqid = 0;
@@ -88,9 +88,9 @@ function smarty_function_object_selector_multi( $params, $smarty )
 	$selector = TikiLib::lib('objectselector');
 
 	if ($arguments['simplevalue'] && ! empty($arguments['filter']['type']) && $arguments['separator']) {
-		$arguments['current_selection'] = $selector->readMultipleSimple($arguments['filter']['type'], $arguments['simplevalue'], $arguments['separator']);
+		$arguments['current_selection'] = $selector->readMultipleSimple($arguments['filter']['type'], $arguments['simplevalue'], $arguments['separator'], $arguments['format']);
 	} else {
-		$arguments['current_selection'] = $selector->readMultiple($arguments['value']);
+		$arguments['current_selection'] = $selector->readMultiple($arguments['value'], $arguments['format']);
 	}
 
 	if ($arguments['simplename']) {
@@ -112,4 +112,3 @@ function smarty_function_object_selector_multi( $params, $smarty )
 
 	return $smarty->fetch('object_selector_multi.tpl');
 }
-

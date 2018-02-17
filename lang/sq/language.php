@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Type" => "Lloj",
 "Comment" => "Koment",
 "Source" => "Burim",
@@ -93,4 +93,4 @@ $lang = array(
 "Show posts" => "Shfaq postimet",
 "Is email public? (uses scrambling to prevent spam)" => "A &euml;sht&euml; email publik? (p&euml;r t&euml; parandaluar mesazhet hedhurina p&euml;rdoret maskim)",
 "Does your email application need a special character set" => "Zgjidhni kodim g&euml;rmash p&euml;r lexuesin e post&euml;s",
-);
+];

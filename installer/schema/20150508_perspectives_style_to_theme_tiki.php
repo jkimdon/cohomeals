@@ -4,7 +4,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20150508_perspectives_style_to_theme_tiki.php 61095 2017-01-28 09:42:55Z drsassafras $
+// $Id: 20150508_perspectives_style_to_theme_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -21,22 +21,21 @@ function upgrade_20150508_perspectives_style_to_theme_tiki($installer)
 	$perspectivePrefs = TikiDb::get()->table('tiki_perspective_preferences');
 
 	$result = $perspectivePrefs->fetchAll(
-		array('perspectiveId' , 'pref' , 'value'),
-		array('pref' => $perspectivePrefs->like('style%'))
+		['perspectiveId' , 'pref' , 'value'],
+		['pref' => $perspectivePrefs->like('style%')]
 	);
 
 	foreach ($result as $row) {
 		$val = unserialize($row['value']);
 		$perspectivePrefs->update(
-			array(
+			[
 				'value' => serialize(str_replace('.css', '', $val)),
 				'perspectiveId' => $row['perspectiveId'],
-				'pref' => str_replace('style', 'theme', $row['pref'])),
-			array(
+				'pref' => str_replace('style', 'theme', $row['pref'])],
+			[
 				'perspectiveId' => $row['perspectiveId'],
 				'pref' => $row['pref']
-			)
+			]
 		);
 	}
 }
-

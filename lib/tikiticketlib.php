@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiticketlib.php 61845 2017-03-24 14:21:39Z chealer $
+// $Id: tikiticketlib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -21,7 +21,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
 	 	restricted_modification();
 	 }
 	 ask_ticket('foo');
-	 
+
 	 ...can now simply use...
 	 $access->check_authenticity();
 	 restricted_modification();
@@ -45,7 +45,7 @@ function ask_ticket($area)
  */
 function check_ticket($area)
 {
-	if (!isset($_SESSION['antisurf'])) {
+	if (! isset($_SESSION['antisurf'])) {
 		$_SESSION['antisurf'] = '';
 	}
 	if ($_SESSION['antisurf'] != $area) {
@@ -64,4 +64,3 @@ function check_ticket($area)
 
 	return true;
 }
-

@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PluginOutputTest.php 58382 2016-04-20 08:59:56Z jonnybradley $
+// $Id: PluginOutputTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class WikiParser_PluginOutputTest extends PHPUnit_Framework_TestCase
 {
@@ -38,15 +38,14 @@ class WikiParser_PluginOutputTest extends PHPUnit_Framework_TestCase
 	function testInternalError()
 	{
 		$output = WikiParser_PluginOutput::internalError(tra('Unknown conversion'));
-		
+
 		$this->assertContains('Unknown conversion', $output->toHtml());
 	}
 
 	function testMissingArguments()
 	{
-		$output = WikiParser_PluginOutput::argumentError(array('id', 'test'));
+		$output = WikiParser_PluginOutput::argumentError(['id', 'test']);
 
 		$this->assertContains('<li>id</li>', $output->toHtml());
 	}
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CsvWriter.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: CsvWriter.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Writer;
 
@@ -41,9 +41,8 @@ class CsvWriter
 			foreach ($columns as $column) {
 				$row[] = $entry->render($column);
 			}
-			
+
 			$this->file->fputcsv($row);
 		}
 	}
 }
-

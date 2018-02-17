@@ -1,4 +1,4 @@
-{* $Id: cart_gift_cert.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}{$prefs.mail_template_custom_text}{tr}Gift Certificate Information{/tr}
+{* $Id: cart_gift_cert.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}{$prefs.mail_template_custom_text}{tr}Gift Certificate Information{/tr}
 
 {section name=cert loop=$giftcerts}
 {tr}Name:{/tr} {$giftcerts[cert].name|escape}

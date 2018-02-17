@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rating_choice.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.rating_choice.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
-function smarty_function_rating_choice( $params, $smarty )
+function smarty_function_rating_choice($params, $smarty)
 {
 	global $prefs, $user;
 	$ratinglib = TikiLib::lib('rating');
 
-	if ( ! isset($params['comment_author'], $params['type'], $params['id']) ) {
+	if (! isset($params['comment_author'], $params['type'], $params['id'])) {
 		return tra('No object information provided for rating.');
 	}
 
@@ -32,4 +32,3 @@ function smarty_function_rating_choice( $params, $smarty )
 	$smarty->assign('current_rating', $vote);
 	return $smarty->fetch('rating_choice.tpl');
 }
-

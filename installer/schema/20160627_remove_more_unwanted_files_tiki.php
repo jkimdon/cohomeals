@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20160627_remove_more_unwanted_files_tiki.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: 20160627_remove_more_unwanted_files_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -16,7 +16,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function upgrade_20160627_remove_more_unwanted_files_tiki($installer)
 {
 
-	$files = array(
+	$files = [
 		'vendor/player/mp3/template_default/compileTemplateDefault.bat',
 		'vendor/blueimp/javascript-load-image/js/demo.js',
 		'vendor/blueimp/javascript-load-image/css/demo.css',
@@ -33,9 +33,9 @@ function upgrade_20160627_remove_more_unwanted_files_tiki($installer)
 		'vendor/svg-edit/svg-edit/embedapi.html',
 		'vendor/svg-edit/svg-edit/extensions/imagelib/index.html',
 		'vendor/svg-edit/svg-edit/browser-not-supported.html',
-	);
+	];
 
-	$folders = array(
+	$folders = [
 		'vendor/codemirror/codemirror/doc',
 		'vendor/phpcas/phpcas/CAS-1.3.3/docs',
 		'vendor/zendframework/zend-json/doc',
@@ -57,7 +57,7 @@ function upgrade_20160627_remove_more_unwanted_files_tiki($installer)
 		'vendor/blueimp/jquery-file-upload/server',
 		'vendor/phpcas/phpcas/CAS-1.3.3/docs',
 		'vendor/jquery/plugins/jquery-json/test',
-	);
+	];
 
 	foreach ($files as $file) {
 		if (is_writable($file)) {
@@ -70,15 +70,14 @@ function upgrade_20160627_remove_more_unwanted_files_tiki($installer)
 			delTree($folder);
 		}
 	}
-
 }
 
 function delTree($dir)
 {
-	$files = array_diff(scandir($dir), array('.', '..'));
+	$files = array_diff(scandir($dir), ['.', '..']);
 	foreach ($files as $file) {
 		$path = "$dir/$file";
-		if ((is_dir($path) && !is_link($dir))) {
+		if ((is_dir($path) && ! is_link($dir))) {
 			delTree($path);
 		} else {
 			unlink($path);

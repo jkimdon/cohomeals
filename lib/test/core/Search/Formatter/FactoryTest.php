@@ -3,24 +3,27 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FactoryTest.php 61082 2017-01-26 15:56:08Z kroky6 $
+// $Id: FactoryTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_Formatter_FactoryTest extends PHPUnit_Framework_TestCase
 {
 	private $plugin;
 
-	function setUp() {
+	function setUp()
+	{
 		$this->plugin = new Search_Formatter_Plugin_WikiTemplate("");
 	}
 
-	function testInstantiation() {
+	function testInstantiation()
+	{
 		$formatter = Search_Formatter_Factory::newFormatter($this->plugin);
 		$this->assertEquals('Search_Formatter', get_class($formatter));
 	}
 
-	function testSequence() {
+	function testSequence()
+	{
 		$formatter1 = Search_Formatter_Factory::newFormatter($this->plugin);
 		$formatter2 = Search_Formatter_Factory::newFormatter($this->plugin);
-		$this->assertEquals($formatter1->getCounter()+1, $formatter2->getCounter());
+		$this->assertEquals($formatter1->getCounter() + 1, $formatter2->getCounter());
 	}
 }

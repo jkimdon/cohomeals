@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.thumb.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.thumb.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -22,11 +22,11 @@ function smarty_function_thumb($params, $smarty)
 {
 	global $prefs;
 
-	if ( ! is_array($params) || ! isset($params['_id']) ) {
+	if (! is_array($params) || ! isset($params['_id'])) {
 		return;
 	}
 
-	if ( ! isset($params['_max']) ) {
+	if (! isset($params['_max'])) {
 		$params['_max'] = $prefs['fgal_thumb_max_size']; // default thumbnail size
 	}
 
@@ -40,7 +40,7 @@ function smarty_function_thumb($params, $smarty)
 
 	$html = '<img ';
 	foreach ($params as $k => $v) {
-		if ( $k == '' || $k[0] == '_' || $k == 'src' ) {
+		if ($k == '' || $k[0] == '_' || $k == 'src') {
 			continue;
 		}
 		$html .= ' ' . htmlentities($k) . '="' . htmlentities($v) . '"';

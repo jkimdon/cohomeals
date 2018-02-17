@@ -3,11 +3,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-perspective.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-perspective.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -15,12 +15,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_perspective_info()
 {
-	return array(
+	return [
 		'name' => tra('Perspective'),
 		'description' => tra('Enables to change current perspective.'),
-		'prefs' => array('feature_perspective'),
-		'params' => array()
-	);
+		'prefs' => ['feature_perspective'],
+		'params' => []
+	];
 }
 
 /**
@@ -32,10 +32,9 @@ function module_perspective($mod_reference, $module_params)
 	$perspectivelib = TikiLib::lib('perspective');
 	$smarty = TikiLib::lib('smarty');
 	global $prefs;
-	
+
 	$perspectives = $perspectivelib->list_perspectives();
 	$smarty->assign('perspectives', $perspectives);
 
 	$smarty->assign('current_perspective', $perspectivelib->get_current_perspective($prefs));
 }
-

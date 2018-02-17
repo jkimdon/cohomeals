@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-users_own_rank.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-users_own_rank.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -16,19 +16,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
  */
 function module_users_own_rank_info()
 {
-	return array(
+	return [
 		'name' => tra('My Score'),
 		'description' => tra('Display the logged user\'s rank and score.'),
-		'prefs' => array( 'feature_score' ),
-		'params' => array()
-	);
+		'prefs' => [ 'feature_score' ],
+		'params' => []
+	];
 }
 
 /**
  * @param $mod_reference
  * @param $module_params
  */
-function module_users_own_rank( $mod_reference, $module_params )
+function module_users_own_rank($mod_reference, $module_params)
 {
 	global $user;
 	$scorelib = TikiLib::lib('score');

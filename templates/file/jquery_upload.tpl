@@ -1,4 +1,4 @@
-{* $Id: jquery_upload.tpl 58277 2016-04-10 15:56:11Z jonnybradley $ *}
+{* $Id: jquery_upload.tpl 63421 2017-07-31 20:29:15Z chealer $ *}
 {* Used by smarty_function_filegal_uploader() when $prefs.file_galleries_use_jquery_upload is enabled *}
 {* The fileinput-button span is used to style the file input field as button *}
 <div class="form-group">
@@ -6,7 +6,7 @@
 		<div class="well fileupload margin-bottom-none">
 			<h3 class="text-center">{icon name="cloud-upload"} {tr}Drop files or {/tr}
 				<div class="btn btn-primary fileinput-button">
-					<span>{tr}Browse files{/tr}</span>
+					<span>{tr}Choose files{/tr}</span>
 					{* The file input field used as target for the file upload widget *}
 					<input id="fileupload" type="file" name="files[]" multiple>
 				</div>

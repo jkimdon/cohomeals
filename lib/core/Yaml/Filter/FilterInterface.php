@@ -3,9 +3,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FilterInterface.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: FilterInterface.php 64291 2017-10-16 22:22:03Z rjsmelo $
 
-interface Yaml_Filter_FilterInterface
+namespace Tiki\Yaml\Filter;
+
+interface FilterInterface
 {
 	public function filter(&$value);
-} 
+}

@@ -30,21 +30,21 @@
             null,
             "Отменить"
          ],
-         "Bookmarked Rooms": [
+         "Bookmarks": [
             null,
             ""
          ],
-         "Click to open this room": [
+         "Remove this bookmark": [
             null,
-            "Зайти в чат"
+            ""
          ],
          "Show more information on this room": [
             null,
             "Показать больше информации об этом чате"
          ],
-         "Remove this bookmark": [
+         "Click to open this room": [
             null,
-            ""
+            "Зайти в чат"
          ],
          "Close this chat box": [
             null,
@@ -53,6 +53,10 @@
          "Personal message": [
             null,
             "Ваше сообщение"
+         ],
+         "Send": [
+            null,
+            ""
          ],
          "me": [
             null,
@@ -202,6 +206,14 @@
             null,
             "Выйти"
          ],
+         "Click to add new chat contacts": [
+            null,
+            "Добавить новый чат"
+         ],
+         "Add a contact": [
+            null,
+            "Добавть контакт"
+         ],
          "Contact name": [
             null,
             "Имя контакта"
@@ -214,53 +226,17 @@
             null,
             "Добавить"
          ],
-         "Click to add new chat contacts": [
-            null,
-            "Добавить новый чат"
-         ],
-         "Add a contact": [
-            null,
-            "Добавть контакт"
-         ],
          "No users found": [
             null,
             "Пользователи не найдены"
          ],
-         "Click to add as a chat contact": [
+         "This client does not allow presence subscriptions": [
             null,
-            "Кликните, чтобы добавить контакт"
-         ],
-         "Toggle chat": [
-            null,
-            "Включить чат"
+            "Программа не поддерживает уведомления о статусе"
          ],
          "Click to hide these contacts": [
             null,
             "Кликните, чтобы спрятать эти контакты"
-         ],
-         "The connection has dropped, attempting to reconnect.": [
-            null,
-            ""
-         ],
-         "Connecting": [
-            null,
-            "Соединение"
-         ],
-         "Authenticating": [
-            null,
-            "Авторизация"
-         ],
-         "Authentication Failed": [
-            null,
-            "Не удалось авторизоваться"
-         ],
-         "Sorry, there was an error while trying to add ": [
-            null,
-            "Возникла ошибка при добавлении "
-         ],
-         "This client does not allow presence subscriptions": [
-            null,
-            "Программа не поддерживает уведомления о статусе"
          ],
          "Minimize this chat box": [
             null,
@@ -334,9 +310,9 @@
             null,
             "Спрятать список участников"
          ],
-         "Error: the \"": [
+         "${command}": [
             null,
-            "Ошибка:  \""
+            ""
          ],
          "Are you sure you want to clear the messages from this room?": [
             null,
@@ -414,6 +390,10 @@
             null,
             "Отправить"
          ],
+         "${notification.reason}": [
+            null,
+            ""
+         ],
          " has left the room. \"": [
             null,
             ""
@@ -425,26 +405,6 @@
          " has joined the room.": [
             null,
             ""
-         ],
-         "You are not on the member list of this room": [
-            null,
-            "Вы не участник этого чата"
-         ],
-         "No nickname was specified": [
-            null,
-            "Вы не указали псевдоним"
-         ],
-         "You are not allowed to create new rooms": [
-            null,
-            "Вы не имеете права создавать чаты"
-         ],
-         "Your nickname doesn't conform to this room's policies": [
-            null,
-            "Псевдоним запрещён правилами чата"
-         ],
-         "This room does not (yet) exist": [
-            null,
-            "Этот чат не существует"
          ],
          "Topic set by %1$s to: %2$s": [
             null,
@@ -502,7 +462,7 @@
             null,
             ""
          ],
-         "All other room occupants can see your Jabber ID": [
+         "All other room occupants can see your XMPP username": [
             null,
             ""
          ],
@@ -510,7 +470,7 @@
             null,
             ""
          ],
-         "Only moderators can see your Jabber ID": [
+         "Only moderators can see your XMPP username": [
             null,
             ""
          ],
@@ -525,6 +485,10 @@
          "You may optionally include a message, explaining the reason for the invitation.": [
             null,
             "Вы можете дополнительно вставить сообщение, объясняющее причину приглашения."
+         ],
+         "Please enter a valid XMPP username": [
+            null,
+            ""
          ],
          "Room name": [
             null,
@@ -550,13 +514,13 @@
             null,
             "Нет чатов %1$s"
          ],
-         "Rooms on %1$s": [
-            null,
-            "Чаты %1$s:"
-         ],
          "Description:": [
             null,
             "Описание:"
+         ],
+         "Room Address (JID):": [
+            null,
+            ""
          ],
          "Occupants:": [
             null,
@@ -762,10 +726,6 @@
             null,
             "Зарегистрирован успешно"
          ],
-         "Return": [
-            null,
-            "Назад"
-         ],
          "The provider rejected your registration attempt. Please check the values you entered for correctness.": [
             null,
             "Провайдер отклонил вашу попытку зарегистрироваться. Пожалуйста, проверьте, правильно ли введены значения."
@@ -830,6 +790,10 @@
             null,
             ""
          ],
+         "Unread": [
+            null,
+            ""
+         ],
          "Chatty": [
             null,
             ""
@@ -837,18 +801,6 @@
          "Extended Away": [
             null,
             ""
-         ],
-         "Click to remove this contact": [
-            null,
-            "Удалить контакт"
-         ],
-         "Click to accept this contact request": [
-            null,
-            "Кликните, чтобы принять запрос этого контакта"
-         ],
-         "Click to decline this contact request": [
-            null,
-            "Кликните, чтобы отклонить запрос этого контакта"
          ],
          "Click to chat with this contact": [
             null,
@@ -861,10 +813,6 @@
          "Are you sure you want to remove this contact?": [
             null,
             "Вы уверены, что хотите удалить этот контакт?"
-         ],
-         "Sorry, there was an error while trying to remove ": [
-            null,
-            "Возникла ошибка при удалении "
          ],
          "Are you sure you want to decline this contact request?": [
             null,

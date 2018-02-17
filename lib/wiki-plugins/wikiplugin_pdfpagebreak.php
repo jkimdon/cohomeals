@@ -3,20 +3,20 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_pdfpagebreak.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: wikiplugin_pdfpagebreak.php 64629 2017-11-19 12:06:52Z rjsmelo $
 
 function wikiplugin_pdfpagebreak_info()
 {
-	 return array(
-                'name' => tra('PluginPDF Page Break'),
-                'documentation' => 'PluginPDFPageBreak',
-                'description' => tra('Helpful to format PDF files created, plugin adds page break in PDF file generated.'),
-                'tags' => array( 'basic' ),
+	 return [
+				'name' => tra('PluginPDF Page Break'),
+				'documentation' => 'PluginPDFPageBreak',
+				'description' => tra('Helpful to format PDF files created, plugin adds page break in PDF file generated.'),
+				'tags' => [ 'basic' ],
 				'iconname' => 'pdf',
-                'prefs' => array( 'wikiplugin_pdf' ),
+				'prefs' => [ 'wikiplugin_pdf' ],
 				'introduced' => 17,
-                   
-        );
+
+						   ];
 }
 
 function wikiplugin_pdfpagebreak()

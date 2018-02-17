@@ -30,21 +30,21 @@
             null,
             "Mégsem"
          ],
-         "Bookmarked Rooms": [
+         "Bookmarks": [
             null,
             ""
          ],
-         "Click to open this room": [
+         "Remove this bookmark": [
             null,
-            "Belépés a csevegőszobába"
+            ""
          ],
          "Show more information on this room": [
             null,
             "További információk a csevegőszobáról"
          ],
-         "Remove this bookmark": [
+         "Click to open this room": [
             null,
-            ""
+            "Belépés a csevegőszobába"
          ],
          "Close this chat box": [
             null,
@@ -53,6 +53,10 @@
          "Personal message": [
             null,
             "Személyes üzenet"
+         ],
+         "Send": [
+            null,
+            ""
          ],
          "me": [
             null,
@@ -206,6 +210,14 @@
             null,
             "Kilépés"
          ],
+         "Click to add new chat contacts": [
+            null,
+            "Új csevegőpartner hozzáadása"
+         ],
+         "Add a contact": [
+            null,
+            "Új partner felvétele"
+         ],
          "Contact name": [
             null,
             "Partner neve"
@@ -218,57 +230,17 @@
             null,
             "Hozzáad"
          ],
-         "Click to add new chat contacts": [
-            null,
-            "Új csevegőpartner hozzáadása"
-         ],
-         "Add a contact": [
-            null,
-            "Új partner felvétele"
-         ],
          "No users found": [
             null,
             "Nincs felhasználó"
          ],
-         "Click to add as a chat contact": [
+         "This client does not allow presence subscriptions": [
             null,
-            "Felvétel a csevegőpartnerek közé"
-         ],
-         "Toggle chat": [
-            null,
-            "Csevegőablak"
+            "Ez a kliens nem engedélyezi a jelenlét követését"
          ],
          "Click to hide these contacts": [
             null,
             "A csevegő partnerek elrejtése"
-         ],
-         "Reconnecting": [
-            null,
-            "Kapcsolódás"
-         ],
-         "The connection has dropped, attempting to reconnect.": [
-            null,
-            ""
-         ],
-         "Connecting": [
-            null,
-            "Kapcsolódás"
-         ],
-         "Authenticating": [
-            null,
-            "Azonosítás"
-         ],
-         "Authentication Failed": [
-            null,
-            "Azonosítási hiba"
-         ],
-         "Sorry, there was an error while trying to add ": [
-            null,
-            "Sajnáljuk, hiba történt a hozzáadás során"
-         ],
-         "This client does not allow presence subscriptions": [
-            null,
-            "Ez a kliens nem engedélyezi a jelenlét követését"
          ],
          "Minimize this chat box": [
             null,
@@ -342,9 +314,9 @@
             null,
             "A résztvevők listájának elrejtése"
          ],
-         "Error: the \"": [
+         "${command}": [
             null,
-            "Hiba: a \""
+            ""
          ],
          "Are you sure you want to clear the messages from this room?": [
             null,
@@ -426,9 +398,9 @@
             null,
             "Küldés"
          ],
-         "The reason given is: \"": [
+         "${notification.reason}": [
             null,
-            "Az indok: \""
+            ""
          ],
          " has left the room. \"": [
             null,
@@ -441,26 +413,6 @@
          " has joined the room.": [
             null,
             ""
-         ],
-         "You are not on the member list of this room": [
-            null,
-            "Nem szerepelsz a csevegőszoba taglistáján"
-         ],
-         "No nickname was specified": [
-            null,
-            "Nem lett megadva becenév"
-         ],
-         "You are not allowed to create new rooms": [
-            null,
-            "Nem lehet új csevegőszobát létrehozni"
-         ],
-         "Your nickname doesn't conform to this room's policies": [
-            null,
-            "A beceneved ütközik a csevegőszoba szabályzataival"
-         ],
-         "This room does not (yet) exist": [
-            null,
-            "Ez a szoba (még) nem létezik"
          ],
          "Topic set by %1$s to: %2$s": [
             null,
@@ -518,7 +470,7 @@
             null,
             ""
          ],
-         "All other room occupants can see your Jabber ID": [
+         "All other room occupants can see your XMPP username": [
             null,
             ""
          ],
@@ -526,7 +478,7 @@
             null,
             ""
          ],
-         "Only moderators can see your Jabber ID": [
+         "Only moderators can see your XMPP username": [
             null,
             ""
          ],
@@ -541,6 +493,10 @@
          "You may optionally include a message, explaining the reason for the invitation.": [
             null,
             "Megadhat egy üzenet a meghívás okaként."
+         ],
+         "Please enter a valid XMPP username": [
+            null,
+            ""
          ],
          "Room name": [
             null,
@@ -566,13 +522,13 @@
             null,
             "Nincs csevegőszoba a(z) %1$s szerveren"
          ],
-         "Rooms on %1$s": [
-            null,
-            "Csevegőszobák a(z) %1$s szerveren:"
-         ],
          "Description:": [
             null,
             "Leírás:"
+         ],
+         "Room Address (JID):": [
+            null,
+            ""
          ],
          "Occupants:": [
             null,
@@ -794,10 +750,6 @@
             null,
             "Sikeres regisztráció"
          ],
-         "Return": [
-            null,
-            "Visza"
-         ],
          "The provider rejected your registration attempt. Please check the values you entered for correctness.": [
             null,
             "A szolgáltató visszautasította a regisztrációs kérelmet. Kérem ellenőrízze a bevitt adatok pontosságát."
@@ -862,6 +814,10 @@
             null,
             ""
          ],
+         "Unread": [
+            null,
+            ""
+         ],
          "Chatty": [
             null,
             ""
@@ -869,18 +825,6 @@
          "Extended Away": [
             null,
             ""
-         ],
-         "Click to remove this contact": [
-            null,
-            "Partner törlése"
-         ],
-         "Click to accept this contact request": [
-            null,
-            "Partner felvételének elfogadása"
-         ],
-         "Click to decline this contact request": [
-            null,
-            "Partner felvételének megtagadása"
          ],
          "Click to chat with this contact": [
             null,
@@ -893,10 +837,6 @@
          "Are you sure you want to remove this contact?": [
             null,
             "Valóban törölni szeretné a csevegőpartnerét?"
-         ],
-         "Sorry, there was an error while trying to remove ": [
-            null,
-            "Sajnáljuk, hiba történt a törlés során"
          ],
          "Are you sure you want to decline this contact request?": [
             null,

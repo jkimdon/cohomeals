@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.lock.php 63066 2017-06-24 12:05:04Z jonnybradley $
+// $Id: function.lock.php 63067 2017-06-24 12:07:08Z jonnybradley $
 
 /**
  * This is a lock smarty function. It sets a lock button link that allows you to lock (and unlock) an object.

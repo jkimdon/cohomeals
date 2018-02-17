@@ -8,6 +8,10 @@
 
 	-->
 	<services>
+		<!-- this makes public all the services defined in this file -->
+		<!-- https://symfony.com/blog/new-in-symfony-3-4-services-are-private-by-default -->
+		<defaults public="true" />
+
 		<!-- Proxy that will be replaced at runtime -->
 		<service id="tiki.lib.db" class="stdclass"/>
 
@@ -79,6 +83,7 @@
 		<service id="tiki.lib.css" class="cssLib">
 			<file>%kernel.root_dir%/lib/csslib.php</file>
 		</service>
+		<service id="tiki.lib.custom_route" class="Tiki\CustomRoute\CustomRouteLib" />
 		<service id="tiki.lib.dcs" class="DCSLib">
 			<file>%kernel.root_dir%/lib/dcs/dcslib.php</file>
 		</service>
@@ -101,6 +106,9 @@
 		</service>
 		<service id="tiki.lib.filegalbatch" class="FileGalBatchLib">
 			<file>%kernel.root_dir%/lib/filegals/filegalbatchlib.php</file>
+		</service>
+		<service id="tiki.lib.filegalcopy" class="FileGalCopyLib">
+			<file>%kernel.root_dir%/lib/filegals/filegalcopylib.php</file>
 		</service>
 		<service id="tiki.lib.freetag" class="FreetagLib">
 			<file>%kernel.root_dir%/lib/freetag/freetaglib.php</file>
@@ -348,6 +356,12 @@
 		</service>
 		<service id="tiki.lib.blacklist" class="blacklistLib">
 			<file>%kernel.root_dir%/lib/user/blacklistlib.php</file>
+		</service>
+		<service id="tiki.lib.version" class="TWVersion">
+			<file>%kernel.root_dir%/lib/setup/twversion.class.php</file>
+		</service>
+		<service id="tiki.lib.accounting" class="AccountingLib">
+			<file>%kernel.root_dir%/lib/accounting/accountinglib.php</file>
 		</service>
 
 		<service id="tiki.wiki.slug.dash" class="Tiki\Wiki\SlugManager\DashGenerator">

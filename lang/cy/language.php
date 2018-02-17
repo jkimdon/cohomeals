@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "Cymraeg",
 "English" => "Seisnig",
 "English British" => "Saesneg Prydeinig",
@@ -766,4 +766,4 @@ $lang = array(
 "An email with a link to reset your password has been sent " => "E-bost gyda dolen i ailosod eich cyfrinair wedi ei anfon at eich cyfeiriad e-bost cofrestredig ar gyfer",
 "high" => "uchel",
 "Aborted" => "Wedi atal",
-);
+];

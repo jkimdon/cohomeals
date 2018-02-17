@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: QueryBuilder.php 63703 2017-08-30 09:01:15Z kroky6 $
+// $Id: QueryBuilder.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 use Search_Expr_Token as Token;
 use Search_Expr_And as AndX;
@@ -19,7 +19,7 @@ class Search_MySql_QueryBuilder
 	private $db;
 	private $factory;
 	private $fieldBuilder;
-	private $indexes = array();
+	private $indexes = [];
 
 	function __construct($db)
 	{
@@ -30,7 +30,7 @@ class Search_MySql_QueryBuilder
 
 	function build(Search_Expr_Interface $expr)
 	{
-		$this->indexes = array();
+		$this->indexes = [];
 		$query = $expr->walk($this);
 
 		return $query;
@@ -112,12 +112,12 @@ class Search_MySql_QueryBuilder
 
 	private function requireIndex($field, $type, $weight = 1.0)
 	{
-		$this->indexes[$field . $type] = array('field' => $field, 'type' => $type, 'weight' => $weight);
+		$this->indexes[$field . $type] = ['field' => $field, 'type' => $type, 'weight' => $weight];
 	}
 
 	private function getFields($node)
 	{
-		$fields = array();
+		$fields = [];
 		$node->walk(
 			function ($node) use (& $fields) {
 				if (method_exists($node, 'getField')) {
@@ -152,7 +152,8 @@ class Search_MySql_QueryBuilder
 		return $this->db->qstr($string . $suffix);
 	}
 
-	private function getRaw($node) {
+	private function getRaw($node)
+	{
 		return $node->getValue($this->factory)->getValue();
 	}
 }

@@ -1,4 +1,4 @@
-{* $Id: include_i18n.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_i18n.tpl 64028 2017-09-28 16:35:34Z chealer $ *}
 {jq}
 	function updateList( active )
 	{
@@ -11,7 +11,7 @@
 	}
 {/jq}
 <form role="form" class="form-horizontal" action="tiki-admin.php?page=i18n" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<input type="hidden" name="i18nsetup" />
 	<div class="t_navbar margin-bottom-md clearfix">
 		{if $tiki_p_edit_languages eq 'y'}
@@ -69,6 +69,9 @@
 			{preference name=wikiplugin_translated}
 		</div>
 		{preference name=lang_use_db}
+		<div class="adminoptionboxchild" id="lang_use_db_childcontainer">
+			{preference name=lang_control_contribution}
+		</div>
 		{preference name=record_untranslated}
 		{preference name=feature_machine_translation}
 		<div class="adminoptionboxchild" id="feature_machine_translation_childcontainer">

@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_polls.tpl 61826 2017-03-22 23:53:26Z jyhem $ *}
+{* $Id: tiki-admin_polls.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title help="Polls" admpage="polls"}{tr}Admin Polls{/tr}{/title}
 
 <div class="t_navbar margin-bottom-md">
@@ -175,7 +175,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_poll_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.admin_poll_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

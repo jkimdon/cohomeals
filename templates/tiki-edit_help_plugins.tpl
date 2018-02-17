@@ -1,4 +1,4 @@
-{* $Id: tiki-edit_help_plugins.tpl 54677 2015-03-23 02:54:20Z lindonb $ *}
+{* $Id: tiki-edit_help_plugins.tpl 64501 2017-11-07 20:34:22Z chealer $ *}
 {* \brief Show plugins help
  * included by tiki-show_help.tpl via smarty_block_add_help() *}
 
@@ -30,9 +30,9 @@
 		<table id="plugins_help_table" width="95%" class="formcolor">
 			<tr><th>{tr}Description{/tr}</th></tr>
 
-			{section name=i loop=$plugins} {* To modify the template of below: tiki-plugin_help.tpl *}
+			{section name=i loop=$plugins}
 				<tr>
-					<td>
+					<td>{* $plugins[i].help is generated using the tiki-plugin_help.tpl template *}
 						{if $plugins[i].help eq ''}
 							{tr}No description available{/tr}
 						{else}

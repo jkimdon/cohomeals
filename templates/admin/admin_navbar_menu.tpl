@@ -92,7 +92,7 @@
 			{if $tiki_p_admin eq "y"}
 				<li><a href="{service controller=managestream action=list}">{tr}Activity Rules{/tr}</a></li>
 			{/if}
-			{if ($prefs.feature_wiki_templates eq "y" or $prefs.feature_cms_templates eq "y") and $tiki_p_edit_content_templates eq "y"}
+			{if ($prefs.feature_wiki_templates eq "y" or $prefs.feature_cms_templates eq "y" or $prefs.feature_file_galleries_templates eq 'y') and $tiki_p_edit_content_templates eq "y"}
 				<li><a href="tiki-admin_content_templates.php ">{tr}Content Templates{/tr}</a></li>
 			{/if}
 			{if $prefs.feature_contribution eq "y" and $tiki_p_admin_contribution eq "y"}
@@ -160,6 +160,9 @@
 			{if $tiki_p_edit_cookies eq "y"}
 				<li><a href="tiki-admin_cookies.php">{tr}Cookies{/tr}</a></li>
 			{/if}
+			{if $prefs.feature_sefurl_routes eq "y" and $tiki_p_admin}
+				<li><a href="tiki-admin_routes.php">{tr}Custom Routes{/tr}</a></li>
+			{/if}
 			<li><a href="tiki-admin_dsn.php">{tr}DSN/Content Authentication{/tr}</a></li>
 			{if $prefs.feature_editcss eq "y" and $tiki_p_create_css eq "y"}
 				<li><a href="tiki-edit_css.php">{tr}Edit CSS{/tr}</a></li>
@@ -190,7 +193,12 @@
 				<li><a href="tiki-admin_system.php">{tr}System Cache{/tr}</a></li>
 			{/if}
 			<li><a href="tiki-syslog.php">{tr}System Logs{/tr}</a></li>
-			<li><a href="tiki-admin_schedulers.php ">{tr}Scheduler{/tr}</a></li>
+			{if $prefs.feature_scheduler eq "y" and $tiki_p_admin}
+				<li><a href="tiki-admin_schedulers.php">{tr}Scheduler{/tr}</a></li>
+			{/if}
+			{if $prefs.sitemap_enable eq "y" and $tiki_p_admin}
+				<li><a href="tiki-admin_sitemap.php">{tr}Sitemap{/tr}</a></li>
+			{/if}
 			<li class="divider"></li>
 			<li><a href="tiki-wizard_admin.php">{tr}Wizards{/tr}</a></li>
 		</ul>

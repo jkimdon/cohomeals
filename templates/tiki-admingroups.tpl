@@ -1,4 +1,4 @@
-{* $Id: tiki-admingroups.tpl 62897 2017-06-04 23:59:46Z lindonb $ *}
+{* $Id: tiki-admingroups.tpl 63723 2017-09-04 17:32:13Z jyhem $ *}
 
 {title help="Groups Management" admpage="login"}{tr}Admin groups{/tr}{/title}
 {if !$ts.ajax}
@@ -12,9 +12,7 @@
 				{button href="tiki-admingroups.php?add=1&amp;cookietab=2" class="btn btn-default" _icon_name="create" _text="{tr}Add New Group{/tr}"}
 			{/if}
 		{/if}
-		<button class="btn btn-link">
-			{permission_link mode=text _type="link"}
-		</button>
+		{button href="tiki-objectpermissions.php" class="btn btn-link" _type="link" _icon_name="permission" _text="{tr}Permissions{/tr}"}
 		{if $prefs.feature_invite eq 'y' and $tiki_p_invite eq 'y'}
 			{button href="tiki-list_invite.php" class="btn btn-default" _type="link" _icon_name="thumbs-up" _text="{tr}Invitation List{/tr}"}
 		{/if}
@@ -119,7 +117,7 @@
 													class="tips"
 													title="{tr}Actions{/tr}"
 													href="#"
-													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.group_actions|escape:"javascript"|escape:"html"}{/if}
+													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.group_actions}{/if}
 													style="padding:0; margin:0; border:0"
 											>
 												{icon name='wrench'}
@@ -519,7 +517,6 @@
 		{tab name="{tr _0="<i>{$groupname|escape}</i>"}%0 members{/tr}"}
 		{* ----------------------- tab with memberlist --------------------------------------- *}
 		{if $membersCount > 0}
-		<div class="clearfix">
 		{if !$ts.ajax}
 				<div class="form-group">
 					<div class="col-sm-7">
@@ -562,7 +559,7 @@
 															<a
 																	class="tips"
 																	title="{tr}Actions{/tr}" href="#"
-																	{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.members_actions|escape:"javascript"|escape:"html"}{/if}
+																	{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.members_actions}{/if}
 																	style="padding:0; margin:0; border:0"
 															>
 																{icon name='settings'}
@@ -605,7 +602,7 @@
 				</div>
 			{/if}
 			<div class="form-group">
-				<div class="col-sm-5" style="margin-top: -10px">
+				<div class="col-sm-5">
 					<form id="addorban" method="post" action="tiki-admingroups.php">
 						<h2>{tr}Add or ban users{/tr}</h2>
 						<div class="col-sm-8" style="display:block">
@@ -624,7 +621,6 @@
 					</form>
 				</div>
 			</div>
-		</div>
 		{/tab}
 		{tab name="{tr _0="<i>{$groupname|escape}</i>"}Users banned from %0{/tr}"}
 			{* ----------------------- tab with users banned from group --------------------------------------- *}

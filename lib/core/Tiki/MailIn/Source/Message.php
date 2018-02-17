@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Message.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Message.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\MailIn\Source;
 
@@ -39,11 +39,11 @@ class Message
 	{
 		$this->messageId = $messageId;
 	}
-	
+
 	function setRawFrom($from)
 	{
 		$this->from = $from;
-		
+
 		if ($email = $this->getFromAddress()) {
 			$userlib = \TikiLib::lib('user');
 			$this->associatedUser = $userlib->get_user_by_email($email);
@@ -53,7 +53,7 @@ class Message
 	function getFromAddress()
 	{
 		preg_match(self::EXTRACT_EMAIL_REGEX, $this->from, $mail);
-		
+
 		return $mail[1];
 	}
 
@@ -75,7 +75,7 @@ class Message
 			$this->deleteCallback = null;
 		}
 	}
-	
+
 	function setSubject($subject)
 	{
 		$this->subject = $subject;
@@ -154,8 +154,7 @@ class Message
 	function getRecipientAddress()
 	{
 		preg_match(self::EXTRACT_EMAIL_REGEX, $this->recipient, $mail);
-		
+
 		return $mail[1];
 	}
 }
-

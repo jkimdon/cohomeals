@@ -9,10 +9,14 @@
 
 'use strict';
 
+var overrideAll = require('../../plot_api/edit_types').overrideAll;
+
 var Scene2D = require('./scene2d');
 var Plots = require('../plots');
 var xmlnsNamespaces = require('../../constants/xmlns_namespaces');
-
+var constants = require('../cartesian/constants');
+var Cartesian = require('../cartesian');
+var fxAttrs = require('../../components/fx/layout_attributes');
 
 exports.name = 'gl2d';
 
@@ -20,17 +24,26 @@ exports.attr = ['xaxis', 'yaxis'];
 
 exports.idRoot = ['x', 'y'];
 
-exports.idRegex = {
-    x: /^x([2-9]|[1-9][0-9]+)?$/,
-    y: /^y([2-9]|[1-9][0-9]+)?$/
-};
+exports.idRegex = constants.idRegex;
 
-exports.attrRegex = {
-    x: /^xaxis([2-9]|[1-9][0-9]+)?$/,
-    y: /^yaxis([2-9]|[1-9][0-9]+)?$/
-};
+exports.attrRegex = constants.attrRegex;
 
 exports.attributes = require('../cartesian/attributes');
+
+// gl2d uses svg axis attributes verbatim, but overrides editType
+// this could potentially be just `layoutAttributes` but it would
+// still need special handling somewhere to give it precedence over
+// the svg version when both are in use on one plot
+exports.layoutAttrOverrides = overrideAll(Cartesian.layoutAttributes, 'plot', 'from-root');
+
+// similar overrides for base plot attributes (and those added by components)
+exports.baseLayoutAttrOverrides = overrideAll({
+    plot_bgcolor: Plots.layoutAttributes.plot_bgcolor,
+    hoverlabel: fxAttrs.hoverlabel
+    // dragmode needs calc but only when transitioning TO lasso or select
+    // so for now it's left inside _relayout
+    // dragmode: fxAttrs.dragmode
+}, 'plot', 'nested');
 
 exports.plot = function plotGl2d(gd) {
     var fullLayout = gd._fullLayout,
@@ -82,6 +95,15 @@ exports.clean = function(newFullData, newFullLayout, oldFullData, oldFullLayout)
             delete oldFullLayout._plots[id];
         }
     }
+
+    // since we use cartesian interactions, do cartesian clean
+    Cartesian.clean.apply(this, arguments);
+};
+
+exports.drawFramework = function(gd) {
+    if(!gd._context.staticPlot) {
+        Cartesian.drawFramework(gd);
+    }
 };
 
 exports.toSVG = function(gd) {
@@ -106,5 +128,14 @@ exports.toSVG = function(gd) {
         });
 
         scene.destroy();
+    }
+};
+
+exports.updateFx = function(fullLayout) {
+    var subplotIds = Plots.getSubplotIds(fullLayout, 'gl2d');
+
+    for(var i = 0; i < subplotIds.length; i++) {
+        var subplotObj = fullLayout._plots[subplotIds[i]]._scene2d;
+        subplotObj.updateFx(fullLayout.dragmode);
     }
 };

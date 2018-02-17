@@ -31,21 +31,21 @@
             null,
             "Anuluj"
          ],
-         "Bookmarked Rooms": [
+         "Bookmarks": [
             null,
             ""
          ],
-         "Click to open this room": [
+         "Remove this bookmark": [
             null,
-            "Kliknij aby wejść do pokoju"
+            ""
          ],
          "Show more information on this room": [
             null,
             "Pokaż więcej informacji o pokoju"
          ],
-         "Remove this bookmark": [
+         "Click to open this room": [
             null,
-            ""
+            "Kliknij aby wejść do pokoju"
          ],
          "You have unread messages": [
             null,
@@ -58,6 +58,10 @@
          "Personal message": [
             null,
             "Wiadomość osobista"
+         ],
+         "Send": [
+            null,
+            ""
          ],
          "me": [
             null,
@@ -215,6 +219,14 @@
             null,
             "Wyloguj się"
          ],
+         "Click to add new chat contacts": [
+            null,
+            "Kliknij aby dodać nowe kontakty"
+         ],
+         "Add a contact": [
+            null,
+            "Dodaj kontakt"
+         ],
          "Contact name": [
             null,
             "Nazwa kontaktu"
@@ -231,57 +243,17 @@
             null,
             "Dodaj"
          ],
-         "Click to add new chat contacts": [
-            null,
-            "Kliknij aby dodać nowe kontakty"
-         ],
-         "Add a contact": [
-            null,
-            "Dodaj kontakt"
-         ],
          "No users found": [
             null,
             "Nie znaleziono użytkowników"
          ],
-         "Click to add as a chat contact": [
+         "This client does not allow presence subscriptions": [
             null,
-            "Kliknij aby dodać jako kontakt"
-         ],
-         "Toggle chat": [
-            null,
-            "Przełącz rozmowę"
+            "Klient nie umożliwia subskrybcji obecności"
          ],
          "Click to hide these contacts": [
             null,
             "Kliknij aby schować te kontakty"
-         ],
-         "Reconnecting": [
-            null,
-            "Przywracam połączenie"
-         ],
-         "The connection has dropped, attempting to reconnect.": [
-            null,
-            ""
-         ],
-         "Connecting": [
-            null,
-            "Łączę się"
-         ],
-         "Authenticating": [
-            null,
-            "Autoryzuję"
-         ],
-         "Authentication Failed": [
-            null,
-            "Autoryzacja nie powiodła się"
-         ],
-         "Sorry, there was an error while trying to add ": [
-            null,
-            "Wystąpił błąd w czasie próby dodania "
-         ],
-         "This client does not allow presence subscriptions": [
-            null,
-            "Klient nie umożliwia subskrybcji obecności"
          ],
          "Close this box": [
             null,
@@ -359,9 +331,9 @@
             null,
             "Ukryj listę rozmówców"
          ],
-         "Error: the \"": [
+         "${command}": [
             null,
-            "Błąd: \""
+            ""
          ],
          "Are you sure you want to clear the messages from this room?": [
             null,
@@ -451,9 +423,9 @@
             null,
             "Wyślij"
          ],
-         "The reason given is: \"": [
+         "${notification.reason}": [
             null,
-            "Podana przyczyna to: \""
+            ""
          ],
          " has left the room. \"": [
             null,
@@ -466,30 +438,6 @@
          " has joined the room.": [
             null,
             ""
-         ],
-         "You are not on the member list of this room": [
-            null,
-            "Nie jesteś członkiem tego pokoju rozmów"
-         ],
-         "No nickname was specified": [
-            null,
-            "Nie podałeś ksywki"
-         ],
-         "You are not allowed to create new rooms": [
-            null,
-            "Nie masz uprawnień do tworzenia nowych pokojów rozmów"
-         ],
-         "Your nickname doesn't conform to this room's policies": [
-            null,
-            "Twoja ksywka nie jest zgodna z regulaminem pokoju"
-         ],
-         "This room does not (yet) exist": [
-            null,
-            "Ten pokój (jeszcze) nie istnieje"
-         ],
-         "This room has reached its maximum number of occupants": [
-            null,
-            "Pokój przekroczył dozwoloną ilość rozmówców"
          ],
          "Topic set by %1$s to: %2$s": [
             null,
@@ -559,7 +507,7 @@
             null,
             ""
          ],
-         "All other room occupants can see your Jabber ID": [
+         "All other room occupants can see your XMPP username": [
             null,
             ""
          ],
@@ -567,7 +515,7 @@
             null,
             ""
          ],
-         "Only moderators can see your Jabber ID": [
+         "Only moderators can see your XMPP username": [
             null,
             ""
          ],
@@ -582,6 +530,10 @@
          "You may optionally include a message, explaining the reason for the invitation.": [
             null,
             "Masz opcjonalną możliwość dołączenia wiadomości, która wyjaśni przyczynę zaproszenia."
+         ],
+         "Please enter a valid XMPP username": [
+            null,
+            ""
          ],
          "Room name": [
             null,
@@ -607,13 +559,13 @@
             null,
             "Brak jest pokojów na %1$s"
          ],
-         "Rooms on %1$s": [
-            null,
-            "Pokoje na %1$s"
-         ],
          "Description:": [
             null,
             "Opis:"
+         ],
+         "Room Address (JID):": [
+            null,
+            ""
          ],
          "Occupants:": [
             null,
@@ -839,10 +791,6 @@
             null,
             "Szczęśliwie zarejestrowany"
          ],
-         "Return": [
-            null,
-            "Powrót"
-         ],
          "The provider rejected your registration attempt. Please check the values you entered for correctness.": [
             null,
             "Dostawca odrzucił twoją próbę rejestracji. Sprawdź proszę poprawność danych które zostały wprowadzone."
@@ -907,6 +855,10 @@
             null,
             "Dowolny"
          ],
+         "Unread": [
+            null,
+            ""
+         ],
          "Chatty": [
             null,
             "Gotowy do rozmowy"
@@ -914,18 +866,6 @@
          "Extended Away": [
             null,
             "Dłuższa nieobecność"
-         ],
-         "Click to remove this contact": [
-            null,
-            "Kliknij aby usunąć kontakt"
-         ],
-         "Click to accept this contact request": [
-            null,
-            "Klknij aby zaakceptować życzenie nawiązania kontaktu"
-         ],
-         "Click to decline this contact request": [
-            null,
-            "Kliknij aby odrzucić życzenie nawiązania kontaktu"
          ],
          "Click to chat with this contact": [
             null,
@@ -938,10 +878,6 @@
          "Are you sure you want to remove this contact?": [
             null,
             "Czy potwierdzasz zamiar usnunięcia tego kontaktu?"
-         ],
-         "Sorry, there was an error while trying to remove ": [
-            null,
-            "Wystąpił błąd w trakcie próby usunięcia "
          ],
          "Are you sure you want to decline this contact request?": [
             null,

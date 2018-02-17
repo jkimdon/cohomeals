@@ -3,25 +3,25 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: workspace.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: workspace.php 64628 2017-11-19 12:03:08Z rjsmelo $
 
 function prefs_workspace_list()
 {
-	return array(
-		'workspace_ui' => array(
+	return [
+		'workspace_ui' => [
 			'name' => tr('Workspace UI'),
 			'description' => tr('Combines multiple site features to create a workspace experience for workgroups.'),
 			'type' => 'flag',
 			'default' => 'n',
 			'perspective' => false,
-			'dependencies' => array(
+			'dependencies' => [
 				'feature_wiki',
 				'namespace_enabled',
 				'feature_perspective',
 				'feature_categories',
-			),
-		),
-		'workspace_root_category' => array(
+			],
+		],
+		'workspace_root_category' => [
 			'name' => tr('Workspace root category'),
 			'description' => tr('ID of the root category containing all workspaces.'),
 			'type' => 'text',
@@ -30,7 +30,6 @@ function prefs_workspace_list()
 			'perspective' => false,
 			'warning' => tr('This value is automatically managed and should not need to be modified manually.'),
 			'profile_reference' => 'category',
-		),
-	);
+		],
+	];
 }
-

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CacheClearCommand.php 60091 2016-10-31 09:01:14Z rjsmelo $
+// $Id: CacheClearCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -49,25 +49,25 @@ class CacheClearCommand extends Command
 			\TikiLib::lib('prefs')->rebuildIndex();
 		} else {
 			switch ($type) {
-			case 'public':
-				$output->writeln('Clearing public caches');
-				return $cachelib->empty_cache('temp_public');
-			case 'private':
-				$output->writeln('Clearing private caches');
-				return $cachelib->empty_cache('temp_cache');
-			case 'templates':
-				$output->writeln('Clearing template caches');
-				return $cachelib->empty_cache('templates_c');
-			case 'modules':
-				$output->writeln('Clearing module caches');
-				return $cachelib->empty_cache('modules_cache');
-			case 'all':
-				$output->writeln('Clearing all caches');
-				return $cachelib->empty_cache();
-			case '':
-				return $output->writeln('Missing parameter.');
-			default:
-				$output->writeln('<error>Invalid cache requested.</error>');
+				case 'public':
+					$output->writeln('Clearing public caches');
+					return $cachelib->empty_cache('temp_public');
+				case 'private':
+					$output->writeln('Clearing private caches');
+					return $cachelib->empty_cache('temp_cache');
+				case 'templates':
+					$output->writeln('Clearing template caches');
+					return $cachelib->empty_cache('templates_c');
+				case 'modules':
+					$output->writeln('Clearing module caches');
+					return $cachelib->empty_cache('modules_cache');
+				case 'all':
+					$output->writeln('Clearing all caches');
+					return $cachelib->empty_cache();
+				case '':
+					return $output->writeln('Missing parameter.');
+				default:
+					$output->writeln('<error>Invalid cache requested.</error>');
 			}
 		}
 	}

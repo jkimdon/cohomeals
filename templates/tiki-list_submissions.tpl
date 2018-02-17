@@ -29,7 +29,7 @@
 
 <form name="checkform" method="post">
 	<input type="hidden" name="maxRecords" value="{$maxRecords|escape}">
-	<div class="{if $js === 'y'}table-responsive{/if}"> {*the table-responsive class cuts off dropdown menus *}
+	<div class="table"> {*the table-responsive class cuts off dropdown menus when chosen is selected*}
 		<table class="table table-striped table-hover">
 			{assign var=numbercol value=0}
 			<tr>
@@ -148,7 +148,7 @@
 							class="tips"
 							title="{tr}Actions{/tr}"
 							href="#"
-							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.submission_actions|escape:"javascript"|escape:"html"}{/if}
+							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.submission_actions}{/if}
 							style="padding:0; margin:0; border:0"
 						>
 							{icon name='wrench'}

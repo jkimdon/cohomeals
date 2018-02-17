@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_trackerstat.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+{* $Id: wikiplugin_trackerstat.tpl 64164 2017-10-08 08:48:35Z yonixxx $ *}
 <div class="table-responsive">
 <table class="table wikiplugin_trackerstat">
 
@@ -10,7 +10,7 @@
 {if $show_count eq 'y'}<td class="{cycle advance=false}">{$val.count}</td>{/if}
 <td class="{cycle advance=false}{if $val.me} highlight{/if}">
 	{if $show_link eq 'y'}<a href="tiki-view_tracker.php?{$val.href}">{/if}
-	{$val.value|escape}
+	{$val.value}
 	{if $show_link eq 'y'}</a>{/if}
 </td>
 {if $show_percent eq 'y'}<td class="{cycle advance=false}">%{$val.average|string_format:"%.2f"}</td>{/if}

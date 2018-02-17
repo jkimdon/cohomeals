@@ -1,4 +1,4 @@
-{* $Id: layout_view.tpl 62780 2017-05-28 12:37:09Z jonnybradley $ *}<!DOCTYPE html>
+{* $Id: layout_view.tpl 62781 2017-05-28 13:26:42Z jonnybradley $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}"{if $prefs.feature_bidi eq 'y'} dir="rtl"{/if}{if !empty($page_id)} id="page_{$page_id}"{/if}>
 <head>
 	{include file='header.tpl'}

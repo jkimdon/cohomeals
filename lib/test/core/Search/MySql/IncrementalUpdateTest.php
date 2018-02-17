@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IncrementalUpdateTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: IncrementalUpdateTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_MySql_IncrementalUpdateTest extends Search_Index_IncrementalUpdateTest
 {
@@ -29,4 +29,3 @@ class Search_MySql_IncrementalUpdateTest extends Search_Index_IncrementalUpdateT
 		}
 	}
 }
-

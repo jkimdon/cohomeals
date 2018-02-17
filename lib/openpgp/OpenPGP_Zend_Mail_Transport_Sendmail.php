@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: OpenPGP_Zend_Mail_Transport_Sendmail.php 57966 2016-03-17 20:05:33Z jonnybradley $
+// $Id: OpenPGP_Zend_Mail_Transport_Sendmail.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 class OpenPGP_Zend_Mail_Transport_Smtp extends Zend\Mail\Transport\Sendmail
 {
@@ -24,25 +24,23 @@ class OpenPGP_Zend_Mail_Transport_Smtp extends Zend\Mail\Transport\Sendmail
 		}
 
 		$body = $message->getBody();
-		if ($body instanceof Zend\Mime\Message){
+		if ($body instanceof Zend\Mime\Message) {
 			$parts = $body->getParts();
-			foreach($parts as $part) {
+			foreach ($parts as $part) {
 				/* @var $part Zend\Mime\Part */
 				if ($part->getType() == Zend\Mime\Mime::TYPE_HTML) {
 					$part->setContent("******** PGP/MIME-ENCRYPTED MESSAGE ********<br>\n"
 							. "Subject: "
 							. $originalSubject
 							. "<br><br>\n"
-							. $part->getContent()
-					);
+							. $part->getContent());
 				}
 				if ($part->getType() == Zend\Mime\Mime::TYPE_TEXT) {
 					$part->setContent("******** PGP/MIME-ENCRYPTED MESSAGE ********\n"
 							. "Subject: "
 							. $originalSubject
 							. "\n\n"
-							. $part->getContent()
-					);
+							. $part->getContent());
 				}
 			}
 		} else {
@@ -56,14 +54,14 @@ class OpenPGP_Zend_Mail_Transport_Smtp extends Zend\Mail\Transport\Sendmail
 		$originalHeaders = parent::prepareHeaders($message);
 		$originalBody = parent::prepareBody($message);
 
-		$recipients = array();
-		foreach($message->getTo() as $destination){
+		$recipients = [];
+		foreach ($message->getTo() as $destination) {
 			$recipients[] = $destination->getEmail();
 		}
-		foreach($message->getCc() as $destination){
+		foreach ($message->getCc() as $destination) {
 			$recipients[] = $destination->getEmail();
 		}
-		foreach($message->getBcc() as $destination){
+		foreach ($message->getBcc() as $destination) {
 			$recipients[] = $destination->getEmail();
 		}
 

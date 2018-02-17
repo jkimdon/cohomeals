@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Czech" => "Gana Czech",
 "Danish" => "Gana Danish",
 "German" => "Gana Tiamani",
@@ -82,4 +82,4 @@ $lang = array(
 "No forumId specified" => "Seai sau forumId ne fakailoa",
 "TOP" => "KI LUGA",
 "You do not have permission to remove someone else's post!" => "E se talia ke fakaseai ne koe a te post ate suaa tino!",
-);
+];

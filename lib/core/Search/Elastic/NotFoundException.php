@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: NotFoundException.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: NotFoundException.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_NotFoundException extends Search_Elastic_Exception
 {
@@ -12,4 +12,3 @@ class Search_Elastic_NotFoundException extends Search_Elastic_Exception
 		parent::__construct(tr('Document not found in index %1 (%0)', $type, $id));
 	}
 }
-

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabisk",
 "Czech" => "Tjekkisk",
 "Danish" => "Dansk",
@@ -926,7 +926,7 @@ $lang = array(
 "Current" => "Aktuel",
 "Versions are identical" => "Versionerne er identiske",
 "vote" => "stem",
-"Repeat password" => "Gentag adgangskode",
+"Confirm password" => "Gentag adgangskode",
 "Generate a password" => "Generer en adgangskode",
 "Valid" => "Gyldig",
 "Create New" => "Opret ny",
@@ -1817,4 +1817,4 @@ $lang = array(
 "Aborted" => "Afbrudt",
 "Top pages" => "Top sider",
 "Last pages" => "Seneste sider",
-);
+];

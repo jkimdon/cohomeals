@@ -1,4 +1,4 @@
-{* $Id: tiki-edit_article.tpl 63772 2017-09-08 01:28:24Z jyhem $ *}
+{* $Id: tiki-edit_article.tpl 63773 2017-09-08 01:31:20Z jyhem $ *}
 {* Note: if you edit this file, make sure to make corresponding edits on tiki-edit_submission.tpl*}
 {include file='tiki-articles-js.tpl'}
 {title help="Articles" admpage="articles"}

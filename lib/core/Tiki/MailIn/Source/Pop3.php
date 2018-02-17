@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Pop3.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Pop3.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\MailIn\Source;
+
 use Tiki\MailIn\Exception\TransportException;
 use Zend\Mail\Storage\Pop3 as ZendPop3;
 use Zend\Mail\Exception\ExceptionInterface as ZendMailException;
@@ -181,12 +182,12 @@ class Pop3 implements SourceInterface
 		$content = $part->getContent();
 		if (isset($part->{'content-transfer-encoding'})) {
 			switch ($part->{'content-transfer-encoding'}) {
-			case 'base64':
-				$content = base64_decode($content);
-				break;
-			case 'quoted-printable':
-				$content = quoted_printable_decode($content);
-				break;
+				case 'base64':
+					$content = base64_decode($content);
+					break;
+				case 'quoted-printable':
+					$content = quoted_printable_decode($content);
+					break;
 			}
 		}
 

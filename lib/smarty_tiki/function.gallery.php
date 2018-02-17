@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.gallery.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: function.gallery.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -24,22 +24,22 @@ function smarty_function_gallery($params, $smarty)
 	}
 	$img = $imagegallib->get_random_image($id);
 	print('<div style="text-align: center">');
-	if (!isset($hidelink) || $hidelink != 1) {
+	if (! isset($hidelink) || $hidelink != 1) {
 		print('<a href="tiki-browse_image.php?galleryId=' . $img['galleryId'] . '&amp;imageId=' . $img['imageId'] . '">');
 	}
 	print ('<img alt="thumbnail" class="athumb" src="show_image.php?id=' . $img['imageId'] . '&amp;thumb=1" />');
-	if (!isset($hidelink) || $hidelink !=1) {
+	if (! isset($hidelink) || $hidelink != 1) {
 		print('</a>');
 	}
-	if (!isset($hideimgname) || $hideimgname !=1) {
-		print('<br /><b>'.$img['name'].'</b>');
+	if (! isset($hideimgname) || $hideimgname != 1) {
+		print('<br /><b>' . $img['name'] . '</b>');
 	}
 	if (isset($showgalleryname) && $showgalleryname == 1) {
 		print(
-						'<br /><small>' . 
-						tra("Gallery") . 
+						'<br /><small>' .
+						tra("Gallery") .
 						': <a href="tiki-browse_gallery.php?galleryId=' . $img['galleryId'] . '">' .
-						$img['gallery'] . 
+						$img['gallery'] .
 						'</a></small>'
 		);
 	}

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Utilities.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Utilities.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Workspace_Utilities
 {
@@ -94,8 +94,8 @@ class Services_Workspace_Utilities
 	function initialize(array $data)
 	{
 		$perspectivelib = TikiLib::lib('perspective');
-		$perspectivelib->set_preference($data['perspective'], 'category_jail', array($data['category']));
-		$perspectivelib->set_preference($data['perspective'], 'category_jail_root', array($this->getWorkspaceRoot()));
+		$perspectivelib->set_preference($data['perspective'], 'category_jail', [$data['category']]);
+		$perspectivelib->set_preference($data['perspective'], 'category_jail_root', [$this->getWorkspaceRoot()]);
 		$perspectivelib->set_preference($data['perspective'], 'namespace_default', $data['page']);
 		$perspectivelib->set_preference($data['perspective'], 'wikiHomePage', $data['page']);
 
@@ -150,16 +150,16 @@ class Services_Workspace_Utilities
 
 		return (int) $table->fetchOne(
 			'categId',
-			array(
+			[
 				'parentId' => (int) $parent,
 				'name' => $name,
-			)
+			]
 		);
 	}
 
 	function getTemplateList()
 	{
-		$list = $this->templates()->fetchAll(array('templateId', 'name'), array());
+		$list = $this->templates()->fetchAll(['templateId', 'name'], []);
 		$list = Perms::simpleFilter('workspace', 'templateId', 'workspace_instantiate', $list);
 
 		return $list;
@@ -171,10 +171,10 @@ class Services_Workspace_Utilities
 			throw new Services_Exception;
 		}
 
-		$info = array(
+		$info = [
 			'name' => $data['name'],
 			'definition' => empty($data['definition']) ? '' : $data['definition'],
-		);
+		];
 
 		if (isset($data['is_advanced'])) {
 			$info['is_advanced'] = $data['is_advanced'];
@@ -182,15 +182,15 @@ class Services_Workspace_Utilities
 
 		return $this->templates()->insertOrUpdate(
 			$info,
-			array('templateId' => $id)
+			['templateId' => $id]
 		);
 	}
 
 	function getTemplate($id)
 	{
 		return $this->templates()->fetchRow(
-			array('templateId', 'name', 'definition', 'is_advanced'),
-			array('templateId' => $id)
+			['templateId', 'name', 'definition', 'is_advanced'],
+			['templateId' => $id]
 		);
 	}
 
@@ -199,4 +199,3 @@ class Services_Workspace_Utilities
 		return TikiDb::get()->table('tiki_workspace_templates');
 	}
 }
-

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "Walisisch",
 "Slovene" => "Slovenisch",
 "Arabic" => "Arabisch",
@@ -2593,7 +2593,6 @@ $lang = array(
 "%A %d of %B, %Y %H:%M:%S %Z" => "%A, %d. %B %Y %H:%M:%S %Z",
 "Force lowercase" => "Erzwinge Kleinbuchstaben",
 "Mail end of line" => "Zeilenumbruch in E-Mails",
-"Specify the end-of-line (EOL) character used by Tiki when sending mail notifications" => "Zeilenumbruch in E-Mails",
 "CRLF (standard)" => "CRLF (Standard)",
 "LF (some Unix MTA)" => "LF (Einige Unix MTA)",
 "Main shadow start" => "Hauptteil Schatten Start",
@@ -7565,7 +7564,7 @@ $lang = array(
 "{\$gr.groupDesc|escape}" => "{\$gr.groupDesc|escape}",
 "Use your email address as your log-in name" => "Benutze Deine E-Mail als Login",
 "Lowercase only" => "Nur Kleinbuchstaben",
-"Repeat password" => "Passwort wiederholen",
+"Confirm password" => "Passwort wiederholen",
 "Generate a password" => "Passwort vorschlagen",
 "Passcode to register" => "Passwort zum Registrieren",
 "Not your password" => "Nicht Dein Passwort",
@@ -11500,4 +11499,4 @@ $lang = array(
 "Aborted" => "Abgebrochen",
 "Top pages" => "Top-Seiten",
 "Last pages" => "Letzte Seiten",
-);
+];

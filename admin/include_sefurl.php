@@ -3,10 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_sefurl.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: include_sefurl.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
-require_once ('tiki-setup.php');
-$access->check_script($_SERVER["SCRIPT_NAME"], basename(__FILE__));
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
+require_once('tiki-setup.php');
 
 if (isset($_REQUEST['feature_sefurl_paths']) && $access->ticketMatch()) {
 	$_REQUEST['feature_sefurl_paths'] = preg_split('/ *[,\/] */', $_REQUEST['feature_sefurl_paths']);
@@ -43,7 +45,7 @@ if (isset($enabledFileName)) {
 			}
 			$referenceIdLine = fgets($referenceFile);
 			$enabledIdLine = fgets($enabledFile);
-			if (!strstr($enabledIdLine, 'This line is used to check that this configuration file is up to date.')) {
+			if (! strstr($enabledIdLine, 'This line is used to check that this configuration file is up to date.')) {
 				$configurationFile = 'unexpected';
 			} elseif ($referenceIdLine == $enabledIdLine) { // Do not warn if the Id line of each file is identical. Id lines contain configuration file revision.
 				$configurationFile = 'current';

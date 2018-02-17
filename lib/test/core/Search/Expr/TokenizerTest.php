@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TokenizerTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: TokenizerTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_Expr_TokenizerTest extends PHPUnit_Framework_TestCase
 {
@@ -16,23 +16,23 @@ class Search_Expr_TokenizerTest extends PHPUnit_Framework_TestCase
 
 	function testSingleWord()
 	{
-		$this->assertEquals(array('hello'), $this->tokenizer->tokenize('hello'));
+		$this->assertEquals(['hello'], $this->tokenizer->tokenize('hello'));
 	}
 
 	function testMultipleWords()
 	{
-		$this->assertEquals(array('hello', 'world', 'who', 'listens'), $this->tokenizer->tokenize('hello world who listens'));
+		$this->assertEquals(['hello', 'world', 'who', 'listens'], $this->tokenizer->tokenize('hello world who listens'));
 	}
 
 	function testWithQuotedText()
 	{
-		$this->assertEquals(array('hello world', 'who listens'), $this->tokenizer->tokenize('"hello world" "who listens"'));
+		$this->assertEquals(['hello world', 'who listens'], $this->tokenizer->tokenize('"hello world" "who listens"'));
 	}
 
 	function testWithParenthesis()
 	{
 		$this->assertEquals(
-			array(
+			[
 				'hello world (who?)',
 				'(',
 				'who',
@@ -41,9 +41,8 @@ class Search_Expr_TokenizerTest extends PHPUnit_Framework_TestCase
 				'test',
 				'listens',
 				')'
-			),
+			],
 			$this->tokenizer->tokenize('"hello world (who?)" (who) (test listens)')
 		);
 	}
 }
-

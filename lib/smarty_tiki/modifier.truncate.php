@@ -1,9 +1,5 @@
 <?php
-// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-//
-// All Rights Reserved. See copyright.txt for details and a complete list of authors.
-// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.truncate.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: modifier.truncate.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * Smarty plugin
@@ -29,28 +25,35 @@
  * @param boolean
  * @return string
  */
-function smarty_modifier_truncate($string, $length = 80, $etc = '...',
-                                  $break_words = false, $middle = false)
-{
-    if ($length == 0)
-        return '';
+function smarty_modifier_truncate(
+	$string,
+	$length = 80,
+	$etc = '...',
+	$break_words = false,
+	$middle = false
+) {
 
-    $strlength = (function_exists('mb_strlen') ? 'mb_strlen' : 'strlen');
-    if ($strlength($string) > $length) {
-        $length -= min($length, strlen($etc));
-		if (function_exists('mb_substr'))
+	if ($length == 0) {
+		return '';
+	}
+
+	$strlength = (function_exists('mb_strlen') ? 'mb_strlen' : 'strlen');
+	if ($strlength($string) > $length) {
+		$length -= min($length, strlen($etc));
+		if (function_exists('mb_substr')) {
 			$func = 'mb_substr';
-		else
+		} else {
 			$func = 'substr';
-        if (!$break_words && !$middle) {
-            $string = preg_replace('/\s+?(\S+)?$/', '', $func($string, 0, $length+1));
-        }
-        if (!$middle) {
-            return $func($string, 0, $length) . $etc;
-        } else {
-            return $func($string, 0, $length/2) . $etc . $func($string, -$length/2);
-        }
-    } else {
-        return $string;
-    }
+		}
+		if (! $break_words && ! $middle) {
+			$string = preg_replace('/\s+?(\S+)?$/', '', $func($string, 0, $length + 1));
+		}
+		if (! $middle) {
+			return $func($string, 0, $length) . $etc;
+		} else {
+			return $func($string, 0, $length / 2) . $etc . $func($string, -$length / 2);
+		}
+	} else {
+		return $string;
+	}
 }

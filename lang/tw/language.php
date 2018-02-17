@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "無",
 "Cache" => "快取",
 "Tag already exists" => "標籤已經存在",
@@ -784,7 +784,7 @@ $lang = array(
 "Current" => "目前",
 "Versions are identical" => "版本相同",
 "vote" => "投票",
-"Repeat password" => "再次輸入密碼",
+"Confirm password" => "再次輸入密碼",
 "Generate a password" => "產生一個密碼",
 "Valid" => "Valid",
 "Create New" => "建立新的",
@@ -1674,4 +1674,4 @@ $lang = array(
 "Aborted" => "aborted",
 "Top pages" => "最熱門頁面",
 "Last pages" => "最新頁面",
-);
+];

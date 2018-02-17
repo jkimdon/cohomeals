@@ -7,12 +7,13 @@ class Search_Elastic_MoreLikeThisTest extends PHPUnit_Framework_TestCase
 
 	function setUp()
 	{
-		$connection = new Search_Elastic_Connection('http://localhost:9200');
+		$elasticSearchHost = empty(getenv('ELASTICSEARCH_HOST')) ? 'localhost' : getenv('ELASTICSEARCH_HOST');
+		$connection = new Search_Elastic_Connection('http://' . $elasticSearchHost . ':9200');
 		$connection->startBulk();
 
 		$status = $connection->getStatus();
 		if (! $status->ok) {
-			$this->markTestSkipped('Elasticsearch needs to be available on localhost:9200 for the test to run.');
+			$this->markTestSkipped('Elasticsearch needs to be available on ' . $elasticSearchHost . ':9200 for the test to run.');
 		}
 
 		$this->index = new Search_Elastic_Index($connection, 'test_index');
@@ -30,17 +31,17 @@ class Search_Elastic_MoreLikeThisTest extends PHPUnit_Framework_TestCase
 
 	function populate($index)
 	{
-		$data = array(
-			'X' => array(
+		$data = [
+			'X' => [
 				'wiki_content' => 'this does not work',
-			),
-		);
+			],
+		];
 
-		$words = array('hello', 'world', 'some', 'random', 'content', 'populated', 'through', 'automatic', 'sampling');
+		$words = ['hello', 'world', 'some', 'random', 'content', 'populated', 'through', 'automatic', 'sampling'];
 
 		// Generate 50 documents with random words (in a stable way)
 		foreach (range(1, 50) as $doc) {
-			$parts = array();
+			$parts = [];
 			foreach ($words as $key => $word) {
 				if ($doc % ($key + 2) === 0) {
 					$parts[] = $word;
@@ -49,19 +50,20 @@ class Search_Elastic_MoreLikeThisTest extends PHPUnit_Framework_TestCase
 				}
 			}
 
-			$data[$doc] = array(
+			$data[$doc] = [
 				'object_type' => 'wiki page',
 				'object_id' => $doc,
 				'wiki_content' => implode(' ', $parts),
-			);
+			];
 		}
 
 		$source = new Search_ContentSource_Static(
-			$data, array(
+			$data,
+			[
 				'object_type' => 'identifier',
 				'object_id' => 'identifier',
 				'wiki_content' => 'plaintext',
-			)
+			]
 		);
 
 		$this->indexer = new Search_Indexer($index);
@@ -90,4 +92,3 @@ class Search_Elastic_MoreLikeThisTest extends PHPUnit_Framework_TestCase
 		$this->assertCount(0, $results);
 	}
 }
-

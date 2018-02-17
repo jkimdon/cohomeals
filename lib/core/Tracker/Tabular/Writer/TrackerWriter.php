@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TrackerWriter.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: TrackerWriter.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Writer;
 
@@ -15,37 +15,81 @@ class TrackerWriter
 
 	function write(\Tracker\Tabular\Source\SourceInterface $source)
 	{
+		$utilities = new \Services_Tracker_Utilities;
 		$schema = $source->getSchema();
 
-		$definition = $schema->getDefinition();
-		$columns = $schema->getColumns();
-		$utilities = new \Services_Tracker_Utilities;
+		$iterate = function ($callback) use ($source, $schema) {
+			$columns = $schema->getColumns();
 
-		$tx = \TikiDb::get()->begin();
+			$tx = \TikiDb::get()->begin();
 
-		$lookup = $this->getItemIdLookup($schema);
+			$lookup = $this->getItemIdLookup($schema);
 
-		foreach ($source->getEntries() as $entry) {
-			$info = [
-				'itemId' => false,
-				'status' => '',
-				'fields' => [],
-			];
+			$result = [];
 
-			foreach ($columns as $column) {
-				$entry->parseInto($info, $column);
+			foreach ($source->getEntries() as $line => $entry) {
+				$info = [
+					'itemId' => false,
+					'fields' => [],
+				];
+
+				foreach ($columns as $column) {
+					$entry->parseInto($info, $column);
+				}
+
+				$info['itemId'] = $lookup($info);
+
+				if (! $schema->canImportUpdate() && $info['itemId']) {
+					continue;
+				}
+
+				if ($schema->ignoreImportBlanks()) {
+					$info['fields'] = array_filter($info['fields']);
+				}
+
+				$result[] = $callback($line, $info);
 			}
-			
-			$info['itemId'] = $lookup($info);
-			
-			if ($info['itemId']) {
-				$utilities->updateItem($definition, $info);
-			} else {
-				$utilities->insertItem($definition, $info);
+
+			$tx->commit();
+
+			return call_user_func_array('array_merge', $result);
+		};
+
+		if ($schema->isImportTransaction()) {
+			$errors = $iterate(function ($line, $info) use ($errors, $utilities, $schema) {
+				static $ids = [];
+				if (! empty($info['itemId']) && in_array($info['itemId'], $ids)) {
+					return [tr('Line %0:', $line + 1) . ' ' . tr('duplicate entry')];
+				}
+				$ids[] = $info['itemId'];
+				return array_map(
+					function ($error) use ($line) {
+						return tr('Line %0:', $line + 1) . ' ' . $error;
+					},
+					$utilities->validateItem($schema->getDefinition(), $info)
+				);
+			});
+
+			if (count($errors) > 0) {
+				\Feedback::error([
+					'title' => tr('Import file contains errors. Please review and fix before importing.'),
+					'mes' => $errors
+				]);
+				return false;
 			}
 		}
 
-		$tx->commit();
+		$iterate(function ($line, $info) use ($utilities, $schema) {
+			$definition = $schema->getDefinition();
+			if ($info['itemId']) {
+				$success = $utilities->updateItem($definition, $info);
+			} else {
+				$success = $utilities->insertItem($definition, $info);
+			}
+			return $success;
+		});
+
+		return true;
 	}
 
 	private function getItemIdLookup($schema)
@@ -76,4 +120,3 @@ class TrackerWriter
 		}
 	}
 }
-

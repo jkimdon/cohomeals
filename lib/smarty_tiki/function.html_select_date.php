@@ -1,9 +1,5 @@
 <?php
-// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-//
-// All Rights Reserved. See copyright.txt for details and a complete list of authors.
-// Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.html_select_date.php 58008 2016-03-19 22:26:34Z lindonb $
+// $Id: function.html_select_date.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -38,6 +34,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  *             dropdown to include given date unless explicitly set (Monte)
  *           - 1.3.4 fix behaviour of 0000-00-00 00:00:00 dates to match that
  *             of 0000-00-00 dates (cybot, boots)
+ *
+ * MODIFIED BY THE TIKI PROJECT
+ * Returning to the upstream version would not be too hard, but https://github.com/smarty-php/smarty/issues/384 needs solving first. Chealer 2017-08-14
  * @link http://smarty.php.net/manual/en/language.function.html.select.date.php {html_select_date}
  *      (Smarty online manual)
  * @version 1.3.4
@@ -148,8 +147,8 @@ function smarty_function_html_select_date($params, $smarty)
 				break;
 
 			default:
-				if (!is_array($_value)) {
-					$extra_attrs .= ' '.$_key.'="'.smarty_function_escape_special_chars($_value).'"';
+				if (! is_array($_value)) {
+					$extra_attrs .= ' ' . $_key . '="' . smarty_function_escape_special_chars($_value) . '"';
 				} else {
 					trigger_error("html_select_date: extra attribute '$_key' cannot be an array", E_USER_NOTICE);
 				}
@@ -187,11 +186,11 @@ function smarty_function_html_select_date($params, $smarty)
 		}
 	}
 	if (strlen($time[0]) > 0) {
-		if ($start_year > $time[0] && !isset($params['start_year'])) {
+		if ($start_year > $time[0] && ! isset($params['start_year'])) {
 			// force start year to include given date if not explicitly set
 			$start_year = $time[0];
 		}
-		if ($end_year < $time[0] && !isset($params['end_year'])) {
+		if ($end_year < $time[0] && ! isset($params['end_year'])) {
 			// force end year to include given date if not explicitly set
 			$end_year = $time[0];
 		}
@@ -204,8 +203,8 @@ function smarty_function_html_select_date($params, $smarty)
 	$field_separator_count = -1;
 	if ($display_months) {
 		$field_separator_count++;
-		$month_names = array();
-		$month_values = array();
+		$month_names = [];
+		$month_values = [];
 		if (isset($month_empty)) {
 			$month_names[''] = $month_empty;
 			$month_values[''] = '';
@@ -237,12 +236,12 @@ function smarty_function_html_select_date($params, $smarty)
 		$month_result .= $extra_attrs . '>' . "\n";
 
 		$month_result .= smarty_function_html_options(
-			array(
+			[
 				'output'     => $month_names,
 				'values'     => $month_values,
 				'selected'   => (int) $time[1] ? strftime($month_value_format, mktime(0, 0, 0, (int) $time[1], 1, 2000)) : '',
 				'print_result' => false
-			),
+			],
 			$smarty
 		);
 		$month_result .= '</select>';
@@ -250,7 +249,7 @@ function smarty_function_html_select_date($params, $smarty)
 
 	if ($display_days) {
 		$field_separator_count++;
-		$days = array();
+		$days = [];
 		if (isset($day_empty)) {
 			$days[''] = '';
 			$day_values[''] = $day_empty;
@@ -275,14 +274,14 @@ function smarty_function_html_select_date($params, $smarty)
 		if (null !== $day_extra) {
 			$day_result .= ' ' . $day_extra;
 		}
-		$day_result .= $extra_attrs . '>'."\n";
+		$day_result .= $extra_attrs . '>' . "\n";
 		$day_result .= smarty_function_html_options(
-			array(
+			[
 				'output'       => $day_values,
 				'values'       => $days,
 				'selected'     => $time[2],
 				'print_result' => false
-			),
+			],
 			$smarty
 		);
 		$day_result .= '</select>';
@@ -326,14 +325,14 @@ function smarty_function_html_select_date($params, $smarty)
 			if (null !== $year_extra) {
 				$year_result .= ' ' . $year_extra;
 			}
-			$year_result .= $extra_attrs . '>'."\n";
+			$year_result .= $extra_attrs . '>' . "\n";
 			$year_result .= smarty_function_html_options(
-				array(
+				[
 					'output' => $years,
 					'values' => $yearvals,
 					'selected'   => $time[0],
 					'print_result' => false
-				),
+				],
 				$smarty
 			);
 			$year_result .= '</select>';
@@ -343,7 +342,7 @@ function smarty_function_html_select_date($params, $smarty)
 	// Loop thru the field_order field
 	for ($i = 0; $i <= 2; $i++) {
 		$c = substr($field_order, $i, 1);
-		switch ($c){
+		switch ($c) {
 			case 'D':
 				$html_result .= $day_result;
 				break;
@@ -364,4 +363,3 @@ function smarty_function_html_select_date($params, $smarty)
 
 	return $html_result;
 }
-

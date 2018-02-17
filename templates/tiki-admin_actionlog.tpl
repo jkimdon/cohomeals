@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_actionlog.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
+{* $Id: tiki-admin_actionlog.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {title help="Action log"}{tr}Action Log{/tr}{/title}
 
@@ -9,7 +9,7 @@
 		<form method="get" action="tiki-admin_actionlog.php#List" class="form-horizontal">
 			<h2>{tr}Filter{/tr}</h2>
 			{if empty($nbViewedConfs)}
-				{button _text="{tr}Please select some actions to be reported.{/tr}" href="tiki-admin_actionlog.php?cookietab=2"}
+				{button _text="{tr}Please select some actions to be reported.{/tr}" href="#" _onclick="showTab(2); return true;"}
 			{else}
 				<fieldset>
 					<legend>{tr}Date{/tr}</legend>
@@ -333,7 +333,7 @@
 													class="tips"
 													title="{tr}Actions{/tr}"
 													href="#"
-													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.log_actions|escape:"javascript"|escape:"html"}{/if}
+													{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.log_actions}{/if}
 													style="padding:0; margin:0; border:0"
 													>
 												{icon name='wrench'}

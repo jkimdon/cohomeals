@@ -1,4 +1,4 @@
-{* $Id: error_ticket.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}<!DOCTYPE html>
+{* $Id: error_ticket.tpl 63885 2017-09-20 16:09:54Z chealer $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}">
 <head>
 	{include file='header.tpl'}
@@ -26,12 +26,8 @@
 								<input type="hidden" name="{$k}" value="{$i|escape}">
 							{/foreach}
 							<input type="submit" class="btn btn-success" name="ticket_action_button"
-								value="{tr}Click here to confirm your action{/tr}">
+								value="{tr}Confirm action{/tr}">
 						</form>
-						{if $prefs.javascript_enabled eq 'y'}
-							{button href="javascript:history.back()" _text="{tr}Go back{/tr}"}
-						{/if}
-						{button href="$prefs.tikiIndex" _text="{tr}Return to home page{/tr}"}
 					</div>
 				</div>
 			</div>
@@ -48,12 +44,8 @@
 								<input type="hidden" name="{$k}" value="{$i|escape}">
 							{/foreach}
 							<input type="submit" class="btn btn-success" name="ticket_action_button"
-								value="{tr}Click here to confirm your action{/tr}">
+								value="{tr}Confirm action{/tr}">
 						</form>
-						{if $prefs.javascript_enabled eq 'y'}
-							{button href="javascript:history.back()" _text="{tr}Go back{/tr}"}
-						{/if}
-						{button href="$prefs.tikiIndex" _text="{tr}Return to home page{/tr}"}
 					</div>
 				</div>
 			</div>
@@ -73,12 +65,8 @@
 								<input type="hidden" name="{$k}" value="{$i|escape}">
 							{/foreach}
 							<input type="submit" class="btn btn-success" name="ticket_action_button"
-								value="{tr}Click here to confirm your action{/tr}">
+								value="{tr}Confirm action{/tr}">
 						</form>
-						{if $prefs.javascript_enabled eq 'y'}
-							{button href="javascript:history.back()" _text="{tr}Go back{/tr}"}
-						{/if}
-						{button href="$prefs.tikiIndex" _text="{tr}Return to home page{/tr}"}
 					</div>
 				</div>
 			</div>
@@ -98,12 +86,8 @@
 								<input type="hidden" name="{$k}" value="{$i|escape}">
 							{/foreach}
 							<input type="submit" class="btn btn-success" name="ticket_action_button"
-								value="{tr}Click here to confirm your action{/tr}">
+								value="{tr}Confirm action{/tr}">
 						</form>
-						{if $prefs.javascript_enabled eq 'y'}
-							{button href="javascript:history.back()" _text="{tr}Go back{/tr}"}
-						{/if}
-						{button href="$prefs.tikiIndex" _text="{tr}Return to home page{/tr}"}
 					</div>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_security.tpl 62659 2017-05-19 14:48:00Z drsassafras $ *}
+{* $Id: tiki-admin_security.tpl 65019 2017-12-29 17:24:23Z jonnybradley $ *}
 {title help="Security Admin" admpage="security"}{tr}Security Admin{/tr}{/title}
 
 {remarksbox type="tip" title="{tr}Tip{/tr}"}
@@ -37,7 +37,9 @@
 <br>
 <h2>{tr}Security checks{/tr}</h2>
 <div>
-	<a href="tiki-admin_security.php?check_files" class="btn btn-default">{tr}Check all tiki files{/tr}</a>
+	<form action="tiki-admin_security.php" method="post">
+		<input type="submit" name="check_files" class="btn btn-default" value="{tr}Check all tiki files{/tr}">
+	</form>
 	<br>
 	{remarksbox type="tip" title="{tr}Info{/tr}"}
 		{tr}Note, that this can take a very long time. You should check your max_execution_time setting in php.ini.{/tr}

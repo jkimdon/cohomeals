@@ -22,8 +22,6 @@ containerCommands.setup = [
     containerCommands.injectEnv,
     containerCommands.restart,
     'sleep 1',
-    containerCommands.ping,
-    'echo '
 ].join(' && ');
 
 containerCommands.dockerRun = [
@@ -31,7 +29,7 @@ containerCommands.dockerRun = [
     '--name', constants.testContainerName,
     '-v', constants.pathToRoot + ':' + constants.testContainerHome,
     '-p', constants.testContainerPort + ':' + constants.testContainerPort,
-    'plotly/testbed:latest'
+    constants.testContainerImage
 ].join(' ');
 
 containerCommands.getRunCmd = function(isCI, commands) {
@@ -61,11 +59,13 @@ function getRunCI(commands) {
     commands = ['export CIRCLECI=1', containerCommands.cdHome].concat(commands);
 
     var commandsJoined = '"' + commands.join(' && ') + '"';
+    var containerId = '$(docker inspect --format \'{{.Id}}\' ' + constants.testContainerName + ')';
 
     return [
         'sudo',
-        'lxc-attach -n',
-        '$(docker inspect --format \'{{.Id}}\' ' + constants.testContainerName + ')',
+        'lxc-attach',
+        '-n', containerId,
+        '-f', '/var/lib/docker/containers/' + containerId + '/config.lxc',
         '-- bash -c',
         commandsJoined
     ].join(' ');

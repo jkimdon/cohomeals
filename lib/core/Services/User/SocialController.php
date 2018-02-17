@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SocialController.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: SocialController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_User_SocialController
 {
@@ -26,7 +26,7 @@ class Services_User_SocialController
 		global $user;
 		// Checks if the username param was passed, if so return that user's friend list
 		// otherwise it returns the active user's friend list
-		if(empty($input->username->text()) || $input->username->text() == $user) {
+		if (empty($input->username->text()) || $input->username->text() == $user) {
 			$username = $user;
 			$incoming = $this->lib->listIncomingRequests($username);
 			$outgoing = $this->lib->listOutgoingRequests($username);
@@ -34,7 +34,7 @@ class Services_User_SocialController
 			$username = $input->username->text();
 		}
 
-		if(empty($input->show_add_friend->text())) {
+		if (empty($input->show_add_friend->text())) {
 			$show_add_friend = 'y';
 		} else {
 			$show_add_friend = $input->show_add_friend->text();
@@ -42,14 +42,14 @@ class Services_User_SocialController
 
 		$friends = $this->lib->listFriends($username);
 
-		return array(
+		return [
 			'title' => tr('Friend List'),
 			'friends' => $friends,
 			'incoming' => $incoming,
 			'outgoing' => $outgoing,
 			'showbutton' => $show_add_friend,
 			'username' => $username,
-		);
+		];
 	}
 
 	function action_add_friend($input)
@@ -65,10 +65,10 @@ class Services_User_SocialController
 			}
 		}
 
-		return array(
+		return [
 			'title' => tr('Add Friend'),
 			'username' => $username,
-		);
+		];
 	}
 
 	function action_approve_friend($input)
@@ -84,11 +84,11 @@ class Services_User_SocialController
 			}
 		}
 
-		return array(
+		return [
 			'title' => tr('Approve Friend'),
 			'username' => $username,
 			'status' => $status,
-		);
+		];
 	}
 
 	function action_remove_friend($input)
@@ -107,11 +107,11 @@ class Services_User_SocialController
 			$status = 'DONE';
 		}
 
-		return array(
+		return [
 			'title' => tr('Remove Friend'),
 			'status' => $status,
 			'friend' => $username,
-		);
+		];
 	}
 
 	function action_like($input)
@@ -122,7 +122,7 @@ class Services_User_SocialController
 			$this->lib->addLike($user, $input->type->text(), $input->id->none());
 		}
 
-		return array();
+		return [];
 	}
 
 	function action_unlike($input)
@@ -133,7 +133,6 @@ class Services_User_SocialController
 			$this->lib->removeLike($user, $input->type->text(), $input->id->none());
 		}
 
-		return array();
+		return [];
 	}
 }
-

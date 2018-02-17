@@ -1,4 +1,4 @@
-{* $Id: layout_view.tpl 63280 2017-07-19 08:08:40Z chibaguy $ *}<!DOCTYPE html>
+{* $Id: layout_view.tpl 64892 2017-12-14 05:28:02Z chibaguy $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}"{if !empty($page_id)} id="page_{$page_id}"{/if}>
 	<head>
 {include file='header.tpl'}
@@ -145,7 +145,7 @@
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle" data-toggle="dropdown">{tr}Log in{/tr} <span
 								class="caret"></span></a>
-								<ul class="dropdown-menu dropdown-login">
+								<ul class="dropdown-menu dropdown-login panel-body">
 									<li>
 										<div>
 		{module

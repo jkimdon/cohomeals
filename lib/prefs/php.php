@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: php.php 57966 2016-03-17 20:05:33Z jonnybradley $
+// $Id: php.php 64628 2017-11-19 12:03:08Z rjsmelo $
 
 /**
  * Note this file is redundant in Tiki 11 and 12 (php 5.3 required)
@@ -14,8 +14,8 @@
 
 function prefs_php_list()
 {
-	return array(
-		'php_libxml' => array(
+	return [
+		'php_libxml' => [
 			'name' => tra('PHP libxml extension'),
 			'description' => tra(
 				'This extension requires the libxml PHP extension.
@@ -23,9 +23,9 @@ function prefs_php_list()
 				implicitly accomplished because libxml is enabled by default.'
 			),
 			'type' => 'flag',
-			'default' => class_exists('DOMDocument') ? 'y' :'n',
-		),
-		'php_datetime' => array(
+			'default' => class_exists('DOMDocument') ? 'y' : 'n',
+		],
+		'php_datetime' => [
 			'name' => tra('PHP DateTime'),
 			'description' => tra(
 				'DateTime class (and related functions) are enabled
@@ -34,7 +34,7 @@ function prefs_php_list()
 				CFLAGS=-DEXPERIMENTAL_DATE_SUPPORT=1'
 			),
 			'type' => 'flag',
-			'default' => class_exists('DateTime') ? 'y' :'n',
-		),
-	);
+			'default' => class_exists('DateTime') ? 'y' : 'n',
+		],
+	];
 }

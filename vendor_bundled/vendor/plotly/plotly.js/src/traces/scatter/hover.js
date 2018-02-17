@@ -6,16 +6,16 @@
 * LICENSE file in the root directory of this source tree.
 */
 
-
 'use strict';
 
 var Lib = require('../../lib');
-var Fx = require('../../plots/cartesian/graph_interact');
-var constants = require('../../plots/cartesian/constants');
+var Fx = require('../../components/fx');
 var ErrorBars = require('../../components/errorbars');
 var getTraceColor = require('./get_trace_color');
 var Color = require('../../components/color');
+var fillHoverText = require('./fill_hover_text');
 
+var MAXDIST = Fx.constants.MAXDIST;
 
 module.exports = function hoverPoints(pointData, xval, yval, hovermode) {
     var cd = pointData.cd,
@@ -24,11 +24,12 @@ module.exports = function hoverPoints(pointData, xval, yval, hovermode) {
         ya = pointData.ya,
         xpx = xa.c2p(xval),
         ypx = ya.c2p(yval),
-        pt = [xpx, ypx];
+        pt = [xpx, ypx],
+        hoveron = trace.hoveron || '';
 
     // look for points to hover on first, then take fills only if we
     // didn't find a point
-    if(trace.hoveron.indexOf('points') !== -1) {
+    if(hoveron.indexOf('points') !== -1) {
         var dx = function(di) {
                 // scatter points: d.mrc is the calculated marker radius
                 // adjust the distance so if you're inside the marker it
@@ -72,9 +73,7 @@ module.exports = function hoverPoints(pointData, xval, yval, hovermode) {
                 yLabelVal: di.y
             });
 
-            if(di.tx) pointData.text = di.tx;
-            else if(trace.text) pointData.text = trace.text;
-
+            fillHoverText(di, trace, pointData);
             ErrorBars.hoverInfo(di, trace, pointData);
 
             return [pointData];
@@ -82,7 +81,7 @@ module.exports = function hoverPoints(pointData, xval, yval, hovermode) {
     }
 
     // even if hoveron is 'fills', only use it if we have polygons too
-    if(trace.hoveron.indexOf('fills') !== -1 && trace._polygons) {
+    if(hoveron.indexOf('fills') !== -1 && trace._polygons) {
         var polygons = trace._polygons,
             polygonsIn = [],
             inside = false,
@@ -146,7 +145,7 @@ module.exports = function hoverPoints(pointData, xval, yval, hovermode) {
 
             Lib.extendFlat(pointData, {
                 // never let a 2D override 1D type as closest point
-                distance: constants.MAXDIST + 10,
+                distance: MAXDIST + 10,
                 x0: xmin,
                 x1: xmax,
                 y0: yAvg,

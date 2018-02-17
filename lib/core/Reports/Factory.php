@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Factory.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: Factory.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 require_once('lib/webmail/tikimaillib.php');
 
@@ -15,7 +15,7 @@ require_once('lib/webmail/tikimaillib.php');
  */
 class Reports_Factory
 {
-	static public function build($className, DateTime $dt = null, TikiMail $tm = null, TikiLib $tikilib = null, $tikiPrefs = null)
+	public static function build($className, DateTime $dt = null, TikiMail $tm = null, TikiLib $tikilib = null, $tikiPrefs = null)
 	{
 		$db = TikiDb::get();
 
@@ -36,7 +36,7 @@ class Reports_Factory
 			$tikiPrefs = $prefs;
 		}
 
-		switch($className) {
+		switch ($className) {
 			case 'Reports_Users':
 				return new Reports_Users($db, $dt);
 			case 'Reports_Cache':

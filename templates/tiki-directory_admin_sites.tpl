@@ -1,4 +1,4 @@
-{* $Id: tiki-directory_admin_sites.tpl 61828 2017-03-23 10:35:36Z jyhem $ *}
+{* $Id: tiki-directory_admin_sites.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 
 {title help="Directory" url="tiki-directory_admin_sites.php?parent=$parent"}{tr}Admin sites{/tr}{/title}
 
@@ -147,7 +147,7 @@
 						class="tips"
 						title="{tr}Actions{/tr}"
 						href="#"
-						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.site_actions|escape:"javascript"|escape:"html"}{/if}
+						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.site_actions}{/if}
 						style="padding:0; margin:0; border:0"
 					>
 						{icon name='wrench'}

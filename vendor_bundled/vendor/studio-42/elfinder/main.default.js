@@ -1,4 +1,3 @@
-"use strict";
 /**
  * elFinder client options and main script for RequireJS
  *
@@ -6,6 +5,7 @@
  * e.g. `<script data-main="./main.js" src="./require.js"></script>`
  **/
 (function(){
+	"use strict";
 	var // jQuery and jQueryUI version
 		jqver = '3.2.1',
 		uiver = '1.12.1',
@@ -22,8 +22,7 @@
 				fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
 			}
 			lang = fullLang.substr(0,2);
-			if (lang === 'ja') lang = 'jp';
-			else if (lang === 'pt') lang = 'pt_BR';
+			if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
 			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
@@ -35,7 +34,7 @@
 			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
 			$(function() {
-				var optEeditors = {
+				var optEditors = {
 						commandsOptions: {
 							edit: {
 								editors: Array.isArray(editors)? editors : []
@@ -43,25 +42,41 @@
 						}
 					},
 					opts = {};
-				// Optional for Japanese decoder "extras/encoding-japanese.min"
-				if (window.Encoding && Encoding.convert) {
-					elFinder.prototype._options.rawStringDecoder = function(s) {
-						return Encoding.convert(s,{to:'UNICODE',type:'string'});
-					};
-				}
 				
 				// Interpretation of "elFinderConfig"
 				if (config && config.managers) {
 					$.each(config.managers, function(id, mOpts) {
-						opts = Object.assign({}, config.defaultOpts || {});
+						opts = Object.assign(opts, config.defaultOpts || {});
 						// editors marges to opts.commandOptions.edit
 						try {
 							mOpts.commandsOptions.edit.editors = mOpts.commandsOptions.edit.editors.concat(editors || []);
 						} catch(e) {
-							Object.assign(mOpts, optEeditors);
+							Object.assign(mOpts, optEditors);
 						}
 						// Make elFinder
-						$('#' + id).elfinder($.extend(true, { lang: lang }, opts, mOpts || {}));
+						$('#' + id).elfinder(
+							// 1st Arg - options
+							$.extend(true, { lang: lang }, opts, mOpts || {}),
+							// 2nd Arg - before boot up function
+							function(fm, extraObj) {
+								// `init` event callback function
+								fm.bind('init', function() {
+									// Optional for Japanese decoder "encoding-japanese"
+									if (fm.lang === 'ja') {
+										require(
+											[ 'encoding-japanese' ],
+											function(Encoding) {
+												if (Encoding && Encoding.convert) {
+													fm.registRawStringDecoder(function(s) {
+														return Encoding.convert(s, {to:'UNICODE',type:'string'});
+													});
+												}
+											}
+										);
+									}
+								});
+							}
+						);
 					});
 				} else {
 					alert('"elFinderConfig" object is wrong.');
@@ -74,11 +89,9 @@
 			require(
 				[
 					'elfinder'
-					, 'extras/editors.default'                   // load text, image editors
+					, 'extras/editors.default.min'               // load text, image editors
 					, 'elFinderConfig'
-					, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
-				//	, 'extras/quicklook.googledocs'              // optional preview for GoogleApps contents on the GoogleDrive volume
-				//	, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
+				//	, 'extras/quicklook.googledocs.min'          // optional preview for GoogleApps contents on the GoogleDrive volume
 				],
 				start,
 				function(error) {
@@ -97,10 +110,7 @@
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
-			'elfinder.lang': [
-				'i18n/elfinder.'+lang,
-				'i18n/elfinder.fallback'
-			]
+			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min'
 		},
 		waitSeconds : 10 // optional
 	});
@@ -126,7 +136,7 @@
 					}
 					,quicklook : {
 						// to enable preview with Google Docs Viewer
-						googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+						googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
 					}
 				}
 			},

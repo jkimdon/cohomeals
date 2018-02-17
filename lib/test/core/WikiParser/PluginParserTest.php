@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PluginParserTest.php 59643 2016-09-08 19:20:40Z jonnybradley $
+// $Id: PluginParserTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -54,7 +54,7 @@ class WikiParser_PluginParserTest extends TikiTestCase
 			->with(
 				$this->equalTo('test'),
 				$this->equalTo('Hello'),
-				$this->equalTo(array('hello' => 'world'))
+				$this->equalTo(['hello' => 'world'])
 			)
 			->will($this->returnValue('test'));
 
@@ -74,7 +74,7 @@ class WikiParser_PluginParserTest extends TikiTestCase
 			->with(
 				$this->equalTo('test'),
 				$this->equalTo(null),
-				$this->equalTo(array('hello' => 'world'))
+				$this->equalTo(['hello' => 'world'])
 			)
 			->will($this->returnValue('test'));
 
@@ -94,7 +94,7 @@ class WikiParser_PluginParserTest extends TikiTestCase
 			->with(
 				$this->equalTo('test'),
 				$this->equalTo(null),
-				$this->equalTo(array())
+				$this->equalTo([])
 			)
 			->will($this->returnValue('test'));
 
@@ -111,7 +111,7 @@ class WikiParser_PluginParserTest extends TikiTestCase
 		$mock = $this->createMock('WikiParser_PluginRunner')
 			->expects($this->once())
 			->method('run')
-			->with($this->equalTo('b'), $this->equalTo(null), $this->equalTo(array()))
+			->with($this->equalTo('b'), $this->equalTo(null), $this->equalTo([]))
 			->will($this->returnValue('return'));
 
 		$data = '~np~ {a} ~/np~ {b} ~np~ {c} ~/np~';
@@ -127,7 +127,7 @@ class WikiParser_PluginParserTest extends TikiTestCase
 		$mock = $this->createMock('WikiParser_PluginRunner')
 			->expects($this->once())
 			->method('run')
-			->with($this->equalTo('a'), $this->equalTo(' {b} '), $this->equalTo(array()))
+			->with($this->equalTo('a'), $this->equalTo(' {b} '), $this->equalTo([]))
 			->will($this->returnValue('no plugin'));
 
 		$data = '{A()} {b} {A}';

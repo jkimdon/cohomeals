@@ -1,4 +1,4 @@
-{* $Id: messu-nav.tpl 54432 2015-03-16 10:44:49Z luciash $ *}
+{* $Id: messu-nav.tpl 62464 2017-05-07 03:28:11Z lindonb $ *}
 
 <div class="t_navbar margin-bottom-md btn-group">
 	{button class="btn btn-default" href="messu-mailbox.php" _class="btn btn-default" _text="{tr}Mailbox{/tr}"}
@@ -11,7 +11,7 @@
 	{button class="btn btn-default" href="messu-sent.php" _class="btn btn-default" _text="{tr}Sent{/tr}"}
 	{button class="btn btn-default" href="messu-archive.php" _class="btn btn-default" _text="{tr}Archive{/tr}"}
 
-	{if $mess_archiveAfter>0}
+	{if isset($mess_archiveAfter) && $mess_archiveAfter>0}
 		({tr}Auto-archive age for read messages:{/tr} {$mess_archiveAfter} {tr}days{/tr})
 	{/if}
 </div>

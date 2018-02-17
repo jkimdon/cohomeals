@@ -9,11 +9,14 @@
 
 'use strict';
 
+var mouseOffset = require('mouse-event-offset');
+var hasHover = require('has-hover');
+
 var Plotly = require('../../plotly');
 var Lib = require('../../lib');
 
 var constants = require('../../plots/cartesian/constants');
-
+var interactConstants = require('../../constants/interactions');
 
 var dragElement = module.exports = {};
 
@@ -26,6 +29,15 @@ dragElement.unhoverRaw = unhover.raw;
 
 /**
  * Abstracts click & drag interactions
+ *
+ * During the interaction, a "coverSlip" element - a transparent
+ * div covering the whole page - is created, which has two key effects:
+ * - Lets you drag beyond the boundaries of the plot itself without
+ *   dropping (but if you drag all the way out of the browser window the
+ *   interaction will end)
+ * - Freezes the cursor: whatever mouse cursor the drag element had when the
+ *   interaction started gets copied to the coverSlip for use until mouseup
+ *
  * @param {object} options with keys:
  *      element (required) the DOM element to drag
  *      prepFn (optional) function(event, startX, startY)
@@ -37,40 +49,46 @@ dragElement.unhoverRaw = unhover.raw;
  *          dx and dy are the net pixel offset of the drag,
  *          dragged is true/false, has the mouse moved enough to
  *          constitute a drag
- *      doneFn (optional) function(dragged, numClicks)
+ *      doneFn (optional) function(dragged, numClicks, e)
  *          executed on mouseup, or mouseout of window since
  *          we don't get events after that
  *          dragged is as in moveFn
  *          numClicks is how many clicks we've registered within
  *          a doubleclick time
- *      setCursor (optional) function(event)
- *          executed on mousemove before mousedown
- *          the purpose of this callback is to update the mouse cursor before
- *          the click & drag interaction has been initiated
+ *          e is the original event
  */
 dragElement.init = function init(options) {
-    var gd = Lib.getPlotDiv(options.element) || {},
-        numClicks = 1,
-        DBLCLICKDELAY = constants.DBLCLICKDELAY,
-        startX,
+    var gd = options.gd;
+    var numClicks = 1;
+    var DBLCLICKDELAY = interactConstants.DBLCLICKDELAY;
+    var element = options.element;
+
+    var startX,
         startY,
         newMouseDownTime,
+        cursor,
         dragCover,
-        initialTarget,
-        initialOnMouseMove;
+        initialTarget;
 
     if(!gd._mouseDownTime) gd._mouseDownTime = 0;
 
+    element.style.pointerEvents = 'all';
+
+    element.onmousedown = onStart;
+    element.ontouchstart = onStart;
+
     function onStart(e) {
-        // disable call to options.setCursor(evt)
-        options.element.onmousemove = initialOnMouseMove;
+        if(e.buttons && e.buttons === 2) {    // right click
+            return;
+        }
 
         // make dragging and dragged into properties of gd
         // so that others can look at and modify them
         gd._dragged = false;
         gd._dragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
+        var offset = pointerOffset(e);
+        startX = offset[0];
+        startY = offset[1];
         initialTarget = e.target;
 
         newMouseDownTime = (new Date()).getTime();
@@ -86,21 +104,30 @@ dragElement.init = function init(options) {
 
         if(options.prepFn) options.prepFn(e, startX, startY);
 
-        dragCover = coverSlip();
+        if(hasHover) {
+            dragCover = coverSlip();
+            dragCover.style.cursor = window.getComputedStyle(element).cursor;
+        }
+        else {
+            // document acts as a dragcover for mobile, bc we can't create dragcover dynamically
+            dragCover = document;
+            cursor = window.getComputedStyle(document.documentElement).cursor;
+            document.documentElement.style.cursor = window.getComputedStyle(element).cursor;
+        }
 
-        dragCover.onmousemove = onMove;
-        dragCover.onmouseup = onDone;
-        dragCover.onmouseout = onDone;
-
-        dragCover.style.cursor = window.getComputedStyle(options.element).cursor;
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onDone);
+        document.addEventListener('touchmove', onMove);
+        document.addEventListener('touchend', onDone);
 
         return Lib.pauseEvent(e);
     }
 
     function onMove(e) {
-        var dx = e.clientX - startX,
-            dy = e.clientY - startY,
-            minDrag = options.minDrag || constants.MINDRAG;
+        var offset = pointerOffset(e);
+        var dx = offset[0] - startX;
+        var dy = offset[1] - startY;
+        var minDrag = options.minDrag || constants.MINDRAG;
 
         if(Math.abs(dx) < minDrag) dx = 0;
         if(Math.abs(dy) < minDrag) dy = 0;
@@ -115,14 +142,18 @@ dragElement.init = function init(options) {
     }
 
     function onDone(e) {
-        // re-enable call to options.setCursor(evt)
-        initialOnMouseMove = options.element.onmousemove;
-        if(options.setCursor) options.element.onmousemove = options.setCursor;
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onDone);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onDone);
 
-        dragCover.onmousemove = null;
-        dragCover.onmouseup = null;
-        dragCover.onmouseout = null;
-        Lib.removeElement(dragCover);
+        if(hasHover) {
+            Lib.removeElement(dragCover);
+        }
+        else if(cursor) {
+            dragCover.documentElement.style.cursor = cursor;
+            cursor = null;
+        }
 
         if(!gd._dragging) {
             gd._dragged = false;
@@ -136,11 +167,26 @@ dragElement.init = function init(options) {
             numClicks = Math.max(numClicks - 1, 1);
         }
 
-        if(options.doneFn) options.doneFn(gd._dragged, numClicks);
+        if(options.doneFn) options.doneFn(gd._dragged, numClicks, e);
 
         if(!gd._dragged) {
-            var e2 = document.createEvent('MouseEvents');
-            e2.initEvent('click', true, true);
+            var e2;
+
+            try {
+                e2 = new MouseEvent('click', e);
+            }
+            catch(err) {
+                var offset = pointerOffset(e);
+                e2 = document.createEvent('MouseEvents');
+                e2.initMouseEvent('click',
+                    e.bubbles, e.cancelable,
+                    e.view, e.detail,
+                    e.screenX, e.screenY,
+                    offset[0], offset[1],
+                    e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+                    e.button, e.relatedTarget);
+            }
+
             initialTarget.dispatchEvent(e2);
         }
 
@@ -150,13 +196,6 @@ dragElement.init = function init(options) {
 
         return Lib.pauseEvent(e);
     }
-
-    // enable call to options.setCursor(evt)
-    initialOnMouseMove = options.element.onmousemove;
-    if(options.setCursor) options.element.onmousemove = options.setCursor;
-
-    options.element.onmousedown = onStart;
-    options.element.style.pointerEvents = 'all';
 };
 
 function coverSlip() {
@@ -182,4 +221,11 @@ dragElement.coverSlip = coverSlip;
 function finishDrag(gd) {
     gd._dragging = false;
     if(gd._replotPending) Plotly.plot(gd);
+}
+
+function pointerOffset(e) {
+    return mouseOffset(
+        e.changedTouches ? e.changedTouches[0] : e,
+        document.body
+    );
 }

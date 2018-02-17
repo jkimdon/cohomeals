@@ -164,7 +164,8 @@ function crawl(objIn, objOut, schema, list, base, path) {
             valOut = objOut[k];
 
         var nestedSchema = getNestedSchema(schema, k),
-            isInfoArray = (nestedSchema || {}).valType === 'info_array';
+            isInfoArray = (nestedSchema || {}).valType === 'info_array',
+            isColorscale = (nestedSchema || {}).valType === 'colorscale';
 
         if(!isInSchema(schema, k)) {
             list.push(format('schema', base, p));
@@ -209,7 +210,7 @@ function crawl(objIn, objOut, schema, list, base, path) {
         else if(!isPlainObject(valIn) && isPlainObject(valOut)) {
             list.push(format('object', base, p, valIn));
         }
-        else if(!isArray(valIn) && isArray(valOut) && !isInfoArray) {
+        else if(!isArray(valIn) && isArray(valOut) && !isInfoArray && !isColorscale) {
             list.push(format('array', base, p, valIn));
         }
         else if(!(k in objOut)) {
@@ -217,6 +218,11 @@ function crawl(objIn, objOut, schema, list, base, path) {
         }
         else if(!Lib.validate(valIn, nestedSchema)) {
             list.push(format('value', base, p, valIn));
+        }
+        else if(nestedSchema.valType === 'enumerated' &&
+            ((nestedSchema.coerceNumber && valIn !== +valOut) || valIn !== valOut)
+        ) {
+            list.push(format('dynamic', base, p, valIn, valOut));
         }
     }
 
@@ -266,6 +272,16 @@ var code2msgFunc = {
 
         return inBase(base) + target + ' ' + astr + ' did not get coerced';
     },
+    dynamic: function(base, astr, valIn, valOut) {
+        return [
+            inBase(base) + 'key',
+            astr,
+            '(set to \'' + valIn + '\')',
+            'got reset to',
+            '\'' + valOut + '\'',
+            'during defaults.'
+        ].join(' ');
+    },
     invisible: function(base) {
         return 'Trace ' + base[1] + ' got defaulted to be not visible';
     },
@@ -283,7 +299,7 @@ function inBase(base) {
     return 'In ' + base + ', ';
 }
 
-function format(code, base, path, valIn) {
+function format(code, base, path, valIn, valOut) {
     path = path || '';
 
     var container, trace;
@@ -300,8 +316,8 @@ function format(code, base, path, valIn) {
         trace = null;
     }
 
-    var astr = convertPathToAttributeString(path),
-        msg = code2msgFunc[code](base, astr, valIn);
+    var astr = convertPathToAttributeString(path);
+    var msg = code2msgFunc[code](base, astr, valIn, valOut);
 
     // log to console if logger config option is enabled
     Lib.log(msg);
@@ -334,15 +350,14 @@ function getNestedSchema(schema, key) {
     return schema[parts.keyMinusId];
 }
 
-function splitKey(key) {
-    var idRegex = /([2-9]|[1-9][0-9]+)$/;
+var idRegex = Lib.counterRegex('([a-z]+)');
 
-    var keyMinusId = key.split(idRegex)[0],
-        id = key.substr(keyMinusId.length, key.length);
+function splitKey(key) {
+    var idMatch = key.match(idRegex);
 
     return {
-        keyMinusId: keyMinusId,
-        id: id
+        keyMinusId: idMatch && idMatch[1],
+        id: idMatch && idMatch[2]
     };
 }
 

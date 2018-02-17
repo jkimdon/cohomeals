@@ -1,4 +1,4 @@
-{* $Id: tiki-share.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
+{* $Id: tiki-share.tpl 62699 2017-05-23 00:25:06Z jyhem $ *}
 {title help='share' admpage='share'}
 	{if $report != 'y'}{tr}Share this page{/tr}{else}{tr}Report this page{/tr}{/if}
 {/title}

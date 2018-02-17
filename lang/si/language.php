@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Type" => "වර්ගය",
 "Name" => "නම",
 "Description" => "විස්තරය",
@@ -53,4 +53,4 @@ $lang = array(
 "Oct." => "ඔක්.",
 "Nov." => "නොවැ.",
 "Edit translations" => "පරිවර්තනය සකසන්න",
-);
+];

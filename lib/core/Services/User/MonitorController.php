@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: MonitorController.php 61817 2017-03-22 15:55:32Z kroky6 $
+// $Id: MonitorController.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_User_MonitorController
 {
@@ -37,36 +37,39 @@ class Services_User_MonitorController
 			}
 		}
 
-		return array(
+		return [
 			'type' => $type,
 			'object' => $object,
 			'title' => tr('Notifications for %0', $title),
 			'options' => $monitorlib->getOptions($user, $type, $object),
 			'priorities' => $monitorlib->getPriorities(),
-		);
+		];
 	}
 
-	function action_set_component_last_view($input) {
+	function action_set_component_last_view($input)
+	{
 		global $user;
 
-		if(!$user) return;
+		if (! $user) {
+			return;
+		}
 
 		$tikiLib = TikiLib::lib('tiki');
-		
+
 		$component = $input->component->text();
 		$id = $input->id->int();
 
 		$prefName = "last_viewed_";
 
-		if(!empty($id)) {
-			$prefName .= $component."_".$id;
+		if (! empty($id)) {
+			$prefName .= $component . "_" . $id;
 		} else {
 			$prefName .= $component;
 		}
 
 		$tikiLib->set_user_preference($user, $prefName, time());
 	}
-	
+
 	function action_stream($input)
 	{
 		$loginlib = TikiLib::lib('login');
@@ -213,4 +216,3 @@ class Services_User_MonitorController
 		}
 	}
 }
-

@@ -3,18 +3,18 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-socialnetworks_linkedin.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: tiki-socialnetworks_linkedin.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
 $section = 'mytiki';
-require_once ('tiki-setup.php');
-require_once ('lib/socialnetworkslib.php');
+require_once('tiki-setup.php');
+require_once('lib/socialnetworkslib.php');
 $access->check_feature('feature_socialnetworks');
 $access->check_permission('tiki_p_socialnetworks', tra('Social networks'));
 
-$auto_query_args = array();
+$auto_query_args = [];
 if (isset($_REQUEST['connect'])) {
 	$socialnetworkslib->getLinkedInRequestToken();
 }

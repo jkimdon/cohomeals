@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.redirect.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.redirect.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_function_redirect($params, $smarty)
@@ -17,7 +17,7 @@ function smarty_function_redirect($params, $smarty)
 	// Param = url
 	if (empty($url)) {
 		trigger_error("assign: missing parameter: url");
-	return;
+		return;
 	}
 	header("Location: $url");
 	exit;

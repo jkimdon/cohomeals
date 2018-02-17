@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_newsletters.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
+{* $Id: tiki-admin_newsletters.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title help="Newsletters"}{tr}Admin newsletters{/tr}{/title}
 
 <div class="t_navbar btn-group form-group">
@@ -79,7 +79,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.newsletters_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.newsletters_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

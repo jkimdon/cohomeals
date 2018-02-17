@@ -11,28 +11,30 @@
 
 var mapboxgl = require('mapbox-gl');
 
+var Lib = require('../../lib');
 var Plots = require('../plots');
 var xmlnsNamespaces = require('../../constants/xmlns_namespaces');
 
 var createMapbox = require('./mapbox');
 var constants = require('./constants');
 
+var MAPBOX = 'mapbox';
 
-exports.name = 'mapbox';
+
+exports.name = MAPBOX;
 
 exports.attr = 'subplot';
 
-exports.idRoot = 'mapbox';
+exports.idRoot = MAPBOX;
 
-exports.idRegex = /^mapbox([2-9]|[1-9][0-9]+)?$/;
-
-exports.attrRegex = /^mapbox([2-9]|[1-9][0-9]+)?$/;
+exports.idRegex = exports.attrRegex = Lib.counterRegex(MAPBOX);
 
 exports.attributes = {
     subplot: {
         valType: 'subplotid',
         role: 'info',
         dflt: 'mapbox',
+        editType: 'calc',
         description: [
             'Sets a reference between this trace\'s data coordinates and',
             'a mapbox subplot.',
@@ -49,14 +51,14 @@ exports.supplyLayoutDefaults = require('./layout_defaults');
 exports.plot = function plotMapbox(gd) {
     var fullLayout = gd._fullLayout,
         calcData = gd.calcdata,
-        mapboxIds = Plots.getSubplotIds(fullLayout, 'mapbox');
+        mapboxIds = Plots.getSubplotIds(fullLayout, MAPBOX);
 
     var accessToken = findAccessToken(gd, mapboxIds);
     mapboxgl.accessToken = accessToken;
 
     for(var i = 0; i < mapboxIds.length; i++) {
         var id = mapboxIds[i],
-            subplotCalcData = Plots.getSubplotCalcData(calcData, 'mapbox', id),
+            subplotCalcData = Plots.getSubplotCalcData(calcData, MAPBOX, id),
             opts = fullLayout[id],
             mapbox = opts._subplot;
 
@@ -75,12 +77,21 @@ exports.plot = function plotMapbox(gd) {
             fullLayout[id]._subplot = mapbox;
         }
 
+        if(!mapbox.viewInitial) {
+            mapbox.viewInitial = {
+                center: Lib.extendFlat({}, opts.center),
+                zoom: opts.zoom,
+                bearing: opts.bearing,
+                pitch: opts.pitch
+            };
+        }
+
         mapbox.plot(subplotCalcData, fullLayout, gd._promises);
     }
 };
 
 exports.clean = function(newFullData, newFullLayout, oldFullData, oldFullLayout) {
-    var oldMapboxKeys = Plots.getSubplotIds(oldFullLayout, 'mapbox');
+    var oldMapboxKeys = Plots.getSubplotIds(oldFullLayout, MAPBOX);
 
     for(var i = 0; i < oldMapboxKeys.length; i++) {
         var oldMapboxKey = oldMapboxKeys[i];
@@ -93,7 +104,7 @@ exports.clean = function(newFullData, newFullLayout, oldFullData, oldFullLayout)
 
 exports.toSVG = function(gd) {
     var fullLayout = gd._fullLayout,
-        subplotIds = Plots.getSubplotIds(fullLayout, 'mapbox'),
+        subplotIds = Plots.getSubplotIds(fullLayout, MAPBOX),
         size = fullLayout._size;
 
     for(var i = 0; i < subplotIds.length; i++) {
@@ -144,3 +155,12 @@ function findAccessToken(gd, mapboxIds) {
 
     return accessToken;
 }
+
+exports.updateFx = function(fullLayout) {
+    var subplotIds = Plots.getSubplotIds(fullLayout, MAPBOX);
+
+    for(var i = 0; i < subplotIds.length; i++) {
+        var subplotObj = fullLayout[subplotIds[i]]._subplot;
+        subplotObj.updateFx(fullLayout);
+    }
+};

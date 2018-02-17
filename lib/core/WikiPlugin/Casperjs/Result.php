@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Result.php 61984 2017-04-01 00:22:13Z rjsmelo $
+// $Id: Result.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class WikiPlugin_Casperjs_Result
 {
@@ -18,7 +18,7 @@ class WikiPlugin_Casperjs_Result
 		$this->commandLine = $commandLine;
 		$this->casperJsScript = $casperJsScript;
 
-		$this->output = array();
+		$this->output = [];
 
 		$tagStart = $prefix . "_START";
 		$tagStartLen = strlen($tagStart);

@@ -3,14 +3,18 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: DirectivesTest.php 60792 2017-01-05 14:41:05Z kroky6 $
+// $Id: DirectivesTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
+namespace Tiki\Tests\Yaml;
+
+use PHPUnit_Framework_TestCase;
 use Symfony\Component\Yaml\Yaml;
+use Tiki\Yaml\Directives as Directives;
 
-class Yaml_DirectivesTest extends PHPUnit_Framework_TestCase
+class DirectivesTest extends PHPUnit_Framework_TestCase
 {
 	/**
-	 * @var Yaml_Directives
+	 * @var Directives
 	 */
 	protected $directives;
 	protected $fixtures;
@@ -18,7 +22,7 @@ class Yaml_DirectivesTest extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->fixtures = __DIR__ . '/Fixtures/';
-		$this->directives = new Yaml_Directives(null, $this->fixtures);
+		$this->directives = new Directives(null, $this->fixtures);
 	}
 
 	public function testNoChangeIfNoDirective()
@@ -49,11 +53,11 @@ class Yaml_DirectivesTest extends PHPUnit_Framework_TestCase
 
 	public function includeDataProvider()
 	{
-		return array(
-			array('include_replace_key.yml', 'include_replace_key_result.yml'),
-			array('include_replace_key_2.yml', 'include_replace_key_result.yml'),
-			array('include_replace_deep_key.yml', 'include_replace_deep_key_result.yml'),
-			array('include_appending.yml', 'include_appending_result.yml'),
-		);
+		return [
+			['include_replace_key.yml', 'include_replace_key_result.yml'],
+			['include_replace_key_2.yml', 'include_replace_key_result.yml'],
+			['include_replace_deep_key.yml', 'include_replace_deep_key_result.yml'],
+			['include_appending.yml', 'include_appending_result.yml'],
+		];
 	}
 }

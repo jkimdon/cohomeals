@@ -1,5 +1,5 @@
 <form class="form-horizontal" action="tiki-admin.php?page=video" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 
 	{tabset name="admin_video"}
 
@@ -81,6 +81,16 @@
 			<fieldset class="table clearfix featurelist">
 				<legend> {tr}jQuery plugins and add-ons{/tr} </legend>
 				{preference name=jquery_fitvidjs}
+			</fieldset>
+		{/tab}
+
+	    {tab name="{tr}Alchemy{/tr}" key=alchemy}
+			<br>
+			<fieldset class="table clearfix featurelist">
+				<legend> {tr}Settings for Alchemy{/tr} </legend>
+				{preference name=alchemy_ffmpeg_path}
+				{preference name=alchemy_ffprobe_path}
+				{preference name=alchemy_imagine_driver}
 			</fieldset>
 		{/tab}
 

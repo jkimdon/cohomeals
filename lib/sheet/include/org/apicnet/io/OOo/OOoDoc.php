@@ -8,7 +8,7 @@ if (strpos($_SERVER["SCRIPT_NAME"],basename(__FILE__)) !== false) {
 
 
 /*
-This file is part of J4PHP - Ensembles de propriÈtÈs et mÈthodes permettant le developpment rapide d'application web modulaire
+This file is part of J4PHP - Ensembles de propri√©t√©s et m√©thodes permettant le developpment rapide d'application web modulaire
 Copyright (c) 2002-2004 @PICNet
 
 This program is free software; you can redistribute it and/or
@@ -40,7 +40,7 @@ class OOoDoc extends OOoUtil {
 	var $TYPE;
 	
 	
-	function OOoDoc(){
+	function __construct(){
 		$this->TYPE     = NULL;
 		$this->docExist = FALSE;
 		$this->manifest = NULL;
@@ -71,7 +71,7 @@ class OOoDoc extends OOoUtil {
 	
 	function openWriter($file){
 		$this->TYPE     = "Writer";
-		$allRep         = split("\/", $file);
+		$allRep         = explode("/", $file);
 		$this->fileName = array_pop($allRep);
 		$this->dirName  = join ("/", $allRep);
 
@@ -86,7 +86,7 @@ class OOoDoc extends OOoUtil {
 	function openCalc($file){
 		$this->TYPE     = "Calc";
 		
-		$allRep         = split("\/", $file);
+		$allRep         = explode("/", $file);
 		$this->fileName = array_pop($allRep);
 		$this->dirName  = join ("/", $allRep);
 
@@ -122,7 +122,7 @@ class OOoDoc extends OOoUtil {
 			}
 			
 		} else {
-			$this -> ErrorTracker(4, "Aucun document OpenOffice a ÈtÈ crÈÈ", 'save', __FILE__, __LINE__);
+			$this -> ErrorTracker(4, "Aucun document OpenOffice a √©t√© cr√©√©", 'save', __FILE__, __LINE__);
 		}
 	}
 	

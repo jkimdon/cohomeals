@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.js_insert_icon.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.js_insert_icon.php 64634 2017-11-19 12:59:14Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -25,22 +25,22 @@ if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
  */
 function smarty_function_js_insert_icon($params, $smarty)
 {
-	if (!empty($params['type'])) {
+	if (! empty($params['type'])) {
 		//set icon
 		$iconmap = [
 			'jscalendar' => 'calendar'
 		];
-		$iconname = !empty($params['iconname']) ? $params['iconname'] : $iconmap[$params['type']];
+		$iconname = ! empty($params['iconname']) ? $params['iconname'] : $iconmap[$params['type']];
 		$smarty->loadPlugin('smarty_function_icon');
 		$icon = smarty_function_icon(['name' => $iconname], $smarty);
 		//set js
 		switch ($params['type']) {
-			case 'jscalendar' :
+			case 'jscalendar':
 				$js = "$('div.jscal > button.ui-datepicker-trigger').empty().append('$icon').addClass('btn btn-sm btn-link').css({'padding' : '0px', 'font-size': '16px'});";
 				break;
 		}
 		//load js
-		if (!empty($js)) {
+		if (! empty($js)) {
 			if (isset($params['return']) && $params['return'] === 'y') {
 				return $js;
 			} else {

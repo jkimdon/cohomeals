@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.module.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.module.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 function smarty_function_module($params, $smarty)
 {
@@ -20,18 +20,18 @@ function smarty_function_module($params, $smarty)
 		return tr("Missing %0 parameter", 'module');
 	}
 
-	$module_reference = array(
+	$module_reference = [
 		'moduleId' => $moduleId,
 		'name' => $params['module'],
 		'params' => $params,
 		'rows' => 10,
 		'position' => null,
 		'ord' => null,
-		'cache_time'=> 0,
-	);
+		'cache_time' => 0,
+	];
 
-	foreach (array('module_style', 'rows') as $key) {
-		if (!empty($params[$key])) {
+	foreach (['module_style', 'rows'] as $key) {
+		if (! empty($params[$key])) {
 			$module_reference[$key] = $params[$key];
 		}
 	}

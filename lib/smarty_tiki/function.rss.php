@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.rss.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: function.rss.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /* inserts the content of an rss feed into a module */
@@ -27,10 +27,10 @@ function smarty_function_rss($params, $smarty)
 	$out = TikiLib::lib('parser')->plugin_execute(
 		'rss',
 		'',
-		array('id' => $id, 'max' => $max,),
+		['id' => $id, 'max' => $max,],
 		0,
 		false,
-		array('context_format' => 'html')
+		['context_format' => 'html']
 	);
 	TikiLib::lib('parser')->setOptions();
 	return $out;

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RelativeURL.php 63479 2017-08-07 14:41:22Z jonnybradley $
+// $Id: RelativeURL.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Class TikiFilter_RelativeURL
@@ -23,7 +23,7 @@ class TikiFilter_RelativeURL implements Zend\Filter\FilterInterface
 	{
 
 		$filter = new Zend\Filter\StripTags();
-		$url =  $filter->filter($input);
+		$url = $filter->filter($input);
 
 		$url = Zend\Uri\UriFactory::factory($url);
 		$url->normalize();
@@ -32,12 +32,13 @@ class TikiFilter_RelativeURL implements Zend\Filter\FilterInterface
 		$fragment = $url->getFragment();
 		$url = preg_replace('/^\/\/+/', '', $url->getPath());
 
-		if ($query)
-			$url .= '?'.$query;
-		if ($fragment)
-			$url .= '#'.$fragment;
+		if ($query) {
+			$url .= '?' . $query;
+		}
+		if ($fragment) {
+			$url .= '#' . $fragment;
+		}
 
 		return $url;
-
 	}
 }

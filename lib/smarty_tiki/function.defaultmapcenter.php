@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.defaultmapcenter.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: function.defaultmapcenter.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -17,6 +17,6 @@ function smarty_function_defaultmapcenter($params, $smarty)
 	global $prefs;
 	$geolib = TikiLib::lib('geo');
 	$coords = $geolib->parse_coordinates($prefs['gmap_defaultx'] . ',' . $prefs['gmap_defaulty'] . ',' . $prefs['gmap_defaultz']);
-	$center = $geolib->build_location_string($coords); 
+	$center = $geolib->build_location_string($coords);
 	return smarty_modifier_escape($center);
 }

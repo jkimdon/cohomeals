@@ -3,9 +3,13 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ReplaceUserData.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: ReplaceUserData.php 64291 2017-10-16 22:22:03Z rjsmelo $
 
-class Yaml_Filter_ReplaceUserData implements Yaml_Filter_FilterInterface
+namespace Tiki\Yaml\Filter;
+
+use Tiki_Profile;
+
+class ReplaceUserData implements FilterInterface
 {
 	protected $profile;
 	protected $userData;
@@ -20,4 +24,4 @@ class Yaml_Filter_ReplaceUserData implements Yaml_Filter_FilterInterface
 	{
 		$this->profile->replaceReferences($value, $this->userData);
 	}
-} 
+}

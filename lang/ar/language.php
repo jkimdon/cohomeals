@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "ويلزية",
 "Slovene" => "سلوفينية",
 "Arabic" => "عربية",
@@ -230,7 +230,7 @@ $lang = array(
 "Top galleries" => "المجموعات الأكثر شعبيةً",
 "view" => "عرض",
 "online users" => "مستخدمين متواجدين",
-"Repeat password" => "اعادة كلمة السر",
+"Confirm password" => "اعادة كلمة السر",
 "Generate a password" => "توليد كلمة سر",
 "Locked" => "مقفول",
 "Display last post titles" => "عرض عناوين آخر التدخلات",
@@ -352,4 +352,4 @@ $lang = array(
 "You do not have permission to remove someone else's post!" => "لا تمتلك الصلاحية لحذف إرسال أو إرسالات شخص آخر !",
 "Top pages" => "اعلى الصفحات",
 "Last pages" => "اخر الصفحات",
-);
+];

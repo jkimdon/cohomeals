@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: KeyPatternUnsetTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: KeyPatternUnsetTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -15,10 +15,10 @@ class DeclFilter_KeyPatternUnsetTest extends TikiTestCase
 	function testMatch()
 	{
 		$rule = new DeclFilter_KeyPatternUnsetRule(
-			array(
+			[
 				'/^foo_\d+$/',
 				'/^bar_[a-z]+$/',
-			)
+			]
 		);
 
 		$this->assertTrue($rule->match('foo_123'));
@@ -30,17 +30,17 @@ class DeclFilter_KeyPatternUnsetTest extends TikiTestCase
 	function testApply()
 	{
 		$rule = new DeclFilter_KeyPatternUnsetRule(
-			array(
+			[
 				'/^foo_\d+$/',
 				'/^bar_[a-z]+$/',
-			)
+			]
 		);
 
-		$data = array(
+		$data = [
 			'foo_123' => '123abc',
 			'bar_abc' => '123abc',
 			'foo' => '123abc',
-		);
+		];
 
 		$rule->apply($data, 'foo_123');
 		$rule->apply($data, 'bar_abc');

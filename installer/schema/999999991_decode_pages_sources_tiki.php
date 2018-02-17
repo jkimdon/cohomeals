@@ -1,13 +1,13 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 999999991_decode_pages_sources_tiki.php 57973 2016-03-17 20:10:42Z jonnybradley $
+// $Id: 999999991_decode_pages_sources_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /* ABOUT THE NUMBERING:
@@ -38,4 +38,3 @@ function upgrade_999999991_decode_pages_sources_tiki($installer)
 	$converter->convertPages();
 	$converter->convertModules();
 }
-

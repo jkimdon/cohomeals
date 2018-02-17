@@ -1,4 +1,4 @@
-{* $Id: tiki-user_menu.tpl 56968 2015-12-10 14:59:37Z jonnybradley $ *}
+{* $Id: tiki-user_menu.tpl 62887 2017-06-04 18:11:17Z chealer $ *}
 <div class="tikimenu{if isset($menu_info.structure) && $menu_info.structure eq 'y'} structuremenu{/if}">
 	{assign var=opensec value='0'}
 	{assign var=sep value=''}
@@ -55,8 +55,17 @@
 							</span>
 						{/if}
 					{else}
-						{* this anchor tag needs to be in a single long line to avoid stray underlining upon hover *}
-						<a class='separator' href="#" onclick="icontoggle('menu{$cname}', this); return false;" title="{tr}Toggle options{/tr}" id="sep{$cname}">{if empty($menu_info.icon)}<span class="toggle-open" style="display:{$open}">{icon name="$expanded" alt='Toggle'}</span><span class="toggle-closed" style="display:{$closed}">{icon name="$collapsed" alt='Toggle'}</span>{else}<span class="toggle-open" style="display:{$open}"><img src="{$menu_info.oicon|escape}" alt="{tr}Toggle{/tr}"></span><span class="toggle-closed" style="display:{$closed}"><img src="{$menu_info.icon|escape}" alt="{tr}Toggle{/tr}"></span>{/if}</a>
+						{strip}{* this anchor tag needs to be in a single long line to avoid stray underlining upon hover *}
+						<a class='separator' href="#" onclick="icontoggle('menu{$cname}', this); return false;" title="{tr}Toggle options{/tr}" id="sep{$cname}">
+							{if empty($menu_info.icon)}
+								<span class="toggle-open" style="display:{$open}">{icon name="$expanded" alt='Toggle'}</span>
+								<span class="toggle-closed" style="display:{$closed}">{icon name="$collapsed" alt='Toggle'}</span>
+							{else}
+								<span class="toggle-open" style="display:{$open}"><img src="{$menu_info.oicon|escape}" alt="{tr}Toggle{/tr}"></span>
+								<span class="toggle-closed" style="display:{$closed}"><img src="{$menu_info.icon|escape}" alt="{tr}Toggle{/tr}"></span>
+							{/if}
+						</a>
+						{/strip}
 					{/if}
 				{else}
 					{if empty($menu_info.icon)}

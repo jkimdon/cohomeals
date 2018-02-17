@@ -1,4 +1,4 @@
-{* $Id: tiki-admin.tpl 61837 2017-03-24 10:26:59Z jyhem $ *}
+{* $Id: tiki-admin.tpl 63483 2017-08-07 17:34:45Z chealer $ *}
 
 {include file="admin/admin_navbar.tpl"}
 
@@ -32,7 +32,6 @@
 		{remarksbox type="error" title="{tr}Installer not locked{/tr}"}
 			{tr} The installer allows a user to change or destroy the site's database through the browser so it is very important to keep it locked. {/tr}
 			{tr}<br />You can re-run the installer (tiki-install.php), skip to the last step and select <strong>LOCK THE INSTALLER</strong>. Alternatively, you can simply <strong>add a lock file</strong> (file without any extension) in your db/ folder.{/tr}
-
 		{/remarksbox}
 	{/if}
 
@@ -58,4 +57,10 @@
 	{/remarksbox}
 {/if}
 
-{include file="admin/include_$include.tpl"}
+{if $template_not_found eq 'y'}
+	{remarksbox type="error" title="{tr}Error{/tr}"}
+		{tr _0="page" _1={$include|escape}}The <strong>%0</strong> parameter has an invalid value: <strong>%1</strong>.{/tr}
+	{/remarksbox}
+{else}
+	{include file="admin/include_$include.tpl"}
+{/if}

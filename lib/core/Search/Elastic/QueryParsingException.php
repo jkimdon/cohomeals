@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: QueryParsingException.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: QueryParsingException.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Elastic_QueryParsingException extends Search_Elastic_Exception
 {
@@ -15,4 +15,3 @@ class Search_Elastic_QueryParsingException extends Search_Elastic_Exception
 		parent::__construct(tr('Parsing search query failed: "%0"', $this->string));
 	}
 }
-

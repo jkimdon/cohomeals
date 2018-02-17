@@ -1,4 +1,4 @@
-{* $Id: tiki-user_cssmenu.tpl 62935 2017-06-07 13:41:32Z chealer $ *}
+{* $Id: tiki-user_cssmenu.tpl 62937 2017-06-07 16:37:58Z jonnybradley $ *}
 {if count($menu_channels) > 0}
 	{assign var=opensec value='0'}
 	{assign var=sep value=''}

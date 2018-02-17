@@ -16,6 +16,7 @@ var Lib = require('../../lib');
 var cleanNumber = Lib.cleanNumber;
 var ms2DateTime = Lib.ms2DateTime;
 var dateTime2ms = Lib.dateTime2ms;
+var ensureNumber = Lib.ensureNumber;
 
 var numConstants = require('../../constants/numerical');
 var FP_SAFE = numConstants.FP_SAFE;
@@ -26,13 +27,6 @@ var axisIds = require('./axis_ids');
 
 function fromLog(v) {
     return Math.pow(10, v);
-}
-
-function num(v) {
-    if(!isNumeric(v)) return BADNUM;
-    v = Number(v);
-    if(v < -FP_SAFE || v > FP_SAFE) return BADNUM;
-    return isNumeric(v) ? Number(v) : BADNUM;
 }
 
 /**
@@ -61,7 +55,10 @@ function num(v) {
  * also clears the autorange bounds ._min and ._max
  * and the autotick constraints ._minDtick, ._forceTick0
  */
-module.exports = function setConvert(ax) {
+module.exports = function setConvert(ax, fullLayout) {
+    fullLayout = fullLayout || {};
+
+    var axLetter = (ax._id || 'x').charAt(0);
 
     // clipMult: how many axis lengths past the edge do we render?
     // for panning, 1-2 would suffice, but for zooming more is nice.
@@ -125,12 +122,20 @@ module.exports = function setConvert(ax) {
      */
     function setCategoryIndex(v) {
         if(v !== null && v !== undefined) {
-            var c = ax._categories.indexOf(v);
-            if(c === -1) {
-                ax._categories.push(v);
-                return ax._categories.length - 1;
+            if(ax._categoriesMap === undefined) {
+                ax._categoriesMap = {};
             }
-            return c;
+
+            if(ax._categoriesMap[v] !== undefined) {
+                return ax._categoriesMap[v];
+            } else {
+                ax._categories.push(v);
+
+                var curLength = ax._categories.length - 1;
+                ax._categoriesMap[v] = curLength;
+
+                return curLength;
+            }
         }
         return BADNUM;
     }
@@ -138,9 +143,12 @@ module.exports = function setConvert(ax) {
     function getCategoryIndex(v) {
         // d2l/d2c variant that that won't add categories but will also
         // allow numbers to be mapped to the linearized axis positions
-        var index = ax._categories.indexOf(v);
-        if(index !== -1) return index;
-        if(typeof v === 'number') return v;
+        if(ax._categoriesMap) {
+            var index = ax._categoriesMap[v];
+            if(index !== undefined) return index;
+        }
+
+        if(isNumeric(v)) return +v;
     }
 
     function l2p(v) {
@@ -153,8 +161,8 @@ module.exports = function setConvert(ax) {
     function p2l(px) { return (px - ax._b) / ax._m; }
 
     // conversions among c/l/p are fairly simple - do them together for all axis types
-    ax.c2l = (ax.type === 'log') ? toLog : num;
-    ax.l2c = (ax.type === 'log') ? fromLog : num;
+    ax.c2l = (ax.type === 'log') ? toLog : ensureNumber;
+    ax.l2c = (ax.type === 'log') ? fromLog : ensureNumber;
 
     ax.l2p = l2p;
     ax.p2l = p2l;
@@ -170,10 +178,12 @@ module.exports = function setConvert(ax) {
     if(['linear', '-'].indexOf(ax.type) !== -1) {
         // all are data vals, but d and r need cleaning
         ax.d2r = ax.r2d = ax.d2c = ax.r2c = ax.d2l = ax.r2l = cleanNumber;
-        ax.c2d = ax.c2r = ax.l2d = ax.l2r = num;
+        ax.c2d = ax.c2r = ax.l2d = ax.l2r = ensureNumber;
 
-        ax.d2p = ax.r2p = function(v) { return l2p(cleanNumber(v)); };
+        ax.d2p = ax.r2p = function(v) { return ax.l2p(cleanNumber(v)); };
         ax.p2d = ax.p2r = p2l;
+
+        ax.cleanPos = ensureNumber;
     }
     else if(ax.type === 'log') {
         // d and c are data vals, r and l are logged (but d and r need cleaning)
@@ -181,16 +191,18 @@ module.exports = function setConvert(ax) {
         ax.r2d = ax.r2c = function(v) { return fromLog(cleanNumber(v)); };
 
         ax.d2c = ax.r2l = cleanNumber;
-        ax.c2d = ax.l2r = num;
+        ax.c2d = ax.l2r = ensureNumber;
 
         ax.c2r = toLog;
         ax.l2d = fromLog;
 
-        ax.d2p = function(v, clip) { return l2p(ax.d2r(v, clip)); };
+        ax.d2p = function(v, clip) { return ax.l2p(ax.d2r(v, clip)); };
         ax.p2d = function(px) { return fromLog(p2l(px)); };
 
-        ax.r2p = function(v) { return l2p(cleanNumber(v)); };
+        ax.r2p = function(v) { return ax.l2p(cleanNumber(v)); };
         ax.p2r = p2l;
+
+        ax.cleanPos = ensureNumber;
     }
     else if(ax.type === 'date') {
         // r and d are date strings, l and c are ms
@@ -208,26 +220,38 @@ module.exports = function setConvert(ax) {
         ax.d2c = ax.r2c = ax.d2l = ax.r2l = dt2ms;
         ax.c2d = ax.c2r = ax.l2d = ax.l2r = ms2dt;
 
-        ax.d2p = ax.r2p = function(v, _, calendar) { return l2p(dt2ms(v, 0, calendar)); };
+        ax.d2p = ax.r2p = function(v, _, calendar) { return ax.l2p(dt2ms(v, 0, calendar)); };
         ax.p2d = ax.p2r = function(px, r, calendar) { return ms2dt(p2l(px), r, calendar); };
+
+        ax.cleanPos = function(v) { return Lib.cleanDate(v, BADNUM, ax.calendar); };
     }
     else if(ax.type === 'category') {
-        // d is categories; r, c, and l are indices
-        // TODO: should r accept category names too?
-        // ie r2c and r2l would be getCategoryIndex (and r2p would change)
+        // d is categories (string)
+        // c and l are indices (numbers)
+        // r is categories or numbers
 
-        ax.d2r = ax.d2c = ax.d2l = setCategoryIndex;
+        ax.d2c = ax.d2l = setCategoryIndex;
         ax.r2d = ax.c2d = ax.l2d = getCategoryName;
 
-        // special d2l variant that won't add categories
-        ax.d2l_noadd = getCategoryIndex;
+        ax.d2r = ax.d2l_noadd = getCategoryIndex;
 
-        ax.r2l = ax.l2r = ax.r2c = ax.c2r = num;
+        ax.r2c = function(v) {
+            var index = getCategoryIndex(v);
+            return index !== undefined ? index : ax.fraction2r(0.5);
+        };
 
-        ax.d2p = function(v) { return l2p(getCategoryIndex(v)); };
+        ax.l2r = ax.c2r = ensureNumber;
+        ax.r2l = getCategoryIndex;
+
+        ax.d2p = function(v) { return ax.l2p(ax.r2c(v)); };
         ax.p2d = function(px) { return getCategoryName(p2l(px)); };
-        ax.r2p = l2p;
+        ax.r2p = ax.d2p;
         ax.p2r = p2l;
+
+        ax.cleanPos = function(v) {
+            if(typeof v === 'string' && v !== '') return v;
+            return ensureNumber(v);
+        };
     }
 
     // find the range value at the specified (linear) fraction of the axis
@@ -254,8 +278,7 @@ module.exports = function setConvert(ax) {
      */
     ax.cleanRange = function(rangeAttr) {
         if(!rangeAttr) rangeAttr = 'range';
-        var range = ax[rangeAttr],
-            axLetter = (ax._id || 'x').charAt(0),
+        var range = Lib.nestedProperty(ax, rangeAttr).get(),
             i, dflt;
 
         if(ax.type === 'date') dflt = Lib.dfltRange(ax.calendar);
@@ -266,7 +289,7 @@ module.exports = function setConvert(ax) {
         dflt = dflt.slice();
 
         if(!range || range.length !== 2) {
-            ax[rangeAttr] = dflt;
+            Lib.nestedProperty(ax, rangeAttr).set(dflt);
             return;
         }
 
@@ -319,16 +342,17 @@ module.exports = function setConvert(ax) {
 
     // set scaling to pixels
     ax.setScale = function(usePrivateRange) {
-        var gs = ax._gd._fullLayout._size,
-            axLetter = ax._id.charAt(0);
+        var gs = fullLayout._size;
 
         // TODO cleaner way to handle this case
         if(!ax._categories) ax._categories = [];
+        // Add a map to optimize the performance of category collection
+        if(!ax._categoriesMap) ax._categoriesMap = {};
 
         // make sure we have a domain (pull it in from the axis
         // this one is overlaying if necessary)
         if(ax.overlaying) {
-            var ax2 = axisIds.getFromId(ax._gd, ax.overlaying);
+            var ax2 = axisIds.getFromId({ _fullLayout: fullLayout }, ax.overlaying);
             ax.domain = ax2.domain;
         }
 
@@ -360,7 +384,7 @@ module.exports = function setConvert(ax) {
             Lib.notifier(
                 'Something went wrong with axis scaling',
                 'long');
-            ax._gd._replotting = false;
+            fullLayout._replotting = false;
             throw new Error('axis scaling');
         }
     };
@@ -402,11 +426,36 @@ module.exports = function setConvert(ax) {
         return arrayOut;
     };
 
+    ax.isValidRange = function(range) {
+        return (
+            Array.isArray(range) &&
+            range.length === 2 &&
+            isNumeric(ax.r2l(range[0])) &&
+            isNumeric(ax.r2l(range[1]))
+        );
+    };
+
+    if(axLetter === 'x') {
+        ax.isPtWithinRange = function(d) {
+            var x = d.x;
+            return x >= ax.range[0] && x <= ax.range[1];
+        };
+    } else {
+        ax.isPtWithinRange = function(d) {
+            var y = d.y;
+            return y >= ax.range[0] && y <= ax.range[1];
+        };
+    }
+
     // for autoranging: arrays of objects:
     //      {val: axis value, pad: pixel padding}
     // on the low and high sides
     ax._min = [];
     ax._max = [];
+
+    // copy ref to fullLayout.separators so that
+    // methods in Axes can use it w/o having to pass fullLayout
+    ax._separators = fullLayout.separators;
 
     // and for bar charts and box plots: reset forced minimum tick spacing
     delete ax._minDtick;

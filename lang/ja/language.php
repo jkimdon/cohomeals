@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "ウェールズ語",
 "Slovene" => "スロベニア語",
 "Arabic" => "アラビア語",
@@ -1053,7 +1053,7 @@ $lang = array(
 "Current" => "現在",
 "vote" => "投票",
 "Rate" => "評価",
-"Repeat password" => "パスワード(再入力)",
+"Confirm password" => "パスワード(再入力)",
 "Generate a password" => "パスワードの自動生成",
 "Create New" => "新規作成",
 "Tasks" => "タスク",
@@ -1700,4 +1700,4 @@ $lang = array(
 "No thread indicated" => "スレッドの指定はありません",
 "Top pages" => "トップ・ページ",
 "Last pages" => "最近のページ",
-);
+];

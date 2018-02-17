@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Jan." => "Jan.",
 "Feb." => "Feb.",
 "Mar" => "Mar.",
@@ -10,4 +10,4 @@ $lang = array(
 "Sep." => "Sep.",
 "Oct." => "Oct.",
 "Nov." => "Nov.",
-);
+];

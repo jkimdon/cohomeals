@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IteratorTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: IteratorTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -16,14 +16,14 @@ class JitFilter_IteratorTest extends TikiTestCase
 
 	function setUp()
 	{
-		$this->array = array(
+		$this->array = [
 			'foo' => 'bar',
 			'bar' => 10,
-			'baz' => array(
+			'baz' => [
 				'hello',
 				'world',
-			),
-		);
+			],
+		];
 
 		$this->array = new JitFilter($this->array);
 		$this->array->setDefaultFilter(new Zend\Filter\StringToUpper);
@@ -37,18 +37,18 @@ class JitFilter_IteratorTest extends TikiTestCase
 	function testForeach()
 	{
 		foreach ($this->array as $key => $value) {
-			switch($key) {
-			case 'foo':
-				$this->assertEquals('BAR', $value);
-				break;
-			case 'bar':
-				$this->assertEquals(10, $value);
-				break;
-			case 'baz':
-				$this->assertEquals(2, count($value));
-				break;
-			default:
-				$this->assertTrue(false, 'Unknown key found');
+			switch ($key) {
+				case 'foo':
+					$this->assertEquals('BAR', $value);
+					break;
+				case 'bar':
+					$this->assertEquals(10, $value);
+					break;
+				case 'baz':
+					$this->assertEquals(2, count($value));
+					break;
+				default:
+					$this->assertTrue(false, 'Unknown key found');
 			}
 		}
 	}

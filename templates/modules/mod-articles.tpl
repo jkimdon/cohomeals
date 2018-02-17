@@ -1,4 +1,4 @@
-{* $Id: mod-articles.tpl 62117 2017-04-06 16:45:08Z drsassafras $ *}
+{* $Id: mod-articles.tpl 62137 2017-04-08 16:53:55Z lindonb $ *}
 
 {tikimodule error=$module_params.error title=$tpl_module_title name="articles" flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	{if $show_rating_selector eq 'y'}

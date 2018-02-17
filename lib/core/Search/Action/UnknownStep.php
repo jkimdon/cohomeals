@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UnknownStep.php 60878 2017-01-12 15:16:08Z kroky6 $
+// $Id: UnknownStep.php 65366 2018-01-29 18:03:44Z robertokir $
 
 class Search_Action_UnknownStep implements Search_Action_Step
 {
@@ -16,7 +16,7 @@ class Search_Action_UnknownStep implements Search_Action_Step
 
 	function getFields()
 	{
-		return array();
+		return [];
 	}
 
 	function validate(array $entry)
@@ -28,8 +28,13 @@ class Search_Action_UnknownStep implements Search_Action_Step
 	{
 	}
 
-	function requiresInput() {
+	function requiresInput()
+	{
 		return false;
 	}
-}
 
+	function getName()
+	{
+		return $this->actionName;
+	}
+}

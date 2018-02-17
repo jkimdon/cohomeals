@@ -6,21 +6,21 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-image_gallery_rss.php 57957 2016-03-17 19:58:54Z jonnybradley $
+// $Id: tiki-image_gallery_rss.php 64606 2017-11-17 02:05:08Z rjsmelo $
 
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 
 $imagegallib = TikiLib::lib('imagegal');
 $rsslib = TikiLib::lib('rss');
 
 if ($prefs['feed_image_gallery'] != 'y') {
 	$errmsg = tra('rss feed disabled');
-	require_once ('tiki-rss_error.php');
+	require_once('tiki-rss_error.php');
 }
 
-if (!isset($_REQUEST['galleryId'])) {
+if (! isset($_REQUEST['galleryId'])) {
 	$errmsg = tra('No gallery ID specified');
-	require_once ('tiki-rss_error.php');
+	require_once('tiki-rss_error.php');
 }
 
 $tikilib->get_perm_object($_REQUEST['galleryId'], 'image gallery');
@@ -28,7 +28,7 @@ $tikilib->get_perm_object($_REQUEST['galleryId'], 'image gallery');
 if ($tiki_p_view_image_gallery != 'y') {
 	$smarty->assign('errortype', 401);
 	$errmsg = tra('You do not have permission to view this section');
-	require_once ('tiki-rss_error.php');
+	require_once('tiki-rss_error.php');
 }
 
 $feed = 'imggal';
@@ -45,7 +45,7 @@ if ($output['data'] == 'EMPTY') {
 	$authorId = 'user';
 	$dateId = 'created';
 	$readrepl = 'tiki-browse_image.php?imageId=%s';
-	
+
 	$changes = $imagegallib->get_images(0, $prefs['feed_image_gallery_max'], $dateId . '_desc', '', $_REQUEST['galleryId']);
 	$output = $rsslib->generate_feed($feed, $uniqueid, '', $changes, $readrepl, '', $id, $title, $titleId, $desc, $descId, $dateId, $authorId);
 }

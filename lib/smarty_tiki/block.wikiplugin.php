@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.wikiplugin.php 60301 2016-11-17 13:36:10Z kroky6 $
+// $Id: block.wikiplugin.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * Smarty plugin
@@ -14,23 +14,25 @@
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
-function smarty_block_wikiplugin( $params, $content, $smarty, $repeat = false )
+function smarty_block_wikiplugin($params, $content, $smarty, $repeat = false)
 {
 
-	if ( $repeat ) return '';
+	if ($repeat) {
+		return '';
+	}
 
-	if ( ! isset( $params['_name'] ) ) {
+	if (! isset($params['_name'])) {
 		return '<div class="alert alert-warning">' . tra('Plugin name not specified.') . '</div>';
 	}
 
 	$name = $params['_name'];
-	unset( $params['_name'] );
+	unset($params['_name']);
 
-	if( !empty($params['_compactArguments_']) ) {
+	if (! empty($params['_compactArguments_'])) {
 		$params = $params['_compactArguments_'];
 	}
 
@@ -41,13 +43,12 @@ function smarty_block_wikiplugin( $params, $content, $smarty, $repeat = false )
 		$params,
 		0,
 		false,
-		array(
+		[
 			'context_format' => 'html',
 			'ck_editor' => false,
 			'is_html' => true
-		)
+		]
 	);
 	$parserlib->setOptions();
 	return $out;
 }
-

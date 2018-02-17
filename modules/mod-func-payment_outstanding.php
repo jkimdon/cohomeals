@@ -3,11 +3,11 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-payment_outstanding.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-payment_outstanding.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -15,11 +15,11 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_payment_outstanding_info()
 {
-	return array(
+	return [
 		'name' => tra('Payments Outstanding'),
 		'description' => tra('Displays the payments outstanding for the current user.'),
-		'prefs' => array('payment_feature'),
-	);
+		'prefs' => ['payment_feature'],
+	];
 }
 
 /**
@@ -37,4 +37,3 @@ function module_payment_outstanding($mod_reference, $module_params)
 		$smarty->assign('outstanding', $data);
 	}
 }
-

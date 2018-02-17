@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: validator_pagename.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: validator_pagename.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 function validator_pagename($input, $parameter = '', $message = '')
 {
@@ -13,9 +13,9 @@ function validator_pagename($input, $parameter = '', $message = '')
 			return tra("Page already exists");
 		}
 	} else {
-		if (!$tikilib->page_exists($input)) {
+		if (! $tikilib->page_exists($input)) {
 			return tra("Page does not exist");
 		}
 	}
-	return true; 
+	return true;
 }

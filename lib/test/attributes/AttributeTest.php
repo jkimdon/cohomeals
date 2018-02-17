@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AttributeTest.php 57964 2016-03-17 20:04:05Z jonnybradley $
+// $Id: AttributeTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 $attributelib = TikiLib::lib('attribute');
 
@@ -12,20 +12,20 @@ class AttributeTest extends TikiTestCase
 	function setUp()
 	{
 		parent::setUp();
-		TikiDb::get()->query('DELETE FROM `tiki_object_attributes` WHERE `attribute` LIKE ?', array('tiki.test%'));
+		TikiDb::get()->query('DELETE FROM `tiki_object_attributes` WHERE `attribute` LIKE ?', ['tiki.test%']);
 	}
 
 	function tearDown()
 	{
 		parent::tearDown();
-		TikiDb::get()->query('DELETE FROM `tiki_object_attributes` WHERE `attribute` LIKE ?', array('tiki.test%'));
+		TikiDb::get()->query('DELETE FROM `tiki_object_attributes` WHERE `attribute` LIKE ?', ['tiki.test%']);
 	}
 
 	function testNoAttributes()
 	{
 		$lib = new AttributeLib;
 
-		$this->assertEquals(array(), $lib->get_attributes('test', 'HelloWorld'));
+		$this->assertEquals([], $lib->get_attributes('test', 'HelloWorld'));
 	}
 
 	function testSetAttributes()
@@ -37,7 +37,7 @@ class AttributeTest extends TikiTestCase
 		$lib->set_attribute('test', 'HelloWorldAgain', 'tiki.test.jkl', 'no');
 
 		$this->assertEquals(
-			array('tiki.test.abc' => 121.22, 'tiki.test.def' => 111,),
+			['tiki.test.abc' => 121.22, 'tiki.test.def' => 111,],
 			$lib->get_attributes('test', 'HelloWorld')
 		);
 	}
@@ -49,7 +49,7 @@ class AttributeTest extends TikiTestCase
 		$this->assertTrue($lib->set_attribute('test', 'HelloWorld', 'tiki.test.abc', 'replaced'));
 
 		$this->assertEquals(
-			array('tiki.test.abc' => 'replaced',),
+			['tiki.test.abc' => 'replaced',],
 			$lib->get_attributes('test', 'HelloWorld')
 		);
 	}
@@ -59,7 +59,7 @@ class AttributeTest extends TikiTestCase
 		$lib = new AttributeLib;
 		$this->assertFalse($lib->set_attribute('test', 'HelloWorld', 'tiki.test', 121.22));
 
-		$this->assertEquals(array(), $lib->get_attributes('test', 'HelloWorld'));
+		$this->assertEquals([], $lib->get_attributes('test', 'HelloWorld'));
 	}
 
 	function testLowecase()
@@ -68,7 +68,7 @@ class AttributeTest extends TikiTestCase
 		$this->assertTrue($lib->set_attribute('test', 'HelloWorld', 'tiki.TEST.aaa', 121.22));
 
 		$this->assertEquals(
-			array('tiki.test.aaa' => 121.22,),
+			['tiki.test.aaa' => 121.22,],
 			$lib->get_attributes('test', 'HelloWorld')
 		);
 	}
@@ -79,7 +79,7 @@ class AttributeTest extends TikiTestCase
 		$this->assertTrue($lib->set_attribute('test', 'HelloWorld', 'tiki . test . aaa55bBb', 121.22));
 
 		$this->assertEquals(
-			array('tiki.test.aaa55bbb' => 121.22,),
+			['tiki.test.aaa55bbb' => 121.22,],
 			$lib->get_attributes('test', 'HelloWorld')
 		);
 	}
@@ -90,7 +90,6 @@ class AttributeTest extends TikiTestCase
 		$lib->set_attribute('test', 'HelloWorld', 'tiki.test.abc', 121.22);
 		$lib->set_attribute('test', 'HelloWorld', 'tiki.test.abc', '');
 
-		$this->assertEquals(array(), $lib->get_attributes('test', 'HelloWorld'));
+		$this->assertEquals([], $lib->get_attributes('test', 'HelloWorld'));
 	}
 }
-

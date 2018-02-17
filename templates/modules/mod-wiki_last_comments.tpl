@@ -1,4 +1,4 @@
-{* $Id: mod-wiki_last_comments.tpl 62117 2017-04-06 16:45:08Z drsassafras $ *}
+{* $Id: mod-wiki_last_comments.tpl 62137 2017-04-08 16:53:55Z lindonb $ *}
 
 {if ($type eq 'wiki page' and $prefs.feature_wiki eq 'y')
 	or ($type eq 'article' and $prefs.feature_articles eq 'y')}

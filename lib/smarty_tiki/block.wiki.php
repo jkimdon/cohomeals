@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.wiki.php 62028 2017-04-02 14:52:01Z jonnybradley $
+// $Id: block.wiki.php 64630 2017-11-19 12:11:11Z rjsmelo $
 /**
  * Smarty plugin
  * @package Smarty
@@ -17,22 +17,24 @@
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_block_wiki($params, $content, $smarty, &$repeat)
 {
-	if ( $repeat ) return;
-
-	if ( (isset($params['isHtml'])) and ($params['isHtml'] ) ) {
-	  $isHtml = true;
-	} else {
-	  $isHtml = false;
+	if ($repeat) {
+		return;
 	}
-	$ret = TikiLib::lib('parser')->parse_data($content, array('is_html' => $isHtml));
+
+	if ((isset($params['isHtml'])) and ($params['isHtml'] )) {
+		$isHtml = true;
+	} else {
+		$isHtml = false;
+	}
+	$ret = TikiLib::lib('parser')->parse_data($content, ['is_html' => $isHtml]);
 	if (isset($params['line']) && $params['line'] == 1) {
-		$ret = preg_replace(array('/<br \/>$/', '/[\n\r]*$/'), '', $ret);
+		$ret = preg_replace(['/<br \/>$/', '/[\n\r]*$/'], '', $ret);
 	}
 	return $ret;
 }

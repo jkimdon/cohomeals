@@ -3,21 +3,21 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.help.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: function.help.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_function_help($params, $smarty)
 {
-    extract($params);
-    // Param = zone
-    if (empty($url) && empty($desc) && empty($crumb)) {
-        trigger_error("assign: missing parameter: help (url desc)|crumb");
-        return;
-    }
-    print help_doclink($params);
+	extract($params);
+	// Param = zone
+	if (empty($url) && empty($desc) && empty($crumb)) {
+		trigger_error("assign: missing parameter: help (url desc)|crumb");
+		return;
+	}
+	print help_doclink($params);
 }

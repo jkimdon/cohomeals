@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: javascript.php 63968 2017-09-21 20:39:58Z jonnybradley $
+// $Id: javascript.php 65140 2018-01-09 11:57:30Z jonnybradley $
 
-//this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
-
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
 // need to rebuild because they were created in tiki-setup and just removed due to clear cache
-// we need to create upfront in case codemirror is used later on. 
+// we need to create upfront in case codemirror is used later on.
 require_once("lib/codemirror_tiki/tiki_codemirror.php");
 createCodemirrorModes();
 
@@ -20,9 +20,9 @@ createCodemirrorModes();
 
 $js_cookie = getCookie('javascript_enabled');
 
-if ($prefs['disableJavascript'] == 'y' ) {
+if ($prefs['disableJavascript'] == 'y') {
 	$prefs['javascript_enabled'] = 'n';
-} elseif (!empty($js_cookie)) {
+} elseif (! empty($js_cookie)) {
 	// Update the pref with the cookie value
 	$prefs['javascript_enabled'] = 'y';
 	setCookieSection('javascript_enabled_detect', '', '', time() - 3600);	// remove the test cookie
@@ -44,26 +44,23 @@ $javascript_enabled_detect = getCookie('javascript_enabled_detect', '', '0');
 // and so javascript will get disabled by mistake
 
 if (empty($javascript_enabled_detect) && $feature_no_cookie) {
-
 	$prefs['javascript_enabled'] = 'y';					// assume javascript should be enabled while cookie consent is pending
-
-} else if ( $prefs['javascript_enabled'] === '' && $prefs['disableJavascript'] != 'y' && $javascript_enabled_detect < 3) {
+} elseif ($prefs['javascript_enabled'] === '' && $prefs['disableJavascript'] != 'y' && $javascript_enabled_detect < 3) {
 	// Set the cookie to 'y', through javascript - expires: approx. 1 year
 	$prefs['javascript_enabled'] = 'y';											// temporarily enable to we output the test js
 	$plus_one_year = $tikilib->now + 365 * 24 * 3600;
 	$headerlib->add_js("setCookieBrowser('javascript_enabled', 'y', '', new Date({$plus_one_year}000));", 0);		// setCookieBrowser does not use the tiki_cookie_jar
 
-	if ( strpos($_SERVER['PHP_SELF'], 'tiki-download') === false &&
+	if (strpos($_SERVER['PHP_SELF'], 'tiki-download') === false &&
 			strpos($_SERVER['PHP_SELF'], 'tiki-ajax_services.php') === false &&
-			strpos($_SERVER['PHP_SELF'], 'tiki-login.php')         === false &&
-			strpos($_SERVER['PHP_SELF'], 'tiki-install.php')       === false) {
-
+			strpos($_SERVER['PHP_SELF'], 'tiki-login.php') === false &&
+			strpos($_SERVER['PHP_SELF'], 'tiki-install.php') === false) {
 		$javascript_enabled_detect++;
 		if ($prefs['javascript_assume_enabled'] != 'y') {
 			setCookieSection('javascript_enabled_detect', $javascript_enabled_detect, '', $plus_one_year);
 		}
 	}
-} else if ($js_cookie !== 'y') {	// no js cookie detected
+} elseif ($js_cookie !== 'y') {	// no js cookie detected
 	$prefs['javascript_enabled'] = 'n';
 }
 
@@ -89,26 +86,26 @@ if ($prefs['javascript_enabled'] == 'y') {	// we have JavaScript
 			->add_js("$.lang = '" . $prefs['language'] . "';");
 	}
 
-	
+
 	/** Use custom.js in lang dir if there **/
 	$language = $prefs['language'];
 	if (is_file("lang/$language/custom.js")) {
 		TikiLib::lib('header')->add_jsfile("lang/$language/custom.js");	// before styles custom.js
 	}
-	
-	if (!empty($tikidomain) && is_file("lang/$language/$tikidomain/custom.js")) {		// Note: lang tikidomain dirs not created automatically
+
+	if (! empty($tikidomain) && is_file("lang/$language/$tikidomain/custom.js")) {		// Note: lang tikidomain dirs not created automatically
 		TikiLib::lib('header')->add_jsfile("lang/$language/$tikidomain/custom.js");
 	}
-	
-	
+
+
 	/** Use custom.js in themes or options dir if there **/
 	$themelib = TikiLib::lib('theme');
 	$custom_js = $themelib->get_theme_path($prefs['theme'], $prefs['theme_option'], 'custom.js');
-	if (!empty($custom_js)) {
+	if (! empty($custom_js)) {
 		$headerlib->add_jsfile($custom_js);
 	} else {															// there's no custom.js in the current theme or option
 		$custom_js = $themelib->get_theme_path('', '', 'custom.js');		// so use one in the root of /themes if there
-		if (!empty($custom_js)) {
+		if (! empty($custom_js)) {
 			$headerlib->add_jsfile($custom_js);
 		}
 	}
@@ -155,70 +152,74 @@ if (m.substring(0,4) == "GMT-") {
 if (inArray(m, allTimeZoneCodes)) {
 	setCookie("local_tz", m);
 }
-', 2
-);
+',
+		2
+	);
 
-	$js = '
-// JS Object to hold prefs for jq
-var jqueryTiki = new Object();
-jqueryTiki.ui = '.($prefs['feature_jquery_ui'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.ui_theme = "'.$prefs['feature_jquery_ui_theme'].'";
-jqueryTiki.tooltips = '.($prefs['feature_jquery_tooltips'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.autocomplete = '.($prefs['feature_jquery_autocomplete'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.superfish = '.($prefs['feature_jquery_superfish'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.reflection = '.($prefs['feature_jquery_reflection'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.tablesorter = '.($prefs['feature_jquery_tablesorter'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.colorbox = '.($prefs['feature_shadowbox'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.cboxCurrent = "{current} / {total}";
-jqueryTiki.sheet = '.($prefs['feature_sheet'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.carousel = '.($prefs['feature_jquery_carousel'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.validate = '.($prefs['feature_jquery_validation'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.zoom = '.($prefs['feature_jquery_zoom'] == 'y' ? 'true' : 'false') . ';
+	$jqueryTiki['ui'] = $prefs['feature_jquery_ui'] === 'y' ? true : false;
+	$jqueryTiki['ui_theme'] = $prefs['feature_jquery_ui_theme'];
+	$jqueryTiki['tooltips'] = $prefs['feature_jquery_tooltips'] === 'y' ? true : false;
+	$jqueryTiki['autocomplete'] = $prefs['feature_jquery_autocomplete'] === 'y' ? true : false;
+	$jqueryTiki['superfish'] = $prefs['feature_jquery_superfish'] === 'y' ? true : false;
+	$jqueryTiki['reflection'] = $prefs['feature_jquery_reflection'] === 'y' ? true : false;
+	$jqueryTiki['tablesorter'] = $prefs['feature_jquery_tablesorter'] === 'y' ? true : false;
+	$jqueryTiki['colorbox'] = $prefs['feature_shadowbox'] === 'y' ? true : false;
+	$jqueryTiki['cboxCurrent'] = "{current} / {total}";
+	$jqueryTiki['sheet'] = $prefs['feature_sheet'] === 'y' ? true : false;
+	$jqueryTiki['carousel'] = $prefs['feature_jquery_carousel'] === 'y' ? true : false;
+	$jqueryTiki['validate'] = $prefs['feature_jquery_validation'] === 'y' ? true : false;
+	$jqueryTiki['zoom'] = $prefs['feature_jquery_zoom'] === 'y' ? true : false;
 
-jqueryTiki.effect = "'.$prefs['jquery_effect'].'";				// Default effect
-jqueryTiki.effect_direction = "'.$prefs['jquery_effect_direction'].'";	// "horizontal" | "vertical" etc
-jqueryTiki.effect_speed = '.($prefs['jquery_effect_speed'] == 'normal' ? '400' : '"'.$prefs['jquery_effect_speed'].'"').';	// "slow" | "normal" | "fast" | milliseconds (int) ]
-jqueryTiki.effect_tabs = "'.$prefs['jquery_effect_tabs'].'";		// Different effect for tabs
-jqueryTiki.effect_tabs_direction = "'.$prefs['jquery_effect_tabs_direction'].'";
-jqueryTiki.effect_tabs_speed = '.($prefs['jquery_effect_tabs_speed'] == 'normal' ? '400' : '"'.$prefs['jquery_effect_tabs_speed'].'"').';
-jqueryTiki.home_file_gallery = "'.$prefs['home_file_gallery'].'";
+	// Default effect
+	$jqueryTiki['effect'] = $prefs['jquery_effect'];
+	// "horizontal" | "vertical" etc
+	$jqueryTiki['effect_direction'] = $prefs['jquery_effect_direction'];
+	// "slow" | "normal" | "fast" | milliseconds (int) ]
+	$jqueryTiki['effect_speed'] = $prefs['jquery_effect_speed'] === 'normal' ? '400' : $prefs['jquery_effect_speed'];
+	$jqueryTiki['effect_tabs'] = $prefs['jquery_effect_tabs'];		// Different effect for tabs
+	$jqueryTiki['effect_tabs_direction'] = $prefs['jquery_effect_tabs_direction'];
+	$jqueryTiki['effect_tabs_speed'] = $prefs['jquery_effect_tabs_speed'] === 'normal' ? '400' : $prefs['jquery_effect_tabs_speed'];
+	$jqueryTiki['home_file_gallery'] = $prefs['home_file_gallery'];
 
-jqueryTiki.autosave = '.($prefs['ajax_autosave'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.sefurl = '.($prefs['feature_sefurl'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.ajax = '.($prefs['feature_ajax'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.syntaxHighlighter = '.($prefs['feature_syntax_highlighter'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.chosen = '.($prefs['jquery_ui_chosen'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.mapTileSets = ' . json_encode($tikilib->get_preference('geo_tilesets', array('openstreetmap'), true)) . ';
-jqueryTiki.infoboxTypes = ' . json_encode(Services_Object_Controller::supported()) . ';
-jqueryTiki.googleStreetView = '.($prefs['geo_google_streetview'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.googleStreetViewOverlay = '.($prefs['geo_google_streetview_overlay'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.structurePageRepeat = '.($prefs['page_n_times_in_a_structure'] == 'y' ? 'true' : 'false') . ';
-jqueryTiki.mobile = '.((isset($prefs['mobile_mode']) && $prefs['mobile_mode'] == 'y') ? 'true' : 'false') . ';
-jqueryTiki.no_cookie = false;
-jqueryTiki.language = "' . $prefs['language'] . '";
-jqueryTiki.useInlineComment = '.($prefs['feature_inline_comments'] === 'y' ? 'true' : 'false') . ';
-jqueryTiki.helpurl = "' . ($prefs['feature_help'] === 'y' ? $prefs['helpurl'] : '') . '";
-jqueryTiki.shortDateFormat = "'.$prefs['short_date_format_js'].'";
-jqueryTiki.shortTimeFormat = "'.$prefs['short_time_format_js'].'";
-jqueryTiki.username = ' . json_encode($user) . ';
-jqueryTiki.userRealName = ' . json_encode(TikiLib::lib('user')->clean_user($user)) . ';
-jqueryTiki.userAvatar = "' . $base_url . TikiLib::lib('userprefs')->get_public_avatar_path($user) . '";
-jqueryTiki.autoToc_inline = ' . (($prefs['wiki_inline_auto_toc'] == 'y') ? 'true' : 'false') . ';
-jqueryTiki.autoToc_pos = "' . $prefs['wiki_toc_pos'] . '";
-jqueryTiki.autoToc_offset = ' . (!empty($prefs['wiki_toc_offset']) ? $prefs['wiki_toc_offset'] : 10) . ';
-';
+	$jqueryTiki['autosave'] = $prefs['ajax_autosave'] === 'y' ? true : false;
+	$jqueryTiki['sefurl'] = $prefs['feature_sefurl'] === 'y' ? true : false;
+	$jqueryTiki['ajax'] = $prefs['feature_ajax'] === 'y' ? true : false;
+	$jqueryTiki['syntaxHighlighter'] = $prefs['feature_syntax_highlighter'] === 'y' ? true : false;
+	$jqueryTiki['chosen'] = $prefs['jquery_ui_chosen'] === 'y' ? true : false;
+	$jqueryTiki['mapTileSets'] = $tikilib->get_preference('geo_tilesets', ['openstreetmap'], true);
+	$jqueryTiki['infoboxTypes'] = Services_Object_Controller::supported();
+	$jqueryTiki['googleStreetView'] = $prefs['geo_google_streetview'] === 'y' ? true : false;
+	$jqueryTiki['googleStreetViewOverlay'] = $prefs['geo_google_streetview_overlay'] === 'y' ? true : false;
+	$jqueryTiki['structurePageRepeat'] = $prefs['page_n_times_in_a_structure'] === 'y' ? true : false;
+	$jqueryTiki['mobile'] = $prefs['mobile_mode'] === 'y' ? true : false;
+	$jqueryTiki['no_cookie'] = false;
+	$jqueryTiki['language'] = $prefs['language'];
+	$jqueryTiki['useInlineComment'] = $prefs['feature_inline_comments'] === 'y' ? true : false;
+	$jqueryTiki['useInlineAnnotations'] = $prefs['comments_inline_annotator'] === 'y' ? true : false;
+	$jqueryTiki['helpurl'] = $prefs['feature_help'] === 'y' ? $prefs['helpurl'] : '';
+	$jqueryTiki['shortDateFormat'] = $prefs['short_date_format_js'];
+	$jqueryTiki['shortTimeFormat'] = $prefs['short_time_format_js'];
+	$jqueryTiki['username'] = $user;
+	$jqueryTiki['userRealName'] = TikiLib::lib('user')->clean_user($user);
+	$jqueryTiki['userAvatar'] = $base_url . TikiLib::lib('userprefs')->get_public_avatar_path($user);
+	$jqueryTiki['autoToc_inline'] = $prefs['wiki_inline_auto_toc'] === 'y' ? true : false;
+	$jqueryTiki['autoToc_pos'] = $prefs['wiki_toc_pos'];
+	$jqueryTiki['autoToc_offset'] = $prefs['wiki_toc_offset'];
 
 	if (empty($object)) {
 		$object = current_object();
 	}
-	$js .= "jqueryTiki.current_object = " . json_encode($object) . ";\n";
+	$jqueryTiki['current_object'] = $object;
 
 
 	if ($prefs['feature_calendar'] === 'y') {
 		$calendarlib = TikiLib::lib('calendar');
-		$firstDayofWeek = $calendarlib->firstDayofWeek();
-		$js .= "jqueryTiki.firstDayofWeek = $firstDayofWeek;\n";
+		$jqueryTiki['firstDayofWeek'] = $calendarlib->firstDayofWeek();
 	}
+
+	$js = '
+// JS Object to hold prefs for jq
+var jqueryTiki = ' . json_encode($jqueryTiki) . "\n";
 
 	if ($prefs['feature_syntax_highlighter'] !== 'y') {
 		// add a dummy syntaxHighlighter object as it seems to be used all over the place without checking for the feature

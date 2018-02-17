@@ -8,6 +8,10 @@
 
 	-->
 	<services>
+		<!-- this makes public all the services defined in this file -->
+		<!-- https://symfony.com/blog/new-in-symfony-3-4-services-are-private-by-default -->
+		<defaults public="true" />
+
 		<service id="tiki.controller.access" class="Services_Access_Controller"/>
 		<service id="tiki.controller.activitystream" class="Services_ActivityStream_Controller"/>
 		<service id="tiki.controller.annotation" class="Services_Comment_AnnotationController"/>
@@ -22,6 +26,7 @@
 		<service id="tiki.controller.connect_server" class="Services_Connect_Server"/>
 		<service id="tiki.controller.connect" class="Services_Connect_Client"/>
 		<service id="tiki.controller.contenttemplate" class="Services_ContentTemplate_Controller"/>
+		<service id="tiki.controller.customroute" class="Services_CustomRoute_Controller"/>
 		<service id="tiki.controller.draw" class="Services_Draw_Controller"/>
 		<service id="tiki.controller.edit" class="Services_Edit_Controller"/>
 		<service id="tiki.controller.favorite" class="Services_User_FavoriteController"/>
@@ -43,6 +48,7 @@
 		<service id="tiki.controller.object" class="Services_Object_Controller"/>
 		<service id="tiki.controller.payment" class="Services_Payment_Controller"/>
 		<service id="tiki.controller.pivot" class="Services_Pivot_Controller"/>
+		<service id="tiki.controller.pdf" class="Services_PDF_Controller"/>
 		<service id="tiki.controller.plugin" class="Services_Edit_PluginController"/>
 		<service id="tiki.controller.rating" class="Services_Rating_Controller"/>
 		<service id="tiki.controller.relation" class="Services_Relation_Controller"/>
@@ -57,6 +63,7 @@
 		<service id="tiki.controller.semaphore" class="Services_Edit_SemaphoreController"/>
 		<service id="tiki.controller.showtikiorg" class="Services_ShowTikiOrg_Controller"/>
 		<service id="tiki.controller.social" class="Services_User_SocialController"/>
+		<service id="tiki.controller.styleguide" class="Services_StyleGuide_Controller"/>
 		<service id="tiki.controller.suite" class="Services_Suite_Controller"/>
 		<service id="tiki.controller.tabular" class="Services_Tracker_TabularController"/>
 		<service id="tiki.controller.tracker" class="Services_Tracker_Controller"/>
@@ -71,5 +78,6 @@
 		<service id="tiki.controller.wiki" class="Services_Wiki_Controller"/>
 		<service id="tiki.controller.wiki_structure" class="Services_Wiki_StructureController"/>
 		<service id="tiki.controller.workspace" class="Services_Workspace_Controller"/>
+		<service id="tiki.controller.ids" class="Services_IDS_Controller"/>
 	</services>
 </container>

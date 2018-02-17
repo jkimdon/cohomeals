@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: PermissionComparatorTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: PermissionComparatorTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
@@ -87,10 +87,10 @@ class Perms_Reflection_PermissionComparatorTest extends TikiTestCase
 
 		$comparator = new Perms_Reflection_PermissionComparator($a, $b);
 		$this->assertEquals(
-			array(
-				array('Anonymous', 'view'),
-				array('Registered', 'edit'),
-			),
+			[
+				['Anonymous', 'view'],
+				['Registered', 'edit'],
+			],
 			$comparator->getRemovals()
 		);
 	}
@@ -107,10 +107,10 @@ class Perms_Reflection_PermissionComparatorTest extends TikiTestCase
 
 		$comparator = new Perms_Reflection_PermissionComparator($a, $b);
 		$this->assertEquals(
-			array(
-				array('Registered', 'view'),
-				array('Registered', 'edit'),
-			),
+			[
+				['Registered', 'view'],
+				['Registered', 'edit'],
+			],
 			$comparator->getAdditions()
 		);
 	}
@@ -124,7 +124,7 @@ class Perms_Reflection_PermissionComparatorTest extends TikiTestCase
 		$b->add('Anonymous', 'view');
 
 		$comparator = new Perms_Reflection_PermissionComparator($a, $b);
-		$this->assertEquals(array(), $comparator->getAdditions());
-		$this->assertEquals(array(), $comparator->getRemovals());
+		$this->assertEquals([], $comparator->getAdditions());
+		$this->assertEquals([], $comparator->getRemovals());
 	}
 }

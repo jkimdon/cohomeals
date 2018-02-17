@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-last_modified_blogs.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-last_modified_blogs.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,13 +16,13 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_last_modified_blogs_info()
 {
-	return array(
+	return [
 		'name' => tra('Last-Modified Blogs'),
 		'description' => tra('Displays the specified number of blogs, starting from the most recently modified.'),
-		'prefs' => array("feature_blogs"),
-		'params' => array(),
-		'common_params' => array('nonums', 'rows')
-	);
+		'prefs' => ["feature_blogs"],
+		'params' => [],
+		'common_params' => ['nonums', 'rows']
+	];
 }
 
 /**
@@ -35,6 +35,6 @@ function module_last_modified_blogs($mod_reference, $module_params)
 	$bloglib = TikiLib::lib('blog');
 
 	$ranking = $bloglib->list_blogs(0, $mod_reference["rows"], 'lastModif_desc', '', 'blog');
-	
+
 	$smarty->assign('modLastModifiedBlogs', $ranking["data"]);
 }

@@ -1,4 +1,4 @@
-{* $Id: wikiplugin_paypal.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: wikiplugin_paypal.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 <form action="{$prefs.payment_paypal_environment}" method="post" target="paypal" title="{$wppaypal_title|escape}" class="wppaypal_button" style="display:inline-block">
 	{foreach key=key item=val from=$wppaypal_hiddens}
 		<input type="hidden" name="{$key|escape}" value="{$val|escape}">

@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "Velska",
 "Slovene" => "Slóvenska",
 "Arabic" => "Arabíska",
@@ -566,4 +566,4 @@ $lang = array(
 "Error: " => "Villa: ",
 "END" => "ENDIR",
 "Changes" => "Breytingar",
-);
+];

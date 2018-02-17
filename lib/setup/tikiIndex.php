@@ -3,11 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tikiIndex.php 62837 2017-05-31 11:07:05Z drsassafras $
+// $Id: tikiIndex.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
-//this script may only be included - so its better to die if called directly.
-$access->check_script($_SERVER['SCRIPT_NAME'], basename(__FILE__));
+if (basename($_SERVER['SCRIPT_NAME']) === basename(__FILE__)) {
+	die('This script may only be included.');
+}
 
-if (!empty($prefs['useUrlIndex']) && $prefs['useUrlIndex'] == 'y') {
+if (! empty($prefs['useUrlIndex']) && $prefs['useUrlIndex'] == 'y') {
 	$prefs['tikiIndex'] = $prefs['urlIndex'];
 }

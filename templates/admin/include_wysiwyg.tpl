@@ -1,7 +1,7 @@
-{* $Id: include_wysiwyg.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_wysiwyg.tpl 64513 2017-11-09 17:57:28Z chealer $ *}
 {remarksbox type="tip" title="{tr}Tip{/tr}"}{tr}WYSIWYG means What You See Is What You Get, and is handled in Tiki by <a class="alert-link" href="http://ckeditor.com/">CKEditor</a>{/tr}.{/remarksbox}
 <form class="form-horizontal" action="tiki-admin.php?page=wysiwyg" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md">
 		<a role="button" class="btn btn-link" href="tiki-admin_toolbars.php" title="{tr}Toolbars{/tr}">
 			{icon name="settings"} {tr}Toolbars{/tr}
@@ -23,10 +23,12 @@
 			{preference name=wysiwyg_default}
 			{preference name=wysiwyg_memo}
 		</div>
+		
 		{preference name=wysiwyg_wiki_parsed}
 		<div class="adminoptionboxchild" id="wysiwyg_wiki_parsed_childcontainer">
 			{preference name=wysiwyg_wiki_semi_parsed}
 		</div>
+		
 		{preference name=wysiwyg_htmltowiki}
 		{preference name=wysiwyg_inline_editing}
 		{preference name=wysiwyg_toolbar_skin}

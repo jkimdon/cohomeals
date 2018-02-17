@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Render.php 63605 2017-08-20 23:00:51Z rjsmelo $
+// $Id: Render.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class WikiPlugin_Casperjs_Render
 {
@@ -11,7 +11,7 @@ class WikiPlugin_Casperjs_Render
 	 * @param WikiPlugin_Casperjs_Result $result
 	 * @return string
 	 */
-	static public function resultAsHTML($result)
+	public static function resultAsHTML($result)
 	{
 		$executionResult = "<h3>CasperJs Execution Details</h3>";
 		$executionResult .= "<strong>CasperJS Script</strong>";
@@ -30,7 +30,7 @@ class WikiPlugin_Casperjs_Render
 		$executionResult .= "<strong>Tiki Bridge Variables</strong>";
 		$executionResult .= "<pre>";
 		foreach ($result->getScriptResults() as $key => $value) {
-			if (!is_string($value)) {
+			if (! is_string($value)) {
 				$value = print_r($value, true);
 			}
 			$valueToPrint = str_replace('=&gt;', '=>', htmlspecialchars($value));

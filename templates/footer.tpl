@@ -1,4 +1,4 @@
-{* $Id: footer.tpl 62025 2017-04-02 13:02:09Z jonnybradley $ *}
+{* $Id: footer.tpl 63824 2017-09-13 11:37:44Z luciash $ *}
 {* ==> put in this file what is not displayed in the layout (javascript, debug..)*}
 <div id="bootstrap-modal" class="modal fade footer-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
@@ -95,7 +95,7 @@ if (confirm("A problem occurred while detecting JavaScript on this page, click o
 {if $prefs.site_piwik_code}
 	{eval var=$prefs.site_piwik_code}
 {/if}
-{if $prefs.webcron_enabled == 'y' && $prefs.webcron_type != 'url'}
+{if $prefs.feature_scheduler eq "y" && $prefs.webcron_enabled == 'y' && $prefs.webcron_type != 'url'}
 	<script type="text/javascript">
 		$(window).on('load', function () {
 			function cron() {
@@ -103,6 +103,14 @@ if (confirm("A problem occurred while detecting JavaScript on this page, click o
 			}
 			setTimeout(cron, 500);
 			setInterval(cron, 60000);
+		});
+	</script>
+{/if}
+{* when we are on a page to be printed open the print dialog auto-magically *}
+{if !empty($print_page) and $print_page eq "y"}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			print();
 		});
 	</script>
 {/if}

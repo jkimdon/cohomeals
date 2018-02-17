@@ -11,7 +11,7 @@
 
 var Registry = require('../../registry');
 var Axes = require('../../plots/cartesian/axes');
-var Fx = require('../../plots/cartesian/graph_interact');
+var Fx = require('../../components/fx');
 
 var createPlot2D = require('gl-plot2d');
 var createSpikes = require('gl-spikes2d');
@@ -22,6 +22,9 @@ var createOptions = require('./convert');
 var createCamera = require('./camera');
 var convertHTMLToUnicode = require('../../lib/html2unicode');
 var showNoWebGlMsg = require('../../lib/show_no_webgl_msg');
+var axisConstraints = require('../../plots/cartesian/constraints');
+var enforceAxisConstraints = axisConstraints.enforce;
+var cleanAxisConstraints = axisConstraints.clean;
 
 var AXES = ['xaxis', 'yaxis'];
 var STATIC_CANVAS, STATIC_CONTEXT;
@@ -33,6 +36,7 @@ function Scene2D(options, fullLayout) {
     this.pixelRatio = options.plotGlPixelRatio || window.devicePixelRatio;
     this.id = options.id;
     this.staticPlot = !!options.staticPlot;
+    this.scrollZoom = this.graphDiv._context.scrollZoom;
 
     this.fullData = null;
     this.updateRefs(fullLayout);
@@ -51,7 +55,6 @@ function Scene2D(options, fullLayout) {
 
     // trace set
     this.traces = {};
-    this._inputs = {};
 
     // create axes spikes
     this.spikes = createSpikes(this.glplot);
@@ -66,6 +69,11 @@ function Scene2D(options, fullLayout) {
 
     // last pick result
     this.pickResult = null;
+
+    // is the mouse over the plot?
+    // it's OK if this says true when it's not, so long as
+    // when we get a mouseout we set it to false before handling
+    this.isMouseOver = true;
 
     this.bounds = [Infinity, Infinity, -Infinity, -Infinity];
 
@@ -147,12 +155,22 @@ proto.makeFramework = function() {
     // create div to catch the mouse event
     var mouseContainer = this.mouseContainer = document.createElement('div');
     mouseContainer.style.position = 'absolute';
+    mouseContainer.style['pointer-events'] = 'auto';
 
     // append canvas, hover svg and mouse div to container
     var container = this.container;
     container.appendChild(canvas);
     container.appendChild(svgContainer);
     container.appendChild(mouseContainer);
+
+    var self = this;
+    mouseContainer.addEventListener('mouseout', function() {
+        self.isMouseOver = false;
+        self.unhover();
+    });
+    mouseContainer.addEventListener('mouseover', function() {
+        self.isMouseOver = true;
+    });
 };
 
 proto.toImage = function(format) {
@@ -233,19 +251,15 @@ proto.updateSize = function(canvas) {
         canvas.height = pixelHeight;
     }
 
+    // make sure plots render right thing
+    if(this.redraw) this.redraw();
+
     return canvas;
 };
 
 proto.computeTickMarks = function() {
     this.xaxis.setScale();
     this.yaxis.setScale();
-
-    // override _length from backward compatibility
-    // even though setScale 'should' give the correct result
-    this.xaxis._length =
-        this.glplot.viewBox[2] - this.glplot.viewBox[0];
-    this.yaxis._length =
-        this.glplot.viewBox[3] - this.glplot.viewBox[1];
 
     var nextTicks = [
         Axes.calcTicks(this.xaxis),
@@ -343,6 +357,8 @@ proto.handleAnnotations = function() {
 };
 
 proto.destroy = function() {
+    if(!this.glplot) return;
+
     var traces = this.traces;
 
     if(traces) {
@@ -359,9 +375,11 @@ proto.destroy = function() {
     this.container.removeChild(this.mouseContainer);
 
     this.fullData = null;
-    this._inputs = null;
     this.glplot = null;
     this.stopped = true;
+    this.camera.mouseListener.enabled = false;
+    this.mouseContainer.removeEventListener('wheel', this.camera.wheelListener);
+    this.camera = null;
 };
 
 proto.plot = function(fullData, calcData, fullLayout) {
@@ -369,6 +387,7 @@ proto.plot = function(fullData, calcData, fullLayout) {
 
     this.updateRefs(fullLayout);
     this.updateTraces(fullData, calcData);
+    this.updateFx(fullLayout.dragmode);
 
     var width = fullLayout.width,
         height = fullLayout.height;
@@ -378,6 +397,15 @@ proto.plot = function(fullData, calcData, fullLayout) {
     var options = this.glplotOptions;
     options.merge(fullLayout);
     options.screenBox = [0, 0, width, height];
+
+    var mockGraphDiv = {_fullLayout: {
+        _axisConstraintGroups: this.graphDiv._fullLayout._axisConstraintGroups,
+        xaxis: this.xaxis,
+        yaxis: this.yaxis
+    }};
+
+    cleanAxisConstraints(mockGraphDiv, this.xaxis);
+    cleanAxisConstraints(mockGraphDiv, this.yaxis);
 
     var size = fullLayout._size,
         domainX = this.xaxis.domain,
@@ -424,6 +452,8 @@ proto.plot = function(fullData, calcData, fullLayout) {
         Axes.doAutoRange(ax);
         ax.setScale();
     }
+
+    enforceAxisConstraints(mockGraphDiv);
 
     options.ticks = this.computeTickMarks();
 
@@ -484,7 +514,6 @@ proto.updateTraces = function(fullData, calcData) {
     // update / create trace objects
     for(i = 0; i < fullData.length; i++) {
         fullTrace = fullData[i];
-        this._inputs[fullTrace.uid] = i;
         var calcTrace = calcData[i],
             traceObj = this.traces[fullTrace.uid];
 
@@ -494,24 +523,58 @@ proto.updateTraces = function(fullData, calcData) {
             this.traces[fullTrace.uid] = traceObj;
         }
     }
+
+    // order object per traces
+    this.glplot.objects.sort(function(a, b) {
+        return a._trace.index - b._trace.index;
+    });
+};
+
+proto.updateFx = function(dragmode) {
+    // switch to svg interactions in lasso/select mode
+    if(dragmode === 'lasso' || dragmode === 'select') {
+        this.mouseContainer.style['pointer-events'] = 'none';
+    } else {
+        this.mouseContainer.style['pointer-events'] = 'auto';
+    }
+
+    // set proper cursor
+    if(dragmode === 'pan') {
+        this.mouseContainer.style.cursor = 'move';
+    }
+    else if(dragmode === 'zoom') {
+        this.mouseContainer.style.cursor = 'crosshair';
+    }
+    else {
+        this.mouseContainer.style.cursor = null;
+    }
 };
 
 proto.emitPointAction = function(nextSelection, eventType) {
+    var uid = nextSelection.trace.uid;
+    var ptNumber = nextSelection.pointIndex;
+    var trace;
 
-    var curveIndex = this._inputs[nextSelection.trace.uid];
+    for(var i = 0; i < this.fullData.length; i++) {
+        if(this.fullData[i].uid === uid) {
+            trace = this.fullData[i];
+        }
+    }
 
-    this.graphDiv.emit(eventType, {
-        points: [{
-            x: nextSelection.traceCoord[0],
-            y: nextSelection.traceCoord[1],
-            curveNumber: curveIndex,
-            pointNumber: nextSelection.pointIndex,
-            data: this.fullData[curveIndex]._input,
-            fullData: this.fullData,
-            xaxis: this.xaxis,
-            yaxis: this.yaxis
-        }]
-    });
+    var pointData = {
+        x: nextSelection.traceCoord[0],
+        y: nextSelection.traceCoord[1],
+        curveNumber: trace.index,
+        pointNumber: ptNumber,
+        data: trace._input,
+        fullData: this.fullData,
+        xaxis: this.xaxis,
+        yaxis: this.yaxis
+    };
+
+    Fx.appendArrayPointValue(pointData, trace, ptNumber);
+
+    this.graphDiv.emit(eventType, {points: [pointData]});
 };
 
 proto.draw = function() {
@@ -532,26 +595,36 @@ proto.draw = function() {
     var x = mouseListener.x * glplot.pixelRatio;
     var y = this.canvas.height - glplot.pixelRatio * mouseListener.y;
 
+    var result;
+
     if(camera.boxEnabled && fullLayout.dragmode === 'zoom') {
         this.selectBox.enabled = true;
 
-        this.selectBox.selectBox = [
+        var selectBox = this.selectBox.selectBox = [
             Math.min(camera.boxStart[0], camera.boxEnd[0]),
             Math.min(camera.boxStart[1], camera.boxEnd[1]),
             Math.max(camera.boxStart[0], camera.boxEnd[0]),
             Math.max(camera.boxStart[1], camera.boxEnd[1])
         ];
 
+        // 1D zoom
+        for(var i = 0; i < 2; i++) {
+            if(camera.boxStart[i] === camera.boxEnd[i]) {
+                selectBox[i] = glplot.dataBox[i];
+                selectBox[i + 2] = glplot.dataBox[i + 2];
+            }
+        }
+
         glplot.setDirty();
     }
-    else {
+    else if(!camera.panning && this.isMouseOver) {
         this.selectBox.enabled = false;
 
         var size = fullLayout._size,
             domainX = this.xaxis.domain,
             domainY = this.yaxis.domain;
 
-        var result = glplot.pick(
+        result = glplot.pick(
             (x / glplot.pixelRatio) + size.l + domainX[0] * size.w,
             (y / glplot.pixelRatio) - (size.t + (1 - domainY[1]) * size.h)
         );
@@ -593,8 +666,11 @@ proto.draw = function() {
                 // also it's important to copy, otherwise data is lost by the time event data is read
                 this.emitPointAction(nextSelection, 'plotly_hover');
 
-                var hoverinfo = selection.hoverinfo;
-                if(hoverinfo !== 'all') {
+                var trace = this.fullData[selection.trace.index] || {};
+                var ptNumber = selection.pointIndex;
+                var hoverinfo = Fx.castHoverinfo(trace, fullLayout, ptNumber);
+
+                if(hoverinfo && hoverinfo !== 'all') {
                     var parts = hoverinfo.split('+');
                     if(parts.indexOf('x') === -1) selection.traceCoord[0] = undefined;
                     if(parts.indexOf('y') === -1) selection.traceCoord[1] = undefined;
@@ -611,21 +687,35 @@ proto.draw = function() {
                     zLabel: selection.traceCoord[2],
                     text: selection.textLabel,
                     name: selection.name,
-                    color: selection.color
+                    color: Fx.castHoverOption(trace, ptNumber, 'bgcolor') || selection.color,
+                    borderColor: Fx.castHoverOption(trace, ptNumber, 'bordercolor'),
+                    fontFamily: Fx.castHoverOption(trace, ptNumber, 'font.family'),
+                    fontSize: Fx.castHoverOption(trace, ptNumber, 'font.size'),
+                    fontColor: Fx.castHoverOption(trace, ptNumber, 'font.color')
                 }, {
-                    container: this.svgContainer
+                    container: this.svgContainer,
+                    gd: this.graphDiv
                 });
             }
         }
-        else if(!result && this.lastPickResult) {
-            this.spikes.update({});
-            this.lastPickResult = null;
-            this.graphDiv.emit('plotly_unhover');
-            Fx.loneUnhover(this.svgContainer);
-        }
+    }
+
+    // Remove hover effects if we're not over a point OR
+    // if we're zooming or panning (in which case result is not set)
+    if(!result) {
+        this.unhover();
     }
 
     glplot.draw();
+};
+
+proto.unhover = function() {
+    if(this.lastPickResult) {
+        this.spikes.update({});
+        this.lastPickResult = null;
+        this.graphDiv.emit('plotly_unhover');
+        Fx.loneUnhover(this.svgContainer);
+    }
 };
 
 proto.hoverFormatter = function(axisName, val) {

@@ -1,8 +1,8 @@
-/* 
+/*
  * Javascript translation definition
  * Example to help translation of some English strings in some js files
- * 
- * $Id: language.js 63964 2017-09-21 20:17:43Z jyhem $
+ *
+ * $Id: language.js 64615 2017-11-17 23:53:38Z rjsmelo $
  */
 
 lang = {

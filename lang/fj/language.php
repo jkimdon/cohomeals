@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Vaka Arapea",
 "Catalan" => "Catalan",
 "Simplified Chinese" => "Vaka Jaina",
@@ -180,4 +180,4 @@ $lang = array(
 "By:" => "Nei:",
 "The uploaded file is not recognized as a image" => "The uploaded file is not recognized as an image",
 "No URL indicated" => "No URL indicated",
-);
+];

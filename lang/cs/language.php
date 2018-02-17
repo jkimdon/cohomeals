@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabsky",
 "Bulgarian" => "Bulharsky",
 "Catalan" => "Katalánsky",
@@ -1450,7 +1450,7 @@ $lang = array(
 "[-]" => "[-]",
 "vote" => "Hlasovat",
 "Rate" => "Rate",
-"Repeat password" => "Zopakovat heslo",
+"Confirm password" => "Zopakovat heslo",
 "Generate a password" => "Vygenerovat heslo",
 "Valid" => "Platný",
 "Create New" => "Vytvořit nový",
@@ -2890,4 +2890,4 @@ $lang = array(
 "Aborted" => "Přerušeno",
 "Top pages" => "Top stránky",
 "Last pages" => "Poslední stránky",
-);
+];

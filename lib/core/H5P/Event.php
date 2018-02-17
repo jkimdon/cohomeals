@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Event.php 61332 2017-02-18 16:43:49Z jonnybradley $
+// $Id: Event.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 
 /**
@@ -27,7 +27,7 @@ class H5P_Event extends H5PEventBase
 	 * @param string $library_version
 	 * @internal param string $library Name of H5P library affacted*  Name of H5P library affacted
 	 */
-	function __construct($type, $sub_type = NULL, $content_id = NULL, $content_title = NULL, $library_name = NULL, $library_version = NULL)
+	function __construct($type, $sub_type = null, $content_id = null, $content_title = null, $library_name = null, $library_version = null)
 	{
 		global $user;
 
@@ -45,19 +45,19 @@ class H5P_Event extends H5PEventBase
 		// Get data in array format without NULL values
 		$data = $this->getDataArray();
 
-		$message = 'Library ' . $data['library_name'] . ' (' .$data['library_version'] . ')';
+		$message = 'Library ' . $data['library_name'] . ' (' . $data['library_version'] . ')';
 
 		$title = $data['content_title'] ? $data['content_title'] : $data['content_id'];
 
 		TikiLib::lib('logs')->add_action(
 			$data['type'],
 			$title,
-				'h5p',
-				$message,
-				$this->user,
-				'',
-				'',
-				$data['created_at']
+			'h5p',
+			$message,
+			$this->user,
+			'',
+			'',
+			$data['created_at']
 		);
 
 		return $this->id;

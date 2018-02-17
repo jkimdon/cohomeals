@@ -3,16 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: debug-command_dmsg.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: debug-command_dmsg.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 /**
  * \brief 'debugger command' to show user messages in tab
  * \author zaufi <zaufi@sendmail.ru>
  */
-require_once ('lib/debug/debugger-ext.php');
+require_once('lib/debug/debugger-ext.php');
 
 global $debugger;
-require_once ('lib/debug/debugger.php');
+require_once('lib/debug/debugger.php');
 
 /**
  * \brief Command 'watch'

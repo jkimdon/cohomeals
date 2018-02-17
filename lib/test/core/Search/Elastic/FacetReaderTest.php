@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetReaderTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: FacetReaderTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_Elastic_FacetReaderTest extends PHPUnit_Framework_TestCase
 {
@@ -12,50 +12,50 @@ class Search_Elastic_FacetReaderTest extends PHPUnit_Framework_TestCase
 	function setUp()
 	{
 		$this->reader = new Search_Elastic_FacetReader(
-			(object) array(
-				'facets' => (object) array(
-					'categories' => (object) array(
+			(object) [
+				'facets' => (object) [
+					'categories' => (object) [
 						'_type' => "terms",
 						'missing' => 0,
 						'total' => 7,
 						'other' => 0,
-						'terms' => array(
-							(object) array(
+						'terms' => [
+							(object) [
 								'term' => "1",
 								'count' => 3,
-							),
-							(object) array(
+							],
+							(object) [
 								'term' => "2",
 								'count' => 2,
-							),
-							(object) array(
+							],
+							(object) [
 								'term' => "3",
 								'count' => 1,
-							),
-						),
-					),
-					'tracker_field_priority' => (object) array(
+							],
+						],
+					],
+					'tracker_field_priority' => (object) [
 						'_type' => "terms",
 						'missing' => 0,
 						'total' => 7,
 						'other' => 0,
-						'terms' => array(
-							(object) array(
+						'terms' => [
+							(object) [
 								'term' => "",
 								'count' => 3,
-							),
-							(object) array(
+							],
+							(object) [
 								'term' => "2",
 								'count' => 2,
-							),
-							(object) array(
+							],
+							(object) [
 								'term' => "3",
 								'count' => 1,
-							),
-						),
-					),
-				),
-			)
+							],
+						],
+					],
+				],
+			]
 		);
 	}
 
@@ -68,11 +68,12 @@ class Search_Elastic_FacetReaderTest extends PHPUnit_Framework_TestCase
 	{
 		$facet = new Search_Query_Facet_Term('categories');
 		$expect = new Search_ResultSet_FacetFilter(
-			$facet, array(
-				array('value' => "1", 'count' => 3),
-				array('value' => "2", 'count' => 2),
-				array('value' => "3", 'count' => 1),
-			)
+			$facet,
+			[
+				['value' => "1", 'count' => 3],
+				['value' => "2", 'count' => 2],
+				['value' => "3", 'count' => 1],
+			]
 		);
 
 		$this->assertEquals($expect, $this->reader->getFacetFilter($facet));
@@ -82,13 +83,13 @@ class Search_Elastic_FacetReaderTest extends PHPUnit_Framework_TestCase
 	{
 		$facet = new Search_Query_Facet_Term('tracker_field_priority');
 		$expect = new Search_ResultSet_FacetFilter(
-			$facet, array(
-				array('value' => "2", 'count' => 2),
-				array('value' => "3", 'count' => 1),
-			)
+			$facet,
+			[
+				['value' => "2", 'count' => 2],
+				['value' => "3", 'count' => 1],
+			]
 		);
 
 		$this->assertEquals($expect, $this->reader->getFacetFilter($facet));
 	}
 }
-

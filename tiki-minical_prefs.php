@@ -1,12 +1,12 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-minical_prefs.php 57956 2016-03-17 19:58:12Z jonnybradley $
+// $Id: tiki-minical_prefs.php 65320 2018-01-24 10:49:49Z lfagundes $
 
-require_once ('tiki-setup.php');
-include_once ('lib/minical/minicallib.php');
+require_once('tiki-setup.php');
+include_once('lib/minical/minicallib.php');
 $access->check_feature('feature_minical');
 $access->check_user($user);
 //if ($tiki_p_minical != 'y') {
@@ -22,7 +22,6 @@ if (isset($_REQUEST['save'])) {
 	$tikilib->set_user_preference($user, 'minical_start_hour', $_REQUEST['minical_start_hour']);
 	$tikilib->set_user_preference($user, 'minical_end_hour', $_REQUEST['minical_end_hour']);
 	//  $tikilib->set_user_preference($user,'minical_public',$_REQUEST['minical_public']);
-	
 }
 $minical_interval = $tikilib->get_user_preference($user, 'minical_interval', 60 * 60);
 $minical_start_hour = $tikilib->get_user_preference($user, 'minical_start_hour', 9);
@@ -81,10 +80,19 @@ if (isset($_REQUEST['import'])) {
 if (isset($_REQUEST['addtopic'])) {
 	check_ticket('minical-prefs');
 	if (isset($_FILES['userfile1']) && is_uploaded_file($_FILES['userfile1']['tmp_name'])) {
+		$filegallib = TikiLib::lib('filegal');
+		try {
+			$filegallib->assertUploadedFileIsSafe($_FILES['userfile1']['tmp_name'], $_FILES['userfile1']['name']);
+		} catch (Exception $e) {
+			$smarty->assign('errortype', 403);
+			$smarty->assign('msg', $e->getMessage());
+			$smarty->display("error.tpl");
+			die;
+		}
 		$fp = fopen($_FILES['userfile1']['tmp_name'], "rb");
 		$data = '';
-		while (!feof($fp)) {
-			$data.= fread($fp, 8192 * 16);
+		while (! feof($fp)) {
+			$data .= fread($fp, 8192 * 16);
 		}
 		fclose($fp);
 		$size = $_FILES['userfile1']['size'];
@@ -101,7 +109,7 @@ if (isset($_REQUEST['addtopic'])) {
 $topics = $minicallib->minical_list_topics($user, 0, -1, 'name_asc', '');
 $smarty->assign('topics', $topics['data']);
 $smarty->assign('cols', 4);
-include_once ('tiki-mytiki_shared.php');
+include_once('tiki-mytiki_shared.php');
 ask_ticket('minical-prefs');
 $smarty->assign('mid', 'tiki-minical_prefs.tpl');
 $smarty->display("tiki.tpl");

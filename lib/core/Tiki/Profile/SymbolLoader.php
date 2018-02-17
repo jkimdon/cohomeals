@@ -3,17 +3,17 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: SymbolLoader.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: SymbolLoader.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 /**
  * Dynamically loads and caches profile symbols for usage in templates.
  *
  * The following provides the value for the most recent entry with such name
- * Smarty: {$symbols.some_name} 
+ * Smarty: {$symbols.some_name}
  * PHP: $symbols['some_name']
  *
  * Common names may appear in multiple profiles. It is possible to narrow them down:
- * 
+ *
  * Smarty: {$symbols->Profile_Name_Here.some_name}
  * PHP: $symbols->Profile_Name_Here['some_name']
  */
@@ -23,14 +23,14 @@ class Tiki_Profile_SymbolLoader implements ArrayAccess
 	private $filters;
 	private $nextFilters;
 
-	function __construct($store = null, array $filters = null, array $nextFilters = array('profile', 'domain'))
+	function __construct($store = null, array $filters = null, array $nextFilters = ['profile', 'domain'])
 	{
 		$this->store = $store ?: new Tiki_Profile_SymbolLoader_Store;
 		$this->nextFilters = $nextFilters;
-		$this->filters = $filters ?: array(
+		$this->filters = $filters ?: [
 			'profile' => '',
 			'domain' => '',
-		);
+		];
 	}
 
 	function offsetGet($name)
@@ -38,9 +38,16 @@ class Tiki_Profile_SymbolLoader implements ArrayAccess
 		return $this->store->get($name, $this->filters);
 	}
 
-	function offsetExists($name) { return true; }
-	function offsetSet($name, $value) {}
-	function offsetUnset($name) {}
+	function offsetExists($name)
+	{
+		return true;
+	}
+	function offsetSet($name, $value)
+	{
+	}
+	function offsetUnset($name)
+	{
+	}
 
 	function __get($name)
 	{
@@ -93,7 +100,7 @@ class Tiki_Profile_SymbolLoader_Store
 
 		$cache = TikiLib::lib('cache');
 		if (! $data = $cache->getSerialized(self::KEY)) {
-			$data = array();
+			$data = [];
 		}
 
 		$this->data = $data;

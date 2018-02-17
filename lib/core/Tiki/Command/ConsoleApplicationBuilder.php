@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ConsoleApplicationBuilder.php 62496 2017-05-08 09:02:22Z chibaguy $
+// $Id: ConsoleApplicationBuilder.php 64977 2017-12-23 20:02:26Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -65,6 +65,11 @@ class ConsoleApplicationBuilder
 					new BackupDBCommand,
 					new BackupFilesCommand,
 					new ProfileBaselineCommand,
+					new PluginApproveRunCommand,
+					new PluginListRunCommand,
+					new PluginRefreshRunCommand,
+					new InstallerLockCommand,
+					new PatchCommand,
 				],
 			],
 			'checkIsInstalledAndDoNotRequireUpdate' => [
@@ -74,9 +79,14 @@ class ConsoleApplicationBuilder
 					new AddonRemoveCommand,
 					new AddonUpgradeCommand,
 					new DailyReportSendCommand,
+					new FakerTrackerCommand,
+					new GalleryMigrateCommand,
 					new GoalCheckCommand,
 					new FilesBatchuploadCommand,
+					new FilesCheckCommand,
+					new FilesCopyCommand,
 					new FilesDeleteoldCommand,
+					new FilesMoveCommand,
 					new IndexRebuildCommand,
 					new IndexOptimizeCommand,
 					new IndexCatchUpCommand,
@@ -95,6 +105,7 @@ class ConsoleApplicationBuilder
 					new RssClearCacheCommand,
 					new SchedulerRunCommand,
 					new TrackerImportCommand,
+					new SitemapGenerateCommand,
 					new TrackerClearCommand,
 					new AdminIndexRebuildCommand,
 					new UsersListCommand,
@@ -127,6 +138,7 @@ class ConsoleApplicationBuilder
 					new ProfileExport\Rss,
 					new ProfileExport\Tracker,
 					new ProfileExport\TrackerField,
+					new ProfileExport\TrackerItem,
 					new ProfileExport\WikiPage,
 					new ProfileExport\Finalize,
 				],
@@ -166,6 +178,11 @@ class ConsoleApplicationBuilder
 	protected function checkConfigurationIsAvailable()
 	{
 		$local_php = TikiInit::getCredentialsFile();
+		if (is_readable($local_php)) {
+			// TikiInit::getCredentialsFile will reset all globals bellow, requiring $local_php again to restore the environment.
+			global $api_tiki, $db_tiki, $dbversion_tiki, $host_tiki, $user_tiki, $pass_tiki, $dbs_tiki, $tikidomain, $dbfail_url;
+			require $local_php;
+		}
 		$result = (is_file($local_php) || TikiInit::getEnvironmentCredentials()) ? true : false;
 
 		return $result;
@@ -190,7 +207,7 @@ class ConsoleApplicationBuilder
 	protected function checkIsInstalledAndDoNotRequireUpdate()
 	{
 		$installer = new Installer;
-		$result = ($installer->isInstalled() && !$installer->requiresUpdate()) ? true : false;
+		$result = ($installer->isInstalled() && ! $installer->requiresUpdate()) ? true : false;
 
 		return $result;
 	}
@@ -228,15 +245,14 @@ class ConsoleApplicationBuilder
 	 */
 	public function create($returnLastInstance = false)
 	{
-		if ($returnLastInstance && self::$lastInstance instanceof self){
+		if ($returnLastInstance && self::$lastInstance instanceof self) {
 			return self::$lastInstance;
 		}
 
 		$console = new Application;
 
 		foreach ($this->listOfRegisteredConsoleCommands() as $condition => $CommandGroupDefinition) {
-
-			$available = call_user_func(array($this, $condition));
+			$available = call_user_func([$this, $condition]);
 			$actionWhenNotAvailable = $CommandGroupDefinition['action'];
 
 			/** @var \Symfony\Component\Console\Command\Command $command */
@@ -249,13 +265,10 @@ class ConsoleApplicationBuilder
 					}
 				}
 			}
-
 		}
 
 		self::$lastInstance = $console;
 
 		return $console;
 	}
-
 }
-

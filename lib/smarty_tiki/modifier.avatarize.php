@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: modifier.avatarize.php 61829 2017-03-23 10:59:12Z kroky6 $
+// $Id: modifier.avatarize.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -19,12 +19,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  * Purpose:  show avatar for a given user name
  * -------------------------------------------------------------
  */
-function smarty_modifier_avatarize($user, $float = '', $default = '', $show_tag='y')
+function smarty_modifier_avatarize($user, $float = '', $default = '', $show_tag = 'y')
 {
 	if (! $user) {
 		return '';
 	}
-	
+
 	$avatar = TikiLib::lib('tiki')->get_user_avatar($user, $float);
 
 	if (! $avatar && $default) {
@@ -34,9 +34,8 @@ function smarty_modifier_avatarize($user, $float = '', $default = '', $show_tag=
 		$avatar = smarty_function_icon(['_id' => $default, 'title' => $name], $smarty);
 	}
 
-	if ( $avatar != '' && $show_tag == 'y') {
+	if ($avatar != '' && $show_tag == 'y') {
 		$avatar = TikiLib::lib('user')->build_userinfo_tag($user, $avatar);
 	}
-	return $avatar;	
+	return $avatar;
 }
-

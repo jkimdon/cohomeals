@@ -1,4 +1,4 @@
-{* $Id: tiki-view_forum.tpl 61828 2017-03-23 10:35:36Z jyhem $ *}
+{* $Id: tiki-view_forum.tpl 63529 2017-08-11 17:11:50Z chealer $ *}
 {if $prefs.javascript_enabled !== 'y'}
 	{$js = 'n'}
 	{$libeg = '<li>'}
@@ -106,17 +106,15 @@
 			</ul>
 			{if $js == 'n'}</li></ul>{/if}
 		</div>
-		<div class="categbar" align="right">
-			{if $user and $prefs.feature_user_watches eq 'y'}
-				{if isset($category_watched) and $category_watched eq 'y'}
-					{tr}Watched by categories:{/tr}
-					{section name=i loop=$watching_categories}
-						<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}">{$watching_categories[i].name|escape}</a>
-						&nbsp;
-					{/section}
-				{/if}
-			{/if}
-		</div>
+		{if $user and $prefs.feature_user_watches eq 'y' and isset($category_watched) and $category_watched eq 'y'}
+			<div class="categbar">
+				{tr}Watched by categories:{/tr}
+				{section name=i loop=$watching_categories}
+					<a href="tiki-browse_categories.php?parentId={$watching_categories[i].categId}">{$watching_categories[i].name|escape}</a>
+					&nbsp;
+				{/section}
+			</div>
+		{/if}
 	</div>
 	<div class="breadcrumb">
 		<a class="link" href="{if $prefs.feature_sefurl eq 'y'}forums{else}tiki-forums.php{/if}">{tr}Forums{/tr}</a>
@@ -704,7 +702,7 @@
 								class="tips"
 								title="{tr}Actions{/tr}"
 								href="#"
-								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.view_forum_actions|escape:"javascript"|escape:"html"}{/if}
+								{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.view_forum_actions}{/if}
 								style="padding:0; margin:0; border:0"
 							>
 								{icon name='wrench'}

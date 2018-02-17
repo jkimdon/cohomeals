@@ -1,15 +1,15 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Categorize.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: Categorize.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Profile_InstallHandler_Categorize extends Tiki_Profile_InstallHandler
 {
 	private $type;
 	private $object;
-	private $categories = array();
+	private $categories = [];
 
 	function fetchData()
 	{
@@ -46,7 +46,7 @@ class Tiki_Profile_InstallHandler_Categorize extends Tiki_Profile_InstallHandler
 		$this->replaceReferences($this->type);
 		$this->replaceReferences($this->object);
 		$this->replaceReferences($this->categories);
-		
+
 		$categlib = TikiLib::lib('categ');
 
 		$type = Tiki_Profile_Installer::convertType($this->type);

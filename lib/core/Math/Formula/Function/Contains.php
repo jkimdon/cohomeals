@@ -3,20 +3,19 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Contains.php 57972 2016-03-17 20:09:51Z jonnybradley $
+// $Id: Contains.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Math_Formula_Function_Contains extends Math_Formula_Function
 {
-    function evaluate( $element )
-    {
-        $reference = $this->evaluateChild($element[0]);
-        $pattern = $element[1];
+	function evaluate($element)
+	{
+		$reference = $this->evaluateChild($element[0]);
+		$pattern = $element[1];
 
-        if (preg_match("|" . preg_quote($pattern) . "|", $reference)) {
-            return true;
-        }
+		if (preg_match("|" . preg_quote($pattern) . "|", $reference)) {
+			return true;
+		}
 
-        return false;
-    }
+		return false;
+	}
 }
-

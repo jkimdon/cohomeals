@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.scheduler_params.php 62232 2017-04-16 16:48:48Z rjsmelo $
+// $Id: function.scheduler_params.php 65102 2018-01-06 10:05:57Z robertokir $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_function_scheduler_params($params, $smarty)
@@ -19,41 +19,41 @@ function smarty_function_scheduler_params($params, $smarty)
 
 	$className = 'Scheduler_Task_' . $params['name'];
 
-	if(!class_exists($className)) {
+	if (! class_exists($className)) {
 		return;
 	}
 
 	$schedulerParams = $params['params'];
 
-	$class = new $className;
+	$logger = new Tiki_Log('Schedulers', \Psr\Log\LogLevel::ERROR);
+	$class = new $className($logger);
 	$inputParams = $class->getParams();
 	$taskName = strtolower($class->getTaskName());
 	$html = '';
 
 	foreach ($inputParams as $key => $param) {
-
-		$escapedParam = smarty_modifier_escape($schedulerParams[$key]);
-		$inputKey = $taskName .'_' . $key;
+		$escapedParam = (isset($schedulerParams[$key])) ? smarty_modifier_escape($schedulerParams[$key]) : '';
+		$inputKey = $taskName . '_' . $key;
 
 		switch ($param['type']) {
 			case 'text':
-				$input = '<input type="text" id="'. $inputKey .'" class="form-control" name="'. $inputKey .'" value="' . $escapedParam . '">';
+				$input = '<input type="text" id="' . $inputKey . '" class="form-control" name="' . $inputKey . '" value="' . $escapedParam . '">';
 				break;
 			case 'password':
-				$input = '<input type="password" id="'. $inputKey .'" class="form-control" name="'. $inputKey .'" value="' . $escapedParam . '">';
+				$input = '<input type="password" id="' . $inputKey . '" class="form-control" name="' . $inputKey . '" value="' . $escapedParam . '">';
 				break;
 			case 'textarea':
-				$input = '<textarea id="'. $inputKey .'" class="form-control" name="'. $inputKey .'"">' . $escapedParam .'</textarea>';
+				$input = '<textarea id="' . $inputKey . '" class="form-control" name="' . $inputKey . '"">' . $escapedParam . '</textarea>';
 				break;
 			case 'select':
 				//@todo implement
 				break;
 		}
 
-		$required = !empty($param['required']) ? ' *' : '';
+		$required = ! empty($param['required']) ? ' *' : '';
 
 		$infoHtml = '';
-		if (!empty($param['description'])) {
+		if (! empty($param['description'])) {
 			$description = smarty_modifier_escape($param['description']);
 			$icon = smarty_function_icon(['name' => 'information'], $smarty);
 
@@ -62,7 +62,6 @@ function smarty_function_scheduler_params($params, $smarty)
 	{$icon}
 </a>
 HTML;
-
 		}
 
 		$html .= <<<HTML
@@ -77,5 +76,4 @@ HTML;
 	}
 
 	echo $html;
-
 }

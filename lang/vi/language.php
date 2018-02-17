@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Arabic" => "Arabic",
 "Catalan" => "Catalan",
 "Simplified Chinese" => "Simplified Chinese",
@@ -1148,7 +1148,7 @@ $lang = array(
 "vote" => "bình chọn",
 "A valid email is mandatory to register" => "Cần có một email hợp lệ để đăng kí",
 "Use your email address as your log-in name" => "Sử dụng email của bạn để đăng nhập",
-"Repeat password" => "Lặp lại mật khẩu",
+"Confirm password" => "Lặp lại mật khẩu",
 "Generate a password" => "Tạo mật khẩu",
 "Valid" => "Hợp lệ",
 "Last modification" => "Lần sửa cuối",
@@ -1597,4 +1597,4 @@ $lang = array(
 "No thread indicated" => "Không có chủ đề nào được chọn",
 "Top pages" => "Top trang",
 "Last pages" => "Trang cuối",
-);
+];

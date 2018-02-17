@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AutoDetectCsvSource.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: AutoDetectCsvSource.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tracker\Tabular\Source;
 
@@ -19,7 +19,7 @@ class AutoDetectCsvSource implements SourceInterface
 		$headers = $file->fgetcsv();
 
 		$schema = new Schema($definition);
-		
+
 		foreach ($headers as $header) {
 			if (preg_match(Schema\Column::HEADER_PATTERN, $header, $parts)) {
 				list($full, $pk, $field, $mode) = $parts;
@@ -48,4 +48,3 @@ class AutoDetectCsvSource implements SourceInterface
 		return $this->source->getSchema();
 	}
 }
-

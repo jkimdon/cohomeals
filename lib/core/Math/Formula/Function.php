@@ -3,28 +3,27 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Function.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: Function.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 abstract class Math_Formula_Function
 {
 	private $callback;
 
-	function evaluateTemplate( $element, $evaluateCallback )
+	function evaluateTemplate($element, $evaluateCallback)
 	{
 		$this->callback = $evaluateCallback;
 		return $this->evaluate($element);
 	}
 
-	abstract function evaluate( $element );
+	abstract function evaluate($element);
 
-	protected function evaluateChild( $child, array $extraVariables = array() )
+	protected function evaluateChild($child, array $extraVariables = [])
 	{
 		return call_user_func($this->callback, $child, $extraVariables);
 	}
 
-	protected function error( $message )
+	protected function error($message)
 	{
 		throw new Math_Formula_Exception($message);
 	}
 }
-

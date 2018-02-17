@@ -1,15 +1,15 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Sequence.php 60502 2016-12-01 11:50:43Z kroky6 $
+// $Id: Sequence.php 65366 2018-01-29 18:03:44Z robertokir $
 
 class Search_Action_Sequence
 {
 	private $name;
-	private $steps = array();
-	private $fields = array();
+	private $steps = [];
+	private $fields = [];
 	private $requiredGroup;
 
 	function __construct($name)
@@ -59,12 +59,18 @@ class Search_Action_Sequence
 		return $success;
 	}
 
-	function requiresInput() {
+	function requiresInput()
+	{
 		foreach ($this->steps as $step) {
 			if ($step->requiresInput()) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	function getSteps()
+	{
+		return $this->steps;
 	}
 }

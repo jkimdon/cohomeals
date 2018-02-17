@@ -3,17 +3,19 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-dynamic-js.php 57962 2016-03-17 20:02:39Z jonnybradley $
+// $Id: tiki-dynamic-js.php 64634 2017-11-19 12:59:14Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
-$list = array();
-if (!empty($_SESSION['tiki_cookie_jar']) && is_array($_SESSION['tiki_cookie_jar']) )
-	foreach ( $_SESSION['tiki_cookie_jar'] as $name=>$value )
+$list = [];
+if (! empty($_SESSION['tiki_cookie_jar']) && is_array($_SESSION['tiki_cookie_jar'])) {
+	foreach ($_SESSION['tiki_cookie_jar'] as $name => $value) {
 		$list[] = $name . ": '" . addslashes($value) . "'";
+	}
+}
 ?>
 <script type="text/javascript">
 var tiki_cookie_jar = new Array();

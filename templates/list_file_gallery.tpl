@@ -1,4 +1,4 @@
-{* $Id: list_file_gallery.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
+{* $Id: list_file_gallery.tpl 63814 2017-09-12 13:29:39Z chealer $ *}
 
 {if (isset($tree)
 	and count($tree) gt 0
@@ -74,12 +74,16 @@
 			{assign var=other_columns_selected value=''}
 			{if $view eq 'browse' or $view eq 'page'}
 				{assign var=show_infos value='y'}
-				{include file='browse_file_gallery.tpl'}
+				{if $view eq 'page'}
+					{include file='fgal_view_page.tpl'}
+				{else}
+					{include file='browse_file_gallery.tpl'}
+				{/if}
 			{else}
 				{assign var=show_infos value='n'}
 				{include file='list_file_gallery_content.tpl'}
 			{/if}
-			{if ($files
+			{if (isset($files) && $files
 				and $gal_info.show_checked neq 'n'
 				and $prefs.fgal_checked eq 'y'
 				and ($tiki_p_admin_file_galleries eq 'y' or $tiki_p_upload_files eq 'y' or $tiki_p_assign_perm_file_gallery eq 'y')

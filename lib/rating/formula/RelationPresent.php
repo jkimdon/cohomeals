@@ -3,16 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: RelationPresent.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: RelationPresent.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 class Tiki_Formula_Function_RelationPresent extends Math_Formula_Function
 {
-	function evaluate( $element )
+	function evaluate($element)
 	{
 		$default = 0;
 		$allowed = ['qualifier', 'from', 'to'];
 
-		if ( $extra = $element->getExtraValues($allowed) ) {
+		if ($extra = $element->getExtraValues($allowed)) {
 			$this->error(tr('Unexpected values: %0', implode(', ', $extra)));
 		}
 
@@ -20,15 +20,15 @@ class Tiki_Formula_Function_RelationPresent extends Math_Formula_Function
 		$to = $element->to;
 		$qualifier = $element->qualifier;
 
-		if ( ! $qualifier || count($qualifier) != 1 ) {
+		if (! $qualifier || count($qualifier) != 1) {
 			$this->error(tra('Qualifier must be provided and contain one argument: type'));
 		}
 
-		if ( ! $from || count($from) != 2 ) {
+		if (! $from || count($from) != 2) {
 			$this->error(tra('From must be provided and contain two arguments: type, object-id'));
 		}
 
-		if ( ! $to || count($to) != 2 ) {
+		if (! $to || count($to) != 2) {
 			$this->error(tra('To must be provided and contain two arguments: type, object-id'));
 		}
 
@@ -40,8 +40,7 @@ class Tiki_Formula_Function_RelationPresent extends Math_Formula_Function
 
 		$lib = TikiLib::lib('relation');
 		$id = $lib->get_relation_id($qualifier, $typeFrom, $objectFrom, $typeTo, $objectTo);
-		
+
 		return $id ? 1 : 0;
 	}
 }
-

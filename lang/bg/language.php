@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Bulgaria" => "България",
 "test" => "test",
-);
+];

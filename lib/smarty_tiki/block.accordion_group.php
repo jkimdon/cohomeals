@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: block.accordion_group.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: block.accordion_group.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 /**
  * Smarty plugin
@@ -26,8 +26,8 @@
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 function smarty_block_accordion_group($params, $content, $smarty, $repeat)

@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Static.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Static.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_GlobalSource_Static implements Search_GlobalSource_Interface
 {
@@ -16,9 +16,9 @@ class Search_GlobalSource_Static implements Search_GlobalSource_Interface
 		$this->typeMap = $typeMap;
 	}
 
-	function getData($objectType, $objectId, Search_Type_Factory_Interface $typeFactory, array $data = array())
+	function getData($objectType, $objectId, Search_Type_Factory_Interface $typeFactory, array $data = [])
 	{
-		$out = array();
+		$out = [];
 
 		foreach ($this->data["$objectType:$objectId"] as $key => $value) {
 			$type = $this->typeMap[$key];
@@ -38,4 +38,3 @@ class Search_GlobalSource_Static implements Search_GlobalSource_Interface
 		return array_fill_keys(array_keys($this->typeMap), true);
 	}
 }
-

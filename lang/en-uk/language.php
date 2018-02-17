@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "English British" => "British English",
 "Low German" => "Low Saxon",
 "United Nations Organization" => "United Nations Organisation",
@@ -197,4 +197,4 @@ $lang = array(
 "Access from your localization was forbidden due to excessive spamming" => "Access from your localisation was forbidden due to excessive spamming",
 "Payment canceled" => "Payment cancelled",
 "The uploaded file is not recognized as a image" => "The uploaded file ist not recognised as a image",
-);
+];

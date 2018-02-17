@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: include_workspace.php 61883 2017-03-26 23:57:11Z lindonb $
+// $Id: include_workspace.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 // This script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -28,20 +28,20 @@ if ($prefs['feature_areas'] === 'y') {
 	// building overview
 	$areas_table = $areaslib->table('tiki_areas');
 
-	$result = $areas_table->fetchAll(array('categId', 'perspectives', 'exclusive', 'share_common', 'enabled'));
-	$areas = array();
+	$result = $areas_table->fetchAll(['categId', 'perspectives', 'exclusive', 'share_common', 'enabled']);
+	$areas = [];
 	$perspectivelib = TikiLib::lib('perspective');
-	$perspectives = array();
+	$perspectives = [];
 
 	foreach ($result as $item) {
-		$area = array();
+		$area = [];
 		$area['categId'] = $item['categId'];
 		$area['exclusive'] = $item['exclusive'];
 		$area['share_common'] = $item['share_common'];
 		$area['enabled'] = $item['enabled'];
-		$area['perspectives'] = array();
+		$area['perspectives'] = [];
 		foreach (unserialize($item['perspectives']) as $pers) {
-			if (!array_key_exists($pers, $perspectives)) {
+			if (! array_key_exists($pers, $perspectives)) {
 				$perspectives[$pers] = $perspectivelib->get_perspective($pers);
 			}
 
@@ -53,5 +53,4 @@ if ($prefs['feature_areas'] === 'y') {
 	}
 
 	$smarty->assign_by_ref('areas', $areas);
-
 }

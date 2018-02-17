@@ -1,4 +1,4 @@
-{* $Id: tiki-directory_validate_sites.tpl 60452 2016-11-29 09:30:37Z drsassafras $ *}
+{* $Id: tiki-directory_validate_sites.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title help="Directory"}{tr}Validate sites{/tr}{/title}
 
 {* Display the title using parent *}
@@ -64,7 +64,7 @@ var CHECKBOX_LIST = [{{section name=user loop=$items}'sites[{$items[user].siteId
 							class="tips"
 							title="{tr}Actions{/tr}"
 							href="#"
-							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.validate_actions|escape:"javascript"|escape:"html"}{/if}
+							{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.validate_actions}{/if}
 							style="padding:0; margin:0; border:0"
 						>
 							{icon name='wrench'}

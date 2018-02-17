@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Checker.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: Checker.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Version_Checker
 {
@@ -22,7 +22,7 @@ class Tiki_Version_Checker
 
 	function check($callback)
 	{
-		$upgrades = array();
+		$upgrades = [];
 		$branchupdate = null;
 
 		$content = call_user_func($callback, "http://tiki.org/{$this->cycle}.cycle");
@@ -46,7 +46,7 @@ class Tiki_Version_Checker
 
 	private function getSupportedVersions($content)
 	{
-		return array_filter(array_map(array('Tiki_Version_Version', 'get'), explode("\n", $content)));
+		return array_filter(array_map(['Tiki_Version_Version', 'get'], explode("\n", $content)));
 	}
 
 	private function findSupportedInBranch($versions)
@@ -73,4 +73,3 @@ class Tiki_Version_Checker
 		return $max;
 	}
 }
-

@@ -16,7 +16,7 @@ var Axes = require('../../plots/cartesian/axes');
 var histogram2dCalc = require('../histogram2d/calc');
 var colorscaleCalc = require('../../components/colorscale/calc');
 var hasColumns = require('./has_columns');
-var convertColumnXYZ = require('./convert_column_xyz');
+var convertColumnData = require('./convert_column_xyz');
 var maxRowLength = require('./max_row_length');
 var clean2dArray = require('./clean_2d_array');
 var interp2d = require('./interp2d');
@@ -57,10 +57,15 @@ module.exports = function calc(gd, trace) {
         z = binned.z;
     }
     else {
-        if(hasColumns(trace)) convertColumnXYZ(trace, xa, ya);
+        if(hasColumns(trace)) {
+            convertColumnData(trace, xa, ya, 'x', 'y', ['z']);
+            x = trace.x;
+            y = trace.y;
+        } else {
+            x = trace.x ? xa.makeCalcdata(trace, 'x') : [];
+            y = trace.y ? ya.makeCalcdata(trace, 'y') : [];
+        }
 
-        x = trace.x ? xa.makeCalcdata(trace, 'x') : [];
-        y = trace.y ? ya.makeCalcdata(trace, 'y') : [];
         x0 = trace.x0 || 0;
         dx = trace.dx || 1;
         y0 = trace.y0 || 0;
@@ -121,7 +126,7 @@ module.exports = function calc(gd, trace) {
         Axes.expand(ya, yArray);
     }
 
-    var cd0 = {x: xArray, y: yArray, z: z};
+    var cd0 = {x: xArray, y: yArray, z: z, text: trace.text};
 
     // auto-z and autocolorscale if applicable
     colorscaleCalc(trace, z, '', 'z');

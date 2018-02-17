@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ImplicitPhrase.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: ImplicitPhrase.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_Expr_ImplicitPhrase implements Search_Expr_Interface
 {
@@ -63,7 +63,7 @@ class Search_Expr_ImplicitPhrase implements Search_Expr_Interface
 
 	function walk($callback)
 	{
-		$results = array();
+		$results = [];
 		foreach ($this->parts as $part) {
 			$results[] = $part->walk($callback);
 		}
@@ -76,4 +76,3 @@ class Search_Expr_ImplicitPhrase implements Search_Expr_Interface
 		return call_user_func($callback, $callback, $this, $this->parts);
 	}
 }
-

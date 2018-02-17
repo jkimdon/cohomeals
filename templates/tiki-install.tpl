@@ -1,10 +1,12 @@
 <div class="tiki-install container">
-	<div class="row install-header page-header">
+	<div class="row install-header">
 		<div class="col-md-3">
-			<img alt="{tr}Tiki Wiki CMS Groupware{/tr}" src="{if isset($ie6)}img/tiki/tikisitelogo.gif{else}img/tiki/Tiki_WCG.png{/if}">
+			<div class="panel-body">
+				<img alt="{tr}Tiki Wiki CMS Groupware{/tr}" class="img-responsive" src="img/tiki/Tiki_WCG.png">
+			</div>
 		</div>
 		<div class="col-md-9">
-			<h1>{tr}Tiki installer{/tr} <small>{$tiki_version_name} <a title="{tr}Help{/tr}" href="https://doc.tiki.org/Installation" target="help">{icon name="help"}</a></small></h1>
+			<h1>{tr}Tiki Installer{/tr} <small>{$tiki_version_name} <a title="{tr}Help{/tr}" href="https://doc.tiki.org/Installation" target="help">{icon name="help"}</a></small></h1>
 		</div>
 	</div><!-- End of install-header -->
 	<div class="row install-body">
@@ -91,7 +93,7 @@
 			{if $install_step eq '0' or !$install_step}{* start of installation *}
 				<div class="install-step0">
 					<h1 class="pagetitle">{tr}Welcome{/tr}</h1>
-					<p>{tr}Welcome to the Tiki installation and upgrade script.{/tr} {tr}Use this script to install a new Tiki database or upgrade your existing database to release{/tr} <strong>{$tiki_version_name}</strong></p>
+					<p>{tr _0=$tiki_version_name}Welcome to the <strong>Tiki %0</strong> installer.{/tr} {tr}Use this script to install a new database or upgrade your existing database.{/tr}</p>
 					<ul>
 						<li>{tr}For the latest information about this release, please read the{/tr} <a href="https://doc.tiki.org/Tiki{$tiki_version_short|urlencode}" target="_blank">{tr}Release Notes{/tr}</a>.</li>
 						<li>{tr}For complete documentation, please visit{/tr} <a href="https://doc.tiki.org" target="_blank">doc.tiki.org</a>.</li>
@@ -323,7 +325,7 @@
 								<legend>{tr}Database user{/tr}</legend>
 								<p>{tr}Enter a database user with administrator permission for the Database.{/tr}</p>
 								<div style="padding:5px;">
-									<label for="user">{tr}User name:{/tr}</label> <input type="text" class=form-control id="user" name="user" value="{if (isset($smarty.request.user))}{$smarty.request.user|escape:"html"}{elseif isset($preconfiguser)}{$preconfiguser|escape:"html"}{/if}" placeholder="{tr}Database username{/tr}">
+									<label for="user">{tr}User name:{/tr}</label> <input type="text" class=form-control id="user" name="user" value="{if (isset($smarty.request.user))}{$smarty.request.user|escape:"html"}{elseif isset($preconfiguser)}{$preconfiguser|escape:"html"}{/if}" maxlength="16" placeholder="{tr}Database username{/tr}">
 								</div>
 
 								<div style="padding:5px;">
@@ -458,7 +460,7 @@
 											<label for="dbEnginge">{tr}Select database engine{/tr}</label>
 											<select name="useInnoDB" id="dbEnginge" class="form-control">
 												<option value="0">{tr}MyISAM{/tr}</option>
-												<option value="1">{tr}InnoDB{/tr}</option>
+												<option selected="selected" value="1">{tr}InnoDB{/tr}</option>
 											</select>
 										{else}
 											<input type="hidden" name="useInnoDB" value="0">
@@ -512,21 +514,20 @@
 							{tr}You can now log in into Tiki as user <strong>admin</strong> and start configuring the application.{/tr}
 						</p>
 					{/remarksbox}
-					{if $installer->success|@count gt 0}
-						<p>{icon name="ok"}
-						<span style="font-weight:bold">
+					{if $installer->queries.successful|@count gt 0}
+						<p><span class="text-success">{icon name="ok"}
 						{if isset($smarty.post.update)}
-							{tr}Upgrade operations executed successfully:{/tr}
+							<strong>{tr}Upgrade operations executed successfully:{/tr}</strong>
 						{else}
-							{tr}Installation operations executed successfully:{/tr}
+								<strong>{tr}Installation operations executed successfully:{/tr}</strong>
 						{/if}
 						</span>
-						{$installer->success|@count} {tr}SQL queries.{/tr}</p>
+						{$installer->queries.successful|@count} {tr}SQL queries.{/tr}</p>
 					{else}
-						<p>{icon name="ok"} <span style="font-weight: bold">{tr}Database was left unchanged.{/tr}</span></p>
+						<p>{icon name="ok"} <span class="text-warning"><strong>{tr}Database was left unchanged.{/tr}</strong></span></p>
 					{/if}
 					<form action="tiki-install.php" method="post">
-						{if $installer->failures|@count > 0}
+						{if $installer->queries.failed|@count > 0}
 							<script type='text/javascript'><!--//--><![CDATA[//><!--
 										{literal}
 										function sql_failed() {
@@ -535,12 +536,12 @@
 										{/literal}
 							//--><!]]></script>
 
-							<p>{icon name="error"} <strong>{tr}Operations failed:{/tr}</strong> {$installer->failures|@count} {tr}SQL queries.{/tr}
+						<p><span class="text-danger">{icon name="error"} <strong>{tr}Operations failed:{/tr}</strong> {$installer->queries.failed|@count} {tr}SQL queries.{/tr}
 							<a href="javascript:sql_failed()">{tr}Display details.{/tr}</a>
 							<div id="sql_failed_log" style="display:none">
-								<p>{tr}During an upgrade, it is normal to have SQL failures resulting with <strong>Table already exists</strong> messages.{/tr}</p>
+						<p><span class="text-warning">{tr}During an upgrade, it is normal to have SQL failures resulting with <strong>Table already exists</strong> messages.{/tr}</span></p>
 								{assign var='patch' value=''}
-								{foreach from=$installer->failures item=item}
+								{foreach from=$installer->queries.failed item=item}
 									{if $patch ne $item[2]}
 										{if $patch ne ''}
 											</textarea>
@@ -838,10 +839,6 @@
 						{/if}
 						{tr}You can now log in into Tiki as user <strong>admin</strong> and start configuring the application.{/tr}
 					</p>
-					{if $install_type eq 'scratch'}
-						<h3>{icon name='information'} {tr}Installation{/tr}</h3>
-						<p>{tr}If this is a first time installation, go to <strong>tiki-admin.php</strong> after login to start configuring your new Tiki installation.{/tr}</p>
-					{/if}
 					{if isset($smarty.post.update)}
 						<h3>{icon name='information'} {tr}Upgrade{/tr}</h3>
 						<p>{tr}If this is an upgrade, clean the Tiki caches manually (the <strong>temp/templates_c</strong> directory) or by using the <strong>Admin &gt; System</strong> option from the Admin menu.{/tr}</p>

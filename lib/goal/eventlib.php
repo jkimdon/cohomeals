@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: eventlib.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: eventlib.php 64632 2017-11-19 12:22:53Z rjsmelo $
 
 class GoalEventLib
 {
@@ -74,7 +74,7 @@ class GoalEventLib
 					}
 				}
 			}
-			
+
 			$list = array_unique($list);
 			$cachelib->cacheItem(self::CACHE_KEY, serialize($list));
 		}
@@ -87,4 +87,3 @@ class GoalEventLib
 		return TikiDb::get()->table('tiki_goal_events');
 	}
 }
-

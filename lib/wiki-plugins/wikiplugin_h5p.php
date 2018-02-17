@@ -1,9 +1,9 @@
 <?php
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: wikiplugin_h5p.php 63181 2017-07-06 14:03:53Z jonnybradley $
+// $Id: wikiplugin_h5p.php 65140 2018-01-09 11:57:30Z jonnybradley $
 
 function wikiplugin_h5p_info()
 {
@@ -38,7 +38,7 @@ function wikiplugin_h5p($data, $params)
 	$instance++;
 
 	// temporary issue in 17.x with annotatorjs 1.2 (we hope)
-	if ($prefs['feature_inline_comments'] === 'y') {
+	if ($prefs['comments_inline_annotator'] === 'y') {
 		if ($instance === 1) {
 			Feedback::warning(tr('H5P is not compatible with the Inline comments (annotations) feature'));
 		}
@@ -68,4 +68,3 @@ function wikiplugin_h5p_rewrite($data, $params, $context)
 		return "{h5p}";
 	}
 }
-

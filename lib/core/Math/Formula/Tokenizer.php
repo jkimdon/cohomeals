@@ -3,54 +3,53 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Tokenizer.php 57971 2016-03-17 20:09:05Z jonnybradley $
+// $Id: Tokenizer.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Math_Formula_Tokenizer
 {
-	function getTokens( $string )
+	function getTokens($string)
 	{
-		$tokens = array();
+		$tokens = [];
 
 		$len = strlen($string);
 		$current = '';
 		$inString = false;
 
-		for ( $i = 0; $len > $i; ++$i ) {
+		for ($i = 0; $len > $i; ++$i) {
 			$chr = $string{$i};
 
 			$end = false;
 			$extra = null;
 
-			if ( $chr == '"' ) {
+			if ($chr == '"') {
 				$current .= $chr;
 				$inString = ! $inString;
 				$end = ! $inString;
-			} elseif ( $inString ) {
+			} elseif ($inString) {
 				$current .= $chr;
-			} elseif ( ctype_space($chr) ) {
+			} elseif (ctype_space($chr)) {
 				$end = true;
-			} elseif ( $chr == '(' || $chr == ')' ) {
+			} elseif ($chr == '(' || $chr == ')') {
 				$extra = $chr;
 				$end = true;
 			} else {
 				$current .= $chr;
 			}
 
-			if ( $end && 0 != strlen($current) ) {
+			if ($end && 0 != strlen($current)) {
 				$tokens[] = $current;
 				$current = '';
 			}
 
-			if ( $extra ) {
+			if ($extra) {
 				$tokens[] = $extra;
 			}
 		}
 
-		if ( strlen($current) != 0 ) {
+		if (strlen($current) != 0) {
 			$tokens[] = $current;
 		}
 
 		return $tokens;
 	}
 }
-

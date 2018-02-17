@@ -1,6 +1,6 @@
-{* $Id: include_community.tpl 62223 2017-04-15 21:28:56Z montefuscolo $ *}
+{* $Id: include_community.tpl 62680 2017-05-21 21:26:55Z montefuscolo $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=community" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md">
 		{button href="tiki-admingroups.php" _class="btn-link tips" _type="text" _icon_name="group" _text="{tr}Groups{/tr}" _title=":{tr}Group Administration{/tr}"}
 		{button href="tiki-adminusers.php" _class="btn-link tips" _type="text" _icon_name="user" _text="{tr}Users{/tr}" _title=":{tr}User Administration{/tr}"}
@@ -104,26 +104,6 @@
 			{preference name=wikiplugin_userlink}
 			{preference name=wikiplugin_userlist}
 			{preference name=wikiplugin_userpref}
-		{/tab}
-
-		{tab name="{tr}BigBlueButton{/tr}"}
-			<br>
-			{preference name=bigbluebutton_feature}
-			<div class="adminoptionboxchild" id="bigbluebutton_feature_childcontainer">
-				{preference name=bigbluebutton_server_location}
-				{preference name=bigbluebutton_server_salt}
-				{preference name=bigbluebutton_recording_max_duration}
-				{preference name=wikiplugin_bigbluebutton}
-			</div>
-		{/tab}
-		{tab name="XMPP"}
-			<h2>XMPP</h2>
-			{preference name=xmpp_feature}
-			<div class="adminoptionboxchild" id="xmpp_feature_childcontainer">
-				{preference name=xmpp_server_host}
-				{preference name=xmpp_server_http_bind}
-				{preference name=xmpp_openfire_use_token}
-			</div>
 		{/tab}
 	{/tabset}
 	{include file='admin/include_apply_bottom.tpl'}

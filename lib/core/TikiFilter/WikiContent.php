@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: WikiContent.php 57968 2016-03-17 20:06:57Z jonnybradley $
+// $Id: WikiContent.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class TikiFilter_WikiContent implements Zend\Filter\FilterInterface
 {
-	function filter( $value )
+	function filter($value)
 	{
 		$parserlib = TikiLib::lib('parser');
-		$noparsed = array();
+		$noparsed = [];
 		$parserlib->plugins_remove($value, $noparsed);
 
 		$value = TikiFilter::get('xss')->filter($value);

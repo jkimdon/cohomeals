@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: OutputLink.php 57967 2016-03-17 20:06:16Z jonnybradley $
+// $Id: OutputLink.php 64983 2017-12-25 13:29:36Z lfagundes $
 
 class WikiParser_OutputLink
 {
@@ -16,59 +16,59 @@ class WikiParser_OutputLink
 	private $namespace;
 	private $namespaceSeparator;
 
-	private $externals = array();
+	private $externals = [];
 	private $handlePlurals = false;
 
 	private $wikiLookup;
 	private $wikiBuilder = 'trim';
 
-	function setIdentifier( $identifier )
+	function setIdentifier($identifier)
 	{
 		$this->identifier = $identifier;
 	}
 
-	function setNamespace( $namespace, $separator )
+	function setNamespace($namespace, $separator)
 	{
 		$this->namespace = $namespace;
 		$this->namespaceSeparator = $separator;
 	}
 
-	function setDescription( $description )
+	function setDescription($description)
 	{
 		$this->description = $description;
 	}
 
-	function setQualifier( $qualifier )
+	function setQualifier($qualifier)
 	{
 		$this->qualifier = $qualifier;
 	}
 
-	function setLanguage( $lang )
+	function setLanguage($lang)
 	{
 		$this->language = $lang;
 	}
 
-	function setWikiLookup( $lookup )
+	function setWikiLookup($lookup)
 	{
 		$this->wikiLookup = $lookup;
 	}
 
-	function setWikiLinkBuilder( $builder )
+	function setWikiLinkBuilder($builder)
 	{
 		$this->wikiBuilder = $builder;
 	}
 
-	function setExternals( array $externals )
+	function setExternals(array $externals)
 	{
 		$this->externals = $externals;
 	}
 
-	function setHandlePlurals( $handle )
+	function setHandlePlurals($handle)
 	{
 		$this->handlePlurals = (bool) $handle;
 	}
 
-	function setAnchor( $anchor )
+	function setAnchor($anchor)
 	{
 		$this->anchor = $anchor;
 	}
@@ -77,35 +77,37 @@ class WikiParser_OutputLink
 	{
 		$page = $this->identifier;
 		$description = $this->identifier;
-		if ( $this->description ) {
+		if ($this->description) {
 			$description = $this->description;
 		}
-
-		if ( $link = $this->handleExternal($page, $description, $class) ) {
+		$pageId = substr($page, 0, 158);
+		if ($link = $this->handleExternal($page, $description, $class)) {
 			return $this->outputLink(
 				$description,
-				array(
+				[
 						'href' => $link . $this->anchor,
 						'class' => $class,
-				)
+				]
 			);
-		} elseif ( $this->namespace && (($info = $this->findWikiPage("{$this->namespace}{$this->namespaceSeparator}$page")) || $ck_editor) ) {
+		} elseif ($this->namespace && (($info = $this->findWikiPage("{$this->namespace}{$this->namespaceSeparator}$pageId")) || $ck_editor)) {
 			// When currently displayed page is in a namespace, interpret links as within namespace as a priority
-			if (!empty($info['pageName'])) {
+			if (! empty($info['pageName'])) {
 				$page = $info['pageName'];
+				$pageId = substr($page, 0, 158);                
 			}
 
 			return $this->outputLink(
 				$description,
-				array(
-						'href' => call_user_func($this->wikiBuilder, $page) . $this->anchor,
+				[
+						'href' => call_user_func($this->wikiBuilder, $pageId) . $this->anchor,
 						'title' => $this->getTitle($info),
 						'class' => 'wiki wiki_page',
-				)
+				]
 			);
-		} elseif ( ($info = $this->findWikiPage($page)) || $ck_editor ) {
-			if (!empty($info['pageName'])) {
+		} elseif (($info = $this->findWikiPage($pageId)) || $ck_editor) {
+			if (! empty($info['pageName'])) {
 				$page = $info['pageName'];
+				$pageId = substr($page, 0, 158);                
 			}
 
 			if ($description == $info['pageName']) {
@@ -114,28 +116,29 @@ class WikiParser_OutputLink
 
 			return $this->outputLink(
 				$description,
-				array(
-					'href' => call_user_func($this->wikiBuilder, $page) . $this->anchor,
+				[
+					'href' => call_user_func($this->wikiBuilder, $pageId) . $this->anchor,
 					'title' => $this->getTitle($info),
 					'class' => 'wiki wiki_page',
-				)
+				]
 			);
 		} else {
 			$page = $this->getTargetPage($page);
+			$pageId = substr($page, 0, 158);                
 			return $this->outputLink(
 				$description,
-				array(
-					'href' => $this->getEditLink($page),
-					'title' => tra('Create page:') . ' ' . $page,
+				[
+					'href' => $this->getEditLink($pageId),
+					'title' => tra('Create page:') . ' ' . $pageId,
 					'class' => 'wiki wikinew text-danger tips',
-				)
+				]
 			);
 		}
 	}
 
-	private function outputLink( $text, array $attributes )
+	private function outputLink($text, array $attributes)
 	{
-		if ( $this->qualifier ) {
+		if ($this->qualifier) {
 			$attributes['class'] .= ' ' . $this->qualifier;
 		}
 
@@ -150,27 +153,27 @@ class WikiParser_OutputLink
 		return $string;
 	}
 
-	private function getEditLink( $page )
+	private function getEditLink($page)
 	{
 		$url = 'tiki-editpage.php?page=' . urlencode($page);
 
-		if ( $this->language ) {
+		if ($this->language) {
 			$url .= '&lang=' . urlencode($this->language);
 		}
 
 		return $url;
 	}
 
-	private function handleExternal( & $page, & $description, & $class )
+	private function handleExternal(& $page, & $description, & $class)
 	{
 		$parts = explode(':', $page);
 
-		if ( count($parts) == 2 ) {
+		if (count($parts) == 2) {
 			list( $token, $remotePage ) = $parts;
 			$token = strtolower($token);
 
-			if ( isset( $this->externals[$token] ) ) {
-				if ( $page == $description ) {
+			if (isset($this->externals[$token])) {
+				if ($page == $description) {
 					$description = $remotePage;
 				}
 
@@ -214,7 +217,7 @@ class WikiParser_OutputLink
 		return $out . $info['baseName'];
 	}
 
-	private function findWikiPage( $page )
+	private function findWikiPage($page)
 	{
 		if (! $this->wikiLookup) {
 			return;
@@ -227,9 +230,9 @@ class WikiParser_OutputLink
 		}
 	}
 
-	private function handlePlurals( $page )
+	private function handlePlurals($page)
 	{
-		if ( ! $this->handlePlurals ) {
+		if (! $this->handlePlurals) {
 			return;
 		}
 
@@ -243,7 +246,7 @@ class WikiParser_OutputLink
 		// Others, excluding ending ss like address(es)
 		$alternate = preg_replace("/([A-Za-rt-z])s$/", "$1", $alternate);
 
-		if ( $alternate != $page ) {
+		if ($alternate != $page) {
 			return $alternate;
 		}
 	}
@@ -259,7 +262,7 @@ class WikiParser_OutputLink
 
 	private function getTitle($info)
 	{
-		if (!empty($info['description'])) {
+		if (! empty($info['description'])) {
 			return $info['description'];
 		} elseif (! empty($info['prettyName'])) {
 			return $info['prettyName'];
@@ -268,4 +271,3 @@ class WikiParser_OutputLink
 		}
 	}
 }
-

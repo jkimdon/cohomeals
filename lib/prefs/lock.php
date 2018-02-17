@@ -3,22 +3,22 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: lock.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: lock.php 64628 2017-11-19 12:03:08Z rjsmelo $
 
 function prefs_lock_list()
 {
-	return array (
-		'lock_content_templates' => array(
+	return  [
+		'lock_content_templates' => [
 			'name' => tra('Lock Content Templates'),
 			'description' => tra('Enable users to lock content templates and so prevent others from editing them'),
 			'type' => 'flag',
 			'default' => 'n',
-		),
-		'lock_wiki_structures' => array(
+		],
+		'lock_wiki_structures' => [
 			'name' => tra('Lock Wiki Structures'),
 			'description' => tra('Enable users to lock wiki structures and so prevent others from editing them'),
 			'type' => 'flag',
 			'default' => 'n',
-		),
-	);
+		],
+	];
 }

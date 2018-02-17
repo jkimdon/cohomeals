@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: gal.php 63592 2017-08-18 05:00:30Z drsassafras $
+// $Id: gal.php 64628 2017-11-19 12:03:08Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -113,7 +113,7 @@ function prefs_gal_list()
 			'type' => 'list',
 			'options' => [
 				'gd' => tra('GD'),
-				'imagick' => tra('Imagick'). ' 0',
+				'imagick' => tra('Imagick') . ' 0',
 			],
 			'default' => 'imagick',
 			'hint' => $gdlib . '  ' . $imagicklib

@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-admin_schedulers.php 62768 2017-05-26 22:40:55Z rjsmelo $
+// $Id: tiki-admin_schedulers.php 64604 2017-11-17 02:02:41Z rjsmelo $
 
 function saveScheduler()
 {
@@ -29,14 +29,15 @@ function saveScheduler()
 		$addTask = false;
 	} else {
 		$className = 'Scheduler_Task_' . $task;
-		if (!class_exists($className)) {
+		if (! class_exists($className)) {
 			Feedback::error(tra('An error occurred; please contact the administrator.'), 'session');
 			$access = TikiLib::lib('access');
 			$access->redirect('tiki-admin_schedulers.php');
 			die;
 		}
 
-		$class = new $className();
+		$logger = new Tiki_Log('Schedulers', \Psr\Log\LogLevel::ERROR);
+		$class = new $className($logger);
 
 		$taskName = strtolower($class->getTaskName());
 		$taskParams = $class->getParams();
@@ -61,7 +62,7 @@ function saveScheduler()
 		$addTask = false;
 	}
 
-	if (!Scheduler_Utils::validate_cron_time_format($runTime)) {
+	if (! Scheduler_Utils::validate_cron_time_format($runTime)) {
 		$errors[] = tra('Run Time format is invalid');
 		$addTask = false;
 	}
@@ -74,7 +75,7 @@ function saveScheduler()
 	$schedulerinfo = [];
 
 	if ($addTask) {
-		$scheduler = !empty($_POST['scheduler']) ? $_POST['scheduler'] : null;
+		$scheduler = ! empty($_POST['scheduler']) ? $_POST['scheduler'] : null;
 
 		$schedLib->set_scheduler($name, $description, $task, $params, $runTime, $status, $reRun, $scheduler);
 		if ($scheduler) {
@@ -87,9 +88,8 @@ function saveScheduler()
 		$access = TikiLib::lib('access');
 		$access->redirect('tiki-admin_schedulers.php');
 		die;
-
 	} else {
-		if (!empty($errors)) {
+		if (! empty($errors)) {
 			Feedback::error(['mes' => $errors], 'session');
 		}
 	}
@@ -108,21 +108,20 @@ function saveScheduler()
 require_once('tiki-setup.php');
 
 $access = TikiLib::lib('access');
-$access->check_permission(array('tiki_p_admin_schedulers'));
+$access->checkAuthenticity();
+$access->check_feature('feature_scheduler');
+$access->check_permission(['tiki_p_admin_schedulers']);
 
-$auto_query_args = array();
+$auto_query_args = [];
 $cookietab = 1;
 
 $schedLib = TikiLib::lib('scheduler');
 
-if (isset($_POST['new_scheduler']) || (isset($_POST['editscheduler']) && isset($_POST['scheduler']))) {
-
+if ((isset($_POST['new_scheduler']) || (isset($_POST['editscheduler']) && isset($_POST['scheduler']))) && $access->ticketMatch()) {
 	// If scheduler saved, it redirects to the schedulers page, cleaning the add/edit scheduler form.
 	$schedulerinfo = saveScheduler();
 	$cookietab = 2;
-
-} else if (isset($_REQUEST['scheduler']) and $_REQUEST['scheduler']) {
-
+} elseif (isset($_REQUEST['scheduler']) and $_REQUEST['scheduler']) {
 	$schedulerinfo = $schedLib->get_scheduler($_REQUEST['scheduler']);
 
 	if (empty($schedulerinfo)) {
@@ -136,10 +135,8 @@ if (isset($_POST['new_scheduler']) || (isset($_POST['editscheduler']) && isset($
 
 		$_REQUEST['scheduler'] = 0;
 	} else {
-
 		$schedulerinfo['params'] = json_decode($schedulerinfo['params'], true);
 		$schedulerRuns = $schedLib->get_scheduler_runs($_REQUEST['scheduler'], 10);
-
 	}
 
 	if (isset($_REQUEST['logs'])) {
@@ -147,7 +144,6 @@ if (isset($_POST['new_scheduler']) || (isset($_POST['editscheduler']) && isset($
 	} else {
 		$cookietab = '2';
 	}
-
 } else {
 	$schedulerinfo['name'] = '';
 	$schedulerinfo['description'] = '';
@@ -167,14 +163,14 @@ if (isset($_REQUEST['add'])) {
 }
 
 $smarty->assign('schedulerinfo', $schedulerinfo);
-$smarty->assign('schedulerruns', isset($schedulerRuns) ? $schedulerRuns : array());
+$smarty->assign('schedulerruns', isset($schedulerRuns) ? $schedulerRuns : []);
 $smarty->assign('schedulerId', $_REQUEST['scheduler']);
 $smarty->assign('schedulerTasks', Scheduler_Item::getAvailableTasks());
 $smarty->assign('selectedTask', '');
-$smarty->assign('schedulerStatus', array(
+$smarty->assign('schedulerStatus', [
 	Scheduler_Item::STATUS_ACTIVE => tra('Active'),
 	Scheduler_Item::STATUS_INACTIVE => tra('Inactive'),
-));
+]);
 
 // disallow robots to index page:
 $smarty->assign('metatag_robots', 'NOINDEX, NOFOLLOW');

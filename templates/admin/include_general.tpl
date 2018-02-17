@@ -1,6 +1,6 @@
-{* $Id: include_general.tpl 62289 2017-04-21 16:18:36Z jyhem $ *}
+{* $Id: include_general.tpl 64686 2017-11-23 02:23:47Z rjsmelo $ *}
 <form class="form-horizontal" action="tiki-admin.php?page=general" class="admin" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="t_navbar margin-bottom-md">
 		{button _class="btn btn-link tips" _type="text" href="tiki-install.php" _icon_name="database" _text="{tr}Tiki installer{/tr}" _title=":{tr}Reset or upgrade your database{/tr}"}
 		{button _class="btn btn-link tips" _type="text" href="tiki-admin_menus.php" _icon_name="menu" _text="{tr}Menus{/tr}" _title=":{tr}Create and edit menus{/tr}"}
@@ -14,6 +14,8 @@
 			<fieldset>
 				<legend>{tr}Release check{/tr}</legend>
 				{remarksbox type="info" title="{tr}Tiki version{/tr}" close="n"}
+					{capture assign="lastup"}{svn_lastup}{/capture}
+					{capture assign="svnrev"}{svn_rev}{/capture}
 					{if !empty($lastup)}
 						{tr}Last update from SVN{/tr} ({$tiki_version}): {$lastup|tiki_long_datetime}
 					{else}
@@ -35,6 +37,7 @@
 			<fieldset>
 				<legend>{tr}Site identity{/tr}</legend>
 				{preference name=browsertitle}
+				{preference name=fallbackBaseUrl}
 				{preference name=site_title_location}
 				{preference name=site_title_breadcrumb}
 				{remarksbox type="info" title="{tr}Themes{/tr}"}
@@ -195,6 +198,7 @@
 				<legend>{tr}Menus{/tr}</legend>
 				<div class="adminoptionbox">
 					{preference name=feature_cssmenus}
+					{preference name=feature_jquery_superfish}
 					{preference name=feature_userlevels}
 					{preference name=feature_featuredLinks}
 					{preference name=feature_menusfolderstyle}
@@ -248,6 +252,12 @@
 				<legend>{tr}User{/tr}</legend>
 				{preference name='urlOnUsername'}
 			</fieldset>
+
+			<fieldset>
+				<legend>{tr}Sitemap protocol{/tr}</legend>
+				{preference name=sitemap_enable}
+			</fieldset>
+
 			<fieldset>
 				<legend>{tr}Site access{/tr}</legend>
 				{preference name=site_closed}

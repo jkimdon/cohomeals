@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Totals.php 58029 2016-03-20 20:09:41Z lindonb $
+// $Id: Totals.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER['SCRIPT_NAME'], basename(__FILE__)) !== false) {
@@ -25,10 +25,10 @@ class Table_Totals
 	 * @param $count
 	 * @return bool
 	 */
-	static public function getTotalsHtml(array $s, $count)
+	public static function getTotalsHtml(array $s, $count)
 	{
 		if (Table_Check::isEnabled()) {
-			if (!empty($s['math'])) {
+			if (! empty($s['math'])) {
 				$smarty = TikiLib::lib('smarty');
 				$smarty->assign('fieldcount', $count);
 				$smarty->assign('tstotals', $s['math']['totals']);
@@ -43,16 +43,14 @@ class Table_Totals
 	/**
 	 * @param array $s
 	 */
-	static public function setTotals(array $s)
+	public static function setTotals(array $s)
 	{
 		if (Table_Check::isEnabled()) {
-			if (!empty($s['math'])) {
+			if (! empty($s['math'])) {
 				$smarty = TikiLib::lib('smarty');
 				$smarty->assign('tstotals', $s['math']['totals']);
 				$smarty->assign('tscols', $s['columns']);
 			}
 		}
 	}
-
-
 }

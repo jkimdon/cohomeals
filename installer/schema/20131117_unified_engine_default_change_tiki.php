@@ -4,7 +4,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20131117_unified_engine_default_change_tiki.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: 20131117_unified_engine_default_change_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -20,8 +20,8 @@ function upgrade_20131117_unified_engine_default_change_tiki($installer)
 {
 	$value = $installer->getOne("SELECT `value` FROM `tiki_preferences` WHERE `name` = 'unified_engine'");
 
-	if (!$value) {	// default values can be empty
+	if (! $value) {	// default values can be empty
 		$preferences = $installer->table('tiki_preferences');
-		$preferences->insertOrUpdate(array('value' => 'lucene'), array('name' => 'unified_engine'));
+		$preferences->insertOrUpdate(['value' => 'lucene'], ['name' => 'unified_engine']);
 	}
 }

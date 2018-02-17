@@ -1,4 +1,4 @@
-{* $Id: blog_actions.tpl 62879 2017-06-04 16:35:33Z drsassafras $ *}
+{* $Id: blog_actions.tpl 62883 2017-06-04 17:03:17Z drsassafras $ *}
 <span class="blogactions">
 	{if $prefs.javascript_enabled != 'y'}
 		{$js = 'n'}

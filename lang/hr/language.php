@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "None" => "Nijedan",
 "Cache" => "Priručna memorija",
 "Tag already exists" => "Oznaka već postoji",
@@ -763,7 +763,7 @@ $lang = array(
 "Current" => "Trenutni",
 "Versions are identical" => "Verzije su identične",
 "vote" => "glasaj",
-"Repeat password" => "Ponovi šifru",
+"Confirm password" => "Ponovi šifru",
 "Generate a password" => "Generiraj šifru",
 "Valid" => "Ispravan",
 "Create New" => "Napravi novo",
@@ -1640,4 +1640,4 @@ $lang = array(
 "Aborted" => "Prekinut",
 "Top pages" => "Naj stranice",
 "Last pages" => "Zadnje stranice",
-);
+];

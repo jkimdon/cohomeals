@@ -1,4 +1,4 @@
-{* $Id: tiki-user_preferences.tpl 62223 2017-04-15 21:28:56Z montefuscolo $ *}
+{* $Id: tiki-user_preferences.tpl 62216 2017-04-15 15:25:45Z montefuscolo $ *}
 {if $userwatch ne $user}
 	{title help="User Preferences"}{tr}User Preferences:{/tr} {$userwatch}{/title}
 {else}

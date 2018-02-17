@@ -27,8 +27,9 @@ var ONEDAY = constants.ONEDAY;
 var ONEHOUR = constants.ONEHOUR;
 var ONEMIN = constants.ONEMIN;
 var ONESEC = constants.ONESEC;
-var BADNUM = constants.BADNUM;
+var MINUS_SIGN = constants.MINUS_SIGN;
 
+var MID_SHIFT = require('../../constants/alignment').MID_SHIFT;
 
 var axes = module.exports = {};
 
@@ -36,6 +37,7 @@ axes.layoutAttributes = require('./layout_attributes');
 axes.supplyLayoutDefaults = require('./layout_defaults');
 
 axes.setConvert = require('./set_convert');
+var autoType = require('./axis_autotype');
 
 var axisIds = require('./axis_ids');
 axes.id2name = axisIds.id2name;
@@ -44,7 +46,6 @@ axes.list = axisIds.list;
 axes.listIds = axisIds.listIds;
 axes.getFromId = axisIds.getFromId;
 axes.getFromTrace = axisIds.getFromTrace;
-
 
 /*
  * find the list of possible axes to reference with an xref or yref attribute
@@ -101,46 +102,77 @@ axes.coerceRef = function(containerIn, containerOut, gd, attr, dflt, extraOption
  * - for other types: coerce them to numbers
  */
 axes.coercePosition = function(containerOut, gd, coerce, axRef, attr, dflt) {
-    var pos,
-        newPos;
+    var cleanPos, pos;
 
     if(axRef === 'paper' || axRef === 'pixel') {
+        cleanPos = Lib.ensureNumber;
         pos = coerce(attr, dflt);
-    }
-    else {
+    } else {
         var ax = axes.getFromId(gd, axRef);
-
         dflt = ax.fraction2r(dflt);
         pos = coerce(attr, dflt);
-
-        if(ax.type === 'category') {
-            // if position is given as a category name, convert it to a number
-            if(typeof pos === 'string' && (ax._categories || []).length) {
-                newPos = ax._categories.indexOf(pos);
-                containerOut[attr] = (newPos === -1) ? dflt : newPos;
-                return;
-            }
-        }
-        else if(ax.type === 'date') {
-            containerOut[attr] = Lib.cleanDate(pos, BADNUM, ax.calendar);
-            return;
-        }
+        cleanPos = ax.cleanPos;
     }
-    // finally make sure we have a number (unless date type already returned a string)
-    containerOut[attr] = isNumeric(pos) ? Number(pos) : dflt;
+
+    containerOut[attr] = cleanPos(pos);
 };
 
-// empty out types for all axes containing these traces
-// so we auto-set them again
-axes.clearTypes = function(gd, traces) {
-    if(!Array.isArray(traces) || !traces.length) {
-        traces = (gd._fullData).map(function(d, i) { return i; });
+axes.cleanPosition = function(pos, gd, axRef) {
+    var cleanPos = (axRef === 'paper' || axRef === 'pixel') ?
+        Lib.ensureNumber :
+        axes.getFromId(gd, axRef).cleanPos;
+
+    return cleanPos(pos);
+};
+
+var getDataConversions = axes.getDataConversions = function(gd, trace, target, targetArray) {
+    var ax;
+
+    // If target points to an axis, use the type we already have for that
+    // axis to find the data type. Otherwise use the values to autotype.
+    var d2cTarget = (target === 'x' || target === 'y' || target === 'z') ?
+        target :
+        targetArray;
+
+    // In the case of an array target, make a mock data array
+    // and call supplyDefaults to the data type and
+    // setup the data-to-calc method.
+    if(Array.isArray(d2cTarget)) {
+        ax = {
+            type: autoType(targetArray),
+            _categories: []
+        };
+        axes.setConvert(ax);
+
+        // build up ax._categories (usually done during ax.makeCalcdata()
+        if(ax.type === 'category') {
+            for(var i = 0; i < targetArray.length; i++) {
+                ax.d2c(targetArray[i]);
+            }
+        }
+    } else {
+        ax = axes.getFromTrace(gd, trace, d2cTarget);
     }
-    traces.forEach(function(tracenum) {
-        var trace = gd.data[tracenum];
-        delete (axes.getFromId(gd, trace.xaxis) || {}).type;
-        delete (axes.getFromId(gd, trace.yaxis) || {}).type;
-    });
+
+    // if 'target' has corresponding axis
+    // -> use setConvert method
+    if(ax) return {d2c: ax.d2c, c2d: ax.c2d};
+
+    // special case for 'ids'
+    // -> cast to String
+    if(d2cTarget === 'ids') return {d2c: toString, c2d: toString};
+
+    // otherwise (e.g. numeric-array of 'marker.color' or 'marker.size')
+    // -> cast to Number
+
+    return {d2c: toNum, c2d: toNum};
+};
+
+function toNum(v) { return +v; }
+function toString(v) { return String(v); }
+
+axes.getDataToCoordFunc = function(gd, trace, target, targetArray) {
+    return getDataConversions(gd, trace, target, targetArray).d2c;
 };
 
 // get counteraxis letter for this axis (name or id)
@@ -326,16 +358,15 @@ axes.doAutoRange = function(ax) {
     if(ax.autorange && hasDeps) {
         ax.range = axes.getAutoRange(ax);
 
+        ax._r = ax.range.slice();
+        ax._rl = Lib.simpleMap(ax._r, ax.r2l);
+
         // doAutoRange will get called on fullLayout,
         // but we want to report its results back to layout
-        var axIn = ax._gd.layout[ax._name];
 
-        if(!axIn) ax._gd.layout[ax._name] = axIn = {};
-
-        if(axIn !== ax) {
-            axIn.range = ax.range.slice();
-            axIn.autorange = ax.autorange;
-        }
+        var axIn = ax._input;
+        axIn.range = ax.range.slice();
+        axIn.autorange = ax.autorange;
     }
 };
 
@@ -365,6 +396,35 @@ axes.saveRangeInitial = function(gd, overwrite) {
     return hasOneAxisChanged;
 };
 
+// save a copy of the initial spike visibility
+axes.saveShowSpikeInitial = function(gd, overwrite) {
+    var axList = axes.list(gd, '', true),
+        hasOneAxisChanged = false,
+        allEnabled = 'on';
+
+    for(var i = 0; i < axList.length; i++) {
+        var ax = axList[i];
+
+        var isNew = (ax._showSpikeInitial === undefined);
+        var hasChanged = (
+            isNew || !(
+                ax.showspikes === ax._showspikes
+            )
+        );
+
+        if((isNew) || (overwrite && hasChanged)) {
+            ax._showSpikeInitial = ax.showspikes;
+            hasOneAxisChanged = true;
+        }
+
+        if(allEnabled === 'on' && !ax.showspikes) {
+            allEnabled = 'off';
+        }
+    }
+    gd._fullLayout._cartesianSpikesEnabled = allEnabled;
+    return hasOneAxisChanged;
+};
+
 // axes.expand: if autoranging, include new data in the outer limits
 // for this axis
 // data is an array of numbers (ie already run through ax.d2c)
@@ -378,7 +438,13 @@ axes.saveRangeInitial = function(gd, overwrite) {
 //      tozero: (boolean) make sure to include zero if axis is linear,
 //          and make it a tight bound if possible
 axes.expand = function(ax, data, options) {
-    if(!(ax.autorange || ax._needsExpand) || !data) return;
+    var needsAutorange = (
+        ax.autorange ||
+        !!Lib.nestedProperty(ax, 'rangeslider.autorange').get()
+    );
+
+    if(!needsAutorange || !data) return;
+
     if(!ax._min) ax._min = [];
     if(!ax._max) ax._max = [];
     if(!options) options = {};
@@ -389,6 +455,13 @@ axes.expand = function(ax, data, options) {
         tozero = options.tozero && (ax.type === 'linear' || ax.type === '-'),
         i, j, v, di, dmin, dmax,
         ppadiplus, ppadiminus, includeThis, vmin, vmax;
+
+    // domain-constrained axes: base extrappad on the unconstrained
+    // domain so it's consistent as the domain changes
+    if(extrappad && (ax.constrain === 'domain') && ax._inputDomain) {
+        extrappad *= (ax._inputDomain[1] - ax._inputDomain[0]) /
+            (ax.domain[1] - ax.domain[0]);
+    }
 
     function getPad(item) {
         if(Array.isArray(item)) {
@@ -496,7 +569,8 @@ axes.autoBin = function(data, ax, nbins, is2d, calendar) {
         return {
             start: dataMin - 0.5,
             end: dataMax + 0.5,
-            size: 1
+            size: 1,
+            _count: dataMax - dataMin + 1
         };
     }
 
@@ -540,8 +614,8 @@ axes.autoBin = function(data, ax, nbins, is2d, calendar) {
 
     axes.autoTicks(dummyAx, size0);
     var binStart = axes.tickIncrement(
-            axes.tickFirst(dummyAx), dummyAx.dtick, 'reverse', calendar),
-        binEnd;
+            axes.tickFirst(dummyAx), dummyAx.dtick, 'reverse', calendar);
+    var binEnd, bincount;
 
     // check for too many data points right at the edges of bins
     // (>50% within 1% of bin edges) or all data points integral
@@ -549,7 +623,7 @@ axes.autoBin = function(data, ax, nbins, is2d, calendar) {
     if(typeof dummyAx.dtick === 'number') {
         binStart = autoShiftNumericBins(binStart, data, dummyAx, dataMin, dataMax);
 
-        var bincount = 1 + Math.floor((dataMax - binStart) / dummyAx.dtick);
+        bincount = 1 + Math.floor((dataMax - binStart) / dummyAx.dtick);
         binEnd = binStart + bincount * dummyAx.dtick;
     }
     else {
@@ -565,15 +639,18 @@ axes.autoBin = function(data, ax, nbins, is2d, calendar) {
         // calculate the endpoint for nonlinear ticks - you have to
         // just increment until you're done
         binEnd = binStart;
+        bincount = 0;
         while(binEnd <= dataMax) {
             binEnd = axes.tickIncrement(binEnd, dummyAx.dtick, false, calendar);
+            bincount++;
         }
     }
 
     return {
         start: ax.c2r(binStart, 0, calendar),
         end: ax.c2r(binEnd, 0, calendar),
-        size: dummyAx.dtick
+        size: dummyAx.dtick,
+        _count: bincount
     };
 };
 
@@ -727,13 +804,18 @@ axes.calcTicks = function calcTicks(ax) {
         endtick = (axrev) ? Math.max(-0.5, endtick) :
             Math.min(ax._categories.length - 0.5, endtick);
     }
+
+    var xPrevious = null;
+    var maxTicks = Math.max(1000, ax._length || 0);
     for(var x = ax._tmin;
             (axrev) ? (x >= endtick) : (x <= endtick);
             x = axes.tickIncrement(x, ax.dtick, axrev, ax.calendar)) {
-        vals.push(x);
+        // prevent infinite loops - no more than one tick per pixel,
+        // and make sure each value is different from the previous
+        if(vals.length > maxTicks || x === xPrevious) break;
+        xPrevious = x;
 
-        // prevent infinite loops
-        if(vals.length > 1000) break;
+        vals.push(x);
     }
 
     // save the last tick as well as first, so we can
@@ -965,7 +1047,7 @@ function autoTickRound(ax) {
 
         var rangeexp = Math.floor(Math.log(maxend) / Math.LN10 + 0.01);
         if(Math.abs(rangeexp) > 3) {
-            if(ax.exponentformat === 'SI' || ax.exponentformat === 'B') {
+            if(isSIFormat(ax.exponentformat) && !beyondSI(rangeexp)) {
                 ax._tickexponent = 3 * Math.round((rangeexp - 1) / 3);
             }
             else ax._tickexponent = rangeexp;
@@ -1116,7 +1198,11 @@ axes.tickText = function(ax, x, hover) {
         return showAttr !== 'all' && x !== first_or_last;
     }
 
-    hideexp = ax.exponentformat !== 'none' && isHidden(ax.showexponent) ? 'hide' : '';
+    if(hover) {
+        hideexp = 'never';
+    } else {
+        hideexp = ax.exponentformat !== 'none' && isHidden(ax.showexponent) ? 'hide' : '';
+    }
 
     if(ax.type === 'date') formatDate(ax, out, hover, extraPrecision);
     else if(ax.type === 'log') formatLog(ax, out, hover, extraPrecision, hideexp);
@@ -1131,7 +1217,7 @@ axes.tickText = function(ax, x, hover) {
 };
 
 function tickTextObj(ax, x, text) {
-    var tf = ax.tickfont || ax._gd._fullLayout.font;
+    var tf = ax.tickfont || {};
 
     return {
         x: x,
@@ -1203,18 +1289,30 @@ function formatDate(ax, out, hover, extraPrecision) {
 function formatLog(ax, out, hover, extraPrecision, hideexp) {
     var dtick = ax.dtick,
         x = out.x;
+
+    if(hideexp === 'never') {
+        // If this is a hover label, then we must *never* hide the exponent
+        // for the sake of display, which could give the wrong value by
+        // potentially many orders of magnitude. If hideexp was 'never', then
+        // it's now succeeded by preventing the other condition from automating
+        // this choice. Thus we can unset it so that the axis formatting takes
+        // precedence.
+        hideexp = '';
+    }
+
     if(extraPrecision && ((typeof dtick !== 'string') || dtick.charAt(0) !== 'L')) dtick = 'L3';
 
     if(ax.tickformat || (typeof dtick === 'string' && dtick.charAt(0) === 'L')) {
         out.text = numFormat(Math.pow(10, x), ax, hideexp, extraPrecision);
     }
     else if(isNumeric(dtick) || ((dtick.charAt(0) === 'D') && (Lib.mod(x + 0.01, 1) < 0.1))) {
-        if(['e', 'E', 'power'].indexOf(ax.exponentformat) !== -1) {
-            var p = Math.round(x);
+        var p = Math.round(x);
+        if(['e', 'E', 'power'].indexOf(ax.exponentformat) !== -1 ||
+                (isSIFormat(ax.exponentformat) && beyondSI(p))) {
             if(p === 0) out.text = 1;
             else if(p === 1) out.text = '10';
             else if(p > 1) out.text = '10<sup>' + p + '</sup>';
-            else out.text = '10<sup>\u2212' + -p + '</sup>';
+            else out.text = '10<sup>' + MINUS_SIGN + -p + '</sup>';
 
             out.fontSize *= 1.25;
         }
@@ -1254,10 +1352,18 @@ function formatCategory(ax, out) {
 }
 
 function formatLinear(ax, out, hover, extraPrecision, hideexp) {
-    // don't add an exponent to zero if we're showing all exponents
-    // so the only reason you'd show an exponent on zero is if it's the
-    // ONLY tick to get an exponent (first or last)
-    if(ax.showexponent === 'all' && Math.abs(out.x / ax.dtick) < 1e-6) {
+    if(hideexp === 'never') {
+        // If this is a hover label, then we must *never* hide the exponent
+        // for the sake of display, which could give the wrong value by
+        // potentially many orders of magnitude. If hideexp was 'never', then
+        // it's now succeeded by preventing the other condition from automating
+        // this choice. Thus we can unset it so that the axis formatting takes
+        // precedence.
+        hideexp = '';
+    } else if(ax.showexponent === 'all' && Math.abs(out.x / ax.dtick) < 1e-6) {
+        // don't add an exponent to zero if we're showing all exponents
+        // so the only reason you'd show an exponent on zero is if it's the
+        // ONLY tick to get an exponent (first or last)
         hideexp = 'hide';
     }
     out.text = numFormat(out.x, ax, hideexp, extraPrecision);
@@ -1268,6 +1374,21 @@ function formatLinear(ax, out, hover, extraPrecision, hideexp) {
 // add half the rounding increment, then stringify and truncate
 // also automatically switch to sci. notation
 var SIPREFIXES = ['f', 'p', 'n', 'μ', 'm', '', 'k', 'M', 'G', 'T'];
+
+function isSIFormat(exponentFormat) {
+    return exponentFormat === 'SI' || exponentFormat === 'B';
+}
+
+// are we beyond the range of common SI prefixes?
+// 10^-16 -> 1x10^-16
+// 10^-15 -> 1f
+// ...
+// 10^14 -> 100T
+// 10^15 -> 1x10^15
+// 10^16 -> 1x10^16
+function beyondSI(exponent) {
+    return exponent > 14 || exponent < -15;
+}
 
 function numFormat(v, ax, fmtoverride, hover) {
         // negative?
@@ -1297,7 +1418,7 @@ function numFormat(v, ax, fmtoverride, hover) {
         if(ax.hoverformat) tickformat = ax.hoverformat;
     }
 
-    if(tickformat) return d3.format(tickformat)(v).replace(/-/g, '\u2212');
+    if(tickformat) return d3.format(tickformat)(v).replace(/-/g, MINUS_SIGN);
 
     // 'epsilon' - rounding increment
     var e = Math.pow(10, -tickRound) / 2;
@@ -1341,19 +1462,19 @@ function numFormat(v, ax, fmtoverride, hover) {
             if(dp) v = v.substr(0, dp + tickRound).replace(/\.?0+$/, '');
         }
         // insert appropriate decimal point and thousands separator
-        v = Lib.numSeparate(v, ax._gd._fullLayout.separators, separatethousands);
+        v = Lib.numSeparate(v, ax._separators, separatethousands);
     }
 
     // add exponent
     if(exponent && exponentFormat !== 'hide') {
+        if(isSIFormat(exponentFormat) && beyondSI(exponent)) exponentFormat = 'power';
+
         var signedExponent;
-        if(exponent < 0) signedExponent = '\u2212' + -exponent;
+        if(exponent < 0) signedExponent = MINUS_SIGN + -exponent;
         else if(exponentFormat !== 'power') signedExponent = '+' + exponent;
         else signedExponent = String(exponent);
 
-        if(exponentFormat === 'e' ||
-                ((exponentFormat === 'SI' || exponentFormat === 'B') &&
-                 (exponent > 12 || exponent < -15))) {
+        if(exponentFormat === 'e') {
             v += 'e' + signedExponent;
         }
         else if(exponentFormat === 'E') {
@@ -1365,7 +1486,7 @@ function numFormat(v, ax, fmtoverride, hover) {
         else if(exponentFormat === 'B' && exponent === 9) {
             v += 'B';
         }
-        else if(exponentFormat === 'SI' || exponentFormat === 'B') {
+        else if(isSIFormat(exponentFormat)) {
             v += SIPREFIXES[exponent / 3 + 5];
         }
     }
@@ -1373,10 +1494,9 @@ function numFormat(v, ax, fmtoverride, hover) {
     // put sign back in and return
     // replace standard minus character (which is technically a hyphen)
     // with a true minus sign
-    if(isNeg) return '\u2212' + v;
+    if(isNeg) return MINUS_SIGN + v;
     return v;
 }
-
 
 axes.subplotMatch = /^x([0-9]*)y([0-9]*)$/;
 
@@ -1486,15 +1606,13 @@ axes.findSubplotsWithAxis = function(subplots, ax) {
 
 // makeClipPaths: prepare clipPaths for all single axes and all possible xy pairings
 axes.makeClipPaths = function(gd) {
-    var fullLayout = gd._fullLayout,
-        defs = fullLayout._defs,
-        fullWidth = {_offset: 0, _length: fullLayout.width, _id: ''},
-        fullHeight = {_offset: 0, _length: fullLayout.height, _id: ''},
-        xaList = axes.list(gd, 'x', true),
-        yaList = axes.list(gd, 'y', true),
-        clipList = [],
-        i,
-        j;
+    var fullLayout = gd._fullLayout;
+    var fullWidth = {_offset: 0, _length: fullLayout.width, _id: ''};
+    var fullHeight = {_offset: 0, _length: fullLayout.height, _id: ''};
+    var xaList = axes.list(gd, 'x', true);
+    var yaList = axes.list(gd, 'y', true);
+    var clipList = [];
+    var i, j;
 
     for(i = 0; i < xaList.length; i++) {
         clipList.push({x: xaList[i], y: fullHeight});
@@ -1504,16 +1622,10 @@ axes.makeClipPaths = function(gd) {
         }
     }
 
-    var defGroup = defs.selectAll('g.clips')
-        .data([0]);
-
-    defGroup.enter().append('g')
-        .classed('clips', true);
-
     // selectors don't work right with camelCase tags,
     // have to use class instead
     // https://groups.google.com/forum/#!topic/d3-js/6EpAzQ2gU9I
-    var axClips = defGroup.selectAll('.axesclip')
+    var axClips = fullLayout._clips.selectAll('.axesclip')
         .data(clipList, function(d) { return d.x._id + d.y._id; });
 
     axClips.enter().append('clipPath')
@@ -1532,7 +1644,6 @@ axes.makeClipPaths = function(gd) {
         });
     });
 };
-
 
 // doTicks: draw ticks, grids, and tick labels
 // axid: 'x', 'y', 'x2' etc,
@@ -1569,6 +1680,8 @@ axes.doTicks = function(gd, axid, skipTitle) {
                     .selectAll('path').remove();
                 plotinfo.zerolinelayer
                     .selectAll('path').remove();
+                fullLayout._infolayer.select('.g-' + xa._id + 'title').remove();
+                fullLayout._infolayer.select('.g-' + ya._id + 'title').remove();
             });
         }
 
@@ -1601,7 +1714,7 @@ axes.doTicks = function(gd, axid, skipTitle) {
     // set scaling to pixels
     ax.setScale();
 
-    var axletter = axid.charAt(0),
+    var axLetter = axid.charAt(0),
         counterLetter = axes.counterLetter(axid),
         vals = axes.calcTicks(ax),
         datafn = function(d) { return [d.text, d.x, ax.mirror].join('_'); },
@@ -1609,23 +1722,26 @@ axes.doTicks = function(gd, axid, skipTitle) {
         gcls = axid + 'grid',
         zcls = axid + 'zl',
         pad = (ax.linewidth || 1) / 2,
-        labelStandoff =
-            (ax.ticks === 'outside' ? ax.ticklen : 1) + (ax.linewidth || 0),
+        labelStandoff = (ax.ticks === 'outside' ? ax.ticklen : 0),
         labelShift = 0,
         gridWidth = Drawing.crispRound(gd, ax.gridwidth, 1),
         zeroLineWidth = Drawing.crispRound(gd, ax.zerolinewidth, gridWidth),
         tickWidth = Drawing.crispRound(gd, ax.tickwidth, 1),
-        sides, transfn, tickpathfn,
+        sides, transfn, tickpathfn, subplots,
         i;
 
     if(ax._counterangle && ax.ticks === 'outside') {
         var caRad = ax._counterangle * Math.PI / 180;
-        labelStandoff = ax.ticklen * Math.cos(caRad) + (ax.linewidth || 0);
+        labelStandoff = ax.ticklen * Math.cos(caRad) + 1;
         labelShift = ax.ticklen * Math.sin(caRad);
     }
 
+    if(ax.showticklabels && (ax.ticks === 'outside' || ax.showline)) {
+        labelStandoff += 0.2 * ax.tickfont.size;
+    }
+
     // positioning arguments for x vs y axes
-    if(axletter === 'x') {
+    if(axLetter === 'x') {
         sides = ['bottom', 'top'];
         transfn = function(d) {
             return 'translate(' + ax.l2p(d.x) + ',0)';
@@ -1638,7 +1754,7 @@ axes.doTicks = function(gd, axid, skipTitle) {
             else return 'M0,' + shift + 'v' + len;
         };
     }
-    else if(axletter === 'y') {
+    else if(axLetter === 'y') {
         sides = ['left', 'right'];
         transfn = function(d) {
             return 'translate(0,' + ax.l2p(d.x) + ')';
@@ -1659,9 +1775,11 @@ axes.doTicks = function(gd, axid, skipTitle) {
     // which direction do the side[0], side[1], and free ticks go?
     // then we flip if outside XOR y axis
         ticksign = [-1, 1, axside === sides[1] ? 1 : -1];
-    if((ax.ticks !== 'inside') === (axletter === 'x')) {
+    if((ax.ticks !== 'inside') === (axLetter === 'x')) {
         ticksign = ticksign.map(function(v) { return -v; });
     }
+
+    if(!ax.visible) return;
 
     // remove zero lines, grid lines, and inside ticks if they're within
     // 1 pixel of the end
@@ -1691,20 +1809,27 @@ axes.doTicks = function(gd, axid, skipTitle) {
         // tick labels - for now just the main labels.
         // TODO: mirror labels, esp for subplots
         var tickLabels = container.selectAll('g.' + tcls).data(vals, datafn);
-        if(!ax.showticklabels || !isNumeric(position)) {
+
+        if(!isNumeric(position)) {
             tickLabels.remove();
-            drawAxTitle(axid);
+            drawAxTitle();
+            return;
+        }
+        if(!ax.showticklabels) {
+            tickLabels.remove();
+            drawAxTitle();
+            calcBoundingBox();
             return;
         }
 
         var labelx, labely, labelanchor, labelpos0, flipit;
-        if(axletter === 'x') {
+        if(axLetter === 'x') {
             flipit = (axside === 'bottom') ? 1 : -1;
             labelx = function(d) { return d.dx + labelShift * flipit; };
             labelpos0 = position + (labelStandoff + pad) * flipit;
             labely = function(d) {
                 return d.dy + labelpos0 + d.fontSize *
-                    ((axside === 'bottom') ? 1 : -0.5);
+                    ((axside === 'bottom') ? 1 : -0.2);
             };
             labelanchor = function(angle) {
                 if(!isNumeric(angle) || angle === 0 || angle === 180) {
@@ -1715,7 +1840,9 @@ axes.doTicks = function(gd, axid, skipTitle) {
         }
         else {
             flipit = (axside === 'right') ? 1 : -1;
-            labely = function(d) { return d.dy + d.fontSize / 2 - labelShift * flipit; };
+            labely = function(d) {
+                return d.dy + d.fontSize * MID_SHIFT - labelShift * flipit;
+            };
             labelx = function(d) {
                 return d.dx + position + (labelStandoff + pad +
                     ((Math.abs(ax.tickangle) === 90) ? d.fontSize / 2 : 0)) * flipit;
@@ -1739,10 +1866,10 @@ axes.doTicks = function(gd, axid, skipTitle) {
                     var thisLabel = d3.select(this),
                         newPromise = gd._promises.length;
                     thisLabel
-                        .call(Drawing.setPosition, labelx(d), labely(d))
+                        .call(svgTextUtils.positionText, labelx(d), labely(d))
                         .call(Drawing.font, d.font, d.fontSize, d.fontColor)
                         .text(d.text)
-                        .call(svgTextUtils.convertToTspans);
+                        .call(svgTextUtils.convertToTspans, gd);
                     newPromise = gd._promises[newPromise];
                     if(newPromise) {
                         // if we have an async label, we'll deal with that
@@ -1775,17 +1902,10 @@ axes.doTicks = function(gd, axid, skipTitle) {
                             (labely(d) - d.fontSize / 2) + ')') :
                         '');
                 if(mathjaxGroup.empty()) {
-                    var txt = thisLabel.select('text').attr({
+                    thisLabel.select('text').attr({
                         transform: transform,
                         'text-anchor': anchor
                     });
-
-                    if(!txt.empty()) {
-                        txt.selectAll('tspan.line').attr({
-                            x: txt.attr('x'),
-                            y: txt.attr('y')
-                        });
-                    }
                 }
                 else {
                     var mjShift =
@@ -1814,7 +1934,7 @@ axes.doTicks = function(gd, axid, skipTitle) {
             // check for auto-angling if x labels overlap
             // don't auto-angle at all for log axes with
             // base and digit format
-            if(axletter === 'x' && !isNumeric(ax.tickangle) &&
+            if(axLetter === 'x' && !isNumeric(ax.tickangle) &&
                     (ax.type !== 'log' || String(ax.dtick).charAt(0) !== 'D')) {
                 var lbbArray = [];
                 tickLabels.each(function(d) {
@@ -1859,12 +1979,95 @@ axes.doTicks = function(gd, axid, skipTitle) {
             // (so it can move out of the way if needed)
             // TODO: separate out scoot so we don't need to do
             // a full redraw of the title (mostly relevant for MathJax)
-            drawAxTitle(axid);
+            drawAxTitle();
             return axid + ' done';
         }
 
         function calcBoundingBox() {
-            ax._boundingBox = container.node().getBoundingClientRect();
+            if(ax.showticklabels) {
+                var gdBB = gd.getBoundingClientRect();
+                var bBox = container.node().getBoundingClientRect();
+
+                /*
+                 * the way we're going to use this, the positioning that matters
+                 * is relative to the origin of gd. This is important particularly
+                 * if gd is scrollable, and may have been scrolled between the time
+                 * we calculate this and the time we use it
+                 */
+
+                ax._boundingBox = {
+                    width: bBox.width,
+                    height: bBox.height,
+                    left: bBox.left - gdBB.left,
+                    right: bBox.right - gdBB.left,
+                    top: bBox.top - gdBB.top,
+                    bottom: bBox.bottom - gdBB.top
+                };
+            } else {
+                var gs = fullLayout._size;
+                var pos;
+
+                // set dummy bbox for ticklabel-less axes
+
+                if(axLetter === 'x') {
+                    pos = ax.anchor === 'free' ?
+                        gs.t + gs.h * (1 - ax.position) :
+                        gs.t + gs.h * (1 - ax._anchorAxis.domain[{bottom: 0, top: 1}[ax.side]]);
+
+                    ax._boundingBox = {
+                        top: pos,
+                        bottom: pos,
+                        left: ax._offset,
+                        rigth: ax._offset + ax._length,
+                        width: ax._length,
+                        height: 0
+                    };
+                } else {
+                    pos = ax.anchor === 'free' ?
+                        gs.l + gs.w * ax.position :
+                        gs.l + gs.w * ax._anchorAxis.domain[{left: 0, right: 1}[ax.side]];
+
+                    ax._boundingBox = {
+                        left: pos,
+                        right: pos,
+                        bottom: ax._offset + ax._length,
+                        top: ax._offset,
+                        height: ax._length,
+                        width: 0
+                    };
+                }
+            }
+
+            /*
+             * for spikelines: what's the full domain of positions in the
+             * opposite direction that are associated with this axis?
+             * This means any axes that we make a subplot with, plus the
+             * position of the axis itself if it's free.
+             */
+            if(subplots) {
+                var fullRange = ax._counterSpan = [Infinity, -Infinity];
+
+                for(i = 0; i < subplots.length; i++) {
+                    var subplot = fullLayout._plots[subplots[i]];
+                    var counterAxis = subplot[(axLetter === 'x') ? 'yaxis' : 'xaxis'];
+
+                    extendRange(fullRange, [
+                        counterAxis._offset,
+                        counterAxis._offset + counterAxis._length
+                    ]);
+                }
+
+                if(ax.anchor === 'free') {
+                    extendRange(fullRange, (axLetter === 'x') ?
+                        [ax._boundingBox.bottom, ax._boundingBox.top] :
+                        [ax._boundingBox.right, ax._boundingBox.left]);
+                }
+            }
+
+            function extendRange(range, newRange) {
+                range[0] = Math.min(range[0], newRange[0]);
+                range[1] = Math.max(range[1], newRange[1]);
+            }
         }
 
         var done = Lib.syncOrAsync([
@@ -1876,7 +2079,7 @@ axes.doTicks = function(gd, axid, skipTitle) {
         return done;
     }
 
-    function drawAxTitle(axid) {
+    function drawAxTitle() {
         if(skipTitle) return;
 
         // now this only applies to regular cartesian axes; colorbars and
@@ -1902,16 +2105,23 @@ axes.doTicks = function(gd, axid, skipTitle) {
             avoid.offsetTop = translation.y;
         }
 
+        var titleStandoff = 10 + fontSize * offsetBase +
+            (ax.linewidth ? ax.linewidth - 1 : 0);
+
         if(axLetter === 'x') {
             counterAxis = (ax.anchor === 'free') ?
                 {_offset: gs.t + (1 - (ax.position || 0)) * gs.h, _length: 0} :
                 axisIds.getFromId(gd, ax.anchor);
 
             x = ax._offset + ax._length / 2;
-            y = counterAxis._offset + ((ax.side === 'top') ?
-                -10 - fontSize * (offsetBase + (ax.showticklabels ? 1 : 0)) :
-                counterAxis._length + 10 +
-                    fontSize * (offsetBase + (ax.showticklabels ? 1.5 : 0.5)));
+            if(ax.side === 'top') {
+                y = -titleStandoff - fontSize * (ax.showticklabels ? 1 : 0);
+            }
+            else {
+                y = counterAxis._length + titleStandoff +
+                    fontSize * (ax.showticklabels ? 1.5 : 0.5);
+            }
+            y += counterAxis._offset;
 
             if(ax.rangeslider && ax.rangeslider.visible && ax._boundingBox) {
                 y += (fullLayout.height - fullLayout.margin.b - fullLayout.margin.t) *
@@ -1926,10 +2136,14 @@ axes.doTicks = function(gd, axid, skipTitle) {
                 axisIds.getFromId(gd, ax.anchor);
 
             y = ax._offset + ax._length / 2;
-            x = counterAxis._offset + ((ax.side === 'right') ?
-                counterAxis._length + 10 +
-                    fontSize * (offsetBase + (ax.showticklabels ? 1 : 0.5)) :
-                -10 - fontSize * (offsetBase + (ax.showticklabels ? 0.5 : 0)));
+            if(ax.side === 'right') {
+                x = counterAxis._length + titleStandoff +
+                    fontSize * (ax.showticklabels ? 1 : 0.5);
+            }
+            else {
+                x = -titleStandoff - fontSize * (ax.showticklabels ? 0.5 : 0);
+            }
+            x += counterAxis._offset;
 
             transform = {rotate: '-90', offset: 0};
             if(!avoid.side) avoid.side = 'left';
@@ -1947,16 +2161,16 @@ axes.doTicks = function(gd, axid, skipTitle) {
 
     function traceHasBarsOrFill(trace, subplot) {
         if(trace.visible !== true || trace.xaxis + trace.yaxis !== subplot) return false;
-        if(Registry.traceIs(trace, 'bar') && trace.orientation === {x: 'h', y: 'v'}[axletter]) return true;
-        return trace.fill && trace.fill.charAt(trace.fill.length - 1) === axletter;
+        if(Registry.traceIs(trace, 'bar') && trace.orientation === {x: 'h', y: 'v'}[axLetter]) return true;
+        return trace.fill && trace.fill.charAt(trace.fill.length - 1) === axLetter;
     }
 
     function drawGrid(plotinfo, counteraxis, subplot) {
         var gridcontainer = plotinfo.gridlayer,
             zlcontainer = plotinfo.zerolinelayer,
-            gridvals = plotinfo['hidegrid' + axletter] ? [] : valsClipped,
+            gridvals = plotinfo['hidegrid' + axLetter] ? [] : valsClipped,
             gridpath = ax._gridpath ||
-                'M0,0' + ((axletter === 'x') ? 'v' : 'h') + counteraxis._length,
+                'M0,0' + ((axLetter === 'x') ? 'v' : 'h') + counteraxis._length,
             grid = gridcontainer.selectAll('path.' + gcls)
                 .data((ax.showgrid === false) ? [] : gridvals, datafn);
         grid.enter().append('path').classed(gcls, 1)
@@ -2010,12 +2224,13 @@ axes.doTicks = function(gd, axid, skipTitle) {
         return drawLabels(ax._axislayer, ax._pos);
     }
     else {
-        var alldone = axes.getSubplots(gd, ax).map(function(subplot) {
+        subplots = axes.getSubplots(gd, ax);
+        var alldone = subplots.map(function(subplot) {
             var plotinfo = fullLayout._plots[subplot];
 
             if(!fullLayout._has('cartesian')) return;
 
-            var container = plotinfo[axletter + 'axislayer'],
+            var container = plotinfo[axLetter + 'axislayer'],
 
                 // [bottom or left, top or right, free, main]
                 linepositions = ax._linepositions[subplot] || [],

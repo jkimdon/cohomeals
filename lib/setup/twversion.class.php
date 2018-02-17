@@ -1,9 +1,9 @@
 <?php
-// (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
+// (c) Copyright 2002-2017 by authors of the Tiki Wiki CMS Groupware Project
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: twversion.class.php 63932 2017-09-21 18:13:27Z jonnybradley $
+// $Id: twversion.class.php 65368 2018-01-29 18:07:16Z lfagundes $
 
 // Should generally be instantiated from tiki-setup.php
 
@@ -27,9 +27,9 @@ class TWVersion
 		$this->branch 	= 'stable';
 
 		// Set everything else, including defaults.
-		$this->version 	= '17.1';	// needs to have no spaces for releases
-		$this->star	= 'Zeta Boötis';
-		$this->releases	= array();
+		$this->version 	= '18.0';	// needs to have no spaces for releases
+		$this->star	= 'Alcyone';
+		$this->releases	= [];
 
 		// Check for Subversion or not
 		$this->svn	= is_dir('.svn') ? 'y' : 'n';
@@ -50,47 +50,48 @@ class TWVersion
 	// Returns an array of all used Tiki stars.
 	function tikiStars()
 	{
-		return array(
-				1=>'Spica',			// 0.9
-				2=>'Shaula',		// 0.95
-				3=>'Ras Algheti',	// 1.0.x
-				4=>'Capella',		// 1.1.x
-				5=>'Antares',		// 1.2.x
-				6=>'Pollux',		// 1.3.x
-				7=>'Mira',			// 1.4.x
-				8=>'Regulus',		// 1.5.x
-				9=>'Tau Ceti',		// 1.6.x
-				10=>'Era Carinae',	// 1.7.x
-				11=>'Polaris',		// 1.8.x
-				12=>'Sirius',		// 1.9.x
-				13=>'Arcturus',		// 2.x
-				14=>'Betelgeuse',	// 3.x
-				15=>'Aldebaran',	// 4.x
-				16=>'Vulpeculae',	// 5.x
-				17=>'Rigel',		// 6.x
-				18=>'Electra',		// 7.x
-				19=>'Acubens',		// 8.x
-				20=>'Herbig Haro',	// 9.x
-				21=>'Sun',			// 10.x
-				22=>'Vega',			// 11.x
-				23=>'Altair',		// 12.x
-				24=>'Fomalhaut',	// 13.x
-				25=>'Peony',		// 14.x
-				26=>'Situla',		// 15.x
-				27=>'Tabby\'s',		// 16.x
-				28=>'Zeta Boötis',	// 17.x
-		);
+		return [
+				1 => 'Spica',			// 0.9
+				2 => 'Shaula',		// 0.95
+				3 => 'Ras Algheti',	// 1.0.x
+				4 => 'Capella',		// 1.1.x
+				5 => 'Antares',		// 1.2.x
+				6 => 'Pollux',		// 1.3.x
+				7 => 'Mira',			// 1.4.x
+				8 => 'Regulus',		// 1.5.x
+				9 => 'Tau Ceti',		// 1.6.x
+				10 => 'Eta Carinae',	// 1.7.x
+				11 => 'Polaris',		// 1.8.x
+				12 => 'Sirius',		// 1.9.x
+				13 => 'Arcturus',		// 2.x
+				14 => 'Betelgeuse',	// 3.x
+				15 => 'Aldebaran',	// 4.x
+				16 => 'Vulpeculae',	// 5.x
+				17 => 'Rigel',		// 6.x
+				18 => 'Electra',		// 7.x
+				19 => 'Acubens',		// 8.x
+				20 => 'Herbig Haro',	// 9.x
+				21 => 'Sun',			// 10.x
+				22 => 'Vega',			// 11.x
+				23 => 'Altair',		// 12.x
+				24 => 'Fomalhaut',	// 13.x
+				25 => 'Peony',		// 14.x
+				26 => 'Situla',		// 15.x
+				27 => 'Tabby\'s',		// 16.x
+				28 => 'Zeta Boötis',	// 17.x
+				29 => 'Alcyone',	// 18.x
+		];
 	}
 
- 	// Returns an array of all valid versions of Tiki.
+	 // Returns an array of all valid versions of Tiki.
 	function tikiVersions()
 	{
 		// These are all the valid release versions of Tiki.
 		// Newest version goes at the end.
 		// Release Managers should update this array before
 		// release.
-		return array(
-				1=>'1.9.1',
+		return [
+				1 => '1.9.1',
 				'1.9.1.1',
 				'1.9.2',
 				'1.9.3.1',
@@ -229,6 +230,7 @@ class TWVersion
 				'12.9',
 				'12.10',
 				'12.11',
+				'12.12',
 				'13.0beta',
 				'13.0',
 				'13.1',
@@ -246,15 +248,20 @@ class TWVersion
 				'15.2',
 				'15.3',
 				'15.4',
+				'15.5',
 				'16.0beta',
 				'16.0',
 				'16.1',
 				'16.2',
+				'16.3',
 				'17.0alpha',
 				'17.0beta',
 				'17.0',
 				'17.1',
-			);
+				'18.0alpha',
+				'18.0beta',
+				'18.0',
+			];
 	}
 
 	// Gets the latest star used by Tiki.
@@ -266,13 +273,13 @@ class TWVersion
 		return $star;
 	}
 
-	// Determines the currently-running version of Tikiwiki.
+	// Determines the currently-running version of Tiki.
 	function getVersion()
 	{
 		return $this->version;
 	}
 
-	// Pulls the list of releases in the current branch of Tikiwiki from
+	// Pulls the list of releases in the current branch of Tiki from
 	// a central site.
 	private function pollVersion()
 	{

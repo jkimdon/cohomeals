@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: TitleInitialTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: TitleInitialTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 class Search_GlobalSource_TitleInitialTest extends PHPUnit_Framework_TestCase
 {
@@ -14,22 +14,21 @@ class Search_GlobalSource_TitleInitialTest extends PHPUnit_Framework_TestCase
 	{
 		$factory = new Search_Type_Factory_Direct;
 		$source = new Search_GlobalSource_TitleInitialSource;
-		$out = $source->getData(null, null, $factory, array(
+		$out = $source->getData(null, null, $factory, [
 			'title' => $factory->sortable($string),
-		));
+		]);
 
 		$this->assertEquals($factory->identifier($letter), $out['title_initial']);
 	}
 
 	function mapping()
 	{
-		return array(
-			'basic' => array('H', 'Hello World'),
-			'lowercase' => array('H', 'hello world'),
-			'vowel' => array('E', 'End'),
-			'missing' => array('0', ''),
-			'accentuated' => array('E', 'éducation'),
-		);
+		return [
+			'basic' => ['H', 'Hello World'],
+			'lowercase' => ['H', 'hello world'],
+			'vowel' => ['E', 'End'],
+			'missing' => ['0', ''],
+			'accentuated' => ['E', 'éducation'],
+		];
 	}
 }
-

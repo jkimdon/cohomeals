@@ -1,4 +1,4 @@
-{* $Id: tiki-galleries.tpl 61985 2017-04-01 01:04:28Z jyhem $ *}
+{* $Id: tiki-galleries.tpl 63726 2017-09-04 23:00:50Z rjsmelo $ *}
 {title help="Image Galleries" admpage="gal"}{tr}Galleries{/tr}{/title}
 {if $tiki_p_create_galleries eq 'y'}
 	{if $edit_mode ne 'y' or $galleryId ne 0}
@@ -6,6 +6,9 @@
 			{button href="?edit_mode=1&amp;galleryId=0" class="btn btn-default" _icon_name="create" _text="{tr}Create New Gallery{/tr}"}
 			{if $galleryId ne 0}
 				{button href="tiki-browse_gallery.php?galleryId=$galleryId" class="btn btn-default" _icon_name="view" _text="{tr}Browse Gallery{/tr}"}
+			{/if}
+			{if $display_migrate_filegal}
+				{button href="tiki-galleries.php?migrate_images_to_fgal=1" class="btn btn-default" _icon_name="file" _text="{tr}Migrate Images to File Gallery{/tr}"}
 			{/if}
 		</div>
 	{/if}
@@ -435,7 +438,7 @@
 												class="tips"
 												title="{tr}Actions{/tr}"
 												href="#"
-												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.gallery_actions|escape:"javascript"|escape:"html"}{/if}
+												{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.gallery_actions}{/if}
 												style="padding:0; margin:0; border:0"
 										>
 											{icon name='wrench'}

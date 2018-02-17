@@ -1,4 +1,4 @@
-{* $Id: tiki-searchfacets.tpl 62176 2017-04-10 06:01:52Z drsassafras $ *}
+{* $Id: tiki-searchfacets.tpl 62177 2017-04-10 06:06:43Z drsassafras $ *}
 {extends 'layout_view.tpl'}
 
 {block name=title}

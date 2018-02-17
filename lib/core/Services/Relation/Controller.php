@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 58433 2016-04-25 09:44:23Z jonnybradley $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Relation_Controller
 {
@@ -47,28 +47,28 @@ class Services_Relation_Controller
 			$relationId = $relationlib->add_relation($relation, $source_type, $source_id, $target_type, $target_id);
 			TikiLib::events()->trigger(
 				'tiki.relation.add',
-				array(
+				[
 					'id' => $relationId,
 					'target_type' => $target_type,
 					'target_id' => $target_id,
 					'source_type' => $source_type,
 					'source_id' => $source_id,
 					'relation' => $relation,
-				)
+				]
 			);
 		} else {
 			//if there is a relation, remove the relation, trigger the event, and set the relationId to null
 			$relationlib->remove_relation($relationId);
 			TikiLib::events()->trigger(
 				'tiki.relation.remove',
-				array(
+				[
 					'id' => $relationId,
 					'target_type' => $target_type,
 					'target_id' => $target_id,
 					'source_type' => $source_type,
 					'source_id' => $source_id,
 					'relation' => $relation,
-				)
+				]
 			);
 			$relationId = null; // set the
 		}
@@ -76,9 +76,9 @@ class Services_Relation_Controller
 		$tx->commit();
 
 		//return the relationId (new relation if added, null if removed)
-		return array(
+		return [
 			'relation_id' => $relationId,
-		);
+		];
 	}
 
 	/**
@@ -121,14 +121,14 @@ class Services_Relation_Controller
 				$relationlib->remove_relation($rel['relationId']);
 				TikiLib::events()->trigger(
 					'tiki.relation.remove',
-					array(
+					[
 						'id' => $rel['relation_id'],
 						'target_type' => $target_type,
 						'target_id' => $target_id,
 						'source_type' => $source_type,
 						'source_id' => $source_id,
 						'relation' => $relation,
-					)
+					]
 				);
 			}
 		}
@@ -140,23 +140,22 @@ class Services_Relation_Controller
 			$relationId = $relationlib->add_relation($relation, $source_type, $source_id, $target_type, $target_id);
 			TikiLib::events()->trigger(
 				'tiki.relation.add',
-				array(
+				[
 					'id' => $relationId,
 					'target_type' => $target_type,
 					'target_id' => $target_id,
 					'source_type' => $source_type,
 					'source_id' => $source_id,
 					'relation' => $relation,
-				)
+				]
 			);
 		}
 
 		$tx->commit();
 
 		//return the relationId (new relation if added, null if removed)
-		return array(
+		return [
 			'relation_id' => $relationId,
-		);
+		];
 	}
 }
-

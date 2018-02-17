@@ -3,28 +3,28 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: zoterolib.php 57961 2016-03-17 20:01:56Z jonnybradley $
+// $Id: zoterolib.php 64633 2017-11-19 12:25:47Z rjsmelo $
 
 /**
  *
  */
 class ZoteroLib extends TikiDb_Bridge
 {
-    /**
-     * @return bool
-     */
-    function is_authorized()
+	/**
+	 * @return bool
+	 */
+	function is_authorized()
 	{
 		$oauthlib = TikiLib::lib('oauth');
 		return $oauthlib->is_authorized('zotero');
 	}
 
-    /**
-     * @param $tag
-     * @param int $limit
-     * @return array|bool
-     */
-    function get_references($tag, $limit = 25)
+	/**
+	 * @param $tag
+	 * @param int $limit
+	 * @return array|bool
+	 */
+	function get_references($tag, $limit = 25)
 	{
 		global $prefs;
 
@@ -33,10 +33,10 @@ class ZoteroLib extends TikiDb_Bridge
 			$subset = '/tags/' . rawurlencode($tag);
 		}
 
-		$arguments = array(
+		$arguments = [
 			'content' => 'bib',
 			'limit' => $limit,
-		);
+		];
 
 		if (! empty($prefs['zotero_style'])) {
 			$arguments['style'] = $prefs['zotero_style'];
@@ -45,23 +45,23 @@ class ZoteroLib extends TikiDb_Bridge
 		$oauthlib = TikiLib::lib('oauth');
 		$response = $oauthlib->do_request(
 			'zotero',
-			array(
+			[
 				'url' => "https://api.zotero.org/groups/{$prefs['zotero_group_id']}$subset/items",
 				'get' => $arguments,
-			)
+			]
 		);
 
 		if ($response && $response->isSuccessful()) {
 			$feed = Zend\Feed\Reader\Reader::importString($response->getBody());
 
-			$data = array();
+			$data = [];
 			foreach ($feed as $entry) {
-				$data[] = array(
+				$data[] = [
 					'key' => basename($entry->getLink()),
 					'url' => $entry->getLink(),
 					'title' => $entry->getTitle(),
 					'content' => $entry->getDescription(),
-				);
+				];
 			}
 
 			return $data;
@@ -70,11 +70,11 @@ class ZoteroLib extends TikiDb_Bridge
 		return false;
 	}
 
-    /**
-     * @param $tag
-     * @return bool|mixed
-     */
-    function get_first_entry($tag)
+	/**
+	 * @param $tag
+	 * @return bool|mixed
+	 */
+	function get_first_entry($tag)
 	{
 		if ($references = $this->get_references($tag, 1)) {
 			return reset($references);
@@ -83,17 +83,17 @@ class ZoteroLib extends TikiDb_Bridge
 		return false;
 	}
 
-    /**
-     * @param $itemId
-     * @return array|bool
-     */
-    function get_entry($itemId)
+	/**
+	 * @param $itemId
+	 * @return array|bool
+	 */
+	function get_entry($itemId)
 	{
 		global $prefs;
 
-		$arguments = array(
+		$arguments = [
 			'content' => 'bib',
-		);
+		];
 
 		if (! empty($prefs['zotero_style'])) {
 			$arguments['style'] = $prefs['zotero_style'];
@@ -102,10 +102,10 @@ class ZoteroLib extends TikiDb_Bridge
 		$oauthlib = TikiLib::lib('oauth');
 		$response = $oauthlib->do_request(
 			'zotero',
-			array(
+			[
 				'url' => "https://api.zotero.org/groups/{$prefs['zotero_group_id']}/items/" . urlencode($itemId),
 				'get' => $arguments,
-			)
+			]
 		);
 
 		if ($response->isSuccessful()) {
@@ -114,23 +114,23 @@ class ZoteroLib extends TikiDb_Bridge
 			$feed = Zend\Feed\Reader\Reader::importString($entry);
 
 			foreach ($feed as $entry) {
-				return array(
+				return [
 					'key' => basename($entry->getLink()),
 					'url' => $entry->getLink(),
 					'title' => $entry->getTitle(),
 					'content' => $entry->getDescription(),
-				);
+				];
 			}
 		}
 
 		return false;
 	}
 
-    /**
-     * @param $tag
-     * @return bool
-     */
-    function get_formatted_references($tag)
+	/**
+	 * @param $tag
+	 * @return bool
+	 */
+	function get_formatted_references($tag)
 	{
 		global $prefs;
 
@@ -139,11 +139,11 @@ class ZoteroLib extends TikiDb_Bridge
 			$subset = '/tags/' . rawurlencode($tag);
 		}
 
-		$arguments = array(
+		$arguments = [
 			'content' => 'bib',
 			'format' => 'bib',
 			'limit' => 500,
-		);
+		];
 
 		if (! empty($prefs['zotero_style'])) {
 			$arguments['style'] = $prefs['zotero_style'];
@@ -152,10 +152,10 @@ class ZoteroLib extends TikiDb_Bridge
 		$oauthlib = TikiLib::lib('oauth');
 		$response = $oauthlib->do_request(
 			'zotero',
-			array(
+			[
 				'url' => "https://api.zotero.org/groups/{$prefs['zotero_group_id']}$subset/items",
 				'get' => $arguments,
-			)
+			]
 		);
 
 		if ($response->isSuccessful()) {
@@ -167,4 +167,3 @@ class ZoteroLib extends TikiDb_Bridge
 		return false;
 	}
 }
-

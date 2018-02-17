@@ -1,6 +1,6 @@
-{* $Id: include_look.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_look.tpl 65359 2018-01-29 10:36:19Z jonnybradley $ *}
 <form action="tiki-admin.php?page=look" id="look" name="look" class="form-horizontal labelColumns" class="admin" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="clearfix margin-bottom-md">
 		{if $prefs.feature_theme_control eq y}
 			{button _text="{tr}Theme Control{/tr}" href="tiki-theme_control.php" _class="btn-sm tikihelp" }
@@ -86,21 +86,14 @@
 			<div class="adminoptionbox">
 				<fieldset>
 					<legend>{tr}Module zone visibility{/tr}</legend>
-					{if !isset($smarty.get.Zone_options) || !$smarty.get.Zone_options}
-						{remarksbox type="tip" title="{tr}Hint{/tr}"}
-							Some module zone visibility options may not be supported anymore from Tiki 13+, but you can still access them in case you are upgrading from an earlier version. <a href="tiki-admin.php?page=look&Zone_options=y#contentadmin_look-2" class="alert-link">Show all module visibility options</a>
-						{/remarksbox}
-						{preference name=feature_left_column}
-						{preference name=feature_right_column}
-					{else}
-						{preference name=module_zones_top}
-						{preference name=module_zones_topbar}
-						{preference name=module_zones_pagetop}
-						{preference name=feature_left_column}
-						{preference name=feature_right_column}
-						{preference name=module_zones_pagebottom}
-						{preference name=module_zones_bottom}
-					{/if}
+					{preference name=module_zones_top}
+					{preference name=module_zones_topbar}
+					{preference name=module_zones_pagetop}
+					{preference name=feature_left_column}
+					{preference name=feature_right_column}
+					{preference name=module_zones_pagebottom}
+					{preference name=module_zones_bottom}
+					<hr>
 					{preference name=module_file}
 					{preference name=module_zone_available_extra}
 				</fieldset>
@@ -197,6 +190,7 @@
 			</fieldset>
 			<fieldset>
 				<legend>{tr}Editing{/tr}</legend>
+				{preference name=theme_styleguide}
 				{preference name=feature_editcss}
 				{preference name=feature_view_tpl}
 				{if $prefs.feature_view_tpl eq 'y'}

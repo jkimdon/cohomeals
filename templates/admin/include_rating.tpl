@@ -1,7 +1,7 @@
-{* $Id: include_rating.tpl 62023 2017-04-02 07:10:43Z lindonb $ *}
+{* $Id: include_rating.tpl 64272 2017-10-14 17:43:57Z rjsmelo $ *}
 
 <form class="admin form-horizontal" id="performance" name="performance" action="tiki-admin.php?page=rating" method="post">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	<div class="row">
 		<div class="form-group col-lg-12 clearfix">
 			{include file='admin/include_apply_top.tpl'}
@@ -16,6 +16,7 @@
 			{preference name=rating_recalculation_count}
 		</div>
 		{preference name=ip_can_be_checked}
+		{preference name=rating_allow_multi_votes}
 	</fieldset>
 
 	<fieldset>
@@ -83,7 +84,7 @@
 <div id="rating_advanced_childcontainer">
 	{foreach from=$configurations item=config}
 		<form class="config" method="post" action="">
-			{include file='access/include_ticket.tpl'}
+			{ticket}
 			<fieldset>
 				<legend>{$config.name|escape} <small>(ID: {$config.ratingConfigId|escape}, Search Field: <em>adv_rating_{$config.ratingConfigId|escape}</em>)</small></legend>
 				<input type="hidden" name="config" value="{$config.ratingConfigId|escape}">
@@ -125,7 +126,7 @@
 		</form><br>
 	{/foreach}
 	<form method="post" action="">
-		{include file='access/include_ticket.tpl'}
+		{ticket}
 		<fieldset>
 			<legend>{tr}Create new{/tr}</legend>
 			<label class="control-label col-sm-4" for="rating_config_new">

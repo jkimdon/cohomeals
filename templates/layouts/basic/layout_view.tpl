@@ -1,4 +1,4 @@
-{* $Id: layout_view.tpl 62780 2017-05-28 12:37:09Z jonnybradley $ *}<!DOCTYPE html>
+{* $Id: layout_view.tpl 65358 2018-01-29 10:32:10Z jonnybradley $ *}<!DOCTYPE html>
 <html lang="{if !empty($pageLang)}{$pageLang}{else}{$prefs.language}{/if}"{if !empty($page_id)} id="page_{$page_id}"{/if}>
 <head>
 	{include file='header.tpl'}
@@ -93,7 +93,7 @@
 				</div>
 			{/if}
 			{if $prefs.feature_right_column eq 'user'}
-				<div class="col-md-6 text-right side-col-toggle">
+				<div class="col-md-6 text-right side-col-toggle{if $prefs.feature_left_column neq 'user'} col-md-offset-6{/if}">
 					{$icon_name = (not empty($smarty.cookies.hide_zone_right)) ? 'toggle-left' : 'toggle-right'}
 					{icon name=$icon_name class='toggle_zone right' href='#' title='{tr}Toggle right modules{/tr}'}
 				</div>

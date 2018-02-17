@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: AddonRemoveCommand.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: AddonRemoveCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -87,10 +87,10 @@ class AddonRemoveCommand extends Command
 
 		$installedProfiles = $addon_utilities->getInstalledProfiles($folder);
 
-		if (!$confirm && ($willRemove || !empty($installedProfiles))) {
+		if (! $confirm && ($willRemove || ! empty($installedProfiles))) {
 			$output->writeln("<error>There will be NO undo, and all data in the above objects will be deleted.</error>");
 			$output->writeln("<info>Use the --confirm option to proceed with removal.</info>");
-		} elseif (!$willRemove) {
+		} elseif (! $willRemove) {
 			$output->writeln("<info>It looks like the objects for this addon have been removed already.</info>");
 		}
 		if (empty($installedProfiles)) {

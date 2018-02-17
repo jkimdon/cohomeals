@@ -1,10 +1,12 @@
 {if $p.helpurl}
-	<a href="{$p.helpurl|escape}" target="tikihelp" class="tikihelp" title="{$p.name|escape}: {$p.description|escape} {if $p.separator && $p.type neq 'multiselector'}{tr}Separator is {/tr}<b>{$p.separator|simplewiki}</b>{/if}">
-		{icon name="help"}
-	</a>
+	{$icon = "help"}
 {elseif $p.description}
-	<a class="tikihelp" title="{$p.name|escape}: {$p.description|escape} {if $p.separator && $p.type neq 'multiselector'}{tr}Separator is {/tr}<b>{$p.separator|simplewiki}</b>{/if}">
-		{icon name="information"}
+	{$icon = "information"}
+{/if}
+{if isset($icon)}
+	<a {if $p.helpurl} href="{$p.helpurl|escape}" target="tikihelp"{/if}
+	 	class="tikihelp" title="{$p.name|escape}: {$p.description|escape} {if $p.separator && $p.type neq 'multiselector'}{tr}Separator is {/tr}<b>{$p.separator|simplewiki}</b>{/if}">
+		{icon name=$icon}
 	</a>
 {/if}
 
@@ -23,7 +25,7 @@
 {/if}
 
 {if !empty($p.popup_html)}
-	<a class="tips" title="{tr}Actions{/tr}" href="#" style="padding:0; margin:0; border:0" {popup fullhtml=1 center="true" text=$p.popup_html|escape:"javascript"|escape:"html"}>
+	<a class="tips" title="{tr}Actions{/tr}" href="#" style="padding:0; margin:0; border:0" {popup fullhtml=1 center="true" text=$p.popup_html}>
 		{icon name="actions"}
 	</a>
 {/if}

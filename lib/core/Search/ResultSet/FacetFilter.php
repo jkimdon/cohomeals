@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: FacetFilter.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: FacetFilter.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_ResultSet_FacetFilter
 {
@@ -38,13 +38,12 @@ class Search_ResultSet_FacetFilter
 
 	function getOptions()
 	{
-		$out = array();
+		$out = [];
 
 		foreach ($this->data as $entry) {
 			$out[$entry['value']] = tr('%0 (%1)', tra($this->facet->render($entry['value'])), $entry['count']);
 		}
-		
+
 		return $out;
 	}
 }
-

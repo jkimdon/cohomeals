@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: HighlightHelper.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: HighlightHelper.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Search_MySql_HighlightHelper implements Zend\Filter\FilterInterface
 {
-	private $words = array();
-	private $replacements = array();
+	private $words = [];
+	private $replacements = [];
 	private $snippetHelper;
 
 	function __construct(array $words)
@@ -21,7 +21,8 @@ class Search_MySql_HighlightHelper implements Zend\Filter\FilterInterface
 			function ($word) use (& $counter) {
 				$counter++;
 				return "<b class=\"highlight_word highlight_word_$counter\">$word</b>";
-			}, $this->words
+			},
+			$this->words
 		);
 		$this->snippetHelper = new Search_ResultSet_SnippetHelper;
 	}
@@ -33,4 +34,3 @@ class Search_MySql_HighlightHelper implements Zend\Filter\FilterInterface
 		return trim(strip_tags($content, '<b><i><em><strong><pre><code><span>'));
 	}
 }
-

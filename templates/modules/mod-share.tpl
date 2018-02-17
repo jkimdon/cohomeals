@@ -1,4 +1,4 @@
-{* $Id: mod-share.tpl 63376 2017-07-27 09:40:14Z jonnybradley $ *}
+{* $Id: mod-share.tpl 63386 2017-07-27 15:28:44Z jonnybradley $ *}
 {strip}
 {tikimodule error=$module_params.error title=$tpl_module_title name=$tpl_module_name flip=$module_params.flip decorations=$module_params.decorations nobox=$module_params.nobox notitle=$module_params.notitle}
 	<div class="{if !$share_icons}site_report {/if}mod-share-item" id="site_report_{$share_mod_usage_counter}">

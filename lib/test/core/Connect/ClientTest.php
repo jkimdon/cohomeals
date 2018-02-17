@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ClientTest.php 59625 2016-09-07 18:12:47Z jonnybradley $
+// $Id: ClientTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * Test class for TikiConnect.
@@ -32,12 +32,11 @@ class Connect_Client_Test extends TikiTestCase
 	{
 		global $TWV;
 
-		include_once ('lib/setup/twversion.class.php');
+		include_once('lib/setup/twversion.class.php');
 		$TWV = new TWVersion();
 
 		$data = $this->obj->buildConnectData(); // TODO check status etc
 
 		$this->assertGreaterThan(0, count($data));
 	}
-
 }

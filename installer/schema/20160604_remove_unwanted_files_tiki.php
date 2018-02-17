@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: 20160604_remove_unwanted_files_tiki.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: 20160604_remove_unwanted_files_tiki.php 64614 2017-11-17 23:30:13Z rjsmelo $
 
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 	header("location: index.php");
@@ -16,7 +16,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
 function upgrade_20160604_remove_unwanted_files_tiki($installer)
 {
 
-	$files = array(
+	$files = [
 		'vendo/player/mp3/template_default/compileTemplateDefault.bat',
 		'vendor/player/mp3/template_default/compileTemplateDefault.sh',
 		'vendor/player/mp3/template_default/TemplateDefault.as',
@@ -27,13 +27,11 @@ function upgrade_20160604_remove_unwanted_files_tiki($installer)
 		'vendor/player/flv/template_default/rorobong.jpg',
 		'vendor/player/flv/template_default/TemplateDefault.as',
 		'vendor/jcapture-applet/jcapture-applet/applet.php',
-	);
+	];
 
 	foreach ($files as $file) {
 		if (is_writable($file)) {
 			unlink($file);
 		}
 	}
-
 }
-

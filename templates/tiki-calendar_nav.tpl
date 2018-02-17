@@ -27,7 +27,7 @@
 			<div>{strip}
 
 	{*previous*}
-				<div style="display:inline-block; padding-right: 6px; position: relative; bottom: 9px;">
+				<div style="display:inline-block; padding-right: 6px; position: relative; bottom: 20px; right: 100px">
 					<a class="tips" href="{query _type='relative' _ajax=$ajax _class='prev' todate=$focus_prev}" title=":{tr}Previous {$viewmode|escape}{/tr}">
 						{icon name="previous"}
 					</a>
@@ -57,7 +57,7 @@
 				</div>
 
 	{*next*}
-				<div style="display:inline-block; padding-left: 6px; position: relative; bottom: 9px;">
+				<div style="display:inline-block; padding-left: 6px; position: relative; bottom: 20px; left: 100px">
 					<a class="tips" href="{query _type='relative' _ajax=$ajax _class='next' todate=$focus_next}" title=":{tr}Next {$viewmode|escape}{/tr}">
 						{icon name="next"}
 					</a>
@@ -94,7 +94,7 @@
 
 {*next*}
 		{if !empty($module_params.viewnavbar) && $module_params.viewnavbar eq 'partial'}
-			{self_link _ajax=$ajax _class="next" todate=$focus_next _title=":{tr}Next {$viewmode|escape}{/tr}" _icon_name="next"}{/self_link}
+			{self_link _ajax=$ajax _class="next tips" todate=$focus_next _title=":{tr}Next {$viewmode|escape}{/tr}" _icon_name="next"}{/self_link}
 		{/if}
 	</div>
 {/if}

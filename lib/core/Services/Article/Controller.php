@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 57970 2016-03-17 20:08:22Z jonnybradley $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Article_Controller
 {
@@ -37,14 +37,14 @@ class Services_Article_Controller
 
 			$hash = md5($data['title'] . $data['description'] . $data['content']);
 
-			$id = TikiDb::get()->table('tiki_articles')->fetchOne('articleId', array(
+			$id = TikiDb::get()->table('tiki_articles')->fetchOne('articleId', [
 				'linkto' => $url,
-			)) ?: 0;
+			]) ?: 0;
 
 			if (! $id) {
 				$tikilib = TikiLib::lib('tiki');
 				$publication = $tikilib->now;
-				$expire = $publication + 3600*24*365;
+				$expire = $publication + 3600 * 24 * 365;
 				$rating = 10;
 
 				$artlib = TikiLib::lib('art');
@@ -84,8 +84,8 @@ class Services_Article_Controller
 		}
 
 		$db = TikiDb::get();
-		$topics = $db->table('tiki_topics')->fetchMap('topicId', 'name', array(), -1, -1, 'name_asc');
-		$types = $db->table('tiki_article_types')->fetchColumn('type', array());
+		$topics = $db->table('tiki_topics')->fetchMap('topicId', 'name', [], -1, -1, 'name_asc');
+		$types = $db->table('tiki_article_types')->fetchColumn('type', []);
 
 		return [
 			'title' => tr('Create article from URL'),
@@ -97,4 +97,3 @@ class Services_Article_Controller
 		];
 	}
 }
-

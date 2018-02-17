@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "Walisisk",
 "Slovene" => "Slovensk",
 "Arabic" => "Arabisk",
@@ -1341,7 +1341,7 @@ $lang = array(
 "Versions are identical" => "Versjonene er identiske",
 "Minimum %0 characters long" => "Minimum %0 tegn langt",
 "vote" => "stem",
-"Repeat password" => "Igjen",
+"Confirm password" => "Igjen",
 "Generate a password" => "Generere et passord",
 "Valid" => "Gyldig",
 "Last modification" => "Siste endring",
@@ -2289,4 +2289,4 @@ $lang = array(
 "No thread indicated" => "Ingen tråd valgt",
 "Top pages" => "Topp sider",
 "Last pages" => "Siste sider",
-);
+];

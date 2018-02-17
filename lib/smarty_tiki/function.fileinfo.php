@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: function.fileinfo.php 57965 2016-03-17 20:04:49Z jonnybradley $
+// $Id: function.fileinfo.php 64630 2017-11-19 12:11:11Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
@@ -21,7 +21,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function smarty_function_fileinfo($params, $smarty)
 {
-	if ( ! is_array($params) || ! isset($params['_id']) || ! isset($params['_field']) ) {
+	if (! is_array($params) || ! isset($params['_id']) || ! isset($params['_field'])) {
 		return;
 	}
 	$filegallib = TikiLib::lib('filegal');
@@ -29,23 +29,23 @@ function smarty_function_fileinfo($params, $smarty)
 
 	$infos = $filegallib->get_file($params['_id']);
 
-	if ( isset($infos[$params['_field']]) && $infos[$params['_field']] != '' ) {
+	if (isset($infos[$params['_field']]) && $infos[$params['_field']] != '') {
 		$return = $infos[$params['_field']];
-	} elseif ( $params['_field'] == 'name' ) {
+	} elseif ($params['_field'] == 'name') {
 		// Fallback to filename if there is no name for the specified file
 		$return = $infos['filename'];
 	} else {
 		$return = '';
 	}
 
-	if ( isset($params['_link']) ) {
+	if (isset($params['_link'])) {
 		global $prefs, $filegals_manager, $url_path;
 		$key_type = substr($infos['filetype'], 0, 9);
-		$tmp = '<a href="'.$url_path.'tiki-download_file.php?fileId='.$params['_id'].'&amp;display"';
-		if ( $prefs['feature_shadowbox'] == 'y' ) {
-			$tmp .= ' data-box="shadowbox['.htmlentities($params['_link']).'];type=' . ( in_array($key_type, array('image/png', 'image/jpe', 'image/gif')) ? 'img' : 'iframe' ) . '"';
+		$tmp = '<a href="' . $url_path . 'tiki-download_file.php?fileId=' . $params['_id'] . '&amp;display"';
+		if ($prefs['feature_shadowbox'] == 'y') {
+			$tmp .= ' data-box="shadowbox[' . htmlentities($params['_link']) . '];type=' . ( in_array($key_type, ['image/png', 'image/jpe', 'image/gif']) ? 'img' : 'iframe' ) . '"';
 		}
-		$return = $tmp.'>'.$return.'</a>';
+		$return = $tmp . '>' . $return . '</a>';
 		unset($tmp);
 	}
 

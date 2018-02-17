@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Editable.php 59939 2016-10-08 03:50:05Z lindonb $
+// $Id: Editable.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Tiki_Render_Editable
 {
@@ -17,8 +17,8 @@ class Tiki_Render_Editable
 	function __construct($html, array $parameters)
 	{
 		$this->inner = $html;
-		
-		if (! empty($parameters['layout']) && in_array($parameters['layout'], array('inline', 'block', 'dialog'))) {
+
+		if (! empty($parameters['layout']) && in_array($parameters['layout'], ['inline', 'block', 'dialog'])) {
 			$this->layout = $parameters['layout'];
 		}
 
@@ -78,4 +78,3 @@ class Tiki_Render_Editable
 		return "<$tag class=\"$class\" data-field-fetch-url=\"$fieldFetch\" data-object-store-url=\"$objectStore\" data-group=\"$group\" data-label=\"$label\">$value</$tag>";
 	}
 }
-

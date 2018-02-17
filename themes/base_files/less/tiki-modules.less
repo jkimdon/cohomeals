@@ -1,4 +1,4 @@
-// $Id: tiki-modules.less 62500 2017-05-08 13:54:34Z jonnybradley $
+// $Id: tiki-modules.less 64877 2017-12-12 08:36:48Z chibaguy $
 
 //#top_modules,
 //#topbar_modules,
@@ -203,8 +203,14 @@ li.login_link ul li a {
 	background: none !important;
 }
 
-.siteloginbar_popup img {
-	height: 24px;
+.siteloginbar_popup {
+	img {
+		height: 24px;
+	}
+	.list-unstyled li a	{ // Make left alignment of links even with inputs
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
 .navbar-form .siteloginbar_poppedup .form-control,
@@ -348,6 +354,10 @@ div.cvsup {
 	.btn-link {
 		margin-top: @navbar-fixed-height / 7;
 	}
+	& .dropdown .btn,
+	& .dropdown .btn-link {
+		margin-top: inherit;
+	}
 	//  .navbar-inverse .navbar-collapse,
 	//  .navbar-inverse .navbar-form,
 	//  .navbar-inverse {
@@ -373,5 +383,23 @@ div.cvsup {
 @media (min-width: @screen-sm-min) {
 	.layout_social_modules .navbar-header {
 		margin-top: -34px;
+	}
+}
+
+@media (max-width: @screen-xs-max) {
+	.box-search {
+		.form-inline .input-group {
+			margin-left: 0 !important;
+			margin-right: 0 !important;
+			.form-control { width: auto; }
+			.input-group-btn { float: left; width: auto; }
+		}
+
+		.panel-body .form-inline .input-group {
+			width: 100%;
+			.input-group-addon, .input-group-btn, .form-control {
+				width: 100%;
+			}
+		}
 	}
 }

@@ -3,11 +3,19 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: CommandTask.php 61987 2017-04-01 12:39:23Z rjsmelo $
+// $Id: CommandTask.php 62818 2017-05-29 23:39:30Z rjsmelo $
+
+use Psr\Log\LoggerInterface;
 
 abstract class Scheduler_Task_CommandTask
 {
 	protected $errorMessage;
+	protected $logger;
+
+	public function __construct(LoggerInterface $logger)
+	{
+		$this->logger = $logger;
+	}
 
 	abstract protected function execute($params = null);
 

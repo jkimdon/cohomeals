@@ -3,14 +3,14 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: IncrementalUpdateTest.php 57963 2016-03-17 20:03:23Z jonnybradley $
+// $Id: IncrementalUpdateTest.php 64624 2017-11-19 11:24:47Z rjsmelo $
 
 /**
  * @group unit
  */
 abstract class Search_Index_IncrementalUpdateTest extends PHPUnit_Framework_TestCase
 {
-	protected abstract function getIndex();
+	abstract protected function getIndex();
 
 	protected function populate($index)
 	{
@@ -23,12 +23,12 @@ abstract class Search_Index_IncrementalUpdateTest extends PHPUnit_Framework_Test
 	{
 		$index = $this->getIndex();
 		$index->invalidateMultiple(
-			array(
-				array(
+			[
+				[
 					'object_type' => 'wiki page',
 					'object_id' => 'NewPage',
-				),
-			)
+				],
+			]
 		);
 		$this->addDocument($index, 'wiki page', 'NewPage', 'Testing search');
 		$index->endUpdate();
@@ -42,12 +42,12 @@ abstract class Search_Index_IncrementalUpdateTest extends PHPUnit_Framework_Test
 	{
 		$index = $this->getIndex();
 		$index->invalidateMultiple(
-			array(
-				array(
+			[
+				[
 					'object_type' => 'wiki page',
 					'object_id' => 'SomePage',
-				),
-			)
+				],
+			]
 		);
 		$this->addDocument($index, 'wiki page', 'SomePage', 'Foobar');
 		$index->endUpdate();
@@ -60,12 +60,12 @@ abstract class Search_Index_IncrementalUpdateTest extends PHPUnit_Framework_Test
 	{
 		$index = $this->getIndex();
 		$index->invalidateMultiple(
-			array(
-				array(
+			[
+				[
 					'object_type' => 'wiki page',
 					'object_id' => 'SomePage',
-				),
-			)
+				],
+			]
 		);
 		$index->endUpdate();
 
@@ -86,13 +86,12 @@ abstract class Search_Index_IncrementalUpdateTest extends PHPUnit_Framework_Test
 		$typeFactory = $index->getTypeFactory();
 
 		$index->addDocument(
-			array(
+			[
 				'object_type' => $typeFactory->identifier($type),
 				'object_id' => $typeFactory->identifier($id),
 				'wiki_content' => $typeFactory->wikitext($data),
 				'contents' => $typeFactory->wikitext($data),
-			)
+			]
 		);
 	}
 }
-

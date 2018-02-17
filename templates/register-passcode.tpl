@@ -1,4 +1,4 @@
-{* $Id: register-passcode.tpl 62695 2017-05-22 23:53:25Z jyhem $ *}
+{* $Id: register-passcode.tpl 62699 2017-05-23 00:25:06Z jyhem $ *}
 {if $prefs.user_register_prettytracker eq 'y' and $prefs.user_register_prettytracker_tpl}
 	<input type="password" name="passcode" id="passcode" onkeypress="regCapsLock(event)" class="form-control" >
 	{if $prefs.user_register_prettytracker_hide_mandatory neq 'y'}&nbsp;<strong class='mandatory_star text-danger tips' title=":{tr}This field is mandatory{/tr}">*</strong>{/if}

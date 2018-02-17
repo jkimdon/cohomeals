@@ -1,4 +1,4 @@
-{* $Id: tiki-admin_topics.tpl 57783 2016-03-05 18:04:25Z jonnybradley $ *}
+{* $Id: tiki-admin_topics.tpl 62640 2017-05-17 20:31:06Z chealer $ *}
 {title admpage="articles" help="Articles"}{tr}Article Topics{/tr}{/title}
 <div class="t_navbar margin-bottom-md">
 	{if $tiki_p_admin eq 'y' or $tiki_p_admin_cms eq 'y'}
@@ -102,7 +102,7 @@
 						class="tips"
 						title="{tr}Actions{/tr}"
 						href="#"
-						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.topic_actions|escape:"javascript"|escape:"html"}{/if}
+						{if $js === 'y'}{popup fullhtml="1" center=true text=$smarty.capture.topic_actions}{/if}
 						style="padding:0; margin:0; border:0"
 					>
 						{icon name='wrench'}

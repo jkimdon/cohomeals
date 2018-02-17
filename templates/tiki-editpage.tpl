@@ -1,8 +1,17 @@
-{* $Id: tiki-editpage.tpl 61553 2017-03-07 16:50:53Z jonnybradley $ *}
+{* $Id: tiki-editpage.tpl 64582 2017-11-15 23:03:47Z lfagundes $ *}
 {extends 'layout_edit.tpl'}
 {block name=title}
 	{if $translation_mode eq 'n'}
-		{title url="tiki-editpage.php?page=$page"}{if isset($hdr) && $prefs.wiki_edit_section eq 'y'}{tr}Edit Section:{/tr}{else}{tr}Edit:{/tr}{/if} {$page}{if $pageAlias ne ''} ({$pageAlias}){/if}{/title}
+		<h1 class="pagetitle">
+			{capture name="pageDescription"}
+				{$page|escape}{if $pageAlias ne ''} ({$pageAlias|escape}){/if}
+			{/capture}
+			{if isset($hdr) && $prefs.wiki_edit_section eq 'y'}
+				{tr}Edit Section:{/tr} {$smarty.capture.pageDescription}
+			{else}
+				{tr _0='<a class="edit_pagetitle" href="'|cat:($page|sefurl)|cat:'">'|cat:$smarty.capture.pageDescription|cat:'</a>'}Edit %0{/tr}
+			{/if}
+		</h1>
 	{else}
 		{title}{tr}Update '{$page}'{/tr}{/title}
 	{/if}
@@ -51,6 +60,12 @@
 			{tr}The Sandbox is a page where you can practice editing, etc. and use the preview feature to check the appearance of the page. No versions are stored for this page.{/tr}
 		{/remarksbox}
 	{/if}
+        {if isset($included_by)}
+                {remarksbox type='Warning' title="{tr}Warning{/tr}"}
+                        {tr}The following item(s) include this one with Plugin Include and might be affected by these changes. Renaming sections can break related item(s).{/tr}
+		        {include file='tiki-edit-page-included_by.tpl'}
+                {/remarksbox}
+        {/if}
 	{if $category_needed eq 'y'}
 		{remarksbox type='Warning' title="{tr}Warning{/tr}"}
 			<div class="highlight"><em class='mandatory_note'>{tr}A category is mandatory{/tr}</em></div>
@@ -169,7 +184,6 @@
 			{/if}
 			{tabset name='tabs_editpage' cookietab=1}
 				{tab name="{tr}Edit page{/tr}"}
-					<h2>{tr}Edit page{/tr}</h2>
 					{if $translation_mode == 'y'}
 						<div class="translation_message">
 							<h2>{tr}Translate to:{/tr} {$target_page|escape}</h2>
@@ -219,7 +233,6 @@
 				{/tab}
 				{if $prefs.feature_categories eq 'y' and $tiki_p_modify_object_categories eq 'y' and count($categories) gt 0}
 					{tab name="{tr}Categories{/tr}"}
-						<h2>{tr}Categories{/tr}</h2>
 						{if $categIds}
 							{remarksbox type="note" title="{tr}Note:{/tr}"}
 								<strong>{tr}Categorization has been preset for this edit{/tr}</strong>
@@ -241,14 +254,12 @@
 				{if $prefs.wiki_freetags_edit_position eq 'freetagstab'}
 					{if $prefs.feature_freetags eq 'y' and $tiki_p_freetags_tag eq 'y'}
 						{tab name="{tr}Tags{/tr}"}
-							<h2>{tr}Tags{/tr}</h2>
 							{include file='freetag.tpl'}
 						{/tab}
 					{/if}
 				{/if}
 				{if !empty($showPropertiesTab)}
 					{tab name="{tr}Properties{/tr}"}
-						<h2>{tr}Properties{/tr}</h2>
 						<div class="t_navbar margin-bottom-md clearfix">
 							{if $tiki_p_admin_wiki eq "y"}
 								<a href="tiki-admin.php?page=wiki" class="btn btn-link">

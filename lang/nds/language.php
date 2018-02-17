@@ -1,7 +1,7 @@
 <?php
 
 
-$lang = array(
+$lang = [
 "Welsh" => "Kymriesch",
 "Slovene" => "Sloweensch",
 "Arabic" => "Aråbsch",
@@ -2505,7 +2505,7 @@ $lang = array(
 "[-]" => "[-]",
 "Requires" => "Benödigt",
 "Use your email address as your log-in name" => "Bruk Dien Nettpostadress as Anmellennåm",
-"Repeat password" => "Wederhål Kennwoord",
+"Confirm password" => "Wederhål Kennwoord",
 "Generate a password" => "'N Kennwoord tügen",
 "Not your password" => "Nich Dien Kennwoord",
 "Index" => "Index",
@@ -3647,4 +3647,4 @@ $lang = array(
 "Checking" => "Pröven",
 "Aborted" => "Afbraken",
 "Last pages" => "Leste Sieden",
-);
+];

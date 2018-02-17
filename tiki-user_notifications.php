@@ -3,15 +3,15 @@
  * @package tikiwiki
  */
 // (c) Copyright 2002-2016 by authors of the Tiki Wiki CMS Groupware Project
-// 
+//
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: tiki-user_notifications.php 59887 2016-10-04 10:08:40Z xavidp $
+// $Id: tiki-user_notifications.php 64607 2017-11-17 02:06:23Z rjsmelo $
 
 $section = 'mytiki';
-require_once ('tiki-setup.php');
+require_once('tiki-setup.php');
 
-$auto_query_args = array('userId', 'view_user');
+$auto_query_args = ['userId', 'view_user'];
 
 $access->check_user($user);
 $access->check_feature('feature_user_watches');

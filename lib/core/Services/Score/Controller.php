@@ -3,16 +3,16 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: Controller.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: Controller.php 64622 2017-11-18 19:34:07Z rjsmelo $
 class Services_Score_Controller
 {
 
 	function setUp()
 	{
-
 	}
 
-	function action_create_score_event($input) {
+	function action_create_score_event($input)
+	{
 
 		$eventType = $input->eventType->text();
 
@@ -28,10 +28,10 @@ class Services_Score_Controller
 			$rowCount = 0;
 		}
 
-		return array (
+		return  [
 			'eventType' => $eventType,
 			'rowOnly' => $rowOnly,
 			'rowCount' => $rowCount,
-		);
+		];
 	}
 }

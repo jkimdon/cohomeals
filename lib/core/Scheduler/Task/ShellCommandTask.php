@@ -3,9 +3,10 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ShellCommandTask.php 62232 2017-04-16 16:48:48Z rjsmelo $
+// $Id: ShellCommandTask.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 
 class Scheduler_Task_ShellCommandTask extends Scheduler_Task_CommandTask
 {
@@ -17,8 +18,20 @@ class Scheduler_Task_ShellCommandTask extends Scheduler_Task_CommandTask
 			return false;
 		}
 
-		$process = new Process($params['shell_command']);
-		$process->run();
+		$command = $params['shell_command'];
+
+		$this->logger->debug(sprintf(tra('Executing shell command: %s'), $command));
+		$process = new Process($command);
+		if (! empty($params['timeout'])) {
+			$process->setTimeout($params['timeout']);
+			$process->setIdleTimeout($params['timeout']);
+		}
+		try {
+			$process->run();
+		} catch (ProcessTimedOutException $e) {
+			$this->errorMessage = $e->getMessage();
+			return false;
+		}
 
 		if ($success = $process->isSuccessful()) {
 			$this->errorMessage = $process->getOutput();
@@ -29,14 +42,19 @@ class Scheduler_Task_ShellCommandTask extends Scheduler_Task_CommandTask
 		return $success;
 	}
 
-	public function getParams() {
-		return array(
-			'shell_command' => array(
+	public function getParams()
+	{
+		return [
+			'shell_command' => [
 				'name' => tra('Shell command'),
 				'type' => 'text',
 				'required' => true,
-			),
-		);
+			],
+			'timeout' => [
+				'name' => tra('Run timeout'),
+				'type' => 'text',
+				'required' => false,
+			],
+		];
 	}
-
 }

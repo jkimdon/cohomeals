@@ -1,6 +1,6 @@
-{* $Id: include_intertiki.tpl 63101 2017-06-28 11:40:31Z jonnybradley $ *}
+{* $Id: include_intertiki.tpl 63105 2017-06-28 13:32:38Z kroky6 $ *}
 <form action="tiki-admin.php?page=intertiki" method="post" name="intertiki" class="form-horizontal">
-	{include file='access/include_ticket.tpl'}
+	{ticket}
 	{include file='admin/include_apply_top.tpl'}
 	{tabset name="admin_interwiki"}
 		{tab name="{tr}Intertiki Client{/tr}"}

@@ -1,4 +1,4 @@
-{* $Id: tiki-accounting_stacklist.tpl 56013 2015-08-07 14:09:32Z markitosaad $ *}
+{* $Id: tiki-accounting_stacklist.tpl 63998 2017-09-24 17:38:59Z rjsmelo $ *}
 <a class="icon" href="tiki-accounting_export.php?action=print&what=stack&bookId={$bookId}" target="new">
 	{icon name="print" alt="{tr}printable version{/tr}"}
 </a>
@@ -31,7 +31,7 @@
 			<td class="journal"{if $s.maxcount>1} rowspan="{$s.maxcount}"{/if}>{$s.stackDescription|escape}</td>
 		{section name=posts loop=$s.maxcount}{assign var='i' value=$smarty.section.posts.iteration-1}
 			{if !$smarty.section.posts.first}<tr class="{$style}">{/if}
-				<td class="journal" style="text-align:right">{if $i<$s.debitcount}{$j.debit[$i].stackItemAccountId}{/if}&nbsp;</td>
+				<td class="journal" style="text-align:right">{if $i<$s.debitcount}{$s.debit[$i].stackItemAccountId}{/if}&nbsp;</td>
 				<td class="journal" style="text-align:right">
 					{if $i<$s.debitcount}
 						{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}
@@ -39,8 +39,8 @@
 						{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;
 					{/if}
 				</td>
-				<td class="journal">{if $i<$j.debitcount}{$j.debit[$i].stackItemText|escape}{/if}&nbsp;</td>
-				<td class="journal" style="text-align:right">{if $i<$s.creditcount}{$j.credit[$i].stackItemAccountId}{/if}&nbsp;</td>
+				<td class="journal">{if $i<$s.debitcount}{$s.debit[$i].stackItemText|escape}{/if}&nbsp;</td>
+				<td class="journal" style="text-align:right">{if $i<$s.creditcount}{$s.credit[$i].stackItemAccountId}{/if}&nbsp;</td>
 				<td class="journal" style="text-align:right">
 					{if $i<$s.creditcount}
 						{if $book.bookCurrencyPos==-1}{$book.bookCurrency} {/if}
@@ -48,14 +48,14 @@
 						{if $book.bookCurrencyPos==1} {$book.bookCurrency}{/if}&nbsp;
 					{/if}
 				</td>
-				<td class="journal">{if $i<$j.creditcount}{$j.credit[$i].stackItemText|escape}{/if}&nbsp;</td>
+				<td class="journal">{if $i<$s.creditcount}{$s.credit[$i].stackItemText|escape}{/if}&nbsp;</td>
 				{if $smarty.section.posts.first}
 					<td rowspan="{$s.maxcount}">
-						<a class="icon" href="tiki-accounting_stack.php?action=delete&bookId={$bookId}&stackId={$s.stackId}">
+						<a class="icon timeout" href="tiki-accounting_stack.php?action=delete&bookId={$bookId}&stackId={$s.stackId}{ticket mode=get}">
 							{icon name="remove" alt="{tr}delete this transaction from the stack{/tr}" _confirm="{tr}Are you sure you want to delete this transaction from stack?{/tr}"}
 						</a><br>
 						{if $canBook}
-							<a class="icon" href="tiki-accounting_stack.php?action=confirm&bookId={$bookId}&stackId={$s.stackId}">
+							<a class="icon timeout" href="tiki-accounting_stack.php?action=confirm&bookId={$bookId}&stackId={$s.stackId}{ticket mode=get}">
 								{icon name="help" alt="{tr}confirm this transaction{/tr}" _confirm="{tr}Are you sure you want to confirm this transaction?{/tr}"}
 							</a><br>
 						{/if}

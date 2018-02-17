@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: ProfileAnalyser.php 57969 2016-03-17 20:07:40Z jonnybradley $
+// $Id: ProfileAnalyser.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 class Services_Workspace_ProfileAnalyser
 {
@@ -33,8 +33,7 @@ class Services_Workspace_ProfileAnalyser
 		if (isset($conditions['type'])) {
 			$objects = array_filter(
 				$objects,
-				function ($object) use ($conditions)
-				{
+				function ($object) use ($conditions) {
 					return $conditions['type'] == $object->getType();
 				}
 			);
@@ -44,8 +43,7 @@ class Services_Workspace_ProfileAnalyser
 		if (isset($conditions['ref'])) {
 			$objects = array_filter(
 				$objects,
-				function ($object) use ($conditions)
-				{
+				function ($object) use ($conditions) {
 					return $conditions['ref'] === $object->getRef();
 				}
 			);
@@ -55,8 +53,7 @@ class Services_Workspace_ProfileAnalyser
 		foreach ($conditions as $condition => $value) {
 			$objects = array_filter(
 				$objects,
-				function ($object) use ($condition, $value)
-				{
+				function ($object) use ($condition, $value) {
 					$data = $object->getData();
 					return isset($data[$condition]) && $data[$condition] === $value;
 				}
@@ -71,18 +68,18 @@ class Services_Workspace_ProfileAnalyser
 	 */
 	function getGroups($type, $object)
 	{
-		$out = array();
+		$out = [];
 
 		$groupMap = $this->profile->getGroupMap();
-		$permissions =  $this->profile->getPermissions();
+		$permissions = $this->profile->getPermissions();
 
 		foreach ($groupMap as $key => $name) {
-			$out[$key] = array(
+			$out[$key] = [
 				'name' => $name,
 				'managing' => false,
 				'autojoin' => true,
-				'permissions' => array(),
-			);
+				'permissions' => [],
+			];
 
 			if (isset($permissions[$key])) {
 				$related = $permissions[$key];
@@ -97,7 +94,7 @@ class Services_Workspace_ProfileAnalyser
 
 	function getObjects($type, $default = null)
 	{
-		$out = array();
+		$out = [];
 
 		foreach ($this->profile->getObjects() as $object) {
 			if ($object->getType() == $type) {
@@ -116,8 +113,7 @@ class Services_Workspace_ProfileAnalyser
 	{
 		array_walk_recursive(
 			$data,
-			function (& $entry)
-			{
+			function (& $entry) {
 				if (is_string($entry)) {
 					$entry = preg_replace('/\$profilerequest:(\w+)\$[^\$]*\$/', '{$1}', $entry);
 				}
@@ -155,7 +151,6 @@ class Services_Workspace_ProfileAnalyser
 			}
 		}
 
-		return array();
+		return [];
 	}
 }
-

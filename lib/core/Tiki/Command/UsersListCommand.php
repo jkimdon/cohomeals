@@ -3,7 +3,7 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: UsersListCommand.php 62176 2017-04-10 06:01:52Z drsassafras $
+// $Id: UsersListCommand.php 64622 2017-11-18 19:34:07Z rjsmelo $
 
 namespace Tiki\Command;
 
@@ -78,16 +78,16 @@ class UsersListCommand extends Command
 		);
 
 		$table = new Table($output);
-		$table->setHeaders(array('User', 'Email', 'Last Login', 'Registered', 'Groups'));
-		$rows = array();
+		$table->setHeaders(['User', 'Email', 'Last Login', 'Registered', 'Groups']);
+		$rows = [];
 		foreach ($users['data'] as $user) {
-			$rows[] = array(
+			$rows[] = [
 				$user['login'],
 				$user['email'],
-				!empty($user['lastLogin']) ? \TikiLib::date_format('%Y-%m-%d %H:%m', $user['lastLogin']) : 'Never',
+				! empty($user['lastLogin']) ? \TikiLib::date_format('%Y-%m-%d %H:%m', $user['lastLogin']) : 'Never',
 				\TikiLib::date_format('%Y-%m-%d %H:%m', $user['registrationDate']),
 				implode(', ', $user['groups'])
-			);
+			];
 		}
 
 		$table->setRows($rows);

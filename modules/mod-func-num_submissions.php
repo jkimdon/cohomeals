@@ -3,12 +3,12 @@
 //
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
-// $Id: mod-func-num_submissions.php 57960 2016-03-17 20:01:11Z jonnybradley $
+// $Id: mod-func-num_submissions.php 64616 2017-11-18 00:02:17Z rjsmelo $
 
 //this script may only be included - so its better to die if called directly.
 if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
-  header("location: index.php");
-  exit;
+	header("location: index.php");
+	exit;
 }
 
 /**
@@ -16,12 +16,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], basename(__FILE__)) !== false) {
  */
 function module_num_submissions_info()
 {
-	return array(
+	return [
 		'name' => tra('Pending Article Submissions'),
 		'description' => tra('Displays the number of article submissions waiting examination and a link to the list.'),
-		'prefs' => array('feature_submissions'),
-		'params' => array()
-	);
+		'prefs' => ['feature_submissions'],
+		'params' => []
+	];
 }
 
 /**
