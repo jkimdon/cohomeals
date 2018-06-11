@@ -58,6 +58,7 @@
 									{assign var=over value=$cell[w][d].items[item].over}
 									{assign var=calendarId value=$cell[w][d].items[item].calendarId}
 									<tr>
+									{if ($calendarId neq '12' and $calendarId neq '2') or ($cell[w][d].items[item].notEndOfMultipleDayEvent eq true)} {* coho hardcoded. 2 is the guest room, 12 is camping *}
 										{if is_array($cell[w][d].items[item])}
 											<td class="Cal{$cell[w][d].items[item].type} calId{$cell[w][d].items[item].calendarId} viewcalitemId_{$cell[w][d].items[item].calitemId} tips" style="padding:0;height:14px;background-color:#{$infocals.$calendarId.custombgcolor};border-color:#{$infocals.$calendarId.customfgcolor};opacity:{if $cell[w][d].items[item].status eq '0'}0.8{else}1{/if};filter:Alpha(opacity={if $cell[w][d].items[item].status eq '0'}80{else}100{/if});border-width:1px {if $cell[w][d].items[item].endTimeStamp <= ($cell[w][d].day + 86400)}1{else}0{/if}px 1px {if $cell[w][d].items[item].startTimeStamp >= $cell[w][d].day}1{else}0{/if}px;cursor:pointer"
 												{if $prefs.calendar_sticky_popup eq 'y'}
@@ -66,10 +67,17 @@
 													{popup caption="{tr}Event{/tr}" vauto=true hauto=true sticky=false fullhtml="1" text=$over}
 												{/if}>
 
-												{if $myurl eq "tiki-action_calendar.php" or ($cell[w][d].items[item].startTimeStamp >= $cell[w][d].day or $smarty.section.d.index eq '0' or $cell[w][d].firstDay or $infocals[$cell[w][d].items[item].calendarId].nameoneachday eq 'y')}
-													<a style="padding:1px 3px;{if $infocals.$calendarId.customfgcolor}color:#{$infocals.$calendarId.customfgcolor}{/if}{if $cell[w][d].items[item].status eq '2'} text-decoration:line-through;{/if}"
+												{if $myurl eq "tiki-action_calendar.php" or ( $cell[w][d].items[item].startTimeStamp >= $cell[w][d].day or ($cell[w][d].items[item].startTimeStamp <= $cell[w][d].day and $cell[w][d].items[item].endTimeStamp >= $cell[w][d].day) or $smarty.section.d.index eq '0' or $cell[w][d].firstDay)}
+												<a style="padding:1px 3px;{if $cell[w][d].items[item].status eq '2'}text-decoration:line-through;{/if}color:#{$infocals.$calendarId.customfgcolor};"
 														{if $myurl eq "tiki-action_calendar.php"}
-															{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="{$cell[w][d].items[item].url}"{/if}
+                                										{if $cell[w][d].items[item].calendarId eq "1"} {* coho meal program is #1 *}
+														{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="coho_meals-view_entry.php?id={$cell[w][d].items[item].calitemId}"{/if}
+														{elseif $cell[w][d].items[item].calitemId eq "-1"}
+														{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="tiki-calendar_edit_item.php?viewrecurrenceId={$cell[w][d].items[item].recurrenceId}&calendarId={$cell[w][d].items[item].calendarId}&itemdate={$cell[w][d].items[item].startTimeStamp}"{/if}
+														{else}
+														{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="tiki-calendar_edit_item.php?viewcalitemId={$cell[w][d].items[item].calitemId}"{/if}
+														{/if}
+
 														{elseif $prefs.calendar_sticky_popup neq 'y'}
 															{if $cell[w][d].items[item].modifiable eq "y" || $cell[w][d].items[item].visible eq 'y'}href="tiki-calendar_edit_item.php?viewcalitemId={$cell[w][d].items[item].calitemId}"{/if}
 														{else}
@@ -87,6 +95,7 @@
 											</td>
 										{else}
 											<td style="padding: 0; height: 14px; border: solid white 1px; width: 100%; font-size: 10px">&nbsp;</td>
+										{/if}
 										{/if}
 									</tr>
 									{if $smarty.section.item.last}

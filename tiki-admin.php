@@ -427,6 +427,14 @@ $admin_icons = [
 		'description' => tr('Settings and features for FAQs'),
 		'help' => 'FAQ',
 	],
+	"cohomeals" => [
+		'icon' => 'img/icons/large/vcard.png',
+		'position' => '-300px -415px;',
+		'title' => tr('CoHo Meals'),
+		'disabled' => $prefs['feature_cohomeals'] != 'y',
+		'description' => tr('Settings and features for CoHo meal program'),
+		'help' => 'cohomeals',
+	],
 	"directory" => [
 		'title' => tr('Directory'),
 		'disabled' => $prefs['feature_directory'] != 'y',

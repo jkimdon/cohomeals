@@ -41,6 +41,9 @@ class CalRecurrence extends TikiLib
 	private $weekday;
 	private $monthly;
 	private $dayOfMonth;
+	private $monthlyByWeekday;
+	private $monthlyWeekday;
+	private $monthlyWeekNumber;	
 	private $yearly;
 	private $dateOfYear; // format is mmdd
 	private $nbRecurrences;
@@ -66,6 +69,7 @@ class CalRecurrence extends TikiLib
 	{
 		if ($this->getId() > 0) {
 			$query = "SELECT calendarId, start, end, allday, locationId, categoryId, nlId, priority, status, url, lang, name, description, weekly, weekday, monthly, dayOfMonth,"
+			           . "monthlyByWeekday, monthlyWeekday, monthlyWeekNumber, "
 				   . "yearly, dateOfYear, nbRecurrences, startPeriod, endPeriod, user, created, lastModif FROM tiki_calendar_recurrence "
 				   . "WHERE recurrenceId = ?";
 			$result = $this->query($query, [(int)$this->getId()]);
@@ -87,6 +91,9 @@ class CalRecurrence extends TikiLib
 				$this->setWeekday($row['weekday']);
 				$this->setMonthly($row['monthly'] == 1);
 				$this->setDayOfMonth($row['dayOfMonth']);
+				$this->setMonthlyByWeekday($row['monthlyByWeekday'] == 1);
+				$this->setMonthlyWeekday($row['monthlyWeekday']);
+				$this->setMonthlyWeekNumber($row['monthlyWeekNumber']);		
 				$this->setYearly($row['yearly'] == 1);
 				$this->setDateOfYear($row['dateOfYear']);
 				$this->setNbRecurrences($row['nbRecurrences']);
@@ -127,25 +134,29 @@ class CalRecurrence extends TikiLib
 		if (! ($this->getCalendarId() > 0)) {
 			return false;
 		}
-		// should have valid start and end date
-		if (! ($this->isAllday())
-			 && (! ($this->getStart() > 0) || ! ($this->getEnd() > 0) || ($this->getStart() > 2359) || ($this->getEnd() > 2359) || ($this->getStart() > $this->getEnd()))) {
+		// should have valid start and end time
+		if (! ($this->isAllday()) 
+			 && (!($this->getStart() >= 0) || !($this->getEnd() > 0) || ($this->getStart() > 2359) || ($this->getEnd() > 2359) || ($this->getStart() > $this->getEnd()))) {
 			return false;
 		}
 		// should be recurrent on "some" basis
-		if (! $this->isWeekly() && ! $this->isMonthly() && ! $this->isYearly()) {
-			return false;
+		if (!$this->isWeekly() && !$this->isMonthly() && !$this->isMonthlyByWeekday() && !$this->isYearly()) {
+		return false;
 		}
 		// recurrence should be correctly defined
 		if (($this->isWeekly() && (is_null($this->getWeekday()) || $this->getWeekday() > 6 || $this->getWeekday() < 0 || $this->getWeekday() == ''))
 		  || ($this->isMonthly() && (is_null($this->getDayOfMonth()) || $this->getDayOfMonth() > 31 || $this->getDayOfMonth() < 1 || $this->getDayOfMonth() == ''))
+		  || ($this->isMonthlyByWeekday() && (is_null($this->getMonthlyWeekday()) || $this->getMonthlyWeekday() > 6 || $this->getMonthlyWeekday() < 0 || $this->getMonthlyWeekday() == '' || is_null($this->getMonthlyWeekNumber()) || $this->getMonthlyWeekNumber() < 0 || $this->getMonthlyWeekNumber() > 4 || $this->getMonthlyWeekNumber() == ''))
 		  || ($this->isYearly() && (is_null($this->getDateOfYear()) || $this->getDateOfYear() > 1231 || $this->getDateOfYear() < 0101 || $this->getDateOfYear() == ''))
 		   ) {
 			return false;
 		}
-		// recurrence period should be defined
+		// recurrence start should be defined
+		if ( is_null($this->getStartPeriod()) || ($this->getStartPeriod() == '') || ($this->getStartPeriod() == 0) )
+		  return false;
+		// recurrence end should be defined
 		if ((is_null($this->getNbRecurrences()) || ($this->getNbRecurrences() == '') || ($this->getNbRecurrences() == 0))
-			&& (is_null($this->getEndPeriod()) || ($this->getEndPeriod() == '') || ($this->getEndPeriod() < $this->getStartPeriod())) ) {
+		        && (($this->getEndPeriod() < $this->getStartPeriod()) && $this->getEndPeriod != 0) ) {
 			return false;
 		}
 		//
@@ -189,8 +200,8 @@ class CalRecurrence extends TikiLib
 	private function create()
 	{
 		$query = "INSERT INTO tiki_calendar_recurrence (calendarId, start, end, allday, locationId, categoryId, nlId, priority, status, url, lang, name, description, "
-			   . "weekly, weekday, monthly, dayOfMonth,yearly, dateOfYear, nbRecurrences, startPeriod, endPeriod, user, created, lastModif) "
-			   . "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			   . "weekly, weekday, monthly, dayOfMonth, monthlyByWeekday, monthlyWeekday, monthlyWeekNumber, yearly, dateOfYear, nbRecurrences, startPeriod, endPeriod, user, created, lastModif) "
+			   . "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		$now = time();
 		$bindvars = [
 						$this->getCalendarId(),
@@ -210,6 +221,9 @@ class CalRecurrence extends TikiLib
 						$this->getWeekday(),
 						$this->isMonthly() ? 1 : 0,
 						$this->getDayOfMonth(),
+						$this->isMonthlyByWeekday() ? 1 : 0,
+						$this->getMonthlyWeekday(),
+						$this->getMonthlyWeekNumber(),
 						$this->isYearly() ? 1 : 0,
 						$this->getDateOfYear(),
 						$this->getNbRecurrences(),
@@ -224,7 +238,7 @@ class CalRecurrence extends TikiLib
 			$this->setId($this->GetOne("SELECT `recurrenceId` FROM `tiki_calendar_recurrence` WHERE `created`=?", [$now]));
 			if ($this->getId() > 0) {
 				// create the recurrent events
-				$this->createEvents();
+			  //	$this->createEvents(); don't create since using new recurrence method
 				return true;
 			}
 		}
@@ -238,7 +252,7 @@ class CalRecurrence extends TikiLib
 	private function update($updateManuallyChangedEvents = false)
 	{
 		$query = "UPDATE tiki_calendar_recurrence SET calendarId = ?, start = ?, end = ?, allday = ?, locationId = ?, categoryId = ?, nlId = ?, priority = ?, status = ?, "
-			   . "url = ?, lang = ?, name = ?, description = ?, weekly = ?, weekday = ?, monthly = ?, dayOfMonth = ?, yearly = ?, dateOfYear = ?, nbRecurrences = ?, "
+			   . "url = ?, lang = ?, name = ?, description = ?, weekly = ?, weekday = ?, monthly = ?, dayOfMonth = ?, monthlyByWeekday = ?, monthlyWeekday = ?, monthlyWeekNumber = ?, yearly = ?, dateOfYear = ?, nbRecurrences = ?, "
 			   . "startPeriod = ?, endPeriod = ?, user = ?, lastModif = ? WHERE recurrenceId = ?";
 		$now = time();
 		$bindvars = [
@@ -259,6 +273,9 @@ class CalRecurrence extends TikiLib
 						$this->getWeekday(),
 						$this->isMonthly() ? 1 : 0,
 						$this->getDayOfMonth(),
+						$this->isMonthlyByWeekday() ? 1 : 0,
+						$this->getMonthlyWeekday(),
+						$this->getMonthlyWeekNumber(),
 						$this->isYearly() ? 1 : 0,
 						$this->getDateOfYear(),
 						$this->getNbRecurrences(),
@@ -272,7 +289,7 @@ class CalRecurrence extends TikiLib
 		$result = $this->query($query, $bindvars);
 		if ($result) {
 			// update the recurrent events, according to the way to handle the already changed events
-			$this->updateEvents($updateManuallyChangedEvents, $oldRec);
+//fixme			$this->updateEvents($updateManuallyChangedEvents, $oldRec);
 			return true;
 		}
 		return false;
@@ -281,7 +298,7 @@ class CalRecurrence extends TikiLib
 	/**
 	 * @return bool
 	 */
-	public function createEvents()
+    public function createEvents() // NOTE: not used for (and broken if used with) coho recurrences (??)
 	{
 		// calculate the date of every events to create
 		$dates = [];
@@ -308,6 +325,44 @@ class CalRecurrence extends TikiLib
 						continue;
 					}
 					$dates[] = TikiLib::make_time(0, 0, 0, $startMonth + $i, $this->getDayOfMonth(), $start[0]);
+					$occurrences++;
+				}
+			} elseif ($this->isMonthlyByWeekday()) {
+			        $week = array();
+				$nbDaysInPrevMonth = date('t',TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]));
+				$nbDaysInMonth = $nbDaysInPrevMonth;
+				$curDayOfMonth = $nbDaysInPrevMonth;
+				$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				while ($curDayOfWeek != $this->getMonthlyWeekday() ) {
+				        $curDayOfMonth--;
+					$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				}
+				$week[4] = $curDayOfMonth; // to set up for the first month's calculations
+
+				$started = false;
+				$occurrences = 0;
+				for ($iMonth=$occurrences ; $occurrences < $nbRec ; $iMonth++) {
+				        $nbDaysInPrevMonth = $nbDaysInMonth;
+				        if ($week[4]<=$nbDaysInPrevMonth) 
+					  $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+					else 
+					  $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+					$week[1] = $week[0] + 7;
+					$week[2] = $week[1] + 7;
+					$week[3] = $week[2] + 7;
+					$week[4] = $week[3] + 7;
+
+					$curDay = $week[$this->getMonthlyWeekNumber()];
+					$nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $iMonth,1,$start[0]));
+					if ($curDay > $nbDaysInMonth)
+					  continue;
+					if ( $started == false ) {
+					  if ( (TikiLib::make_time(0,0,0,$start[1] + $iMonth,$curDay,$start[0])) < (TikiLib::make_time(0,0,0,$start[1],$start[2],$start[0]))) 
+					    continue;
+					  else 
+					    $started = true;
+					}
+					$dates[] = TikiLib::make_time(0,0,0,$start[1] + $iMonth,$curDay,$start[0]);
 					$occurrences++;
 				}
 			} elseif ($this->isYearly()) {
@@ -356,6 +411,62 @@ class CalRecurrence extends TikiLib
 					$dates[] = $currDate;
 					$i++;
 					$currDate = TikiLib::make_time(0, 0, 0, $startMonth + $i, $this->getDayOfMonth(), $start[0]);
+				}
+			} elseif ($this->isMonthlyByWeekday()) {
+			        $week = array();
+				$nbDaysInPrevMonth = date('t',TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]));
+				$nbDaysInMonth = $nbDaysInPrevMonth;
+				$curDayOfMonth = $nbDaysInPrevMonth;
+				$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				while ($curDayOfWeek != $this->getMonthlyWeekday() ) {
+				        $curDayOfMonth--;
+					$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				}
+				$week[4] = $curDayOfMonth; // to set up for the first month's calculations
+				$currDate = TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]);
+				$monthOffset = 0;
+				while ($currDate < $this->getStartPeriod()) { // find the first date after the start
+				  $nbDaysInPrevMonth = $nbDaysInMonth;
+				  if ($week[4]<=$nbDaysInPrevMonth) 
+				    $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+				  else 
+				    $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+				  $week[1] = $week[0] + 7;
+				  $week[2] = $week[1] + 7;
+				  $week[3] = $week[2] + 7;
+				  $week[4] = $week[3] + 7;
+
+				  $curDay = $week[$this->getMonthlyWeekNumber()];
+				  $nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]));
+				  if ($curDay <= $nbDaysInMonth) 
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,$curDay,$start[0]);
+				  $monthOffset++;
+				}
+				$counts = true;
+				while ($currDate < $this->getEndPeriod()) {
+				  if ($counts == true)
+				    $dates[] = $currDate;
+				  
+				  $nbDaysInPrevMonth = $nbDaysInMonth;
+				  if ($week[4]<=$nbDaysInPrevMonth) 
+				    $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+				  else 
+				    $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+				  $week[1] = $week[0] + 7;
+				  $week[2] = $week[1] + 7;
+				  $week[3] = $week[2] + 7;
+				  $week[4] = $week[3] + 7;
+
+				  $curDay = $week[$this->getMonthlyWeekNumber()];
+				  $nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]));
+				  if ($curDay <= $nbDaysInMonth) {
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,$curDay,$start[0]);
+				    $counts = true;
+				  } else {
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]);
+				    $counts = false;
+				  }
+				  $monthOffset++;
 				}
 			} elseif ($this->isYearly()) {
 				$yymm = TikiLib::date_format2('md', $this->getStartPeriod());
@@ -423,6 +534,211 @@ class CalRecurrence extends TikiLib
 		}
 	}
 
+	// calculate the dates of every event as if all were unchanged
+	// startperiod, endperiod are Unix time
+	public function coho_getUnchangedDates( $startperiod, $endperiod ) 
+	{
+		$dates = array();
+		$emptyarray = array();
+		$start = TikiLib::date_format2('Y/m/d',$startperiod);
+		$start = explode("/",$start);
+		if ($this->getNbRecurrences() > 0) {
+			$nbRec = $this->getNbRecurrences();
+			if ($this->isWeekly()) {
+				$startWeekday = TikiLib::date_format2('w',$startperiod); // 0->Sunday, 6->Saturday
+				$firstEventDate = $this->getWeekday() - $startWeekday;
+				if ($firstEventDate < 0)
+					$firstEventDate += 7;
+				for ($i=0 ; $i < $nbRec ; $i++) {
+					$dates[] = TikiLib::make_time(0,0,0,$start[1],$start[2] + $firstEventDate + ($i * 7),$start[0]);
+				}
+			} elseif ($this->isMonthly()) {
+				$firstIsNextMonth = ($this->getDayOfMonth() < $start[2]);
+				$startMonth = $firstIsNextMonth ? $start[1] + 1 : $start[1];
+				$occurrences = 0;
+				for ($i=0 ; $occurrences < $nbRec ; $i++) {
+					$nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$startMonth + $i,1,$start[0]));
+					if ($this->getDayOfMonth() > $nbDaysInMonth)
+						continue;
+					$dates[] = TikiLib::make_time(0,0,0,$startMonth + $i,$this->getDayOfMonth(),$start[0]);
+					$occurrences++;
+				}
+			} elseif ($this->isMonthlyByWeekday()) {
+			        $week = array();
+				$nbDaysInPrevMonth = date('t',TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]));
+				$nbDaysInMonth = $nbDaysInPrevMonth;
+				$curDayOfMonth = $nbDaysInPrevMonth;
+				$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				while ($curDayOfWeek != $this->getMonthlyWeekday() ) {
+				        $curDayOfMonth--;
+					$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				}
+				$week[4] = $curDayOfMonth; // to set up for the first month's calculations
+
+				$started = false;
+				$occurrences = 0;
+				for ($iMonth=$occurrences ; $occurrences < $nbRec ; $iMonth++) {
+				        $nbDaysInPrevMonth = $nbDaysInMonth;
+				        if ($week[4]<=$nbDaysInPrevMonth) 
+					  $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+					else 
+					  $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+					$week[1] = $week[0] + 7;
+					$week[2] = $week[1] + 7;
+					$week[3] = $week[2] + 7;
+					$week[4] = $week[3] + 7;
+
+					$curDay = $week[$this->getMonthlyWeekNumber()];
+					$nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $iMonth,1,$start[0]));
+					if ($curDay > $nbDaysInMonth)
+					  continue;
+					if ( $started == false ) {
+					  if ( (TikiLib::make_time(0,0,0,$start[1] + $iMonth,$curDay,$start[0])) < (TikiLib::make_time(0,0,0,$start[1],$start[2],$start[0]))) 
+					    continue;
+					  else 
+					    $started = true;
+					}
+					$dates[] = TikiLib::make_time(0,0,0,$start[1] + $iMonth,$curDay,$start[0]);
+					$occurrences++;
+				}
+			} elseif ($this->isYearly()) {
+				$yymm = TikiLib::date_format2('md',$startperiod);
+				$isLeapDay = ($this->getDateOfYear() == 229); // Feb 29th case.
+				$offset = ($this->getDateOfYear() < $yymm) ? 1 : 0;
+				$dt = str_pad($this->getDateOfYear(),4,"0",STR_PAD_LEFT);
+				$occurrences = 0;
+				for ($i=0 ; $occurrences < $nbRec ; $i++) {
+					if ($isLeapDay) {
+						if ( TikiLib::date_format2('L', TikiLib::make_time(0,0,0,1,1,$start[0] + $offset + $i)) == 0 ) {
+							continue;
+						}
+					}
+					$dates[] = TikiLib::make_time(0,0,0,substr($dt,0,2),substr($dt,-2),$start[0] + $offset + $i);
+					$occurrences++;
+				}
+			} else {
+				// there should be no other case
+			  return $emptyarray;
+			}
+		} elseif ($this->getEndPeriod() >= 0) {
+			if ($this->isWeekly()) {
+				$startWeekday = TikiLib::date_format2('w',$startperiod); // 0->Sunday, 6->Saturday
+				$firstEventDate = $this->getWeekday() - $startWeekday;
+				if ($firstEventDate < 0)
+					$firstEventDate += 7;
+				$currDate = TikiLib::make_time(0,0,0,$start[1],$start[2] + $firstEventDate,$start[0]);
+
+				$i=1;
+				while ($currDate < $endperiod) {
+				  $dates[] = $currDate;
+				  $currDate = TikiLib::make_time(0,0,0,$start[1],$start[2] + $firstEventDate + ($i * 7),$start[0]);				  
+				  $i++;
+				}
+			} elseif ($this->isMonthly()) {
+				$firstIsNextMonth = ($this->getDayOfMonth() < $start[2]);
+				$startMonth = $firstIsNextMonth ? $start[1] + 1 : $start[1];
+				$currDate = TikiLib::make_time(0,0,0,$startMonth,$this->getDayOfMonth(),$start[0]);
+				$i = 0;
+				while ($currDate < $endperiod) {
+					$nbDaysInMonth = TikiLib::date_format2('t',TikiLib::make_time(0,0,0,$startMonth + $i,1,$start[0]));
+					if ($this->getDayOfMonth() > $nbDaysInMonth) {
+						$i++;
+						$currDate = TikiLib::make_time(0,0,0,substr($dt,0,2),substr($dt,-2),$start[0] + $offset + $i);
+						continue;
+					}
+					$dates[] = $currDate;
+					$i++;
+					$currDate = TikiLib::make_time(0,0,0,$startMonth + $i,$this->getDayOfMonth(),$start[0]);
+				}
+			} elseif ($this->isMonthlyByWeekday()) {
+			        $week = array();
+				$nbDaysInPrevMonth = date('t',TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]));
+				$nbDaysInMonth = $nbDaysInPrevMonth;
+				$curDayOfMonth = $nbDaysInPrevMonth;
+				$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				while ($curDayOfWeek != $this->getMonthlyWeekday() ) {
+				        $curDayOfMonth--;
+					$curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$start[1]-1,$curDayOfMonth,$start[0]));
+				}
+				$week[4] = $curDayOfMonth; // to set up for the first month's calculations
+				$currDate = TikiLib::make_time(0,0,0,$start[1]-1,1,$start[0]);
+				$monthOffset = 0;
+				while ($currDate < $startperiod) { // find the first date after the start
+				  $nbDaysInPrevMonth = $nbDaysInMonth;
+				  if ($week[4]<=$nbDaysInPrevMonth) 
+				    $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+				  else 
+				    $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+				  $week[1] = $week[0] + 7;
+				  $week[2] = $week[1] + 7;
+				  $week[3] = $week[2] + 7;
+				  $week[4] = $week[3] + 7;
+
+				  $curDay = $week[$this->getMonthlyWeekNumber()];
+				  $nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]));
+				  if ($curDay <= $nbDaysInMonth) 
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,$curDay,$start[0]);
+				  $monthOffset++;
+				}
+				$counts = true;
+				while ($currDate < $endperiod) {
+				  if ($counts == true)
+				    $dates[] = $currDate;
+				  
+				  $nbDaysInPrevMonth = $nbDaysInMonth;
+				  if ($week[4]<=$nbDaysInPrevMonth) 
+				    $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+				  else 
+				    $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+				  $week[1] = $week[0] + 7;
+				  $week[2] = $week[1] + 7;
+				  $week[3] = $week[2] + 7;
+				  $week[4] = $week[3] + 7;
+
+				  $curDay = $week[$this->getMonthlyWeekNumber()];
+				  $nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]));
+				  if ($curDay <= $nbDaysInMonth) {
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,$curDay,$start[0]);
+				    $counts = true;
+				  } else {
+				    $currDate = TikiLib::make_time(0,0,0,$start[1] + $monthOffset,1,$start[0]);
+				    $counts = false;
+				  }
+				  $monthOffset++;
+				}
+			} elseif ($this->isYearly()) {
+				$yymm = TikiLib::date_format2('md',$startperiod);
+				$isLeapDay = ($this->getDateOfYear() == 229); // Feb 29th case.
+				$offset = ($this->getDateOfYear() < $yymm) ? 1 : 0;
+				$dt = str_pad($this->getDateOfYear(),4,"0",STR_PAD_LEFT);
+				$currDate = TikiLib::make_time(0,0,0,substr($dt,0,2),substr($dt,-2),$start[0] + $offset);
+				$i = 0;
+				while ($currDate < $endperiod) {
+					if ($isLeapDay) {
+						if (TikiLib::date_format2('L',TikiLib::make_time(0,0,0,1,1,$start[0] + $offset + $i)) == 0) {
+							$i++;
+							$currDate = TikiLib::make_time(0,0,0,substr($dt,0,2),substr($dt,-2),$start[0] + $offset + $i);
+							continue;
+						}
+					}
+					$dates[] = $currDate;
+					$i++;
+					$currDate = TikiLib::make_time(0,0,0,substr($dt,0,2),substr($dt,-2),$start[0] + $offset + $i);
+				}
+			} else {
+				// there should be no other case
+				return $emptyarray;
+			}
+		} else {
+			// there should be no other case
+			return $emptyarray;
+		}
+
+		return $dates;
+	}
+
+
+
 	/**
 	 * @param bool $updateManuallyChangedEvents
 	 * @param $oldRec
@@ -469,6 +785,9 @@ class CalRecurrence extends TikiLib
 		}
 			// we now update the events
 			$advanced = null;
+			$week = array();
+			$week[4] = 0;
+			$monthOffset = 0;
 			$ChangeDateInSeconds; //will be needed if dates have been changed
 		foreach ($theEventsToBeChanged as $anEvtId) {
 			$anEvt = $theEvents[$anEvtId];
@@ -549,6 +868,43 @@ class CalRecurrence extends TikiLib
 							$tmp[] = "start='" . TikiLib::make_time($newStartHour, $newStartMin, 0, $anEvtStart[1] + $offsetMonth, $this->getDayOfMonth(), $anEvtStart[0]) . "'";
 							$tmp[] = "end='" . TikiLib::make_time($newEndHour, $newEndMin, 0, $anEvtStart[1] + $offsetMonth, $this->getDayOfMonth(), $anEvtStart[0]) . "'";
 						}
+						// - for monthly events by weekday  ****BROKEN**** (DEBUG FIXME) 
+						} elseif ($aField == "_monthlyByWeekday") {
+							$doWeChangeTimeIfNeeded = false;
+							if ($week[4] == 0) {
+							  // set up in previous month 
+							  $nbDaysInPrevMonth = date('t',TikiLib::make_time(0,0,0,$anEvtStart[1]-1,1,$anEvtStart[0]));
+							  $nbDaysInMonth = $nbDaysInPrevMonth;
+							  $curDayOfMonth = $nbDaysInPrevMonth;
+							  $curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$anEvtStart[1]-1,$curDayOfMonth,$anEvtStart[0]));
+							  while ($curDayOfWeek != $this->getMonthlyWeekday() ) {
+							    $curDayOfMonth--;
+							    $curDayOfWeek = date('w',TikiLib::make_time(0,0,0,$anEvtStart[1]-1,$curDayOfMonth,$anEvtStart[0]));
+							  }
+							  $week[4] = $curDayOfMonth;
+							}
+							// find the next date
+							$found = false;
+							while ($found == false) {
+							  if ($week[4]<=$nbDaysInPrevMonth) 
+							    $week[0] = $week[4]+7-$nbDaysInPrevMonth;
+							  else 
+							    $week[0] = $week[3]+7-$nbDaysInPrevMonth;
+							  $week[1] = $week[0] + 7;
+							  $week[2] = $week[1] + 7;
+							  $week[3] = $week[2] + 7;
+							  $week[4] = $week[3] + 7;
+							  $nbDaysInPrevMonth = $nbDaysInMonth;
+							  $nbDaysInMonth = date('t',TikiLib::make_time(0,0,0,$anEvtStart[1] + $monthOffset,1,$anEvtStart[0]));
+							  $newDay = $week[$this->getMonthlyWeekNumber()];
+							  $newDate = TikiLib::make_time(0,0,0,$anEvtStart[1],$newDay+$monthOffset,$anEvtStart[0]);
+							  if ( ($newDay <= $nbDaysInMonth) && ($newDate > TikiLib::make_time(0,0,0,$anEvtStart[1],$anEvtStart[2],$anEvtStart[0])) ) {
+							    $tmp[] = "start='" . TikiLib::make_time($newStartHour, $newStartMin, 0, $anEvtStart[1] + $monthOffset, $newDay, $anEvtStart[0]) . "'";
+							    $tmp[] = "end='" . TikiLib::make_time($newEndHour, $newEndMin, 0, $anEvtStart[1] + $monthOffset, $newDay, $anEvtStart[0]) . "'";
+							    $found = true;
+							  }
+							  $monthOffset++;
+							}
 						// - for yearly events :
 						// if the new day of year is before (less than) the old day of year
 						//		if this year's new day is after (greater than) now and after the startperiod
@@ -668,6 +1024,9 @@ class CalRecurrence extends TikiLib
 		if ($this->isMonthly() && ($this->getDayOfMonth() != $oldRec->getDayOfMonth())) {
 			$result[] = "_dayOfMonth";
 		}
+		if ($this->isMonthlyByWeekday() && (($this->getMonthlyWeekday() != $oldRec->getMonthlyWeekday()) || ($this->getMonthlyWeekNumber() != $oldRec->getMonthlyWeekNumber()))) {
+		  $result[] = "_monthlyByWeekday";
+		}
 		if ($this->isYearly() && ($this->getDateOfYear() != $oldRec->getDateOfYear())) {
 			$result[] = "_dateOfYear";
 		}
@@ -736,6 +1095,12 @@ class CalRecurrence extends TikiLib
 			if (TikiLib::date_format2('d', $evt['start']) != $oldRec->getDayOfMonth()) {
 				$result[] = "_dayOfMonth";
 			}
+		} elseif ($oldRec->isMonthlyByWeekday()) {
+		  $tmpStart = TikiLib::date_format2('Y/m/d',$this->getStartPeriod());
+		  $tmpStart = explode("/",$tmpStart);
+		  if ( (TikiLib::date_format2('w',$evt['start']) != $oldRec->getMonthlyWeekday()) &&
+		       (TikiLib::date_format2('W',$evt['start']) != (TikiLib::date_format2('W', TikiLib::make_time(0,0,0,$tmpStart[1],1,$tmpStart[0]))+$this->getMonthlyWeekNumber()-1)) )
+				$result[] = "_monthlyByWeekday";
 		} elseif ($oldRec->isYearly()) {
 			if (TikiLib::date_format2('md', $evt['start']) != $oldRec->getDateOfYear()) {
 				$result[] = "_dateOfYear";
@@ -755,6 +1120,9 @@ class CalRecurrence extends TikiLib
 		'weekday' => $this->getWeekday(),
 		'monthly' => $this->isMonthly(),
 		'dayOfMonth' => $this->getDayOfMonth(),
+		'monthlyByWeekday' => $this->isMonthlyByWeekday(),
+		'monthlyWeekday' => $this->getMonthlyWeekday(),
+		'monthlyWeekNumber' => $this->getMonthlyWeekNumber(),
 		'yearly' => $this->isYearly(),
 		'dateOfYear' => $this->getDateOfYear(),
 		'dateOfYear_month' => floor($this->getDateOfYear() / 100),
@@ -1000,6 +1368,32 @@ class CalRecurrence extends TikiLib
 	public function setDayOfMonth($value)
 	{
 		$this->dayOfMonth = $value;
+	}
+
+	public function isMonthlyByWeekday() 
+	{ 
+	        return $this->monthlyByWeekday; 
+	}
+	public function setMonthlyByWeekday($value) 
+	{
+	        $this->monthlyByWeekday = $value; 
+	}
+
+	public function getMonthlyWeekday() 
+	{ 
+	        return $this->monthlyWeekday; 
+	}
+	public function setMonthlyWeekday($value) {
+	        $this->monthlyWeekday = $value; 
+	}
+
+	public function getMonthlyWeekNumber() 
+	{ 
+	        return $this->monthlyWeekNumber; 
+	}
+	public function setMonthlyWeekNumber($value) 
+	{
+	        $this->monthlyWeekNumber = $value; 
 	}
 
 	public function isYearly()
