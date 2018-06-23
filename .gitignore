@@ -1,3 +1,4 @@
+db/local.php
 temp/cache/*
 temp/*
 modules/cache/*
